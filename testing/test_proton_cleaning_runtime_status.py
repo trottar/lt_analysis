@@ -229,6 +229,77 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
             "cell_fit_skipped_insufficient_support_count",
         )
 
+    def test_timing_t_support_hierarchy_rejects_isolated_cell(self):
+        thresholds = {
+            "minimum_supported_t_slices": 2,
+            "minimum_marginal_t_slices": 1,
+            "minimum_supported_coverage": 0.35,
+            "minimum_marginal_coverage": 0.15,
+            "minimum_modeled_yield": 5.0,
+            "minimum_setting_valid_t_cells": 2,
+        }
+        self.assertEqual(
+            proton_cleaning._classify_timing_t_support(1, 0.2, 10.0, thresholds),
+            proton_cleaning.SUPPORT_MARGINAL,
+        )
+        gate = proton_cleaning._classify_timing_t_setting_support(
+            [{"support_label": proton_cleaning.SUPPORT_MARGINAL, "valid_t_cells": 1,
+              "data_total": 10.0, "fitted_data_total": 2.0, "model_total": 10.0}],
+            thresholds,
+        )
+        self.assertFalse(gate["accepted"])
+        self.assertEqual(gate["support_label"], proton_cleaning.SUPPORT_UNSUPPORTED)
+
+    def test_delta_center_interpolation_only_changes_shape_coordinates(self):
+        left = {
+            "valid": True, "kaon_mean": -0.1, "proton_mean": 0.6,
+            "kaon_sigma": 0.1, "proton_sigma": 0.2, "proton_yield": 9.0,
+        }
+        right = {
+            "valid": True, "kaon_mean": 0.1, "proton_mean": 1.0,
+            "kaon_sigma": 0.3, "proton_sigma": 0.4, "proton_yield": 99.0,
+        }
+        interpolated = proton_cleaning._interpolate_delta_timing_center_shape(
+            left, right, -1.0, 0.0, 1.0,
+        )
+        self.assertAlmostEqual(interpolated["kaon_mean"], 0.0)
+        self.assertAlmostEqual(interpolated["proton_mean"], 0.8)
+        self.assertAlmostEqual(interpolated["kaon_sigma"], 0.2)
+        self.assertAlmostEqual(interpolated["proton_sigma"], 0.3)
+        self.assertEqual(interpolated["proton_yield"], left["proton_yield"])
+
+    def test_ct_candidate_uses_exact_epsilon_ranges(self):
+        low = proton_cleaning.resolve_timing_t_candidate_configuration(
+            {"epsset": "low"}, self.config, "CTime_ROC1", None, None, 0.7, 1.5,
+        )
+        high = proton_cleaning.resolve_timing_t_candidate_configuration(
+            {"epsset": "high"}, self.config, "CTime_ROC1", None, None, 0.7, 1.5,
+        )
+        self.assertEqual(low["display_range"], (-2.0, 2.0))
+        self.assertEqual(low["histogram_bins"], 131)
+        self.assertEqual(high["display_range"], (-4.0, 4.0))
+        self.assertEqual(high["histogram_bins"], 262)
+        self.assertFalse(low["proton_peak_is_lower"])
+
+    def test_aerogel_validation_is_observational(self):
+        result = {"t_edges": [0.0, 1.0]}
+        rows = [{
+            "t_index": 0, "aero_index": 0, "physical_weight": 2.0,
+            "proton_weight": 0.25, "adj_mm": 0.85,
+        }]
+        config = {
+            "aerogel_validation": {
+                "enabled": True, "slice_edges": (0.0, 5.0, 10.0),
+                "affects_event_weights": False, "affects_fit_acceptance": False,
+            },
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, config)
+        self.assertFalse(validation["affects_event_weights"])
+        self.assertFalse(validation["affects_fit_acceptance"])
+        self.assertEqual(validation["event_count_by_t_aero"][0][0], 1)
+        self.assertAlmostEqual(validation["average_proton_probability_by_t_aero"][0][0], 0.25)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -42,6 +42,26 @@ def _log(message):
     print("[BG OPT] {}".format(message))
 
 
+def _canonical_bin_proposal(inp_dict):
+    """Return frozen paired analysis edges when canonical binning owns them."""
+    canonical = inp_dict.get("canonical_t_binning") if isinstance(inp_dict, dict) else None
+    if not isinstance(canonical, dict):
+        return None
+    t_edges = np.asarray(canonical.get("t_edges", []), dtype=float)
+    phi_edges = np.asarray(canonical.get("phi_edges", []), dtype=float)
+    if t_edges.size < 2 or phi_edges.size < 2:
+        raise RuntimeError("canonical binning is active without a complete t/phi edge pair")
+    return {
+        "t_bins": t_edges.copy(),
+        "phi_bins": phi_edges.copy(),
+        "requested_num_t_bins": int(t_edges.size - 1),
+        "requested_num_phi_bins": int(phi_edges.size - 1),
+        "actual_num_t_bins": int(t_edges.size - 1),
+        "actual_num_phi_bins": int(phi_edges.size - 1),
+        "canonical_frozen": True,
+    }
+
+
 def _format_metric_value(value, precision=4):
     try:
         val = float(value)
@@ -1367,10 +1387,31 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     requested_t_bins = int(inpDict["NumtBins"])
     requested_phi_bins = int(inpDict["NumPhiBins"])
     candidate_results = []
+    canonical_proposal = _canonical_bin_proposal(inpDict)
+    if canonical_proposal is not None:
+        _log("Canonical t/phi bins are frozen; optimizing background scales only")
+        phi_results = [
+            _optimize_phi_scale(
+                base_hist, inpDict, canonical_proposal["t_bins"], canonical_proposal["phi_bins"]
+            )
+            for base_hist in histlist
+        ]
+        aggregate_metrics = _aggregate_bin_candidate_result(phi_results)
+        candidate_results.append(
+            {
+                "valid": math.isfinite(float(aggregate_metrics["ratio_mean_dev"])),
+                "requested_num_t_bins": canonical_proposal["actual_num_t_bins"],
+                "requested_num_phi_bins": canonical_proposal["actual_num_phi_bins"],
+                "proposal": canonical_proposal,
+                "phi_results": phi_results,
+                "metrics": aggregate_metrics,
+                "canonical_frozen": True,
+            }
+        )
 
-    for candidate_t_bins, candidate_phi_bins in build_bin_count_candidates(
+    for candidate_t_bins, candidate_phi_bins in (() if canonical_proposal is not None else build_bin_count_candidates(
         requested_t_bins, requested_phi_bins
-    ):
+    )):
         _log("Trying shared bin candidate NumtBins={} NumPhiBins={}".format(candidate_t_bins, candidate_phi_bins))
         try:
             proposal = propose_bins(
@@ -1419,9 +1460,10 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
 
     valid_candidates = [result for result in candidate_results if result.get("valid")]
     if not valid_candidates:
-        fallback_proposal = propose_bins(histlist, inpDict, quiet=True)
-        apply_bin_proposal(inpDict, fallback_proposal)
-        write_bin_interval_files(inpDict, fallback_proposal["t_bins"], fallback_proposal["phi_bins"])
+        fallback_proposal = canonical_proposal or propose_bins(histlist, inpDict, quiet=True)
+        if canonical_proposal is None:
+            apply_bin_proposal(inpDict, fallback_proposal)
+            write_bin_interval_files(inpDict, fallback_proposal["t_bins"], fallback_proposal["phi_bins"])
         fallback_map = {
             get_bg_scale_setting_key(inpDict["EPSSET"], hist["phi_setting"]): float(BG_STAT_SCALE2)
             for hist in histlist
@@ -1476,8 +1518,9 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
             _format_metric_value(best_candidate.get("selection_score")),
         )
     )
-    apply_bin_proposal(inpDict, best_candidate["proposal"])
-    write_bin_interval_files(inpDict, best_candidate["proposal"]["t_bins"], best_candidate["proposal"]["phi_bins"])
+    if canonical_proposal is None:
+        apply_bin_proposal(inpDict, best_candidate["proposal"])
+        write_bin_interval_files(inpDict, best_candidate["proposal"]["t_bins"], best_candidate["proposal"]["phi_bins"])
 
     selected_histlist = []
     selected_bg_scale1s = {}
@@ -1532,14 +1575,16 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     inpDict["bg_resolved_profile"] = profile_meta["resolved_profile"]
     inpDict["bg_use_common_epsilon_scales"] = profile_meta["use_common_epsilon_scales"]
     inpDict["bg_common_epsilon_scale_behavior"] = profile_meta["common_epsilon_scale_behavior"]
-    proposal = {
-        "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
-        "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
-        "requested_num_t_bins": len(histlist[0]["t_bins"]) - 1,
-        "requested_num_phi_bins": len(histlist[0]["phi_bins"]) - 1,
-        "actual_num_t_bins": len(histlist[0]["t_bins"]) - 1,
-        "actual_num_phi_bins": len(histlist[0]["phi_bins"]) - 1,
-    }
+    proposal = _canonical_bin_proposal(inpDict)
+    if proposal is None:
+        proposal = {
+            "t_bins": np.array(histlist[0]["t_bins"], dtype=float),
+            "phi_bins": np.array(histlist[0]["phi_bins"], dtype=float),
+            "requested_num_t_bins": len(histlist[0]["t_bins"]) - 1,
+            "requested_num_phi_bins": len(histlist[0]["phi_bins"]) - 1,
+            "actual_num_t_bins": len(histlist[0]["t_bins"]) - 1,
+            "actual_num_phi_bins": len(histlist[0]["phi_bins"]) - 1,
+        }
     _log(
         "Using low-e shared bins for high-e: NumtBins={} NumPhiBins={}".format(
             len(proposal["t_bins"]) - 1,

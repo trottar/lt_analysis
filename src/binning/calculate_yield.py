@@ -117,8 +117,8 @@ from proton_contamination_weights import (
 )
 
 
-def _assert_canonical_t_edges(inpDict, t_bins, stage):
-    """Record and enforce immutable canonical edges at downstream consumers."""
+def _assert_canonical_t_edges(inpDict, t_bins, stage, phi_bins=None):
+    """Record and enforce immutable paired canonical edges downstream."""
     canonical = inpDict.get("canonical_t_binning") if isinstance(inpDict, dict) else None
     if not isinstance(canonical, dict) or canonical.get("t_edges") is None:
         return True
@@ -140,14 +140,32 @@ def _assert_canonical_t_edges(inpDict, t_bins, stage):
     )
     canonical["canonical_edge_match"] = matched
     canonical["maximum_edge_difference"] = maximum_difference
+    expected_phi = np.asarray(canonical.get("phi_edges", []), dtype=float)
+    actual_phi = np.asarray(phi_bins if phi_bins is not None else expected_phi, dtype=float)
+    maximum_phi_difference = float("inf")
+    if expected_phi.shape == actual_phi.shape and expected_phi.size:
+        maximum_phi_difference = float(np.max(np.abs(expected_phi - actual_phi)))
+    phi_matched = bool(
+        (expected_phi.size == 0 and phi_bins is None)
+        or (
+            expected_phi.shape == actual_phi.shape
+            and expected_phi.size >= 2
+            and np.all(np.isfinite(actual_phi))
+            and maximum_phi_difference <= edge_tolerance
+        )
+    )
+    canonical["canonical_phi_edge_match"] = phi_matched
+    canonical["maximum_phi_edge_difference"] = maximum_phi_difference
     canonical.setdefault("edge_validation_by_stage", {})[str(stage)] = {
         "canonical_edge_match": matched,
         "maximum_edge_difference": maximum_difference,
         "edge_tolerance": edge_tolerance,
+        "canonical_phi_edge_match": phi_matched,
+        "maximum_phi_edge_difference": maximum_phi_difference,
     }
-    if not matched and bool(get_proton_contamination_cleaning_config(inp_dict=inpDict).get("strict_mode", False)):
-        raise RuntimeError("{} received non-canonical t edges".format(stage))
-    return matched
+    if not (matched and phi_matched) and bool(get_proton_contamination_cleaning_config(inp_dict=inpDict).get("strict_mode", False)):
+        raise RuntimeError("{} received non-canonical t/phi edges".format(stage))
+    return bool(matched and phi_matched)
 from mm_background_subtraction import (
     build_mm_background_weights,
     build_mm_background_weights_with_diagnostics,
@@ -2995,7 +3013,7 @@ def find_yield_data(histlist, inpDict):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
-    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_data")
+    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_data", phi_bins)
 
     yieldDict = {
         "t_bins" : t_bins,
@@ -3367,7 +3385,7 @@ def find_yield_simc(histlist, inpDict, iteration=False):
     for hist in histlist:
         t_bins = hist["t_bins"]
         phi_bins = hist["phi_bins"]
-    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_simc")
+    _assert_canonical_t_edges(inpDict, t_bins, "calculate_yield.find_yield_simc", phi_bins)
 
     yieldDict = {
         "t_bins" : t_bins,

@@ -160,8 +160,50 @@ class PreParticleSubtractionBinningTests(unittest.TestCase):
                 self._payload(), high_inp, quiet=True
             )
             self.assertEqual(high["t_bins"].tolist(), reused["t_bins"].tolist())
+            self.assertEqual(high["phi_bins"].tolist(), reused["phi_bins"].tolist())
             self.assertEqual(high["metadata"]["consumer_epsilon"], "high")
             self.assertEqual(high["metadata"]["shared_from_epsilon"], "low")
+
+    def test_phi_sidecar_mismatch_recomputes_low_pair_and_blocks_high(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            first = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            phi_metadata_path = Path(first["metadata"]["phi_metadata_file"])
+            with phi_metadata_path.open(encoding="utf-8") as handle:
+                phi_metadata = json.load(handle)
+            phi_metadata["phi_edges"][1] += 0.5
+            with phi_metadata_path.open("w", encoding="utf-8") as handle:
+                json.dump(phi_metadata, handle)
+            low = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), self._inp(), quiet=True
+            )
+            self.assertEqual(low["source"], "computed_from_pre_particle_subtraction_histograms")
+            self.assertIn("phi_text_metadata_edges_mismatch", low["metadata"]["validation_rejection_reasons"])
+
+            high_inp = self._inp()
+            high_inp["EPSSET"] = "high"
+            with phi_metadata_path.open("w", encoding="utf-8") as handle:
+                json.dump({"schema_version": 999}, handle)
+            with self.assertRaisesRegex(RuntimeError, "t/phi interval pair"):
+                self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                    self._payload(), high_inp, quiet=True
+                )
+
+    def test_legacy_writer_cannot_overwrite_canonical_sidecars(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            inp = self._inp()
+            self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                self._payload(), inp, quiet=True
+            )
+            with self.assertRaisesRegex(RuntimeError, "canonical_interval_overwrite_refused"):
+                self.find_bins.write_bin_interval_files(
+                    {**self._inp()}, np.array([0.0, 0.5, 1.0]), np.array([-180.0, 0.0, 180.0])
+                )
 
     def test_missing_sidecar_is_rejected_then_prepass_replaces_it(self):
         with tempfile.TemporaryDirectory() as directory:

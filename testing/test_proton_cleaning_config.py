@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +40,30 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             "Q3p0W2p32:default",
             config["proton_contamination_override_layers"],
         )
+
+    def test_partial_timing_t_nested_overrides_preserve_defaults(self):
+        override = {
+            "t_binning": {"edge_tolerance": 2.5e-10},
+            "t_cell_fit": {"minimum_entries": 41},
+            "t_support_thresholds": {"minimum_setting_valid_t_cells": 3},
+            "aerogel_validation": {"enabled": False},
+        }
+        with mock.patch.dict(
+            background_config.PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES,
+            override,
+            clear=True,
+        ):
+            config = background_config.get_proton_contamination_cleaning_config(
+                inp_dict={"Q2": "3p0", "W": "3p14"},
+            )
+        self.assertEqual(config["t_binning"]["edge_tolerance"], 2.5e-10)
+        self.assertTrue(config["t_binning"]["require_metadata_sidecar"])
+        self.assertEqual(config["t_cell_fit"]["minimum_entries"], 41)
+        self.assertEqual(config["t_cell_fit"]["maximum_chi2_ndf"], 5.0)
+        self.assertEqual(config["t_support_thresholds"]["minimum_setting_valid_t_cells"], 3)
+        self.assertEqual(config["t_support_thresholds"]["minimum_modeled_yield"], 5.0)
+        self.assertFalse(config["aerogel_validation"]["enabled"])
+        self.assertFalse(config["aerogel_validation"]["affects_event_weights"])
 
 
 if __name__ == "__main__":

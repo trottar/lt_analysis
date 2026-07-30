@@ -105,7 +105,9 @@ REGRESSION_REL_TOL = 1e-6
 
 # Shared bin-finding controls migrated from find_bins.py.
 PHI_BIN_MIN_EVENTS = 10
-T_BIN_MIN_EVENTS = 500 
+# Canonical-t support is defined in selected event records, not histogram
+# normalization.  Keep the long-standing effective threshold (the duplicate
+# 500 declaration below it was dead configuration).
 T_BIN_MIN_EVENTS = 100
 MIN_PHI_BINS = 8
 MIN_T_BINS = 2
@@ -471,6 +473,7 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "minimum_t_bins": 1,
         "metadata_schema_version": 1,
         "require_metadata_sidecar": True,
+        "require_phi_metadata_sidecar": True,
         "allow_legacy_interval_without_metadata": False,
         "edge_tolerance": 1.0e-9,
         "cross_stage_t_tolerance": 1.0e-10,
@@ -483,6 +486,8 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         ),
         "allowed_algorithm_identifiers": ("find_bins_adjust_t_bins",),
         "allowed_algorithm_versions": (1,),
+        "allowed_phi_algorithm_identifiers": ("find_bins_phi_minimum_events",),
+        "allowed_phi_algorithm_versions": (1,),
     },
     "t_cell_fit": {
         "maximum_chi2_ndf": 5.0,
@@ -497,6 +502,9 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "minimum_supported_coverage": 0.35,
         "minimum_marginal_coverage": 0.15,
         "minimum_modeled_yield": 5.0,
+        # A single fitted delta x canonical-t cell is useful diagnostics but
+        # cannot accept a production timing-t cleaning result by itself.
+        "minimum_setting_valid_t_cells": 2,
     },
     "aerogel_validation": {
         "enabled": True,
@@ -692,6 +700,10 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "tof_offset_validation",
         "tof_summary_validation",
         "low_aero_offset",
+        "t_binning",
+        "t_cell_fit",
+        "t_support_thresholds",
+        "aerogel_validation",
     }
 )
 

@@ -331,6 +331,19 @@ def _canonical_binning_config_hash(semantic_config):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _canonical_phi_binning_semantic_config(inp_dict, t_binning_config):
+    """Stable choices that determine the shared canonical phi proposal."""
+    return {
+        "requested_num_phi_bins": int(inp_dict["NumPhiBins"]),
+        "phi_min_deg": float(PHI_BIN_MIN_DEG),
+        "phi_max_deg": float(PHI_BIN_MAX_DEG),
+        "minimum_phi_bins": int(MIN_PHI_BINS),
+        "minimum_phi_events": int(PHI_BIN_MIN_EVENTS),
+        "algorithm_identifier": "find_bins_phi_minimum_events",
+        "algorithm_version": 1,
+    }
+
+
 def _read_text_interval_edges(interval_path):
     with open(interval_path, "r", encoding="utf-8") as handle:
         lines = handle.readlines()
@@ -340,6 +353,100 @@ def _read_text_interval_edges(interval_path):
     if len(tokens) < 2:
         raise ValueError("interval file has fewer than two edges")
     return np.asarray([float(token) for token in tokens], dtype=float)
+
+
+def _read_interval_metadata(metadata_path, reasons):
+    if not os.path.exists(metadata_path):
+        reasons.append("metadata_sidecar_missing")
+        return None
+    try:
+        with open(metadata_path, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except Exception as exc:
+        reasons.append("metadata_sidecar_unreadable:{}".format(exc))
+        return None
+
+
+def _validate_authoritative_phi_interval(inp_dict, consumer_epsilon):
+    """Validate the phi member of the low-epsilon canonical interval pair."""
+    paths = _interval_paths(inp_dict)
+    t_binning = _canonical_t_binning_config(inp_dict)
+    reasons = []
+    metadata = None
+    text_edges = None
+    if not os.path.exists(paths["phi_path"]):
+        reasons.append("interval_file_missing")
+    else:
+        try:
+            text_edges = _read_text_interval_edges(paths["phi_path"])
+        except Exception as exc:
+            reasons.append("interval_file_unreadable:{}".format(exc))
+    if bool(t_binning.get("require_phi_metadata_sidecar", True)):
+        metadata = _read_interval_metadata(paths["phi_metadata_path"], reasons)
+    elif os.path.exists(paths["phi_metadata_path"]):
+        metadata = _read_interval_metadata(paths["phi_metadata_path"], reasons)
+    else:
+        reasons.append("metadata_sidecar_missing")
+
+    if metadata is not None:
+        expected_config = _canonical_phi_binning_semantic_config(inp_dict, t_binning)
+        expected_hash = _canonical_binning_config_hash(expected_config)
+        checks = (
+            (metadata.get("schema_version") == int(t_binning.get("metadata_schema_version", 1)), "metadata_schema_version_mismatch"),
+            (metadata.get("particle_type") == inp_dict.get("ParticleType"), "particle_type_mismatch"),
+            (metadata.get("Q2_token") == inp_dict.get("Q2"), "q2_token_mismatch"),
+            (metadata.get("W_token") == inp_dict.get("W"), "w_token_mismatch"),
+            (metadata.get("kinematic_key") == "Q{}W{}".format(inp_dict.get("Q2"), inp_dict.get("W")), "kinematic_key_mismatch"),
+            (metadata.get("source_stage") == "pre_particle_subtraction", "source_stage_mismatch"),
+            (metadata.get("source_epsilon") == "low", "source_epsilon_mismatch"),
+            (bool(metadata.get("shared_with_high_epsilon", False)), "low_to_high_sharing_not_enabled"),
+            (metadata.get("requested_num_phi_bins") == int(inp_dict["NumPhiBins"]), "requested_bin_count_mismatch"),
+            (metadata.get("actual_num_phi_bins") == int(inp_dict["NumPhiBins"]), "actual_bin_count_mismatch"),
+            (metadata.get("binning_config_hash") == expected_hash, "binning_config_hash_mismatch"),
+            (metadata.get("algorithm_identifier") in set(t_binning.get("allowed_phi_algorithm_identifiers") or ("find_bins_phi_minimum_events",)), "algorithm_identifier_not_allowed"),
+            (metadata.get("algorithm_version") in set(t_binning.get("allowed_phi_algorithm_versions") or (1,)), "algorithm_version_not_allowed"),
+        )
+        for valid, reason in checks:
+            if not valid:
+                reasons.append(reason)
+        try:
+            metadata_edges = np.asarray(metadata.get("phi_edges") or [], dtype=float)
+        except (TypeError, ValueError):
+            metadata_edges = np.asarray([], dtype=float)
+            reasons.append("metadata_edges_invalid")
+        tolerance = float(t_binning.get("edge_tolerance", 1.0e-9))
+        if metadata_edges.size != int(inp_dict["NumPhiBins"]) + 1:
+            reasons.append("metadata_edge_count_mismatch")
+        if metadata_edges.size and metadata.get("actual_num_phi_bins") != int(metadata_edges.size - 1):
+            reasons.append("metadata_actual_bin_count_edge_count_mismatch")
+        if metadata_edges.size and (not np.all(np.isfinite(metadata_edges)) or np.any(np.diff(metadata_edges) <= 0.0)):
+            reasons.append("metadata_edges_not_strictly_increasing_finite")
+        if metadata_edges.size and (
+            abs(float(metadata_edges[0]) - float(PHI_BIN_MIN_DEG)) > tolerance
+            or abs(float(metadata_edges[-1]) - float(PHI_BIN_MAX_DEG)) > tolerance
+        ):
+            reasons.append("metadata_edges_do_not_cover_configured_range")
+        if text_edges is not None:
+            if text_edges.size < 2:
+                reasons.append("text_edge_count_mismatch")
+            elif not np.all(np.isfinite(text_edges)) or np.any(np.diff(text_edges) <= 0.0):
+                reasons.append("text_edges_not_strictly_increasing_finite")
+            if text_edges.size != metadata_edges.size:
+                reasons.append("text_metadata_edge_count_mismatch")
+            elif not np.allclose(text_edges, metadata_edges, rtol=0.0, atol=tolerance):
+                reasons.append("text_metadata_edges_mismatch")
+    status = "validated_authoritative_interval_file" if not reasons else "metadata_mismatch"
+    if reasons == ["metadata_sidecar_missing"]:
+        status = "legacy_interval_rejected"
+    return {
+        "valid": not reasons,
+        "validation_status": status,
+        "validation_rejection_reasons": reasons,
+        "interval_file": paths["phi_path"],
+        "metadata_file": paths["phi_metadata_path"],
+        "metadata": metadata,
+        "phi_edges": text_edges,
+    }
 
 
 def _prepass_records(pre_subtraction_histograms):
@@ -541,6 +648,27 @@ def validate_canonical_t_edges(inp_dict, t_edges, context=""):
     return diagnostics
 
 
+def validate_canonical_phi_edges(inp_dict, phi_edges, context=""):
+    """Record and enforce the companion immutable phi edges."""
+    canonical = dict(inp_dict.get("canonical_t_binning") or {})
+    expected_source = canonical.get("phi_edges")
+    if expected_source is None:
+        expected_source = inp_dict.get("phi_bins")
+    expected = np.asarray(expected_source if expected_source is not None else [], dtype=float)
+    candidate = np.asarray(phi_edges if phi_edges is not None else [], dtype=float)
+    tolerance = float(_canonical_t_binning_config(inp_dict).get("edge_tolerance", 1.0e-9))
+    match = bool(expected.size == candidate.size and np.allclose(expected, candidate, rtol=0.0, atol=tolerance))
+    max_difference = float(np.max(np.abs(expected - candidate))) if expected.size == candidate.size and expected.size else float("inf")
+    diagnostics = {
+        "context": str(context),
+        "canonical_phi_edge_match": match,
+        "maximum_phi_edge_difference": max_difference,
+    }
+    if not match and bool(get_proton_contamination_cleaning_config(inp_dict=inp_dict).get("strict_mode", False)):
+        raise RuntimeError("canonical phi edges differ in {}".format(context or "unknown context"))
+    return diagnostics
+
+
 def resolve_canonical_analysis_bins_pre_subtraction(
     pre_subtraction_histograms,
     inp_dict,
@@ -579,27 +707,40 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         "validation_status": "no_valid_source",
         "validation_rejection_reasons": ["authoritative_interval_disabled"],
     }
+    phi_interval_validation = {
+        "valid": False,
+        "validation_status": "no_valid_source",
+        "validation_rejection_reasons": ["authoritative_interval_disabled"],
+    }
     if allow_interval_file and bool(t_binning.get("allow_authoritative_interval_file", True)):
         interval_validation = _validate_authoritative_t_interval(inp_dict, consumer_epsilon)
+        phi_interval_validation = _validate_authoritative_phi_interval(inp_dict, consumer_epsilon)
 
-    if interval_validation.get("valid"):
+    interval_pair_valid = bool(interval_validation.get("valid") and phi_interval_validation.get("valid"))
+    pair_rejection_reasons = list(interval_validation.get("validation_rejection_reasons") or []) + [
+        "phi_{}".format(reason)
+        for reason in (phi_interval_validation.get("validation_rejection_reasons") or [])
+    ]
+    if interval_pair_valid:
         t_edges = np.asarray(interval_validation["t_edges"], dtype=float)
+        phi_edges = np.asarray(phi_interval_validation["phi_edges"], dtype=float)
         source = "validated_authoritative_interval_file"
         validation_status = source
         metadata = dict(interval_validation.get("metadata") or {})
+        phi_metadata = dict(phi_interval_validation.get("metadata") or {})
     elif consumer_epsilon == "high":
         # High epsilon is a consumer of low-epsilon canonical bins, never a
         # second independent producer for the same kinematic key.
         canonical = {
             "source": "no_valid_source",
-            "validation_status": interval_validation.get("validation_status", "no_valid_source"),
-            "validation_rejection_reasons": list(interval_validation.get("validation_rejection_reasons") or []),
+            "validation_status": "no_valid_source",
+            "validation_rejection_reasons": pair_rejection_reasons,
             "consumer_epsilon": "high",
             "shared_from_epsilon": "low",
             "created_before_proton_cleaning": True,
         }
         inp_dict["canonical_t_binning"] = canonical
-        raise RuntimeError("No compatible low-epsilon canonical t interval is available for high epsilon.")
+        raise RuntimeError("No compatible low-epsilon canonical t/phi interval pair is available for high epsilon.")
     else:
         proposal_values = t_values.copy()
         proposal_values[np.argmin(proposal_values)] = float(inp_dict["tmin"])
@@ -615,11 +756,15 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         source = "computed_from_pre_particle_subtraction_histograms"
         validation_status = "computed_pre_particle_subtraction"
         metadata = {}
+        phi_metadata = {}
+        phi_degrees = phi_values * (180.0 / math.pi)
+        phi_edges, _ = _find_phi_bins(phi_degrees, requested_phi, quiet=quiet)
 
     phi_degrees = phi_values * (180.0 / math.pi)
-    phi_edges, phi_counts = _find_phi_bins(phi_degrees, requested_phi, quiet=quiet)
+    phi_counts, _ = np.histogram(phi_degrees, phi_edges)
     support = _support_summaries(t_values, physical_weights, t_edges)
     semantic_config = _canonical_binning_semantic_config(inp_dict, t_binning)
+    phi_semantic_config = _canonical_phi_binning_semantic_config(inp_dict, t_binning)
     paths = _interval_paths(inp_dict)
     source_stats = [
         _json_ready((payload or {}).get("source_stats") or {})
@@ -639,7 +784,7 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         "source": source,
         "resolution_status": validation_status,
         "validation_status": validation_status,
-        "validation_rejection_reasons": list(interval_validation.get("validation_rejection_reasons") or []),
+        "validation_rejection_reasons": pair_rejection_reasons,
         "interval_file": paths["t_path"],
         "metadata_file": paths["t_metadata_path"],
         "requested_num_t_bins": requested_t,
@@ -647,6 +792,11 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         "tmin": float(inp_dict["tmin"]),
         "tmax": float(inp_dict["tmax"]),
         "t_edges": _json_ready(t_edges),
+        "phi_interval_file": paths["phi_path"],
+        "phi_metadata_file": paths["phi_metadata_path"],
+        "requested_num_phi_bins": requested_phi,
+        "actual_num_phi_bins": len(phi_edges) - 1,
+        "phi_edges": _json_ready(phi_edges),
         "raw_event_count_by_t_bin": _json_ready(support["raw_event_count_by_t_bin"]),
         "signed_weighted_yield_by_t_bin": _json_ready(support["signed_weighted_yield_by_t_bin"]),
         "absolute_weighted_support_by_t_bin": _json_ready(support["absolute_weighted_support_by_t_bin"]),
@@ -658,6 +808,10 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         ),
         "binning_config": _json_ready(semantic_config),
         "binning_config_hash": _canonical_binning_config_hash(semantic_config),
+        "phi_binning_config": _json_ready(phi_semantic_config),
+        "phi_binning_config_hash": _canonical_binning_config_hash(phi_semantic_config),
+        "phi_algorithm_identifier": "find_bins_phi_minimum_events",
+        "phi_algorithm_version": 1,
         "algorithm_identifier": "find_bins_adjust_t_bins",
         "algorithm_version": 1,
         "input_provenance": {"source_stats": source_stats, "record_count": int(len(records))},
@@ -669,6 +823,8 @@ def resolve_canonical_analysis_bins_pre_subtraction(
     # while exposing current-run support in the active resolution payload.
     if metadata:
         canonical["authoritative_metadata"] = _json_ready(metadata)
+    if phi_metadata:
+        canonical["authoritative_phi_metadata"] = _json_ready(phi_metadata)
     inp_dict["t_bins"] = np.asarray(t_edges, dtype=float)
     inp_dict["phi_bins"] = np.asarray(phi_edges, dtype=float)
     inp_dict["NumtBins"] = int(len(t_edges) - 1)
@@ -695,6 +851,18 @@ def write_bin_interval_files(inpDict, t_bins, phi_bins, canonical_metadata=None)
     paths = _interval_paths(inpDict)
     phi_path = paths["phi_path"]
     t_path = paths["t_path"]
+
+    # A legacy bin finder must never replace canonical text while leaving an
+    # old sidecar behind.  Canonical output is owned by the pre-subtraction
+    # resolver, which supplies one matching metadata payload for both files.
+    if canonical_metadata is None and (
+        bool(inpDict.get("canonical_t_binning"))
+        or os.path.exists(paths["t_metadata_path"])
+        or os.path.exists(paths["phi_metadata_path"])
+    ):
+        raise RuntimeError(
+            "canonical_interval_overwrite_refused: use resolve_canonical_analysis_bins_pre_subtraction"
+        )
 
     phi_lines = ["\t{:.17g}".format(float(phi)) for phi in phi_bins]
     with open(phi_path, "w") as file:
@@ -735,13 +903,21 @@ def write_bin_interval_files(inpDict, t_bins, phi_bins, canonical_metadata=None)
             "particle_type": metadata.get("particle_type"),
             "Q2_token": metadata.get("Q2_token"),
             "W_token": metadata.get("W_token"),
+            "kinematic_key": metadata.get("kinematic_key"),
             "source_epsilon": metadata.get("source_epsilon"),
+            "consumer_epsilon": metadata.get("consumer_epsilon"),
+            "shared_with_high_epsilon": bool(metadata.get("shared_with_high_epsilon", False)),
             "source_stage": metadata.get("source_stage"),
             "interval_file": phi_path,
             "metadata_file": paths["phi_metadata_path"],
             "phi_edges": _json_ready(np.asarray(phi_bins, dtype=float)),
             "requested_num_phi_bins": len(phi_bins) - 1,
             "actual_num_phi_bins": len(phi_bins) - 1,
+            "binning_config": metadata.get("phi_binning_config"),
+            "binning_config_hash": metadata.get("phi_binning_config_hash"),
+            "algorithm_identifier": metadata.get("phi_algorithm_identifier", "find_bins_phi_minimum_events"),
+            "algorithm_version": metadata.get("phi_algorithm_version", 1),
+            "input_provenance": metadata.get("input_provenance", {}),
             "created_before_proton_cleaning": True,
             "creation_timestamp": metadata.get("creation_timestamp"),
         }
@@ -751,6 +927,10 @@ def write_bin_interval_files(inpDict, t_bins, phi_bins, canonical_metadata=None)
 
 
 def find_bins(histlist, inpDict):
+    if bool(inpDict.get("canonical_t_binning")):
+        raise RuntimeError(
+            "canonical_interval_overwrite_refused: canonical bins are immutable after pre-subtraction resolution"
+        )
     proposal = propose_bins(histlist, inpDict, quiet=False)
     apply_bin_proposal(inpDict, proposal)
     write_bin_interval_files(inpDict, proposal["t_bins"], proposal["phi_bins"])
@@ -766,7 +946,11 @@ def check_bins(histlist, inpDict):
         edge_diagnostics = validate_canonical_t_edges(
             inpDict, t_bins, context="find_bins.check_bins"
         )
+        phi_edge_diagnostics = validate_canonical_phi_edges(
+            inpDict, phi_bins, context="find_bins.check_bins"
+        )
         inpDict["canonical_t_binning"]["check_bins_edge_validation"] = edge_diagnostics
+        inpDict["canonical_t_binning"]["check_bins_phi_edge_validation"] = phi_edge_diagnostics
 
     print("\nFinding phi bins...")
     phi_counts, phi_edges = np.histogram(phi_values, phi_bins)

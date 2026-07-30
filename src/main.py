@@ -815,11 +815,23 @@ if canonical_t_enabled:
     prepass_provenance_path = os.path.join(
         OUTPATH, "{}_{}_canonical_t_prepass_{}.json".format(ParticleType, OutFilename, EPSSET)
     )
+    prepass_provenance_payloads = []
+    for payload in canonical_prepass_payloads:
+        payload = dict(payload or {})
+        prepass_provenance_payloads.append(
+            {
+                "phi_setting": payload.get("phi_setting"),
+                "raw_event_support": int(payload.get("raw_event_support", 0) or 0),
+                "source_stats": payload.get("source_stats") or {},
+                "selection_provenance": payload.get("selection_provenance") or {},
+            }
+        )
     with open(prepass_provenance_path, "w", encoding="utf-8") as handle:
         json.dump(
             {
                 "resolution": canonical_bin_resolution.get("metadata"),
-                "payloads": canonical_prepass_payloads,
+                "payloads": prepass_provenance_payloads,
+                "cross_stage_prepass_samples": canonical_prepass_samples,
             },
             handle,
             sort_keys=True,
@@ -1008,6 +1020,7 @@ if canonical_t_enabled:
     t_bins = np.asarray(inpDict["t_bins"], dtype=float)
     phi_bins = np.asarray(inpDict["phi_bins"], dtype=float)
     canonical_t_edges = np.asarray(inpDict["canonical_t_binning"]["t_edges"], dtype=float)
+    canonical_phi_edges = np.asarray(inpDict["canonical_t_binning"]["phi_edges"], dtype=float)
     canonical_edge_tolerance = float(
         (get_proton_contamination_cleaning_config(inp_dict=inpDict).get("t_binning") or {}).get(
             "edge_tolerance", 1.0e-9
@@ -1024,15 +1037,30 @@ if canonical_t_enabled:
         and np.all(np.isfinite(t_bins))
         and maximum_edge_difference <= canonical_edge_tolerance
     )
+    maximum_phi_edge_difference = (
+        float(np.max(np.abs(phi_bins - canonical_phi_edges)))
+        if phi_bins.shape == canonical_phi_edges.shape and phi_bins.size
+        else float("inf")
+    )
+    canonical_phi_edge_match = bool(
+        phi_bins.shape == canonical_phi_edges.shape
+        and phi_bins.size >= 2
+        and np.all(np.isfinite(phi_bins))
+        and maximum_phi_edge_difference <= canonical_edge_tolerance
+    )
     inpDict["canonical_t_binning"]["canonical_edge_match"] = canonical_edge_match
     inpDict["canonical_t_binning"]["maximum_edge_difference"] = maximum_edge_difference
+    inpDict["canonical_t_binning"]["canonical_phi_edge_match"] = canonical_phi_edge_match
+    inpDict["canonical_t_binning"]["maximum_phi_edge_difference"] = maximum_phi_edge_difference
     inpDict["canonical_t_binning"].setdefault("edge_validation_by_stage", {})["main.Step4"] = {
         "canonical_edge_match": canonical_edge_match,
         "maximum_edge_difference": maximum_edge_difference,
         "edge_tolerance": canonical_edge_tolerance,
+        "canonical_phi_edge_match": canonical_phi_edge_match,
+        "maximum_phi_edge_difference": maximum_phi_edge_difference,
     }
-    if not canonical_edge_match:
-        raise RuntimeError("Step 4 attempted to replace immutable canonical t edges")
+    if not (canonical_edge_match and canonical_phi_edge_match):
+        raise RuntimeError("Step 4 attempted to replace immutable canonical t/phi edges")
 else:
     # Keep pion/non-kaon interval ownership unchanged.
     interval_root = "{}/src/{}".format(LTANAPATH, ParticleType)
@@ -1086,6 +1114,35 @@ if EPSSET == "high":
     for hist in histlist:
         hist["t_bins"] = t_bins
         hist["phi_bins"] = phi_bins
+
+    if canonical_t_enabled:
+        current_t_edges = np.asarray(inpDict.get("t_bins", []), dtype=float)
+        current_phi_edges = np.asarray(inpDict.get("phi_bins", []), dtype=float)
+        high_t_match = bool(
+            current_t_edges.shape == canonical_t_edges.shape
+            and np.allclose(current_t_edges, canonical_t_edges, rtol=0.0, atol=canonical_edge_tolerance)
+        )
+        high_phi_match = bool(
+            current_phi_edges.shape == canonical_phi_edges.shape
+            and np.allclose(current_phi_edges, canonical_phi_edges, rtol=0.0, atol=canonical_edge_tolerance)
+        )
+        inpDict["canonical_t_binning"].setdefault("edge_validation_by_stage", {})[
+            "main.Step4.high_bg_optimization"
+        ] = {
+            "canonical_edge_match": high_t_match,
+            "canonical_phi_edge_match": high_phi_match,
+            "maximum_edge_difference": (
+                float(np.max(np.abs(current_t_edges - canonical_t_edges)))
+                if current_t_edges.shape == canonical_t_edges.shape and current_t_edges.size else float("inf")
+            ),
+            "maximum_phi_edge_difference": (
+                float(np.max(np.abs(current_phi_edges - canonical_phi_edges)))
+                if current_phi_edges.shape == canonical_phi_edges.shape and current_phi_edges.size else float("inf")
+            ),
+            "edge_tolerance": canonical_edge_tolerance,
+        }
+        if not (high_t_match and high_phi_match):
+            raise RuntimeError("high-epsilon BG optimization attempted to replace canonical t/phi edges")
 
 bin_check_start = perf_counter()
 check_bins(histlist, inpDict)
