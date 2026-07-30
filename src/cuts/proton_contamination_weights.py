@@ -16,6 +16,7 @@ from ROOT import (
     TLatex,
     TLegend,
     TLine,
+    TPad,
     TPaveText,
     gPad,
     gStyle,
@@ -56,6 +57,21 @@ SUPPORT_CLASS_TO_CODE = {
     SUPPORT_UNSUPPORTED: 0.0,
     SUPPORT_MARGINAL: 1.0,
     SUPPORT_SUPPORTED: 2.0,
+}
+APPLIED_ZERO_REASON_TO_CODE = {
+    "applied": 0,
+    "invalid_cell_fit": 1,
+    "weak_proton_component": 2,
+    "unsupported_delta": 3,
+    "setting_gate_rejected": 4,
+}
+TIMING_CENTER_SOURCE_TO_CODE = {
+    "delta_all_t_fit": 0,
+    "delta_supported_t_fit": 1,
+    "neighbor_delta_interpolation": 2,
+    "neighbor_delta_nearest_fallback": 3,
+    "stable_global_center_fallback": 4,
+    "invalid_timing_center": 5,
 }
 
 DEFAULT_RF_BRANCH_CANDIDATES = (
@@ -4092,6 +4108,8 @@ def _signed_histogram_diagnostics(hist):
         "positive_integral": 0.0,
         "negative_integral": 0.0,
         "absolute_negative_integral": 0.0,
+        "signed_integral": 0.0,
+        "absolute_integral": 0.0,
     }
     if hist is None:
         return diagnostics
@@ -4105,10 +4123,14 @@ def _signed_histogram_diagnostics(hist):
                 diagnostics["negative_bin_count"] += 1
                 diagnostics["negative_integral"] += value
                 diagnostics["absolute_negative_integral"] += abs(value)
+            diagnostics["signed_integral"] += value
+            diagnostics["absolute_integral"] += abs(value)
     return diagnostics
 
 
-def _build_t_aerogel_root_payload(cleaning_result, event_rows, validation_cfg, t_edges):
+def _build_t_aerogel_root_payload(
+    cleaning_result, event_rows, validation_cfg, t_edges, coarse_cells=None,
+):
     """Create display objects from frozen lookup rows only; never refit events."""
     display_edges = _resolve_aerogel_display_edges(validation_cfg)
     if len(display_edges) < 2:
@@ -4147,8 +4169,24 @@ def _build_t_aerogel_root_payload(cleaning_result, event_rows, validation_cfg, t
                 "H_aero_vs_t_estimated_proton", "Estimated proton physical yield;canonical -t [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
+            "H_aero_vs_t_estimated_proton_positive": _make_t_aerogel_hist(
+                "H_aero_vs_t_estimated_proton_positive", "Positive estimated proton yield;canonical -t [GeV^{2}];P_aero NPE",
+                t_edges, display_edges,
+            ),
+            "H_aero_vs_t_estimated_proton_negative_abs": _make_t_aerogel_hist(
+                "H_aero_vs_t_estimated_proton_negative_abs", "Absolute negative estimated proton yield;canonical -t [GeV^{2}];P_aero NPE",
+                t_edges, display_edges,
+            ),
             "H_aero_vs_t_proton_cleaned": _make_t_aerogel_hist(
                 "H_aero_vs_t_proton_cleaned", "Frozen proton-cleaned physical yield;canonical -t [GeV^{2}];P_aero NPE",
+                t_edges, display_edges,
+            ),
+            "H_aero_vs_t_proton_cleaned_positive": _make_t_aerogel_hist(
+                "H_aero_vs_t_proton_cleaned_positive", "Positive frozen cleaned yield;canonical -t [GeV^{2}];P_aero NPE",
+                t_edges, display_edges,
+            ),
+            "H_aero_vs_t_proton_cleaned_negative_abs": _make_t_aerogel_hist(
+                "H_aero_vs_t_proton_cleaned_negative_abs", "Absolute negative frozen cleaned yield;canonical -t [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
         }
@@ -4231,6 +4269,14 @@ def _build_t_aerogel_root_payload(cleaning_result, event_rows, validation_cfg, t
                 global_hists["H_aero_vs_t_signed_physical_negative"].Fill(event["adj_t"], aero_value, abs(physical_weight))
             global_hists["H_aero_vs_t_estimated_proton"].Fill(event["adj_t"], aero_value, estimated)
             global_hists["H_aero_vs_t_proton_cleaned"].Fill(event["adj_t"], aero_value, cleaned)
+            if estimated > 0.0:
+                global_hists["H_aero_vs_t_estimated_proton_positive"].Fill(event["adj_t"], aero_value, estimated)
+            elif estimated < 0.0:
+                global_hists["H_aero_vs_t_estimated_proton_negative_abs"].Fill(event["adj_t"], aero_value, abs(estimated))
+            if cleaned > 0.0:
+                global_hists["H_aero_vs_t_proton_cleaned_positive"].Fill(event["adj_t"], aero_value, cleaned)
+            elif cleaned < 0.0:
+                global_hists["H_aero_vs_t_proton_cleaned_negative_abs"].Fill(event["adj_t"], aero_value, abs(cleaned))
         if t_index >= len(per_t):
             continue
         row = per_t[t_index]
@@ -4249,26 +4295,63 @@ def _build_t_aerogel_root_payload(cleaning_result, event_rows, validation_cfg, t
                 row["full_signed_physical_timing_vs_aero"].Fill(aero_value, timing_value, physical_weight)
                 row["full_estimated_proton_timing_vs_aero"].Fill(aero_value, timing_value, estimated)
                 row["full_cleaned_timing_vs_aero"].Fill(aero_value, timing_value, cleaned)
+    hidden_accumulator_objects_released = 0
     for row in per_t:
         for bin_index in range(1, row["average_proton_probability"].GetNbinsX() + 1):
             support = float(row["_absolute_support"].GetBinContent(bin_index))
             numerator = float(row["_absolute_probability"].GetBinContent(bin_index))
             if support > 0.0:
                 row["average_proton_probability"].SetBinContent(bin_index, numerator / support)
+        # These ROOT histograms are transient implementation accumulators;
+        # the frozen average is the only retained visual product.
+        row.pop("_absolute_support", None)
+        row.pop("_absolute_probability", None)
+        hidden_accumulator_objects_released += 2
+
+    coarse_hists = {}
+    coarse_edges = _resolve_aerogel_summary_edges(validation_cfg)
+    if len(coarse_edges) >= 2 and coarse_cells:
+        metric_specs = (
+            ("average_proton_probability", "H_t_aero_average_proton_probability"),
+            ("low_mm_removed_fraction", "H_t_aero_low_mm_removed_fraction"),
+            ("lambda_removed_fraction", "H_t_aero_lambda_removed_fraction"),
+        )
+        for metric_key, base_name in metric_specs:
+            value_hist = _make_t_aerogel_hist(
+                base_name, "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
+                t_edges, coarse_edges,
+            )
+            valid_hist = _make_t_aerogel_hist(
+                "{}_valid".format(base_name), "{} validity;canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
+                t_edges, coarse_edges,
+            )
+            for t_index, cell_row in enumerate(coarse_cells):
+                for aero_index, cell in enumerate(cell_row or []):
+                    value = cell.get(metric_key)
+                    if value is not None:
+                        value_hist.SetBinContent(t_index + 1, aero_index + 1, float(value))
+                        valid_hist.SetBinContent(t_index + 1, aero_index + 1, 1.0)
+            coarse_hists[base_name] = value_hist
+            coarse_hists["{}_valid".format(base_name)] = valid_hist
     root_objects = list(global_hists.values())
     root_objects.extend(
         hist for row in per_t for hist in row.values() if _is_root_object(hist)
     )
+    root_objects.extend(coarse_hists.values())
     return {
         "global": global_hists,
         "per_t": per_t,
+        "coarse": coarse_hists,
         "display_aero_edges": display_edges,
         "timing_range": [timing_low, timing_high],
         "timing_bins": int(timing_bins),
         "object_count": int(len(root_objects)),
-        "signed_histogram_diagnostics": _signed_histogram_diagnostics(
-            global_hists.get("H_aero_vs_t_signed_physical")
-        ),
+        "hidden_accumulator_objects_released": int(hidden_accumulator_objects_released),
+        "signed_histogram_diagnostics": {
+            "signed_physical": _signed_histogram_diagnostics(global_hists.get("H_aero_vs_t_signed_physical")),
+            "estimated_proton": _signed_histogram_diagnostics(global_hists.get("H_aero_vs_t_estimated_proton")),
+            "proton_cleaned": _signed_histogram_diagnostics(global_hists.get("H_aero_vs_t_proton_cleaned")),
+        },
     }
 
 
@@ -4304,8 +4387,8 @@ def _build_t_aerogel_validation(
         "absolute_event_weight_support", "sum_proton_probability",
         "absolute_weighted_probability_sum", "raw_missing_mass_yield",
         "estimated_proton_missing_mass_yield", "cleaned_missing_mass_yield",
-        "low_mm_raw_yield", "low_mm_removed_yield", "lambda_raw_yield",
-        "lambda_removed_yield",
+        "low_mm_raw_yield", "low_mm_removed_yield", "low_mm_cleaned_yield",
+        "lambda_raw_yield", "lambda_removed_yield", "lambda_cleaned_yield",
     )
     count_metrics = {"event_count", "raw_prompt_event_count"}
     cells = [
@@ -4316,40 +4399,88 @@ def _build_t_aerogel_validation(
     windows = dict(config.get("validation_windows") or {})
     low_mm = tuple(windows.get("low_mm") or (0.80, 0.90))
     lambda_peak = tuple(windows.get("lambda_peak") or (1.105, 1.125))
+
+    def _new_accumulator():
+        return {name: (0 if name in count_metrics else 0.0) for name in metric_names}
+
+    def _fill_accumulator(accumulator, row, physical_weight, proton_weight, cleaned_factor, adj_mm):
+        accumulator["event_count"] += 1
+        if bool(row.get("is_prompt_source", False)):
+            accumulator["raw_prompt_event_count"] += 1
+        accumulator["signed_event_weight_sum"] += physical_weight
+        accumulator["absolute_event_weight_support"] += abs(physical_weight)
+        accumulator["sum_proton_probability"] += physical_weight * proton_weight
+        accumulator["absolute_weighted_probability_sum"] += abs(physical_weight) * proton_weight
+        accumulator["raw_missing_mass_yield"] += physical_weight
+        accumulator["estimated_proton_missing_mass_yield"] += physical_weight * proton_weight
+        accumulator["cleaned_missing_mass_yield"] += physical_weight * cleaned_factor
+        if adj_mm is not None and low_mm[0] <= adj_mm < low_mm[1]:
+            accumulator["low_mm_raw_yield"] += physical_weight
+            accumulator["low_mm_removed_yield"] += physical_weight * proton_weight
+            accumulator["low_mm_cleaned_yield"] += physical_weight * cleaned_factor
+        if adj_mm is not None and lambda_peak[0] <= adj_mm < lambda_peak[1]:
+            accumulator["lambda_raw_yield"] += physical_weight
+            accumulator["lambda_removed_yield"] += physical_weight * proton_weight
+            accumulator["lambda_cleaned_yield"] += physical_weight * cleaned_factor
+
+    def _finalize_accumulator(accumulator):
+        summary = dict(accumulator)
+        summary["average_proton_probability"] = _safe_validation_ratio(
+            summary["absolute_weighted_probability_sum"], summary["absolute_event_weight_support"],
+        )
+        summary["low_mm_removed_fraction"] = _safe_validation_ratio(
+            summary["low_mm_removed_yield"], summary["low_mm_raw_yield"],
+        )
+        summary["lambda_removed_fraction"] = _safe_validation_ratio(
+            summary["lambda_removed_yield"], summary["lambda_raw_yield"],
+        )
+        # Preserve an observed zero while making an absent denominator
+        # distinguishable in both JSON and the CSV validity columns.
+        for metric in (
+            "average_proton_probability",
+            "low_mm_removed_fraction",
+            "lambda_removed_fraction",
+        ):
+            summary["{}_valid".format(metric)] = summary[metric] is not None
+        return summary
+
+    threshold_by_t = [
+        {"low": _new_accumulator(), "high": _new_accumulator()}
+        for _ in range(len(t_edges) - 1)
+    ]
+    threshold_setting = {"low": _new_accumulator(), "high": _new_accumulator()}
+    all_by_t = [_new_accumulator() for _ in range(len(t_edges) - 1)]
+    all_setting = _new_accumulator()
+    low_limit = float(validation_cfg.get("low_reference_max_npe", 5.0))
+    high_limit = float(validation_cfg.get("high_reference_min_npe", 10.0))
     source_stats = {}
     signed_positive_events = signed_negative_events = 0
     signed_positive_integral = signed_negative_integral = 0.0
     for row in event_rows:
         t_index = row.get("t_index")
-        aero_index = row.get("aero_index")
-        if not (isinstance(t_index, int) and isinstance(aero_index, int)):
+        if not isinstance(t_index, int) or not (0 <= t_index < len(cells)):
             continue
-        if not (0 <= t_index < len(cells) and 0 <= aero_index < len(cells[t_index])):
-            continue
+        aero_value = _finite_float_or_none(row.get("aero_value"))
         physical_weight = _finite_float_or_none(row.get("physical_weight"))
         proton_weight = _finite_float_or_none(row.get("proton_weight"))
         cleaned_factor = _finite_float_or_none(row.get("cleaned_factor"))
         adj_mm = _finite_float_or_none(row.get("adj_mm"))
-        if physical_weight is None or proton_weight is None:
+        if aero_value is None or physical_weight is None or proton_weight is None:
             continue
         cleaned_factor = 1.0 - proton_weight if cleaned_factor is None else cleaned_factor
-        cell = cells[t_index][aero_index]
-        cell["event_count"] += 1
-        if bool(row.get("is_prompt_source", False)):
-            cell["raw_prompt_event_count"] += 1
-        cell["signed_event_weight_sum"] += physical_weight
-        cell["absolute_event_weight_support"] += abs(physical_weight)
-        cell["sum_proton_probability"] += physical_weight * proton_weight
-        cell["absolute_weighted_probability_sum"] += abs(physical_weight) * proton_weight
-        cell["raw_missing_mass_yield"] += physical_weight
-        cell["estimated_proton_missing_mass_yield"] += physical_weight * proton_weight
-        cell["cleaned_missing_mass_yield"] += physical_weight * cleaned_factor
-        if adj_mm is not None and low_mm[0] <= adj_mm < low_mm[1]:
-            cell["low_mm_raw_yield"] += physical_weight
-            cell["low_mm_removed_yield"] += physical_weight * proton_weight
-        if adj_mm is not None and lambda_peak[0] <= adj_mm < lambda_peak[1]:
-            cell["lambda_raw_yield"] += physical_weight
-            cell["lambda_removed_yield"] += physical_weight * proton_weight
+        # Per-t totals use every valid frozen row; display/coarse membership
+        # remains an independent, optional projection below.
+        _fill_accumulator(all_by_t[t_index], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+        _fill_accumulator(all_setting, row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+        if aero_value < low_limit:
+            _fill_accumulator(threshold_by_t[t_index]["low"], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+            _fill_accumulator(threshold_setting["low"], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+        if aero_value >= high_limit:
+            _fill_accumulator(threshold_by_t[t_index]["high"], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+            _fill_accumulator(threshold_setting["high"], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+        aero_index = _find_collection_bin(aero_value, aero_edges)
+        if 0 <= aero_index < len(cells[t_index]):
+            _fill_accumulator(cells[t_index][aero_index], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
         source_name = str(row.get("source_label", "unknown"))
         source_stats.setdefault(source_name, {"event_count": 0, "raw_prompt_event_count": 0, "signed_physical_yield": 0.0})
         source_stats[source_name]["event_count"] += 1
@@ -4364,47 +4495,40 @@ def _build_t_aerogel_validation(
 
     matrices = {name: [[cell[name] for cell in row] for row in cells] for name in metric_names}
     average_probability = [
-        [_safe_validation_ratio(cell["absolute_weighted_probability_sum"], cell["absolute_event_weight_support"]) or 0.0 for cell in row]
+        [_safe_validation_ratio(cell["absolute_weighted_probability_sum"], cell["absolute_event_weight_support"]) for cell in row]
         for row in cells
     ]
     low_removed_fraction = [
-        [_safe_validation_ratio(cell["low_mm_removed_yield"], cell["low_mm_raw_yield"]) or 0.0 for cell in row]
+        [_safe_validation_ratio(cell["low_mm_removed_yield"], cell["low_mm_raw_yield"]) for cell in row]
         for row in cells
     ]
     lambda_removed_fraction = [
-        [_safe_validation_ratio(cell["lambda_removed_yield"], cell["lambda_raw_yield"]) or 0.0 for cell in row]
+        [_safe_validation_ratio(cell["lambda_removed_yield"], cell["lambda_raw_yield"]) for cell in row]
         for row in cells
     ]
-    low_limit = float(validation_cfg.get("low_reference_max_npe", 5.0))
-    high_limit = float(validation_cfg.get("high_reference_min_npe", 10.0))
+    for t_index, row in enumerate(cells):
+        for aero_index, cell in enumerate(row):
+            cell["average_proton_probability"] = average_probability[t_index][aero_index]
+            cell["average_proton_probability_valid"] = cell["average_proton_probability"] is not None
+            cell["low_mm_removed_fraction"] = low_removed_fraction[t_index][aero_index]
+            cell["low_mm_removed_fraction_valid"] = cell["low_mm_removed_fraction"] is not None
+            cell["lambda_removed_fraction"] = lambda_removed_fraction[t_index][aero_index]
+            cell["lambda_removed_fraction_valid"] = cell["lambda_removed_fraction"] is not None
     minimum_events = max(0, int(validation_cfg.get("minimum_events_per_t_bin", 20) or 20))
     maximum_high_weight = float(validation_cfg.get("maximum_high_aero_average_weight", 0.10))
     maximum_ratio = float(validation_cfg.get("maximum_high_to_low_weight_ratio", 1.0))
     maximum_high_lambda = float(validation_cfg.get("maximum_high_aero_lambda_removed_fraction", 0.10))
     minimum_low_probability = float(validation_cfg.get("minimum_low_aero_proton_fraction", 0.50))
 
-    def _aggregate(selected):
-        summary = {name: sum(cell[name] for cell in selected) for name in metric_names}
-        summary["average_proton_probability"] = _safe_validation_ratio(
-            summary["absolute_weighted_probability_sum"], summary["absolute_event_weight_support"],
-        )
-        summary["low_mm_removed_fraction"] = _safe_validation_ratio(
-            summary["low_mm_removed_yield"], summary["low_mm_raw_yield"],
-        )
-        summary["lambda_removed_fraction"] = _safe_validation_ratio(
-            summary["lambda_removed_yield"], summary["lambda_raw_yield"],
-        )
-        return summary
-
     all_warnings = []
     per_t_summary = []
     warnings_by_t_bin = []
     for t_index, row in enumerate(cells):
-        low_cells = [cell for index, cell in enumerate(row) if aero_edges[index + 1] <= low_limit]
-        high_cells = [cell for index, cell in enumerate(row) if aero_edges[index] >= high_limit]
-        total = _aggregate(row)
-        low = _aggregate(low_cells)
-        high = _aggregate(high_cells)
+        total = _finalize_accumulator(all_by_t[t_index])
+        # Threshold accumulators are filled directly from event-level NPE.
+        # They deliberately do not depend on the coarse matrix boundaries.
+        low = _finalize_accumulator(threshold_by_t[t_index]["low"])
+        high = _finalize_accumulator(threshold_by_t[t_index]["high"])
         labels = []
         if total["raw_prompt_event_count"] < minimum_events:
             labels.append("insufficient_aerogel_support")
@@ -4441,9 +4565,23 @@ def _build_t_aerogel_validation(
             "t_index": int(t_index), "t_low": float(t_edges[t_index]), "t_high": float(t_edges[t_index + 1]),
             **total,
             "low_aero": low, "high_aero": high,
+            "low_aero_raw_prompt_count": low["raw_prompt_event_count"],
+            "high_aero_raw_prompt_count": high["raw_prompt_event_count"],
+            "low_aero_signed_yield": low["signed_event_weight_sum"],
+            "high_aero_signed_yield": high["signed_event_weight_sum"],
+            "low_aero_absolute_support": low["absolute_event_weight_support"],
+            "high_aero_absolute_support": high["absolute_event_weight_support"],
+            "low_aero_estimated_proton_yield": low["estimated_proton_missing_mass_yield"],
+            "high_aero_estimated_proton_yield": high["estimated_proton_missing_mass_yield"],
+            "low_aero_cleaned_yield": low["cleaned_missing_mass_yield"],
+            "high_aero_cleaned_yield": high["cleaned_missing_mass_yield"],
+            "low_aero_average_proton_probability": low["average_proton_probability"],
+            "high_aero_average_proton_probability": high["average_proton_probability"],
             "low_aero_average_weight": low_average,
             "high_aero_average_weight": high_average,
             "high_to_low_aero_weight_ratio": high_to_low,
+            "low_aero_low_mm_removed_fraction": low["low_mm_removed_fraction"],
+            "high_aero_low_mm_removed_fraction": high["low_mm_removed_fraction"],
             "low_aero_lambda_removed_fraction": low["lambda_removed_fraction"],
             "high_aero_lambda_removed_fraction": high["lambda_removed_fraction"],
             "warnings": sorted(set(labels)),
@@ -4451,13 +4589,17 @@ def _build_t_aerogel_validation(
         warnings_by_t_bin.append({
             "t_index": int(t_index), "t_low": float(t_edges[t_index]), "t_high": float(t_edges[t_index + 1]),
             "low_aero_average_weight": low_average, "high_aero_average_weight": high_average,
+            "low_aero_average_weight_valid": low_average is not None,
+            "high_aero_average_weight_valid": high_average is not None,
             "low_aero_lambda_removed_fraction": low["lambda_removed_fraction"],
             "high_aero_lambda_removed_fraction": high["lambda_removed_fraction"],
+            "low_aero_lambda_removed_fraction_valid": low["lambda_removed_fraction"] is not None,
+            "high_aero_lambda_removed_fraction_valid": high["lambda_removed_fraction"] is not None,
             "warnings": sorted(set(labels)),
         })
-    total_low = [cell for row in cells for index, cell in enumerate(row) if aero_edges[index + 1] <= low_limit]
-    total_high = [cell for row in cells for index, cell in enumerate(row) if aero_edges[index] >= high_limit]
-    aggregate_low, aggregate_high = _aggregate(total_low), _aggregate(total_high)
+    aggregate_low = _finalize_accumulator(threshold_setting["low"])
+    aggregate_high = _finalize_accumulator(threshold_setting["high"])
+    aggregate_all = _finalize_accumulator(all_setting)
     if (
         aggregate_low["average_proton_probability"] is not None
         and aggregate_high["average_proton_probability"] is not None
@@ -4471,6 +4613,8 @@ def _build_t_aerogel_validation(
         "affects_fit_acceptance": False,
         "configuration": _json_ready_value(validation_cfg),
         "configuration_observational_only": True,
+        "low_reference_max_npe": low_limit,
+        "high_reference_min_npe": high_limit,
         "t_edges": t_edges,
         "aero_edges": aero_edges,
         "display_aero_edges": _resolve_aerogel_display_edges(validation_cfg),
@@ -4493,6 +4637,23 @@ def _build_t_aerogel_validation(
         "average_weight_above_10_npe": aggregate_high["average_proton_probability"],
         "aggregate_low_aero": aggregate_low,
         "aggregate_high_aero": aggregate_high,
+        "aggregate_all_frozen_rows": aggregate_all,
+        "low_aero_raw_prompt_count": aggregate_low["raw_prompt_event_count"],
+        "high_aero_raw_prompt_count": aggregate_high["raw_prompt_event_count"],
+        "low_aero_signed_yield": aggregate_low["signed_event_weight_sum"],
+        "high_aero_signed_yield": aggregate_high["signed_event_weight_sum"],
+        "low_aero_absolute_support": aggregate_low["absolute_event_weight_support"],
+        "high_aero_absolute_support": aggregate_high["absolute_event_weight_support"],
+        "low_aero_estimated_proton_yield": aggregate_low["estimated_proton_missing_mass_yield"],
+        "high_aero_estimated_proton_yield": aggregate_high["estimated_proton_missing_mass_yield"],
+        "low_aero_cleaned_yield": aggregate_low["cleaned_missing_mass_yield"],
+        "high_aero_cleaned_yield": aggregate_high["cleaned_missing_mass_yield"],
+        "low_aero_average_proton_probability": aggregate_low["average_proton_probability"],
+        "high_aero_average_proton_probability": aggregate_high["average_proton_probability"],
+        "low_aero_low_mm_removed_fraction": aggregate_low["low_mm_removed_fraction"],
+        "high_aero_low_mm_removed_fraction": aggregate_high["low_mm_removed_fraction"],
+        "low_aero_lambda_removed_fraction": aggregate_low["lambda_removed_fraction"],
+        "high_aero_lambda_removed_fraction": aggregate_high["lambda_removed_fraction"],
         "signed_weight_diagnostics": {
             "positive_event_count": int(signed_positive_events),
             "negative_event_count": int(signed_negative_events),
@@ -4513,18 +4674,23 @@ def _build_t_aerogel_validation(
     }
     if include_root_payload:
         root_payload = _build_t_aerogel_root_payload(
-            cleaning_result, event_rows, validation_cfg, t_edges,
+            cleaning_result, event_rows, validation_cfg, t_edges, cells,
         )
         candidate_accounting = (
             (cleaning_result.get("diagnostics") or {}).get("candidate_root_object_accounting") or {}
         )
         payload["root_object_accounting"] = {
-            "selected_candidate_full_root_objects_retained": int(root_payload.get("object_count", 0)),
-            "rejected_candidate_global_root_objects_retained": int(
+            "selected_candidate_fit_root_objects_retained": int(
+                candidate_accounting.get("selected_candidate_fit_root_objects_retained", 0) or 0
+            ),
+            "aerogel_validation_root_objects_retained": int(root_payload.get("object_count", 0)),
+            "nonselected_candidate_root_objects_retained": int(
                 candidate_accounting.get("rejected_candidate_global_root_objects_retained", 0) or 0
             ),
-            "rejected_candidate_per_cell_root_objects_retained": 0,
-            "rejected_candidate_per_cell_root_objects_released": int(
+            "hidden_accumulator_objects_released": int(
+                root_payload.get("hidden_accumulator_objects_released", 0) or 0
+            ),
+            "nonselected_candidate_per_cell_root_objects_released": int(
                 candidate_accounting.get("rejected_candidate_per_cell_root_objects_released", 0) or 0
             ),
         }
@@ -6061,7 +6227,12 @@ def _build_timing_t_event_weight_result(
                 [dict(fit or {}) for slices in delta_t_cell_fits for fit in (slices or [])]
             ),
             "candidate_root_object_accounting": {
-                "selected_candidate_full_root_payload_retained": True,
+                "selected_candidate_fit_root_objects_retained": int(
+                    len(timing_payload.get("global_t_slices") or [])
+                    + len(timing_payload.get("delta_all_t_hists") or [])
+                    + sum(len(row or []) for row in (timing_payload.get("delta_t_cells") or []))
+                    + 3
+                ),
                 "rejected_candidate_global_root_objects_retained": int(rejected_global_objects_retained),
                 "rejected_candidate_per_cell_root_objects_released": int(rejected_cell_objects_released),
             },
@@ -6164,6 +6335,13 @@ def build_kaon_proton_cleaning_result(
             "strict_mode": bool(config.get("strict_mode", False)),
             "failure_policy": str(config.get("failure_policy", "bypass")),
             "tree_policy": str(tree_policy),
+            "kinematic_context": {
+                "Q2": inpDict.get("Q2"),
+                "W": inpDict.get("W"),
+                "epsilon": inpDict.get("EPSVAL", inpDict.get("EPSSET")),
+                "epsset": inpDict.get("EPSSET"),
+                "phi_setting": phi_setting,
+            },
             "rf_policy": str(config.get("rf_policy", "epsset_default_after_cleaning")),
             "input_tree_state": "explicit_noRF",
             "input_tree_particle_selection": "Cut_Kaon_Events_*_noRF",
@@ -7550,10 +7728,13 @@ def apply_kaon_proton_cleaning_to_targets(
                 entry_index,
                 strict=True,
             )
-            delta_index = int(frozen_payload.get("delta_index", -1) or -1)
-            secondary_index = int(
-                frozen_payload.get("t_index" if method_is_t_binned else "aero_index", -1) or -1
+            delta_value = frozen_payload.get("delta_index", -1)
+            secondary_value = frozen_payload.get(
+                "t_index" if method_is_t_binned else "aero_index", -1
             )
+            # Bin zero is a real canonical cell, not an absent value.
+            delta_index = int(delta_value) if isinstance(delta_value, (int, float)) else -1
+            secondary_index = int(secondary_value) if isinstance(secondary_value, (int, float)) else -1
             support_label = str(
                 frozen_payload.get("support_label", SUPPORT_UNSUPPORTED)
                 or SUPPORT_UNSUPPORTED
@@ -9502,6 +9683,101 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     canvas.Print(output_pdf)
 
 
+def _make_timing_t_report_canvas(name, title, width, height, columns=1, rows=1, header_text=None):
+    """Create a canvas with a dedicated, non-data header pad."""
+    canvas = TCanvas(str(name), str(title), int(width), int(height))
+    header = TPad("{}_header".format(name), "", 0.0, 0.91, 1.0, 1.0)
+    body = TPad("{}_body".format(name), "", 0.0, 0.0, 1.0, 0.91)
+    header.SetFillStyle(0)
+    header.SetBorderMode(0)
+    body.SetFillStyle(0)
+    body.SetBorderMode(0)
+    header.Draw()
+    body.Draw()
+    header.cd()
+    label = TPaveText(0.02, 0.10, 0.98, 0.90, "NDC")
+    label.SetBorderSize(0)
+    label.SetFillStyle(0)
+    label.SetTextAlign(12)
+    label.SetTextSize(0.026)
+    label.AddText(str(header_text or title))
+    label.Draw()
+    body.cd()
+    if int(columns) * int(rows) > 1:
+        body.Divide(int(columns), int(rows))
+    return canvas, body, header, label
+
+
+def _draw_categorical_legend(code_map, title):
+    legend = TPaveText(0.14, 0.70, 0.86, 0.90, "NDC")
+    legend.SetBorderSize(1)
+    legend.SetFillStyle(0)
+    legend.SetTextAlign(12)
+    legend.SetTextSize(0.030)
+    legend.AddText(str(title))
+    legend.AddText(";  ".join("{} = {}".format(code, label) for label, code in code_map.items()))
+    legend.Draw()
+    return legend
+
+
+def _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id):
+    """Section F: frozen lookup closure after aerogel diagnostics."""
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    rows = list(diagnostics.get("cross_stage_t_consistency") or [])
+    canvas = TCanvas(
+        "C_timing_t_cross_stage_final_{}".format(page_id),
+        "{} cross-stage shifted-t consistency".format(prefix), 1100, 750,
+    )
+    hist = TH1D(
+        "H_timing_t_cross_stage_difference_final_{}".format(page_id),
+        "Cross-stage shifted-t maximum difference;sample index;max |#Delta t|",
+        max(len(rows), 1), 0.0, float(max(len(rows), 1)),
+    )
+    hist.SetDirectory(0)
+    for index, row in enumerate(rows, start=1):
+        hist.SetBinContent(index, float(row.get("maximum_absolute_difference", 0.0) or 0.0))
+    hist.Draw("hist")
+    summary = diagnostics.get("cross_stage_t_consistency_summary") or {}
+    info = TPaveText(0.52, 0.70, 0.90, 0.90, "NDC")
+    info.SetBorderSize(1)
+    info.SetFillStyle(0)
+    info.AddText("samples: {}".format(summary.get("sample_count", len(rows))))
+    info.AddText("max difference: {}".format(summary.get("maximum_absolute_difference", 0.0)))
+    info.AddText("tolerance: {}".format(summary.get("tolerance", "n/a")))
+    info.Draw()
+    canvas.Print(output_pdf)
+
+    canonical = diagnostics.get("canonical_t_binning") or {}
+    t_edges = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
+    phi_edges = [float(edge) for edge in (canonical.get("phi_edges") or [])]
+    rows = list(diagnostics.get("event_weight_lookup_by_t_phi") or [])
+    if len(t_edges) < 2 or len(phi_edges) < 2 or not rows:
+        return
+    count_hist = ROOT.TH2D(
+        "H_timing_t_lookup_tphi_count_final_{}".format(page_id),
+        "Frozen lookup event count;canonical -t [GeV^{2}];#phi [deg]",
+        len(t_edges) - 1, array("d", t_edges), len(phi_edges) - 1, array("d", phi_edges),
+    )
+    count_hist.SetDirectory(0)
+    proton_hist = _clone_hist(
+        count_hist, "H_timing_t_lookup_tphi_proton_final_{}".format(page_id), reset=True,
+    )
+    for row in rows:
+        t_index, phi_index = row.get("t_index"), row.get("phi_index")
+        if isinstance(t_index, int) and isinstance(phi_index, int):
+            if 0 <= t_index < count_hist.GetNbinsX() and 0 <= phi_index < count_hist.GetNbinsY():
+                count_hist.SetBinContent(t_index + 1, phi_index + 1, float(row.get("event_count", 0) or 0))
+                proton_hist.SetBinContent(t_index + 1, phi_index + 1, float(row.get("estimated_proton_yield", 0.0) or 0.0))
+    canvas = TCanvas("C_timing_t_lookup_tphi_final_{}".format(page_id), "{} frozen lookup by canonical t and phi".format(prefix), 1400, 700)
+    canvas.Divide(2, 1)
+    canvas.cd(1)
+    count_hist.Draw("colz text")
+    canvas.cd(2)
+    proton_hist.SetTitle("Frozen lookup estimated proton yield;canonical -t [GeV^{2}];#phi [deg]")
+    proton_hist.Draw("colz text")
+    canvas.Print(output_pdf)
+
+
 def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     """Append provenance and observational t x aerogel pages for timing-t."""
     if str(cleaning_result.get("method") or "") != PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
@@ -9627,6 +9903,88 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
     t_edges_for_cells = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
     if cell_rows and len(delta_edges) >= 2 and len(t_edges_for_cells) >= 2:
+        def _delta_t_map(name, title):
+            hist = ROOT.TH2D(
+                "{}_{}".format(name, page_id), str(title),
+                len(delta_edges) - 1, array("d", delta_edges),
+                len(t_edges_for_cells) - 1, array("d", t_edges_for_cells),
+            )
+            hist.SetDirectory(0)
+            return hist
+
+        maps = {
+            "fit_valid": _delta_t_map("H_delta_t_fit_valid", "Cell-fit validity;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "proton_detected": _delta_t_map("H_delta_t_proton_detected", "Proton component detected;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "delta_support": _delta_t_map("H_delta_t_delta_support", "Delta support class;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "setting_support": _delta_t_map("H_delta_t_setting_support", "Setting support class;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "raw_yield": _delta_t_map("H_delta_t_raw_proton_yield", "Raw fitted proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "fitted_yield": _delta_t_map("H_delta_t_fitted_proton_yield", "Weak-component-handled fitted proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "applied_yield": _delta_t_map("H_delta_t_applied_proton_yield", "Applied proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "raw_minus_applied": _delta_t_map("H_delta_t_raw_minus_applied_yield", "Raw minus applied proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "significance": _delta_t_map("H_delta_t_proton_significance", "Proton component significance;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "applied_enabled": _delta_t_map("H_delta_t_applied_enabled", "Applied-cell enabled;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "zero_reason": _delta_t_map("H_delta_t_applied_zero_reason", "Applied zero reason;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "timing_center": _delta_t_map("H_delta_t_timing_center_source", "Timing-center source;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "event_probability": _delta_t_map("H_delta_t_average_proton_probability", "Average frozen proton probability;SHMS #delta [%];canonical -t [GeV^{2}]"),
+        }
+        probability_sum = diagnostics.get("event_probability_sum_by_delta_t") or []
+        probability_count = diagnostics.get("event_probability_count_by_delta_t") or []
+        for row in cell_rows:
+            delta_index, t_index = row.get("delta_index"), row.get("t_index")
+            if not isinstance(delta_index, int) or not isinstance(t_index, int):
+                continue
+            if not (0 <= delta_index < maps["fit_valid"].GetNbinsX() and 0 <= t_index < maps["fit_valid"].GetNbinsY()):
+                continue
+            x_bin, y_bin = delta_index + 1, t_index + 1
+            maps["fit_valid"].SetBinContent(x_bin, y_bin, float(bool(row.get("cell_fit_valid", row.get("valid", False)))))
+            maps["proton_detected"].SetBinContent(x_bin, y_bin, float(bool(row.get("proton_component_detected", False))))
+            maps["delta_support"].SetBinContent(x_bin, y_bin, SUPPORT_CLASS_TO_CODE.get(str(row.get("delta_support_label", SUPPORT_UNSUPPORTED)), 0.0))
+            maps["setting_support"].SetBinContent(x_bin, y_bin, SUPPORT_CLASS_TO_CODE.get(str(row.get("setting_support_label", SUPPORT_UNSUPPORTED)), 0.0))
+            raw_yield = float(row.get("raw_proton_yield", 0.0) or 0.0)
+            fitted_yield = float(row.get("fitted_proton_yield", row.get("proton_yield", 0.0)) or 0.0)
+            applied_yield = float(row.get("applied_proton_yield", 0.0) or 0.0)
+            maps["raw_yield"].SetBinContent(x_bin, y_bin, raw_yield)
+            maps["fitted_yield"].SetBinContent(x_bin, y_bin, fitted_yield)
+            maps["applied_yield"].SetBinContent(x_bin, y_bin, applied_yield)
+            maps["raw_minus_applied"].SetBinContent(x_bin, y_bin, raw_yield - applied_yield)
+            maps["significance"].SetBinContent(x_bin, y_bin, float(row.get("proton_component_significance", 0.0) or 0.0))
+            maps["applied_enabled"].SetBinContent(x_bin, y_bin, float(bool(row.get("applied_cell_enabled", False))))
+            reason = "applied" if bool(row.get("applied_cell_enabled", False)) else str(row.get("applied_zero_reason") or "invalid_cell_fit")
+            maps["zero_reason"].SetBinContent(x_bin, y_bin, APPLIED_ZERO_REASON_TO_CODE.get(reason, APPLIED_ZERO_REASON_TO_CODE["invalid_cell_fit"]))
+            maps["timing_center"].SetBinContent(x_bin, y_bin, TIMING_CENTER_SOURCE_TO_CODE.get(str(row.get("timing_center_source") or "invalid_timing_center"), TIMING_CENTER_SOURCE_TO_CODE["invalid_timing_center"]))
+            try:
+                count = float(probability_count[delta_index][t_index])
+                value = float(probability_sum[delta_index][t_index])
+                if count > 0.0:
+                    maps["event_probability"].SetBinContent(x_bin, y_bin, value / count)
+            except (IndexError, TypeError, ValueError):
+                pass
+
+        canvas = TCanvas("C_timing_t_delta_t_yields_{}".format(page_id), "{} raw/fitted/applied delta-t yields".format(prefix), 1800, 700)
+        canvas.Divide(4, 1)
+        for index, key in enumerate(("raw_yield", "fitted_yield", "applied_yield", "raw_minus_applied"), start=1):
+            canvas.cd(index)
+            maps[key].Draw("colz text")
+        canvas.Print(output_pdf)
+        canvas = TCanvas("C_timing_t_delta_t_categories_{}".format(page_id), "{} delta-t categorical state".format(prefix), 1800, 900)
+        canvas.Divide(3, 2)
+        for index, key in enumerate(("fit_valid", "proton_detected", "delta_support", "setting_support", "applied_enabled", "zero_reason"), start=1):
+            canvas.cd(index)
+            maps[key].Draw("colz text")
+            if key == "delta_support":
+                _draw_categorical_legend({label: int(code) for label, code in SUPPORT_CLASS_TO_CODE.items()}, "support")
+            elif key == "zero_reason":
+                _draw_categorical_legend(APPLIED_ZERO_REASON_TO_CODE, "zero reason")
+        canvas.Print(output_pdf)
+        canvas = TCanvas("C_timing_t_delta_t_timing_{}".format(page_id), "{} delta-t timing and event state".format(prefix), 1500, 700)
+        canvas.Divide(3, 1)
+        for index, key in enumerate(("significance", "timing_center", "event_probability"), start=1):
+            canvas.cd(index)
+            maps[key].Draw("colz text")
+            if key == "timing_center":
+                _draw_categorical_legend(TIMING_CENTER_SOURCE_TO_CODE, "timing center")
+        canvas.Print(output_pdf)
+
         h_applied = ROOT.TH2D(
             "H_timing_t_applied_cell_state_{}".format(page_id),
             "Applied timing-t cell state;SHMS #delta [%];canonical -t [GeV^{2}]",
@@ -9661,6 +10019,10 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         h_closure.Draw("colz text")
         canvas.Print(output_pdf)
 
+    # Section F is emitted after the observational aerogel pages.  Retain the
+    # existing calculations here for compatibility, but do not render them
+    # before Section E.
+    defer_closure_pages = True
     rows = list(diagnostics.get("cross_stage_t_consistency") or [])
     canvas = TCanvas(
         "C_timing_t_cross_stage_{}".format(page_id),
@@ -9686,7 +10048,8 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     text.AddText("max difference: {}".format(consistency.get("maximum_absolute_difference", 0.0)))
     text.AddText("tolerance: {}".format(consistency.get("tolerance", "n/a")))
     text.Draw()
-    canvas.Print(output_pdf)
+    if not defer_closure_pages:
+        canvas.Print(output_pdf)
 
     # Frozen lookup coverage in the final canonical (t, phi) coordinates.
     phi_edges_for_lookup = [float(edge) for edge in (canonical.get("phi_edges") or [])]
@@ -9717,45 +10080,45 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         canvas.cd(2)
         h_tphi_proton.SetTitle("Frozen lookup estimated proton yield;canonical -t [GeV^{2}];#phi [deg]")
         h_tphi_proton.Draw("colz text")
-        canvas.Print(output_pdf)
+        if not defer_closure_pages:
+            canvas.Print(output_pdf)
 
     aero = diagnostics.get("aerogel_vs_t_validation") or diagnostics.get("aerogel_validation") or {}
     t_edges = list(aero.get("t_edges") or [])
     aero_edges = list(aero.get("aero_edges") or [])
     if len(t_edges) < 2 or len(aero_edges) < 2:
+        # Aerogel products may be disabled, but frozen-lookup closure remains
+        # part of the timing-t report.
+        _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id)
         return
     validation_cfg = dict(aero.get("configuration") or {})
 
-    def _draw_observational_label():
-        label = TPaveText(0.12, 0.91, 0.88, 0.98, "NDC")
-        label.SetBorderSize(1)
-        label.SetFillStyle(0)
-        label.SetTextSize(0.028)
-        label.AddText("Aerogel secondary validation only - Not used in production timing-t event weights")
-        label.Draw()
-        return label
+    observational_header = (
+        "Aerogel secondary PID validation only - not used in production timing-t event-weight lookup"
+    )
 
     # Section E1: exact canonical-t x fine-aerogel frozen-lookup maps.
     root_payload = cleaning_result.get("_aerogel_vs_t_root_payload") or {}
     global_hists = root_payload.get("global") or {}
     if bool(validation_cfg.get("write_global_aero_vs_t_pages", True)) and global_hists:
-        canvas = TCanvas(
+        canvas, body, _header, _label = _make_timing_t_report_canvas(
             "C_timing_t_aero_global_{}".format(page_id),
-            "{} aerogel versus canonical-t validation".format(prefix), 1600, 1000,
+            "{} aerogel versus canonical-t validation".format(prefix), 1600, 1000, 3, 4,
+            observational_header,
         )
-        canvas.Divide(3, 2)
         for index, key in enumerate((
             "H_aero_vs_t_raw_prompt", "H_aero_vs_t_signed_physical",
             "H_aero_vs_t_signed_physical_positive", "H_aero_vs_t_signed_physical_negative",
-            "H_aero_vs_t_estimated_proton", "H_aero_vs_t_proton_cleaned",
+            "H_aero_vs_t_estimated_proton", "H_aero_vs_t_estimated_proton_positive",
+            "H_aero_vs_t_estimated_proton_negative_abs", "H_aero_vs_t_proton_cleaned",
+            "H_aero_vs_t_proton_cleaned_positive", "H_aero_vs_t_proton_cleaned_negative_abs",
         ), start=1):
-            canvas.cd(index)
+            body.cd(index)
             hist = global_hists.get(key)
             if hist is not None:
                 hist.Draw("colz")
                 gPad.Modified()
                 gPad.Update()
-        _draw_observational_label()
         canvas.Print(output_pdf)
 
     # Section E2: eight compact canonical-t x summary-aerogel matrices.
@@ -9771,13 +10134,13 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
             ("lambda_removed_fraction_by_t_aero", "Lambda removal fraction"),
         )
         for page_index, specs in enumerate((matrix_specs[:4], matrix_specs[4:]), start=1):
-            canvas = TCanvas(
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_aero_matrices_{}_{}".format(page_id, page_index),
-                "{} aerogel validation summary matrices".format(prefix), 1500, 1000,
+                "{} aerogel validation summary matrices".format(prefix), 1500, 1000, 2, 2,
+                observational_header,
             )
-            canvas.Divide(2, 2)
             for draw_index, (metric_key, metric_label) in enumerate(specs, start=1):
-                canvas.cd(draw_index)
+                body.cd(draw_index)
                 hist = _make_t_aerogel_hist(
                     "H_timing_t_aero_{}_{}_{}".format(metric_key, page_id, page_index),
                     "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_label),
@@ -9791,24 +10154,80 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
                 hist.Draw("colz text")
                 gPad.Modified()
                 gPad.Update()
-            _draw_observational_label()
+            canvas.Print(output_pdf)
+        coarse_hists = root_payload.get("coarse") or {}
+        if coarse_hists:
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
+                "C_timing_t_aero_validity_masks_{}".format(page_id),
+                "{} aerogel value and validity masks".format(prefix), 1600, 900, 3, 2,
+                observational_header + " | mask: 1=evaluated, 0=undefined",
+            )
+            for draw_index, key in enumerate((
+                "H_t_aero_average_proton_probability", "H_t_aero_average_proton_probability_valid",
+                "H_t_aero_low_mm_removed_fraction", "H_t_aero_low_mm_removed_fraction_valid",
+                "H_t_aero_lambda_removed_fraction", "H_t_aero_lambda_removed_fraction_valid",
+            ), start=1):
+                body.cd(draw_index)
+                hist = coarse_hists.get(key)
+                if hist is not None:
+                    hist.Draw("colz text")
             canvas.Print(output_pdf)
 
     # Section E3: compact, per-canonical-t PID views created from the same
     # frozen rows.  Hidden numerator/support histograms never enter a page.
     if bool(validation_cfg.get("write_per_t_pid_pages", True)):
         for row in root_payload.get("per_t") or []:
-            canvas = TCanvas(
-                "C_timing_t_aero_per_t_{}_{}".format(page_id, row.get("t_index")),
-                "{} aerogel PID validation t bin {}".format(prefix, row.get("t_index")),
-                1500, 1000,
+            summary = (aero.get("per_t_bin_summary") or [])
+            t_index = int(row.get("t_index", -1))
+            t_summary = summary[t_index] if 0 <= t_index < len(summary) else {}
+            context = diagnostics.get("kinematic_context") or {}
+            local_cells = [
+                cell for cell in (diagnostics.get("applied_timing_t_cell_map") or [])
+                if cell.get("t_index") == t_index
+            ]
+            local_support = "/".join(
+                "{}:{}".format(label, sum(str(cell.get("delta_support_label")) == label for cell in local_cells))
+                for label in SUPPORT_CLASS_ORDER
             )
-            canvas.Divide(2, 2)
-            canvas.cd(1)
+            applied_yield = sum(float(cell.get("applied_proton_yield", 0.0) or 0.0) for cell in local_cells)
+            header_text = (
+                "Aerogel secondary PID validation only | Q2={q2} W={w} eps={epsilon} phi={phi} | t bin {t}: [{low:.6g}, {high:.6g}] | "
+                "timing={branch} range={timing} | setting={setting} | prompt={prompt} signed={signed:.4g} "
+                "p={proton:.4g} applied={applied:.4g} | delta support={delta_support} | warnings={warnings}"
+            ).format(
+                q2=context.get("Q2", "n/a"), w=context.get("W", "n/a"), epsilon=context.get("epsilon", "n/a"),
+                phi=context.get("phi_setting", cleaning_result.get("phi_setting", "n/a")),
+                t=t_index, low=float(t_summary.get("t_low", 0.0) or 0.0), high=float(t_summary.get("t_high", 0.0) or 0.0),
+                branch=diagnostics.get("timing_branch", "n/a"), timing=root_payload.get("timing_range", "n/a"),
+                setting=(diagnostics.get("setting_support") or {}).get("support_label", "n/a"),
+                prompt=t_summary.get("raw_prompt_event_count", 0), signed=float(t_summary.get("signed_event_weight_sum", 0.0) or 0.0),
+                proton=float(t_summary.get("estimated_proton_missing_mass_yield", 0.0) or 0.0),
+                applied=applied_yield, delta_support=local_support,
+                warnings=",".join(t_summary.get("warnings") or []) or "none",
+            )
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
+                "C_timing_t_aero_per_t_{}_{}".format(page_id, row.get("t_index")),
+                "{} aerogel PID validation t bin {}".format(prefix, row.get("t_index")), 1500, 1000, 2, 2,
+                header_text,
+            )
+            if int(t_summary.get("event_count", 0) or 0) == 0:
+                body.cd(1)
+                empty = TPaveText(0.14, 0.35, 0.86, 0.65, "NDC")
+                empty.SetBorderSize(1)
+                empty.SetFillStyle(0)
+                empty.SetTextAlign(22)
+                empty.SetTextSize(0.045)
+                empty.AddText("No supported events in this canonical t bin")
+                empty.AddText("raw prompt count = {}".format(t_summary.get("raw_prompt_event_count", 0)))
+                empty.AddText("warnings = {}".format(", ".join(t_summary.get("warnings") or []) or "none"))
+                empty.Draw()
+                canvas.Print(output_pdf)
+                continue
+            body.cd(1)
             row["raw_prompt_timing_vs_aero"].Draw("colz")
-            canvas.cd(2)
+            body.cd(2)
             row["estimated_proton_timing_vs_aero"].Draw("colz")
-            canvas.cd(3)
+            body.cd(3)
             raw_projection = row["raw_signed_projection"]
             proton_projection = row["estimated_proton_projection"]
             cleaned_projection = row["cleaned_projection"]
@@ -9824,27 +10243,53 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
             legend.AddEntry(proton_projection, "estimated proton", "l")
             legend.AddEntry(cleaned_projection, "frozen cleaned", "l")
             legend.Draw()
-            canvas.cd(4)
+            body.cd(4)
             row["average_proton_probability"].SetMinimum(0.0)
             row["average_proton_probability"].SetMaximum(1.0)
             row["average_proton_probability"].Draw("hist")
-            _draw_observational_label()
             canvas.Print(output_pdf)
             if bool(validation_cfg.get("write_full_per_t_pid_pages", False)) and "full_raw_prompt_timing_vs_aero" in row:
-                full_canvas = TCanvas(
+                full_canvas, full_body, _header, _label = _make_timing_t_report_canvas(
                     "C_timing_t_aero_per_t_full_{}_{}".format(page_id, row.get("t_index")),
-                    "{} full aerogel PID detail t bin {}".format(prefix, row.get("t_index")),
-                    1500, 1000,
+                    "{} full aerogel PID detail t bin {}".format(prefix, row.get("t_index")), 1500, 1000, 2, 2,
+                    header_text,
                 )
-                full_canvas.Divide(2, 2)
                 for draw_index, key in enumerate((
                     "full_raw_prompt_timing_vs_aero", "full_signed_physical_timing_vs_aero",
                     "full_estimated_proton_timing_vs_aero", "full_cleaned_timing_vs_aero",
                 ), start=1):
-                    full_canvas.cd(draw_index)
+                    full_body.cd(draw_index)
                     row[key].Draw("colz")
-                _draw_observational_label()
                 full_canvas.Print(output_pdf)
+
+    warning_rows = [row for row in (aero.get("warnings_by_t_bin") or []) if row.get("warnings")]
+    canvas, body, _header, _label = _make_timing_t_report_canvas(
+        "C_timing_t_aero_warnings_{}".format(page_id),
+        "{} aerogel validation exceptions".format(prefix), 1400, 800, 1, 1,
+        observational_header,
+    )
+    warning_text = TPaveText(0.05, 0.05, 0.95, 0.95, "NDC")
+    warning_text.SetBorderSize(1)
+    warning_text.SetFillStyle(0)
+    warning_text.SetTextAlign(12)
+    warning_text.SetTextSize(0.028)
+    warning_text.AddText("Warnings only; complete diagnostics are stored in JSON/CSV")
+    if not warning_rows:
+        warning_text.AddText("No per-t-bin aerogel validation warnings")
+    for row in warning_rows:
+        warning_text.AddText(
+            "t{} [{:.6g}, {:.6g}]: {}".format(
+                row.get("t_index"), float(row.get("t_low", 0.0) or 0.0),
+                float(row.get("t_high", 0.0) or 0.0), ", ".join(row.get("warnings") or []),
+            )
+        )
+    body.cd()
+    warning_text.Draw()
+    canvas.Print(output_pdf)
+
+    # Section F: frozen lookup/cross-stage closure follows all aerogel-only
+    # pages so the report ordering remains A--G.
+    _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id)
 
 
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):

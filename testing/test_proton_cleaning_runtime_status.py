@@ -25,7 +25,7 @@ except ImportError:
 
     root_stub = types.ModuleType("ROOT")
     for name in (
-        "TCanvas", "TLatex", "TLegend", "TLine", "TPaveText", "TH1D", "TH2D",
+        "TCanvas", "TLatex", "TLegend", "TLine", "TPad", "TPaveText", "TH1D", "TH2D",
         "TF1", "TGraphErrors",
     ):
         setattr(root_stub, name, _RootImportStub)
@@ -367,7 +367,7 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         result = {"t_edges": [0.0, 1.0]}
         rows = [{
             "t_index": 0, "aero_index": 0, "physical_weight": 2.0,
-            "proton_weight": 0.25, "adj_mm": 0.85,
+            "proton_weight": 0.25, "aero_value": 2.0, "adj_mm": 0.85,
         }]
         config = {
             "aerogel_validation": {
@@ -388,12 +388,12 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
             {
                 "t_index": 0, "aero_index": 0, "source_label": "prompt",
                 "is_prompt_source": True, "physical_weight": 2.0,
-                "proton_weight": 0.50, "cleaned_factor": 0.50, "adj_mm": 0.85,
+                "proton_weight": 0.50, "cleaned_factor": 0.50, "aero_value": 2.0, "adj_mm": 0.85,
             },
             {
                 "t_index": 0, "aero_index": 1, "source_label": "rand",
                 "is_prompt_source": False, "physical_weight": -0.5,
-                "proton_weight": 0.20, "cleaned_factor": 0.80, "adj_mm": 1.115,
+                "proton_weight": 0.20, "cleaned_factor": 0.80, "aero_value": 7.0, "adj_mm": 1.115,
             },
         ]
         config = {
@@ -428,6 +428,50 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
             }),
             [0.0, 3.0, 9.0],
         )
+
+    def test_aerogel_thresholds_use_event_npe_not_coarse_bins(self):
+        result = {"t_edges": [0.0, 1.0]}
+        rows = [
+            {"t_index": 0, "aero_value": 4.0, "is_prompt_source": True,
+             "physical_weight": 2.0, "proton_weight": 0.5, "cleaned_factor": 0.5, "adj_mm": 0.85},
+            {"t_index": 0, "aero_value": 5.0, "is_prompt_source": True,
+             "physical_weight": 3.0, "proton_weight": 0.4, "cleaned_factor": 0.6, "adj_mm": 0.85},
+            {"t_index": 0, "aero_value": 10.0, "is_prompt_source": True,
+             "physical_weight": 4.0, "proton_weight": 0.25, "cleaned_factor": 0.75, "adj_mm": 1.115},
+        ]
+        base_config = {
+            "aerogel_validation": {
+                "enabled": True, "summary_slice_edges": (0.0, 3.0, 6.0, 10.0, 25.0),
+                "low_reference_max_npe": 5.0, "high_reference_min_npe": 10.0,
+            },
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, base_config)
+        self.assertEqual(validation["low_aero_raw_prompt_count"], 1)
+        self.assertEqual(validation["high_aero_raw_prompt_count"], 1)
+        self.assertAlmostEqual(validation["low_aero_signed_yield"], 2.0)
+        self.assertAlmostEqual(validation["high_aero_signed_yield"], 4.0)
+        changed = dict(base_config)
+        changed["aerogel_validation"] = dict(base_config["aerogel_validation"], summary_slice_edges=(0.0, 2.0, 8.0, 25.0))
+        changed_validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, changed)
+        self.assertEqual(changed_validation["low_aero_raw_prompt_count"], 1)
+        self.assertEqual(changed_validation["high_aero_raw_prompt_count"], 1)
+
+    def test_aerogel_ratio_preserves_undefined_and_measured_zero(self):
+        result = {"t_edges": [0.0, 1.0]}
+        rows = [{
+            "t_index": 0, "aero_value": 1.0, "is_prompt_source": True,
+            "physical_weight": 2.0, "proton_weight": 0.0, "cleaned_factor": 1.0, "adj_mm": 1.0,
+        }]
+        config = {
+            "aerogel_validation": {"enabled": True, "summary_slice_edges": (0.0, 5.0, 10.0)},
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, config)
+        self.assertEqual(validation["average_proton_probability_by_t_aero"][0][0], 0.0)
+        self.assertTrue(validation["cells"][0][0]["average_proton_probability_valid"])
+        self.assertIsNone(validation["average_proton_probability_by_t_aero"][0][1])
+        self.assertFalse(validation["cells"][0][1]["average_proton_probability_valid"])
 
 
 if __name__ == "__main__":
