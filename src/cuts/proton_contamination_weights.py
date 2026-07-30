@@ -18,6 +18,7 @@ from ROOT import (
     TLine,
     TPad,
     TPaveText,
+    TH1D,
     gPad,
     gStyle,
     kBlack,

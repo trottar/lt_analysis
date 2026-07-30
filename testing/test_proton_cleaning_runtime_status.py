@@ -140,6 +140,11 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
             timing_constraint=self.timing_constraint if timing_constraint is None else timing_constraint,
         )
 
+    def test_timing_t_pdf_helpers_import_direct_th1d(self):
+        # Cross-stage closure pages use the direct ROOT alias rather than
+        # ROOT.TH1D, so retain this import-level regression guard.
+        self.assertTrue(hasattr(proton_cleaning, "TH1D"))
+
     def test_delta_offset_reads_only_current_tof_summary(self):
         histogram = _FakeHistogram()
         tof_summary = {"valid": True, "mean_delta_t_pk_ns": 0.5, "prompt_event_count": 100}
