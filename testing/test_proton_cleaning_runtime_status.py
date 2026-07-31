@@ -478,6 +478,167 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertIsNone(validation["average_proton_probability_by_t_aero"][0][1])
         self.assertFalse(validation["cells"][0][1]["average_proton_probability_valid"])
 
+    def test_aerogel_matrix_payload_uses_named_prompt_and_physical_metrics(self):
+        result = {"t_edges": [0.0, 1.0], "diagnostics": {"selected_timing_candidate": {"selected": True}}}
+        rows = [
+            {"t_index": 0, "aero_value": 2.0, "is_prompt_source": True,
+             "physical_weight": 2.0, "proton_weight": 0.25, "cleaned_factor": 0.75, "adj_mm": 0.85},
+            {"t_index": 0, "aero_value": 7.0, "is_prompt_source": False,
+             "physical_weight": -0.5, "proton_weight": 0.20, "cleaned_factor": 0.80, "adj_mm": 1.115},
+        ]
+        config = {
+            "aerogel_validation": {"enabled": True, "summary_slice_edges": (0.0, 5.0, 10.0)},
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, rows, config)
+        matrix = validation["matrix_payload"]
+        self.assertEqual(matrix["source"], "frozen_timing_t_lookup_rows")
+        self.assertEqual(matrix["metrics"]["selected_prompt_count"][0], [1, 0])
+        self.assertEqual(matrix["metrics"]["signed_physical_yield"][0], [2.0, -0.5])
+        self.assertEqual(matrix["metrics"]["estimated_proton_yield"][0], [0.5, -0.1])
+        self.assertEqual(
+            validation["raw_prompt_event_count_by_t_aero"],
+            matrix["metrics"]["selected_prompt_count"],
+        )
+        self.assertAlmostEqual(
+            matrix["metrics"]["cleaned_yield"][0][0],
+            matrix["metrics"]["signed_physical_yield"][0][0]
+            - matrix["metrics"]["estimated_proton_yield"][0][0],
+        )
+
+    def test_integrity_rejects_nonempty_source_with_no_coarse_matrix_content(self):
+        result = {"t_edges": [0.0, 1.0], "diagnostics": {"selected_timing_candidate": {"selected": True}}}
+        config = {
+            "aerogel_validation": {"enabled": True, "summary_slice_edges": (0.0, 5.0, 10.0)},
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        validation = proton_cleaning._build_t_aerogel_validation(result, {}, [{
+            "t_index": 0, "aero_value": 50.0, "is_prompt_source": True,
+            "physical_weight": 1.0, "proton_weight": 0.2, "adj_mm": 0.85,
+        }], config)
+        self.assertIn(
+            "nonempty_frozen_source_has_matrix_content",
+            validation["diagnostic_integrity"]["failures"],
+        )
+
+    def test_integrity_strict_mode_raises_for_invalid_diagnostic_contract(self):
+        result = {"t_edges": [0.0, 1.0], "diagnostics": {"selected_timing_candidate": {"selected": True}}}
+        config = {
+            "aerogel_validation": {
+                "enabled": True, "summary_slice_edges": (0.0, 5.0, 10.0),
+                "diagnostic_strict": True,
+            },
+            "validation_windows": {"low_mm": (0.8, 0.9), "lambda_peak": (1.105, 1.125)},
+        }
+        with self.assertRaisesRegex(RuntimeError, "timing-t diagnostic integrity failed"):
+            proton_cleaning._build_t_aerogel_validation(result, {}, [{
+                "t_index": 0, "aero_value": 30.0, "physical_weight": 1.0,
+                "proton_weight": 0.2, "adj_mm": 0.85,
+            }], config)
+
+    def test_timing_t_summary_uses_selected_candidate_state_not_legacy_arrays(self):
+        result = {
+            "delta_edges": [-1.0, 0.0, 1.0],
+            "diagnostics": {
+                "selected_timing_candidate": {"selected": True, "timing_branch": "P_RF_Dist", "candidate_selection_rank": [1]},
+                "candidate_selection_tuple": ["setting_accepted"],
+                "setting_support": {"accepted": True, "support_label": "supported"},
+                "delta_support": [{
+                    "delta_index": 0, "support_label": "supported", "data_total": 10.0,
+                    "fitted_data_total": 9.0, "model_total": 9.0, "proton_total": 3.0,
+                    "kaon_total": 5.0, "other_total": 1.0, "valid_t_cells": 2, "coverage": 0.9,
+                }],
+                "applied_timing_t_cell_map": [{"delta_index": 0, "applied_proton_yield": 2.0}],
+                "event_weight_closure_by_delta": [{
+                    "delta_index": 0, "summed_event_proton_probability": 1.0, "event_count": 4,
+                }],
+                "proton_yield_by_delta": [999.0],
+            },
+        }
+        summary = proton_cleaning._build_timing_t_summary(
+            result, {"source": "frozen_timing_t_lookup_rows"},
+            {"raw_missing_mass_yield": 7.0, "estimated_proton_missing_mass_yield": 2.0, "cleaned_missing_mass_yield": 5.0},
+        )
+        self.assertEqual(summary["selected_candidate"]["timing_branch"], "P_RF_Dist")
+        self.assertEqual(summary["per_delta"][0]["proton_yield"], 3.0)
+        self.assertEqual(summary["per_delta"][0]["applied_proton_yield"], 2.0)
+        self.assertAlmostEqual(summary["per_delta"][0]["mean_event_lookup_probability"], 0.25)
+
+    def test_timing_t_layout_cross_stage_and_per_t_eligibility_helpers(self):
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(1), (1, 1))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(2), (2, 1))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(4), (2, 2))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(6), (3, 2))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(8), (4, 2))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(10), (5, 2))
+        self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(12), (4, 3))
+        self.assertTrue(proton_cleaning._cross_stage_visual_state([
+            {"maximum_absolute_difference": 0.0},
+        ])["render_pass_status"])
+        self.assertFalse(proton_cleaning._cross_stage_visual_state([
+            {"maximum_absolute_difference": 0.2},
+        ], {"cross_stage_visual_threshold": 0.1})["render_pass_status"])
+        self.assertTrue(proton_cleaning._timing_t_per_t_pid_eligible({
+            "raw_prompt_event_count": 1, "absolute_event_weight_support": 0.2,
+        }, {"per_t_absolute_support_tolerance": 0.1})["eligible"])
+        self.assertFalse(proton_cleaning._timing_t_per_t_pid_eligible({
+            "raw_prompt_event_count": 0, "absolute_event_weight_support": 10.0,
+        })["eligible"])
+
+    def test_hgcer_display_audit_preserves_signed_content(self):
+        class FakeHistogram:
+            def GetNbinsX(self):
+                return 2
+
+            def GetNbinsY(self):
+                return 2
+
+            def GetBinContent(self, x_bin, y_bin):
+                return {(1, 1): 2.0, (1, 2): -3.0}.get((x_bin, y_bin), 0.0)
+
+        result = {
+            "method": "timing_t_event_weight",
+            "application": {"generic_hgcer_fill_counters": {"final_cleaned": {}}},
+            "diagnostics": {},
+        }
+        audit = proton_cleaning.audit_timing_t_hgcer_display_targets(
+            result, {"hgcer_x_mm": FakeHistogram()},
+        )
+        display = audit["final_display_histograms"]["hgcer_x_mm"]
+        self.assertEqual(display["positive_bin_count"], 1)
+        self.assertEqual(display["negative_bin_count"], 1)
+        self.assertAlmostEqual(display["signed_integral"], -1.0)
+        self.assertAlmostEqual(display["absolute_integral"], 5.0)
+
+    def test_hgcer_fill_counter_records_selection_range_and_signed_support(self):
+        class Axis:
+            def GetXmin(self):
+                return -1.0
+
+            def GetXmax(self):
+                return 1.0
+
+        class FakeHistogram:
+            def GetXaxis(self):
+                return Axis()
+
+            def GetYaxis(self):
+                return Axis()
+
+        counters = {}
+        proton_cleaning._record_hgcer_fill_counter(
+            counters, "hgcer_x_mm", FakeHistogram(), 0.25, 0.50, -2.0, True,
+        )
+        counter = counters["hgcer_x_mm"]
+        self.assertEqual(counter["seen"], 1)
+        self.assertEqual(counter["selected"], 1)
+        self.assertEqual(counter["finite"], 1)
+        self.assertEqual(counter["in_range"], 1)
+        self.assertEqual(counter["filled"], 1)
+        self.assertEqual(counter["nonzero"], 1)
+        self.assertEqual(counter["signed_weight_sum"], -2.0)
+        self.assertEqual(counter["absolute_weight_sum"], 2.0)
+
 
 if __name__ == "__main__":
     unittest.main()

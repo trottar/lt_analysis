@@ -105,6 +105,7 @@ from pion_component_subtraction import (
     summarize_particle_subtraction_component_payload,
 )
 from proton_contamination_weights import (
+    audit_timing_t_hgcer_display_targets,
     apply_kaon_proton_cleaning_to_targets,
     build_kaon_proton_cleaning_result,
     prepare_kaon_proton_cleaning_source_bundle,
@@ -203,6 +204,44 @@ def _warn_if_oversub_diagnostics(inpDict, diagnostics, phi_setting, fit_stage):
                 affected_mm_range,
             )
         )
+
+
+def _draw_hgcer_signed_display(hist, title, status_payload=None):
+    """Draw a display clone without suppressing negative signed content."""
+    status_payload = dict(status_payload or {})
+    if hist is None or not bool(status_payload.get("available", hist is not None)):
+        text = TPaveText(0.14, 0.38, 0.86, 0.62, "NDC")
+        text.SetBorderSize(1)
+        text.SetFillStyle(0)
+        text.SetTextAlign(22)
+        text.SetTextSize(0.040)
+        text.SetTextColor(kRed)
+        text.AddText("HGCer diagnostic unavailable")
+        text.Draw()
+        return text
+    if int(status_payload.get("nonzero_bin_count", 0) or 0) == 0:
+        text = TPaveText(0.14, 0.38, 0.86, 0.62, "NDC")
+        text.SetBorderSize(1)
+        text.SetFillStyle(0)
+        text.SetTextAlign(22)
+        text.SetTextSize(0.035)
+        text.SetTextColor(kRed)
+        text.AddText("No nonzero final-display bins")
+        text.AddText("See timing-t HGCer fill/audit diagnostics")
+        text.Draw()
+        return text
+    display = hist.Clone("{}_display_{}".format(hist.GetName(), abs(id(hist))))
+    display.SetDirectory(0)
+    display.SetTitle(str(title))
+    maximum = max(abs(float(display.GetMinimum())), abs(float(display.GetMaximum())), 1.0e-12)
+    if int(status_payload.get("negative_bin_count", 0) or 0) > 0:
+        # Symmetric limits retain random/dummy-subtracted negative structure.
+        display.SetMinimum(-maximum)
+        display.SetMaximum(maximum)
+    else:
+        display.SetMinimum(0.0)
+    display.Draw("colz")
+    return display
 
 
 def _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills):
@@ -1181,11 +1220,23 @@ def _write_timing_t_validation_artifacts(
             "lookup_by_t_phi": diagnostics.get("event_weight_lookup_by_t_phi") or [],
         },
         "aerogel_vs_t_validation": aero_validation,
+        "timing_t_summary": diagnostics.get("timing_t_summary") or {},
+        "timing_t_diagnostic_integrity": diagnostics.get("timing_t_diagnostic_integrity") or {},
+        "generic_hgcer_diagnostic_integrity": diagnostics.get("generic_hgcer_diagnostic_integrity") or {},
     }
     timing_diagnostics_json = os.path.join(outpath, "{}_candidate_cell_diagnostics.json".format(base))
     with open(timing_diagnostics_json, "w", encoding="utf-8") as handle:
         json.dump(timing_diagnostics, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
     artifacts.append(timing_diagnostics_json)
+    for suffix, payload in (
+        ("timing_t_summary", timing_diagnostics["timing_t_summary"]),
+        ("timing_t_diagnostic_integrity", timing_diagnostics["timing_t_diagnostic_integrity"]),
+        ("generic_hgcer_diagnostic_integrity", timing_diagnostics["generic_hgcer_diagnostic_integrity"]),
+    ):
+        path = os.path.join(outpath, "{}_{}.json".format(base, suffix))
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        artifacts.append(path)
     for suffix, rows in (
         ("candidate_support", timing_diagnostics["candidate_production_support"]),
         ("applied_cells", timing_diagnostics["applied_cell_state"]),
@@ -1211,7 +1262,21 @@ def _write_timing_t_validation_artifacts(
         artifacts.append(aero_json)
         t_edges = list(aero_validation.get("t_edges") or [])
         aero_edges = list(aero_validation.get("aero_edges") or [])
-        cells = list(aero_validation.get("cells") or [])
+        matrix_payload = dict(aero_validation.get("matrix_payload") or {})
+        matrix_metrics = dict(matrix_payload.get("metrics") or {})
+        matrix_validity = dict(matrix_payload.get("validity_masks") or {})
+
+        def _matrix_cell(metric, t_index, aero_index):
+            rows = matrix_metrics.get(metric) or []
+            if t_index >= len(rows) or aero_index >= len(rows[t_index] or []):
+                return None
+            return rows[t_index][aero_index]
+
+        def _matrix_valid(metric, t_index, aero_index):
+            rows = matrix_validity.get(metric) or []
+            if t_index >= len(rows) or aero_index >= len(rows[t_index] or []):
+                return False
+            return bool(rows[t_index][aero_index])
         def _csv_value(value):
             return (
                 json.dumps(value, sort_keys=True, separators=(",", ":"))
@@ -1232,8 +1297,8 @@ def _write_timing_t_validation_artifacts(
             ]
             writer = csv.DictWriter(handle, fieldnames=fields)
             writer.writeheader()
-            for t_index, row in enumerate(cells):
-                for aero_index, cell in enumerate(row):
+            for t_index in range(max(len(t_edges) - 1, 0)):
+                for aero_index in range(max(len(aero_edges) - 1, 0)):
                     writer.writerow({
                         "setting": outfilename,
                         "epsilon": epsset,
@@ -1244,19 +1309,19 @@ def _write_timing_t_validation_artifacts(
                         "aero_index": aero_index,
                         "aero_low": aero_edges[aero_index] if aero_index < len(aero_edges) else None,
                         "aero_high": aero_edges[aero_index + 1] if aero_index + 1 < len(aero_edges) else None,
-                        "raw_prompt_count": cell.get("raw_prompt_event_count"),
-                        "signed_yield": cell.get("signed_event_weight_sum"),
-                        "absolute_support": cell.get("absolute_event_weight_support"),
-                        "estimated_proton_yield": cell.get("estimated_proton_missing_mass_yield"),
-                        "cleaned_yield": cell.get("cleaned_missing_mass_yield"),
-                        "average_proton_probability": _csv_value(cell.get("average_proton_probability")),
-                        "average_proton_probability_valid": cell.get("average_proton_probability_valid"),
-                        "low_mm_removed_yield": cell.get("low_mm_removed_yield"),
-                        "low_mm_removed_fraction": _csv_value(cell.get("low_mm_removed_fraction")),
-                        "low_mm_removed_fraction_valid": cell.get("low_mm_removed_fraction_valid"),
-                        "lambda_removed_yield": cell.get("lambda_removed_yield"),
-                        "lambda_removed_fraction": _csv_value(cell.get("lambda_removed_fraction")),
-                        "lambda_removed_fraction_valid": cell.get("lambda_removed_fraction_valid"),
+                        "raw_prompt_count": _matrix_cell("selected_prompt_count", t_index, aero_index),
+                        "signed_yield": _matrix_cell("signed_physical_yield", t_index, aero_index),
+                        "absolute_support": _matrix_cell("absolute_physical_support", t_index, aero_index),
+                        "estimated_proton_yield": _matrix_cell("estimated_proton_yield", t_index, aero_index),
+                        "cleaned_yield": _matrix_cell("cleaned_yield", t_index, aero_index),
+                        "average_proton_probability": _csv_value(_matrix_cell("average_proton_probability", t_index, aero_index)),
+                        "average_proton_probability_valid": _matrix_valid("average_proton_probability", t_index, aero_index),
+                        "low_mm_removed_yield": _matrix_cell("low_mm_removed_yield", t_index, aero_index),
+                        "low_mm_removed_fraction": _csv_value(_matrix_cell("low_mm_removed_fraction", t_index, aero_index)),
+                        "low_mm_removed_fraction_valid": _matrix_valid("low_mm_removed_fraction", t_index, aero_index),
+                        "lambda_removed_yield": _matrix_cell("lambda_removed_yield", t_index, aero_index),
+                        "lambda_removed_fraction": _csv_value(_matrix_cell("lambda_removed_fraction", t_index, aero_index)),
+                        "lambda_removed_fraction_valid": _matrix_valid("lambda_removed_fraction", t_index, aero_index),
                     })
         artifacts.append(cells_csv)
 
@@ -4476,6 +4541,43 @@ def rand_sub(
     CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
 
     if isinstance(proton_cleaning_result, dict):
+        if str(proton_cleaning_result.get("method") or "") == "timing_t_event_weight":
+            display_audit = audit_timing_t_hgcer_display_targets(
+                proton_cleaning_result,
+                {
+                    "hgcer_xy": P_hgcer_xAtCer_vs_yAtCer_DATA,
+                    "hgcer_xy_nohole": P_hgcer_nohole_xAtCer_vs_yAtCer_DATA,
+                    "hgcer_x_mm": P_hgcer_xAtCer_vs_MM_DATA,
+                    "hgcer_x_mm_nohole": P_hgcer_nohole_xAtCer_vs_MM_DATA,
+                    "hgcer_y_mm": P_hgcer_yAtCer_vs_MM_DATA,
+                    "hgcer_y_mm_nohole": P_hgcer_nohole_yAtCer_vs_MM_DATA,
+                },
+            )
+            histDict["proton_contamination_cleaning_result_setting"] = (
+                serialize_kaon_proton_cleaning_result(proton_cleaning_result)
+            )
+            histDict["proton_contamination_cleaning_setting"] = (
+                summarize_kaon_proton_cleaning_result(proton_cleaning_result)
+            )
+            refreshed_artifacts = _write_timing_t_validation_artifacts(
+                proton_cleaning_result,
+                outpath=OUTPATH,
+                particle_type=ParticleType,
+                outfilename=OutFilename,
+                epsset=EPSSET,
+                phi_setting=phi_setting,
+            )
+            histDict["proton_contamination_cleaning_artifacts"] = list(dict.fromkeys(
+                list(histDict.get("proton_contamination_cleaning_artifacts") or [])
+                + list(refreshed_artifacts or [])
+            ))
+            _print_rand_debug(
+                "timing-t HGCer final display audit",
+                populated=sum(
+                    int((entry or {}).get("nonzero_bin_count", 0) or 0) > 0
+                    for entry in (display_audit.get("final_display_histograms") or {}).values()
+                ),
+            )
         print_kaon_proton_cleaning_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             proton_cleaning_result,
@@ -4616,21 +4718,38 @@ def rand_sub(
 
         c_hgcervsMM.Divide(2,2)
 
-        c_hgcervsMM.cd(1)
-        P_hgcer_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-        P_hgcer_xAtCer_vs_MM_DATA.Draw("colz")
-
-        c_hgcervsMM.cd(2)
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-        P_hgcer_nohole_xAtCer_vs_MM_DATA.Draw("colz")
-
-        c_hgcervsMM.cd(3)
-        P_hgcer_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-        P_hgcer_yAtCer_vs_MM_DATA.Draw("colz")
-
-        c_hgcervsMM.cd(4)
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.SetMinimum(1e-6) # Remove color of empty bins
-        P_hgcer_nohole_yAtCer_vs_MM_DATA.Draw("colz")    
+        hgc_display_audit = (
+            ((proton_cleaning_result or {}).get("diagnostics") or {})
+            .get("generic_hgcer_diagnostic_integrity", {})
+            .get("final_display_histograms", {})
+            if isinstance(proton_cleaning_result, dict)
+            and str(proton_cleaning_result.get("method") or "") == "timing_t_event_weight"
+            else {}
+        )
+        if hgc_display_audit:
+            for pad_index, key, hist, title in (
+                (1, "hgcer_x_mm", P_hgcer_xAtCer_vs_MM_DATA, "HGCer X versus shifted missing mass;HGCer xAtCer;adj_MM [GeV]"),
+                (2, "hgcer_x_mm_nohole", P_hgcer_nohole_xAtCer_vs_MM_DATA, "HGCer X versus shifted missing mass (no hole);HGCer xAtCer;adj_MM [GeV]"),
+                (3, "hgcer_y_mm", P_hgcer_yAtCer_vs_MM_DATA, "HGCer Y versus shifted missing mass;HGCer yAtCer;adj_MM [GeV]"),
+                (4, "hgcer_y_mm_nohole", P_hgcer_nohole_yAtCer_vs_MM_DATA, "HGCer Y versus shifted missing mass (no hole);HGCer yAtCer;adj_MM [GeV]"),
+            ):
+                c_hgcervsMM.cd(pad_index)
+                _draw_hgcer_signed_display(hist, title, hgc_display_audit.get(key))
+        else:
+            # Legacy C-macro-reference diagnostic rendering is intentionally
+            # unchanged; adaptive signed display applies only to timing-t.
+            c_hgcervsMM.cd(1)
+            P_hgcer_xAtCer_vs_MM_DATA.SetMinimum(1e-6)
+            P_hgcer_xAtCer_vs_MM_DATA.Draw("colz")
+            c_hgcervsMM.cd(2)
+            P_hgcer_nohole_xAtCer_vs_MM_DATA.SetMinimum(1e-6)
+            P_hgcer_nohole_xAtCer_vs_MM_DATA.Draw("colz")
+            c_hgcervsMM.cd(3)
+            P_hgcer_yAtCer_vs_MM_DATA.SetMinimum(1e-6)
+            P_hgcer_yAtCer_vs_MM_DATA.Draw("colz")
+            c_hgcervsMM.cd(4)
+            P_hgcer_nohole_yAtCer_vs_MM_DATA.SetMinimum(1e-6)
+            P_hgcer_nohole_yAtCer_vs_MM_DATA.Draw("colz")
 
         c_hgcervsMM.Draw()
 

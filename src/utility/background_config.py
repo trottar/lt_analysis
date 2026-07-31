@@ -527,6 +527,13 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "write_per_t_pid_pages": True,
         "write_full_per_t_pid_pages": False,
         "write_t_aero_heatmaps": True,
+        # These controls govern diagnostic rendering/validation only.  They
+        # deliberately do not participate in timing-candidate selection,
+        # fitting, support classification, or the frozen event lookup.
+        "diagnostic_strict": False,
+        "diagnostic_integrity_tolerance": 1.0e-10,
+        "cross_stage_visual_threshold": 0.0,
+        "per_t_absolute_support_tolerance": 0.0,
         "minimum_events_per_t_bin": 20,
         "maximum_high_aero_average_weight": 0.10,
         "maximum_high_to_low_weight_ratio": 1.0,

@@ -4092,6 +4092,229 @@ def _safe_validation_ratio(numerator, denominator):
     return float(numerator / denominator)
 
 
+# The compact canonical-t x aerogel products have one serializable source of
+# truth.  ROOT objects and PDF pages are presentation layers over this payload;
+# they must never independently re-accumulate a differently-defined matrix.
+_T_AEROGEL_MATRIX_METRIC_SOURCES = {
+    "selected_prompt_count": "raw_prompt_event_count",
+    "signed_physical_yield": "signed_event_weight_sum",
+    "absolute_physical_support": "absolute_event_weight_support",
+    "estimated_proton_yield": "estimated_proton_missing_mass_yield",
+    "cleaned_yield": "cleaned_missing_mass_yield",
+    "average_proton_probability": "average_proton_probability",
+    "low_mm_removed_yield": "low_mm_removed_yield",
+    "low_mm_removed_fraction": "low_mm_removed_fraction",
+    "lambda_removed_yield": "lambda_removed_yield",
+    "lambda_removed_fraction": "lambda_removed_fraction",
+}
+
+
+def _matrix_from_t_aerogel_cells(cells, source_key):
+    return [
+        [
+            (cell or {}).get(source_key)
+            for cell in (row or [])
+        ]
+        for row in (cells or [])
+    ]
+
+
+def _sum_matrix_row(matrix, row_index):
+    values = matrix[row_index] if 0 <= row_index < len(matrix or []) else []
+    return float(sum(
+        float(value) for value in values
+        if _finite_float_or_none(value) is not None
+    ))
+
+
+def _build_t_aerogel_matrix_payload(cells, t_edges, aero_edges, exclusions=None):
+    """Return the canonical coarse-matrix contract for all diagnostics.
+
+    ``cells`` is already accumulated from frozen lookup rows.  Keeping the
+    conversion to named matrices here prevents JSON, CSV, ROOT, and PDF code
+    from accidentally selecting different source keys for the same label.
+    """
+    metrics = {
+        name: _matrix_from_t_aerogel_cells(cells, source)
+        for name, source in _T_AEROGEL_MATRIX_METRIC_SOURCES.items()
+    }
+    validity = {
+        name: _matrix_from_t_aerogel_cells(cells, "{}_valid".format(source))
+        for name, source in _T_AEROGEL_MATRIX_METRIC_SOURCES.items()
+        if name in (
+            "average_proton_probability",
+            "low_mm_removed_fraction",
+            "lambda_removed_fraction",
+        )
+    }
+    return {
+        "schema_version": 1,
+        "source": "frozen_timing_t_lookup_rows",
+        "t_edges": [float(edge) for edge in (t_edges or [])],
+        "aero_edges": [float(edge) for edge in (aero_edges or [])],
+        "metric_sources": dict(_T_AEROGEL_MATRIX_METRIC_SOURCES),
+        "metrics": metrics,
+        "validity_masks": validity,
+        "exclusions": dict(exclusions or {}),
+    }
+
+
+def _matrix_metric(matrix_payload, metric_name):
+    return ((matrix_payload or {}).get("metrics") or {}).get(metric_name) or []
+
+
+def _matrix_has_nonzero_content(matrix, tolerance=0.0):
+    tolerance = abs(float(tolerance or 0.0))
+    return any(
+        abs(float(value)) > tolerance
+        for row in (matrix or [])
+        for value in (row or [])
+        if _finite_float_or_none(value) is not None
+    )
+
+
+def _build_timing_t_summary(cleaning_result, matrix_payload, aggregate_all):
+    """Build a selected-candidate-only final timing-t diagnostic summary."""
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    selected = diagnostics.get("selected_timing_candidate") or {}
+    delta_rows = list(diagnostics.get("delta_support") or [])
+    applied_cells = list(diagnostics.get("applied_timing_t_cell_map") or [])
+    closure_by_delta = list(diagnostics.get("event_weight_closure_by_delta") or [])
+    delta_edges = [float(edge) for edge in ((cleaning_result or {}).get("delta_edges") or [])]
+    closure_by_index = {
+        int(row.get("delta_index")): row
+        for row in closure_by_delta
+        if isinstance(row, dict) and isinstance(row.get("delta_index"), int)
+    }
+    cells_by_delta = {}
+    for cell in applied_cells:
+        if not isinstance(cell, dict) or not isinstance(cell.get("delta_index"), int):
+            continue
+        cells_by_delta.setdefault(int(cell["delta_index"]), []).append(cell)
+    per_delta = []
+    for row in delta_rows:
+        if not isinstance(row, dict) or not isinstance(row.get("delta_index"), int):
+            continue
+        index = int(row["delta_index"])
+        closure = closure_by_index.get(index, {})
+        cells = cells_by_delta.get(index, [])
+        applied_yield = float(sum(
+            float((cell or {}).get("applied_proton_yield", 0.0) or 0.0)
+            for cell in cells
+        ))
+        data_total = float(row.get("data_total", 0.0) or 0.0)
+        per_delta.append({
+            "delta_index": index,
+            "delta_low": delta_edges[index] if index < len(delta_edges) - 1 else None,
+            "delta_high": delta_edges[index + 1] if index + 1 < len(delta_edges) else None,
+            "support_label": row.get("support_label", SUPPORT_UNSUPPORTED),
+            "raw_data_total": data_total,
+            "fitted_data_total": float(row.get("fitted_data_total", 0.0) or 0.0),
+            "model_yield": float(row.get("model_total", 0.0) or 0.0),
+            "proton_yield": float(row.get("proton_total", 0.0) or 0.0),
+            "kaon_yield": float(row.get("kaon_total", 0.0) or 0.0),
+            "other_yield": float(row.get("other_total", 0.0) or 0.0),
+            "valid_t_cell_count": int(row.get("valid_t_cells", 0) or 0),
+            "coverage": float(row.get("coverage", 0.0) or 0.0),
+            "applied_proton_yield": applied_yield,
+            "applied_proton_fraction": (
+                float(applied_yield / data_total) if data_total > 0.0 else None
+            ),
+            "mean_event_lookup_probability": _safe_validation_ratio(
+                closure.get("summed_event_proton_probability"),
+                closure.get("event_count"),
+            ),
+            "lookup_event_count": int(closure.get("event_count", 0) or 0),
+        })
+    return {
+        "schema_version": 1,
+        "source": "selected_timing_candidate_and_frozen_lookup_only",
+        "selected_candidate": {
+            "timing_branch": selected.get("timing_branch") or diagnostics.get("timing_branch"),
+            "selected": bool(selected.get("selected", True)),
+            "candidate_selection_rank": selected.get("candidate_selection_rank"),
+            "candidate_selection_tuple": diagnostics.get("candidate_selection_tuple") or [],
+        },
+        "delta_edges": delta_edges,
+        "per_delta": per_delta,
+        "setting_support": diagnostics.get("setting_support") or {},
+        "matrix_source": (matrix_payload or {}).get("source"),
+        "missing_mass_totals": {
+            "raw": (aggregate_all or {}).get("raw_missing_mass_yield"),
+            "estimated_proton": (aggregate_all or {}).get("estimated_proton_missing_mass_yield"),
+            "cleaned": (aggregate_all or {}).get("cleaned_missing_mass_yield"),
+        },
+    }
+
+
+def _build_timing_t_diagnostic_integrity(
+    cleaning_result, matrix_payload, coarse_by_t, validation_cfg, source_row_count,
+):
+    """Validate observational products without consulting production inputs."""
+    tolerance = abs(float((validation_cfg or {}).get("diagnostic_integrity_tolerance", 1.0e-10) or 1.0e-10))
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    failures = []
+    checks = []
+
+    def _check(name, passed, **details):
+        checks.append({"name": str(name), "passed": bool(passed), **details})
+        if not passed:
+            failures.append(str(name))
+
+    t_edges = list((matrix_payload or {}).get("t_edges") or [])
+    _check(
+        "matrix_t_edges_match_cleaning_result",
+        len(t_edges) == len((cleaning_result or {}).get("t_edges") or [])
+        and all(abs(float(left) - float(right)) <= tolerance for left, right in zip(t_edges, (cleaning_result or {}).get("t_edges") or [])),
+        tolerance=tolerance,
+    )
+    metrics = (matrix_payload or {}).get("metrics") or {}
+    required = ("selected_prompt_count", "signed_physical_yield", "estimated_proton_yield", "average_proton_probability")
+    for name in required:
+        _check("matrix_metric_present_{}".format(name), name in metrics)
+    prompt_matrix = metrics.get("selected_prompt_count") or []
+    for t_index, accumulator in enumerate(coarse_by_t or []):
+        observed = _sum_matrix_row(prompt_matrix, t_index)
+        expected = float((accumulator or {}).get("raw_prompt_event_count", 0) or 0)
+        _check(
+            "prompt_total_matches_coarse_matrix_t{}".format(t_index),
+            abs(observed - expected) <= tolerance,
+            observed=observed, expected=expected,
+        )
+    for t_index, row in enumerate((matrix_payload or {}).get("metrics", {}).get("cleaned_yield") or []):
+        raw_row = (metrics.get("signed_physical_yield") or [[]])[t_index] if t_index < len(metrics.get("signed_physical_yield") or []) else []
+        removed_row = (metrics.get("estimated_proton_yield") or [[]])[t_index] if t_index < len(metrics.get("estimated_proton_yield") or []) else []
+        for aero_index, cleaned in enumerate(row or []):
+            raw = raw_row[aero_index] if aero_index < len(raw_row) else None
+            removed = removed_row[aero_index] if aero_index < len(removed_row) else None
+            if any(_finite_float_or_none(value) is None for value in (raw, removed, cleaned)):
+                continue
+            _check(
+                "cleaned_equals_raw_minus_removed_t{}_a{}".format(t_index, aero_index),
+                abs(float(cleaned) - (float(raw) - float(removed))) <= tolerance,
+                raw=float(raw), removed=float(removed), cleaned=float(cleaned),
+            )
+    selected = diagnostics.get("selected_timing_candidate") or {}
+    _check("selected_timing_candidate_present", bool(selected))
+    if int(source_row_count or 0) > 0:
+        _check(
+            "nonempty_frozen_source_has_matrix_content",
+            _matrix_has_nonzero_content(prompt_matrix) or _matrix_has_nonzero_content(metrics.get("signed_physical_yield") or []),
+            source_row_count=int(source_row_count or 0),
+        )
+    return {
+        "schema_version": 1,
+        "source": "frozen_timing_t_lookup_diagnostic_validation",
+        "strict": bool((validation_cfg or {}).get("diagnostic_strict", False)),
+        "tolerance": tolerance,
+        "source_row_count": int(source_row_count or 0),
+        "checks": checks,
+        "failures": failures,
+        "valid": not failures,
+        "matrix_exclusions": dict((matrix_payload or {}).get("exclusions") or {}),
+    }
+
+
 def _make_t_aerogel_hist(name, title, t_edges, aero_edges):
     hist = ROOT.TH2D(
         str(name), str(title), len(t_edges) - 1, array("d", t_edges),
@@ -4130,7 +4353,7 @@ def _signed_histogram_diagnostics(hist):
 
 
 def _build_t_aerogel_root_payload(
-    cleaning_result, event_rows, validation_cfg, t_edges, coarse_cells=None,
+    cleaning_result, event_rows, validation_cfg, t_edges, matrix_payload=None,
 ):
     """Create display objects from frozen lookup rows only; never refit events."""
     display_edges = _resolve_aerogel_display_edges(validation_cfg)
@@ -4310,30 +4533,46 @@ def _build_t_aerogel_root_payload(
         hidden_accumulator_objects_released += 2
 
     coarse_hists = {}
-    coarse_edges = _resolve_aerogel_summary_edges(validation_cfg)
-    if len(coarse_edges) >= 2 and coarse_cells:
+    coarse_edges = list((matrix_payload or {}).get("aero_edges") or _resolve_aerogel_summary_edges(validation_cfg))
+    if len(coarse_edges) >= 2 and (matrix_payload or {}).get("metrics"):
         metric_specs = (
-            ("average_proton_probability", "H_t_aero_average_proton_probability"),
-            ("low_mm_removed_fraction", "H_t_aero_low_mm_removed_fraction"),
-            ("lambda_removed_fraction", "H_t_aero_lambda_removed_fraction"),
+            ("selected_prompt_count", "H_t_aero_selected_prompt_count", False),
+            ("signed_physical_yield", "H_t_aero_signed_physical_yield", False),
+            ("estimated_proton_yield", "H_t_aero_estimated_proton_yield", False),
+            ("average_proton_probability", "H_t_aero_average_proton_probability", True),
+            ("low_mm_removed_yield", "H_t_aero_low_mm_removed_yield", False),
+            ("low_mm_removed_fraction", "H_t_aero_low_mm_removed_fraction", True),
+            ("lambda_removed_yield", "H_t_aero_lambda_removed_yield", False),
+            ("lambda_removed_fraction", "H_t_aero_lambda_removed_fraction", True),
         )
-        for metric_key, base_name in metric_specs:
+        for metric_key, base_name, has_validity_mask in metric_specs:
             value_hist = _make_t_aerogel_hist(
                 base_name, "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
                 t_edges, coarse_edges,
             )
-            valid_hist = _make_t_aerogel_hist(
-                "{}_valid".format(base_name), "{} validity;canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
-                t_edges, coarse_edges,
-            )
-            for t_index, cell_row in enumerate(coarse_cells):
-                for aero_index, cell in enumerate(cell_row or []):
-                    value = cell.get(metric_key)
+            valid_hist = None
+            if has_validity_mask:
+                valid_hist = _make_t_aerogel_hist(
+                    "{}_valid".format(base_name), "{} validity;canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
+                    t_edges, coarse_edges,
+                )
+            values = _matrix_metric(matrix_payload, metric_key)
+            validity = ((matrix_payload or {}).get("validity_masks") or {}).get(metric_key) or []
+            for t_index, value_row in enumerate(values):
+                for aero_index, value in enumerate(value_row or []):
                     if value is not None:
                         value_hist.SetBinContent(t_index + 1, aero_index + 1, float(value))
-                        valid_hist.SetBinContent(t_index + 1, aero_index + 1, 1.0)
+                    if valid_hist is not None:
+                        is_valid = (
+                            bool(validity[t_index][aero_index])
+                            if t_index < len(validity) and aero_index < len(validity[t_index] or [])
+                            else value is not None
+                        )
+                        if is_valid:
+                            valid_hist.SetBinContent(t_index + 1, aero_index + 1, 1.0)
             coarse_hists[base_name] = value_hist
-            coarse_hists["{}_valid".format(base_name)] = valid_hist
+            if valid_hist is not None:
+                coarse_hists["{}_valid".format(base_name)] = valid_hist
     root_objects = list(global_hists.values())
     root_objects.extend(
         hist for row in per_t for hist in row.values() if _is_root_object(hist)
@@ -4451,15 +4690,27 @@ def _build_t_aerogel_validation(
     ]
     threshold_setting = {"low": _new_accumulator(), "high": _new_accumulator()}
     all_by_t = [_new_accumulator() for _ in range(len(t_edges) - 1)]
+    # These aggregates represent exactly the rows admitted to a coarse
+    # aerogel bin.  They are the reference totals for matrix integrity, while
+    # ``all_by_t`` intentionally includes rows outside display coverage.
+    coarse_by_t = [_new_accumulator() for _ in range(len(t_edges) - 1)]
     all_setting = _new_accumulator()
     low_limit = float(validation_cfg.get("low_reference_max_npe", 5.0))
     high_limit = float(validation_cfg.get("high_reference_min_npe", 10.0))
     source_stats = {}
     signed_positive_events = signed_negative_events = 0
     signed_positive_integral = signed_negative_integral = 0.0
+    exclusions = {
+        "source_rows_seen": int(len(event_rows or [])),
+        "invalid_t_index": 0,
+        "missing_aerogel_or_weight_or_probability": 0,
+        "outside_coarse_aerogel_edges": 0,
+        "coarse_rows": 0,
+    }
     for row in event_rows:
         t_index = row.get("t_index")
         if not isinstance(t_index, int) or not (0 <= t_index < len(cells)):
+            exclusions["invalid_t_index"] += 1
             continue
         aero_value = _finite_float_or_none(row.get("aero_value"))
         physical_weight = _finite_float_or_none(row.get("physical_weight"))
@@ -4467,6 +4718,7 @@ def _build_t_aerogel_validation(
         cleaned_factor = _finite_float_or_none(row.get("cleaned_factor"))
         adj_mm = _finite_float_or_none(row.get("adj_mm"))
         if aero_value is None or physical_weight is None or proton_weight is None:
+            exclusions["missing_aerogel_or_weight_or_probability"] += 1
             continue
         cleaned_factor = 1.0 - proton_weight if cleaned_factor is None else cleaned_factor
         # Per-t totals use every valid frozen row; display/coarse membership
@@ -4482,6 +4734,10 @@ def _build_t_aerogel_validation(
         aero_index = _find_collection_bin(aero_value, aero_edges)
         if 0 <= aero_index < len(cells[t_index]):
             _fill_accumulator(cells[t_index][aero_index], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+            _fill_accumulator(coarse_by_t[t_index], row, physical_weight, proton_weight, cleaned_factor, adj_mm)
+            exclusions["coarse_rows"] += 1
+        else:
+            exclusions["outside_coarse_aerogel_edges"] += 1
         source_name = str(row.get("source_label", "unknown"))
         source_stats.setdefault(source_name, {"event_count": 0, "raw_prompt_event_count": 0, "signed_physical_yield": 0.0})
         source_stats[source_name]["event_count"] += 1
@@ -4494,7 +4750,6 @@ def _build_t_aerogel_validation(
             signed_negative_events += 1
             signed_negative_integral += physical_weight
 
-    matrices = {name: [[cell[name] for cell in row] for row in cells] for name in metric_names}
     average_probability = [
         [_safe_validation_ratio(cell["absolute_weighted_probability_sum"], cell["absolute_event_weight_support"]) for cell in row]
         for row in cells
@@ -4515,6 +4770,10 @@ def _build_t_aerogel_validation(
             cell["low_mm_removed_fraction_valid"] = cell["low_mm_removed_fraction"] is not None
             cell["lambda_removed_fraction"] = lambda_removed_fraction[t_index][aero_index]
             cell["lambda_removed_fraction_valid"] = cell["lambda_removed_fraction"] is not None
+    matrix_payload = _build_t_aerogel_matrix_payload(
+        cells, t_edges, aero_edges, exclusions,
+    )
+    matrices = {name: _matrix_from_t_aerogel_cells(cells, name) for name in metric_names}
     minimum_events = max(0, int(validation_cfg.get("minimum_events_per_t_bin", 20) or 20))
     maximum_high_weight = float(validation_cfg.get("maximum_high_aero_average_weight", 0.10))
     maximum_ratio = float(validation_cfg.get("maximum_high_to_low_weight_ratio", 1.0))
@@ -4620,16 +4879,24 @@ def _build_t_aerogel_validation(
         "aero_edges": aero_edges,
         "display_aero_edges": _resolve_aerogel_display_edges(validation_cfg),
         "source_tree_provenance": source_stats,
+        "matrix_payload": matrix_payload,
+        # New explicit names are the authoritative compact-matrix interface.
+        "selected_prompt_count_by_t_aero": _matrix_metric(matrix_payload, "selected_prompt_count"),
+        "signed_physical_yield_by_t_aero": _matrix_metric(matrix_payload, "signed_physical_yield"),
+        "estimated_proton_yield_by_t_aero": _matrix_metric(matrix_payload, "estimated_proton_yield"),
+        "cleaned_yield_by_t_aero": _matrix_metric(matrix_payload, "cleaned_yield"),
         "event_count_by_t_aero": matrices["event_count"],
-        "raw_prompt_event_count_by_t_aero": matrices["raw_prompt_event_count"],
-        "signed_event_weight_sum_by_t_aero": matrices["signed_event_weight_sum"],
-        "absolute_event_weight_support_by_t_aero": matrices["absolute_event_weight_support"],
-        "proton_probability_sum_by_t_aero": matrices["sum_proton_probability"],
-        "average_proton_probability_by_t_aero": average_probability,
-        "low_mm_removed_yield_by_t_aero": matrices["low_mm_removed_yield"],
-        "low_mm_removed_fraction_by_t_aero": low_removed_fraction,
-        "lambda_removed_yield_by_t_aero": matrices["lambda_removed_yield"],
-        "lambda_removed_fraction_by_t_aero": lambda_removed_fraction,
+        # Compatibility aliases intentionally reference the same named matrix
+        # payload rather than a second independently-computed set of arrays.
+        "raw_prompt_event_count_by_t_aero": _matrix_metric(matrix_payload, "selected_prompt_count"),
+        "signed_event_weight_sum_by_t_aero": _matrix_metric(matrix_payload, "signed_physical_yield"),
+        "absolute_event_weight_support_by_t_aero": _matrix_metric(matrix_payload, "absolute_physical_support"),
+        "proton_probability_sum_by_t_aero": _matrix_metric(matrix_payload, "estimated_proton_yield"),
+        "average_proton_probability_by_t_aero": _matrix_metric(matrix_payload, "average_proton_probability"),
+        "low_mm_removed_yield_by_t_aero": _matrix_metric(matrix_payload, "low_mm_removed_yield"),
+        "low_mm_removed_fraction_by_t_aero": _matrix_metric(matrix_payload, "low_mm_removed_fraction"),
+        "lambda_removed_yield_by_t_aero": _matrix_metric(matrix_payload, "lambda_removed_yield"),
+        "lambda_removed_fraction_by_t_aero": _matrix_metric(matrix_payload, "lambda_removed_fraction"),
         "cells": cells,
         "per_t_bin_summary": per_t_summary,
         "proton_fraction_below_5_npe": aggregate_low["average_proton_probability"],
@@ -4673,9 +4940,27 @@ def _build_t_aerogel_validation(
             for row in warnings_by_t_bin
         ],
     }
+    coarse_summary_by_t = [
+        _finalize_accumulator(accumulator) for accumulator in coarse_by_t
+    ]
+    payload["coarse_matrix_per_t_summary"] = coarse_summary_by_t
+    integrity = _build_timing_t_diagnostic_integrity(
+        cleaning_result,
+        matrix_payload,
+        coarse_summary_by_t,
+        validation_cfg,
+        exclusions["source_rows_seen"],
+    )
+    payload["diagnostic_integrity"] = integrity
+    if bool(validation_cfg.get("diagnostic_strict", False)) and not integrity["valid"]:
+        raise RuntimeError(
+            "timing-t diagnostic integrity failed: {}".format(
+                ", ".join(integrity["failures"])
+            )
+        )
     if include_root_payload:
         root_payload = _build_t_aerogel_root_payload(
-            cleaning_result, event_rows, validation_cfg, t_edges, cells,
+            cleaning_result, event_rows, validation_cfg, t_edges, matrix_payload,
         )
         candidate_accounting = (
             (cleaning_result.get("diagnostics") or {}).get("candidate_root_object_accounting") or {}
@@ -4903,6 +5188,16 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
     diagnostics["aerogel_vs_t_validation"] = _json_ready_value(aerogel_validation)
     # Keep the pre-existing artifact/consumer name as a compatibility alias.
     diagnostics["aerogel_validation"] = diagnostics["aerogel_vs_t_validation"]
+    diagnostics["timing_t_diagnostic_integrity"] = _json_ready_value(
+        aerogel_validation.get("diagnostic_integrity") or {}
+    )
+    diagnostics["timing_t_summary"] = _json_ready_value(
+        _build_timing_t_summary(
+            cleaning_result,
+            aerogel_validation.get("matrix_payload") or {},
+            aerogel_validation.get("aggregate_all_frozen_rows") or {},
+        )
+    )
     diagnostics["prepared_event_lookup_count"] = int(len(lookup))
     return lookup
 
@@ -7489,7 +7784,119 @@ def build_kaon_proton_cleaning_result(
     return result
 
 
-def _fill_standard_target_hists(evt, adj_MM, adj_t, adj_hsdelta, weight, target_hists, allcuts=False, nommcuts=False, noholecuts=False):
+_HGCER_DIAGNOSTIC_TARGETS = (
+    "hgcer_xy",
+    "hgcer_x_mm",
+    "hgcer_y_mm",
+    "hgcer_xy_nohole",
+    "hgcer_x_mm_nohole",
+    "hgcer_y_mm_nohole",
+)
+
+
+def _new_hgcer_fill_counter():
+    return {
+        "seen": 0,
+        "selected": 0,
+        "finite": 0,
+        "in_range": 0,
+        "filled": 0,
+        "nonzero": 0,
+        "signed_weight_sum": 0.0,
+        "absolute_weight_sum": 0.0,
+    }
+
+
+def _record_hgcer_fill_counter(counter_map, key, hist, x_value, y_value, fill_weight, selected):
+    if counter_map is None:
+        return
+    counter = counter_map.setdefault(str(key), _new_hgcer_fill_counter())
+    counter["seen"] += 1
+    if not selected:
+        return
+    counter["selected"] += 1
+    if not all(math.isfinite(float(value)) for value in (x_value, y_value, fill_weight)):
+        return
+    counter["finite"] += 1
+    if hist is not None:
+        try:
+            x_axis, y_axis = hist.GetXaxis(), hist.GetYaxis()
+            if (
+                float(x_axis.GetXmin()) <= float(x_value) <= float(x_axis.GetXmax())
+                and float(y_axis.GetXmin()) <= float(y_value) <= float(y_axis.GetXmax())
+            ):
+                counter["in_range"] += 1
+        except Exception:
+            pass
+        counter["filled"] += 1
+    if float(fill_weight) != 0.0:
+        counter["nonzero"] += 1
+    counter["signed_weight_sum"] += float(fill_weight)
+    counter["absolute_weight_sum"] += abs(float(fill_weight))
+
+
+def _summarize_hgcer_display_histogram(hist):
+    summary = {
+        "available": bool(hist is not None), "nonzero_bin_count": 0,
+        "signed_integral": 0.0, "absolute_integral": 0.0,
+        "positive_bin_count": 0, "negative_bin_count": 0,
+    }
+    if hist is None:
+        return summary
+    try:
+        for x_bin in range(1, int(hist.GetNbinsX()) + 1):
+            for y_bin in range(1, int(hist.GetNbinsY()) + 1):
+                value = float(hist.GetBinContent(x_bin, y_bin))
+                summary["signed_integral"] += value
+                summary["absolute_integral"] += abs(value)
+                if value > 0.0:
+                    summary["positive_bin_count"] += 1
+                    summary["nonzero_bin_count"] += 1
+                elif value < 0.0:
+                    summary["negative_bin_count"] += 1
+                    summary["nonzero_bin_count"] += 1
+    except Exception:
+        summary["read_error"] = True
+    return summary
+
+
+def audit_timing_t_hgcer_display_targets(cleaning_result, target_hists):
+    """Attach final, display-stage HGCer audit without changing histograms."""
+    if str((cleaning_result or {}).get("method") or "") != PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
+        return {}
+    application = (cleaning_result or {}).get("application") or {}
+    diagnostics = (cleaning_result or {}).setdefault("diagnostics", {})
+    display = {
+        key: _summarize_hgcer_display_histogram((target_hists or {}).get(key))
+        for key in _HGCER_DIAGNOSTIC_TARGETS
+    }
+    audit = {
+        "source": "frozen_target_fill_counters_and_final_display_histograms",
+        "adj_mm_source": "shared_shifted_missing_mass",
+        "fill_counters": application.get("generic_hgcer_fill_counters") or {},
+        "final_display_histograms": display,
+    }
+    diagnostics["generic_hgcer_diagnostic_integrity"] = audit
+    return audit
+
+
+def _fill_standard_target_hists(
+    evt, adj_MM, adj_t, adj_hsdelta, weight, target_hists, allcuts=False,
+    nommcuts=False, noholecuts=False, hgcer_counters=None,
+):
+    hgcer_weight = float(weight) * float(evt.P_hgcer_npeSum)
+    for key, x_value, y_value, selected in (
+        ("hgcer_xy", evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, allcuts),
+        ("hgcer_x_mm", evt.P_hgcer_xAtCer, adj_MM, allcuts),
+        ("hgcer_y_mm", evt.P_hgcer_yAtCer, adj_MM, allcuts),
+        ("hgcer_xy_nohole", evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer, noholecuts),
+        ("hgcer_x_mm_nohole", evt.P_hgcer_xAtCer, adj_MM, noholecuts),
+        ("hgcer_y_mm_nohole", evt.P_hgcer_yAtCer, adj_MM, noholecuts),
+    ):
+        _record_hgcer_fill_counter(
+            hgcer_counters, key, (target_hists or {}).get(key), x_value, y_value,
+            hgcer_weight, bool(selected),
+        )
     if not math.isfinite(weight) or weight == 0.0:
         return
     if noholecuts:
@@ -7651,6 +8058,9 @@ def apply_kaon_proton_cleaning_to_targets(
         "final_mm_fills": 0,
         "sum_physical_mm_weights": 0.0,
     }
+    hgcer_fill_counters = {
+        "raw": {}, "estimated_proton": {}, "cleaned_pre_rf": {}, "final_cleaned": {},
+    }
 
     rf_counts = {"accepted": 0, "rejected": 0}
     support_counts = {SUPPORT_SUPPORTED: 0, SUPPORT_MARGINAL: 0, SUPPORT_UNSUPPORTED: 0}
@@ -7766,6 +8176,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 allcuts=allcuts,
                 nommcuts=nommcuts,
                 noholecuts=noholecuts,
+                hgcer_counters=hgcer_fill_counters["raw"],
             )
             _fill_standard_target_hists(
                 evt,
@@ -7777,6 +8188,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 allcuts=allcuts,
                 nommcuts=nommcuts,
                 noholecuts=noholecuts,
+                hgcer_counters=hgcer_fill_counters["estimated_proton"],
             )
             _fill_standard_target_hists(
                 evt,
@@ -7788,6 +8200,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 allcuts=allcuts,
                 nommcuts=nommcuts,
                 noholecuts=noholecuts,
+                hgcer_counters=hgcer_fill_counters["cleaned_pre_rf"],
             )
             if rf_accept:
                 rf_counts["accepted"] += 1
@@ -7803,6 +8216,7 @@ def apply_kaon_proton_cleaning_to_targets(
                     allcuts=allcuts,
                     nommcuts=nommcuts,
                     noholecuts=noholecuts,
+                    hgcer_counters=hgcer_fill_counters["final_cleaned"],
                 )
             else:
                 rf_counts["rejected"] += 1
@@ -7847,6 +8261,7 @@ def apply_kaon_proton_cleaning_to_targets(
         "H_MM_estimated_proton": h_mm_proton,
         "H_MM_after_proton_cleaning": h_mm_cleaned,
         "H_MM_after_proton_cleaning_final_rf": h_mm_cleaned_final_rf,
+        "generic_hgcer_fill_counters": _json_ready_value(hgcer_fill_counters),
         "H_proton_fraction_vs_MM": h_proton_fraction_vs_mm,
         "H_proton_weight_vs_delta": h_weight_avg_delta,
         "H_proton_weight_vs_delta_{}".format(secondary_name): h_weight_avg_delta_secondary,
@@ -9691,7 +10106,97 @@ def _print_proton_tof_constraint_diagnostics_page(output_pdf, cleaning_result, p
     canvas.Print(output_pdf)
 
 
-def _make_timing_t_report_canvas(name, title, width, height, columns=1, rows=1, header_text=None):
+def _timing_t_layout_for_panel_count(panel_count):
+    """Return the compact, deterministic timing-t report layout."""
+    count = max(1, int(panel_count or 1))
+    if count == 1:
+        return 1, 1
+    if count == 2:
+        return 2, 1
+    if count <= 4:
+        return 2, 2
+    if count <= 6:
+        return 3, 2
+    if count <= 8:
+        return 4, 2
+    if count <= 10:
+        return 5, 2
+    return 4, 3
+
+
+def _cross_stage_visual_state(rows, validation_cfg=None):
+    threshold = abs(float((validation_cfg or {}).get("cross_stage_visual_threshold", 0.0) or 0.0))
+    maximum = max(
+        [abs(float((row or {}).get("maximum_absolute_difference", 0.0) or 0.0)) for row in (rows or [])] or [0.0]
+    )
+    return {
+        "visual_threshold": threshold,
+        "maximum_absolute_difference": maximum,
+        "render_pass_status": bool(maximum <= threshold),
+    }
+
+
+def _timing_t_per_t_pid_eligible(t_summary, validation_cfg=None):
+    tolerance = abs(float((validation_cfg or {}).get("per_t_absolute_support_tolerance", 0.0) or 0.0))
+    prompt_count = int((t_summary or {}).get("raw_prompt_event_count", 0) or 0)
+    absolute_support = abs(float((t_summary or {}).get("absolute_event_weight_support", 0.0) or 0.0))
+    return {
+        "eligible": bool(prompt_count > 0 and absolute_support > tolerance),
+        "prompt_count": prompt_count,
+        "absolute_support": absolute_support,
+        "absolute_support_tolerance": tolerance,
+    }
+
+
+def _timing_t_root_content_status(hist, *, tolerance=0.0, categorical=False):
+    """Classify a ROOT payload without mistaking signed cancellation for empty."""
+    if hist is None:
+        return {"state": "unavailable", "reason": "missing_histogram"}
+    if categorical:
+        return {"state": "available", "reason": "categorical_state_map"}
+    tolerance = abs(float(tolerance or 0.0))
+    nonzero_bins = 0
+    absolute_content = 0.0
+    maximum_absolute_content = 0.0
+    try:
+        for x_bin in range(1, int(hist.GetNbinsX()) + 1):
+            y_bins = int(hist.GetNbinsY()) if hasattr(hist, "GetNbinsY") else 0
+            if y_bins > 1:
+                values = (float(hist.GetBinContent(x_bin, y_bin)) for y_bin in range(1, y_bins + 1))
+            else:
+                values = (float(hist.GetBinContent(x_bin)),)
+            for value in values:
+                absolute_content += abs(value)
+                maximum_absolute_content = max(maximum_absolute_content, abs(value))
+                if abs(value) > tolerance:
+                    nonzero_bins += 1
+    except Exception:
+        return {"state": "available", "reason": "histogram_content_unavailable"}
+    return {
+        "state": "available" if nonzero_bins else "empty",
+        "reason": "nonzero_bins" if nonzero_bins else "zero_content",
+        "nonzero_bins": int(nonzero_bins),
+        "absolute_content": float(absolute_content),
+        "maximum_absolute_content": float(maximum_absolute_content),
+    }
+
+
+def _draw_timing_t_status_panel(message, *, color=kRed):
+    status = TPaveText(0.12, 0.35, 0.88, 0.65, "NDC")
+    status.SetBorderSize(1)
+    status.SetFillStyle(0)
+    status.SetTextAlign(22)
+    status.SetTextSize(0.040)
+    status.SetTextColor(color)
+    for line in str(message).split("\n"):
+        status.AddText(line)
+    status.Draw()
+    return status
+
+
+def _make_timing_t_report_canvas(
+    name, title, width, height, columns=1, rows=1, header_text=None, *, panel_count=None,
+):
     """Create a canvas with a dedicated, non-data header pad."""
     canvas = TCanvas(str(name), str(title), int(width), int(height))
     header = TPad("{}_header".format(name), "", 0.0, 0.91, 1.0, 1.0)
@@ -9708,9 +10213,12 @@ def _make_timing_t_report_canvas(name, title, width, height, columns=1, rows=1, 
     label.SetFillStyle(0)
     label.SetTextAlign(12)
     label.SetTextSize(0.026)
-    label.AddText(str(header_text or title))
+    for line in (header_text if isinstance(header_text, (list, tuple)) else (header_text or title,)):
+        label.AddText(str(line))
     label.Draw()
     body.cd()
+    if panel_count is not None:
+        columns, rows = _timing_t_layout_for_panel_count(panel_count)
     if int(columns) * int(rows) > 1:
         body.Divide(int(columns), int(rows))
     return canvas, body, header, label
@@ -9732,27 +10240,46 @@ def _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id):
     """Section F: frozen lookup closure after aerogel diagnostics."""
     diagnostics = cleaning_result.get("diagnostics") or {}
     rows = list(diagnostics.get("cross_stage_t_consistency") or [])
-    canvas = TCanvas(
+    summary = diagnostics.get("cross_stage_t_consistency_summary") or {}
+    aero_cfg = ((diagnostics.get("aerogel_vs_t_validation") or {}).get("configuration") or {})
+    visual_state = _cross_stage_visual_state(rows, aero_cfg)
+    visual_threshold = visual_state["visual_threshold"]
+    maximum_difference = visual_state["maximum_absolute_difference"]
+    canvas, body, _header, _label = _make_timing_t_report_canvas(
         "C_timing_t_cross_stage_final_{}".format(page_id),
         "{} cross-stage shifted-t consistency".format(prefix), 1100, 750,
+        header_text="Frozen lookup cross-stage shifted-t consistency", panel_count=1,
     )
-    hist = TH1D(
-        "H_timing_t_cross_stage_difference_final_{}".format(page_id),
-        "Cross-stage shifted-t maximum difference;sample index;max |#Delta t|",
-        max(len(rows), 1), 0.0, float(max(len(rows), 1)),
-    )
-    hist.SetDirectory(0)
-    for index, row in enumerate(rows, start=1):
-        hist.SetBinContent(index, float(row.get("maximum_absolute_difference", 0.0) or 0.0))
-    hist.Draw("hist")
-    summary = diagnostics.get("cross_stage_t_consistency_summary") or {}
-    info = TPaveText(0.52, 0.70, 0.90, 0.90, "NDC")
-    info.SetBorderSize(1)
-    info.SetFillStyle(0)
-    info.AddText("samples: {}".format(summary.get("sample_count", len(rows))))
-    info.AddText("max difference: {}".format(summary.get("maximum_absolute_difference", 0.0)))
-    info.AddText("tolerance: {}".format(summary.get("tolerance", "n/a")))
-    info.Draw()
+    body.cd()
+    if visual_state["render_pass_status"]:
+        _draw_timing_t_status_panel(
+            "PASS: all sampled cross-stage shifted-t differences are <= {:.6g}\n"
+            "samples={} | maximum={:.6g} | strict tolerance={}".format(
+                visual_threshold,
+                summary.get("sample_count", len(rows)),
+                maximum_difference,
+                summary.get("tolerance", "n/a"),
+            ),
+            color=kGreen + 2,
+        )
+    else:
+        hist = TH1D(
+            "H_timing_t_cross_stage_difference_final_{}".format(page_id),
+            "Cross-stage shifted-t maximum difference;sample index;max |#Delta t|",
+            max(len(rows), 1), 0.0, float(max(len(rows), 1)),
+        )
+        hist.SetDirectory(0)
+        for index, row in enumerate(rows, start=1):
+            hist.SetBinContent(index, float(row.get("maximum_absolute_difference", 0.0) or 0.0))
+        hist.Draw("hist")
+        info = TPaveText(0.52, 0.70, 0.90, 0.90, "NDC")
+        info.SetBorderSize(1)
+        info.SetFillStyle(0)
+        info.AddText("samples: {}".format(summary.get("sample_count", len(rows))))
+        info.AddText("max difference: {}".format(maximum_difference))
+        info.AddText("visual threshold: {}".format(visual_threshold))
+        info.AddText("strict tolerance: {}".format(summary.get("tolerance", "n/a")))
+        info.Draw()
     canvas.Print(output_pdf)
 
     canonical = diagnostics.get("canonical_t_binning") or {}
@@ -10111,8 +10638,8 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     if bool(validation_cfg.get("write_global_aero_vs_t_pages", True)) and global_hists:
         canvas, body, _header, _label = _make_timing_t_report_canvas(
             "C_timing_t_aero_global_{}".format(page_id),
-            "{} aerogel versus canonical-t validation".format(prefix), 1600, 1000, 3, 4,
-            observational_header,
+            "{} aerogel versus canonical-t validation".format(prefix), 1600, 1000,
+            header_text=observational_header, panel_count=10,
         )
         for index, key in enumerate((
             "H_aero_vs_t_raw_prompt", "H_aero_vs_t_signed_physical",
@@ -10131,39 +10658,48 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
 
     # Section E2: eight compact canonical-t x summary-aerogel matrices.
     if bool(validation_cfg.get("write_t_aero_heatmaps", True)):
+        matrix_payload = aero.get("matrix_payload") or {}
+        coarse_hists = root_payload.get("coarse") or {}
         matrix_specs = (
-            ("event_count_by_t_aero", "Selected event count"),
-            ("signed_event_weight_sum_by_t_aero", "Signed physical yield"),
-            ("proton_probability_sum_by_t_aero", "Estimated proton yield"),
-            ("average_proton_probability_by_t_aero", "Average proton probability"),
-            ("low_mm_removed_yield_by_t_aero", "Low-MM removed yield"),
-            ("low_mm_removed_fraction_by_t_aero", "Low-MM removal fraction"),
-            ("lambda_removed_yield_by_t_aero", "Lambda removed yield"),
-            ("lambda_removed_fraction_by_t_aero", "Lambda removal fraction"),
+            ("selected_prompt_count", "H_t_aero_selected_prompt_count", "Selected prompt count"),
+            ("signed_physical_yield", "H_t_aero_signed_physical_yield", "Signed physical yield"),
+            ("estimated_proton_yield", "H_t_aero_estimated_proton_yield", "Estimated proton yield"),
+            ("average_proton_probability", "H_t_aero_average_proton_probability", "Average proton probability"),
+            ("low_mm_removed_yield", "H_t_aero_low_mm_removed_yield", "Low-MM removed yield"),
+            ("low_mm_removed_fraction", "H_t_aero_low_mm_removed_fraction", "Low-MM removal fraction"),
+            ("lambda_removed_yield", "H_t_aero_lambda_removed_yield", "Lambda removed yield"),
+            ("lambda_removed_fraction", "H_t_aero_lambda_removed_fraction", "Lambda removal fraction"),
         )
         for page_index, specs in enumerate((matrix_specs[:4], matrix_specs[4:]), start=1):
             canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_aero_matrices_{}_{}".format(page_id, page_index),
-                "{} aerogel validation summary matrices".format(prefix), 1500, 1000, 2, 2,
-                observational_header,
+                "{} aerogel validation summary matrices".format(prefix), 1500, 1000,
+                header_text=observational_header, panel_count=len(specs),
             )
-            for draw_index, (metric_key, metric_label) in enumerate(specs, start=1):
+            for draw_index, (metric_key, root_key, metric_label) in enumerate(specs, start=1):
                 body.cd(draw_index)
-                hist = _make_t_aerogel_hist(
-                    "H_timing_t_aero_{}_{}_{}".format(metric_key, page_id, page_index),
-                    "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_label),
-                    t_edges, aero_edges,
-                )
-                for t_index, row in enumerate(aero.get(metric_key) or []):
-                    for aero_index, value in enumerate(row or []):
-                        numeric = _finite_float_or_none(value)
-                        if numeric is not None and t_index < hist.GetNbinsX() and aero_index < hist.GetNbinsY():
-                            hist.SetBinContent(t_index + 1, aero_index + 1, numeric)
-                hist.Draw("colz text")
-                gPad.Modified()
-                gPad.Update()
+                hist = coarse_hists.get(root_key)
+                if hist is None:
+                    hist = _make_t_aerogel_hist(
+                        "H_timing_t_aero_{}_{}_{}".format(metric_key, page_id, page_index),
+                        "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_label),
+                        t_edges, aero_edges,
+                    )
+                    for t_index, value_row in enumerate(_matrix_metric(matrix_payload, metric_key)):
+                        for aero_index, value in enumerate(value_row or []):
+                            numeric = _finite_float_or_none(value)
+                            if numeric is not None and t_index < hist.GetNbinsX() and aero_index < hist.GetNbinsY():
+                                hist.SetBinContent(t_index + 1, aero_index + 1, numeric)
+                status = _timing_t_root_content_status(hist)
+                if status["state"] == "empty":
+                    _draw_timing_t_status_panel(
+                        "{}\nNo populated coarse cells; see diagnostic integrity".format(metric_label),
+                    )
+                else:
+                    hist.Draw("colz text")
+                    gPad.Modified()
+                    gPad.Update()
             canvas.Print(output_pdf)
-        coarse_hists = root_payload.get("coarse") or {}
         if coarse_hists:
             canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_aero_validity_masks_{}".format(page_id),
@@ -10184,10 +10720,25 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     # Section E3: compact, per-canonical-t PID views created from the same
     # frozen rows.  Hidden numerator/support histograms never enter a page.
     if bool(validation_cfg.get("write_per_t_pid_pages", True)):
+        skipped_t_summaries = []
+        minimum_absolute_support = abs(float(
+            validation_cfg.get("per_t_absolute_support_tolerance", 0.0) or 0.0
+        ))
         for row in root_payload.get("per_t") or []:
             summary = (aero.get("per_t_bin_summary") or [])
             t_index = int(row.get("t_index", -1))
             t_summary = summary[t_index] if 0 <= t_index < len(summary) else {}
+            eligibility = _timing_t_per_t_pid_eligible(t_summary, validation_cfg)
+            prompt_count = eligibility["prompt_count"]
+            absolute_support = eligibility["absolute_support"]
+            if not eligibility["eligible"]:
+                skipped_t_summaries.append({
+                    "t_index": t_index,
+                    "prompt_count": prompt_count,
+                    "absolute_support": absolute_support,
+                    "warnings": list(t_summary.get("warnings") or []),
+                })
+                continue
             context = diagnostics.get("kinematic_context") or {}
             local_cells = [
                 cell for cell in (diagnostics.get("applied_timing_t_cell_map") or [])
@@ -10198,39 +10749,31 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
                 for label in SUPPORT_CLASS_ORDER
             )
             applied_yield = sum(float(cell.get("applied_proton_yield", 0.0) or 0.0) for cell in local_cells)
-            header_text = (
-                "Aerogel secondary PID validation only | Q2={q2} W={w} eps={epsilon} phi={phi} | t bin {t}: [{low:.6g}, {high:.6g}] | "
-                "timing={branch} range={timing} | setting={setting} | prompt={prompt} signed={signed:.4g} "
-                "p={proton:.4g} applied={applied:.4g} | delta support={delta_support} | warnings={warnings}"
-            ).format(
+            header_text = [
+                "Aerogel secondary PID validation only - not used in production timing-t event weights",
+                "Q2={q2} GeV^2  W={w} GeV  eps={epsilon}  phi={phi} | t bin {t}: [{low:.6g}, {high:.6g}] GeV^2 | timing={branch} {timing}".format(
                 q2=context.get("Q2", "n/a"), w=context.get("W", "n/a"), epsilon=context.get("epsilon", "n/a"),
                 phi=context.get("phi_setting", cleaning_result.get("phi_setting", "n/a")),
                 t=t_index, low=float(t_summary.get("t_low", 0.0) or 0.0), high=float(t_summary.get("t_high", 0.0) or 0.0),
                 branch=diagnostics.get("timing_branch", "n/a"), timing=root_payload.get("timing_range", "n/a"),
-                setting=(diagnostics.get("setting_support") or {}).get("support_label", "n/a"),
-                prompt=t_summary.get("raw_prompt_event_count", 0), signed=float(t_summary.get("signed_event_weight_sum", 0.0) or 0.0),
-                proton=float(t_summary.get("estimated_proton_missing_mass_yield", 0.0) or 0.0),
-                applied=applied_yield, delta_support=local_support,
-                warnings=",".join(t_summary.get("warnings") or []) or "none",
-            )
+                ),
+                "physical source units: prompt={prompt} signed yield={signed:.4g} estimated proton={proton:.4g} abs support={support:.4g}".format(
+                    prompt=prompt_count,
+                    signed=float(t_summary.get("signed_event_weight_sum", 0.0) or 0.0),
+                    proton=float(t_summary.get("estimated_proton_missing_mass_yield", 0.0) or 0.0),
+                    support=absolute_support,
+                ),
+                "fit-model units (not compared to physical yield): applied proton yield={applied:.4g}; delta support={delta_support}; setting={setting}; warnings={warnings}".format(
+                    applied=applied_yield, delta_support=local_support,
+                    setting=(diagnostics.get("setting_support") or {}).get("support_label", "n/a"),
+                    warnings=",".join(t_summary.get("warnings") or []) or "none",
+                ),
+            ]
             canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_aero_per_t_{}_{}".format(page_id, row.get("t_index")),
-                "{} aerogel PID validation t bin {}".format(prefix, row.get("t_index")), 1500, 1000, 2, 2,
-                header_text,
+                "{} aerogel PID validation t bin {}".format(prefix, row.get("t_index")), 1500, 1000,
+                header_text=header_text, panel_count=4,
             )
-            if int(t_summary.get("event_count", 0) or 0) == 0:
-                body.cd(1)
-                empty = TPaveText(0.14, 0.35, 0.86, 0.65, "NDC")
-                empty.SetBorderSize(1)
-                empty.SetFillStyle(0)
-                empty.SetTextAlign(22)
-                empty.SetTextSize(0.045)
-                empty.AddText("No supported events in this canonical t bin")
-                empty.AddText("raw prompt count = {}".format(t_summary.get("raw_prompt_event_count", 0)))
-                empty.AddText("warnings = {}".format(", ".join(t_summary.get("warnings") or []) or "none"))
-                empty.Draw()
-                canvas.Print(output_pdf)
-                continue
             body.cd(1)
             row["raw_prompt_timing_vs_aero"].Draw("colz")
             body.cd(2)
@@ -10269,12 +10812,37 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
                     full_body.cd(draw_index)
                     row[key].Draw("colz")
                 full_canvas.Print(output_pdf)
+        if skipped_t_summaries:
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
+                "C_timing_t_aero_skipped_t_bins_{}".format(page_id),
+                "{} skipped aerogel PID bins".format(prefix), 1300, 750,
+                header_text=observational_header, panel_count=1,
+            )
+            body.cd()
+            message = [
+                "No compact PID page was rendered for the following canonical t bins.",
+                "Requirement: raw prompt count > 0 and absolute physical support > {:.6g}.".format(minimum_absolute_support),
+            ]
+            for skipped in skipped_t_summaries:
+                message.append(
+                    "t{t}: prompt={prompt_count}, abs support={absolute_support:.6g}, warnings={warnings}".format(
+                        **{**skipped, "warnings": ",".join(skipped["warnings"]) or "none"}
+                    )
+                )
+            _draw_timing_t_status_panel("\n".join(message), color=kBlack)
+            canvas.Print(output_pdf)
 
     warning_rows = [row for row in (aero.get("warnings_by_t_bin") or []) if row.get("warnings")]
+    integrity = diagnostics.get("timing_t_diagnostic_integrity") or aero.get("diagnostic_integrity") or {}
+    per_t_details = {
+        int(row.get("t_index")): row
+        for row in (aero.get("per_t_bin_summary") or [])
+        if isinstance(row, dict) and isinstance(row.get("t_index"), int)
+    }
     canvas, body, _header, _label = _make_timing_t_report_canvas(
         "C_timing_t_aero_warnings_{}".format(page_id),
-        "{} aerogel validation exceptions".format(prefix), 1400, 800, 1, 1,
-        observational_header,
+        "{} aerogel validation exceptions".format(prefix), 1400, 800,
+        header_text=observational_header, panel_count=1,
     )
     warning_text = TPaveText(0.05, 0.05, 0.95, 0.95, "NDC")
     warning_text.SetBorderSize(1)
@@ -10282,13 +10850,28 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     warning_text.SetTextAlign(12)
     warning_text.SetTextSize(0.028)
     warning_text.AddText("Warnings only; complete diagnostics are stored in JSON/CSV")
+    if not bool(integrity.get("valid", True)):
+        warning_text.SetTextColor(kRed)
+        warning_text.AddText(
+            "DIAGNOSTIC INTEGRITY WARNING: {}".format(
+                ", ".join(integrity.get("failures") or []) or "unknown failure"
+            )
+        )
     if not warning_rows:
         warning_text.AddText("No per-t-bin aerogel validation warnings")
     for row in warning_rows:
+        detail = per_t_details.get(int(row.get("t_index", -1)), {})
         warning_text.AddText(
-            "t{} [{:.6g}, {:.6g}]: {}".format(
+            "t{} [{:.6g}, {:.6g}]: {} | low/high Pp={}/{} | low/high low-MM removal={}/{} | low/high Lambda removal={}/{} | abs support={:.5g}".format(
                 row.get("t_index"), float(row.get("t_low", 0.0) or 0.0),
                 float(row.get("t_high", 0.0) or 0.0), ", ".join(row.get("warnings") or []),
+                detail.get("low_aero_average_proton_probability"),
+                detail.get("high_aero_average_proton_probability"),
+                detail.get("low_aero_low_mm_removed_fraction"),
+                detail.get("high_aero_low_mm_removed_fraction"),
+                detail.get("low_aero_lambda_removed_fraction"),
+                detail.get("high_aero_lambda_removed_fraction"),
+                float(detail.get("absolute_event_weight_support", 0.0) or 0.0),
             )
         )
     body.cd()
@@ -10296,8 +10879,65 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     canvas.Print(output_pdf)
 
     # Section F: frozen lookup/cross-stage closure follows all aerogel-only
-    # pages so the report ordering remains A--G.
+    # pages.  The selected-candidate-only final summary is emitted by the
+    # timing-t route immediately afterwards.
     _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id)
+
+
+def _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix):
+    """Render Section J without falling back to legacy aerogel diagnostics."""
+    diagnostics = cleaning_result.get("diagnostics") or {}
+    summary = diagnostics.get("timing_t_summary") or {}
+    page_id = abs(id(cleaning_result))
+    canvas, body, _header, _label = _make_timing_t_report_canvas(
+        "C_timing_t_selected_summary_{}".format(page_id),
+        "{} selected timing-t summary".format(prefix), 1450, 900,
+        header_text="Timing-t final summary - selected candidate and frozen lookup only", panel_count=1,
+    )
+    body.cd()
+    summary_text = TPaveText(0.04, 0.04, 0.96, 0.96, "NDC")
+    summary_text.SetBorderSize(1)
+    summary_text.SetFillStyle(0)
+    summary_text.SetTextAlign(12)
+    summary_text.SetTextSize(0.025)
+    if not summary:
+        summary_text.SetTextColor(kRed)
+        summary_text.AddText("Timing-t summary unavailable; see diagnostic integrity payload")
+    else:
+        candidate = summary.get("selected_candidate") or {}
+        setting = summary.get("setting_support") or {}
+        mm = summary.get("missing_mass_totals") or {}
+        per_delta = list(summary.get("per_delta") or [])
+        applied = sum(float(row.get("applied_proton_yield", 0.0) or 0.0) for row in per_delta)
+        data_total = sum(float(row.get("raw_data_total", 0.0) or 0.0) for row in per_delta)
+        summary_text.AddText(
+            "selected timing branch={} | rank={} | setting support={} accepted={}".format(
+                candidate.get("timing_branch"), candidate.get("candidate_selection_rank"),
+                setting.get("support_label"), setting.get("accepted"),
+            )
+        )
+        summary_text.AddText("delta edges: {}".format(summary.get("delta_edges")))
+        summary_text.AddText(
+            "integrated applied proton fraction={} (applied yield={} / raw fit data={})".format(
+                _safe_validation_ratio(applied, data_total), applied, data_total,
+            )
+        )
+        summary_text.AddText(
+            "frozen missing-mass totals: raw={} estimated proton={} cleaned={}".format(
+                mm.get("raw"), mm.get("estimated_proton"), mm.get("cleaned"),
+            )
+        )
+        for row in per_delta:
+            summary_text.AddText(
+                "delta {delta_index} [{delta_low}, {delta_high}]: support={support_label} "
+                "data={raw_data_total:.5g} fitted={fitted_data_total:.5g} coverage={coverage:.4g} "
+                "K/p/other={kaon_yield:.5g}/{proton_yield:.5g}/{other_yield:.5g} "
+                "applied={applied_proton_yield:.5g} mean lookup={mean_event_lookup_probability}".format(
+                    **row
+                )
+            )
+    summary_text.Draw()
+    canvas.Print(output_pdf)
 
 
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
@@ -10315,7 +10955,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     # C-macro-reference aerogel route continues through the unchanged pages.
     if str(cleaning_result.get("method") or "") == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
         _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix)
-        _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, prefix)
+        _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix)
         return
 
     _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
