@@ -358,7 +358,8 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         "kaon_signal_tail_extension": 0.02,
         "enabled_windows": {
             "pi_n": True,
-            "pi_delta": True,
+            #"pi_delta": True,
+            "pi_delta": False,
             "pi_sidis": True,
             #"k_sigma0_signal": True,
             "k_sigma0_signal": False,
