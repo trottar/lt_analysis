@@ -544,6 +544,19 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "affects_event_weights": False,
         "affects_fit_acceptance": False,
     },
+    # Missing-mass products for the opt-in timing-t cleaner are a frozen-row
+    # diagnostic only.  They deliberately share neither fit inputs nor any
+    # event-weight controls with the production cleaning path.
+    "mm_diagnostics": {
+        "enabled": True,
+        "display_range": (0.70, 1.50),
+        "display_bins": 100,
+        "write_overview_page": True,
+        "write_t_binned_pages": True,
+        "write_window_accounting_page": True,
+        "affects_event_weights": False,
+        "affects_fit_acceptance": False,
+    },
     "ctime_hist_range": (-2.0, 2.0),
     "ctime_hist_bins": 131,
     "ctime_hist_range_high_epsilon": (-4.0, 4.0),
@@ -735,6 +748,7 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "t_cell_fit",
         "t_support_thresholds",
         "aerogel_validation",
+        "mm_diagnostics",
     }
 )
 

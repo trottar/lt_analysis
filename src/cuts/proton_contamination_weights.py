@@ -4226,6 +4226,8 @@ def _build_timing_t_summary(cleaning_result, matrix_payload, aggregate_all):
             ),
             "lookup_event_count": int(closure.get("event_count", 0) or 0),
         })
+    mm_diagnostics = diagnostics.get("timing_t_mm_diagnostics") or {}
+    mm_aggregate = mm_diagnostics.get("aggregate") or {}
     return {
         "schema_version": 1,
         "source": "selected_timing_candidate_and_frozen_lookup_only",
@@ -4240,11 +4242,270 @@ def _build_timing_t_summary(cleaning_result, matrix_payload, aggregate_all):
         "setting_support": diagnostics.get("setting_support") or {},
         "matrix_source": (matrix_payload or {}).get("source"),
         "missing_mass_totals": {
-            "raw": (aggregate_all or {}).get("raw_missing_mass_yield"),
-            "estimated_proton": (aggregate_all or {}).get("estimated_proton_missing_mass_yield"),
-            "cleaned": (aggregate_all or {}).get("cleaned_missing_mass_yield"),
+            "raw": mm_aggregate.get("raw_missing_mass_yield", (aggregate_all or {}).get("raw_missing_mass_yield")),
+            "estimated_proton": mm_aggregate.get(
+                "estimated_proton_missing_mass_yield",
+                (aggregate_all or {}).get("estimated_proton_missing_mass_yield"),
+            ),
+            "cleaned": mm_aggregate.get(
+                "cleaned_missing_mass_yield",
+                (aggregate_all or {}).get("cleaned_missing_mass_yield"),
+            ),
         },
+        "proton_subtraction_mm": mm_diagnostics,
     }
+
+
+def _resolve_timing_t_mm_display_range(config):
+    """Return a valid MM display range without changing any analysis cuts."""
+    mm_config = dict((config or {}).get("mm_diagnostics") or {})
+    candidate = mm_config.get("display_range") or (config or {}).get("mm_validation_range")
+    if not candidate or len(candidate) < 2:
+        candidate = PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE
+    try:
+        low, high = float(candidate[0]), float(candidate[1])
+    except (TypeError, ValueError, IndexError):
+        low, high = PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE
+    if not (math.isfinite(low) and math.isfinite(high) and high > low):
+        low, high = PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE
+    return [float(low), float(high)]
+
+
+def _new_timing_t_mm_accumulator():
+    return {
+        "event_count": 0,
+        "raw_prompt_event_count": 0,
+        "signed_event_weight_sum": 0.0,
+        "absolute_event_weight_support": 0.0,
+        "raw_missing_mass_yield": 0.0,
+        "estimated_proton_missing_mass_yield": 0.0,
+        "cleaned_missing_mass_yield": 0.0,
+        "final_rf_cleaned_missing_mass_yield": 0.0,
+    }
+
+
+def _fill_timing_t_mm_accumulator(accumulator, row, physical_weight, proton_weight, cleaned_factor, final_cleaned_factor):
+    accumulator["event_count"] += 1
+    accumulator["raw_prompt_event_count"] += int(bool((row or {}).get("is_prompt_source", False)))
+    accumulator["signed_event_weight_sum"] += physical_weight
+    accumulator["absolute_event_weight_support"] += abs(physical_weight)
+    accumulator["raw_missing_mass_yield"] += physical_weight
+    accumulator["estimated_proton_missing_mass_yield"] += physical_weight * proton_weight
+    accumulator["cleaned_missing_mass_yield"] += physical_weight * cleaned_factor
+    accumulator["final_rf_cleaned_missing_mass_yield"] += physical_weight * final_cleaned_factor
+
+
+def _finalize_timing_t_mm_accumulator(accumulator, windows):
+    summary = dict(accumulator)
+    raw = float(summary["raw_missing_mass_yield"])
+    proton = float(summary["estimated_proton_missing_mass_yield"])
+    cleaned = float(summary["cleaned_missing_mass_yield"])
+    summary["raw_minus_estimated_proton"] = raw - proton
+    summary["pre_rf_cleaning_closure_difference"] = (raw - proton) - cleaned
+    summary["windows"] = {}
+    for name, values in (windows or {}).items():
+        raw_yield = float(values["raw_missing_mass_yield"])
+        proton_yield = float(values["estimated_proton_missing_mass_yield"])
+        cleaned_yield = float(values["cleaned_missing_mass_yield"])
+        removed_fraction = _safe_validation_ratio(proton_yield, raw_yield)
+        summary["windows"][str(name)] = {
+            "range": [float(values["range"][0]), float(values["range"][1])],
+            "raw_yield": raw_yield,
+            "estimated_proton_yield": proton_yield,
+            "cleaned_yield": cleaned_yield,
+            "final_rf_cleaned_yield": float(values["final_rf_cleaned_missing_mass_yield"]),
+            "removed_yield": proton_yield,
+            "removed_fraction": removed_fraction,
+            "removed_fraction_valid": removed_fraction is not None,
+            "raw_minus_estimated_proton": raw_yield - proton_yield,
+            "pre_rf_cleaning_closure_difference": (raw_yield - proton_yield) - cleaned_yield,
+        }
+    return summary
+
+
+def _build_timing_t_mm_root_payload(event_rows, mm_payload):
+    """Create display-only MM ROOT products from frozen lookup rows."""
+    payload_id = abs(id(mm_payload))
+    t_edges = [float(value) for value in (mm_payload.get("t_edges") or [])]
+    display_range = list(mm_payload.get("display_range") or [])
+    try:
+        mm_low, mm_high = float(display_range[0]), float(display_range[1])
+    except (TypeError, ValueError, IndexError):
+        return {}
+    if len(t_edges) < 2 or not (math.isfinite(mm_low) and math.isfinite(mm_high) and mm_high > mm_low):
+        return {}
+    display_bins = max(1, int(mm_payload.get("display_bins", 100) or 100))
+    maps = {}
+    for key, title in (
+        ("raw", "Raw selected MM;shifted MM [GeV];|t| [GeV^{2}]"),
+        ("estimated_proton", "Estimated proton MM;shifted MM [GeV];|t| [GeV^{2}]"),
+        ("cleaned_pre_rf", "Proton-cleaned MM before RF restoration;shifted MM [GeV];|t| [GeV^{2}]"),
+        ("cleaned_final_rf", "Proton-cleaned MM after RF restoration;shifted MM [GeV];|t| [GeV^{2}]"),
+    ):
+        hist = ROOT.TH2D(
+            "H_timing_t_mm_{}_{}".format(key, payload_id), title,
+            display_bins, mm_low, mm_high,
+            len(t_edges) - 1, array("d", t_edges),
+        )
+        hist.SetDirectory(0)
+        hist.Sumw2()
+        maps[key] = hist
+    for row in event_rows or []:
+        t_index = row.get("t_index")
+        adj_mm = _finite_float_or_none(row.get("adj_mm"))
+        physical_weight = _finite_float_or_none(row.get("physical_weight"))
+        proton_weight = _finite_float_or_none(row.get("proton_weight"))
+        cleaned_factor = _finite_float_or_none(row.get("cleaned_factor"))
+        final_cleaned_factor = _finite_float_or_none(row.get("final_cleaned_factor"))
+        if (
+            not isinstance(t_index, int) or not (0 <= t_index < len(t_edges) - 1)
+            or adj_mm is None or physical_weight is None or proton_weight is None
+        ):
+            continue
+        cleaned_factor = 1.0 - proton_weight if cleaned_factor is None else cleaned_factor
+        final_cleaned_factor = cleaned_factor if final_cleaned_factor is None else final_cleaned_factor
+        t_value = _finite_float_or_none(row.get("adj_t"))
+        if t_value is None:
+            t_value = 0.5 * (t_edges[t_index] + t_edges[t_index + 1])
+        maps["raw"].Fill(adj_mm, t_value, physical_weight)
+        maps["estimated_proton"].Fill(adj_mm, t_value, physical_weight * proton_weight)
+        maps["cleaned_pre_rf"].Fill(adj_mm, t_value, physical_weight * cleaned_factor)
+        maps["cleaned_final_rf"].Fill(adj_mm, t_value, physical_weight * final_cleaned_factor)
+
+    window_fraction_hists = {}
+    for window_name in (mm_payload.get("validation_windows") or {}):
+        hist = ROOT.TH1D(
+            "H_timing_t_mm_{}_removed_fraction_{}".format(window_name, payload_id),
+            "{} proton removal fraction;|t| [GeV^{{2}}];estimated proton / raw".format(window_name),
+            len(t_edges) - 1, array("d", t_edges),
+        )
+        hist.SetDirectory(0)
+        hist.Sumw2()
+        for row in mm_payload.get("per_t_bin_summary") or []:
+            t_index = row.get("t_index")
+            window = (row.get("windows") or {}).get(window_name) or {}
+            value = _finite_float_or_none(window.get("removed_fraction"))
+            if isinstance(t_index, int) and value is not None and 0 <= t_index < hist.GetNbinsX():
+                hist.SetBinContent(t_index + 1, value)
+        window_fraction_hists[str(window_name)] = hist
+    return {
+        "maps": maps,
+        "window_removed_fraction": window_fraction_hists,
+        "object_count": int(len(maps) + len(window_fraction_hists)),
+    }
+
+
+def _build_timing_t_mm_diagnostics(cleaning_result, event_rows, config, *, include_root_payload=False):
+    """Summarize proton-subtraction MM effects from frozen lookup rows only."""
+    mm_config = dict((config or {}).get("mm_diagnostics") or {})
+    if not bool(mm_config.get("enabled", True)):
+        return {
+            "enabled": False,
+            "affects_event_weights": False,
+            "affects_fit_acceptance": False,
+            "configuration": _json_ready_value(mm_config),
+        }
+    t_edges = _finite_strictly_increasing_edges((cleaning_result or {}).get("t_edges") or [])
+    if len(t_edges) < 2:
+        return {
+            "enabled": True,
+            "affects_event_weights": False,
+            "affects_fit_acceptance": False,
+            "configuration": _json_ready_value(mm_config),
+            "warnings": ["timing_t_mm_edges_unavailable"],
+        }
+    windows = {}
+    for name, bounds in ((config or {}).get("validation_windows") or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS).items():
+        try:
+            low, high = float(bounds[0]), float(bounds[1])
+        except (TypeError, ValueError, IndexError):
+            continue
+        if math.isfinite(low) and math.isfinite(high) and high > low:
+            windows[str(name)] = [low, high]
+    per_t = [_new_timing_t_mm_accumulator() for _ in range(len(t_edges) - 1)]
+    per_t_windows = [
+        {
+            name: {**_new_timing_t_mm_accumulator(), "range": bounds}
+            for name, bounds in windows.items()
+        }
+        for _ in per_t
+    ]
+    aggregate = _new_timing_t_mm_accumulator()
+    aggregate_windows = {
+        name: {**_new_timing_t_mm_accumulator(), "range": bounds}
+        for name, bounds in windows.items()
+    }
+    exclusions = {
+        "source_rows_seen": int(len(event_rows or [])),
+        "invalid_t_index": 0,
+        "missing_mm_or_weight_or_probability": 0,
+        "outside_display_range": 0,
+        "selected_rows": 0,
+    }
+    display_range = _resolve_timing_t_mm_display_range(config)
+    for row in event_rows or []:
+        t_index = row.get("t_index")
+        adj_mm = _finite_float_or_none(row.get("adj_mm"))
+        physical_weight = _finite_float_or_none(row.get("physical_weight"))
+        proton_weight = _finite_float_or_none(row.get("proton_weight"))
+        cleaned_factor = _finite_float_or_none(row.get("cleaned_factor"))
+        final_cleaned_factor = _finite_float_or_none(row.get("final_cleaned_factor"))
+        if not isinstance(t_index, int) or not (0 <= t_index < len(per_t)):
+            exclusions["invalid_t_index"] += 1
+            continue
+        if adj_mm is None or physical_weight is None or proton_weight is None:
+            exclusions["missing_mm_or_weight_or_probability"] += 1
+            continue
+        cleaned_factor = 1.0 - proton_weight if cleaned_factor is None else cleaned_factor
+        final_cleaned_factor = cleaned_factor if final_cleaned_factor is None else final_cleaned_factor
+        _fill_timing_t_mm_accumulator(
+            per_t[t_index], row, physical_weight, proton_weight, cleaned_factor, final_cleaned_factor,
+        )
+        _fill_timing_t_mm_accumulator(
+            aggregate, row, physical_weight, proton_weight, cleaned_factor, final_cleaned_factor,
+        )
+        for name, bounds in windows.items():
+            if bounds[0] <= adj_mm < bounds[1]:
+                _fill_timing_t_mm_accumulator(
+                    per_t_windows[t_index][name], row, physical_weight, proton_weight,
+                    cleaned_factor, final_cleaned_factor,
+                )
+                _fill_timing_t_mm_accumulator(
+                    aggregate_windows[name], row, physical_weight, proton_weight,
+                    cleaned_factor, final_cleaned_factor,
+                )
+        exclusions["selected_rows"] += 1
+        if not (display_range[0] <= adj_mm <= display_range[1]):
+            exclusions["outside_display_range"] += 1
+
+    per_t_summary = []
+    for index, accumulator in enumerate(per_t):
+        per_t_summary.append({
+            "t_index": int(index),
+            "t_low": float(t_edges[index]),
+            "t_high": float(t_edges[index + 1]),
+            **_finalize_timing_t_mm_accumulator(accumulator, per_t_windows[index]),
+        })
+    payload = {
+        "schema_version": 1,
+        "enabled": True,
+        "source": "frozen_timing_t_lookup_rows",
+        "selection": "prepared_shared_nommcuts_without_final_missing_mass_window",
+        "adj_mm_source": "shared_shifted_missing_mass",
+        "affects_event_weights": False,
+        "affects_fit_acceptance": False,
+        "configuration": _json_ready_value(mm_config),
+        "t_edges": [float(edge) for edge in t_edges],
+        "display_range": display_range,
+        "display_bins": max(1, int(mm_config.get("display_bins", 100) or 100)),
+        "validation_windows": {name: list(bounds) for name, bounds in windows.items()},
+        "aggregate": _finalize_timing_t_mm_accumulator(aggregate, aggregate_windows),
+        "per_t_bin_summary": per_t_summary,
+        "exclusions": exclusions,
+    }
+    if include_root_payload:
+        payload["_root_payload"] = _build_timing_t_mm_root_payload(event_rows, payload)
+    return payload
 
 
 def _build_timing_t_diagnostic_integrity(
@@ -4374,43 +4635,43 @@ def _build_t_aerogel_root_payload(
     if bool(validation_cfg.get("write_global_aero_vs_t_pages", True)):
         global_hists = {
             "H_aero_vs_t_raw_prompt": _make_t_aerogel_hist(
-                "H_aero_vs_t_raw_prompt", "Raw selected prompt events;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_raw_prompt", "Raw selected prompt events;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_signed_physical": _make_t_aerogel_hist(
-                "H_aero_vs_t_signed_physical", "Signed physical source yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_signed_physical", "Signed physical source yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_signed_physical_positive": _make_t_aerogel_hist(
-                "H_aero_vs_t_signed_physical_positive", "Positive physical source yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_signed_physical_positive", "Positive physical source yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_signed_physical_negative": _make_t_aerogel_hist(
-                "H_aero_vs_t_signed_physical_negative", "Absolute negative physical source yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_signed_physical_negative", "Absolute negative physical source yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_estimated_proton": _make_t_aerogel_hist(
-                "H_aero_vs_t_estimated_proton", "Estimated proton physical yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_estimated_proton", "Estimated proton physical yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_estimated_proton_positive": _make_t_aerogel_hist(
-                "H_aero_vs_t_estimated_proton_positive", "Positive estimated proton yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_estimated_proton_positive", "Positive estimated proton yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_estimated_proton_negative_abs": _make_t_aerogel_hist(
-                "H_aero_vs_t_estimated_proton_negative_abs", "Absolute negative estimated proton yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_estimated_proton_negative_abs", "Absolute negative estimated proton yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_proton_cleaned": _make_t_aerogel_hist(
-                "H_aero_vs_t_proton_cleaned", "Frozen proton-cleaned physical yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_proton_cleaned", "Frozen proton-cleaned physical yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_proton_cleaned_positive": _make_t_aerogel_hist(
-                "H_aero_vs_t_proton_cleaned_positive", "Positive frozen cleaned yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_proton_cleaned_positive", "Positive frozen cleaned yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_proton_cleaned_negative_abs": _make_t_aerogel_hist(
-                "H_aero_vs_t_proton_cleaned_negative_abs", "Absolute negative frozen cleaned yield;canonical -t [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_proton_cleaned_negative_abs", "Absolute negative frozen cleaned yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
         }
@@ -4547,13 +4808,13 @@ def _build_t_aerogel_root_payload(
         )
         for metric_key, base_name, has_validity_mask in metric_specs:
             value_hist = _make_t_aerogel_hist(
-                base_name, "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
+                base_name, "{};|t| [GeV^{{2}}];P_aero NPE".format(metric_key),
                 t_edges, coarse_edges,
             )
             valid_hist = None
             if has_validity_mask:
                 valid_hist = _make_t_aerogel_hist(
-                    "{}_valid".format(base_name), "{} validity;canonical -t [GeV^{{2}}];P_aero NPE".format(metric_key),
+                    "{}_valid".format(base_name), "{} validity;|t| [GeV^{{2}}];P_aero NPE".format(metric_key),
                     t_edges, coarse_edges,
                 )
             values = _matrix_metric(matrix_payload, metric_key)
@@ -5191,6 +5452,14 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
     diagnostics["timing_t_diagnostic_integrity"] = _json_ready_value(
         aerogel_validation.get("diagnostic_integrity") or {}
     )
+    # The MM layer is intentionally built from the same immutable lookup rows
+    # after probabilities are frozen.  It is independent of the aerogel layer
+    # and cannot feed back into candidate selection or event weighting.
+    mm_diagnostics = _build_timing_t_mm_diagnostics(
+        cleaning_result, validation_rows, config, include_root_payload=True,
+    )
+    cleaning_result["_timing_t_mm_root_payload"] = mm_diagnostics.pop("_root_payload", {})
+    diagnostics["timing_t_mm_diagnostics"] = _json_ready_value(mm_diagnostics)
     diagnostics["timing_t_summary"] = _json_ready_value(
         _build_timing_t_summary(
             cleaning_result,
@@ -5631,7 +5900,7 @@ def _build_signed_timing_t_histograms(
     h_global_timing.SetDirectory(0)
     h_global_timing.Sumw2()
     h_global_timing_vs_t = ROOT.TH2D(
-        "{}_vs_t".format(prefix), "Global {} versus canonical -t;-t;{} [ns];Signed yield".format(timing_branch, timing_branch),
+        "{}_vs_t".format(prefix), "Global {} versus |t|;|t| [GeV^{{2}}];{} [ns];Signed yield".format(timing_branch, timing_branch),
         len(t_edges) - 1, t_axis, n_time_bins, time_min, time_max,
     )
     h_global_timing_vs_t.SetDirectory(0)
@@ -5649,7 +5918,7 @@ def _build_signed_timing_t_histograms(
     for t_index in range(len(t_edges) - 1):
         hist = ROOT.TH1D(
             "{}_global_t_{}".format(prefix, t_index),
-            "Global canonical t slice {};{} [ns];Signed yield".format(t_index + 1, timing_branch),
+            "Global |t| slice {};{} [ns];Signed yield".format(t_index + 1, timing_branch),
             n_time_bins, time_min, time_max,
         )
         hist.SetDirectory(0)
@@ -5668,7 +5937,7 @@ def _build_signed_timing_t_histograms(
         for t_index in range(len(t_edges) - 1):
             hist = ROOT.TH1D(
                 "{}_delta_{}_t_{}".format(prefix, delta_index, t_index),
-                "Timing delta {} canonical t {};{} [ns];Signed yield".format(
+                "Timing delta {} |t| slice {};{} [ns];Signed yield".format(
                     delta_index + 1, t_index + 1, timing_branch
                 ),
                 n_time_bins, time_min, time_max,
@@ -8002,7 +8271,7 @@ def apply_kaon_proton_cleaning_to_targets(
     t_edges = [float(edge) for edge in (cleaning_result.get("t_edges") or [])]
     delta_edges = [float(edge) for edge in (cleaning_result.get("delta_edges") or [])]
     secondary_edges = t_edges if method_is_t_binned else aero_edges
-    secondary_label = "canonical -t [GeV^{2}]" if method_is_t_binned else "P_aero NPE"
+    secondary_label = "|t| [GeV^{2}]" if method_is_t_binned else "P_aero NPE"
     secondary_name = "t" if method_is_t_binned else "aero"
     if len(delta_edges) < 2 or len(secondary_edges) < 2:
         return {"accepted": False, "reason": "missing production bin edges"}
@@ -8335,6 +8604,7 @@ def serialize_kaon_proton_cleaning_result(cleaning_result):
     payload.pop("_rf_signature_lookup", None)
     payload.pop("_prepared_event_weight_lookup", None)
     payload.pop("_aerogel_vs_t_root_payload", None)
+    payload.pop("_timing_t_mm_root_payload", None)
     payload.pop("_timing_t_candidate_global_comparisons", None)
     return _json_ready_value(payload)
 
@@ -9472,7 +9742,7 @@ def _print_kaon_proton_cleaning_final_summary_page(output_pdf, cleaning_result, 
     secondary_edges = [float(edge) for edge in (
         cleaning_result.get("t_edges") if method_is_t_binned else cleaning_result.get("aero_edges")
     ) or (PROTON_CLEANING_EXACT_AERO_EDGES if not method_is_t_binned else [0.0, 1.0])]
-    secondary_label = "canonical -t [GeV^{2}]" if method_is_t_binned else "P_aero_npeSum"
+    secondary_label = "|t| [GeV^{2}]" if method_is_t_binned else "P_aero_npeSum"
     secondary_key = "H_proton_weight_vs_delta_t" if method_is_t_binned else "H_proton_weight_vs_delta_aero"
     closure_yield_label = "applied p yield" if method_is_t_binned else "fitted p yield"
     page_id = abs(id(cleaning_result))
@@ -10290,7 +10560,7 @@ def _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id):
         return
     count_hist = ROOT.TH2D(
         "H_timing_t_lookup_tphi_count_final_{}".format(page_id),
-        "Frozen lookup event count;canonical -t [GeV^{2}];#phi [deg]",
+        "Frozen lookup event count;|t| [GeV^{2}];#phi [deg]",
         len(t_edges) - 1, array("d", t_edges), len(phi_edges) - 1, array("d", phi_edges),
     )
     count_hist.SetDirectory(0)
@@ -10303,14 +10573,202 @@ def _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id):
             if 0 <= t_index < count_hist.GetNbinsX() and 0 <= phi_index < count_hist.GetNbinsY():
                 count_hist.SetBinContent(t_index + 1, phi_index + 1, float(row.get("event_count", 0) or 0))
                 proton_hist.SetBinContent(t_index + 1, phi_index + 1, float(row.get("estimated_proton_yield", 0.0) or 0.0))
-    canvas = TCanvas("C_timing_t_lookup_tphi_final_{}".format(page_id), "{} frozen lookup by canonical t and phi".format(prefix), 1400, 700)
+    canvas = TCanvas("C_timing_t_lookup_tphi_final_{}".format(page_id), "{} frozen lookup by |t| and phi".format(prefix), 1400, 700)
     canvas.Divide(2, 1)
     canvas.cd(1)
     count_hist.Draw("colz text")
     canvas.cd(2)
-    proton_hist.SetTitle("Frozen lookup estimated proton yield;canonical -t [GeV^{2}];#phi [deg]")
+    proton_hist.SetTitle("Frozen lookup estimated proton yield;|t| [GeV^{2}];#phi [deg]")
     proton_hist.Draw("colz text")
     canvas.Print(output_pdf)
+
+
+def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, page_id):
+    """Render frozen-row proton-subtraction MM diagnostics for timing-t only."""
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    mm_payload = diagnostics.get("timing_t_mm_diagnostics") or {}
+    if not bool(mm_payload.get("enabled", False)):
+        return
+    config = dict(mm_payload.get("configuration") or {})
+    root_payload = (cleaning_result or {}).get("_timing_t_mm_root_payload") or {}
+    maps = root_payload.get("maps") or {}
+    per_t_rows = list(mm_payload.get("per_t_bin_summary") or [])
+    t_edges = [float(value) for value in (mm_payload.get("t_edges") or [])]
+    if len(t_edges) < 2:
+        return
+    header = (
+        "Frozen timing-|t| proton-subtraction MM diagnostics - "
+        "uses shared shifted MM and immutable event factors only"
+    )
+    if bool(config.get("write_overview_page", True)):
+        canvas, body, _header, _label = _make_timing_t_report_canvas(
+            "C_timing_t_mm_overview_{}".format(page_id),
+            "{} proton-subtraction MM overview".format(prefix), 1600, 1000,
+            header_text=header, panel_count=4,
+        )
+        for index, (key, label) in enumerate((
+            ("raw", "Raw selected MM"),
+            ("estimated_proton", "Estimated proton MM"),
+            ("cleaned_pre_rf", "Proton-cleaned MM before RF restoration"),
+        ), start=1):
+            body.cd(index)
+            hist = maps.get(key)
+            status = _timing_t_root_content_status(hist)
+            if status["state"] in ("unavailable", "empty"):
+                _draw_timing_t_status_panel(
+                    "{}\n{}".format(label, status.get("reason", "unavailable")),
+                )
+            else:
+                hist.Draw("colz")
+                gPad.Modified()
+                gPad.Update()
+        body.cd(4)
+        fraction_hists = root_payload.get("window_removed_fraction") or {}
+        drawn = []
+        colors = (kRed, kBlue, kGreen + 2, kViolet + 1)
+        for index, (window_name, hist) in enumerate(fraction_hists.items()):
+            hist.SetLineColor(colors[index % len(colors)])
+            hist.SetLineWidth(3)
+            hist.SetMinimum(0.0)
+            hist.SetMaximum(1.0)
+            hist.Draw("hist" if index == 0 else "hist same")
+            drawn.append((window_name, hist))
+        if not drawn:
+            _draw_timing_t_status_panel("No configured MM validation windows")
+        else:
+            legend = TLegend(0.48, 0.68, 0.88, 0.88)
+            legend.SetBorderSize(0)
+            legend.SetFillStyle(0)
+            for window_name, hist in drawn:
+                legend.AddEntry(hist, "{} removed fraction".format(window_name), "l")
+            legend.Draw()
+        canvas.Print(output_pdf)
+
+    if bool(config.get("write_t_binned_pages", True)):
+        raw_map = maps.get("raw")
+        proton_map = maps.get("estimated_proton")
+        cleaned_map = maps.get("cleaned_pre_rf")
+        final_map = maps.get("cleaned_final_rf")
+        for first in range(0, len(per_t_rows), 12):
+            rows = per_t_rows[first:first + 12]
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
+                "C_timing_t_mm_by_t_{}_{}".format(page_id, first),
+                "{} proton-subtraction MM by |t| bin".format(prefix), 1600, 1000,
+                header_text=[header, "raw / estimated proton / cleaned before RF restoration"],
+                panel_count=len(rows),
+            )
+            for panel, row in enumerate(rows, start=1):
+                body.cd(panel)
+                t_index = int(row.get("t_index", -1))
+                support = abs(float(row.get("absolute_event_weight_support", 0.0) or 0.0))
+                if (
+                    support <= 0.0 or raw_map is None or proton_map is None
+                    or cleaned_map is None or not (0 <= t_index < len(t_edges) - 1)
+                ):
+                    _draw_timing_t_status_panel(
+                        "|t| bin {} [{:.6g}, {:.6g}]\nNo supported frozen MM events".format(
+                            t_index,
+                            float(row.get("t_low", 0.0) or 0.0),
+                            float(row.get("t_high", 0.0) or 0.0),
+                        ), color=kBlack,
+                    )
+                    continue
+                projections = []
+                for key, hist, color, label in (
+                    ("raw", raw_map, kBlack, "raw"),
+                    ("proton", proton_map, kRed, "estimated proton"),
+                    ("cleaned", cleaned_map, kGreen + 2, "cleaned pre-RF"),
+                    ("final", final_map, kBlue, "cleaned final RF"),
+                ):
+                    if hist is None:
+                        continue
+                    projection = hist.ProjectionX(
+                        "H_timing_t_mm_{}_projection_{}_{}".format(key, page_id, t_index),
+                        t_index + 1, t_index + 1, "e",
+                    )
+                    projection.SetDirectory(0)
+                    _set_hist_line_marker(projection, color, width=2)
+                    projections.append((label, projection))
+                if not projections:
+                    _draw_timing_t_status_panel("No MM projection available", color=kBlack)
+                    continue
+                maximum = max([float(hist.GetMaximum()) for _, hist in projections] or [1.0])
+                minimum = min([float(hist.GetMinimum()) for _, hist in projections] or [0.0])
+                first_projection = projections[0][1]
+                first_projection.SetTitle(
+                    "|t| bin {} [{:.6g}, {:.6g}] GeV^{{2}};shifted MM [GeV];signed physical yield".format(
+                        t_index, float(row.get("t_low", 0.0) or 0.0), float(row.get("t_high", 0.0) or 0.0),
+                    )
+                )
+                first_projection.SetMaximum(max(1.15 * maximum, 1.0))
+                first_projection.SetMinimum(min(1.15 * minimum, 0.0))
+                first_projection.Draw("hist")
+                for _, projection in projections[1:]:
+                    projection.Draw("hist same")
+                legend = TLegend(0.48, 0.64, 0.88, 0.88)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                for label, projection in projections:
+                    legend.AddEntry(projection, label, "l")
+                legend.Draw()
+                gPad.Modified()
+                gPad.Update()
+            canvas.Print(output_pdf)
+
+    if bool(config.get("write_window_accounting_page", True)):
+        window_names = list((mm_payload.get("validation_windows") or {}).keys())
+        rows_per_page = 8
+        aggregate = mm_payload.get("aggregate") or {}
+        for first in range(0, max(len(per_t_rows), 1), rows_per_page):
+            rows = per_t_rows[first:first + rows_per_page]
+            canvas, body, _header, _label = _make_timing_t_report_canvas(
+                "C_timing_t_mm_windows_{}_{}".format(page_id, first),
+                "{} proton-subtraction MM window accounting".format(prefix), 1500, 900,
+                header_text=header, panel_count=1,
+            )
+            body.cd()
+            text = TPaveText(0.03, 0.04, 0.97, 0.96, "NDC")
+            text.SetBorderSize(1)
+            text.SetFillStyle(0)
+            text.SetTextAlign(12)
+            text.SetTextSize(0.024)
+            if first == 0:
+                text.AddText(
+                    "setting total: raw={:.6g}, estimated p={:.6g}, cleaned pre-RF={:.6g}, closure(raw-p-cleaned)={:.3g}".format(
+                        float(aggregate.get("raw_missing_mass_yield", 0.0) or 0.0),
+                        float(aggregate.get("estimated_proton_missing_mass_yield", 0.0) or 0.0),
+                        float(aggregate.get("cleaned_missing_mass_yield", 0.0) or 0.0),
+                        float(aggregate.get("pre_rf_cleaning_closure_difference", 0.0) or 0.0),
+                    )
+                )
+            for row in rows:
+                text.AddText(
+                    "|t|{} [{:.6g},{:.6g}]: raw={:.5g}, p={:.5g}, cleaned={:.5g}, closure={:.3g}".format(
+                        row.get("t_index"), float(row.get("t_low", 0.0) or 0.0),
+                        float(row.get("t_high", 0.0) or 0.0),
+                        float(row.get("raw_missing_mass_yield", 0.0) or 0.0),
+                        float(row.get("estimated_proton_missing_mass_yield", 0.0) or 0.0),
+                        float(row.get("cleaned_missing_mass_yield", 0.0) or 0.0),
+                        float(row.get("pre_rf_cleaning_closure_difference", 0.0) or 0.0),
+                    )
+                )
+                for window_name in window_names:
+                    window = (row.get("windows") or {}).get(window_name) or {}
+                    fraction = window.get("removed_fraction")
+                    fraction_text = "n/a" if fraction is None else "{:.4g}".format(float(fraction))
+                    text.AddText(
+                        "  {} [{:.6g},{:.6g}]: raw={:.5g}, p={:.5g}, cleaned={:.5g}, removed fraction={}".format(
+                            window_name,
+                            float((window.get("range") or [0.0, 0.0])[0]),
+                            float((window.get("range") or [0.0, 0.0])[1]),
+                            float(window.get("raw_yield", 0.0) or 0.0),
+                            float(window.get("estimated_proton_yield", 0.0) or 0.0),
+                            float(window.get("cleaned_yield", 0.0) or 0.0),
+                            fraction_text,
+                        )
+                    )
+            text.Draw()
+            canvas.Print(output_pdf)
 
 
 def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
@@ -10322,14 +10780,14 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     page_id = abs(id(cleaning_result))
     canvas = TCanvas(
         "C_timing_t_canonical_provenance_{}".format(page_id),
-        "{} canonical t provenance".format(prefix), 1200, 800,
+        "{} |t| bin provenance".format(prefix), 1200, 800,
     )
     provenance = TPaveText(0.05, 0.06, 0.95, 0.94, "NDC")
     provenance.SetBorderSize(1)
     provenance.SetFillStyle(0)
     provenance.SetTextAlign(12)
     provenance.SetTextSize(0.026)
-    provenance.AddText("Canonical-t production provenance")
+    provenance.AddText("|t| production-bin provenance")
     for label, value in (
         ("canonical source", canonical.get("source")),
         ("interval file", canonical.get("interval_file")),
@@ -10422,7 +10880,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         canvas.Divide(3, 1)
         for index, (label, hist, option) in enumerate((
             ("Selected global timing", selected_global, "hist"),
-            ("Selected timing versus canonical t", selected_vs_t, "colz"),
+            ("Selected timing versus |t|", selected_vs_t, "colz"),
             ("Selected delta timing", selected_delta, "colz"),
         ), start=1):
             canvas.cd(index)
@@ -10448,19 +10906,19 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
             return hist
 
         maps = {
-            "fit_valid": _delta_t_map("H_delta_t_fit_valid", "Cell-fit validity;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "proton_detected": _delta_t_map("H_delta_t_proton_detected", "Proton component detected;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "delta_support": _delta_t_map("H_delta_t_delta_support", "Delta support class;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "setting_support": _delta_t_map("H_delta_t_setting_support", "Setting support class;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "raw_yield": _delta_t_map("H_delta_t_raw_proton_yield", "Raw fitted proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "fitted_yield": _delta_t_map("H_delta_t_fitted_proton_yield", "Weak-component-handled fitted proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "applied_yield": _delta_t_map("H_delta_t_applied_proton_yield", "Applied proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "raw_minus_applied": _delta_t_map("H_delta_t_raw_minus_applied_yield", "Raw minus applied proton yield;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "significance": _delta_t_map("H_delta_t_proton_significance", "Proton component significance;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "applied_enabled": _delta_t_map("H_delta_t_applied_enabled", "Applied-cell enabled;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "zero_reason": _delta_t_map("H_delta_t_applied_zero_reason", "Applied zero reason;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "timing_center": _delta_t_map("H_delta_t_timing_center_source", "Timing-center source;SHMS #delta [%];canonical -t [GeV^{2}]"),
-            "event_probability": _delta_t_map("H_delta_t_average_proton_probability", "Average frozen proton probability;SHMS #delta [%];canonical -t [GeV^{2}]"),
+            "fit_valid": _delta_t_map("H_delta_t_fit_valid", "Cell-fit validity;SHMS #delta [%];|t| [GeV^{2}]"),
+            "proton_detected": _delta_t_map("H_delta_t_proton_detected", "Proton component detected;SHMS #delta [%];|t| [GeV^{2}]"),
+            "delta_support": _delta_t_map("H_delta_t_delta_support", "Delta support class;SHMS #delta [%];|t| [GeV^{2}]"),
+            "setting_support": _delta_t_map("H_delta_t_setting_support", "Setting support class;SHMS #delta [%];|t| [GeV^{2}]"),
+            "raw_yield": _delta_t_map("H_delta_t_raw_proton_yield", "Raw fitted proton yield;SHMS #delta [%];|t| [GeV^{2}]"),
+            "fitted_yield": _delta_t_map("H_delta_t_fitted_proton_yield", "Weak-component-handled fitted proton yield;SHMS #delta [%];|t| [GeV^{2}]"),
+            "applied_yield": _delta_t_map("H_delta_t_applied_proton_yield", "Applied proton yield;SHMS #delta [%];|t| [GeV^{2}]"),
+            "raw_minus_applied": _delta_t_map("H_delta_t_raw_minus_applied_yield", "Raw minus applied proton yield;SHMS #delta [%];|t| [GeV^{2}]"),
+            "significance": _delta_t_map("H_delta_t_proton_significance", "Proton component significance;SHMS #delta [%];|t| [GeV^{2}]"),
+            "applied_enabled": _delta_t_map("H_delta_t_applied_enabled", "Applied-cell enabled;SHMS #delta [%];|t| [GeV^{2}]"),
+            "zero_reason": _delta_t_map("H_delta_t_applied_zero_reason", "Applied zero reason;SHMS #delta [%];|t| [GeV^{2}]"),
+            "timing_center": _delta_t_map("H_delta_t_timing_center_source", "Timing-center source;SHMS #delta [%];|t| [GeV^{2}]"),
+            "event_probability": _delta_t_map("H_delta_t_average_proton_probability", "Average frozen proton probability;SHMS #delta [%];|t| [GeV^{2}]"),
         }
         probability_sum = diagnostics.get("event_probability_sum_by_delta_t") or []
         probability_count = diagnostics.get("event_probability_count_by_delta_t") or []
@@ -10522,7 +10980,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
 
         h_applied = ROOT.TH2D(
             "H_timing_t_applied_cell_state_{}".format(page_id),
-            "Applied timing-t cell state;SHMS #delta [%];canonical -t [GeV^{2}]",
+            "Applied timing-t cell state;SHMS #delta [%];|t| [GeV^{2}]",
             len(delta_edges) - 1, array("d", delta_edges),
             len(t_edges_for_cells) - 1, array("d", t_edges_for_cells),
         )
@@ -10550,7 +11008,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         canvas.cd(1)
         h_applied.Draw("colz text")
         canvas.cd(2)
-        h_closure.SetTitle("Applied-cell closure ratio;SHMS #delta [%];canonical -t [GeV^{2}]")
+        h_closure.SetTitle("Applied-cell closure ratio;SHMS #delta [%];|t| [GeV^{2}]")
         h_closure.Draw("colz text")
         canvas.Print(output_pdf)
 
@@ -10592,7 +11050,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     if len(t_edges_for_cells) >= 2 and len(phi_edges_for_lookup) >= 2 and t_phi_rows:
         h_tphi_count = ROOT.TH2D(
             "H_timing_t_lookup_tphi_count_{}".format(page_id),
-            "Frozen lookup event count;canonical -t [GeV^{2}];#phi [deg]",
+            "Frozen lookup event count;|t| [GeV^{2}];#phi [deg]",
             len(t_edges_for_cells) - 1, array("d", t_edges_for_cells),
             len(phi_edges_for_lookup) - 1, array("d", phi_edges_for_lookup),
         )
@@ -10607,13 +11065,13 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
                     h_tphi_proton.SetBinContent(t_index + 1, phi_index + 1, float(row.get("estimated_proton_yield", 0.0) or 0.0))
         canvas = TCanvas(
             "C_timing_t_lookup_tphi_{}".format(page_id),
-            "{} frozen lookup by canonical t and phi".format(prefix), 1400, 700,
+            "{} frozen lookup by |t| and phi".format(prefix), 1400, 700,
         )
         canvas.Divide(2, 1)
         canvas.cd(1)
         h_tphi_count.Draw("colz text")
         canvas.cd(2)
-        h_tphi_proton.SetTitle("Frozen lookup estimated proton yield;canonical -t [GeV^{2}];#phi [deg]")
+        h_tphi_proton.SetTitle("Frozen lookup estimated proton yield;|t| [GeV^{2}];#phi [deg]")
         h_tphi_proton.Draw("colz text")
         if not defer_closure_pages:
             canvas.Print(output_pdf)
@@ -10625,6 +11083,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         # Aerogel products may be disabled, but frozen-lookup closure remains
         # part of the timing-t report.
         _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id)
+        _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, page_id)
         return
     validation_cfg = dict(aero.get("configuration") or {})
 
@@ -10638,7 +11097,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     if bool(validation_cfg.get("write_global_aero_vs_t_pages", True)) and global_hists:
         canvas, body, _header, _label = _make_timing_t_report_canvas(
             "C_timing_t_aero_global_{}".format(page_id),
-            "{} aerogel versus canonical-t validation".format(prefix), 1600, 1000,
+            "{} aerogel versus |t| validation".format(prefix), 1600, 1000,
             header_text=observational_header, panel_count=10,
         )
         for index, key in enumerate((
@@ -10682,7 +11141,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
                 if hist is None:
                     hist = _make_t_aerogel_hist(
                         "H_timing_t_aero_{}_{}_{}".format(metric_key, page_id, page_index),
-                        "{};canonical -t [GeV^{{2}}];P_aero NPE".format(metric_label),
+                        "{};|t| [GeV^{{2}}];P_aero NPE".format(metric_label),
                         t_edges, aero_edges,
                     )
                     for t_index, value_row in enumerate(_matrix_metric(matrix_payload, metric_key)):
@@ -10820,7 +11279,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
             )
             body.cd()
             message = [
-                "No compact PID page was rendered for the following canonical t bins.",
+                "No compact PID page was rendered for the following |t| bins.",
                 "Requirement: raw prompt count > 0 and absolute physical support > {:.6g}.".format(minimum_absolute_support),
             ]
             for skipped in skipped_t_summaries:
@@ -10879,9 +11338,10 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
     canvas.Print(output_pdf)
 
     # Section F: frozen lookup/cross-stage closure follows all aerogel-only
-    # pages.  The selected-candidate-only final summary is emitted by the
-    # timing-t route immediately afterwards.
+    # pages.  Section G then reports the frozen MM physics effect before the
+    # selected-candidate-only final summary.
     _print_timing_t_closure_pages(output_pdf, cleaning_result, prefix, page_id)
+    _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, page_id)
 
 
 def _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix):

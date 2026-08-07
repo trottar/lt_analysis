@@ -47,6 +47,7 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             "t_cell_fit": {"minimum_entries": 41},
             "t_support_thresholds": {"minimum_setting_valid_t_cells": 3},
             "aerogel_validation": {"enabled": False},
+            "mm_diagnostics": {"display_bins": 64},
         }
         with mock.patch.dict(
             background_config.PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES,
@@ -69,6 +70,9 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             tuple(config["aerogel_validation"]["summary_slice_edges"]),
             (0.0, 3.0, 6.0, 10.0, 15.0, 25.0),
         )
+        self.assertEqual(config["mm_diagnostics"]["display_bins"], 64)
+        self.assertTrue(config["mm_diagnostics"]["write_overview_page"])
+        self.assertFalse(config["mm_diagnostics"]["affects_event_weights"])
 
 
 if __name__ == "__main__":

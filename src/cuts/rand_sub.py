@@ -1220,6 +1220,7 @@ def _write_timing_t_validation_artifacts(
             "lookup_by_t_phi": diagnostics.get("event_weight_lookup_by_t_phi") or [],
         },
         "aerogel_vs_t_validation": aero_validation,
+        "timing_t_mm_diagnostics": diagnostics.get("timing_t_mm_diagnostics") or {},
         "timing_t_summary": diagnostics.get("timing_t_summary") or {},
         "timing_t_diagnostic_integrity": diagnostics.get("timing_t_diagnostic_integrity") or {},
         "generic_hgcer_diagnostic_integrity": diagnostics.get("generic_hgcer_diagnostic_integrity") or {},
@@ -1230,6 +1231,7 @@ def _write_timing_t_validation_artifacts(
     artifacts.append(timing_diagnostics_json)
     for suffix, payload in (
         ("timing_t_summary", timing_diagnostics["timing_t_summary"]),
+        ("timing_t_mm_diagnostics", timing_diagnostics["timing_t_mm_diagnostics"]),
         ("timing_t_diagnostic_integrity", timing_diagnostics["timing_t_diagnostic_integrity"]),
         ("generic_hgcer_diagnostic_integrity", timing_diagnostics["generic_hgcer_diagnostic_integrity"]),
     ):
@@ -1255,6 +1257,35 @@ def _write_timing_t_validation_artifacts(
                     for field, value in (row or {}).items()
                 })
         artifacts.append(csv_path)
+    mm_rows = list((timing_diagnostics["timing_t_mm_diagnostics"] or {}).get("per_t_bin_summary") or [])
+    if mm_rows:
+        mm_csv = os.path.join(outpath, "{}_proton_cleaning_tbin_mm_summary.csv".format(base))
+        with open(mm_csv, "w", newline="", encoding="utf-8") as handle:
+            fields = [
+                "setting", "epsilon", "phi_setting", "t_index", "t_low", "t_high",
+                "event_count", "raw_prompt_event_count", "signed_event_weight_sum",
+                "absolute_event_weight_support", "raw_missing_mass_yield",
+                "estimated_proton_missing_mass_yield", "cleaned_missing_mass_yield",
+                "final_rf_cleaned_missing_mass_yield", "raw_minus_estimated_proton",
+                "pre_rf_cleaning_closure_difference", "windows",
+            ]
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            for row in mm_rows:
+                writer.writerow({
+                    "setting": outfilename,
+                    "epsilon": epsset,
+                    "phi_setting": phi_setting,
+                    **{
+                        field: (
+                            json.dumps(value, sort_keys=True, separators=(",", ":"))
+                            if isinstance(value, (dict, list, tuple)) else value
+                        )
+                        for field, value in (row or {}).items()
+                        if field in fields
+                    },
+                })
+        artifacts.append(mm_csv)
     if aero_validation:
         aero_json = os.path.join(outpath, "{}_t_aerogel_validation.json".format(base))
         with open(aero_json, "w", encoding="utf-8") as handle:

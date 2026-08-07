@@ -564,6 +564,89 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertEqual(summary["per_delta"][0]["applied_proton_yield"], 2.0)
         self.assertAlmostEqual(summary["per_delta"][0]["mean_event_lookup_probability"], 0.25)
 
+    def test_timing_t_mm_diagnostics_use_only_frozen_lookup_rows(self):
+        result = {"t_edges": [0.0, 1.0, 2.0]}
+        rows = [
+            {
+                "t_index": 0, "is_prompt_source": True,
+                "physical_weight": 2.0, "proton_weight": 0.25,
+                "cleaned_factor": 0.75, "final_cleaned_factor": 0.75,
+                "adj_mm": 0.85,
+            },
+            {
+                "t_index": 0, "is_prompt_source": False,
+                "physical_weight": -0.5, "proton_weight": 0.20,
+                "cleaned_factor": 0.80, "final_cleaned_factor": 0.80,
+                "adj_mm": 1.115,
+            },
+        ]
+        config = {
+            "mm_diagnostics": {
+                "enabled": True,
+                "display_range": (0.70, 1.50),
+                "display_bins": 80,
+                "affects_event_weights": False,
+                "affects_fit_acceptance": False,
+            },
+            "validation_windows": {
+                "low_mm": (0.80, 0.90),
+                "lambda_peak": (1.105, 1.125),
+            },
+        }
+        payload = proton_cleaning._build_timing_t_mm_diagnostics(result, rows, config)
+        self.assertEqual(payload["source"], "frozen_timing_t_lookup_rows")
+        self.assertFalse(payload["affects_event_weights"])
+        self.assertFalse(payload["affects_fit_acceptance"])
+        self.assertEqual(payload["aggregate"]["event_count"], 2)
+        self.assertEqual(payload["aggregate"]["raw_prompt_event_count"], 1)
+        self.assertAlmostEqual(payload["aggregate"]["raw_missing_mass_yield"], 1.5)
+        self.assertAlmostEqual(payload["aggregate"]["estimated_proton_missing_mass_yield"], 0.4)
+        self.assertAlmostEqual(payload["aggregate"]["cleaned_missing_mass_yield"], 1.1)
+        self.assertAlmostEqual(payload["aggregate"]["pre_rf_cleaning_closure_difference"], 0.0)
+        low = payload["per_t_bin_summary"][0]["windows"]["low_mm"]
+        self.assertAlmostEqual(low["removed_fraction"], 0.25)
+        self.assertTrue(low["removed_fraction_valid"])
+        lambda_window = payload["per_t_bin_summary"][0]["windows"]["lambda_peak"]
+        self.assertAlmostEqual(lambda_window["removed_fraction"], 0.20)
+
+    def test_timing_t_mm_diagnostics_preserve_undefined_window_fraction(self):
+        payload = proton_cleaning._build_timing_t_mm_diagnostics(
+            {"t_edges": [0.0, 1.0]},
+            [{
+                "t_index": 0, "is_prompt_source": True,
+                "physical_weight": 1.0, "proton_weight": 0.0,
+                "cleaned_factor": 1.0, "adj_mm": 1.0,
+            }],
+            {
+                "mm_diagnostics": {"enabled": True},
+                "validation_windows": {"low_mm": (0.80, 0.90)},
+            },
+        )
+        low = payload["per_t_bin_summary"][0]["windows"]["low_mm"]
+        self.assertIsNone(low["removed_fraction"])
+        self.assertFalse(low["removed_fraction_valid"])
+
+    def test_timing_t_summary_prefers_frozen_mm_diagnostic_totals(self):
+        result = {
+            "delta_edges": [0.0, 1.0],
+            "diagnostics": {
+                "timing_t_mm_diagnostics": {
+                    "aggregate": {
+                        "raw_missing_mass_yield": 11.0,
+                        "estimated_proton_missing_mass_yield": 4.0,
+                        "cleaned_missing_mass_yield": 7.0,
+                    },
+                },
+            },
+        }
+        summary = proton_cleaning._build_timing_t_summary(
+            result, {},
+            {"raw_missing_mass_yield": 99.0, "estimated_proton_missing_mass_yield": 99.0, "cleaned_missing_mass_yield": 99.0},
+        )
+        self.assertEqual(summary["missing_mass_totals"]["raw"], 11.0)
+        self.assertEqual(summary["missing_mass_totals"]["estimated_proton"], 4.0)
+        self.assertEqual(summary["missing_mass_totals"]["cleaned"], 7.0)
+
     def test_timing_t_layout_cross_stage_and_per_t_eligibility_helpers(self):
         self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(1), (1, 1))
         self.assertEqual(proton_cleaning._timing_t_layout_for_panel_count(2), (2, 1))
