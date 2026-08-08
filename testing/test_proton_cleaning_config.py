@@ -72,6 +72,7 @@ class ProtonCleaningConfigTests(unittest.TestCase):
         )
         self.assertEqual(config["mm_diagnostics"]["display_bins"], 64)
         self.assertTrue(config["mm_diagnostics"]["write_overview_page"])
+        self.assertEqual(config["mm_diagnostics"]["max_t_panels_per_page"], 1)
         self.assertFalse(config["mm_diagnostics"]["affects_event_weights"])
 
 

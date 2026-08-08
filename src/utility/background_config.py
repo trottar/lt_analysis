@@ -554,6 +554,10 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "write_overview_page": True,
         "write_t_binned_pages": True,
         "write_window_accounting_page": True,
+        # Signed MM yields can be small after random/dummy subtraction.  Give
+        # each |t| interval a full page by default so its local scale and
+        # labels remain readable.
+        "max_t_panels_per_page": 1,
         "affects_event_weights": False,
         "affects_fit_acceptance": False,
     },

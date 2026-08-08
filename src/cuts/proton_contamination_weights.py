@@ -10418,6 +10418,24 @@ def _timing_t_per_t_pid_eligible(t_summary, validation_cfg=None):
     }
 
 
+def _timing_t_signed_display_limits(minimum, maximum, padding_fraction=0.12):
+    """Pad a local signed-yield range without imposing a unit-scale floor."""
+    minimum = _finite_float_or_none(minimum)
+    maximum = _finite_float_or_none(maximum)
+    minimum = 0.0 if minimum is None else float(minimum)
+    maximum = 0.0 if maximum is None else float(maximum)
+    y_low = min(minimum, 0.0)
+    y_high = max(maximum, 0.0)
+    span = y_high - y_low
+    if span <= 0.0:
+        span = max(abs(y_high), 1.0e-12)
+    padding = max(0.0, float(padding_fraction)) * span
+    return (
+        y_low - padding if y_low < 0.0 else 0.0,
+        y_high + padding,
+    )
+
+
 def _timing_t_root_content_status(hist, *, tolerance=0.0, categorical=False):
     """Classify a ROOT payload without mistaking signed cancellation for empty."""
     if hist is None:
@@ -10649,8 +10667,9 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
         proton_map = maps.get("estimated_proton")
         cleaned_map = maps.get("cleaned_pre_rf")
         final_map = maps.get("cleaned_final_rf")
-        for first in range(0, len(per_t_rows), 12):
-            rows = per_t_rows[first:first + 12]
+        panels_per_page = max(1, min(12, int(config.get("max_t_panels_per_page", 1) or 1)))
+        for first in range(0, len(per_t_rows), panels_per_page):
+            rows = per_t_rows[first:first + panels_per_page]
             canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_mm_by_t_{}_{}".format(page_id, first),
                 "{} proton-subtraction MM by |t| bin".format(prefix), 1600, 1000,
@@ -10692,6 +10711,20 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
                 if not projections:
                     _draw_timing_t_status_panel("No MM projection available", color=kBlack)
                     continue
+                raw_status = _timing_t_root_content_status(projections[0][1])
+                if raw_status["state"] == "empty":
+                    display_range = mm_payload.get("display_range") or ["n/a", "n/a"]
+                    _draw_timing_t_status_panel(
+                        "|t| bin {} [{:.6g}, {:.6g}]\n"
+                        "No populated signed-MM bins in display range [{}, {}]\n"
+                        "absolute frozen support={:.5g}".format(
+                            t_index,
+                            float(row.get("t_low", 0.0) or 0.0),
+                            float(row.get("t_high", 0.0) or 0.0),
+                            display_range[0], display_range[1], support,
+                        ), color=kBlack,
+                    )
+                    continue
                 maximum = max([float(hist.GetMaximum()) for _, hist in projections] or [1.0])
                 minimum = min([float(hist.GetMinimum()) for _, hist in projections] or [0.0])
                 first_projection = projections[0][1]
@@ -10700,8 +10733,12 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
                         t_index, float(row.get("t_low", 0.0) or 0.0), float(row.get("t_high", 0.0) or 0.0),
                     )
                 )
-                first_projection.SetMaximum(max(1.15 * maximum, 1.0))
-                first_projection.SetMinimum(min(1.15 * minimum, 0.0))
+                # The signed physical yields can be much smaller than one.
+                # Do not impose a unit floor: it makes a valid proton-removal
+                # structure visually disappear in a small |t| interval.
+                y_min, y_max = _timing_t_signed_display_limits(minimum, maximum)
+                first_projection.SetMinimum(y_min)
+                first_projection.SetMaximum(y_max)
                 first_projection.Draw("hist")
                 for _, projection in projections[1:]:
                     projection.Draw("hist same")

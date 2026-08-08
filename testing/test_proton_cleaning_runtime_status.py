@@ -667,6 +667,13 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertFalse(proton_cleaning._timing_t_per_t_pid_eligible({
             "raw_prompt_event_count": 0, "absolute_event_weight_support": 10.0,
         })["eligible"])
+        self.assertEqual(
+            proton_cleaning._timing_t_signed_display_limits(0.0, 0.25),
+            (0.0, 0.28),
+        )
+        signed_limits = proton_cleaning._timing_t_signed_display_limits(-0.10, 0.25)
+        self.assertLess(signed_limits[0], -0.10)
+        self.assertGreater(signed_limits[1], 0.25)
 
     def test_hgcer_display_audit_preserves_signed_content(self):
         class FakeHistogram:
