@@ -13,7 +13,7 @@
 # Import relevant packages
 import ROOT
 import numpy as np
-import sys, math, os, subprocess
+import sys, math, os, subprocess, uuid
 import array
 import re # Regexp package - for string manipulation
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphErrors, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
@@ -23,6 +23,7 @@ from array import array
 import pandas as pd
 from scipy.optimize import curve_fit
 import glob
+from time import perf_counter
 
 ###############################################################################################################################################
 '''
@@ -59,6 +60,24 @@ ROOT.gROOT.ProcessLine("gErrorIgnoreLevel = kError;")
 #################################################################################################################################################
 
 print("Running as %s on %s, hallc_replay_lt path assumed as %s" % (USER, HOST, REPLAYPATH))
+
+# The center-setting common-cut pass is intentionally reused by the three
+# per-phi PDF calls.  Keeping these detached histograms in process memory
+# avoids a second, identical Python traversal of every selected prompt tree.
+_DIAMOND_SOURCE_Q2W_CACHE = {}
+
+
+def _diamond_source_cache_key(root_path, particle_type, q2min, q2max, wmin, wmax, eps_tag):
+    """Return the identity of an acceptance-filtered Diamond Q2/W source."""
+    return (
+        os.path.normcase(os.path.abspath(root_path)),
+        str(particle_type),
+        float(q2min),
+        float(q2max),
+        float(wmin),
+        float(wmax),
+        str(eps_tag).lower(),
+    )
 
 def diamond_fit_legacy(Q2vsW_hist, Q2Val, fitrange=10):
     """Legacy (curve_fit/projection) implementation kept for reference."""
@@ -633,6 +652,7 @@ def _tgraph_from_poly(poly, name):
 
 def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting, tmin, tmax, inpDict):
 
+    diamond_started = perf_counter()
     inpDict["use_hardcoded_diamond_fits"] = False
 
     ##############
@@ -666,7 +686,30 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
     
     FilenameOverride = 'Q'+Qs+'W'+Ws
     
-    Analysis_Distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(phi_setting, ParticleType, FilenameOverride)
+    final_analysis_distributions = OUTPATH+"/{}_{}_diamond_{}.pdf".format(phi_setting, ParticleType, FilenameOverride)
+    output_dir = os.path.dirname(final_analysis_distributions)
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+    except OSError as exc:
+        raise RuntimeError(
+            "Cannot create Diamond PDF output directory '{}': {}".format(
+                output_dir, exc
+            )
+        ) from exc
+    if not os.path.isdir(output_dir) or not os.access(output_dir, os.W_OK | os.X_OK):
+        raise RuntimeError(
+            "Diamond PDF output directory is not writable: '{}'".format(
+                output_dir
+            )
+        )
+    pdf_stem, pdf_extension = os.path.splitext(final_analysis_distributions)
+    Analysis_Distributions = "{}.inprogress-{}-{}-{}{}".format(
+        pdf_stem,
+        HOST,
+        os.getpid(),
+        uuid.uuid4().hex,
+        pdf_extension,
+    )
 
     nbins = 200
     
@@ -766,7 +809,9 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             return False
         return True
 
+    common_prepass_started = None
     if (phi_setting == "Center") and (not use_hardcoded_diamond_fits):
+        common_prepass_started = perf_counter()
         def _find_shortest_root_any(phi_tokens, eps_tag):
             best = None
             best_len = 10**9
@@ -870,6 +915,17 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 )
                 if not htmp:
                     continue
+                _DIAMOND_SOURCE_Q2W_CACHE[
+                    _diamond_source_cache_key(
+                        src_file,
+                        ParticleType,
+                        Q2min,
+                        Q2max,
+                        Wmin,
+                        Wmax,
+                        eps_tag,
+                    )
+                ] = htmp
                 try:
                     poly_tmp = _support_poly_from_histogram(htmp, threshold=0.0)
                     fitrange_tmp = None
@@ -903,6 +959,14 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
                 print("Common-cut polygon built with {} vertices from {} sources".format(len(common_poly), len(common_poly_sources)))
             else:
                 print("WARNING: common-cut: no overlap polygon found across {} sources".format(len(common_poly_sources)))
+
+    if common_prepass_started is not None:
+        print(
+            "[TIMER] Diamond common-cut source build: {:.2f} s ({} cached sources)".format(
+                perf_counter() - common_prepass_started,
+                len(_DIAMOND_SOURCE_Q2W_CACHE),
+            )
+        )
 
     labelh = ""
     labelm = ""
@@ -971,6 +1035,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
             return False
         return _point_in_convex_poly(event.Q2, event.W, cut_poly)
 
+    source_scan_started = perf_counter()
     for k in range(0, 3):
         eps_tag = ""
 
@@ -1021,22 +1086,46 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
         countB = 0
         countA = 0
         badfit = True
-        if (k==2): # High
-            # for event in Cut_Events_Prompt_tree:
+        cached_q2w = _DIAMOND_SOURCE_Q2W_CACHE.get(
+            _diamond_source_cache_key(
+                rootName,
+                ParticleType,
+                Q2min,
+                Q2max,
+                Wmin,
+                Wmax,
+                eps_tag,
+            )
+        )
+        if cached_q2w is not None:
+            # ``cached_q2w`` was filled with this exact acceptance and the
+            # same threshold during the center common-cut pass.  Reusing it
+            # preserves the raw Q2/W PDF pages and removes one full TTree
+            # iteration for this source.
+            print("Reusing common Diamond Q2/W histogram for {} epsilon, {}".format(eps_tag, phi_setting))
+            if (k==2): # High
+                Q2vsW_cut.Add(cached_q2w)
+                Q2vsW_hi_cut.Add(cached_q2w)
+            elif (k==1): # Mid
+                Q2vsW_mide_cut.Add(cached_q2w)
+                Q2vsW_mi_cut.Add(cached_q2w)
+            elif (k==0): # Low
+                Q2vsW_lowe_cut.Add(cached_q2w)
+                Q2vsW_lo_cut.Add(cached_q2w)
+        elif (k==2): # High
+            # Cache is unavailable only for a direct/nonstandard caller.
             for event in Cut_Events_all_noRF_tree:
                 if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
                 Q2vsW_cut.Fill(event.Q2, event.W)
                 Q2vsW_hi_cut.Fill(event.Q2, event.W)
         elif (k==1): # Mid
-            # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
                 if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
                 Q2vsW_mide_cut.Fill(event.Q2, event.W)
                 Q2vsW_mi_cut.Fill(event.Q2, event.W)
         elif (k==0): # Low
-            # for event in Cut_Events_Prompt_tree:
             for event in Cut_Events_all_noRF_tree:
                 if not _passes_source_acceptance(event, eps_tag, phi_setting):
                     continue
@@ -1116,6 +1205,12 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         infile.Close()
 
+    print(
+        "[TIMER] Diamond source scans {}: {:.2f} s".format(
+            phi_setting or "All", perf_counter() - source_scan_started
+        )
+    )
+
     if phi_setting == "Center":
         if cut_poly is None:
             print("!!!!! ERROR !!!!!\n No valid cut polygon available.\n!!!!! ERROR !!!!!")
@@ -1155,6 +1250,7 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
         paramDict = {}
 
+    pdf_render_started = perf_counter()
     ##############################################################################################################################################
     c1_kin = TCanvas("c1_kin", "%s Kinematic Distributions" % ParticleType, 100, 0, 1000, 900)
     gStyle.SetTitleFontSize(0.03)
@@ -1578,6 +1674,23 @@ def DiamondPlot(ParticleType, Q2Val, Q2min, Q2max, WVal, Wmin, Wmax, phi_setting
 
     leg.Draw()
 
-    # Close the multipage PDF here
+    # Close the multipage PDF here.  ROOT writes to a process-unique temporary
+    # file, then atomically publishes the complete diagnostic PDF.  Low/high
+    # jobs can therefore build the same setting without sharing a TPDF handle
+    # or exposing a partially-written file to a reviewer.
     c1_overlay_allphi.Print(Analysis_Distributions + close_pdf)
+    if not os.path.isfile(Analysis_Distributions) or os.path.getsize(Analysis_Distributions) <= 0:
+        raise RuntimeError(
+            "ROOT did not produce a complete Diamond PDF temporary file: '{}'".format(
+                Analysis_Distributions
+            )
+        )
+    os.replace(Analysis_Distributions, final_analysis_distributions)
+    print(
+        "Diamond PDF written: {} ({:.2f} s render; {:.2f} s total)".format(
+            final_analysis_distributions,
+            perf_counter() - pdf_render_started,
+            perf_counter() - diamond_started,
+        )
+    )
     return paramDict

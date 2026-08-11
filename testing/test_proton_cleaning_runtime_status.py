@@ -558,11 +558,52 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         summary = proton_cleaning._build_timing_t_summary(
             result, {"source": "frozen_timing_t_lookup_rows"},
             {"raw_missing_mass_yield": 7.0, "estimated_proton_missing_mass_yield": 2.0, "cleaned_missing_mass_yield": 5.0},
+            {
+                "source": "post_lambda_gate_frozen_lookup_rows",
+                "global": {"committed_applied_proton_yield": 0.0},
+                "per_delta": [{
+                    "delta_index": 0,
+                    "proposed_frozen_lookup_proton_yield": 1.0,
+                    "proposed_frozen_lookup_proton_fraction": 0.1,
+                    "proposed_absolute_support_mean_probability": 0.25,
+                    "committed_applied_proton_yield": 0.0,
+                    "committed_applied_proton_fraction": 0.0,
+                    "committed_absolute_support_mean_probability": 0.0,
+                }],
+            },
         )
         self.assertEqual(summary["selected_candidate"]["timing_branch"], "P_RF_Dist")
-        self.assertEqual(summary["per_delta"][0]["proton_yield"], 3.0)
-        self.assertEqual(summary["per_delta"][0]["applied_proton_yield"], 2.0)
-        self.assertAlmostEqual(summary["per_delta"][0]["mean_event_lookup_probability"], 0.25)
+        delta = summary["per_delta"][0]
+        self.assertEqual(delta["raw_fitted_proton_yield"], 3.0)
+        self.assertEqual(delta["proposed_fit_proton_yield"], 2.0)
+        self.assertEqual(delta["committed_applied_proton_yield"], 0.0)
+        self.assertAlmostEqual(
+            delta["mean_proposed_frozen_wp_signed_coefficient_contribution_per_event"], 0.25
+        )
+        self.assertEqual(
+            delta["mean_proposed_frozen_wp_label"],
+            proton_cleaning.TIMING_T_PROPOSED_FROZEN_WP_SIGNED_CONTRIBUTION_LABEL,
+        )
+
+    def test_frozen_lookup_stage_summary_keeps_proposed_and_committed_yields_distinct(self):
+        summary = proton_cleaning._build_timing_t_frozen_lookup_stage_summary([
+            {
+                "delta_index": 0, "physical_weight": 2.0,
+                "proposed_proton_probability": 0.25,
+                "applied_proton_probability": 0.0,
+            },
+            {
+                "delta_index": 0, "physical_weight": -0.5,
+                "proposed_proton_probability": 0.20,
+                "applied_proton_probability": 0.0,
+            },
+        ])
+        global_summary = summary["global"]
+        self.assertAlmostEqual(global_summary["raw_signed_yield"], 1.5)
+        self.assertAlmostEqual(global_summary["proposed_frozen_lookup_proton_yield"], 0.4)
+        self.assertEqual(global_summary["committed_applied_proton_yield"], 0.0)
+        self.assertAlmostEqual(global_summary["proposed_absolute_support_mean_probability"], 0.24)
+        self.assertEqual(global_summary["committed_absolute_support_mean_probability"], 0.0)
 
     def test_timing_t_mm_diagnostics_use_only_frozen_lookup_rows(self):
         result = {"t_edges": [0.0, 1.0, 2.0]}
@@ -674,6 +715,57 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         signed_limits = proton_cleaning._timing_t_signed_display_limits(-0.10, 0.25)
         self.assertLess(signed_limits[0], -0.10)
         self.assertGreater(signed_limits[1], 0.25)
+        self.assertEqual(
+            proton_cleaning._timing_t_proposed_model_annotation({"status": "pass"}),
+            "PROPOSED MODEL — COMMITTED",
+        )
+        self.assertEqual(
+            proton_cleaning._timing_t_proposed_model_annotation({"status": "fail"}),
+            "PROPOSED TIMING MODEL — NOT APPLIED TO PRODUCTION",
+        )
+        pair = proton_cleaning._cross_stage_pair_state(
+            [{"prepass_t": 0.4, "prepared_proton_cleaning_adj_t": 0.4}],
+            "prepass_t", "prepared_proton_cleaning_adj_t", 1.0e-10,
+        )
+        self.assertEqual(pair["state"], "PASS")
+
+    def test_timing_t_status_page_fallback_and_strict_rendering_integrity(self):
+        class FakeCanvas:
+            def __init__(self):
+                self.printed = []
+
+            def Modified(self):
+                return None
+
+            def Update(self):
+                return None
+
+            def Print(self, path):
+                self.printed.append(path)
+
+        canvas = FakeCanvas()
+
+        def draw_status(_message, *, color, canvas=None):
+            panel = object()
+            proton_cleaning._retain_timing_t_root_objects(canvas, panel, status=True)
+            return panel
+
+        with mock.patch.object(proton_cleaning, "_draw_timing_t_status_panel", side_effect=draw_status):
+            proton_cleaning._print_timing_t_page(
+                canvas, "status.pdf", required_status=True,
+                fallback_message="missing retained panel",
+            )
+        self.assertEqual(canvas.printed, ["status.pdf"])
+        self.assertNotIn(id(canvas), proton_cleaning._TIMING_T_ROOT_RETAINED_OBJECTS)
+
+        strict_canvas = FakeCanvas()
+        with self.assertRaisesRegex(RuntimeError, "missing retained panel"):
+            proton_cleaning._print_timing_t_page(
+                strict_canvas, "strict.pdf",
+                config={"aerogel_validation": {"diagnostic_strict": True}},
+                required_status=True, fallback_message="missing retained panel",
+            )
+        self.assertEqual(strict_canvas.printed, [])
 
     def test_hgcer_display_audit_preserves_signed_content(self):
         class FakeHistogram:

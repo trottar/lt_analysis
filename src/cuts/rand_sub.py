@@ -61,6 +61,7 @@ from utility import (
     create_polar_plot,
     compute_staged_particle_subtraction_scales,
 )
+from lambda_gate_regression import write_csv_atomically, upsert_sorted_csv
 from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
     BG_OPT_MM_PLOT_MAX,
@@ -1239,34 +1240,14 @@ def _build_lambda_gate_summary_row(
 
 def _write_csv_atomically(path, fieldnames, rows):
     """Write a compact CSV without exposing a partially-written artifact."""
-    temporary_path = "{}.{}.tmp".format(path, os.getpid())
-    with open(temporary_path, "w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
-        writer.writeheader()
-        for row in rows:
-            writer.writerow({field: (row or {}).get(field) for field in fieldnames})
-    os.replace(temporary_path, path)
+    return write_csv_atomically(path, fieldnames, rows)
 
 
 def _upsert_lambda_gate_regression_summary(outpath, row):
     """Maintain one deterministic cross-setting Lambda-gate review table."""
     path = os.path.join(outpath, "proton_cleaning_lambda_gate_regression_summary.csv")
     key_fields = ("kinematic", "epsilon", "phi_setting")
-    rows_by_key = {}
-    if os.path.exists(path):
-        with open(path, newline="", encoding="utf-8") as handle:
-            for existing in csv.DictReader(handle):
-                key = tuple(str(existing.get(field) or "") for field in key_fields)
-                rows_by_key[key] = {
-                    field: existing.get(field) for field in LAMBDA_GATE_SUMMARY_FIELDS
-                }
-    key = tuple(str(row.get(field) or "") for field in key_fields)
-    rows_by_key[key] = {
-        field: row.get(field) for field in LAMBDA_GATE_SUMMARY_FIELDS
-    }
-    ordered_rows = [rows_by_key[key] for key in sorted(rows_by_key)]
-    _write_csv_atomically(path, LAMBDA_GATE_SUMMARY_FIELDS, ordered_rows)
-    return path
+    return upsert_sorted_csv(path, row, LAMBDA_GATE_SUMMARY_FIELDS, key_fields)
 
 
 def _write_timing_t_validation_artifacts(
@@ -1322,6 +1303,7 @@ def _write_timing_t_validation_artifacts(
             "boundary_counts": diagnostics.get("t_lookup_boundary_counts") or {},
             "lookup_count": diagnostics.get("prepared_event_lookup_count", 0),
         },
+        "frozen_lookup_stage_summary": diagnostics.get("frozen_lookup_stage_summary") or {},
         "closure_state": {
             "by_cell": diagnostics.get("event_weight_closure_by_cell") or [],
             "by_delta": diagnostics.get("event_weight_closure_by_delta") or [],
@@ -1545,7 +1527,7 @@ def _write_timing_t_validation_artifacts(
             writer.writeheader()
             writer.writerows(warning_rows)
         artifacts.append(warning_csv)
-    return artifacts
+    return list(dict.fromkeys(artifacts))
 
 
 def rand_sub(
