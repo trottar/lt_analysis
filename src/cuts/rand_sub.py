@@ -1160,6 +1160,115 @@ def build_pre_particle_subtraction_binning_payload(phi_setting, inp_dict, *, sou
     }
 
 
+LAMBDA_GATE_SUMMARY_FIELDS = (
+    "kinematic", "epsilon", "phi_setting", "selected_timing_branch",
+    "timing_fit_accepted", "setting_support", "lambda_validation_window_key",
+    "lambda_window_low", "lambda_window_high", "lambda_raw_prompt_count",
+    "lambda_raw_signed_yield", "lambda_raw_absolute_support",
+    "lambda_signed_to_absolute_support_ratio", "lambda_proposed_proton_yield",
+    "lambda_removed_fraction", "lambda_removed_fraction_limit",
+    "lambda_support_valid", "lambda_support_reasons",
+    "lambda_observational_warnings", "lambda_gate_status", "production_action",
+    "proton_cleaning_committed", "closure_tolerance",
+    "proposed_pre_rf_closure_difference", "proposed_pre_rf_closure_passed",
+    "final_applied_pre_rf_closure_difference", "final_applied_closure_passed",
+    "lookup_rows_checked", "lookup_commit_mismatch_count",
+    "lookup_commit_integrity_passed", "lookup_commit_mismatch_categories",
+)
+
+
+def _build_lambda_gate_summary_row(
+    lambda_gate, diagnostics, *, outfilename, epsset, phi_setting,
+):
+    """Flatten one setting-wide Lambda-gate result for CSV artifacts."""
+    candidate = diagnostics.get("selected_timing_candidate") or {}
+    return {
+        "kinematic": outfilename,
+        "epsilon": epsset,
+        "phi_setting": phi_setting,
+        "selected_timing_branch": (
+            candidate.get("timing_branch") or diagnostics.get("timing_branch")
+        ),
+        "timing_fit_accepted": lambda_gate.get("timing_fit_accepted"),
+        "setting_support": lambda_gate.get("setting_support_label"),
+        "lambda_validation_window_key": lambda_gate.get("validation_window_key"),
+        "lambda_window_low": lambda_gate.get("window_low"),
+        "lambda_window_high": lambda_gate.get("window_high"),
+        "lambda_raw_prompt_count": lambda_gate.get("raw_prompt_count"),
+        "lambda_raw_signed_yield": lambda_gate.get("raw_signed_yield"),
+        "lambda_raw_absolute_support": lambda_gate.get("raw_absolute_support"),
+        "lambda_signed_to_absolute_support_ratio": lambda_gate.get(
+            "raw_signed_to_absolute_support_ratio"
+        ),
+        "lambda_proposed_proton_yield": lambda_gate.get("proposed_proton_yield"),
+        "lambda_removed_fraction": lambda_gate.get("proposed_removed_fraction"),
+        "lambda_removed_fraction_limit": lambda_gate.get("maximum_removed_fraction"),
+        "lambda_support_valid": lambda_gate.get("support_valid"),
+        "lambda_support_reasons": json.dumps(
+            lambda_gate.get("support_reasons") or [], separators=(",", ":")
+        ),
+        "lambda_observational_warnings": json.dumps(
+            lambda_gate.get("observational_warnings") or [], separators=(",", ":")
+        ),
+        "lambda_gate_status": lambda_gate.get("status"),
+        "production_action": lambda_gate.get("production_action"),
+        "proton_cleaning_committed": lambda_gate.get("proton_cleaning_committed"),
+        "closure_tolerance": lambda_gate.get("closure_tolerance"),
+        "proposed_pre_rf_closure_difference": lambda_gate.get(
+            "proposed_pre_rf_closure_difference"
+        ),
+        "proposed_pre_rf_closure_passed": lambda_gate.get(
+            "proposed_pre_rf_closure_passed"
+        ),
+        "final_applied_pre_rf_closure_difference": lambda_gate.get(
+            "final_applied_pre_rf_closure_difference"
+        ),
+        "final_applied_closure_passed": lambda_gate.get("final_applied_closure_passed"),
+        "lookup_rows_checked": lambda_gate.get("lookup_rows_checked"),
+        "lookup_commit_mismatch_count": lambda_gate.get("lookup_commit_mismatch_count"),
+        "lookup_commit_integrity_passed": lambda_gate.get(
+            "lookup_commit_integrity_passed"
+        ),
+        "lookup_commit_mismatch_categories": json.dumps(
+            lambda_gate.get("lookup_commit_mismatch_categories") or {},
+            sort_keys=True,
+            separators=(",", ":"),
+        ),
+    }
+
+
+def _write_csv_atomically(path, fieldnames, rows):
+    """Write a compact CSV without exposing a partially-written artifact."""
+    temporary_path = "{}.{}.tmp".format(path, os.getpid())
+    with open(temporary_path, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: (row or {}).get(field) for field in fieldnames})
+    os.replace(temporary_path, path)
+
+
+def _upsert_lambda_gate_regression_summary(outpath, row):
+    """Maintain one deterministic cross-setting Lambda-gate review table."""
+    path = os.path.join(outpath, "proton_cleaning_lambda_gate_regression_summary.csv")
+    key_fields = ("kinematic", "epsilon", "phi_setting")
+    rows_by_key = {}
+    if os.path.exists(path):
+        with open(path, newline="", encoding="utf-8") as handle:
+            for existing in csv.DictReader(handle):
+                key = tuple(str(existing.get(field) or "") for field in key_fields)
+                rows_by_key[key] = {
+                    field: existing.get(field) for field in LAMBDA_GATE_SUMMARY_FIELDS
+                }
+    key = tuple(str(row.get(field) or "") for field in key_fields)
+    rows_by_key[key] = {
+        field: row.get(field) for field in LAMBDA_GATE_SUMMARY_FIELDS
+    }
+    ordered_rows = [rows_by_key[key] for key in sorted(rows_by_key)]
+    _write_csv_atomically(path, LAMBDA_GATE_SUMMARY_FIELDS, ordered_rows)
+    return path
+
+
 def _write_timing_t_validation_artifacts(
     cleaning_result, *, outpath, particle_type, outfilename, epsset, phi_setting
 ):
@@ -1248,45 +1357,16 @@ def _write_timing_t_validation_artifacts(
         lambda_csv = os.path.join(
             outpath, "{}_proton_cleaning_lambda_gate_summary.csv".format(base)
         )
-        lambda_fields = [
-            "kinematic", "epsilon", "phi_setting", "selected_timing_branch",
-            "timing_fit_accepted", "setting_support", "lambda_validation_window_key",
-            "lambda_window_low", "lambda_window_high", "lambda_raw_prompt_count",
-            "lambda_raw_signed_yield", "lambda_raw_absolute_support",
-            "lambda_signed_to_absolute_support_ratio", "lambda_proposed_proton_yield",
-            "lambda_removed_fraction", "lambda_removed_fraction_limit",
-            "lambda_support_valid", "lambda_support_reasons",
-            "lambda_observational_warnings", "lambda_gate_status",
-            "production_action", "proton_cleaning_committed",
-        ]
-        with open(lambda_csv, "w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=lambda_fields)
-            writer.writeheader()
-            writer.writerow({
-                "kinematic": outfilename,
-                "epsilon": epsset,
-                "phi_setting": phi_setting,
-                "selected_timing_branch": ((diagnostics.get("selected_timing_candidate") or {}).get("timing_branch") or diagnostics.get("timing_branch")),
-                "timing_fit_accepted": lambda_gate.get("timing_fit_accepted"),
-                "setting_support": lambda_gate.get("setting_support_label"),
-                "lambda_validation_window_key": lambda_gate.get("validation_window_key"),
-                "lambda_window_low": lambda_gate.get("window_low"),
-                "lambda_window_high": lambda_gate.get("window_high"),
-                "lambda_raw_prompt_count": lambda_gate.get("raw_prompt_count"),
-                "lambda_raw_signed_yield": lambda_gate.get("raw_signed_yield"),
-                "lambda_raw_absolute_support": lambda_gate.get("raw_absolute_support"),
-                "lambda_signed_to_absolute_support_ratio": lambda_gate.get("raw_signed_to_absolute_support_ratio"),
-                "lambda_proposed_proton_yield": lambda_gate.get("proposed_proton_yield"),
-                "lambda_removed_fraction": lambda_gate.get("proposed_removed_fraction"),
-                "lambda_removed_fraction_limit": lambda_gate.get("maximum_removed_fraction"),
-                "lambda_support_valid": lambda_gate.get("support_valid"),
-                "lambda_support_reasons": json.dumps(lambda_gate.get("support_reasons") or [], separators=(",", ":")),
-                "lambda_observational_warnings": json.dumps(lambda_gate.get("observational_warnings") or [], separators=(",", ":")),
-                "lambda_gate_status": lambda_gate.get("status"),
-                "production_action": lambda_gate.get("production_action"),
-                "proton_cleaning_committed": lambda_gate.get("proton_cleaning_committed"),
-            })
+        lambda_row = _build_lambda_gate_summary_row(
+            lambda_gate,
+            diagnostics,
+            outfilename=outfilename,
+            epsset=epsset,
+            phi_setting=phi_setting,
+        )
+        _write_csv_atomically(lambda_csv, LAMBDA_GATE_SUMMARY_FIELDS, [lambda_row])
         artifacts.append(lambda_csv)
+        artifacts.append(_upsert_lambda_gate_regression_summary(outpath, lambda_row))
     audit_rows = list((timing_diagnostics["lambda_preservation_event_audit"] or {}).get("rows") or [])
     if audit_rows:
         audit_csv = os.path.join(

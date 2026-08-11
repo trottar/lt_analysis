@@ -87,6 +87,11 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             config["lambda_preservation_gate"]["minimum_raw_prompt_events"], 20
         )
         self.assertIsNone(config["lambda_preservation_gate"]["minimum_absolute_support"])
+        self.assertIsNone(
+            config["lambda_preservation_gate"]["signed_to_absolute_support_warn_threshold"]
+        )
+        self.assertEqual(config["lambda_preservation_gate"]["closure_tolerance"], 1.0e-10)
+        self.assertFalse(config["lambda_preservation_gate"]["diagnostic_strict"])
 
 
 if __name__ == "__main__":

@@ -45,6 +45,9 @@ def _config(**gate_overrides):
         "minimum_raw_prompt_events": 0,
         "minimum_absolute_support": None,
         "minimum_positive_signed_yield": None,
+        "signed_to_absolute_support_warn_threshold": None,
+        "closure_tolerance": 1.0e-10,
+        "diagnostic_strict": False,
         "insufficient_support_policy": "bypass",
         "affects_event_weights": True,
         "affects_fit_acceptance": False,
@@ -127,6 +130,18 @@ class LambdaPreservationGateTests(unittest.TestCase):
         self.assertEqual(valid["status"], "pass")
         self.assertAlmostEqual(valid["raw_signed_to_absolute_support_ratio"], 0.5)
 
+    def test_cancellation_warning_is_observational_only(self):
+        result = proton_cleaning._evaluate_lambda_preservation_gate(
+            _result(),
+            [_row(1.0, 0.02), _row(-0.8, 0.02, prompt=False, entry=1)],
+            _config(signed_to_absolute_support_warn_threshold=0.2),
+        )
+        self.assertEqual(result["status"], "pass")
+        self.assertIn(
+            "signed_to_absolute_support_ratio_below_warning_threshold",
+            result["observational_warnings"],
+        )
+
     def test_optional_support_thresholds_and_invalid_policy(self):
         below_absolute = proton_cleaning._evaluate_lambda_preservation_gate(
             _result(), [_row(2.0, 0.01)], _config(minimum_absolute_support=3.0)
@@ -176,7 +191,13 @@ class LambdaPreservationGateTests(unittest.TestCase):
         self.assertEqual(first["proton_weight"], 0.0)
         self.assertEqual(first["cleaned_factor"], 1.0)
         self.assertEqual(gate["final_applied_closure"]["pre_rf_closure_difference"], 0.0)
-        self.assertTrue(gate["proposed_model_closure"]["cell_delta_closure_preserved"])
+        self.assertTrue(gate["final_applied_closure_passed"])
+        self.assertTrue(gate["lookup_commit_integrity_passed"])
+        self.assertEqual(gate["lookup_commit_mismatch_count"], 0)
+        self.assertTrue(
+            gate["proposed_model_closure"]["cell_delta_closure_uses_proposed_model"]
+        )
+        self.assertNotIn("cell_delta_closure_preserved", gate["proposed_model_closure"])
 
     def test_commit_pass_copies_the_proposed_lookup(self):
         row = _row(2.0, 0.35, entry=3)
@@ -187,6 +208,67 @@ class LambdaPreservationGateTests(unittest.TestCase):
         self.assertEqual(payload["applied_proton_probability"], payload["proposed_proton_probability"])
         self.assertEqual(payload["cleaned_factor"], payload["proposed_cleaned_factor"])
         self.assertEqual(gate["final_applied_closure"]["pre_rf_closure_difference"], 0.0)
+        self.assertEqual(
+            gate["proposed_pre_rf_closure_difference"],
+            gate["final_applied_pre_rf_closure_difference"],
+        )
+        self.assertTrue(gate["proposed_pre_rf_closure_passed"])
+        self.assertTrue(gate["final_applied_closure_passed"])
+
+    def test_exact_closure_reports_pass_and_deliberate_failure(self):
+        consistent = proton_cleaning._finalize_lambda_gate_closure(
+            [_row(3.0, 0.25)], "proposed", closure_tolerance=1.0e-12
+        )
+        self.assertTrue(consistent["pre_rf_closure_passed"])
+        self.assertAlmostEqual(consistent["pre_rf_closure_difference"], 0.0)
+        inconsistent_row = _row(3.0, 0.25)
+        inconsistent_row["proposed_cleaned_factor"] = 0.50
+        inconsistent = proton_cleaning._finalize_lambda_gate_closure(
+            [inconsistent_row], "proposed", closure_tolerance=1.0e-12
+        )
+        self.assertFalse(inconsistent["pre_rf_closure_passed"])
+        self.assertAlmostEqual(inconsistent["pre_rf_closure_difference"], 0.75)
+
+    def test_lookup_integrity_detects_tampering_and_strict_mode_raises(self):
+        row = _row(2.0, 0.35, entry=9)
+        lookup = {"prompt:9": dict(row)}
+        gate = {"status": "pass", "production_action": "apply"}
+        proton_cleaning._commit_lambda_preservation_gate(lookup, [row], gate)
+        lookup["prompt:9"]["applied_proton_probability"] = 0.0
+        snapshot = {
+            "prompt:9": {
+                "proposed_proton_probability": 0.35,
+                "proposed_cleaned_factor": 0.65,
+                "proposed_final_cleaned_factor": 0.65,
+                "rf_accept": True,
+            }
+        }
+        integrity = proton_cleaning._validate_lambda_gate_lookup_commitment(
+            lookup, snapshot, gate, 1.0e-12
+        )
+        self.assertFalse(integrity["lookup_commit_integrity_passed"])
+        self.assertEqual(integrity["lookup_commit_mismatch_count"], 1)
+        strict_gate = {
+            "status": "pass",
+            "production_action": "apply",
+            "configuration": {"diagnostic_strict": True, "closure_tolerance": 1.0e-12},
+        }
+        strict_lookup = {"prompt:9": dict(_row(2.0, 0.35, entry=9))}
+        with mock.patch.object(
+            proton_cleaning,
+            "_validate_lambda_gate_lookup_commitment",
+            return_value={
+                "lookup_rows_checked": 1,
+                "lookup_commit_mismatch_count": 1,
+                "lookup_commit_mismatch_categories": {"injected": 1},
+                "lookup_commit_mismatch_rows": [],
+                "lookup_commit_integrity_passed": False,
+            },
+        ):
+            with self.assertRaisesRegex(RuntimeError, "Lambda-preservation diagnostic integrity"):
+                proton_cleaning._commit_lambda_preservation_gate(
+                    strict_lookup, [_row(2.0, 0.35, entry=9)], strict_gate
+                )
 
     def test_audit_is_bounded_and_deterministic(self):
         rows = [_row(1.0, 0.1, entry=index) for index in range(8)]

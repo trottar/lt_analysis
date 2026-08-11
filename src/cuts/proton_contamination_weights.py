@@ -4296,6 +4296,9 @@ def _resolve_lambda_preservation_gate_config(config):
         "minimum_raw_prompt_events": 20,
         "minimum_absolute_support": None,
         "minimum_positive_signed_yield": None,
+        "signed_to_absolute_support_warn_threshold": None,
+        "closure_tolerance": 1.0e-10,
+        "diagnostic_strict": False,
         "insufficient_support_policy": "bypass",
         "affects_event_weights": True,
         "affects_fit_acceptance": False,
@@ -4338,7 +4341,11 @@ def _resolve_lambda_preservation_gate_config(config):
     prompt_minimum = int(gate.get("minimum_raw_prompt_events", 20) or 0)
     if prompt_minimum < 0:
         raise ValueError("Lambda-preservation minimum prompt count cannot be negative")
-    for key in ("minimum_absolute_support", "minimum_positive_signed_yield"):
+    for key in (
+        "minimum_absolute_support",
+        "minimum_positive_signed_yield",
+        "signed_to_absolute_support_warn_threshold",
+    ):
         value = gate.get(key)
         if value is None:
             continue
@@ -4346,6 +4353,11 @@ def _resolve_lambda_preservation_gate_config(config):
         if finite_value is None or finite_value < 0.0:
             raise ValueError("Lambda-preservation {} must be a nonnegative finite value or None".format(key))
         gate[key] = finite_value
+    closure_tolerance = _finite_float_or_none(gate.get("closure_tolerance"))
+    if closure_tolerance is None or closure_tolerance < 0.0:
+        raise ValueError(
+            "Lambda-preservation closure_tolerance must be a nonnegative finite value"
+        )
     gate.update(
         {
             "validation_window_key": window_key,
@@ -4353,6 +4365,8 @@ def _resolve_lambda_preservation_gate_config(config):
             "window_high": float(window_high),
             "maximum_lambda_removed_fraction": float(maximum),
             "minimum_raw_prompt_events": int(prompt_minimum),
+            "closure_tolerance": float(closure_tolerance),
+            "diagnostic_strict": bool(gate.get("diagnostic_strict", False)),
             "insufficient_support_policy": policy,
         }
     )
@@ -4395,6 +4409,11 @@ def _evaluate_lambda_preservation_gate(cleaning_result, event_rows, config):
         "minimum_raw_prompt_events": gate["minimum_raw_prompt_events"],
         "minimum_absolute_support": gate["minimum_absolute_support"],
         "minimum_positive_signed_yield": gate["minimum_positive_signed_yield"],
+        "signed_to_absolute_support_warn_threshold": gate[
+            "signed_to_absolute_support_warn_threshold"
+        ],
+        "closure_tolerance": gate["closure_tolerance"],
+        "diagnostic_strict": gate["diagnostic_strict"],
         "support_valid": False,
         "support_reasons": [],
         "observational_warnings": [],
@@ -4480,6 +4499,16 @@ def _evaluate_lambda_preservation_gate(cleaning_result, event_rows, config):
         warnings.append("negative_proposed_lambda_yield")
     if fraction is not None and fraction < 0.0:
         warnings.append("negative_lambda_removed_fraction")
+    cancellation_warning_threshold = gate.get(
+        "signed_to_absolute_support_warn_threshold"
+    )
+    signed_to_absolute_ratio = result.get("raw_signed_to_absolute_support_ratio")
+    if (
+        cancellation_warning_threshold is not None
+        and signed_to_absolute_ratio is not None
+        and abs(float(signed_to_absolute_ratio)) < float(cancellation_warning_threshold)
+    ):
+        warnings.append("signed_to_absolute_support_ratio_below_warning_threshold")
     result["support_reasons"] = sorted(set(reasons))
     result["observational_warnings"] = sorted(set(warnings))
     result["support_valid"] = not bool(reasons)
@@ -4499,10 +4528,16 @@ def _evaluate_lambda_preservation_gate(cleaning_result, event_rows, config):
     return result
 
 
-def _finalize_lambda_gate_closure(event_rows, stage):
-    raw_yield = proton_yield = cleaned_yield = final_rf_cleaned_yield = 0.0
-    event_count = 0
+def _finalize_lambda_gate_closure(event_rows, stage, closure_tolerance=1.0e-10):
+    """Evaluate exact frozen-row pre-RF accounting for one lookup stage."""
+    raw_terms = []
+    proton_terms = []
+    cleaned_terms = []
+    final_rf_terms = []
+    excluded_nonfinite_rows = 0
+    rows_seen = 0
     for row in event_rows or []:
+        rows_seen += 1
         physical_weight = _finite_float_or_none((row or {}).get("physical_weight"))
         proton_probability, cleaned_factor, final_factor = _lambda_gate_stage_values(row, stage)
         if (
@@ -4511,20 +4546,111 @@ def _finalize_lambda_gate_closure(event_rows, stage):
             or cleaned_factor is None
             or final_factor is None
         ):
+            excluded_nonfinite_rows += 1
             continue
-        event_count += 1
-        raw_yield += physical_weight
-        proton_yield += physical_weight * proton_probability
-        cleaned_yield += physical_weight * cleaned_factor
-        final_rf_cleaned_yield += physical_weight * final_factor
+        raw_terms.append(float(physical_weight))
+        proton_terms.append(float(physical_weight * proton_probability))
+        cleaned_terms.append(float(physical_weight * cleaned_factor))
+        final_rf_terms.append(float(physical_weight * final_factor))
+    raw_yield = math.fsum(raw_terms)
+    proton_yield = math.fsum(proton_terms)
+    cleaned_yield = math.fsum(cleaned_terms)
+    final_rf_cleaned_yield = math.fsum(final_rf_terms)
+    difference = math.fsum((raw_yield, -proton_yield, -cleaned_yield))
+    tolerance = abs(float(closure_tolerance))
+    closure_passed = bool(
+        excluded_nonfinite_rows == 0
+        and math.isfinite(difference)
+        and abs(difference) <= tolerance
+    )
     return {
         "stage": str(stage),
-        "event_count": int(event_count),
+        "rows_seen": int(rows_seen),
+        "event_count": int(len(raw_terms)),
+        "excluded_nonfinite_rows": int(excluded_nonfinite_rows),
         "raw_signed_yield": float(raw_yield),
         "proton_signed_yield": float(proton_yield),
         "cleaned_pre_rf_signed_yield": float(cleaned_yield),
         "final_rf_cleaned_signed_yield": float(final_rf_cleaned_yield),
-        "pre_rf_closure_difference": float(raw_yield - proton_yield - cleaned_yield),
+        "pre_rf_closure_difference": float(difference),
+        "pre_rf_closure_tolerance": float(tolerance),
+        "pre_rf_closure_passed": closure_passed,
+    }
+
+
+def _lambda_gate_values_close(left, right, tolerance):
+    """Use one finite, absolute comparison for immutable lookup values."""
+    left_value = _finite_float_or_none(left)
+    right_value = _finite_float_or_none(right)
+    return bool(
+        left_value is not None
+        and right_value is not None
+        and abs(left_value - right_value) <= float(tolerance)
+    )
+
+
+def _validate_lambda_gate_lookup_commitment(
+    lookup, proposal_snapshot, gate_result, tolerance,
+):
+    """Confirm that every lookup row follows the setting-wide gate policy."""
+    status = str((gate_result or {}).get("status") or "insufficient_support")
+    commit = str((gate_result or {}).get("production_action") or "bypass") == "apply"
+    category_counts = {}
+    mismatched_signatures = []
+
+    def record(categories, category):
+        if category not in categories:
+            categories.append(category)
+            category_counts[category] = int(category_counts.get(category, 0)) + 1
+
+    for signature in sorted((proposal_snapshot or {}).keys()):
+        expected = proposal_snapshot[signature]
+        payload = (lookup or {}).get(signature)
+        categories = []
+        if not isinstance(payload, dict):
+            record(categories, "missing_lookup_row")
+        else:
+            expected_probability = (
+                expected["proposed_proton_probability"] if commit else 0.0
+            )
+            expected_cleaned = expected["proposed_cleaned_factor"] if commit else 1.0
+            expected_final = expected_cleaned if expected["rf_accept"] else 0.0
+            expected_gate_passed = (
+                True if status == "pass" else
+                (False if status in ("fail", "insufficient_support") else None)
+            )
+            for field, expected_value in (
+                ("proposed_proton_probability", expected["proposed_proton_probability"]),
+                ("proposed_cleaned_factor", expected["proposed_cleaned_factor"]),
+                ("proposed_final_cleaned_factor", expected["proposed_final_cleaned_factor"]),
+                ("applied_proton_probability", expected_probability),
+                ("applied_cleaned_factor", expected_cleaned),
+                ("applied_final_cleaned_factor", expected_final),
+                ("proton_weight", expected_probability),
+                ("cleaned_factor", expected_cleaned),
+                ("final_cleaned_factor", expected_final),
+            ):
+                if not _lambda_gate_values_close(payload.get(field), expected_value, tolerance):
+                    record(categories, "{}_mismatch".format(field))
+            if bool(payload.get("rf_accept", True)) != bool(expected["rf_accept"]):
+                record(categories, "rf_accept_changed")
+            if str(payload.get("lambda_gate_status") or "") != status:
+                record(categories, "lambda_gate_status_mismatch")
+            if payload.get("lambda_gate_passed") is not expected_gate_passed:
+                record(categories, "lambda_gate_passed_mismatch")
+            if not commit and payload.get("applied_zero_reason") != "lambda_preservation_gate_bypass":
+                record(categories, "applied_zero_reason_mismatch")
+        if categories:
+            mismatched_signatures.append({
+                "event_signature": str(signature),
+                "categories": sorted(categories),
+            })
+    return {
+        "lookup_rows_checked": int(len(proposal_snapshot or {})),
+        "lookup_commit_mismatch_count": int(len(mismatched_signatures)),
+        "lookup_commit_mismatch_categories": dict(sorted(category_counts.items())),
+        "lookup_commit_mismatch_rows": mismatched_signatures,
+        "lookup_commit_integrity_passed": not bool(mismatched_signatures),
     }
 
 
@@ -4532,7 +4658,13 @@ def _commit_lambda_preservation_gate(lookup, event_rows, gate_result):
     """Commit or bypass the proposed lookup without modifying its fit payload."""
     status = str((gate_result or {}).get("status") or "insufficient_support")
     commit = str((gate_result or {}).get("production_action") or "bypass") == "apply"
+    gate_config = dict((gate_result or {}).get("configuration") or {})
+    closure_tolerance = _finite_float_or_none(gate_config.get("closure_tolerance"))
+    if closure_tolerance is None or closure_tolerance < 0.0:
+        closure_tolerance = 1.0e-10
+    diagnostic_strict = bool(gate_config.get("diagnostic_strict", False))
     by_signature = {}
+    proposal_snapshot = {}
     for signature, payload in (lookup or {}).items():
         proposed_probability, proposed_cleaned, proposed_final = _lambda_gate_stage_values(
             payload, "proposed"
@@ -4540,6 +4672,17 @@ def _commit_lambda_preservation_gate(lookup, event_rows, gate_result):
         proposed_probability = 0.0 if proposed_probability is None else proposed_probability
         proposed_cleaned = 1.0 - proposed_probability if proposed_cleaned is None else proposed_cleaned
         rf_accept = bool((payload or {}).get("rf_accept", True))
+        proposed_final = (
+            proposed_final
+            if proposed_final is not None
+            else (proposed_cleaned if rf_accept else 0.0)
+        )
+        proposal_snapshot[str(signature)] = {
+            "proposed_proton_probability": float(proposed_probability),
+            "proposed_cleaned_factor": float(proposed_cleaned),
+            "proposed_final_cleaned_factor": float(proposed_final),
+            "rf_accept": bool(rf_accept),
+        }
         if commit:
             applied_probability = proposed_probability
             applied_cleaned = proposed_cleaned
@@ -4553,7 +4696,7 @@ def _commit_lambda_preservation_gate(lookup, event_rows, gate_result):
             {
                 "proposed_proton_probability": float(proposed_probability),
                 "proposed_cleaned_factor": float(proposed_cleaned),
-                "proposed_final_cleaned_factor": float(proposed_final if proposed_final is not None else (proposed_cleaned if rf_accept else 0.0)),
+                "proposed_final_cleaned_factor": float(proposed_final),
                 "lambda_gate_status": status,
                 "lambda_gate_passed": True if status == "pass" else (False if status in ("fail", "insufficient_support") else None),
                 "applied_proton_probability": float(applied_probability),
@@ -4585,14 +4728,54 @@ def _commit_lambda_preservation_gate(lookup, event_rows, gate_result):
                 "final_cleaned_factor",
             )
         })
+    proposed_accounting = _finalize_lambda_gate_closure(
+        event_rows, "proposed", closure_tolerance
+    )
+    applied_accounting = _finalize_lambda_gate_closure(
+        event_rows, "applied", closure_tolerance
+    )
+    commitment_integrity = _validate_lambda_gate_lookup_commitment(
+        lookup, proposal_snapshot, gate_result, closure_tolerance
+    )
     gate_result["proposed_model_closure"] = {
         "label": "proposed timing-|t| model closure",
-        "lookup_pre_rf_accounting": _finalize_lambda_gate_closure(event_rows, "proposed"),
-        "cell_delta_closure_preserved": True,
+        "lookup_pre_rf_accounting": proposed_accounting,
+        # The cell/delta ratios compare a fitted model with event-level
+        # probabilities.  They remain useful diagnostics, but are not an exact
+        # arithmetic identity on which this setting-wide gate may rely.
+        "cell_delta_closure_uses_proposed_model": True,
     }
-    gate_result["final_applied_closure"] = _finalize_lambda_gate_closure(
-        event_rows, "applied"
+    gate_result["final_applied_closure"] = applied_accounting
+    gate_result.update(
+        {
+            "proposed_pre_rf_closure_difference": proposed_accounting[
+                "pre_rf_closure_difference"
+            ],
+            "proposed_pre_rf_closure_passed": proposed_accounting[
+                "pre_rf_closure_passed"
+            ],
+            "final_applied_pre_rf_closure_difference": applied_accounting[
+                "pre_rf_closure_difference"
+            ],
+            "final_applied_closure_passed": applied_accounting[
+                "pre_rf_closure_passed"
+            ],
+            **commitment_integrity,
+        }
     )
+    if diagnostic_strict and (
+        not proposed_accounting["pre_rf_closure_passed"]
+        or not applied_accounting["pre_rf_closure_passed"]
+        or not commitment_integrity["lookup_commit_integrity_passed"]
+    ):
+        raise RuntimeError(
+            "Lambda-preservation diagnostic integrity failed: "
+            "proposed_closure={}, applied_closure={}, lookup_mismatches={}".format(
+                proposed_accounting["pre_rf_closure_passed"],
+                applied_accounting["pre_rf_closure_passed"],
+                commitment_integrity["lookup_commit_mismatch_count"],
+            )
+        )
     return lookup
 
 
@@ -11937,10 +12120,29 @@ def _print_timing_t_lambda_preservation_gate_pages(output_pdf, cleaning_result, 
     text.AddText("proton cleaning committed={} | applied lookup zeroed={}".format(
         gate.get("proton_cleaning_committed"), gate.get("applied_lookup_zeroed"),
     ))
-    final_closure = gate.get("final_applied_closure") or {}
+    proposed_closure = gate.get("proposed_model_closure") or {}
     text.AddText(
-        "final applied pre-RF closure: raw - p - cleaned = {:.5g}".format(
-            float(final_closure.get("pre_rf_closure_difference", 0.0) or 0.0)
+        "proposed model closure: {} | raw - p - cleaned = {:.5g}".format(
+            "PASS" if gate.get("proposed_pre_rf_closure_passed") else "FAIL",
+            float(gate.get("proposed_pre_rf_closure_difference", 0.0) or 0.0),
+        )
+    )
+    text.AddText(
+        "final applied closure: {} | raw - p - cleaned = {:.5g}".format(
+            "PASS" if gate.get("final_applied_closure_passed") else "FAIL",
+            float(gate.get("final_applied_pre_rf_closure_difference", 0.0) or 0.0),
+        )
+    )
+    text.AddText(
+        "lookup commitment integrity: {} | rows={} | mismatches={} | RF selection unchanged".format(
+            "PASS" if gate.get("lookup_commit_integrity_passed") else "FAIL",
+            gate.get("lookup_rows_checked", 0),
+            gate.get("lookup_commit_mismatch_count", 0),
+        )
+    )
+    text.AddText(
+        "cell/delta closure payload: proposed timing-|t| model only={}".format(
+            proposed_closure.get("cell_delta_closure_uses_proposed_model", False)
         )
     )
     text.Draw()

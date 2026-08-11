@@ -575,6 +575,14 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         # a physics-reviewed threshold.
         "minimum_absolute_support": None,
         "minimum_positive_signed_yield": None,
+        # Cancellation can be informative for later physics review, but it is
+        # intentionally not a Lambda-gate criterion.  Leave the warning off
+        # until a physics-reviewed value is configured.
+        "signed_to_absolute_support_warn_threshold": None,
+        # These checks validate arithmetic and immutable lookup commitment;
+        # they do not participate in timing-fit or setting-support acceptance.
+        "closure_tolerance": 1.0e-10,
+        "diagnostic_strict": False,
         "insufficient_support_policy": "bypass",
         "affects_event_weights": True,
         "affects_fit_acceptance": False,
