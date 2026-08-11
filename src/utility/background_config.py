@@ -561,6 +561,24 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         "affects_event_weights": False,
         "affects_fit_acceptance": False,
     },
+    # This gate is deliberately part of the opt-in timing-t workflow.  It is
+    # evaluated from the proposed, pre-RF frozen lookup and may only decide
+    # whether that setting-wide correction is committed; it never changes a
+    # timing fit or its support classification.
+    "lambda_preservation_gate": {
+        "enabled": True,
+        "validation_window_key": "lambda_peak",
+        "maximum_lambda_removed_fraction": 0.10,
+        "minimum_raw_prompt_events": 20,
+        # Physical source coefficients are setting-dependent.  Keep these
+        # disabled until production support/cancellation diagnostics justify
+        # a physics-reviewed threshold.
+        "minimum_absolute_support": None,
+        "minimum_positive_signed_yield": None,
+        "insufficient_support_policy": "bypass",
+        "affects_event_weights": True,
+        "affects_fit_acceptance": False,
+    },
     "ctime_hist_range": (-2.0, 2.0),
     "ctime_hist_bins": 131,
     "ctime_hist_range_high_epsilon": (-4.0, 4.0),
@@ -753,6 +771,7 @@ PROTON_CONTAMINATION_CLEANING_CONFIG_MERGE_KEYS = frozenset(
         "t_support_thresholds",
         "aerogel_validation",
         "mm_diagnostics",
+        "lambda_preservation_gate",
     }
 )
 

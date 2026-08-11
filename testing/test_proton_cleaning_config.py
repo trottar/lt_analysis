@@ -48,6 +48,7 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             "t_support_thresholds": {"minimum_setting_valid_t_cells": 3},
             "aerogel_validation": {"enabled": False},
             "mm_diagnostics": {"display_bins": 64},
+            "lambda_preservation_gate": {"maximum_lambda_removed_fraction": 0.08},
         }
         with mock.patch.dict(
             background_config.PROTON_CONTAMINATION_CLEANING_RUNTIME_OVERRIDES,
@@ -74,6 +75,18 @@ class ProtonCleaningConfigTests(unittest.TestCase):
         self.assertTrue(config["mm_diagnostics"]["write_overview_page"])
         self.assertEqual(config["mm_diagnostics"]["max_t_panels_per_page"], 1)
         self.assertFalse(config["mm_diagnostics"]["affects_event_weights"])
+        self.assertEqual(
+            config["lambda_preservation_gate"]["maximum_lambda_removed_fraction"],
+            0.08,
+        )
+        self.assertEqual(
+            config["lambda_preservation_gate"]["validation_window_key"],
+            "lambda_peak",
+        )
+        self.assertEqual(
+            config["lambda_preservation_gate"]["minimum_raw_prompt_events"], 20
+        )
+        self.assertIsNone(config["lambda_preservation_gate"]["minimum_absolute_support"])
 
 
 if __name__ == "__main__":

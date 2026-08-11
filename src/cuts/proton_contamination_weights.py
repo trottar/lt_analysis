@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gc
+import hashlib
 import math
 import os
 import sys
@@ -4107,6 +4108,7 @@ _T_AEROGEL_MATRIX_METRIC_SOURCES = {
     "lambda_removed_yield": "lambda_removed_yield",
     "lambda_removed_fraction": "lambda_removed_fraction",
 }
+LAMBDA_PRESERVATION_AUDIT_LIMIT = 128
 
 
 def _matrix_from_t_aerogel_cells(cells, source_key):
@@ -4228,6 +4230,8 @@ def _build_timing_t_summary(cleaning_result, matrix_payload, aggregate_all):
         })
     mm_diagnostics = diagnostics.get("timing_t_mm_diagnostics") or {}
     mm_aggregate = mm_diagnostics.get("aggregate") or {}
+    applied_mm_aggregate = ((mm_diagnostics.get("applied") or {}).get("aggregate") or {})
+    lambda_gate = diagnostics.get("lambda_preservation_gate") or {}
     return {
         "schema_version": 1,
         "source": "selected_timing_candidate_and_frozen_lookup_only",
@@ -4251,7 +4255,19 @@ def _build_timing_t_summary(cleaning_result, matrix_payload, aggregate_all):
                 "cleaned_missing_mass_yield",
                 (aggregate_all or {}).get("cleaned_missing_mass_yield"),
             ),
+            "proposed": {
+                "raw": mm_aggregate.get("raw_missing_mass_yield"),
+                "estimated_proton": mm_aggregate.get("estimated_proton_missing_mass_yield"),
+                "cleaned_pre_rf": mm_aggregate.get("cleaned_missing_mass_yield"),
+            },
+            "applied": {
+                "raw": applied_mm_aggregate.get("raw_missing_mass_yield"),
+                "estimated_proton": applied_mm_aggregate.get("estimated_proton_missing_mass_yield"),
+                "cleaned_pre_rf": applied_mm_aggregate.get("cleaned_missing_mass_yield"),
+                "cleaned_final_rf": applied_mm_aggregate.get("final_rf_cleaned_missing_mass_yield"),
+            },
         },
+        "lambda_preservation_gate": lambda_gate,
         "proton_subtraction_mm": mm_diagnostics,
     }
 
@@ -4269,6 +4285,351 @@ def _resolve_timing_t_mm_display_range(config):
     if not (math.isfinite(low) and math.isfinite(high) and high > low):
         low, high = PROTON_CLEANING_EXACT_MM_VALIDATION_RANGE
     return [float(low), float(high)]
+
+
+def _resolve_lambda_preservation_gate_config(config):
+    """Resolve the timing-t Lambda gate without introducing a second window."""
+    gate = {
+        "enabled": True,
+        "validation_window_key": "lambda_peak",
+        "maximum_lambda_removed_fraction": 0.10,
+        "minimum_raw_prompt_events": 20,
+        "minimum_absolute_support": None,
+        "minimum_positive_signed_yield": None,
+        "insufficient_support_policy": "bypass",
+        "affects_event_weights": True,
+        "affects_fit_acceptance": False,
+    }
+    gate.update(dict((config or {}).get("lambda_preservation_gate") or {}))
+    policy = str(gate.get("insufficient_support_policy") or "").strip().lower()
+    if policy != "bypass":
+        raise ValueError(
+            "Unsupported Lambda-preservation insufficient-support policy '{}'; "
+            "only 'bypass' is supported".format(policy)
+        )
+    window_key = str(gate.get("validation_window_key") or "").strip()
+    validation_windows = dict(
+        (config or {}).get("validation_windows")
+        or PROTON_CLEANING_EXACT_VALIDATION_WINDOWS
+    )
+    if window_key not in validation_windows:
+        raise ValueError(
+            "Lambda-preservation validation window key '{}' is unavailable in "
+            "validation_windows".format(window_key)
+        )
+    bounds = validation_windows[window_key]
+    try:
+        window_low, window_high = float(bounds[0]), float(bounds[1])
+    except (TypeError, ValueError, IndexError) as exc:
+        raise ValueError(
+            "Lambda-preservation validation window '{}' is invalid".format(window_key)
+        ) from exc
+    if not (
+        math.isfinite(window_low)
+        and math.isfinite(window_high)
+        and window_high > window_low
+    ):
+        raise ValueError(
+            "Lambda-preservation validation window '{}' is invalid".format(window_key)
+        )
+    maximum = _finite_float_or_none(gate.get("maximum_lambda_removed_fraction"))
+    if maximum is None:
+        raise ValueError("Lambda-preservation maximum removal fraction must be finite")
+    prompt_minimum = int(gate.get("minimum_raw_prompt_events", 20) or 0)
+    if prompt_minimum < 0:
+        raise ValueError("Lambda-preservation minimum prompt count cannot be negative")
+    for key in ("minimum_absolute_support", "minimum_positive_signed_yield"):
+        value = gate.get(key)
+        if value is None:
+            continue
+        finite_value = _finite_float_or_none(value)
+        if finite_value is None or finite_value < 0.0:
+            raise ValueError("Lambda-preservation {} must be a nonnegative finite value or None".format(key))
+        gate[key] = finite_value
+    gate.update(
+        {
+            "validation_window_key": window_key,
+            "window_low": float(window_low),
+            "window_high": float(window_high),
+            "maximum_lambda_removed_fraction": float(maximum),
+            "minimum_raw_prompt_events": int(prompt_minimum),
+            "insufficient_support_policy": policy,
+        }
+    )
+    return gate
+
+
+def _lambda_gate_stage_values(row, stage):
+    """Read proposed/applied frozen factors while tolerating legacy test rows."""
+    prefix = "{}_".format(str(stage))
+    probability = _finite_float_or_none(row.get(prefix + "proton_probability"))
+    if probability is None:
+        probability = _finite_float_or_none(row.get("proton_weight"))
+    cleaned_factor = _finite_float_or_none(row.get(prefix + "cleaned_factor"))
+    if cleaned_factor is None and probability is not None:
+        cleaned_factor = 1.0 - probability
+    final_cleaned_factor = _finite_float_or_none(
+        row.get(prefix + "final_cleaned_factor")
+    )
+    if final_cleaned_factor is None:
+        final_cleaned_factor = cleaned_factor
+    return probability, cleaned_factor, final_cleaned_factor
+
+
+def _evaluate_lambda_preservation_gate(cleaning_result, event_rows, config):
+    """Make one pre-RF Lambda-preservation decision for the full setting."""
+    gate = _resolve_lambda_preservation_gate_config(config)
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    result = {
+        "enabled": bool(gate.get("enabled", True)),
+        "validation_window_key": gate["validation_window_key"],
+        "window_low": gate["window_low"],
+        "window_high": gate["window_high"],
+        "raw_prompt_count": 0,
+        "raw_signed_yield": 0.0,
+        "raw_absolute_support": 0.0,
+        "raw_signed_to_absolute_support_ratio": None,
+        "proposed_proton_yield": 0.0,
+        "proposed_removed_fraction": None,
+        "maximum_removed_fraction": gate["maximum_lambda_removed_fraction"],
+        "minimum_raw_prompt_events": gate["minimum_raw_prompt_events"],
+        "minimum_absolute_support": gate["minimum_absolute_support"],
+        "minimum_positive_signed_yield": gate["minimum_positive_signed_yield"],
+        "support_valid": False,
+        "support_reasons": [],
+        "observational_warnings": [],
+        "status": "insufficient_support",
+        "production_action": "bypass",
+        "timing_fit_accepted": bool((cleaning_result or {}).get("accepted", False)),
+        "setting_support_label": (diagnostics.get("setting_support") or {}).get(
+            "support_label", SUPPORT_UNSUPPORTED
+        ),
+        "proton_cleaning_committed": False,
+        "proposed_lookup_retained": True,
+        "applied_lookup_zeroed": True,
+        "pre_rf_evaluation": True,
+        "source": "shared_nommcuts_frozen_lookup_rows",
+        "lambda_rows_seen": 0,
+        "lambda_rows_with_nonfinite_values": 0,
+        "configuration": _json_ready_value(gate),
+    }
+    if not result["enabled"]:
+        result.update(
+            {
+                "support_valid": None,
+                "status": "disabled",
+                "production_action": "apply",
+                "proton_cleaning_committed": True,
+                "applied_lookup_zeroed": False,
+            }
+        )
+        return result
+
+    raw_signed = raw_absolute = proposed_yield = 0.0
+    prompt_count = nonfinite_rows = selected_rows = 0
+    for row in event_rows or []:
+        adj_mm = _finite_float_or_none((row or {}).get("adj_mm"))
+        if adj_mm is None or not (gate["window_low"] <= adj_mm < gate["window_high"]):
+            continue
+        selected_rows += 1
+        physical_weight = _finite_float_or_none((row or {}).get("physical_weight"))
+        proposed_probability, _cleaned, _final = _lambda_gate_stage_values(row, "proposed")
+        if physical_weight is None or proposed_probability is None:
+            nonfinite_rows += 1
+            continue
+        raw_signed += physical_weight
+        raw_absolute += abs(physical_weight)
+        proposed_yield += physical_weight * proposed_probability
+        prompt_count += int(bool((row or {}).get("is_prompt_source", False)))
+
+    result.update(
+        {
+            "raw_prompt_count": int(prompt_count),
+            "raw_signed_yield": float(raw_signed),
+            "raw_absolute_support": float(raw_absolute),
+            "proposed_proton_yield": float(proposed_yield),
+            "lambda_rows_seen": int(selected_rows),
+            "lambda_rows_with_nonfinite_values": int(nonfinite_rows),
+        }
+    )
+    if math.isfinite(raw_signed) and math.isfinite(raw_absolute) and raw_absolute > 0.0:
+        result["raw_signed_to_absolute_support_ratio"] = float(raw_signed / raw_absolute)
+    if math.isfinite(raw_signed) and raw_signed > 0.0 and math.isfinite(proposed_yield):
+        result["proposed_removed_fraction"] = float(proposed_yield / raw_signed)
+
+    reasons = []
+    if nonfinite_rows:
+        reasons.append("nonfinite_lambda_row")
+    if prompt_count < gate["minimum_raw_prompt_events"]:
+        reasons.append("minimum_raw_prompt_events_not_met")
+    if not (math.isfinite(raw_signed) and raw_signed > 0.0):
+        reasons.append("raw_signed_yield_not_positive_or_nonfinite")
+    if not (math.isfinite(raw_absolute) and raw_absolute > 0.0):
+        reasons.append("raw_absolute_support_not_positive_or_nonfinite")
+    if not math.isfinite(proposed_yield):
+        reasons.append("proposed_proton_yield_nonfinite")
+    if gate["minimum_absolute_support"] is not None and raw_absolute < gate["minimum_absolute_support"]:
+        reasons.append("minimum_absolute_support_not_met")
+    if gate["minimum_positive_signed_yield"] is not None and raw_signed < gate["minimum_positive_signed_yield"]:
+        reasons.append("minimum_positive_signed_yield_not_met")
+    fraction = result["proposed_removed_fraction"]
+    if fraction is None or not math.isfinite(fraction):
+        reasons.append("proposed_removed_fraction_unevaluable")
+    warnings = []
+    if math.isfinite(proposed_yield) and proposed_yield < 0.0:
+        warnings.append("negative_proposed_lambda_yield")
+    if fraction is not None and fraction < 0.0:
+        warnings.append("negative_lambda_removed_fraction")
+    result["support_reasons"] = sorted(set(reasons))
+    result["observational_warnings"] = sorted(set(warnings))
+    result["support_valid"] = not bool(reasons)
+    if not result["support_valid"]:
+        return result
+    if fraction <= gate["maximum_lambda_removed_fraction"]:
+        result.update(
+            {
+                "status": "pass",
+                "production_action": "apply",
+                "proton_cleaning_committed": True,
+                "applied_lookup_zeroed": False,
+            }
+        )
+    else:
+        result.update({"status": "fail", "production_action": "bypass"})
+    return result
+
+
+def _finalize_lambda_gate_closure(event_rows, stage):
+    raw_yield = proton_yield = cleaned_yield = final_rf_cleaned_yield = 0.0
+    event_count = 0
+    for row in event_rows or []:
+        physical_weight = _finite_float_or_none((row or {}).get("physical_weight"))
+        proton_probability, cleaned_factor, final_factor = _lambda_gate_stage_values(row, stage)
+        if (
+            physical_weight is None
+            or proton_probability is None
+            or cleaned_factor is None
+            or final_factor is None
+        ):
+            continue
+        event_count += 1
+        raw_yield += physical_weight
+        proton_yield += physical_weight * proton_probability
+        cleaned_yield += physical_weight * cleaned_factor
+        final_rf_cleaned_yield += physical_weight * final_factor
+    return {
+        "stage": str(stage),
+        "event_count": int(event_count),
+        "raw_signed_yield": float(raw_yield),
+        "proton_signed_yield": float(proton_yield),
+        "cleaned_pre_rf_signed_yield": float(cleaned_yield),
+        "final_rf_cleaned_signed_yield": float(final_rf_cleaned_yield),
+        "pre_rf_closure_difference": float(raw_yield - proton_yield - cleaned_yield),
+    }
+
+
+def _commit_lambda_preservation_gate(lookup, event_rows, gate_result):
+    """Commit or bypass the proposed lookup without modifying its fit payload."""
+    status = str((gate_result or {}).get("status") or "insufficient_support")
+    commit = str((gate_result or {}).get("production_action") or "bypass") == "apply"
+    by_signature = {}
+    for signature, payload in (lookup or {}).items():
+        proposed_probability, proposed_cleaned, proposed_final = _lambda_gate_stage_values(
+            payload, "proposed"
+        )
+        proposed_probability = 0.0 if proposed_probability is None else proposed_probability
+        proposed_cleaned = 1.0 - proposed_probability if proposed_cleaned is None else proposed_cleaned
+        rf_accept = bool((payload or {}).get("rf_accept", True))
+        if commit:
+            applied_probability = proposed_probability
+            applied_cleaned = proposed_cleaned
+            applied_zero_reason = (payload or {}).get("event_lookup_zero_reason")
+        else:
+            applied_probability = 0.0
+            applied_cleaned = 1.0
+            applied_zero_reason = "lambda_preservation_gate_bypass"
+        applied_final = applied_cleaned if rf_accept else 0.0
+        payload.update(
+            {
+                "proposed_proton_probability": float(proposed_probability),
+                "proposed_cleaned_factor": float(proposed_cleaned),
+                "proposed_final_cleaned_factor": float(proposed_final if proposed_final is not None else (proposed_cleaned if rf_accept else 0.0)),
+                "lambda_gate_status": status,
+                "lambda_gate_passed": True if status == "pass" else (False if status in ("fail", "insufficient_support") else None),
+                "applied_proton_probability": float(applied_probability),
+                "applied_cleaned_factor": float(applied_cleaned),
+                "applied_final_cleaned_factor": float(applied_final),
+                "applied_zero_reason": applied_zero_reason,
+                # Downstream production aliases must always be committed values.
+                "proton_weight": float(applied_probability),
+                "cleaned_factor": float(applied_cleaned),
+                "final_cleaned_factor": float(applied_final),
+            }
+        )
+        by_signature[str(signature)] = payload
+    for row in event_rows or []:
+        signature = _make_prepared_event_signature(
+            row.get("source_label"), row.get("source_entry_index")
+        )
+        payload = by_signature.get(signature)
+        if payload is None:
+            continue
+        row.update({
+            key: payload.get(key)
+            for key in (
+                "proposed_proton_probability", "proposed_cleaned_factor",
+                "proposed_final_cleaned_factor", "lambda_gate_status",
+                "lambda_gate_passed", "applied_proton_probability",
+                "applied_cleaned_factor", "applied_final_cleaned_factor",
+                "applied_zero_reason", "proton_weight", "cleaned_factor",
+                "final_cleaned_factor",
+            )
+        })
+    gate_result["proposed_model_closure"] = {
+        "label": "proposed timing-|t| model closure",
+        "lookup_pre_rf_accounting": _finalize_lambda_gate_closure(event_rows, "proposed"),
+        "cell_delta_closure_preserved": True,
+    }
+    gate_result["final_applied_closure"] = _finalize_lambda_gate_closure(
+        event_rows, "applied"
+    )
+    return lookup
+
+
+def _lambda_gate_audit_rows(event_rows, limit=LAMBDA_PRESERVATION_AUDIT_LIMIT):
+    """Return a deterministic bounded event-level proposed/applied audit."""
+    ranked = []
+    for row in event_rows or []:
+        source = str((row or {}).get("source_label", ""))
+        try:
+            entry = int((row or {}).get("source_entry_index", -1))
+        except (TypeError, ValueError):
+            entry = -1
+        signature = _make_prepared_event_signature(source, entry)
+        rank = hashlib.sha256(signature.encode("utf-8")).hexdigest()
+        ranked.append((rank, signature, row))
+    fields = (
+        "source_label", "source_entry_index", "adj_t", "adj_mm", "selected_timing",
+        "rf_accept", "proposed_proton_probability", "proposed_cleaned_factor",
+        "proposed_final_cleaned_factor", "lambda_gate_status", "lambda_gate_passed",
+        "applied_proton_probability", "applied_cleaned_factor",
+        "applied_final_cleaned_factor", "applied_zero_reason",
+    )
+    rows = []
+    for _rank, signature, row in sorted(ranked)[: max(0, int(limit))]:
+        rows.append({
+            "event_signature": signature,
+            "source": row.get("source_label"),
+            "entry_index": row.get("source_entry_index"),
+            **{field: row.get(field) for field in fields},
+        })
+    return {
+        "sampling_method": "sha256_ranked_source_entry_signature",
+        "sample_limit": int(limit),
+        "source_entry_count": int(len(event_rows or [])),
+        "sampled_entry_count": int(len(rows)),
+        "rows": rows,
+    }
 
 
 def _new_timing_t_mm_accumulator():
@@ -4651,7 +5012,7 @@ def _build_t_aerogel_root_payload(
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_estimated_proton": _make_t_aerogel_hist(
-                "H_aero_vs_t_estimated_proton", "Estimated proton physical yield;|t| [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_estimated_proton", "Proposed estimated proton physical yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_estimated_proton_positive": _make_t_aerogel_hist(
@@ -4663,7 +5024,7 @@ def _build_t_aerogel_root_payload(
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_proton_cleaned": _make_t_aerogel_hist(
-                "H_aero_vs_t_proton_cleaned", "Frozen proton-cleaned physical yield;|t| [GeV^{2}];P_aero NPE",
+                "H_aero_vs_t_proton_cleaned", "Proposed proton-cleaned physical yield;|t| [GeV^{2}];P_aero NPE",
                 t_edges, display_edges,
             ),
             "H_aero_vs_t_proton_cleaned_positive": _make_t_aerogel_hist(
@@ -4689,17 +5050,17 @@ def _build_t_aerogel_root_payload(
                 ),
                 "estimated_proton_timing_vs_aero": ROOT.TH2D(
                     "H_aero_timing_estimated_proton_{}".format(tag),
-                    "Estimated-proton timing versus aerogel;P_aero NPE;selected timing [ns]",
+                    "Proposed estimated-proton timing versus aerogel;P_aero NPE;selected timing [ns]",
                     len(display_edges) - 1, array("d", display_edges), timing_bins, timing_low, timing_high,
                 ),
                 "raw_signed_projection": _make_aero_axis_hist(
                     "H_aero_raw_signed_{}".format(tag), "Signed physical yield;P_aero NPE;yield", display_edges,
                 ),
                 "estimated_proton_projection": _make_aero_axis_hist(
-                    "H_aero_estimated_proton_{}".format(tag), "Estimated proton yield;P_aero NPE;yield", display_edges,
+                    "H_aero_estimated_proton_{}".format(tag), "Proposed estimated proton yield;P_aero NPE;yield", display_edges,
                 ),
                 "cleaned_projection": _make_aero_axis_hist(
-                    "H_aero_cleaned_{}".format(tag), "Frozen cleaned yield;P_aero NPE;yield", display_edges,
+                    "H_aero_cleaned_{}".format(tag), "Proposed cleaned yield;P_aero NPE;yield", display_edges,
                 ),
                 "average_proton_probability": _make_aero_axis_hist(
                     "H_aero_average_proton_probability_{}".format(tag), "Average proton probability;P_aero NPE;#LTw_{p}#GT", display_edges,
@@ -5361,10 +5722,15 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                 "delta_index": int(delta_index), "t_index": int(t_index),
                 "t_low": float(t_edges[t_index]) if 0 <= t_index < len(t_edges) - 1 else None,
                 "t_high": float(t_edges[t_index + 1]) if 0 <= t_index < len(t_edges) - 1 else None,
-                "support_label": support_label, "proton_weight": proton_weight,
+                "support_label": support_label,
+                # These values are the immutable timing-model proposal.  The
+                # Lambda gate below is the only owner allowed to commit the
+                # production aliases used downstream.
+                "proposed_proton_probability": proton_weight,
+                "proposed_cleaned_factor": cleaned_factor,
+                "proposed_final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
                 "event_lookup_zero_reason": lookup_zero_reason,
-                "cleaned_factor": cleaned_factor, "rf_accept": rf_accept,
-                "final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
+                "rf_accept": rf_accept,
             }
             if bool((entry_payload or {}).get("nommcuts", False)):
                 if (delta_index, t_index) in closure_by_cell:
@@ -5382,9 +5748,11 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                     "t_index": int(t_index), "aero_index": int(aero_index),
                     "source_label": str(source_name), "source_entry_index": int(entry_index),
                     "is_prompt_source": bool((source_spec or {}).get("is_prompt_source", False)),
-                    "physical_weight": physical_coefficient, "proton_weight": proton_weight,
-                    "cleaned_factor": cleaned_factor,
-                    "final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
+                    "physical_weight": physical_coefficient,
+                    "proposed_proton_probability": proton_weight,
+                    "proposed_cleaned_factor": cleaned_factor,
+                    "proposed_final_cleaned_factor": cleaned_factor if rf_accept else 0.0,
+                    "rf_accept": rf_accept,
                     "adj_t": t_value,
                     "phi_value": float((entry_payload or {}).get("phi_value", float("nan"))),
                     "aero_value": aero_value,
@@ -5408,9 +5776,32 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                     row["signed_physical_yield"] += physical_coefficient
                     row["estimated_proton_yield"] += physical_coefficient * proton_weight
                     row["frozen_cleaned_yield"] += physical_coefficient * cleaned_factor
+    # The timing fit and all cell/delta closure terms above are deliberately
+    # proposal-only.  Evaluate the physics-preservation gate only after that
+    # immutable proposal exists, then commit one setting-wide applied lookup.
+    lambda_gate = _evaluate_lambda_preservation_gate(
+        cleaning_result, validation_rows, config
+    )
+    _commit_lambda_preservation_gate(lookup, validation_rows, lambda_gate)
+    proposed_validation_rows = []
+    for row in validation_rows:
+        proposal_row = dict(row)
+        proposed_probability, proposed_cleaned, proposed_final = _lambda_gate_stage_values(
+            proposal_row, "proposed"
+        )
+        proposal_row.update(
+            {
+                "proton_weight": proposed_probability,
+                "cleaned_factor": proposed_cleaned,
+                "final_cleaned_factor": proposed_final,
+            }
+        )
+        proposed_validation_rows.append(proposal_row)
+
     for collection in (closure_by_cell, closure_by_delta, closure_by_t):
         for row in collection.values():
             applied = float(row.get("applied_proton_yield", 0.0) or 0.0)
+            row["closure_scope"] = "proposed_timing_t_model"
             if applied > 0.0:
                 row["closure_ratio"] = float(row["summed_event_proton_probability"] / applied)
                 row["closure_status"] = "evaluated_applied_yield"
@@ -5425,6 +5816,11 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
                 fit["closure_ratio"] = closure.get("closure_ratio")
     diagnostics = cleaning_result.setdefault("diagnostics", {})
     diagnostics["event_weight_source"] = "setting_wide_immutable_prepared_lookup"
+    diagnostics["event_weight_closure_label"] = "proposed timing-|t| model closure"
+    diagnostics["lambda_preservation_gate"] = _json_ready_value(lambda_gate)
+    diagnostics["lambda_preservation_event_audit"] = _json_ready_value(
+        _lambda_gate_audit_rows(validation_rows)
+    )
     diagnostics["event_weight_closure_by_cell"] = _json_ready_value(list(closure_by_cell.values()))
     diagnostics["event_weight_closure_by_delta"] = _json_ready_value(list(closure_by_delta.values()))
     diagnostics["event_weight_closure_by_t"] = _json_ready_value(list(closure_by_t.values()))
@@ -5443,7 +5839,7 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
     ])
     diagnostics["t_lookup_boundary_counts"] = {"underflow": underflow, "overflow": overflow, "nonfinite": nonfinite}
     aerogel_validation = _build_t_aerogel_validation(
-        cleaning_result, source_bundle, validation_rows, config, include_root_payload=True,
+        cleaning_result, source_bundle, proposed_validation_rows, config, include_root_payload=True,
     )
     cleaning_result["_aerogel_vs_t_root_payload"] = aerogel_validation.pop("_root_payload", {})
     diagnostics["aerogel_vs_t_validation"] = _json_ready_value(aerogel_validation)
@@ -5452,13 +5848,45 @@ def _build_t_prepared_event_weight_lookup(cleaning_result, source_bundle, config
     diagnostics["timing_t_diagnostic_integrity"] = _json_ready_value(
         aerogel_validation.get("diagnostic_integrity") or {}
     )
-    # The MM layer is intentionally built from the same immutable lookup rows
-    # after probabilities are frozen.  It is independent of the aerogel layer
-    # and cannot feed back into candidate selection or event weighting.
-    mm_diagnostics = _build_timing_t_mm_diagnostics(
+    # Retain the timing-model proposal beside the committed production state.
+    # The former is needed to understand a rejected model; only the latter is
+    # permitted to populate the downstream kaon and pion targets.
+    proposed_mm_diagnostics = _build_timing_t_mm_diagnostics(
+        cleaning_result, proposed_validation_rows, config, include_root_payload=True,
+    )
+    applied_mm_diagnostics = _build_timing_t_mm_diagnostics(
         cleaning_result, validation_rows, config, include_root_payload=True,
     )
-    cleaning_result["_timing_t_mm_root_payload"] = mm_diagnostics.pop("_root_payload", {})
+    proposed_root_payload = proposed_mm_diagnostics.pop("_root_payload", {})
+    applied_root_payload = applied_mm_diagnostics.pop("_root_payload", {})
+    proposed_public = dict(proposed_mm_diagnostics)
+    applied_public = dict(applied_mm_diagnostics)
+    mm_diagnostics = dict(proposed_public)
+    mm_diagnostics.update(
+        {
+            "stage": "proposed",
+            "gate_status": lambda_gate.get("status"),
+            "proposed": proposed_public,
+            "applied": applied_public,
+        }
+    )
+    proposed_maps = proposed_root_payload.get("maps") or {}
+    applied_maps = applied_root_payload.get("maps") or {}
+    mm_root_maps = {
+        "raw": proposed_maps.get("raw"),
+        "proposed_estimated_proton": proposed_maps.get("estimated_proton"),
+        "proposed_cleaned_pre_rf": proposed_maps.get("cleaned_pre_rf"),
+        "applied_cleaned_pre_rf": applied_maps.get("cleaned_pre_rf"),
+        "applied_cleaned_final_rf": applied_maps.get("cleaned_final_rf"),
+    }
+    cleaning_result["_timing_t_mm_root_payload"] = {
+        "maps": mm_root_maps,
+        "window_removed_fraction": proposed_root_payload.get("window_removed_fraction") or {},
+        "object_count": int(
+            sum(hist is not None for hist in mm_root_maps.values())
+            + len(proposed_root_payload.get("window_removed_fraction") or {})
+        ),
+    }
     diagnostics["timing_t_mm_diagnostics"] = _json_ready_value(mm_diagnostics)
     diagnostics["timing_t_summary"] = _json_ready_value(
         _build_timing_t_summary(
@@ -8563,6 +8991,9 @@ def apply_kaon_proton_cleaning_to_targets(
                 "membership optionally applied only after event-level proton weights"
             ),
             "selected_timing_branch": str(timing_branch),
+            "lambda_preservation_gate": _json_ready_value(
+                (cleaning_result.get("diagnostics") or {}).get("lambda_preservation_gate") or {}
+            ),
         },
     }
     diagnostics_payload["cross_stage_t_consistency"] = _json_ready_value(cross_stage_rows)
@@ -10615,9 +11046,12 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
     if len(t_edges) < 2:
         return
     header = (
-        "Frozen timing-|t| proton-subtraction MM diagnostics - "
-        "uses shared shifted MM and immutable event factors only"
+        "Frozen timing-|t| proton-subtraction MM diagnostics - proposed model versus committed applied factors"
     )
+    lambda_status = str(
+        (diagnostics.get("lambda_preservation_gate") or {}).get("status") or "not evaluated"
+    ).upper()
+    header = "{} | setting-wide Lambda gate={}".format(header, lambda_status)
     if bool(config.get("write_overview_page", True)):
         canvas, body, _header, _label = _make_timing_t_report_canvas(
             "C_timing_t_mm_overview_{}".format(page_id),
@@ -10626,8 +11060,9 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
         )
         for index, (key, label) in enumerate((
             ("raw", "Raw selected MM"),
-            ("estimated_proton", "Estimated proton MM"),
-            ("cleaned_pre_rf", "Proton-cleaned MM before RF restoration"),
+            ("proposed_estimated_proton", "Proposed estimated proton MM"),
+            ("proposed_cleaned_pre_rf", "Proposed cleaned pre-RF MM"),
+            ("applied_cleaned_pre_rf", "Final applied cleaned pre-RF MM"),
         ), start=1):
             body.cd(index)
             hist = maps.get(key)
@@ -10640,40 +11075,20 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
                 hist.Draw("colz")
                 gPad.Modified()
                 gPad.Update()
-        body.cd(4)
-        fraction_hists = root_payload.get("window_removed_fraction") or {}
-        drawn = []
-        colors = (kRed, kBlue, kGreen + 2, kViolet + 1)
-        for index, (window_name, hist) in enumerate(fraction_hists.items()):
-            hist.SetLineColor(colors[index % len(colors)])
-            hist.SetLineWidth(3)
-            hist.SetMinimum(0.0)
-            hist.SetMaximum(1.0)
-            hist.Draw("hist" if index == 0 else "hist same")
-            drawn.append((window_name, hist))
-        if not drawn:
-            _draw_timing_t_status_panel("No configured MM validation windows")
-        else:
-            legend = TLegend(0.48, 0.68, 0.88, 0.88)
-            legend.SetBorderSize(0)
-            legend.SetFillStyle(0)
-            for window_name, hist in drawn:
-                legend.AddEntry(hist, "{} removed fraction".format(window_name), "l")
-            legend.Draw()
         canvas.Print(output_pdf)
 
     if bool(config.get("write_t_binned_pages", True)):
         raw_map = maps.get("raw")
-        proton_map = maps.get("estimated_proton")
-        cleaned_map = maps.get("cleaned_pre_rf")
-        final_map = maps.get("cleaned_final_rf")
+        proton_map = maps.get("proposed_estimated_proton")
+        cleaned_map = maps.get("proposed_cleaned_pre_rf")
+        final_map = maps.get("applied_cleaned_pre_rf")
         panels_per_page = max(1, min(12, int(config.get("max_t_panels_per_page", 1) or 1)))
         for first in range(0, len(per_t_rows), panels_per_page):
             rows = per_t_rows[first:first + panels_per_page]
             canvas, body, _header, _label = _make_timing_t_report_canvas(
                 "C_timing_t_mm_by_t_{}_{}".format(page_id, first),
                 "{} proton-subtraction MM by |t| bin".format(prefix), 1600, 1000,
-                header_text=[header, "raw / estimated proton / cleaned before RF restoration"],
+                header_text=[header, "raw / proposed proton / proposed cleaned / final applied cleaned before RF"],
                 panel_count=len(rows),
             )
             for panel, row in enumerate(rows, start=1):
@@ -10695,9 +11110,9 @@ def _print_timing_t_mm_diagnostic_pages(output_pdf, cleaning_result, prefix, pag
                 projections = []
                 for key, hist, color, label in (
                     ("raw", raw_map, kBlack, "raw"),
-                    ("proton", proton_map, kRed, "estimated proton"),
-                    ("cleaned", cleaned_map, kGreen + 2, "cleaned pre-RF"),
-                    ("final", final_map, kBlue, "cleaned final RF"),
+                    ("proposed_proton", proton_map, kRed, "proposed estimated proton"),
+                    ("proposed_cleaned", cleaned_map, kGreen + 2, "proposed cleaned pre-RF"),
+                    ("applied_cleaned", final_map, kBlue, "final applied cleaned pre-RF"),
                 ):
                     if hist is None:
                         continue
@@ -11124,8 +11539,11 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
         return
     validation_cfg = dict(aero.get("configuration") or {})
 
+    lambda_gate_status = str(
+        (diagnostics.get("lambda_preservation_gate") or {}).get("status") or "not evaluated"
+    ).upper()
     observational_header = (
-        "Aerogel secondary PID validation only - not used in production timing-t event-weight lookup"
+        "Aerogel secondary PID validation only - proposed timing-|t| model; not used in production event weights"
     )
 
     # Section E1: exact canonical-t x fine-aerogel frozen-lookup maps.
@@ -11246,7 +11664,7 @@ def _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix):
             )
             applied_yield = sum(float(cell.get("applied_proton_yield", 0.0) or 0.0) for cell in local_cells)
             header_text = [
-                "Aerogel secondary PID validation only - not used in production timing-t event weights",
+                "Aerogel secondary PID validation only - proposed timing-|t| model; Lambda gate={}".format(lambda_gate_status),
                 "Q2={q2} GeV^2  W={w} GeV  eps={epsilon}  phi={phi} | t bin {t}: [{low:.6g}, {high:.6g}] GeV^2 | timing={branch} {timing}".format(
                 q2=context.get("Q2", "n/a"), w=context.get("W", "n/a"), epsilon=context.get("epsilon", "n/a"),
                 phi=context.get("phi_setting", cleaning_result.get("phi_setting", "n/a")),
@@ -11404,6 +11822,7 @@ def _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix):
         candidate = summary.get("selected_candidate") or {}
         setting = summary.get("setting_support") or {}
         mm = summary.get("missing_mass_totals") or {}
+        gate = summary.get("lambda_preservation_gate") or {}
         per_delta = list(summary.get("per_delta") or [])
         applied = sum(float(row.get("applied_proton_yield", 0.0) or 0.0) for row in per_delta)
         data_total = sum(float(row.get("raw_data_total", 0.0) or 0.0) for row in per_delta)
@@ -11419,9 +11838,24 @@ def _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix):
                 _safe_validation_ratio(applied, data_total), applied, data_total,
             )
         )
+        proposed_mm = mm.get("proposed") or {}
+        applied_mm = mm.get("applied") or {}
         summary_text.AddText(
-            "frozen missing-mass totals: raw={} estimated proton={} cleaned={}".format(
-                mm.get("raw"), mm.get("estimated_proton"), mm.get("cleaned"),
+            "proposed MM totals: raw={} estimated proton={} cleaned pre-RF={}".format(
+                proposed_mm.get("raw", mm.get("raw")),
+                proposed_mm.get("estimated_proton", mm.get("estimated_proton")),
+                proposed_mm.get("cleaned_pre_rf", mm.get("cleaned")),
+            )
+        )
+        summary_text.AddText(
+            "final applied MM totals: raw={} estimated proton={} cleaned pre-RF={} cleaned post-RF={}".format(
+                applied_mm.get("raw"), applied_mm.get("estimated_proton"),
+                applied_mm.get("cleaned_pre_rf"), applied_mm.get("cleaned_final_rf"),
+            )
+        )
+        summary_text.AddText(
+            "Lambda gate={} action={} committed={}".format(
+                gate.get("status"), gate.get("production_action"), gate.get("proton_cleaning_committed"),
             )
         )
         for row in per_delta:
@@ -11434,6 +11868,130 @@ def _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix):
                 )
             )
     summary_text.Draw()
+    canvas.Print(output_pdf)
+
+
+def _print_timing_t_lambda_preservation_gate_pages(output_pdf, cleaning_result, prefix):
+    """Render the setting-wide gate immediately before pion diagnostics."""
+    diagnostics = (cleaning_result or {}).get("diagnostics") or {}
+    gate = diagnostics.get("lambda_preservation_gate") or {}
+    if not gate:
+        return
+    page_id = abs(id(cleaning_result))
+    status = str(gate.get("status") or "insufficient_support").upper()
+    status_color = kGreen + 2 if status == "PASS" else (kRed if status == "FAIL" else kOrange + 7)
+    canvas, body, _header, _label = _make_timing_t_report_canvas(
+        "C_timing_t_lambda_gate_{}".format(page_id),
+        "{} Lambda-preservation gate".format(prefix), 1500, 900,
+        header_text="Setting-wide Lambda-preservation gate - pre-RF proposed timing-|t| lookup",
+        panel_count=1,
+    )
+    body.cd()
+    banner = TPaveText(0.05, 0.79, 0.95, 0.94, "NDC")
+    banner.SetBorderSize(2)
+    banner.SetFillColor(status_color)
+    banner.SetTextAlign(22)
+    banner.SetTextSize(0.045)
+    banner.AddText("{}: {} PROTON CLEANING".format(
+        status,
+        "APPLY" if str(gate.get("production_action")) == "apply" else "BYPASS",
+    ))
+    banner.Draw()
+    text = TPaveText(0.06, 0.06, 0.94, 0.74, "NDC")
+    text.SetBorderSize(1)
+    text.SetFillStyle(0)
+    text.SetTextAlign(12)
+    text.SetTextSize(0.028)
+    text.AddText(
+        "timing model accepted={} | branch={} | setting support={}".format(
+            gate.get("timing_fit_accepted"), diagnostics.get("timing_branch"),
+            gate.get("setting_support_label"),
+        )
+    )
+    text.AddText(
+        "Lambda window {}: [{:.6g}, {:.6g}] GeV (shared validation window)".format(
+            gate.get("validation_window_key"),
+            float(gate.get("window_low", 0.0) or 0.0),
+            float(gate.get("window_high", 0.0) or 0.0),
+        )
+    )
+    text.AddText(
+        "raw prompt count={} | raw signed yield={:.7g} | absolute support={:.7g} | signed/abs={}".format(
+            gate.get("raw_prompt_count"),
+            float(gate.get("raw_signed_yield", 0.0) or 0.0),
+            float(gate.get("raw_absolute_support", 0.0) or 0.0),
+            gate.get("raw_signed_to_absolute_support_ratio"),
+        )
+    )
+    text.AddText(
+        "proposed proton Lambda yield={:.7g} | proposed removed fraction={} | maximum allowed={:.6g}".format(
+            float(gate.get("proposed_proton_yield", 0.0) or 0.0),
+            gate.get("proposed_removed_fraction"),
+            float(gate.get("maximum_removed_fraction", 0.10) or 0.10),
+        )
+    )
+    text.AddText("support valid={} | reasons={}".format(
+        gate.get("support_valid"), gate.get("support_reasons") or [],
+    ))
+    text.AddText("observational warnings={}".format(gate.get("observational_warnings") or []))
+    text.AddText("proton cleaning committed={} | applied lookup zeroed={}".format(
+        gate.get("proton_cleaning_committed"), gate.get("applied_lookup_zeroed"),
+    ))
+    final_closure = gate.get("final_applied_closure") or {}
+    text.AddText(
+        "final applied pre-RF closure: raw - p - cleaned = {:.5g}".format(
+            float(final_closure.get("pre_rf_closure_difference", 0.0) or 0.0)
+        )
+    )
+    text.Draw()
+    canvas.Print(output_pdf)
+
+    root_payload = (cleaning_result or {}).get("_timing_t_mm_root_payload") or {}
+    maps = root_payload.get("maps") or {}
+    ordered = (
+        ("raw", "raw", kBlack),
+        ("proposed_estimated_proton", "proposed estimated proton", kRed),
+        ("proposed_cleaned_pre_rf", "proposed cleaned pre-RF", kGreen + 2),
+        ("applied_cleaned_pre_rf", "final applied cleaned pre-RF", kBlue),
+    )
+    projections = []
+    for key, label, color in ordered:
+        hist = maps.get(key)
+        if hist is None:
+            continue
+        projection = hist.ProjectionX(
+            "H_timing_t_lambda_gate_{}_{}".format(key, page_id), 1, hist.GetNbinsY(), "e"
+        )
+        projection.SetDirectory(0)
+        _set_hist_line_marker(projection, color, width=3)
+        projections.append((label, projection))
+    if not projections:
+        return
+    canvas, body, _header, _label = _make_timing_t_report_canvas(
+        "C_timing_t_lambda_gate_mm_{}".format(page_id),
+        "{} proposed versus applied MM".format(prefix), 1400, 900,
+        header_text=(
+            "Lambda gate {} - proposed model is diagnostic; final applied curve is what pion subtraction receives".format(status)
+        ),
+        panel_count=1,
+    )
+    body.cd()
+    maximum = max(float(hist.GetMaximum()) for _label, hist in projections)
+    minimum = min(float(hist.GetMinimum()) for _label, hist in projections)
+    y_min, y_max = _timing_t_signed_display_limits(minimum, maximum)
+    first = projections[0][1]
+    first.SetTitle("Setting-wide shifted MM;shifted MM [GeV];signed physical yield")
+    first.SetMinimum(y_min)
+    first.SetMaximum(y_max)
+    first.Draw("hist")
+    for _label, projection in projections[1:]:
+        projection.Draw("hist same")
+    legend = TLegend(0.52, 0.62, 0.90, 0.88)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    for label, projection in projections:
+        legend.AddEntry(projection, label, "l")
+    legend.Draw()
     canvas.Print(output_pdf)
 
 
@@ -11453,6 +12011,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     if str(cleaning_result.get("method") or "") == PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT:
         _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix)
         _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix)
+        _print_timing_t_lambda_preservation_gate_pages(output_pdf, cleaning_result, prefix)
         return
 
     _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
