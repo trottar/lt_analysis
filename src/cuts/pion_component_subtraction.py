@@ -15,6 +15,8 @@ from mm_background_subtraction import mm_background_weight_from_value
 
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
+KAON_SIGNAL_TEMPLATE_NAME = "k_lambda_signal"
+KAON_SIGMA0_TEMPLATE_NAME = "k_sigma0_signal"
 
 
 def _is_root_object(obj):
@@ -383,6 +385,7 @@ def build_simc_shape_pion_control_weights(
     diagnostics = component_fit_result.get("diagnostics") or {}
     pion_diagnostics = diagnostics.get("pion") or {}
     kaon_diagnostics = diagnostics.get("kaon") or {}
+    protected_kaon_fit = kaon_diagnostics.get("pi_delta_signal_protected_fit") or {}
     if mode_key == "staged":
         pion_amplitude_source = pion_diagnostics.get("staged_amplitudes_scaled") or {}
         kaon_amplitude_source = kaon_diagnostics.get("staged_amplitudes_scaled") or {}
@@ -396,6 +399,14 @@ def build_simc_shape_pion_control_weights(
             kaon_diagnostics.get("refined_amplitudes")
             or kaon_diagnostics.get("staged_amplitudes_scaled")
             or {}
+        )
+    # The old staged pi-delta value remains diagnostic-only when the protected
+    # stage is active.  This applies to the historical ``staged`` diagnostic
+    # model as well, so no event/model path can silently recover it.
+    if bool(protected_kaon_fit.get("enabled")):
+        kaon_amplitude_source = (
+            protected_kaon_fit.get("protected_applied_amplitudes")
+            or kaon_amplitude_source
         )
     pion_amplitudes = {
         "pi_n": float(pion_amplitude_source.get("pi_n", component_fit_result.get("B_n", 0.0)) or 0.0),
@@ -474,6 +485,10 @@ def build_simc_shape_pion_control_weights(
     diagnostics = {
         "model_variant": mode_key,
         "active_component_names": list(active_component_names),
+        "signal_templates_excluded_from_subtraction_weight": bool(
+            KAON_SIGNAL_TEMPLATE_NAME not in active_component_names
+            and KAON_SIGMA0_TEMPLATE_NAME not in active_component_names
+        ),
         "pion_control_integral": _hist_integral(component_fit_result.get("H_pion_control_input")),
         "pion_control_model_integral": _hist_integral(h_pion_control_model),
         "kaon_pion_model_integral": _hist_integral(h_kaon_pion_model),

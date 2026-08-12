@@ -356,6 +356,21 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
         #"max_oversub_bin_fraction": 0.20,
         "max_full_range_chi2_ndf": None,
         "kaon_signal_tail_extension": 0.02,
+        # The final kaon-side pi-delta amplitude is resolved after the
+        # existing pion-control alignment and the early pi-n/pi-SIDIS stages.
+        # K-Lambda and K-Sigma0 are fit only as protected signal templates;
+        # neither is ever included in the pion event-subtraction weight.
+        "pi_delta_signal_protected_fit": {
+            "enabled": True,
+            "require_k_lambda_template": True,
+            "require_k_sigma0_template": True,
+            "fit_window": None,
+            "nonnegative_amplitudes": True,
+            "failure_policy": "zero_pi_delta",
+            "template_corr_warn": 0.95,
+            "affects_pi_n": False,
+            "affects_pi_sidis": False,
+        },
         "enabled_windows": {
             "pi_n": True,
             #"pi_delta": True,
@@ -761,6 +776,7 @@ PARTICLE_SUBTRACTION_CONFIG_MERGE_KEYS = frozenset(
         "residual_component_shift_values",
         "residual_component_shift_scan_grid",
         "residual_component_shift_bounds",
+        "pi_delta_signal_protected_fit",
     }
 )
 
