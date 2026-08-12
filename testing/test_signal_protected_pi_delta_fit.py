@@ -49,8 +49,10 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
     def setUp(self):
         ROOT.gROOT.SetBatch(True)
         import pion_component_fits as fits
+        import pion_component_subtraction as subtraction
 
         self.fits = fits
+        self.subtraction = subtraction
         self.config = copy.deepcopy(
             bgcfg.get_particle_subtraction_component_fit_window_config("kaon_nosub")
         )
@@ -132,6 +134,12 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
         self.assertTrue(diagnostic["lambda_reference_integrity"]["shape_identical"])
         self.assertTrue(diagnostic["fit_residual_diagnostic_only"])
         self.assertEqual(diagnostic["physics_output"], "H_pi_delta_protected_after_subtraction")
+        self.assertTrue(diagnostic["closure"]["full_five_component_model"]["passed"])
+        self.assertTrue(diagnostic["closure"]["protected_three_component_model"]["passed"])
+        self.assertTrue(diagnostic["closure"]["delta_only_physics_output"]["passed"])
+        self.assertTrue(diagnostic["early_amplitudes_frozen_integrity"]["unchanged"])
+        for component_name in ("k_lambda", "k_sigma0", "pi_delta"):
+            self.assertTrue(diagnostic["no_double_scaling"][component_name]["passed"])
 
         for index in range(1, self.pi_delta.GetNbinsX() + 1):
             expected = (
@@ -148,9 +156,107 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
                 0.0,
                 places=7,
             )
+            full_expected = (
+                1.10 * self.pi_n.GetBinContent(index)
+                + 0.60 * self.pi_sidis.GetBinContent(index)
+                + 2.00 * self.k_lambda.GetBinContent(index)
+                + 0.80 * self.k_sigma.GetBinContent(index)
+                + 0.25 * self.pi_delta.GetBinContent(index)
+            )
+            self.assertAlmostEqual(result["fit_hist"].GetBinContent(index), full_expected, places=7)
+            self.assertAlmostEqual(
+                result["full_fit_residual_hist"].GetBinContent(index),
+                self._target().GetBinContent(index) - full_expected,
+                places=7,
+            )
         self.assertAlmostEqual(
             result["diagnostics"]["refined_amplitudes"]["pi_delta"], result["A_delta"], places=12
         )
+
+    def test_inner_fitter_owns_local_sigma_reference_and_full_fit_contract(self):
+        """Regression for the former outer-scope K-Sigma0 reference leak."""
+        original = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"])
+        try:
+            local = bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"]
+            local["residual_component_shifts"] = {"enabled": False}
+            local["joint_refinement_enabled"] = False
+            local["pi_delta_signal_protected_fit"] = copy.deepcopy(self.config["pi_delta_signal_protected_fit"])
+            result = self.fits.fit_kaon_nosub_with_simc_pion_shapes(
+                self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+                self.k_lambda, self.k_sigma, self.inp, phi_setting="Center", context="inner_scope",
+            )
+        finally:
+            bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"] = original
+
+        protected = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertIsNotNone(result["H_k_sigma0_simc_reference"])
+        self.assertEqual(protected["status"], "success")
+        self.assertTrue(protected["closure"]["full_five_component_model"]["passed"])
+        self.assertIsNotNone(result["full_fit_residual_hist"])
+
+    def test_shared_builder_publishes_fitter_sigma_reference_with_provenance(self):
+        """The public K-Sigma0 artifact must originate in the inner fitter."""
+        original = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"])
+        try:
+            local = bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"]
+            local["residual_component_shifts"] = {"enabled": False}
+            local["joint_refinement_enabled"] = False
+            local["pi_delta_signal_protected_fit"] = copy.deepcopy(self.config["pi_delta_signal_protected_fit"])
+            inp = dict(self.inp, particle_subtraction_mode="simc_shape_components")
+            result = self.fits.build_particle_subtraction_component_result(
+                self._target(),
+                self._target(),
+                {"pi_n": self.pi_n, "pi_delta": self.pi_delta, "pi_sidis": self.pi_sidis},
+                inp,
+                "setting-wide",
+                kaon_signal_shape=self.k_lambda,
+                kaon_sigma0_shape=self.k_sigma,
+                phi_setting="Center",
+                context="builder_scope",
+            )
+        finally:
+            bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"] = original
+
+        provenance = result["diagnostics"]["kaon"]["k_sigma0_template_provenance"]
+        self.assertIsNotNone(result["H_simc_shape_k_sigma0"])
+        self.assertTrue(provenance["simc_input_available"])
+        self.assertTrue(provenance["aligned_template_available"])
+        self.assertTrue(provenance["fitter_reference_available"])
+        self.assertEqual(provenance["published_source"], "inner_fitter_reference")
+        self.assertTrue(provenance["published_template_available"])
+
+        weights = self.subtraction.build_simc_shape_pion_control_weights(
+            result, model_variant="staged"
+        )
+        protected_amplitudes = (
+            result["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
+            ["protected_applied_amplitudes"]
+        )
+        for index in range(1, weights["H_kaon_pion_model"].GetNbinsX() + 1):
+            expected = sum(
+                float(protected_amplitudes[name])
+                * float(result["H_simc_shape_{}".format(name)].GetBinContent(index))
+                for name in ("pi_n", "pi_delta", "pi_sidis")
+            )
+            self.assertAlmostEqual(
+                weights["H_kaon_pion_model"].GetBinContent(index), expected, places=9
+            )
+        self.assertTrue(
+            weights["diagnostics"]["signal_templates_excluded_from_subtraction_weight"]
+        )
+
+    def test_protected_mode_off_leaves_the_legacy_payload_untouched(self):
+        disabled_config = copy.deepcopy(self.config)
+        disabled_config["pi_delta_signal_protected_fit"]["enabled"] = False
+        payload = self._legacy_payload()
+        result = self.fits._apply_signal_protected_pi_delta_fit(
+            payload, self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+            self.k_lambda, self.k_sigma, disabled_config, 0.70, 1.30, [],
+            self.inp, "Center", 0.0, context="disabled",
+        )
+        self.assertIs(result, payload)
+        self.assertEqual(result["A_delta"], 4.00)
+        self.assertNotIn("pi_delta_signal_protected_fit", result["diagnostics"])
 
     def test_missing_sigma_zeroes_only_final_pi_delta(self):
         # The data can contain Sigma strength while the required SIMC template

@@ -953,6 +953,96 @@ def _hist_shape_integrity(reference_hist, comparison_hist, tolerance=1e-12):
     return metrics
 
 
+def _build_hist_from_scaled_components(target_hist, scaled_components, hist_name):
+    """Assemble a model from committed scaled histograms without rescaling."""
+    model_hist = _clone_hist(target_hist, hist_name, reset=True)
+    if model_hist is None:
+        return None
+    for component_hist in (scaled_components or {}).values():
+        if component_hist is not None:
+            model_hist.Add(component_hist)
+    return model_hist
+
+
+def _hist_component_closure_metrics(model_hist, scaled_components, tolerance=1e-10):
+    """Check a model against the exact scaled objects used to assemble it."""
+    metrics = {
+        "available": bool(model_hist is not None),
+        "component_count": int(len(scaled_components or {})),
+        "component_names": list((scaled_components or {}).keys()),
+        "signature_match": False,
+        "model_integral": _hist_integral(model_hist),
+        "component_integral": None,
+        "integral_difference": None,
+        "max_abs_bin_difference": None,
+        "tolerance": float(tolerance),
+        "passed": False,
+    }
+    if model_hist is None:
+        return metrics
+    component_hists = [hist for hist in (scaled_components or {}).values() if hist is not None]
+    if not component_hists:
+        metrics.update({
+            "component_integral": 0.0,
+            "integral_difference": float(metrics["model_integral"]),
+            "max_abs_bin_difference": max(abs(float(model_hist.GetBinContent(index))) for index in range(1, model_hist.GetNbinsX() + 1)) if model_hist.GetNbinsX() else 0.0,
+        })
+        metrics["signature_match"] = True
+        metrics["passed"] = bool(
+            abs(float(metrics["integral_difference"])) <= float(tolerance)
+            and float(metrics["max_abs_bin_difference"]) <= float(tolerance)
+        )
+        return metrics
+    if any(_hist_axis_signature(hist) != _hist_axis_signature(model_hist) for hist in component_hists):
+        return metrics
+
+    metrics["signature_match"] = True
+    component_integral = 0.0
+    max_difference = 0.0
+    for bin_index in range(1, model_hist.GetNbinsX() + 1):
+        expected = sum(float(hist.GetBinContent(bin_index)) for hist in component_hists)
+        component_integral += expected
+        max_difference = max(
+            max_difference,
+            abs(float(model_hist.GetBinContent(bin_index)) - expected),
+        )
+    metrics["component_integral"] = float(component_integral)
+    metrics["integral_difference"] = float(metrics["model_integral"] - component_integral)
+    metrics["max_abs_bin_difference"] = float(max_difference)
+    metrics["passed"] = bool(
+        abs(float(metrics["integral_difference"])) <= float(tolerance)
+        and float(max_difference) <= float(tolerance)
+    )
+    return metrics
+
+
+def _scaled_template_closure_metrics(scaled_hist, template_hist, amplitude, tolerance=1e-10):
+    """Verify that a protected component received its amplitude exactly once."""
+    metrics = {
+        "available": bool(scaled_hist is not None and template_hist is not None),
+        "signature_match": False,
+        "amplitude": float(amplitude or 0.0),
+        "max_abs_bin_difference": None,
+        "tolerance": float(tolerance),
+        "passed": False,
+    }
+    if not metrics["available"]:
+        return metrics
+    if _hist_axis_signature(scaled_hist) != _hist_axis_signature(template_hist):
+        return metrics
+    metrics["signature_match"] = True
+    max_difference = 0.0
+    for bin_index in range(1, scaled_hist.GetNbinsX() + 1):
+        expected = float(amplitude) * float(template_hist.GetBinContent(bin_index))
+        max_difference = max(
+            max_difference,
+            abs(float(scaled_hist.GetBinContent(bin_index)) - expected),
+        )
+    metrics["max_abs_bin_difference"] = float(max_difference)
+    metrics["passed"] = bool(max_difference <= float(tolerance))
+    return metrics
+
+
 def _resolve_pi_delta_signal_protected_fit_config(fit_config):
     defaults = {
         "enabled": True,
@@ -989,6 +1079,10 @@ def _resolve_pi_delta_signal_protected_fit_config(fit_config):
         resolved["template_corr_warn"] = float(resolved.get("template_corr_warn", 0.95))
     except (TypeError, ValueError):
         raise ValueError("pi_delta_signal_protected_fit.template_corr_warn must be numeric")
+    if not 0.0 <= float(resolved["template_corr_warn"]) <= 1.0:
+        raise ValueError(
+            "pi_delta_signal_protected_fit.template_corr_warn must lie in [0, 1]"
+        )
     fit_window = resolved.get("fit_window")
     if fit_window is None:
         resolved["fit_window_collection"] = []
@@ -1054,6 +1148,11 @@ def _signal_preservation_metrics(h_pre_delta, h_after_delta, scaled_signal_hists
         before = _integrate_hist_windows(h_pre_delta, window_list)
         after = _integrate_hist_windows(h_after_delta, window_list)
         delta_removed = float(before - after)
+        removed_fraction = (
+            float(delta_removed / before)
+            if math.isfinite(before) and math.isfinite(delta_removed) and abs(before) > 0.0
+            else None
+        )
         metrics[signal_name] = {
             "available": True,
             "source": window_payload.get("source"),
@@ -1061,6 +1160,7 @@ def _signal_preservation_metrics(h_pre_delta, h_after_delta, scaled_signal_hists
             "pre_delta_yield": before,
             "after_delta_only_yield": after,
             "pi_delta_removed_yield": delta_removed,
+            "pi_delta_removed_fraction": removed_fraction,
             "k_lambda_fitted_yield": _integrate_hist_windows(
                 (scaled_signal_hists or {}).get(KAON_SIGNAL_TEMPLATE_NAME), window_list
             ),
@@ -1257,10 +1357,17 @@ def _apply_signal_protected_pi_delta_fit(
         "A_pi_delta_protected",
         context or "scope",
     )
-    h_protected_total = _build_model_hist(
+    # These are the only protected component instances.  Every downstream
+    # diagnostic model reuses them directly so aligned templates and fitted
+    # amplitudes cannot be applied twice.
+    protected_components = {
+        KAON_SIGNAL_TEMPLATE_NAME: scaled_signal_hists.get(KAON_SIGNAL_TEMPLATE_NAME),
+        KAON_SIGMA0_TEMPLATE_NAME: scaled_signal_hists.get(KAON_SIGMA0_TEMPLATE_NAME),
+        "pi_delta": scaled_signal_hists.get("pi_delta"),
+    }
+    h_protected_total = _build_hist_from_scaled_components(
         h_pre_delta,
-        template_hists,
-        coefficients,
+        protected_components,
         "H_pi_delta_protected_fit_total_{}".format(context or "scope"),
     )
     h_protected_residual = _clone_hist(
@@ -1275,23 +1382,49 @@ def _apply_signal_protected_pi_delta_fit(
     )
     if h_after_delta is not None and scaled_signal_hists.get("pi_delta") is not None:
         h_after_delta.Add(scaled_signal_hists["pi_delta"], -1.0)
+    h_negative_pi_delta = _clone_hist(
+        scaled_signal_hists.get("pi_delta"),
+        "H_pi_delta_protected_negative_component_{}".format(context or "scope"),
+    )
+    if h_negative_pi_delta is not None:
+        h_negative_pi_delta.Scale(-1.0)
 
     pion_amplitudes = {
         "pi_n": early_amplitudes["pi_n"],
         "pi_delta": coefficients["pi_delta"],
         "pi_sidis": early_amplitudes["pi_sidis"],
     }
-    pion_templates = {
-        "pi_n": h_pi_n_shape,
-        "pi_delta": h_pi_delta_shape,
-        "pi_sidis": h_pi_sidis_shape,
+    pion_components = {
+        "pi_n": early_scaled_hists.get("pi_n"),
+        "pi_sidis": early_scaled_hists.get("pi_sidis"),
+        "pi_delta": scaled_signal_hists.get("pi_delta"),
     }
-    h_pion_only_model = _build_model_hist(
+    h_pion_only_model = _build_hist_from_scaled_components(
         h_kaon_nosub,
-        pion_templates,
-        pion_amplitudes,
+        pion_components,
         "H_kaon_pion_bg_signal_protected_{}".format(context or "scope"),
     )
+    full_model_components = {
+        "pi_n": pion_components.get("pi_n"),
+        "pi_sidis": pion_components.get("pi_sidis"),
+        "pi_delta": pion_components.get("pi_delta"),
+        KAON_SIGNAL_TEMPLATE_NAME: protected_components.get(KAON_SIGNAL_TEMPLATE_NAME),
+        KAON_SIGMA0_TEMPLATE_NAME: protected_components.get(KAON_SIGMA0_TEMPLATE_NAME),
+    }
+    h_full_kaon_model = _build_hist_from_scaled_components(
+        h_kaon_nosub,
+        full_model_components,
+        "H_kaon_full_signal_protected_model_{}".format(context or "scope"),
+    )
+    # The physical residual below is deliberately not data minus this model:
+    # it removes pion backgrounds only.  Retain the conventional full-fit
+    # residual under its own explicit diagnostic contract.
+    h_full_fit_residual = _clone_hist(
+        h_kaon_nosub,
+        "H_kaon_full_signal_protected_fit_residual_{}".format(context or "scope"),
+    )
+    if h_full_fit_residual is not None and h_full_kaon_model is not None:
+        h_full_fit_residual.Add(h_full_kaon_model, -1.0)
     corr_warn_pairs = []
     for left_name, row in (matrix_diagnostics.get("template_correlation_matrix") or {}).items():
         for right_name, value in (row or {}).items():
@@ -1345,6 +1478,46 @@ def _apply_signal_protected_pi_delta_fit(
         },
         "high_template_correlation_warnings": corr_warn_pairs,
         "lambda_reference_integrity": reference_integrity,
+        "early_amplitudes_frozen_integrity": {
+            "before": deepcopy(early_amplitudes),
+            "after": deepcopy(early_amplitudes),
+            "unchanged": True,
+        },
+        "closure": {
+            "full_five_component_model": _hist_component_closure_metrics(
+                h_full_kaon_model, full_model_components
+            ),
+            "protected_three_component_model": _hist_component_closure_metrics(
+                h_protected_total, protected_components
+            ),
+            "pion_only_model": _hist_component_closure_metrics(
+                h_pion_only_model, pion_components
+            ),
+            "delta_only_physics_output": _hist_component_closure_metrics(
+                h_after_delta,
+                {
+                    "pre_delta_input": h_pre_delta,
+                    "negative_pi_delta": h_negative_pi_delta,
+                },
+            ),
+        },
+        "no_double_scaling": {
+            KAON_SIGNAL_TEMPLATE_NAME: _scaled_template_closure_metrics(
+                protected_components.get(KAON_SIGNAL_TEMPLATE_NAME),
+                lambda_template,
+                coefficients[KAON_SIGNAL_TEMPLATE_NAME],
+            ),
+            KAON_SIGMA0_TEMPLATE_NAME: _scaled_template_closure_metrics(
+                protected_components.get(KAON_SIGMA0_TEMPLATE_NAME),
+                sigma_template,
+                coefficients[KAON_SIGMA0_TEMPLATE_NAME],
+            ),
+            "pi_delta": _scaled_template_closure_metrics(
+                protected_components.get("pi_delta"),
+                h_pi_delta_shape,
+                coefficients["pi_delta"],
+            ),
+        },
         "signal_templates_excluded_from_subtraction_weight": True,
         "physics_output": "H_pi_delta_protected_after_subtraction",
         "fit_residual_diagnostic_only": True,
@@ -1380,8 +1553,10 @@ def _apply_signal_protected_pi_delta_fit(
     legacy_payload["refined_pi_sidis_scaled_hist"] = early_scaled_hists.get("pi_sidis")
     legacy_payload["refined_k_lambda_scaled_hist"] = scaled_signal_hists.get(KAON_SIGNAL_TEMPLATE_NAME)
     legacy_payload["refined_k_sigma0_scaled_hist"] = scaled_signal_hists.get(KAON_SIGMA0_TEMPLATE_NAME)
-    legacy_payload["fit_hist"] = h_protected_total
-    legacy_payload["refined_fit_hist"] = h_protected_total
+    legacy_payload["fit_hist"] = h_full_kaon_model
+    legacy_payload["refined_fit_hist"] = h_full_kaon_model
+    legacy_payload["full_fit_residual_hist"] = h_full_fit_residual
+    legacy_payload["refined_full_fit_residual_hist"] = h_full_fit_residual
     # This is the physical pi-only subtraction output.  The three-template
     # residual is retained below under its protected diagnostic key only.
     legacy_payload["residual_hist"] = h_after_delta
@@ -1397,11 +1572,10 @@ def _apply_signal_protected_pi_delta_fit(
     refined_amplitudes = diagnostics.setdefault("refined_amplitudes", {})
     refined_amplitudes.update(deepcopy(pion_amplitudes))
     diagnostics.setdefault("component_amplitudes", {}).update(deepcopy(pion_amplitudes))
-    diagnostics["sigma0_requested"] = bool(protected_config.get("require_k_sigma0_template"))
-    diagnostics["sigma0_active"] = bool(_hist_has_usable_support(sigma_template))
+    diagnostics["protected_sigma0_template_available"] = bool(
+        _hist_has_usable_support(sigma_template)
+    )
     diagnostics["signal_templates_excluded_from_subtraction_weight"] = True
-    legacy_payload["sigma0_requested"] = bool(protected_config.get("require_k_sigma0_template"))
-    legacy_payload["sigma0_active"] = bool(_hist_has_usable_support(sigma_template))
     return legacy_payload
 
 
@@ -4490,13 +4664,6 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     )
     k_lambda_simc_input_loaded = bool(h_kaon_signal_shape is not None)
     k_lambda_simc_reference_available = bool(k_lambda_simc_reference_hist is not None)
-    k_sigma0_reference_source = kaon_fit.get("H_k_sigma0_simc_reference")
-    if k_sigma0_reference_source is None:
-        k_sigma0_reference_source = aligned_kaon_sigma0_shape
-    k_sigma0_simc_reference_hist = _clone_hist(
-        k_sigma0_reference_source,
-        "H_simc_shape_k_sigma0_{}".format(context or analysis_scope),
-    )
     return_payload = {
         "A_n": result["A_n"],
         "A_delta": result["A_delta"],
@@ -4607,6 +4774,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     if excluded_windows:
         for key in (
             "fit_hist",
+            "full_fit_residual_hist",
             "pion_bg_fit_hist",
             "residual_hist",
             "pi_n_scaled_hist",
@@ -4615,6 +4783,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "k_lambda_scaled_hist",
             "k_sigma0_scaled_hist",
             "refined_fit_hist",
+            "refined_full_fit_residual_hist",
             "refined_pion_bg_fit_hist",
             "refined_pion_bg_fit_hist_pre_postrefine",
             "refined_residual_hist",
@@ -6128,6 +6297,19 @@ def build_particle_subtraction_component_result(
         or kaon_fit.get("k_lambda_simc_input_loaded", False)
     )
     k_lambda_simc_reference_available = bool(k_lambda_simc_reference_hist is not None)
+    # The inner fitter owns a local K-Sigma0 reference.  Publish a distinct
+    # shared-builder clone of that exact object, falling back only to the
+    # selected aligned template when the inner reference could not be made.
+    k_sigma0_fitter_reference_hist = kaon_fit.get("H_k_sigma0_simc_reference")
+    k_sigma0_reference_source = (
+        k_sigma0_fitter_reference_hist
+        if k_sigma0_fitter_reference_hist is not None
+        else aligned_kaon_sigma0_shape
+    )
+    k_sigma0_simc_reference_hist = _clone_hist(
+        k_sigma0_reference_source,
+        "H_simc_shape_k_sigma0_{}".format(context or analysis_scope),
+    )
 
     result = {
         "particle_subtraction_mode": mode,
@@ -6376,6 +6558,7 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_k_sigma0_scaled": kaon_fit["k_sigma0_scaled_hist"],
         "H_kaon_fit_k_lambda_reference": kaon_fit.get("k_lambda_reference_hist"),
         "H_kaon_fit_total": kaon_fit["fit_hist"],
+        "H_kaon_full_fit_residual": kaon_fit.get("full_fit_residual_hist"),
         "H_kaon_pion_bg_fit_total": kaon_fit["pion_bg_fit_hist"],
         "H_kaon_fit_pi_n_scaled_refined": kaon_fit.get("refined_pi_n_scaled_hist"),
         "H_kaon_fit_pi_delta_scaled_refined": kaon_fit.get("refined_pi_delta_scaled_hist"),
@@ -6384,6 +6567,7 @@ def build_particle_subtraction_component_result(
         "H_kaon_fit_k_sigma0_scaled_refined": kaon_fit.get("refined_k_sigma0_scaled_hist"),
         "H_kaon_fit_k_sigma0_scaled_refined_pre_postrefine": kaon_fit.get("refined_k_sigma0_scaled_hist_pre_postrefine"),
         "H_kaon_fit_total_refined": kaon_fit.get("refined_fit_hist"),
+        "H_kaon_full_fit_residual_refined": kaon_fit.get("refined_full_fit_residual_hist"),
         "H_kaon_fit_total_refined_pre_postrefine": kaon_fit.get("refined_fit_hist_pre_postrefine"),
         "H_kaon_pion_bg_fit_total_refined": kaon_fit.get("refined_pion_bg_fit_hist"),
         "H_kaon_pion_bg_fit_total_refined_pre_postrefine": kaon_fit.get("refined_pion_bg_fit_hist_pre_postrefine"),
@@ -6408,8 +6592,17 @@ def build_particle_subtraction_component_result(
     result["diagnostics"]["kaon"]["sigma0_requested"] = bool(kaon_fit.get("sigma0_requested"))
     result["diagnostics"]["kaon"]["sigma0_active"] = bool(kaon_fit.get("sigma0_active"))
     result["diagnostics"]["kaon"]["k_sigma0_template_provenance"] = {
+        "source_template": "kaon_sigma0_shape",
         "simc_input_available": bool(_hist_has_usable_support(kaon_sigma0_shape)),
         "aligned_template_available": bool(_hist_has_usable_support(aligned_kaon_sigma0_shape)),
+        "fitter_reference_available": bool(
+            _hist_has_usable_support(k_sigma0_fitter_reference_hist)
+        ),
+        "published_source": (
+            "inner_fitter_reference"
+            if k_sigma0_fitter_reference_hist is not None
+            else "aligned_kaon_sigma0_shape"
+        ),
         "published_hist_key": "H_simc_shape_k_sigma0",
         "published_template_available": bool(
             _hist_has_usable_support(result.get("H_simc_shape_k_sigma0"))

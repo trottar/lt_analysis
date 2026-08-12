@@ -3583,6 +3583,7 @@ def rand_sub(
             histDict["H_kaon_fit_k_lambda_scaled_DATA"] = component_fit_result.get("H_kaon_fit_k_lambda_scaled")
             histDict["H_kaon_fit_k_sigma0_scaled_DATA"] = component_fit_result.get("H_kaon_fit_k_sigma0_scaled")
             histDict["H_kaon_fit_total_DATA"] = component_fit_result.get("H_kaon_fit_total")
+            histDict["H_kaon_full_fit_residual_DATA"] = component_fit_result.get("H_kaon_full_fit_residual")
             histDict["H_kaon_pion_bg_fit_total_DATA"] = component_fit_result.get("H_kaon_pion_bg_fit_total")
             histDict["H_fit_residual_pion_DATA"] = component_fit_result.get("H_fit_residual_pion")
             histDict["H_fit_residual_kaon_DATA"] = component_fit_result.get("H_fit_residual_kaon")
