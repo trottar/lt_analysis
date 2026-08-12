@@ -7,6 +7,7 @@ import hashlib
 import math
 import os
 import sys
+import warnings
 from array import array
 from copy import deepcopy
 
@@ -4007,6 +4008,148 @@ def _find_collection_bin(value, edges):
         if low_edge <= value < high_edge:
             return index
     return -1
+
+
+def _empty_frozen_coordinate_integrity(tolerance, applicable=True):
+    """Create the application-stage frozen-coordinate audit payload.
+
+    This audit is deliberately diagnostic-only.  Frozen bin indices continue
+    to determine lookup eligibility; the physical coordinates determine where
+    the corresponding ROOT diagnostic point is drawn.
+    """
+    return {
+        "applicable": bool(applicable),
+        "checked_events": 0,
+        "delta_checked_count": 0,
+        "secondary_checked_count": 0,
+        "skipped_invalid_index_count": 0,
+        "skipped_invalid_delta_index_count": 0,
+        "skipped_invalid_secondary_index_count": 0,
+        "delta_mismatch_count": 0,
+        "secondary_mismatch_count": 0,
+        "maximum_delta_edge_violation": 0.0,
+        "maximum_secondary_edge_violation": 0.0,
+        "edge_tolerance": float(tolerance),
+        "passed": True,
+    }
+
+
+def _frozen_coordinate_membership(value, stored_index, edges, tolerance):
+    """Check a stored frozen index against its physical coordinate.
+
+    The production lookup owns the membership convention: ``[low, high)``
+    with the final edge assigned to the last bin.  The final-edge tolerance is
+    only used to accommodate roundoff at that already-inclusive endpoint; it
+    does not create a second binning convention for this diagnostic.
+    """
+    if not isinstance(stored_index, (int, float)) or isinstance(stored_index, bool):
+        return {"eligible": False, "matches": None, "edge_violation": None}
+    numeric_index = float(stored_index)
+    if not math.isfinite(numeric_index) or not numeric_index.is_integer():
+        return {"eligible": False, "matches": None, "edge_violation": None}
+    stored_index = int(numeric_index)
+    if stored_index < 0 or stored_index >= len(edges) - 1:
+        return {"eligible": False, "matches": None, "edge_violation": None}
+    try:
+        physical_value = float(value)
+    except (TypeError, ValueError):
+        return {"eligible": True, "matches": False, "edge_violation": None}
+    if not math.isfinite(physical_value):
+        return {"eligible": True, "matches": False, "edge_violation": None}
+
+    resolved_index = _find_collection_bin(physical_value, edges)
+    final_index = len(edges) - 2
+    if (
+        resolved_index < 0
+        and stored_index == final_index
+        and abs(physical_value - float(edges[-1])) <= float(tolerance)
+    ):
+        # `_find_collection_bin` is also used for the explicit final endpoint,
+        # so delegate that inclusion to the production helper rather than
+        # duplicating its bin-membership loop.
+        resolved_index = _find_collection_bin(float(edges[-1]), edges)
+
+    if resolved_index == stored_index:
+        return {"eligible": True, "matches": True, "edge_violation": 0.0}
+
+    low_edge = float(edges[stored_index])
+    high_edge = float(edges[stored_index + 1])
+    if physical_value < low_edge:
+        violation = low_edge - physical_value
+    elif physical_value >= high_edge:
+        violation = physical_value - high_edge
+    else:
+        # This can only occur for an unusual non-monotonic edge payload; the
+        # mismatch remains visible without manufacturing an artificial value.
+        violation = 0.0
+    return {"eligible": True, "matches": False, "edge_violation": float(violation)}
+
+
+def _record_frozen_coordinate_membership(
+    integrity,
+    *,
+    coordinate_name,
+    physical_value,
+    stored_index,
+    edges,
+):
+    """Accumulate one frozen-index/physical-coordinate audit result."""
+    membership = _frozen_coordinate_membership(
+        physical_value,
+        stored_index,
+        edges,
+        integrity["edge_tolerance"],
+    )
+    if not membership["eligible"]:
+        integrity["skipped_invalid_index_count"] += 1
+        integrity["skipped_invalid_{}_index_count".format(coordinate_name)] += 1
+        return
+
+    integrity["{}_checked_count".format(coordinate_name)] += 1
+    if membership["matches"]:
+        return
+
+    mismatch_key = "{}_mismatch_count".format(coordinate_name)
+    maximum_key = "maximum_{}_edge_violation".format(coordinate_name)
+    integrity[mismatch_key] += 1
+    violation = membership.get("edge_violation")
+    if violation is not None and math.isfinite(float(violation)):
+        integrity[maximum_key] = max(integrity[maximum_key], float(violation))
+
+
+def _fill_proton_weight_coordinate_histograms(
+    *,
+    h_weight_sum_delta,
+    h_weight_norm_delta,
+    h_weight_sum_delta_secondary,
+    h_weight_norm_delta_secondary,
+    physical_delta_value,
+    physical_secondary_value,
+    delta_index,
+    secondary_index,
+    delta_edges,
+    secondary_edges,
+    coefficient,
+    proton_weight,
+):
+    """Fill application diagnostics at physical coordinates, never bin indices."""
+    if not (0 <= delta_index < len(delta_edges) - 1):
+        return
+    abs_norm = abs(float(coefficient))
+    h_weight_sum_delta.Fill(physical_delta_value, abs_norm * proton_weight)
+    h_weight_norm_delta.Fill(physical_delta_value, abs_norm)
+    if not (0 <= secondary_index < len(secondary_edges) - 1):
+        return
+    h_weight_sum_delta_secondary.Fill(
+        physical_delta_value,
+        physical_secondary_value,
+        abs_norm * proton_weight,
+    )
+    h_weight_norm_delta_secondary.Fill(
+        physical_delta_value,
+        physical_secondary_value,
+        abs_norm,
+    )
 
 
 def _evaluate_event_proton_probability(
@@ -9092,7 +9235,16 @@ def apply_kaon_proton_cleaning_to_targets(
     cross_stage_tolerance = float(
         ((config.get("t_binning") or {}).get("cross_stage_t_tolerance", 1.0e-10))
     )
-    strict_cross_stage = bool(config.get("strict_mode", False))
+    strict_timing_t_diagnostics = bool(config.get("strict_mode", False))
+    coordinate_tolerance = float(
+        ((config.get("t_binning") or {}).get("edge_tolerance", 1.0e-9))
+    )
+    frozen_coordinate_integrity = _empty_frozen_coordinate_integrity(
+        coordinate_tolerance,
+        applicable=method_is_t_binned,
+    )
+    if not method_is_t_binned:
+        frozen_coordinate_integrity["status"] = "not_applicable_legacy_aerogel"
 
     for source_name, source_spec in (source_bundle.get("sources") or {}).items():
         tree = source_spec.get("tree")
@@ -9111,7 +9263,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 adj_hsdelta = float((entry_payload or {}).get("adj_hsdelta", 0.0) or 0.0)
                 adj_mm = float((entry_payload or {}).get("adj_mm", 0.0) or 0.0)
                 adj_t = float((entry_payload or {}).get("adj_t", 0.0) or 0.0)
-                delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
+                physical_delta_value = float((entry_payload or {}).get("delta_value", 0.0) or 0.0)
                 aero_value = float((entry_payload or {}).get("aero_value", 0.0) or 0.0)
                 timing_value = ((entry_payload or {}).get("timing_values") or {}).get(str(timing_branch))
                 timing_value = float(timing_value) if timing_value is not None else 0.0
@@ -9126,7 +9278,7 @@ def apply_kaon_proton_cleaning_to_targets(
                     continue
                 adj_mm = float(shifted_mm_getter(evt))
                 adj_t = float(shifted_t_getter(evt))
-                delta_value = float(getattr(evt, "ssdelta", 0.0))
+                physical_delta_value = float(getattr(evt, "ssdelta", 0.0))
                 aero_value = float(getattr(evt, "P_aero_npeSum", 0.0))
                 try:
                     timing_value = float(getattr(evt, timing_branch))
@@ -9148,7 +9300,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 cross_stage_row["downstream_t"] = downstream_t
                 cross_stage_row["maximum_absolute_difference"] = max_difference
                 cross_stage_row["consistent"] = bool(max_difference <= cross_stage_tolerance)
-                if strict_cross_stage and not cross_stage_row["consistent"]:
+                if strict_timing_t_diagnostics and not cross_stage_row["consistent"]:
                     raise RuntimeError("cross-stage shifted-t mismatch for {}".format(signature))
             frozen_payload = get_kaon_proton_cleaning_event_payload(
                 cleaning_result,
@@ -9156,13 +9308,32 @@ def apply_kaon_proton_cleaning_to_targets(
                 entry_index,
                 strict=True,
             )
-            delta_value = frozen_payload.get("delta_index", -1)
-            secondary_value = frozen_payload.get(
+            delta_index_value = frozen_payload.get("delta_index", -1)
+            secondary_index_value = frozen_payload.get(
                 "t_index" if method_is_t_binned else "aero_index", -1
             )
             # Bin zero is a real canonical cell, not an absent value.
-            delta_index = int(delta_value) if isinstance(delta_value, (int, float)) else -1
-            secondary_index = int(secondary_value) if isinstance(secondary_value, (int, float)) else -1
+            delta_index = int(delta_index_value) if isinstance(delta_index_value, (int, float)) else -1
+            secondary_index = int(secondary_index_value) if isinstance(secondary_index_value, (int, float)) else -1
+            # `adj_t` is the prepared/frozen event's shared shifted-|t| value:
+            # it is the same convention used when `t_index` was assigned.
+            physical_secondary_value = adj_t if method_is_t_binned else aero_value
+            if method_is_t_binned:
+                frozen_coordinate_integrity["checked_events"] += 1
+                _record_frozen_coordinate_membership(
+                    frozen_coordinate_integrity,
+                    coordinate_name="delta",
+                    physical_value=physical_delta_value,
+                    stored_index=delta_index_value,
+                    edges=delta_edges,
+                )
+                _record_frozen_coordinate_membership(
+                    frozen_coordinate_integrity,
+                    coordinate_name="secondary",
+                    physical_value=physical_secondary_value,
+                    stored_index=secondary_index_value,
+                    edges=secondary_edges,
+                )
             support_label = str(
                 frozen_payload.get("support_label", SUPPORT_UNSUPPORTED)
                 or SUPPORT_UNSUPPORTED
@@ -9237,14 +9408,37 @@ def apply_kaon_proton_cleaning_to_targets(
                 )
             else:
                 rf_counts["rejected"] += 1
-            if 0 <= delta_index < (len(delta_edges) - 1):
-                abs_norm = abs(float(coefficient))
-                h_weight_sum_delta.Fill(delta_value, abs_norm * proton_weight)
-                h_weight_norm_delta.Fill(delta_value, abs_norm)
-                secondary_value = adj_t if method_is_t_binned else aero_value
-                if 0 <= secondary_index < (len(secondary_edges) - 1):
-                    h_weight_sum_delta_secondary.Fill(delta_value, secondary_value, abs_norm * proton_weight)
-                    h_weight_norm_delta_secondary.Fill(delta_value, secondary_value, abs_norm)
+            _fill_proton_weight_coordinate_histograms(
+                h_weight_sum_delta=h_weight_sum_delta,
+                h_weight_norm_delta=h_weight_norm_delta,
+                h_weight_sum_delta_secondary=h_weight_sum_delta_secondary,
+                h_weight_norm_delta_secondary=h_weight_norm_delta_secondary,
+                physical_delta_value=physical_delta_value,
+                physical_secondary_value=physical_secondary_value,
+                delta_index=delta_index,
+                secondary_index=secondary_index,
+                delta_edges=delta_edges,
+                secondary_edges=secondary_edges,
+                coefficient=coefficient,
+                proton_weight=proton_weight,
+            )
+
+    frozen_coordinate_integrity["passed"] = bool(
+        frozen_coordinate_integrity["delta_mismatch_count"] == 0
+        and frozen_coordinate_integrity["secondary_mismatch_count"] == 0
+    )
+    if method_is_t_binned and not frozen_coordinate_integrity["passed"]:
+        coordinate_message = (
+            "frozen timing-t coordinate integrity mismatch: "
+            "delta={}, secondary={}, skipped_invalid_indices={}".format(
+                frozen_coordinate_integrity["delta_mismatch_count"],
+                frozen_coordinate_integrity["secondary_mismatch_count"],
+                frozen_coordinate_integrity["skipped_invalid_index_count"],
+            )
+        )
+        if strict_timing_t_diagnostics:
+            raise RuntimeError(coordinate_message)
+        warnings.warn(coordinate_message, RuntimeWarning)
 
     for bin_index in range(1, h_weight_avg_delta.GetNbinsX() + 1):
         denominator = float(h_weight_norm_delta.GetBinContent(bin_index))
@@ -9311,6 +9505,7 @@ def apply_kaon_proton_cleaning_to_targets(
                 "membership optionally applied only after event-level proton weights"
             ),
             "selected_timing_branch": str(timing_branch),
+            "frozen_coordinate_integrity": _json_ready_value(frozen_coordinate_integrity),
             "lambda_preservation_gate": _json_ready_value(
                 (cleaning_result.get("diagnostics") or {}).get("lambda_preservation_gate") or {}
             ),

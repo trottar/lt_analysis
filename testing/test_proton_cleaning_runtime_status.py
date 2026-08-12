@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 import types
 import unittest
+from copy import deepcopy
 from pathlib import Path
 from unittest import mock
 
@@ -101,6 +102,63 @@ class _FakeTF1:
         return 4
 
 
+class _RecordingHistogram:
+    """Minimal ROOT-histogram stand-in that records physical Fill coordinates."""
+
+    def __init__(self):
+        self.fills = []
+
+    def Fill(self, *values):
+        self.fills.append(tuple(float(value) for value in values))
+
+
+class _ApplicationHistogram(_RecordingHistogram):
+    """Enough TH1/TH2 behavior to exercise the application loop without ROOT."""
+
+    instances = []
+
+    def __init__(self, name, _title, bins_x, *_axis_args):
+        super().__init__()
+        self.name = str(name)
+        self.bins_x = int(bins_x)
+        self.bins_y = int(_axis_args[2]) if len(_axis_args) >= 3 else 0
+        self.contents = {}
+        self.__class__.instances.append(self)
+
+    def SetDirectory(self, _directory):
+        pass
+
+    def Sumw2(self):
+        pass
+
+    def Clone(self, name):
+        cloned = object.__new__(self.__class__)
+        cloned.fills = []
+        cloned.name = str(name)
+        cloned.bins_x = self.bins_x
+        cloned.bins_y = self.bins_y
+        cloned.contents = {}
+        self.__class__.instances.append(cloned)
+        return cloned
+
+    def Reset(self):
+        self.fills = []
+        self.contents = {}
+
+    def GetNbinsX(self):
+        return self.bins_x
+
+    def GetNbinsY(self):
+        return self.bins_y
+
+    def GetBinContent(self, *indices):
+        return self.contents.get(tuple(int(index) for index in indices), 0.0)
+
+    def SetBinContent(self, *args):
+        *indices, value = args
+        self.contents[tuple(int(index) for index in indices)] = float(value)
+
+
 class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
     def setUp(self):
         self.config = {
@@ -144,6 +202,174 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         # Cross-stage closure pages use the direct ROOT alias rather than
         # ROOT.TH1D, so retain this import-level regression guard.
         self.assertTrue(hasattr(proton_cleaning, "TH1D"))
+
+    def test_proton_weight_diagnostics_fill_physical_delta_and_t_coordinates(self):
+        delta_sum = _RecordingHistogram()
+        delta_norm = _RecordingHistogram()
+        delta_t_sum = _RecordingHistogram()
+        delta_t_norm = _RecordingHistogram()
+        proton_cleaning._fill_proton_weight_coordinate_histograms(
+            h_weight_sum_delta=delta_sum,
+            h_weight_norm_delta=delta_norm,
+            h_weight_sum_delta_secondary=delta_t_sum,
+            h_weight_norm_delta_secondary=delta_t_norm,
+            physical_delta_value=3.75,
+            physical_secondary_value=0.642,
+            delta_index=1,
+            secondary_index=2,
+            delta_edges=(-10.0, 0.0, 10.0),
+            secondary_edges=(0.0, 0.4, 0.6, 0.8),
+            coefficient=-2.0,
+            proton_weight=0.3,
+        )
+        self.assertEqual(delta_sum.fills, [(3.75, 0.6)])
+        self.assertEqual(delta_norm.fills, [(3.75, 2.0)])
+        self.assertEqual(delta_t_sum.fills, [(3.75, 0.642, 0.6)])
+        self.assertEqual(delta_t_norm.fills, [(3.75, 0.642, 2.0)])
+        self.assertNotIn((1.0, 0.6), delta_sum.fills)
+        self.assertNotIn((1.0, 2.0, 0.6), delta_t_sum.fills)
+
+    def test_proton_weight_diagnostic_indices_only_control_lookup_eligibility(self):
+        delta_sum = _RecordingHistogram()
+        delta_norm = _RecordingHistogram()
+        delta_t_sum = _RecordingHistogram()
+        delta_t_norm = _RecordingHistogram()
+        proton_cleaning._fill_proton_weight_coordinate_histograms(
+            h_weight_sum_delta=delta_sum,
+            h_weight_norm_delta=delta_norm,
+            h_weight_sum_delta_secondary=delta_t_sum,
+            h_weight_norm_delta_secondary=delta_t_norm,
+            physical_delta_value=-4.5,
+            physical_secondary_value=0.8,
+            delta_index=-1,
+            secondary_index=0,
+            delta_edges=(-10.0, 0.0, 10.0),
+            secondary_edges=(0.0, 1.0),
+            coefficient=1.0,
+            proton_weight=0.4,
+        )
+        self.assertEqual(delta_sum.fills, [])
+        self.assertEqual(delta_t_sum.fills, [])
+
+    def test_frozen_coordinate_audit_uses_lookup_edges_and_skips_invalid_indices(self):
+        integrity = proton_cleaning._empty_frozen_coordinate_integrity(1.0e-9)
+        proton_cleaning._record_frozen_coordinate_membership(
+            integrity,
+            coordinate_name="delta",
+            physical_value=10.0 + 5.0e-10,
+            stored_index=1,
+            edges=(-10.0, 0.0, 10.0),
+        )
+        proton_cleaning._record_frozen_coordinate_membership(
+            integrity,
+            coordinate_name="secondary",
+            physical_value=0.5,
+            stored_index=-1,
+            edges=(0.0, 0.4, 0.8),
+        )
+        proton_cleaning._record_frozen_coordinate_membership(
+            integrity,
+            coordinate_name="delta",
+            physical_value=-0.1,
+            stored_index=1,
+            edges=(-10.0, 0.0, 10.0),
+        )
+        self.assertEqual(integrity["delta_checked_count"], 2)
+        self.assertEqual(integrity["secondary_checked_count"], 0)
+        self.assertEqual(integrity["skipped_invalid_index_count"], 1)
+        self.assertEqual(integrity["skipped_invalid_secondary_index_count"], 1)
+        self.assertEqual(integrity["delta_mismatch_count"], 1)
+        self.assertGreater(integrity["maximum_delta_edge_violation"], 0.0)
+
+    def test_application_coordinate_fix_leaves_committed_lookup_fields_unchanged(self):
+        class _Event:
+            pass
+
+        event = _Event()
+        event.P_hgcer_npeSum = 0.0
+        event.P_hgcer_xAtCer = 0.0
+        event.P_hgcer_yAtCer = 0.0
+        frozen_payload = {
+            "delta_index": 0,
+            "t_index": 1,
+            "support_label": proton_cleaning.SUPPORT_SUPPORTED,
+            "proton_weight": 0.25,
+            "cleaned_factor": 0.75,
+            "final_cleaned_factor": 0.60,
+            "rf_accept": True,
+            "lambda_gate_status": "pass",
+            "lambda_gate_passed": True,
+        }
+        lookup_before = deepcopy(frozen_payload)
+        cleaning_result = {
+            "accepted": True,
+            "method": proton_cleaning.PROTON_CONTAMINATION_CLEANING_METHOD_TIMING_T_EVENT_WEIGHT,
+            "t_edges": [0.0, 0.5, 1.0],
+            "delta_edges": [-10.0, 0.0, 10.0],
+            "settings": {"strict_mode": True, "t_binning": {"edge_tolerance": 1.0e-9}},
+            "selected_timing_branch": "CTime_ROC1",
+            "diagnostics": {},
+            "_prepared_event_weight_lookup": {"prompt:0": frozen_payload},
+        }
+        source_bundle = {
+            "sources": {"prompt": {"tree": [event], "coefficient": 2.0}},
+            "prepared_sources": {
+                "prompt": {
+                    "entries": {
+                        0: {
+                            "allcuts": False,
+                            "nommcuts": True,
+                            "noholecuts": False,
+                            "adj_hsdelta": 0.0,
+                            "adj_mm": 1.115,
+                            "adj_t": 0.75,
+                            "delta_value": -4.25,
+                            "aero_value": 8.0,
+                            "timing_values": {"CTime_ROC1": 0.1},
+                        }
+                    }
+                }
+            },
+        }
+        _ApplicationHistogram.instances = []
+        with (
+            mock.patch.object(proton_cleaning.ROOT, "TH1D", _ApplicationHistogram),
+            mock.patch.object(proton_cleaning.ROOT, "TH2D", _ApplicationHistogram),
+        ):
+            application = proton_cleaning.apply_kaon_proton_cleaning_to_targets(
+                cleaning_result,
+                source_bundle,
+                {},
+                lambda *_args: (True, True, 0.0),
+                lambda _evt: 1.115,
+                lambda _evt: 0.75,
+                None,
+                0.9,
+                1.2,
+            )
+
+        self.assertTrue(application["accepted"])
+        self.assertEqual(frozen_payload, lookup_before)
+        self.assertEqual(frozen_payload["proton_weight"], 0.25)
+        self.assertEqual(frozen_payload["cleaned_factor"], 0.75)
+        self.assertEqual(frozen_payload["final_cleaned_factor"], 0.60)
+        self.assertTrue(frozen_payload["rf_accept"])
+        self.assertEqual(frozen_payload["lambda_gate_status"], "pass")
+        self.assertTrue(frozen_payload["lambda_gate_passed"])
+        self.assertAlmostEqual(2.0 * frozen_payload["proton_weight"], 0.5)
+        self.assertAlmostEqual(2.0 * frozen_payload["final_cleaned_factor"], 1.2)
+        histogram_by_name = {hist.name: hist for hist in _ApplicationHistogram.instances}
+        self.assertEqual(
+            histogram_by_name["H_proton_weight_sum_delta"].fills,
+            [(-4.25, 0.5)],
+        )
+        self.assertEqual(
+            histogram_by_name["H_proton_weight_sum_delta_t"].fills,
+            [(-4.25, 0.75, 0.5)],
+        )
+        integrity = application["diagnostics"]["frozen_coordinate_integrity"]
+        self.assertTrue(integrity["passed"])
+        self.assertEqual(integrity["checked_events"], 1)
 
     def test_delta_offset_reads_only_current_tof_summary(self):
         histogram = _FakeHistogram()
