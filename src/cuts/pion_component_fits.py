@@ -4361,7 +4361,6 @@ def fit_pion_control_with_simc_shapes(
             "fit_mode": fit_mode,
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
-            "pi_delta_signal_protected_fit": deepcopy(protected_fit_config),
             "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
         },
     }
