@@ -4750,6 +4750,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "joint_refinement_amplitude_floor": amplitude_floor,
             "template_corr_warn": template_corr_warn,
             "cleanup_validation_mm_max": validation_options.get("cleanup_validation_mm_max"),
+            "pi_delta_signal_protected_fit": deepcopy(protected_fit_config),
         },
     }
     if bool(protected_fit_config.get("enabled")) and not bool(_alignment_scoring_only):
@@ -8052,10 +8053,238 @@ def _residual_shift_summary_has_content(summary):
     return int(summary.get("candidate_count", 0) or 0) > 1
 
 
+def _resolve_protected_pi_delta_render_state(component_payload):
+    """Resolve the PDF contract for the kaon signal-protected pi-delta stage.
+
+    The resolved kaon configuration is the authoritative statement of whether
+    protected rendering is required.  The diagnostic is deliberately only a
+    fallback for older in-memory payloads that predate the resolved-config
+    handoff.  Keeping this decision separate from the fit itself prevents a
+    failed or incomplete protected payload from visually reviving the retired
+    staged kaon pi-delta presentation.
+    """
+    payload = component_payload if isinstance(component_payload, dict) else {}
+    resolved_config = payload.get("resolved_subtraction_config") or {}
+    kaon_config = resolved_config.get("kaon_nosub") or {}
+    configured = kaon_config.get("pi_delta_signal_protected_fit")
+
+    diagnostics = payload.get("diagnostics") or {}
+    kaon_diagnostics = diagnostics.get("kaon") or {}
+    protected_diagnostic = kaon_diagnostics.get("pi_delta_signal_protected_fit")
+    if not isinstance(protected_diagnostic, dict):
+        protected_diagnostic = {}
+
+    if not isinstance(configured, dict):
+        configured = protected_diagnostic.get("resolved_configuration") or {}
+    if not isinstance(configured, dict):
+        configured = {}
+
+    configured_enabled = bool(configured.get("enabled"))
+    if not configured and protected_diagnostic:
+        configured_enabled = bool(protected_diagnostic.get("enabled"))
+
+    required_histogram_keys = (
+        "H_pi_delta_protected_fit_input",
+        "H_pi_delta_protected_k_lambda",
+        "H_pi_delta_protected_k_sigma0",
+        "H_pi_delta_protected_pi_delta",
+        "H_pi_delta_protected_fit_total",
+        "H_pi_delta_protected_after_subtraction",
+    )
+    missing_histograms = [
+        key for key in required_histogram_keys if payload.get(key) is None
+    ]
+    diagnostic_available = bool(protected_diagnostic)
+    diagnostic_status = str(protected_diagnostic.get("status") or "").strip().lower()
+    failure_policy = (
+        protected_diagnostic.get("failure_policy")
+        or configured.get("failure_policy")
+        or "unknown"
+    )
+
+    if not configured_enabled:
+        state = "disabled"
+    elif not diagnostic_available:
+        state = "missing_payload"
+    elif diagnostic_status != "success":
+        state = "fit_failure"
+    elif missing_histograms:
+        state = "missing_payload"
+    else:
+        state = "success"
+
+    return {
+        "state": state,
+        "configured_enabled": configured_enabled,
+        "diagnostic_available": diagnostic_available,
+        "diagnostic_status": diagnostic_status or "missing",
+        "diagnostic": protected_diagnostic,
+        "resolved_config": configured,
+        "failure_policy": str(failure_policy),
+        "missing_histograms": missing_histograms,
+        "render_success_pages": state == "success",
+        # This is intentionally configuration-driven: once protected mode is
+        # requested, deprecated staged kaon pages must never reappear.
+        "suppress_deprecated_kaon_pages": configured_enabled,
+    }
+
+
+def _filtered_kaon_early_component_step_overlays(step_overlays):
+    """Return display-only kaon early-step overlays without changing storage."""
+    allowed_components = {"pi_n", "pi_sidis"}
+    return [
+        dict(step_overlay)
+        for step_overlay in (step_overlays or [])
+        if isinstance(step_overlay, dict)
+        and step_overlay.get("component_name") in allowed_components
+    ]
+
+
+def _print_protected_pi_delta_status_page(
+    pdf_name,
+    component_payload,
+    render_state,
+    title_prefix="",
+):
+    """Render an explicit unavailable page instead of a staged-kaon fallback."""
+    diagnostic = render_state.get("diagnostic") or {}
+    availability = diagnostic.get("template_availability") or {}
+    failure_policy = render_state.get("failure_policy") or "unknown"
+    state = render_state.get("state") or "missing_payload"
+    if state == "missing_payload":
+        status_line = "PROTECTED RENDER-CONTRACT ERROR: diagnostic payload is missing or incomplete"
+        detail_lines = [
+            "configured protected mode has no renderable protected diagnostic payload",
+            "missing histograms: {}".format(
+                ", ".join(render_state.get("missing_histograms") or []) or "diagnostic payload"
+            ),
+        ]
+    else:
+        status_line = "PROTECTED FIT UNAVAILABLE: staged kaon pi-delta pages remain suppressed"
+        detail_lines = [
+            "protected status: {}".format(render_state.get("diagnostic_status") or "unknown"),
+            "failure reason: {}".format(diagnostic.get("failure_reason") or "not reported"),
+        ]
+
+    if str(failure_policy).strip().lower() == "zero_pi_delta":
+        detail_lines.append("No pi-delta subtraction applied for this scope")
+    detail_lines.extend(
+        [
+            "failure policy: {}".format(failure_policy),
+            "applied A_delta={}".format(
+                _format_fit_number(diagnostic.get("applied_A_delta"))
+            ),
+            "template availability: K-Lambda={} K-Sigma0={} pi-delta={}".format(
+                "yes" if bool(availability.get(KAON_SIGNAL_TEMPLATE_NAME)) else "no",
+                "yes" if bool(availability.get(KAON_SIGMA0_TEMPLATE_NAME)) else "no",
+                "yes" if bool(availability.get("pi_delta")) else "no",
+            ),
+        ]
+    )
+    _print_component_text_page(
+        pdf_name,
+        "{}Signal-protected final pi-delta fit status".format(title_prefix),
+        [
+            "scope: {}".format(component_payload.get("analysis_scope", "unknown")),
+            status_line,
+        ],
+        detail_lines,
+    )
+
+
+def _print_protected_pi_delta_pages(
+    pdf_name,
+    component_fit_result,
+    render_state,
+    title_prefix="",
+    cut_window=None,
+):
+    """Print the two authoritative protected-kaon pages for a successful fit."""
+    protected = render_state.get("diagnostic") or {}
+    metrics = protected.get("fit_metrics") or {}
+    amplitudes = protected.get("signal_amplitudes") or {}
+    matrix = protected.get("matrix_diagnostics") or {}
+    preservation = protected.get("signal_preservation") or {}
+    closure = protected.get("closure") or {}
+    reference_integrity = protected.get("lambda_reference_integrity") or {}
+    correlations = protected.get("high_template_correlation_warnings") or []
+    early_integrity = protected.get("early_amplitudes_frozen_integrity") or {}
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pi_delta_protected_fit_input"),
+        "R_{pre#Delta}",
+        "{}Signal-protected final #pi#Delta fit".format(title_prefix),
+        [
+            (component_fit_result.get("H_pi_delta_protected_k_lambda"), "fitted K-Lambda", ROOT.kBlue + 1, 1),
+            (component_fit_result.get("H_pi_delta_protected_k_sigma0"), "fitted K-Sigma0", ROOT.kCyan + 2, 1),
+            (component_fit_result.get("H_pi_delta_protected_pi_delta"), "protected pi-delta", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pi_delta_protected_fit_total"), "three-template total", ROOT.kGreen + 2, 2),
+        ],
+        [
+            "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+            "K-Lambda and K-Sigma0 signal-protection templates; only pi-delta is subtracted",
+            "A_delta protected={}  legacy diagnostic={}".format(
+                _format_fit_number(protected.get("applied_A_delta")),
+                _format_fit_number(protected.get("legacy_staged_A_delta")),
+            ),
+            "S_lambda={}  S_sigma0={}".format(
+                _format_fit_number(amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME)),
+                _format_fit_number(amplitudes.get(KAON_SIGMA0_TEMPLATE_NAME)),
+            ),
+            "chi2/ndf={}  p={}  bins={}".format(
+                _format_fit_metric(metrics.get("chi2_ndf")),
+                _format_fit_metric(metrics.get("fit_p_value")),
+                metrics.get("n_fit_bins", 0),
+            ),
+            "rank={}  cond={}".format(
+                matrix.get("weighted_design_effective_rank"),
+                _format_fit_metric(matrix.get("weighted_design_condition_number")),
+            ),
+            "template-correlation warnings={}".format(len(correlations)),
+            "K-Lambda reference integrity={}".format(
+                "pass" if bool(reference_integrity.get("shape_identical")) else "unavailable/fail"
+            ),
+            "early pi-n/pi-SIDIS amplitudes frozen={}".format(
+                "pass" if bool(early_integrity.get("unchanged")) else "fail"
+            ),
+            "Lambda/Sigma preservation={}/{}".format(
+                _format_fit_metric((preservation.get(KAON_SIGNAL_TEMPLATE_NAME) or {}).get("pi_delta_removed_fraction")),
+                _format_fit_metric((preservation.get(KAON_SIGMA0_TEMPLATE_NAME) or {}).get("pi_delta_removed_fraction")),
+            ),
+            "three-template closure={}".format(
+                "pass" if bool((closure.get("protected_three_component_model") or {}).get("passed")) else "fail"
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+    _print_component_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pi_delta_protected_fit_input"),
+        "R_{pre#Delta}",
+        "{}Protected #pi#Delta subtraction - only #pi#Delta removed".format(title_prefix),
+        [
+            (component_fit_result.get("H_pi_delta_protected_pi_delta"), "fitted pi-delta removed", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pi_delta_protected_after_subtraction"), "R_{pre#Delta} - pi-delta", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "K-Lambda and K-Sigma0 are fitted and retained; they are not subtracted",
+            "physics output: R_preDelta - pi-delta only",
+            "fit residual is diagnostic-only and is not a cleaned-kaon spectrum",
+            "delta-only physics closure={}".format(
+                "pass" if bool((closure.get("delta_only_physics_output") or {}).get("passed")) else "fail"
+            ),
+        ],
+        cut_window=cut_window,
+    )
+
+
 def _print_residual_shift_template_pages(
     pdf_name,
     component_fit_result,
     title_prefix="",
+    protected_kaon_mode=False,
 ):
     shift_summaries = (component_fit_result or {}).get("residual_component_shift_summaries") or {}
     target_specs = (
@@ -8100,11 +8329,19 @@ def _print_residual_shift_template_pages(
             top_pad.SetBottomMargin(0.12)
             original_clone = _clone_hist(original_hist, "{}_orig".format(original_hist.GetName()))
             shifted_clone = _clone_hist(shifted_hist, "{}_shift".format(shifted_hist.GetName()))
+            alignment_only_label = (
+                " (alignment diagnostic only)"
+                if protected_kaon_mode
+                and hist_prefix == "kaon"
+                and component_name == "pi_delta"
+                else ""
+            )
             original_clone.SetTitle(
-                "{}{} residual-shift template: {}".format(
+                "{}{} residual-shift template: {}{}".format(
                     title_prefix,
                     sample_label,
                     component_label,
+                    alignment_only_label,
                 )
             )
             _style_overlay_hist(original_clone, ROOT.kBlue + 1, line_style=2)
@@ -8131,6 +8368,8 @@ def _print_residual_shift_template_pages(
             stats_box.SetTextSize(0.026)
             stats_box.AddText("fit target: {}".format(summary_key))
             stats_box.AddText("component: {}".format(component_label))
+            if alignment_only_label:
+                stats_box.AddText("legacy pi-delta alignment QA only; not applied subtraction")
             stats_box.AddText(
                 "selected delta={} {}".format(
                     _format_fit_number(selected_delta),
@@ -8252,6 +8491,7 @@ def _print_residual_shift_scan_pages(
     pdf_name,
     component_fit_result,
     title_prefix="",
+    protected_kaon_mode=False,
 ):
     shift_summaries = (component_fit_result or {}).get("residual_component_shift_summaries") or {}
     target_specs = (
@@ -8301,11 +8541,19 @@ def _print_residual_shift_scan_pages(
 
         top_pad = canvas.cd(1)
         top_pad.SetBottomMargin(0.12)
+        alignment_only_label = (
+            " (alignment diagnostic only)"
+            if protected_kaon_mode
+            and summary_key == "kaon_nosub"
+            and component_name == "pi_delta"
+            else ""
+        )
         objective_graph.SetTitle(
-            "{}{} residual-shift scan: {}".format(
+            "{}{} residual-shift scan: {}{}".format(
                 title_prefix,
                 sample_label,
                 _component_plot_label(component_name),
+                alignment_only_label,
             )
         )
         objective_graph.GetXaxis().SetTitle("delta MM [{}]".format(summary.get("units") or "GeV"))
@@ -8441,7 +8689,20 @@ def print_particle_subtraction_component_application_pages(
         or "staged_only"
     ).strip().lower()
     joint_mode_active = fit_mode in ("staged_plus_joint", "staged_plus_regularized_joint")
-    closure_label = "refined" if joint_mode_active else "staged"
+    protected_render_state = _resolve_protected_pi_delta_render_state(component_payload)
+    protected_kaon_mode = bool(
+        protected_render_state.get("suppress_deprecated_kaon_pages")
+    )
+    closure_label = (
+        "protected applied"
+        if protected_kaon_mode
+        else ("refined" if joint_mode_active else "staged")
+    )
+    kaon_model_label = (
+        "protected applied pion-background model"
+        if protected_kaon_mode
+        else "kaon pion-bg model"
+    )
     model_closure = diagnostics.get("model_closure") or {}
     model_closure_stage = diagnostics.get("model_closure_stage") or {}
     event_template_closure = diagnostics.get("event_template_closure") or {}
@@ -8493,7 +8754,8 @@ def print_particle_subtraction_component_application_pages(
             "unsupported bins={}".format(int(diagnostics.get("pion_weight_unsupported_bin_count", 0) or 0)),
             "unsupported MM={}".format(_format_mm_range(diagnostics.get("pion_weight_unsupported_mm_range"))),
             "denominator: pion-control model (unity-scale convention)",
-            "numerator: kaon pion-bg model{}".format(
+            "numerator: {}{}".format(
+                kaon_model_label,
                 " after kaon-side scaling" if kaon_manual_scaling_active else ""
             ),
         ],
@@ -8501,7 +8763,11 @@ def print_particle_subtraction_component_application_pages(
         line_color=ROOT.kViolet + 1,
     )
 
-    if joint_mode_active and component_payload.get("H_pion_weight_vs_MM_stage") is not None:
+    if (
+        not protected_kaon_mode
+        and joint_mode_active
+        and component_payload.get("H_pion_weight_vs_MM_stage") is not None
+    ):
         _print_component_overlay_page(
             pdf_name,
             component_payload.get("H_pion_weight_vs_MM_stage"),
@@ -8537,10 +8803,11 @@ def print_particle_subtraction_component_application_pages(
     _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
-        "kaon pion-bg model",
-        "{}Part 3 {} model closure: weighted pion model vs kaon bg model".format(
+        kaon_model_label,
+        "{}Part 3 {} model closure: weighted pion model vs {}".format(
             title_prefix,
             closure_label,
+            kaon_model_label,
         ),
         [
             (
@@ -8555,7 +8822,8 @@ def print_particle_subtraction_component_application_pages(
             "signature match={}".format(
                 "pass" if bool(model_closure.get("signature_match")) else "fail"
             ),
-            "kaon pion model integral={}".format(
+            "{} integral={}".format(
+                kaon_model_label,
                 _format_fit_number(model_closure.get("reference_integral"))
             ),
             "weighted pion model integral={}".format(
@@ -8568,7 +8836,8 @@ def print_particle_subtraction_component_application_pages(
                 _format_fit_number(model_closure.get("max_abs_bin_diff")),
                 _format_fit_metric(model_closure.get("max_abs_bin_center")),
             ),
-            "kaon bg curve shown{}.".format(
+            "{} shown{}.".format(
+                kaon_model_label,
                 " after kaon-side post-refine scaling" if kaon_manual_scaling_active else " without manual kaon-side scaling"
             ),
             "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
@@ -8580,10 +8849,11 @@ def print_particle_subtraction_component_application_pages(
     _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
-        "kaon pion-bg model",
-        "{}Part 3 {} event-template closure vs kaon bg model".format(
+        kaon_model_label,
+        "{}Part 3 {} event-template closure vs {}".format(
             title_prefix,
             closure_label,
+            kaon_model_label,
         ),
         [
             (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template (full)", ROOT.kOrange + 7, 2),
@@ -8593,7 +8863,8 @@ def print_particle_subtraction_component_application_pages(
             "signature match={}".format(
                 "pass" if bool(event_template_closure.get("signature_match")) else "fail"
             ),
-            "kaon pion model integral={}".format(
+            "{} integral={}".format(
+                kaon_model_label,
                 _format_fit_number(event_template_closure.get("reference_integral"))
             ),
             "weighted event-template integral={}".format(
@@ -8620,7 +8891,7 @@ def print_particle_subtraction_component_application_pages(
         "kaon data before pion subtraction",
         "{}Part 3 kaon data vs pion-background models".format(title_prefix),
         [
-            (component_payload.get("H_kaon_pion_model"), "kaon pion-bg model", ROOT.kBlue + 1, 1),
+            (component_payload.get("H_kaon_pion_model"), kaon_model_label, ROOT.kBlue + 1, 1),
             (component_payload.get("H_pion_subtraction_template_MM_nosub"), "weighted pion template", ROOT.kOrange + 7, 2),
         ],
         [
@@ -8628,7 +8899,8 @@ def print_particle_subtraction_component_application_pages(
             "before full integral={}".format(
                 _format_fit_number(component_payload.get("kaon_integral_before_pion_sub_full"))
             ),
-            "kaon pion model integral={}".format(
+            "{} integral={}".format(
+                kaon_model_label,
                 _format_fit_number(diagnostics.get("kaon_pion_model_integral"))
             ),
             "weighted template full integral={}".format(
@@ -8637,7 +8909,8 @@ def print_particle_subtraction_component_application_pages(
             "effective scale={}".format(
                 _format_fit_number(component_payload.get("particle_subtraction_effective_scale"))
             ),
-            "kaon pion-bg model shown{}.".format(
+            "{} shown{}.".format(
+                kaon_model_label,
                 " after kaon-side post-refine scaling" if kaon_manual_scaling_active else " without manual kaon-side scaling"
             ),
             "kaon-side post-fit scales: {}".format(_format_component_scale_map(kaon_postfit_scales)),
@@ -8646,7 +8919,11 @@ def print_particle_subtraction_component_application_pages(
         cut_window=cut_window,
     )
 
-    if joint_mode_active and component_payload.get("H_kaon_pion_model_stage") is not None:
+    if (
+        not protected_kaon_mode
+        and joint_mode_active
+        and component_payload.get("H_kaon_pion_model_stage") is not None
+    ):
         _print_component_overlay_page(
             pdf_name,
             component_payload.get("H_MM_nosub_before_pion_subtraction"),
@@ -8769,6 +9046,10 @@ def print_particle_subtraction_component_fit_pages(
 
     pion_diagnostics = ((component_fit_result.get("diagnostics") or {}).get("pion") or {})
     kaon_diagnostics = ((component_fit_result.get("diagnostics") or {}).get("kaon") or {})
+    protected_render_state = _resolve_protected_pi_delta_render_state(component_fit_result)
+    protected_kaon_mode = bool(
+        protected_render_state.get("suppress_deprecated_kaon_pages")
+    )
     pion_stage_amplitudes = pion_diagnostics.get("staged_amplitudes_scaled") or {}
     kaon_stage_amplitudes = kaon_diagnostics.get("staged_amplitudes_scaled") or {}
     pion_stage_validation = pion_diagnostics.get("stage_validation") or pion_diagnostics.get("validation") or {}
@@ -8918,7 +9199,10 @@ def print_particle_subtraction_component_fit_pages(
 
     _print_component_overlay_page(
         pdf_name,
-        component_fit_result.get("H_kaon_nosub_input"),
+        (
+            component_fit_result.get("H_kaon_nosub_input")
+            if not protected_kaon_mode else None
+        ),
         "kaon no-sub data",
         kaon_title.replace("SIMC pion-background fit", "staged SIMC pion-background fit"),
         kaon_overlay_specs,
@@ -8973,44 +9257,20 @@ def print_particle_subtraction_component_fit_pages(
         cut_window=cut_window,
     )
 
-    protected_pi_delta = kaon_diagnostics.get("pi_delta_signal_protected_fit") or {}
-    if bool(protected_pi_delta.get("enabled")):
-        protected_metrics = protected_pi_delta.get("fit_metrics") or {}
-        protected_amplitudes = protected_pi_delta.get("signal_amplitudes") or {}
-        _print_component_overlay_page(
+    if protected_render_state.get("render_success_pages"):
+        _print_protected_pi_delta_pages(
             pdf_name,
-            component_fit_result.get("H_pi_delta_protected_fit_input"),
-            "R_{pre#Delta}",
-            "{}signal-protected final #pi#Delta fit".format(title_prefix),
-            [
-                (component_fit_result.get("H_pi_delta_protected_k_lambda"), "K-Lambda protected", ROOT.kBlue + 1, 1),
-                (component_fit_result.get("H_pi_delta_protected_k_sigma0"), "K-Sigma0 protected", ROOT.kCyan + 2, 1),
-                (component_fit_result.get("H_pi_delta_protected_pi_delta"), "pi-delta SUBTRACTED", ROOT.kAzure + 2, 1),
-                (component_fit_result.get("H_pi_delta_protected_fit_total"), "three-template model", ROOT.kGreen + 2, 2),
-                (component_fit_result.get("H_pi_delta_protected_after_subtraction"), "after pi-delta only", ROOT.kOrange + 7, 2),
-            ],
-            [
-                "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
-                "K-Lambda and K-Sigma0 signal-protection templates; ONLY pi-delta is subtracted",
-                "status: {}".format(protected_pi_delta.get("status") or "unknown"),
-                "failure reason: {}".format(protected_pi_delta.get("failure_reason") or "none"),
-                "A_delta(applied)={}".format(_format_fit_number(protected_pi_delta.get("applied_A_delta"))),
-                "S_lambda={}  S_sigma0={}".format(
-                    _format_fit_number(protected_amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME)),
-                    _format_fit_number(protected_amplitudes.get(KAON_SIGMA0_TEMPLATE_NAME)),
-                ),
-                "chi2/ndf={}  p={}  bins={}".format(
-                    _format_fit_metric(protected_metrics.get("chi2_ndf")),
-                    _format_fit_metric(protected_metrics.get("fit_p_value")),
-                    protected_metrics.get("n_fit_bins", 0),
-                ),
-                "rank={}  cond={}".format(
-                    (protected_pi_delta.get("matrix_diagnostics") or {}).get("weighted_design_effective_rank"),
-                    _format_fit_metric((protected_pi_delta.get("matrix_diagnostics") or {}).get("weighted_design_condition_number")),
-                ),
-                "fit residual is diagnostic-only; after pi-delta only is the physics output",
-            ],
+            component_fit_result,
+            protected_render_state,
+            title_prefix=title_prefix,
             cut_window=cut_window,
+        )
+    elif protected_kaon_mode:
+        _print_protected_pi_delta_status_page(
+            pdf_name,
+            component_fit_result,
+            protected_render_state,
+            title_prefix=title_prefix,
         )
 
     _print_joint_refinement_overlay_page(
@@ -9073,7 +9333,10 @@ def print_particle_subtraction_component_fit_pages(
 
     _print_joint_refinement_overlay_page(
         pdf_name,
-        component_fit_result.get("H_kaon_nosub_input"),
+        (
+            component_fit_result.get("H_kaon_nosub_input")
+            if not protected_kaon_mode else None
+        ),
         component_fit_result.get("H_kaon_fit_total"),
         component_fit_result.get("H_kaon_fit_total_refined"),
         [
@@ -9135,7 +9398,10 @@ def print_particle_subtraction_component_fit_pages(
 
     _print_kaon_pion_bg_comparison_page(
         pdf_name,
-        component_fit_result.get("H_kaon_nosub_input"),
+        (
+            component_fit_result.get("H_kaon_nosub_input")
+            if not protected_kaon_mode else None
+        ),
         component_fit_result.get("H_kaon_pion_bg_fit_total"),
         component_fit_result.get("H_kaon_pion_bg_fit_total_refined_pre_postrefine"),
         component_fit_result.get("H_kaon_pion_bg_fit_total_refined"),
@@ -9166,14 +9432,23 @@ def print_particle_subtraction_component_fit_pages(
         pdf_name,
         component_fit_result,
         title_prefix,
+        protected_kaon_mode=protected_kaon_mode,
     )
     _print_residual_shift_scan_pages(
         pdf_name,
         component_fit_result,
         title_prefix,
+        protected_kaon_mode=protected_kaon_mode,
     )
 
     if component_fit_result.get("analysis_scope") == "setting-wide":
+        kaon_display_step_overlays = (
+            _filtered_kaon_early_component_step_overlays(
+                component_fit_result.get("H_kaon_fit_step_overlays")
+            )
+            if protected_kaon_mode
+            else component_fit_result.get("H_kaon_fit_step_overlays")
+        )
         _print_component_step_pages(
             pdf_name,
             component_fit_result.get("H_pion_control_input"),
@@ -9191,14 +9466,14 @@ def print_particle_subtraction_component_fit_pages(
         _print_component_step_pages(
             pdf_name,
             component_fit_result.get("H_kaon_nosub_input"),
-            component_fit_result.get("H_kaon_fit_step_overlays"),
+            kaon_display_step_overlays,
             title_prefix,
             "kaon no-sub",
         )
         _print_component_amplitude_pages(
             pdf_name,
             component_fit_result.get("H_kaon_nosub_input"),
-            component_fit_result.get("H_kaon_fit_step_overlays"),
+            kaon_display_step_overlays,
             title_prefix,
             "kaon no-sub",
         )
