@@ -93,11 +93,12 @@ class Sigma0ManifestTests(unittest.TestCase):
         self.assertIsNone(high_left["root"])
         self.assertEqual(high_left["environment_variable"], "LT_BG_SIGMA0_LEFT_HIGH_ROOT")
 
-    def test_manifest_epsilon_selects_the_matching_sigma0_variable(self):
+    def test_generated_epsilon_override_does_not_retarget_sigma0(self):
         with mock.patch.dict(
             os.environ,
             {
                 "LT_BG_SAMPLE_EPSILON": "high",
+                "LT_BG_SIGMA0_CENTER_LOW_ROOT": "D:/sigma0/Q4p4W2p74center_low.root",
                 "LT_BG_SIGMA0_CENTER_HIGH_ROOT": "D:/sigma0/Q4p4W2p74center_high.root",
             },
             clear=True,
@@ -106,9 +107,45 @@ class Sigma0ManifestTests(unittest.TestCase):
 
         center = manifest["by_phi"]["Center"]["sigma0"]
         self.assertEqual(manifest["epsilon"], "high")
-        self.assertEqual(center["environment_variable"], "LT_BG_SIGMA0_CENTER_HIGH_ROOT")
-        self.assertEqual(center["root"], "D:/sigma0/Q4p4W2p74center_high.root")
-        self.assertEqual(center["source_identity"]["EPSSET"], "high")
+        self.assertEqual(
+            manifest["by_phi"]["Center"]["neutron"]["source_identity"]["EPSSET"],
+            "high",
+        )
+        self.assertEqual(center["environment_variable"], "LT_BG_SIGMA0_CENTER_LOW_ROOT")
+        self.assertEqual(center["root"], "D:/sigma0/Q4p4W2p74center_low.root")
+        self.assertEqual(center["source_identity"]["EPSSET"], "low")
+
+    def test_analysis_identity_isolated_from_generated_overrides(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "LT_BG_SAMPLE_Q2": "3p0",
+                "LT_BG_SAMPLE_W": "3p14",
+                "LT_BG_SAMPLE_EPSILON": "low",
+                "LT_BG_SIGMA0_LEFT_LOW_ROOT": "D:/sigma0/Q3p0W3p14left_low.root",
+                "LT_BG_SIGMA0_LEFT_HIGH_ROOT": "D:/sigma0/Q4p4W2p74left_high.root",
+            },
+            clear=True,
+        ):
+            manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "high")
+
+        left_sigma0 = manifest["by_phi"]["Left"]["sigma0"]
+        self.assertEqual(manifest["q2"], "3p0")
+        self.assertEqual(manifest["w"], "3p14")
+        self.assertEqual(manifest["epsilon"], "low")
+        for background in ("neutron", "delta", "sidis"):
+            generated = manifest["by_phi"]["Left"][background]
+            self.assertEqual(
+                generated["source_identity"],
+                {"Q2": "3p0", "W": "3p14", "EPSSET": "low", "phi_setting": "Left"},
+            )
+            self.assertIn("Prod_Coin_Q3p0W3p14left_lowe.root", generated["root"])
+        self.assertEqual(left_sigma0["environment_variable"], "LT_BG_SIGMA0_LEFT_HIGH_ROOT")
+        self.assertEqual(left_sigma0["root"], "D:/sigma0/Q4p4W2p74left_high.root")
+        self.assertEqual(
+            left_sigma0["source_identity"],
+            {"Q2": "4p4", "W": "2p74", "EPSSET": "high", "phi_setting": "Left"},
+        )
 
     def test_generic_phi_only_variable_is_ignored(self):
         with mock.patch.dict(

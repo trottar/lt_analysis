@@ -82,18 +82,22 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
     It remains present in every per-phi manifest so consumers can distinguish an
     intentional unconfigured external source from a missing manifest entry.
     """
+    analysis_q2 = str(q2)
+    analysis_w = str(w)
+    analysis_eps = normalize_sigma0_epsilon(epsset)
+
     env_base_dir = os.environ.get("LT_BG_SAMPLE_BASE")
     base_dir = env_base_dir or os.path.join(ltanapath, "background_samples", "OUTPUTS")
-    sample_q2 = os.environ.get("LT_BG_SAMPLE_Q2", q2)
-    sample_w = os.environ.get("LT_BG_SAMPLE_W", w)
-    sample_eps = normalize_sigma0_epsilon(
+    generated_q2 = str(os.environ.get("LT_BG_SAMPLE_Q2", q2))
+    generated_w = str(os.environ.get("LT_BG_SAMPLE_W", w))
+    generated_eps = normalize_sigma0_epsilon(
         os.environ.get("LT_BG_SAMPLE_EPSILON", epsset)
     )
     manifest = {
         "base_dir": base_dir,
-        "q2": sample_q2,
-        "w": sample_w,
-        "epsilon": sample_eps,
+        "q2": generated_q2,
+        "w": generated_w,
+        "epsilon": generated_eps,
         "by_background": {},
         "by_phi": {phi_label: {} for phi_label in BACKGROUND_SAMPLE_PHI_ENV},
     }
@@ -104,19 +108,19 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
         for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
             env_prefix = "LT_BG_{}_{}".format(env_background, phi_env)
             sample_name = "Prod_Coin_Q{}W{}{}_{}e".format(
-                sample_q2,
-                sample_w,
+                generated_q2,
+                generated_w,
                 phi_label.lower(),
-                sample_eps,
+                generated_eps,
             )
             default_base = os.path.join(base_dir, background, sample_name)
             sample_entry = {
                 "source_strategy": "generated_background",
                 "configured": True,
                 "source_identity": _source_identity(
-                    sample_q2,
-                    sample_w,
-                    sample_eps,
+                    generated_q2,
+                    generated_w,
+                    generated_eps,
                     phi_label,
                 ),
             }
@@ -127,17 +131,17 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
             manifest["by_phi"][phi_label][background] = sample_entry
 
     manifest["by_background"]["sigma0"] = {}
-    for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
-        environment_variable = sigma0_environment_variable(phi_label, sample_eps)
-        root_filename = _explicit_sigma0_root(phi_label, sample_eps)
+    for phi_label in BACKGROUND_SAMPLE_PHI_ENV:
+        environment_variable = sigma0_environment_variable(phi_label, analysis_eps)
+        root_filename = _explicit_sigma0_root(phi_label, analysis_eps)
         sample_entry = {
             "source_strategy": "external_required",
             "configured": bool(root_filename),
             "environment_variable": environment_variable,
             "source_identity": _source_identity(
-                sample_q2,
-                sample_w,
-                sample_eps,
+                analysis_q2,
+                analysis_w,
+                analysis_eps,
                 phi_label,
             ),
         }

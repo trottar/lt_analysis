@@ -704,6 +704,11 @@ required branches, and never infers K-$\Sigma^0$ from K-$\Lambda$ or
 pion-background sources.  An absent or incompatible source retains the
 protected fit's conservative \texttt{zero\_pi\_delta} behavior.
 
+The active analysis $Q^2$, $W$, and epsilon passed to the analysis are
+authoritative for K-$\Sigma^0$ source identity and epsilon-specific
+environment-variable selection.  \texttt{LT\_BG\_SAMPLE\_*} generated-background
+overrides do not retarget the external K-$\Sigma^0$ source.
+
 Templates can be resolved at setting-wide and $(t,\phi)$ scope.  For a sparse
 fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then
 setting-wide.  This is a template-support fallback and does not replace the
