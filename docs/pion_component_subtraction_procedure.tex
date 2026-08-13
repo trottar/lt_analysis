@@ -701,8 +701,7 @@ variable for each active epsilon and refuses its pre-clean step if any of the
 six configured locations resolve inside the repository.  The loader records
 the active $(Q^2,W,\epsilon,\phi)$ identity, validates the configured tree and
 required branches, and never infers K-$\Sigma^0$ from K-$\Lambda$ or
-pion-background sources.  An absent or incompatible source retains the
-protected fit's conservative \texttt{zero\_pi\_delta} behavior.
+pion-background sources.
 
 The active analysis $Q^2$, $W$, and epsilon passed to the analysis are
 authoritative for K-$\Sigma^0$ source identity and epsilon-specific
@@ -713,6 +712,20 @@ Templates can be resolved at setting-wide and $(t,\phi)$ scope.  For a sparse
 fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then
 setting-wide.  This is a template-support fallback and does not replace the
 configured physical input sample.
+
+\subsection{Signal-Protected Final $\pi$-$\Delta$ Fit}
+
+The preferred final kaon-side model fits K-$\Lambda$, K-$\Sigma^0$, and
+$\pi$-$\Delta$ together after the early $\pi$-$n$ and $\pi$-SIDIS amplitudes
+are frozen.  Only the fitted $\pi$-$\Delta$ term is propagated into the pion
+subtraction weight.  If the K-$\Sigma^0$ source or the actual template for a
+given scope is unavailable before the fit design is constructed, the explicit
+K-$\Lambda$-only protected fallback fits K-$\Lambda$ and $\pi$-$\Delta$ and
+still subtracts only $\pi$-$\Delta$.  This fallback is less complete than the
+three-template model and is reported as such.  K-$\Lambda$ and $\pi$-$\Delta$
+remain mandatory.  Once a usable K-$\Sigma^0$ template has selected the
+three-template model, rank, design, covariance, or solver failures do not
+retry without it; they retain conservative \texttt{zero\_pi\_delta} behavior.
 
 \subsection{Dynamic Template Alignment}
 

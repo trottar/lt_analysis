@@ -32,6 +32,7 @@ class SignalProtectedPiDeltaConfigTests(unittest.TestCase):
         self.assertTrue(protected["enabled"])
         self.assertTrue(protected["require_k_lambda_template"])
         self.assertTrue(protected["require_k_sigma0_template"])
+        self.assertTrue(protected["allow_lambda_only_fallback"])
         self.assertEqual(protected["failure_policy"], "zero_pi_delta")
 
         merged = bgcfg._deep_merge_particle_subtraction_config(
@@ -41,6 +42,7 @@ class SignalProtectedPiDeltaConfigTests(unittest.TestCase):
         merged_protected = merged["pi_delta_signal_protected_fit"]
         self.assertAlmostEqual(merged_protected["template_corr_warn"], 0.91)
         self.assertTrue(merged_protected["require_k_lambda_template"])
+        self.assertTrue(merged_protected["allow_lambda_only_fallback"])
         self.assertEqual(merged_protected["failure_policy"], "zero_pi_delta")
 
 
@@ -102,7 +104,7 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
             "diagnostics": {"refined_amplitudes": {"pi_n": 1.10, "pi_sidis": 0.60, "pi_delta": 4.00}},
         }
 
-    def _apply(self, target, sigma=None):
+    def _apply(self, target, sigma=None, source_diagnostics=None):
         return self.fits._apply_signal_protected_pi_delta_fit(
             self._legacy_payload(),
             target,
@@ -119,12 +121,17 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
             "Center",
             0.0,
             context="unit",
+            kaon_sigma0_source_diagnostics=source_diagnostics,
         )
 
     def test_recovers_three_template_solution_and_subtracts_only_pi_delta(self):
         result = self._apply(self._target())
         diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
         self.assertEqual(diagnostic["status"], "success")
+        self.assertEqual(diagnostic["fit_variant"], "lambda_sigma0_protected")
+        self.assertFalse(diagnostic["fallback_attempted"])
+        self.assertFalse(diagnostic["fallback_used"])
+        self.assertTrue(diagnostic["sigma0_fitted"])
         self.assertAlmostEqual(result["A_n"], 1.10, places=10)
         self.assertAlmostEqual(result["A_sidis"], 0.60, places=10)
         self.assertAlmostEqual(result["A_delta"], 0.25, places=7)
@@ -256,26 +263,121 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
         )
         self.assertIs(result, payload)
         self.assertEqual(result["A_delta"], 4.00)
-        self.assertNotIn("pi_delta_signal_protected_fit", result["diagnostics"])
+        self.assertEqual(
+            result["diagnostics"]["pi_delta_signal_protected_fit"]["fit_variant"],
+            "disabled",
+        )
 
-    def test_missing_sigma_zeroes_only_final_pi_delta(self):
-        # The data can contain Sigma strength while the required SIMC template
-        # is genuinely absent; this must not revive the legacy pi-delta fit.
+    def test_missing_sigma_uses_lambda_only_protected_fallback(self):
+        # The data can contain Sigma strength while its required external
+        # template is absent.  Lambda and pi-delta still form the explicit
+        # protected fallback; no staged pi-delta value is revived.
         result = self.fits._apply_signal_protected_pi_delta_fit(
             self._legacy_payload(), self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
-            self.k_lambda, None, self.config, 0.70, 1.30, [], self.inp, "Center", 0.0, context="missing",
+            self.k_lambda, None, self.config, 0.70, 1.30, [], self.inp, "Center", 0.0,
+            context="missing",
+            kaon_sigma0_source_diagnostics={
+                "fallback_reason": "no_source_configured",
+                "source_identity": {"Q2": "4p4", "W": "2p74", "EPSSET": "low", "phi_setting": "Center"},
+            },
         )
         diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
-        self.assertEqual(diagnostic["status"], "missing_required_template")
-        self.assertEqual(result["A_delta"], 0.0)
+        self.assertEqual(diagnostic["status"], "success")
+        self.assertEqual(diagnostic["fit_variant"], "lambda_only_protected_fallback")
+        self.assertTrue(diagnostic["fallback_attempted"])
+        self.assertTrue(diagnostic["fallback_used"])
+        self.assertEqual(diagnostic["fallback_reason"], "no_source_configured")
+        self.assertEqual(diagnostic["sigma0_source_availability"]["status"], "unavailable")
+        self.assertEqual(diagnostic["sigma0_scope_template_availability"]["reason"], "k_sigma0_scope_template_missing")
+        self.assertIsNone(result["S_sigma0"])
+        self.assertIsNone(result["H_pi_delta_protected_k_sigma0"])
+        self.assertGreater(result["A_delta"], 0.0)
         self.assertAlmostEqual(result["A_n"], 1.10, places=12)
         self.assertAlmostEqual(result["A_sidis"], 0.60, places=12)
         self.assertEqual(diagnostic["legacy_staged_A_delta"], 4.00)
+
+    def test_scope_local_sigma_failure_preserves_valid_source_provenance(self):
+        empty_sigma = self.k_sigma.Clone("empty_sigma")
+        empty_sigma.Reset()
+        result = self._apply(
+            self._target(k_sigma=empty_sigma),
+            sigma=empty_sigma,
+            source_diagnostics={
+                "normalized": True,
+                "configured": True,
+                "source_identity": {"Q2": "4p4", "W": "2p74", "EPSSET": "low", "phi_setting": "Center"},
+            },
+        )
+        diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["fit_variant"], "lambda_only_protected_fallback")
+        self.assertTrue(diagnostic["fallback_used"])
+        self.assertEqual(diagnostic["sigma0_source_availability"]["status"], "available")
+        self.assertEqual(
+            diagnostic["sigma0_scope_template_availability"]["reason"],
+            "k_sigma0_scope_template_non_positive",
+        )
+        self.assertEqual(diagnostic["fallback_reason"], "k_sigma0_scope_template_non_positive")
+
+    def test_scope_local_sigma_binning_mismatch_uses_fallback(self):
+        mismatched_sigma = ROOT.TH1D("mismatched_sigma", "mismatched_sigma", 60, 0.70, 1.30)
+        for index in range(1, mismatched_sigma.GetNbinsX() + 1):
+            mismatched_sigma.SetBinContent(index, 1.0)
+        mismatched_sigma.SetDirectory(0)
+        result = self._apply(self._target(k_sigma=self.k_sigma), sigma=mismatched_sigma)
+        diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["fit_variant"], "lambda_only_protected_fallback")
+        self.assertEqual(
+            diagnostic["sigma0_scope_template_availability"]["reason"],
+            "k_sigma0_scope_template_binning_mismatch",
+        )
+
+    def test_disabled_lambda_only_policy_retains_zero_pi_delta_safety(self):
+        config = copy.deepcopy(self.config)
+        config["pi_delta_signal_protected_fit"]["allow_lambda_only_fallback"] = False
+        result = self.fits._apply_signal_protected_pi_delta_fit(
+            self._legacy_payload(), self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+            self.k_lambda, None, config, 0.70, 1.30, [], self.inp, "Center", 0.0,
+            context="fallback_disabled",
+        )
+        diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["fit_variant"], "zero_pi_delta_failure")
+        self.assertFalse(diagnostic["fallback_attempted"])
+        self.assertFalse(diagnostic["fallback_used"])
+        self.assertEqual(result["A_delta"], 0.0)
+
+    def test_lambda_or_pi_delta_remains_mandatory(self):
+        missing_lambda = self.fits._apply_signal_protected_pi_delta_fit(
+            self._legacy_payload(), self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+            None, self.k_sigma, self.config, 0.70, 1.30, [], self.inp, "Center", 0.0,
+            context="missing_lambda",
+        )
+        diagnostic = missing_lambda["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["fit_variant"], "zero_pi_delta_failure")
+        self.assertFalse(diagnostic["fallback_attempted"])
+        self.assertEqual(missing_lambda["A_delta"], 0.0)
 
     def test_rank_deficiency_is_not_reported_as_high_correlation_warning_only(self):
         result = self._apply(self._target(k_sigma=self.pi_delta), sigma=self.pi_delta)
         diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
         self.assertEqual(diagnostic["status"], "rank_deficient")
+        self.assertEqual(diagnostic["selected_fit_variant"], "lambda_sigma0_protected")
+        self.assertEqual(diagnostic["fit_variant"], "zero_pi_delta_failure")
+        self.assertFalse(diagnostic["fallback_attempted"])
+        self.assertEqual(result["A_delta"], 0.0)
+
+    def test_lambda_only_rank_failure_remains_zeroed(self):
+        payload = self._legacy_payload()
+        payload["H_k_lambda_simc_reference"] = self.pi_delta.Clone("rank_lambda_reference")
+        result = self.fits._apply_signal_protected_pi_delta_fit(
+            payload, self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+            self.pi_delta, None, self.config, 0.70, 1.30, [], self.inp, "Center", 0.0,
+            context="fallback_rank",
+        )
+        diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["selected_fit_variant"], "lambda_only_protected_fallback")
+        self.assertEqual(diagnostic["fit_variant"], "zero_pi_delta_failure")
+        self.assertTrue(diagnostic["fallback_attempted"])
+        self.assertFalse(diagnostic["fallback_used"])
         self.assertEqual(result["A_delta"], 0.0)
 
     def test_strong_sigma_delta_overlap_remains_a_solvable_protected_fit(self):

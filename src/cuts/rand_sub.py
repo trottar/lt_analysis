@@ -3528,14 +3528,14 @@ def rand_sub(
                     kaon_sigma0_shape_payload,
                     analysis_scope="setting-wide",
                 ),
+                kaon_sigma0_source_diagnostics=(
+                    (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
+                ),
                 mm_offset_data=MM_offset_DATA,
                 phi_setting=phi_setting,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
                 pion_component_alignment=setting_alignment,
                 alignment_bin_key=alignment_bin_key,
-            )
-            component_fit_result["kaon_sigma0_source_diagnostics"] = dict(
-                (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
             )
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):

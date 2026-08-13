@@ -1857,15 +1857,15 @@ def process_hist_data(
                             t_bin_index=j,
                             phi_bin_index=k,
                         ),
+                        kaon_sigma0_source_diagnostics=(
+                            (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
+                        ),
                         mm_offset_data=MM_offset_DATA,
                         phi_setting=phi_setting,
                         context="yield_{}_t{}_phi{}".format(phi_setting, j + 1, k + 1),
                         parent_alignment=parent_pion_alignment,
                         pion_component_alignment=active_alignment,
                         alignment_bin_key=alignment_bin_key,
-                    )
-                    scope_result["kaon_sigma0_source_diagnostics"] = dict(
-                        (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
                     )
                     alignment_payload = scope_result.get("pion_component_alignment")
                     if isinstance(alignment_payload, dict):

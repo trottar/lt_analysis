@@ -364,6 +364,11 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "enabled": True,
             "require_k_lambda_template": True,
             "require_k_sigma0_template": True,
+            # Sigma0 remains a required template for the preferred protected
+            # model.  This explicit policy only permits the conservative
+            # K-Lambda + pi-delta fallback when Sigma0 is unavailable before
+            # a three-template design is constructed.
+            "allow_lambda_only_fallback": True,
             "fit_window": None,
             "nonnegative_amplitudes": True,
             "failure_policy": "zero_pi_delta",

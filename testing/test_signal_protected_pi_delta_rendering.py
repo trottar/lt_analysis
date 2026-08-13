@@ -140,6 +140,33 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             })
         return payload
 
+    def _lambda_only_fallback_payload(self):
+        payload = self._fit_payload()
+        protected = payload["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
+        protected.update(
+            {
+                "fit_variant": "lambda_only_protected_fallback",
+                "selected_fit_variant": "lambda_only_protected_fallback",
+                "fallback_attempted": True,
+                "fallback_used": True,
+                "fallback_reason": "no_source_configured",
+                "sigma0_availability_reason": "no_source_configured",
+                "sigma0_fitted": False,
+                "signal_amplitudes": {"k_lambda_signal": 2.0, "k_sigma0_signal": None},
+                "template_availability": {
+                    "k_lambda_signal": True,
+                    "k_sigma0_signal": False,
+                    "pi_delta": True,
+                },
+                "closure": {
+                    "protected_two_component_model": {"passed": True},
+                    "delta_only_physics_output": {"passed": True},
+                },
+            }
+        )
+        payload.pop("H_pi_delta_protected_k_sigma0")
+        return payload
+
     def _fit_page_recorders(self):
         overlay_pages = []
         text_pages = []
@@ -231,6 +258,31 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         self.assertEqual(state["state"], "success")
         self.assertTrue(state["suppress_deprecated_kaon_pages"])
 
+    def test_lambda_only_fallback_renders_without_a_sigma0_curve(self):
+        payload = self._lambda_only_fallback_payload()
+        state = fits._resolve_protected_pi_delta_render_state(payload)
+        self.assertEqual(state["state"], "success")
+        self.assertEqual(state["fit_variant"], "lambda_only_protected_fallback")
+
+        patches, overlay_pages, text_pages, *_unused = self._fit_page_recorders()
+        with mock.patch.multiple(fits, **patches):
+            fits.print_particle_subtraction_component_fit_pages("ignored.pdf", payload)
+
+        protected_pages = [page for page in overlay_pages if "K-Lambda-only fallback" in page[0]]
+        self.assertEqual(len(protected_pages), 2)
+        self.assertFalse(text_pages)
+        self.assertEqual(
+            [overlay[0] for overlay in protected_pages[0][2]],
+            [
+                self.objects["protected_lambda"],
+                self.objects["protected_delta"],
+                self.objects["protected_total"],
+            ],
+        )
+        self.assertTrue(
+            any("ONLY pi-delta is subtracted" in line for line in protected_pages[0][3])
+        )
+
     def test_enabled_failure_or_missing_payload_gets_status_not_legacy_kaon_pages(self):
         for payload, expected in (
             (self._fit_payload(diagnostic=True, status="missing_required_template"), "PROTECTED FIT UNAVAILABLE"),
@@ -272,6 +324,31 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         self.assertTrue(any("K-Sigma0 source: configured_path_does_not_exist Q4p4 W2p74 low Left" in line for line in body))
         self.assertTrue(any("K-Sigma0 environment: LT_BG_SIGMA0_LEFT_LOW_ROOT" in line for line in body))
         self.assertTrue(any("K-Sigma0 requested: /external/sigma0/left.root" in line for line in body))
+
+    def test_failed_lambda_only_attempt_reports_attempt_without_use(self):
+        payload = self._fit_payload(diagnostic=True, status="rank_deficient")
+        protected = payload["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
+        protected.update(
+            {
+                "fit_variant": "zero_pi_delta_failure",
+                "selected_fit_variant": "lambda_only_protected_fallback",
+                "fallback_attempted": True,
+                "fallback_used": False,
+                "fallback_reason": "k_sigma0_scope_template_non_positive",
+                "sigma0_source_availability": {"status": "available", "reason": None},
+                "sigma0_scope_template_availability": {
+                    "status": "unavailable",
+                    "reason": "k_sigma0_scope_template_non_positive",
+                },
+            }
+        )
+        patches, _overlay_pages, text_pages, *_unused = self._fit_page_recorders()
+        with mock.patch.multiple(fits, **patches):
+            fits.print_particle_subtraction_component_fit_pages("ignored.pdf", payload)
+
+        body = text_pages[0][2]
+        self.assertTrue(any("attempted=True used=False" in line for line in body))
+        self.assertTrue(any("scope-template availability: unavailable" in line for line in body))
 
     def test_disabled_mode_retains_legacy_kaon_sequence(self):
         payload = self._fit_payload(enabled=False, diagnostic=False)

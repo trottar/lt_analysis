@@ -1282,15 +1282,15 @@ def process_hist_data(
                             analysis_scope="t_bin{}".format(j + 1),
                             t_bin_index=j,
                         ),
+                        kaon_sigma0_source_diagnostics=(
+                            (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
+                        ),
                     mm_offset_data=MM_offset_DATA,
                     phi_setting=phi_setting,
                     context="ave_{}_t{}".format(phi_setting, j + 1),
                     parent_alignment=parent_pion_alignment,
                     pion_component_alignment=active_alignment,
                     alignment_bin_key=alignment_bin_key,
-                )
-                component_fit_results[j]["kaon_sigma0_source_diagnostics"] = dict(
-                    (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
                 )
                 alignment_payload = component_fit_results[j].get("pion_component_alignment")
                 if isinstance(alignment_payload, dict):

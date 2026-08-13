@@ -508,6 +508,7 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
                 "setting-wide",
                 kaon_signal_shape=k_lambda,
                 kaon_sigma0_shape=sigma0,
+                kaon_sigma0_source_diagnostics=sigma0_payload["diagnostics"],
                 phi_setting="Left",
                 context="sigma0_full_plumbing",
             )
@@ -516,6 +517,8 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
 
         protected = result["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
         self.assertEqual(protected["status"], "success")
+        self.assertEqual(protected["fit_variant"], "lambda_sigma0_protected")
+        self.assertFalse(protected["fallback_used"])
         self.assertTrue(protected["template_availability"]["k_lambda_signal"])
         self.assertTrue(protected["template_availability"]["k_sigma0_signal"])
         self.assertTrue(protected["template_availability"]["pi_delta"])
@@ -525,6 +528,89 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
             sigma0_payload["diagnostics"]["requested_environment_variable"],
             "LT_BG_SIGMA0_LEFT_LOW_ROOT",
         )
+        self.assertEqual(
+            protected["sigma0_source_availability"]["source_identity"]["EPSSET"],
+            "low",
+        )
+
+    def test_unconfigured_source_reaches_lambda_only_protected_fallback(self):
+        import background_config as bgcfg
+        import pion_component_fits as fits
+        import pion_component_subtraction as subtraction
+
+        with mock.patch.object(self.shapes, "set_val"), mock.patch.object(
+            self.shapes, "apply_simc_cuts", return_value=True
+        ), mock.patch.object(self.shapes, "apply_simc_sub_cuts", return_value=True):
+            sigma0_payload = self.shapes.load_kaon_simc_sigma0_shape(
+                None,
+                self._inp(None),
+                "Left",
+                hgcer_cutg=self.hole_cut,
+                context="sigma0_fallback_plumbing",
+            )
+
+        pi_n = self._shape("fallback_pi_n", 0.90, 0.018)
+        pi_sidis = self._shape("fallback_pi_sidis", 1.07, 0.030)
+        pi_delta = self._shape("fallback_pi_delta", 1.225, 0.050)
+        k_lambda = self._shape("fallback_k_lambda", 1.115, 0.012)
+        target = self._shape("fallback_target", 0.70, 1.0)
+        target.Reset()
+        for hist, amplitude in (
+            (pi_n, 1.10),
+            (pi_sidis, 0.60),
+            (k_lambda, 2.00),
+            (pi_delta, 0.25),
+        ):
+            target.Add(hist, amplitude)
+        for index in range(1, target.GetNbinsX() + 1):
+            target.SetBinError(index, 0.02)
+
+        original = copy.deepcopy(bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"])
+        try:
+            config = bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"]
+            config["joint_refinement_enabled"] = False
+            config["residual_component_shifts_enabled"] = False
+            config["pi_delta_signal_protected_fit"]["fit_window"] = None
+            result = fits.build_particle_subtraction_component_result(
+                target,
+                target,
+                {"pi_n": pi_n, "pi_delta": pi_delta, "pi_sidis": pi_sidis},
+                {
+                    "particle_subtraction_mode": "simc_shape_components",
+                    "bg_opt_mm_plot_min": 0.70,
+                    "bg_opt_mm_plot_max": 1.30,
+                },
+                "setting-wide",
+                kaon_signal_shape=k_lambda,
+                kaon_sigma0_shape=sigma0_payload["setting_shape_full"],
+                kaon_sigma0_source_diagnostics=sigma0_payload["diagnostics"],
+                phi_setting="Left",
+                context="sigma0_fallback_plumbing",
+            )
+        finally:
+            bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"] = original
+
+        protected = result["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(sigma0_payload["diagnostics"]["fallback_reason"], "no_source_configured")
+        self.assertEqual(protected["status"], "success")
+        self.assertEqual(protected["fit_variant"], "lambda_only_protected_fallback")
+        self.assertTrue(protected["fallback_attempted"])
+        self.assertTrue(protected["fallback_used"])
+        self.assertEqual(protected["fallback_reason"], "no_source_configured")
+        self.assertGreater(result["A_delta"], 0.0)
+        self.assertIsNone(result["H_pi_delta_protected_k_sigma0"])
+        weights = subtraction.build_simc_shape_pion_control_weights(result, model_variant="final")
+        protected_amplitudes = protected["protected_applied_amplitudes"]
+        for index in range(1, weights["H_kaon_pion_model"].GetNbinsX() + 1):
+            expected = sum(
+                float(protected_amplitudes[name])
+                * float(result["H_simc_shape_{}".format(name)].GetBinContent(index))
+                for name in ("pi_n", "pi_delta", "pi_sidis")
+            )
+            self.assertAlmostEqual(
+                weights["H_kaon_pion_model"].GetBinContent(index), expected, places=9
+            )
+        self.assertTrue(weights["diagnostics"]["signal_templates_excluded_from_subtraction_weight"])
 
 
 if __name__ == "__main__":

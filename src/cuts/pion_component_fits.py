@@ -1048,6 +1048,7 @@ def _resolve_pi_delta_signal_protected_fit_config(fit_config):
         "enabled": True,
         "require_k_lambda_template": True,
         "require_k_sigma0_template": True,
+        "allow_lambda_only_fallback": True,
         "fit_window": None,
         "nonnegative_amplitudes": True,
         "failure_policy": "zero_pi_delta",
@@ -1061,6 +1062,9 @@ def _resolve_pi_delta_signal_protected_fit_config(fit_config):
     resolved = deepcopy(defaults)
     resolved.update(deepcopy(configured))
     resolved["enabled"] = bool(resolved.get("enabled", True))
+    resolved["allow_lambda_only_fallback"] = bool(
+        resolved.get("allow_lambda_only_fallback", True)
+    )
     if not bool(resolved.get("require_k_lambda_template", True)) or not bool(
         resolved.get("require_k_sigma0_template", True)
     ):
@@ -1153,6 +1157,7 @@ def _signal_preservation_metrics(h_pre_delta, h_after_delta, scaled_signal_hists
             if math.isfinite(before) and math.isfinite(delta_removed) and abs(before) > 0.0
             else None
         )
+        fitted_signal_hist = (scaled_signal_hists or {}).get(signal_name)
         metrics[signal_name] = {
             "available": True,
             "source": window_payload.get("source"),
@@ -1161,14 +1166,85 @@ def _signal_preservation_metrics(h_pre_delta, h_after_delta, scaled_signal_hists
             "after_delta_only_yield": after,
             "pi_delta_removed_yield": delta_removed,
             "pi_delta_removed_fraction": removed_fraction,
-            "k_lambda_fitted_yield": _integrate_hist_windows(
-                (scaled_signal_hists or {}).get(KAON_SIGNAL_TEMPLATE_NAME), window_list
+            "fitted_signal_template_available": bool(fitted_signal_hist is not None),
+            "k_lambda_fitted_yield": (
+                _integrate_hist_windows(
+                    (scaled_signal_hists or {}).get(KAON_SIGNAL_TEMPLATE_NAME), window_list
+                )
+                if (scaled_signal_hists or {}).get(KAON_SIGNAL_TEMPLATE_NAME) is not None
+                else None
             ),
-            "k_sigma0_fitted_yield": _integrate_hist_windows(
-                (scaled_signal_hists or {}).get(KAON_SIGMA0_TEMPLATE_NAME), window_list
+            "k_sigma0_fitted_yield": (
+                _integrate_hist_windows(
+                    (scaled_signal_hists or {}).get(KAON_SIGMA0_TEMPLATE_NAME), window_list
+                )
+                if (scaled_signal_hists or {}).get(KAON_SIGMA0_TEMPLATE_NAME) is not None
+                else None
+            ),
+            "window_diagnostic_only": bool(
+                signal_name == KAON_SIGMA0_TEMPLATE_NAME and fitted_signal_hist is None
             ),
         }
     return metrics
+
+
+_SIGMA0_PRE_SOLVER_SOURCE_FAILURE_REASONS = frozenset(
+    {
+        "no_source_configured",
+        "configured_path_does_not_exist",
+        "root_open_failed",
+        "missing_simc_tree",
+        "incompatible_tree_missing_branches",
+        "zero_entry_tree",
+        "no_events_passed_component_shape_cuts",
+        "weighted_integral_non_positive",
+        "normalization_failed",
+    }
+)
+
+
+def _resolve_sigma0_source_availability(source_diagnostics):
+    """Keep external-source provenance distinct from local template support."""
+    source = deepcopy(source_diagnostics) if isinstance(source_diagnostics, dict) else {}
+    source_reason = str(source.get("fallback_reason") or "").strip()
+    if source_reason in _SIGMA0_PRE_SOLVER_SOURCE_FAILURE_REASONS:
+        status = "unavailable"
+    elif source:
+        status = "available" if bool(source.get("normalized", False)) else "reported"
+    else:
+        status = "not_reported"
+    return {
+        "status": status,
+        "reason": source_reason or None,
+        "configured": source.get("configured"),
+        "requested_environment_variable": source.get("requested_environment_variable"),
+        "requested_root": source.get("requested_root"),
+        "resolved_root": source.get("resolved_root"),
+        "source_identity": deepcopy(source.get("source_identity") or {}),
+        "loader_status": {
+            "normalized": source.get("normalized"),
+            "path_exists": source.get("path_exists"),
+            "tree_exists": source.get("tree_exists"),
+            "tree_entries": source.get("tree_entries"),
+        },
+    }
+
+
+def _resolve_sigma0_scope_template_availability(template_hist, target_signature):
+    """Describe the exact Sigma0 histogram offered to one protected scope."""
+    if template_hist is None:
+        return {"status": "unavailable", "reason": "k_sigma0_scope_template_missing"}
+    if not _hist_has_usable_support(template_hist):
+        return {
+            "status": "unavailable",
+            "reason": "k_sigma0_scope_template_non_positive",
+        }
+    if _hist_axis_signature(template_hist) != target_signature:
+        return {
+            "status": "unavailable",
+            "reason": "k_sigma0_scope_template_binning_mismatch",
+        }
+    return {"status": "available", "reason": None}
 
 
 def _apply_signal_protected_pi_delta_fit(
@@ -1187,10 +1263,20 @@ def _apply_signal_protected_pi_delta_fit(
     phi_setting,
     mm_offset_data,
     context="",
+    kaon_sigma0_source_diagnostics=None,
 ):
     """Replace only the final kaon pi-delta amplitude with a protected fit."""
     protected_config = _resolve_pi_delta_signal_protected_fit_config(fit_config)
     if not bool(protected_config.get("enabled")):
+        if isinstance(legacy_payload, dict):
+            legacy_payload.setdefault("diagnostics", {})["pi_delta_signal_protected_fit"] = {
+                "enabled": False,
+                "status": "disabled",
+                "fit_variant": "disabled",
+                "fallback_attempted": False,
+                "fallback_used": False,
+                "resolved_configuration": deepcopy(protected_config),
+            }
         return legacy_payload
 
     if not isinstance(legacy_payload, dict):
@@ -1228,36 +1314,76 @@ def _apply_signal_protected_pi_delta_fit(
         KAON_SIGMA0_TEMPLATE_NAME: sigma_template,
         "pi_delta": h_pi_delta_shape,
     }
-    fit_names = [KAON_SIGNAL_TEMPLATE_NAME, KAON_SIGMA0_TEMPLATE_NAME, "pi_delta"]
+    all_fit_names = [KAON_SIGNAL_TEMPLATE_NAME, KAON_SIGMA0_TEMPLATE_NAME, "pi_delta"]
+    fit_names = []
     failure_status = None
     failure_reason = None
     reference_integrity = _hist_shape_integrity(h_kaon_signal_shape, lambda_template)
     template_signature = _hist_axis_signature(h_pre_delta)
-    for template_name in fit_names:
-        template_hist = template_hists.get(template_name)
-        required = bool(
-            protected_config.get(
-                "require_k_lambda_template" if template_name == KAON_SIGNAL_TEMPLATE_NAME
-                else "require_k_sigma0_template" if template_name == KAON_SIGMA0_TEMPLATE_NAME
-                else "enabled",
-                True,
-            )
+    sigma0_source_availability = _resolve_sigma0_source_availability(
+        kaon_sigma0_source_diagnostics
+    )
+    sigma0_scope_template_availability = {
+        "status": "not_evaluated",
+        "reason": None,
+    }
+    sigma0_availability_reason = None
+    fallback_attempted = False
+    fallback_used = False
+    fallback_reason = None
+    selected_fit_variant = None
+
+    if h_pre_delta is None:
+        failure_status = "insufficient_support"
+        failure_reason = "unable to construct pre-pi-delta residual"
+    elif not _hist_has_usable_support(lambda_template):
+        failure_status = "missing_required_template"
+        failure_reason = "missing or non-positive {} template".format(
+            KAON_SIGNAL_TEMPLATE_NAME
         )
-        if not _hist_has_usable_support(template_hist):
-            if required:
-                failure_status = "missing_required_template"
-                failure_reason = "missing or non-positive {} template".format(template_name)
-                break
-            continue
-        if _hist_axis_signature(template_hist) != template_signature:
+    elif _hist_axis_signature(lambda_template) != template_signature:
+        failure_status = "missing_required_template"
+        failure_reason = "template binning mismatch for {}".format(
+            KAON_SIGNAL_TEMPLATE_NAME
+        )
+    elif not _hist_has_usable_support(h_pi_delta_shape):
+        failure_status = "missing_required_template"
+        failure_reason = "missing or non-positive pi_delta template"
+    elif _hist_axis_signature(h_pi_delta_shape) != template_signature:
+        failure_status = "missing_required_template"
+        failure_reason = "template binning mismatch for pi_delta"
+    else:
+        sigma0_scope_template_availability = _resolve_sigma0_scope_template_availability(
+            sigma_template,
+            template_signature,
+        )
+        if sigma0_scope_template_availability["status"] == "available":
+            # This selection is final for the invocation.  Later design or
+            # solver failures must remain conservative; they never retry with
+            # Sigma0 removed.
+            selected_fit_variant = "lambda_sigma0_protected"
+            fit_names = list(all_fit_names)
+        elif bool(protected_config.get("allow_lambda_only_fallback", True)):
+            selected_fit_variant = "lambda_only_protected_fallback"
+            fit_names = [KAON_SIGNAL_TEMPLATE_NAME, "pi_delta"]
+            fallback_attempted = True
+            fallback_reason = (
+                sigma0_source_availability.get("reason")
+                if sigma0_source_availability.get("status") == "unavailable"
+                else sigma0_scope_template_availability.get("reason")
+            )
+            sigma0_availability_reason = fallback_reason
+        else:
             failure_status = "missing_required_template"
-            failure_reason = "template binning mismatch for {}".format(template_name)
-            break
+            sigma0_availability_reason = sigma0_scope_template_availability.get("reason")
+            failure_reason = "K-Sigma0 unavailable and Lambda-only fallback is disabled: {}".format(
+                sigma0_availability_reason or "not reported"
+            )
 
     fit_inputs = None
     solver_result = None
-    coefficients = {name: 0.0 for name in fit_names}
-    uncertainties = {name: None for name in fit_names}
+    coefficients = {name: 0.0 for name in all_fit_names}
+    uncertainties = {name: None for name in all_fit_names}
     matrix_diagnostics = {}
     covariance_matrix = {}
     coefficient_correlation_matrix = {}
@@ -1268,10 +1394,6 @@ def _apply_signal_protected_pi_delta_fit(
         "fit_p_value": None,
         "n_fit_bins": 0,
     }
-    if failure_status is None and h_pre_delta is None:
-        failure_status = "insufficient_support"
-        failure_reason = "unable to construct pre-pi-delta residual"
-
     if failure_status is None:
         fit_inputs = _build_multi_template_fit_inputs(
             h_pre_delta,
@@ -1331,14 +1453,16 @@ def _apply_signal_protected_pi_delta_fit(
             failure_reason = "protected nonnegative solver returned non-finite amplitudes"
 
     if failure_status is None:
-        coefficients = {
+        fitted_coefficients = {
             template_name: float(solver_result.x[index])
             for index, template_name in enumerate(fit_names)
         }
-        covariance_matrix, coefficient_correlation_matrix, uncertainties = _compute_parameter_covariance(
+        coefficients.update(fitted_coefficients)
+        covariance_matrix, coefficient_correlation_matrix, fitted_uncertainties = _compute_parameter_covariance(
             weighted_design,
             fit_names,
         )
+        uncertainties.update(fitted_uncertainties)
         residual_vector = weighted_target - np.dot(weighted_design, solver_result.x)
         chi2_value = float(np.sum(np.square(residual_vector)))
         ndf_value = int(len(weighted_target) - len(fit_names))
@@ -1351,8 +1475,11 @@ def _apply_signal_protected_pi_delta_fit(
             }
         )
 
+    selected_template_hists = {
+        name: template_hists[name] for name in fit_names
+    }
     scaled_signal_hists = _build_scaled_hist_map(
-        template_hists,
+        selected_template_hists,
         coefficients,
         "A_pi_delta_protected",
         context or "scope",
@@ -1365,9 +1492,12 @@ def _apply_signal_protected_pi_delta_fit(
         KAON_SIGMA0_TEMPLATE_NAME: scaled_signal_hists.get(KAON_SIGMA0_TEMPLATE_NAME),
         "pi_delta": scaled_signal_hists.get("pi_delta"),
     }
+    active_protected_components = {
+        name: protected_components.get(name) for name in fit_names
+    }
     h_protected_total = _build_hist_from_scaled_components(
         h_pre_delta,
-        protected_components,
+        active_protected_components,
         "H_pi_delta_protected_fit_total_{}".format(context or "scope"),
     )
     h_protected_residual = _clone_hist(
@@ -1439,9 +1569,39 @@ def _apply_signal_protected_pi_delta_fit(
         phi_setting,
         mm_offset_data,
     )
+    fit_succeeded = failure_status is None
+    fit_variant = selected_fit_variant if fit_succeeded else "zero_pi_delta_failure"
+    fallback_used = bool(
+        fit_succeeded and selected_fit_variant == "lambda_only_protected_fallback"
+    )
+    sigma0_fitted = bool(
+        fit_succeeded and selected_fit_variant == "lambda_sigma0_protected"
+    )
+    protected_signal_closure = _hist_component_closure_metrics(
+        h_protected_total,
+        active_protected_components,
+    )
+    full_kaon_model_closure = _hist_component_closure_metrics(
+        h_full_kaon_model,
+        full_model_components,
+    )
     protected_diagnostics = {
         "enabled": True,
-        "status": "success" if failure_status is None else failure_status,
+        "status": "success" if fit_succeeded else failure_status,
+        "fit_variant": fit_variant,
+        "selected_fit_variant": selected_fit_variant,
+        "fallback_attempted": bool(fallback_attempted),
+        "fallback_used": bool(fallback_used),
+        "fallback_reason": fallback_reason,
+        "sigma0_availability_reason": sigma0_availability_reason,
+        "sigma0_source_availability": deepcopy(sigma0_source_availability),
+        "sigma0_scope_template_availability": deepcopy(
+            sigma0_scope_template_availability
+        ),
+        "sigma0_fitted": bool(sigma0_fitted),
+        "kaon_sigma0_source_diagnostics": deepcopy(
+            kaon_sigma0_source_diagnostics or {}
+        ),
         "failure_reason": failure_reason,
         "failure_policy": protected_config["failure_policy"],
         "resolved_configuration": deepcopy(protected_config),
@@ -1463,8 +1623,16 @@ def _apply_signal_protected_pi_delta_fit(
         "applied_A_delta": float(coefficients["pi_delta"]),
         "protected_applied_amplitudes": deepcopy(pion_amplitudes),
         "signal_amplitudes": {
-            KAON_SIGNAL_TEMPLATE_NAME: float(coefficients[KAON_SIGNAL_TEMPLATE_NAME]),
-            KAON_SIGMA0_TEMPLATE_NAME: float(coefficients[KAON_SIGMA0_TEMPLATE_NAME]),
+            KAON_SIGNAL_TEMPLATE_NAME: (
+                float(coefficients[KAON_SIGNAL_TEMPLATE_NAME])
+                if fit_succeeded and KAON_SIGNAL_TEMPLATE_NAME in fit_names
+                else None
+            ),
+            KAON_SIGMA0_TEMPLATE_NAME: (
+                float(coefficients[KAON_SIGMA0_TEMPLATE_NAME])
+                if sigma0_fitted
+                else None
+            ),
         },
         "amplitude_uncertainties": deepcopy(uncertainties),
         "fit_metrics": deepcopy(fit_metrics),
@@ -1484,11 +1652,26 @@ def _apply_signal_protected_pi_delta_fit(
             "unchanged": True,
         },
         "closure": {
-            "full_five_component_model": _hist_component_closure_metrics(
-                h_full_kaon_model, full_model_components
+            "full_five_component_model": (
+                full_kaon_model_closure
+                if selected_fit_variant == "lambda_sigma0_protected"
+                else None
             ),
-            "protected_three_component_model": _hist_component_closure_metrics(
-                h_protected_total, protected_components
+            "full_four_component_lambda_only_fallback_model": (
+                full_kaon_model_closure
+                if selected_fit_variant == "lambda_only_protected_fallback"
+                else None
+            ),
+            "protected_signal_model": protected_signal_closure,
+            "protected_three_component_model": (
+                protected_signal_closure
+                if selected_fit_variant == "lambda_sigma0_protected"
+                else None
+            ),
+            "protected_two_component_model": (
+                protected_signal_closure
+                if selected_fit_variant == "lambda_only_protected_fallback"
+                else None
             ),
             "pion_only_model": _hist_component_closure_metrics(
                 h_pion_only_model, pion_components
@@ -1534,13 +1717,19 @@ def _apply_signal_protected_pi_delta_fit(
         )
 
     # Keep early pion amplitudes untouched; only the final pi-delta source is
-    # replaced.  The protected K-Lambda/K-Sigma0 amplitudes remain diagnostics.
+    # replaced.  The protected signal amplitudes remain diagnostics.
     legacy_payload["A_n"] = float(early_amplitudes["pi_n"])
     legacy_payload["A_sidis"] = float(early_amplitudes["pi_sidis"])
     legacy_payload["A_delta"] = float(coefficients["pi_delta"])
-    legacy_payload["S_lambda"] = float(coefficients[KAON_SIGNAL_TEMPLATE_NAME])
-    legacy_payload["S_sigma0"] = float(coefficients[KAON_SIGMA0_TEMPLATE_NAME])
-    legacy_payload["k_lambda_fit_amplitude"] = float(coefficients[KAON_SIGNAL_TEMPLATE_NAME])
+    legacy_payload["S_lambda"] = (
+        float(coefficients[KAON_SIGNAL_TEMPLATE_NAME])
+        if fit_succeeded and KAON_SIGNAL_TEMPLATE_NAME in fit_names
+        else None
+    )
+    legacy_payload["S_sigma0"] = (
+        float(coefficients[KAON_SIGMA0_TEMPLATE_NAME]) if sigma0_fitted else None
+    )
+    legacy_payload["k_lambda_fit_amplitude"] = legacy_payload["S_lambda"]
     legacy_payload["pi_n_scaled_hist"] = early_scaled_hists.get("pi_n")
     legacy_payload["pi_delta_scaled_hist"] = scaled_signal_hists.get("pi_delta")
     legacy_payload["pi_sidis_scaled_hist"] = early_scaled_hists.get("pi_sidis")
@@ -1557,8 +1746,8 @@ def _apply_signal_protected_pi_delta_fit(
     legacy_payload["refined_fit_hist"] = h_full_kaon_model
     legacy_payload["full_fit_residual_hist"] = h_full_fit_residual
     legacy_payload["refined_full_fit_residual_hist"] = h_full_fit_residual
-    # This is the physical pi-only subtraction output.  The three-template
-    # residual is retained below under its protected diagnostic key only.
+    # This is the physical pi-only subtraction output.  The selected protected
+    # signal-model residual is retained below as a diagnostic only.
     legacy_payload["residual_hist"] = h_after_delta
     legacy_payload["refined_residual_hist"] = h_after_delta
     legacy_payload["H_pi_delta_protected_fit_input"] = h_pre_delta
@@ -1573,7 +1762,7 @@ def _apply_signal_protected_pi_delta_fit(
     refined_amplitudes.update(deepcopy(pion_amplitudes))
     diagnostics.setdefault("component_amplitudes", {}).update(deepcopy(pion_amplitudes))
     diagnostics["protected_sigma0_template_available"] = bool(
-        _hist_has_usable_support(sigma_template)
+        sigma0_scope_template_availability.get("status") == "available"
     )
     diagnostics["signal_templates_excluded_from_subtraction_weight"] = True
     return legacy_payload
@@ -4423,6 +4612,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     _skip_residual_shift=False,
     alignment_windows=None,
     _alignment_scoring_only=False,
+    kaon_sigma0_source_diagnostics=None,
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
@@ -4552,6 +4742,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
                 context=context,
                 _skip_residual_shift=True,
                 _alignment_scoring_only=True,
+                kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
             ),
             fit_min=fit_min,
             cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
@@ -4560,7 +4751,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         )
         if shift_selection is not None:
             selected_result = shift_selection.get("fit_result")
-            if bool(protected_fit_config.get("enabled")) and not bool(_alignment_scoring_only):
+            if not bool(_alignment_scoring_only):
                 selected_components = shift_selection.get("selected_template_hists") or {}
                 selected_extra_templates = shift_selection.get("selected_extra_template_hists") or {}
                 selected_result = _apply_signal_protected_pi_delta_fit(
@@ -4579,6 +4770,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
                     phi_setting,
                     mm_offset_data,
                     context="{}_kaon_nosub".format(context or "scope"),
+                    kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
                 )
             return _annotate_fit_result_with_residual_shift_payload(
                 selected_result,
@@ -4753,7 +4945,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             "pi_delta_signal_protected_fit": deepcopy(protected_fit_config),
         },
     }
-    if bool(protected_fit_config.get("enabled")) and not bool(_alignment_scoring_only):
+    if not bool(_alignment_scoring_only):
         return_payload = _apply_signal_protected_pi_delta_fit(
             return_payload,
             h_kaon_nosub,
@@ -4770,6 +4962,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
             phi_setting,
             mm_offset_data,
             context="{}_kaon_nosub".format(context or "scope"),
+            kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
         )
     if excluded_windows:
         for key in (
@@ -6092,6 +6285,7 @@ def build_particle_subtraction_component_result(
     parent_alignment=None,
     pion_component_alignment=None,
     alignment_bin_key=None,
+    kaon_sigma0_source_diagnostics=None,
 ):
     mode = resolve_particle_subtraction_mode(inpDict)
     if mode != PARTICLE_SUBTRACTION_MODE_COMPONENTS:
@@ -6214,6 +6408,7 @@ def build_particle_subtraction_component_result(
         context=context,
         _skip_residual_shift=dynamic_alignment_enabled,
         alignment_windows=alignment_windows,
+        kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
     )
     kaon_fit = _promote_sparse_zero_solution_if_applicable(
         kaon_fit,
@@ -6314,6 +6509,9 @@ def build_particle_subtraction_component_result(
     result = {
         "particle_subtraction_mode": mode,
         "analysis_scope": analysis_scope,
+        "kaon_sigma0_source_diagnostics": deepcopy(
+            kaon_sigma0_source_diagnostics or {}
+        ),
         "fit_mode": combined_fit_mode,
         "fit_mode_pion": pion_fit_mode,
         "fit_mode_kaon": kaon_fit_mode,
@@ -8099,14 +8297,20 @@ def _resolve_protected_pi_delta_render_state(component_payload):
     if not configured and protected_diagnostic:
         configured_enabled = bool(protected_diagnostic.get("enabled"))
 
+    fit_variant = str(protected_diagnostic.get("fit_variant") or "").strip()
     required_histogram_keys = (
         "H_pi_delta_protected_fit_input",
         "H_pi_delta_protected_k_lambda",
-        "H_pi_delta_protected_k_sigma0",
         "H_pi_delta_protected_pi_delta",
         "H_pi_delta_protected_fit_total",
         "H_pi_delta_protected_after_subtraction",
     )
+    if fit_variant != "lambda_only_protected_fallback":
+        required_histogram_keys = (
+            *required_histogram_keys[:2],
+            "H_pi_delta_protected_k_sigma0",
+            *required_histogram_keys[2:],
+        )
     missing_histograms = [
         key for key in required_histogram_keys if payload.get(key) is None
     ]
@@ -8134,6 +8338,7 @@ def _resolve_protected_pi_delta_render_state(component_payload):
         "configured_enabled": configured_enabled,
         "diagnostic_available": diagnostic_available,
         "diagnostic_status": diagnostic_status or "missing",
+        "fit_variant": fit_variant or "unknown",
         "diagnostic": protected_diagnostic,
         "resolved_config": configured,
         "failure_policy": str(failure_policy),
@@ -8165,6 +8370,8 @@ def _print_protected_pi_delta_status_page(
     """Render an explicit unavailable page instead of a staged-kaon fallback."""
     diagnostic = render_state.get("diagnostic") or {}
     availability = diagnostic.get("template_availability") or {}
+    sigma0_source_availability = diagnostic.get("sigma0_source_availability") or {}
+    sigma0_scope_availability = diagnostic.get("sigma0_scope_template_availability") or {}
     failure_policy = render_state.get("failure_policy") or "unknown"
     state = render_state.get("state") or "missing_payload"
     if state == "missing_payload":
@@ -8176,10 +8383,32 @@ def _print_protected_pi_delta_status_page(
             ),
         ]
     else:
-        status_line = "PROTECTED FIT UNAVAILABLE: staged kaon pi-delta pages remain suppressed"
+        if bool(diagnostic.get("fallback_attempted")) and not bool(
+            diagnostic.get("fallback_used")
+        ):
+            status_line = "PROTECTED FIT UNAVAILABLE: Lambda-only fallback was attempted but failed"
+        else:
+            status_line = "PROTECTED FIT UNAVAILABLE: staged kaon pi-delta pages remain suppressed"
         detail_lines = [
             "protected status: {}".format(render_state.get("diagnostic_status") or "unknown"),
             "failure reason: {}".format(diagnostic.get("failure_reason") or "not reported"),
+            "fit variant: {} (selected={})".format(
+                diagnostic.get("fit_variant") or "unknown",
+                diagnostic.get("selected_fit_variant") or "none",
+            ),
+            "Lambda-only fallback: attempted={} used={} reason={}".format(
+                bool(diagnostic.get("fallback_attempted")),
+                bool(diagnostic.get("fallback_used")),
+                diagnostic.get("fallback_reason") or "none",
+            ),
+            "K-Sigma0 source availability: {} ({})".format(
+                sigma0_source_availability.get("status") or "not reported",
+                sigma0_source_availability.get("reason") or "none",
+            ),
+            "K-Sigma0 scope-template availability: {} ({})".format(
+                sigma0_scope_availability.get("status") or "not reported",
+                sigma0_scope_availability.get("reason") or "none",
+            ),
         ]
 
     sigma0_source = component_payload.get("kaon_sigma0_source_diagnostics") or {}
@@ -8252,6 +8481,102 @@ def _print_protected_pi_delta_pages(
     reference_integrity = protected.get("lambda_reference_integrity") or {}
     correlations = protected.get("high_template_correlation_warnings") or []
     early_integrity = protected.get("early_amplitudes_frozen_integrity") or {}
+    fit_variant = str(protected.get("fit_variant") or "").strip()
+
+    if fit_variant == "lambda_only_protected_fallback":
+        sigma0_source = protected.get("sigma0_source_availability") or {}
+        sigma0_identity = sigma0_source.get("source_identity") or {}
+        sigma0_source_lines = []
+        if sigma0_identity or sigma0_source.get("requested_environment_variable"):
+            sigma0_source_lines.extend(
+                [
+                    "K-Sigma0 source identity: Q{} W{} {} {}".format(
+                        sigma0_identity.get("Q2", ""),
+                        sigma0_identity.get("W", ""),
+                        sigma0_identity.get("EPSSET", ""),
+                        sigma0_identity.get("phi_setting", ""),
+                    ),
+                    "K-Sigma0 environment: {}".format(
+                        sigma0_source.get("requested_environment_variable") or "not recorded"
+                    ),
+                ]
+            )
+        _print_component_overlay_page(
+            pdf_name,
+            component_fit_result.get("H_pi_delta_protected_fit_input"),
+            "R_{pre#Delta}",
+            "{}Signal-protected final #pi#Delta fit - K-Lambda-only fallback".format(
+                title_prefix
+            ),
+            [
+                (component_fit_result.get("H_pi_delta_protected_k_lambda"), "fitted K-Lambda", ROOT.kBlue + 1, 1),
+                (component_fit_result.get("H_pi_delta_protected_pi_delta"), "protected pi-delta", ROOT.kAzure + 2, 1),
+                (component_fit_result.get("H_pi_delta_protected_fit_total"), "Lambda + pi-delta total", ROOT.kGreen + 2, 2),
+            ],
+            [
+                "scope: {}".format(component_fit_result.get("analysis_scope", "unknown")),
+                "K-Lambda is fitted and retained. K-Sigma0 template unavailable. ONLY pi-delta is subtracted.",
+                "K-Sigma0 reason: {}".format(
+                    protected.get("sigma0_availability_reason")
+                    or protected.get("fallback_reason")
+                    or "not reported"
+                ),
+                *sigma0_source_lines,
+                "A_delta protected={}  legacy diagnostic={}".format(
+                    _format_fit_number(protected.get("applied_A_delta")),
+                    _format_fit_number(protected.get("legacy_staged_A_delta")),
+                ),
+                "S_lambda={}  S_sigma0=not fitted".format(
+                    _format_fit_number(amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME))
+                ),
+                "chi2/ndf={}  p={}  bins={}".format(
+                    _format_fit_metric(metrics.get("chi2_ndf")),
+                    _format_fit_metric(metrics.get("fit_p_value")),
+                    metrics.get("n_fit_bins", 0),
+                ),
+                "rank={}  cond={}".format(
+                    matrix.get("weighted_design_effective_rank"),
+                    _format_fit_metric(matrix.get("weighted_design_condition_number")),
+                ),
+                "Lambda/pi-delta correlation={}".format(
+                    _format_fit_metric(
+                        ((matrix.get("template_correlation_matrix") or {}).get(KAON_SIGNAL_TEMPLATE_NAME) or {}).get("pi_delta")
+                    )
+                ),
+                "K-Lambda reference integrity={}".format(
+                    "pass" if bool(reference_integrity.get("shape_identical")) else "unavailable/fail"
+                ),
+                "early pi-n/pi-SIDIS amplitudes frozen={}".format(
+                    "pass" if bool(early_integrity.get("unchanged")) else "fail"
+                ),
+                "two-template closure={}".format(
+                    "pass" if bool((closure.get("protected_two_component_model") or {}).get("passed")) else "fail"
+                ),
+            ],
+            cut_window=cut_window,
+        )
+        _print_component_overlay_page(
+            pdf_name,
+            component_fit_result.get("H_pi_delta_protected_fit_input"),
+            "R_{pre#Delta}",
+            "{}Protected #pi#Delta subtraction - K-Lambda-only fallback".format(
+                title_prefix
+            ),
+            [
+                (component_fit_result.get("H_pi_delta_protected_pi_delta"), "fitted pi-delta removed", ROOT.kAzure + 2, 1),
+                (component_fit_result.get("H_pi_delta_protected_after_subtraction"), "R_{pre#Delta} - pi-delta", ROOT.kOrange + 7, 2),
+            ],
+            [
+                "K-Lambda is fitted and retained. K-Sigma0 template unavailable. ONLY pi-delta is subtracted.",
+                "physics output: R_preDelta - pi-delta only",
+                "fit residual is diagnostic-only and is not a cleaned-kaon spectrum",
+                "delta-only physics closure={}".format(
+                    "pass" if bool((closure.get("delta_only_physics_output") or {}).get("passed")) else "fail"
+                ),
+            ],
+            cut_window=cut_window,
+        )
+        return
 
     _print_component_overlay_page(
         pdf_name,
