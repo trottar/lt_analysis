@@ -682,6 +682,17 @@ hard-coded in the fit.  The normal SIMC tree is \texttt{h10}.  Each component
 is filled with SIMC event weights and comparison cuts, then normalized to a
 unit-area MM template.
 
+The K-$\Sigma^0$ template used by the signal-protected final kaon-side
+$\pi$-$\Delta$ fit is an explicitly configured external SIMC source, not a
+generated background sample.  The active phi setting must export
+\texttt{LT\_BG\_SIGMA0\_RIGHT\_ROOT},
+\texttt{LT\_BG\_SIGMA0\_LEFT\_ROOT}, or
+\texttt{LT\_BG\_SIGMA0\_CENTER\_ROOT}.  The loader records the active
+$(Q^2,W,\epsilon,\phi)$ identity, validates the configured tree and required
+branches, and never infers K-$\Sigma^0$ from K-$\Lambda$ or pion-background
+sources.  An absent or incompatible source retains the protected fit's
+conservative \texttt{zero\_pi\_delta} behavior.
+
 Templates can be resolved at setting-wide and $(t,\phi)$ scope.  For a sparse
 fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then
 setting-wide.  This is a template-support fallback and does not replace the

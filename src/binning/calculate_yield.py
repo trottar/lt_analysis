@@ -1864,6 +1864,9 @@ def process_hist_data(
                         pion_component_alignment=active_alignment,
                         alignment_bin_key=alignment_bin_key,
                     )
+                    scope_result["kaon_sigma0_source_diagnostics"] = dict(
+                        (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
+                    )
                     alignment_payload = scope_result.get("pion_component_alignment")
                     if isinstance(alignment_payload, dict):
                         alignment_payload["persistence_status"] = persistence_status

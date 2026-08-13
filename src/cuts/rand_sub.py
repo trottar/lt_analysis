@@ -3534,6 +3534,9 @@ def rand_sub(
                 pion_component_alignment=setting_alignment,
                 alignment_bin_key=alignment_bin_key,
             )
+            component_fit_result["kaon_sigma0_source_diagnostics"] = dict(
+                (kaon_sigma0_shape_payload or {}).get("diagnostics") or {}
+            )
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):
                 alignment_payload["persistence_status"] = alignment_status

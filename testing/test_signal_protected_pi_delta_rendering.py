@@ -245,6 +245,32 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
                 self.assertFalse(any("kaon no-sub staged" in page[0] for page in overlay_pages))
                 self.assertFalse(any("signal-protected final #pi#Delta fit" == page[0] for page in overlay_pages))
 
+    def test_unavailable_status_includes_sigma0_source_provenance_when_present(self):
+        payload = self._fit_payload(diagnostic=True, status="missing_required_template")
+        payload["kaon_sigma0_source_diagnostics"] = {
+            "resolution_source": "configured_path_does_not_exist",
+            "requested_root": "/external/sigma0/left.root",
+            "resolved_root": "/external/sigma0/left.root",
+            "path_exists": False,
+            "tree_exists": None,
+            "tree_entries": None,
+            "missing_required_branches": [],
+            "fallback_reason": "configured_path_does_not_exist",
+            "source_identity": {
+                "Q2": "4p4",
+                "W": "2p74",
+                "EPSSET": "low",
+                "phi_setting": "Left",
+            },
+        }
+        patches, _overlay_pages, text_pages, *_unused = self._fit_page_recorders()
+        with mock.patch.multiple(fits, **patches):
+            fits.print_particle_subtraction_component_fit_pages("ignored.pdf", payload)
+
+        body = text_pages[0][2]
+        self.assertTrue(any("K-Sigma0 source: configured_path_does_not_exist Q4p4 W2p74 low Left" in line for line in body))
+        self.assertTrue(any("K-Sigma0 requested: /external/sigma0/left.root" in line for line in body))
+
     def test_disabled_mode_retains_legacy_kaon_sequence(self):
         payload = self._fit_payload(enabled=False, diagnostic=False)
         patches, overlay_pages, text_pages, step_calls, _amplitude_calls, joint_pages, comparison_pages = self._fit_page_recorders()

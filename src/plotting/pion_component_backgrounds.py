@@ -37,7 +37,7 @@ def _hist_to_stairs(hist):
 def _format_diag_line(component_name, diagnostics):
     if not diagnostics:
         return "{}: no diagnostics".format(component_name)
-    return (
+    summary = (
         "{}: seen={} passed={} mm_passed={} norm={} fallback={}".format(
             component_name,
             diagnostics.get("n_events_seen", 0),
@@ -46,6 +46,25 @@ def _format_diag_line(component_name, diagnostics):
             diagnostics.get("normalized", False),
             diagnostics.get("fallback_used", False),
         )
+    )
+    if component_name != "k_sigma0_signal":
+        return summary
+
+    identity = diagnostics.get("source_identity") or {}
+    resolved_root = diagnostics.get("resolved_root") or diagnostics.get("requested_root")
+    root_label = os.path.basename(str(resolved_root)) if resolved_root else "unconfigured"
+    return "{} | source={} Q{} W{} {} {} root={} tree={} entries={} branches_missing={} reason={}".format(
+        summary,
+        diagnostics.get("resolution_source", "unknown"),
+        identity.get("Q2", ""),
+        identity.get("W", ""),
+        identity.get("EPSSET", ""),
+        identity.get("phi_setting", ""),
+        root_label,
+        diagnostics.get("tree_name", ""),
+        diagnostics.get("tree_entries", ""),
+        len(diagnostics.get("missing_required_branches") or []),
+        diagnostics.get("fallback_reason") or "none",
     )
 
 

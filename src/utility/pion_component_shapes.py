@@ -40,6 +40,79 @@ from hgcer_hole import apply_HGCer_hole_cut
 
 _SIMC_COMPONENT_SHAPE_CACHE = {}
 
+_KAON_SIMC_REQUIRED_BRANCHES = (
+    "missmass",
+    "t",
+    "ssdelta",
+    "ssxptar",
+    "ssyptar",
+    "hsdelta",
+    "hsxptar",
+    "hsyptar",
+    "Q2",
+    "W",
+    "phgcer_x_det",
+    "phgcer_y_det",
+)
+_KAON_SIMC_BINNED_REQUIRED_BRANCHES = ("phipq",)
+
+
+def _sigma0_source_identity(inpDict, phi_setting):
+    return {
+        "Q2": str((inpDict or {}).get("Q2") or ""),
+        "W": str((inpDict or {}).get("W") or ""),
+        "EPSSET": str((inpDict or {}).get("EPSSET") or ""),
+        "phi_setting": str(phi_setting or ""),
+    }
+
+
+def _sigma0_manifest_entry(inpDict, phi_setting):
+    return (
+        ((((inpDict or {}).get("background_samples") or {}).get("by_phi") or {})
+         .get(phi_setting, {}) or {})
+        .get("sigma0", {})
+        or {}
+    )
+
+
+def resolve_kaon_simc_sigma0_root_filename(root_filename, inpDict, phi_setting):
+    """Resolve only an explicitly configured K-Sigma0 SIMC source.
+
+    K-Sigma0 is an external required input.  In particular, this resolver does
+    not search generated-background directories or infer a path from another
+    kaon/pion component when no Sigma0 path was supplied.
+    """
+    sample_entry = _sigma0_manifest_entry(inpDict, phi_setting)
+    requested_root = str(root_filename or sample_entry.get("root") or "").strip() or None
+    source_identity = deepcopy(
+        sample_entry.get("source_identity") or _sigma0_source_identity(inpDict, phi_setting)
+    )
+    source_strategy = str(sample_entry.get("source_strategy") or "external_required")
+    candidate_roots = [requested_root] if requested_root else []
+    existing_roots = [candidate for candidate in candidate_roots if os.path.isfile(candidate)]
+    if not requested_root:
+        resolution_source = "no_source_configured"
+        resolved_root = None
+    elif existing_roots:
+        resolution_source = "explicit_configured_root"
+        resolved_root = existing_roots[0]
+    else:
+        resolution_source = "configured_path_does_not_exist"
+        resolved_root = requested_root
+
+    return resolved_root, {
+        "requested_root": requested_root,
+        "resolved_root": resolved_root,
+        "candidate_roots": candidate_roots,
+        "existing_roots": existing_roots,
+        "rejected_roots": [],
+        "fallback_used": False,
+        "configured": bool(requested_root),
+        "source_strategy": source_strategy,
+        "source_identity": source_identity,
+        "resolution_source": resolution_source,
+    }
+
 
 def resolve_kaon_simc_signal_root_filename(root_filename, inpDict, phi_setting):
     """Resolve the iter-weighted K-Lambda SIMC product for one phi setting.
@@ -176,6 +249,19 @@ def _freeze_bin_edges_for_cache(edges):
     return tuple(round(float(value), 8) for value in np.asarray(edges, dtype=float))
 
 
+def _freeze_cache_value(value):
+    if isinstance(value, dict):
+        return tuple(
+            (str(key), _freeze_cache_value(item))
+            for key, item in sorted(value.items(), key=lambda item: str(item[0]))
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_cache_value(item) for item in value)
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
 def _get_root_file_cache_token(root_filename):
     try:
         stat_result = os.stat(root_filename)
@@ -202,6 +288,7 @@ def _build_component_shape_cache_key(
     t_bins,
     phi_bins,
     use_full_mm_range,
+    cache_identity=None,
 ):
     return (
         _get_root_file_cache_token(root_filename),
@@ -217,6 +304,7 @@ def _build_component_shape_cache_key(
         _freeze_bin_edges_for_cache(t_bins),
         _freeze_bin_edges_for_cache(phi_bins),
         bool(use_full_mm_range),
+        _freeze_cache_value(cache_identity),
     )
 
 
@@ -253,7 +341,34 @@ def _empty_component_payload(
     fallback_reason,
     t_bins=None,
     phi_bins=None,
+    diagnostic_updates=None,
 ):
+    diagnostics = {
+        "component_name": component_name,
+        "root_filename": root_filename,
+        "tree_name": tree_name,
+        "path_exists": bool(root_filename and os.path.isfile(root_filename)),
+        "root_open_success": None,
+        "tree_exists": None,
+        "tree_entries": None,
+        "required_branches": [],
+        "missing_required_branches": [],
+        "n_events_seen": 0,
+        "n_events_passed": 0,
+        "n_events_passed_mm_window": 0,
+        "weighted_integral_before_norm": 0.0,
+        "weighted_integral_after_norm": 0.0,
+        "setting_shape_integral_before_norm": 0.0,
+        "setting_shape_integral_after_norm": 0.0,
+        "setting_shape_normalized": False,
+        "normalized": False,
+        "fallback_used": True,
+        "fallback_reason": fallback_reason,
+        "n_binned_shapes": 0 if t_bins is None or phi_bins is None else (len(t_bins) - 1) * (len(phi_bins) - 1),
+        "n_normalized_binned_shapes": 0,
+    }
+    if diagnostic_updates:
+        diagnostics.update(deepcopy(diagnostic_updates))
     return {
         "setting_shape": setting_hist,
         "setting_shape_full": setting_full_hist,
@@ -267,24 +382,7 @@ def _empty_component_payload(
             t_bins,
             phi_bins,
         ),
-        "diagnostics": {
-            "component_name": component_name,
-            "root_filename": root_filename,
-            "tree_name": tree_name,
-            "n_events_seen": 0,
-            "n_events_passed": 0,
-            "n_events_passed_mm_window": 0,
-            "weighted_integral_before_norm": 0.0,
-            "weighted_integral_after_norm": 0.0,
-            "setting_shape_integral_before_norm": 0.0,
-            "setting_shape_integral_after_norm": 0.0,
-            "setting_shape_normalized": False,
-            "normalized": False,
-            "fallback_used": True,
-            "fallback_reason": fallback_reason,
-            "n_binned_shapes": 0 if t_bins is None or phi_bins is None else (len(t_bins) - 1) * (len(phi_bins) - 1),
-            "n_normalized_binned_shapes": 0,
-        },
+        "diagnostics": diagnostics,
     }
 
 
@@ -299,6 +397,10 @@ def load_pion_simc_component_shape(
     hgcer_cutg=None,
     use_full_mm_range=True,
     context="",
+    source_provenance=None,
+    required_branch_names=None,
+    failure_reasons=None,
+    cache_identity=None,
 ):
     tree_name = resolve_simc_tree_name(inpDict)
     mm_min = float(inpDict["mm_min"])
@@ -306,6 +408,24 @@ def load_pion_simc_component_shape(
     mm_plot_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     mm_plot_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
     mm_plot_nbins = int(inpDict.get("bg_opt_mm_plot_nbins", BG_OPT_MM_PLOT_NBINS))
+    source_provenance = deepcopy(source_provenance or {})
+    failure_reasons = dict(failure_reasons or {})
+    required_branch_names = tuple(required_branch_names or ())
+    resolution_fallback_used = source_provenance.pop("fallback_used", None)
+    path_exists = bool(root_filename and os.path.isfile(root_filename))
+    base_diagnostic_updates = {
+        "path_exists": path_exists,
+        "root_open_success": None,
+        "tree_exists": None,
+        "tree_entries": None,
+        "required_branches": list(required_branch_names),
+        "missing_required_branches": [],
+    }
+    if source_provenance:
+        base_diagnostic_updates.update(source_provenance)
+    if resolution_fallback_used is not None:
+        base_diagnostic_updates["resolution_fallback_used"] = bool(resolution_fallback_used)
+
     cache_key = None
     if root_filename and hgcer_cutg is None:
         cache_key = _build_component_shape_cache_key(
@@ -322,6 +442,7 @@ def load_pion_simc_component_shape(
             t_bins,
             phi_bins,
             use_full_mm_range,
+            cache_identity=cache_identity,
         )
         cached_payload = _SIMC_COMPONENT_SHAPE_CACHE.get(cache_key)
         if cached_payload is not None:
@@ -367,8 +488,9 @@ def load_pion_simc_component_shape(
         phi_bins,
     )
 
-    if not root_filename or not os.path.isfile(root_filename):
-        fallback_reason = "missing ROOT file"
+    if not root_filename or not path_exists:
+        reason_key = "no_source_configured" if not root_filename else "configured_path_does_not_exist"
+        fallback_reason = failure_reasons.get(reason_key, "missing ROOT file")
         _warn_component_load(
             component_name,
             phi_setting,
@@ -386,11 +508,12 @@ def load_pion_simc_component_shape(
             fallback_reason,
             t_bins=t_bins,
             phi_bins=phi_bins,
+            diagnostic_updates=base_diagnostic_updates,
         )
 
     input_file = ROOT.TFile.Open(root_filename, "READ")
     if not input_file or input_file.IsZombie():
-        fallback_reason = "unable to open ROOT file"
+        fallback_reason = failure_reasons.get("root_open_failed", "unable to open ROOT file")
         _warn_component_load(
             component_name,
             phi_setting,
@@ -408,12 +531,13 @@ def load_pion_simc_component_shape(
             fallback_reason,
             t_bins=t_bins,
             phi_bins=phi_bins,
+            diagnostic_updates=dict(base_diagnostic_updates, root_open_success=False),
         )
 
     tree_simc = input_file.Get(tree_name)
     if not tree_simc:
         input_file.Close()
-        fallback_reason = "missing SIMC tree"
+        fallback_reason = failure_reasons.get("missing_simc_tree", "missing SIMC tree")
         _warn_component_load(
             component_name,
             phi_setting,
@@ -432,6 +556,75 @@ def load_pion_simc_component_shape(
             fallback_reason,
             t_bins=t_bins,
             phi_bins=phi_bins,
+            diagnostic_updates=dict(
+                base_diagnostic_updates,
+                root_open_success=True,
+                tree_exists=False,
+            ),
+        )
+
+    tree_entries = int(tree_simc.GetEntries())
+    missing_required_branches = [
+        branch_name
+        for branch_name in required_branch_names
+        if not tree_simc.GetBranch(branch_name) and not tree_simc.GetLeaf(branch_name)
+    ]
+    tree_diagnostic_updates = dict(
+        base_diagnostic_updates,
+        root_open_success=True,
+        tree_exists=True,
+        tree_entries=tree_entries,
+        missing_required_branches=missing_required_branches,
+    )
+    if missing_required_branches:
+        input_file.Close()
+        fallback_reason = failure_reasons.get(
+            "incompatible_tree_missing_branches",
+            "incompatible SIMC tree missing required branches",
+        )
+        _warn_component_load(
+            component_name,
+            phi_setting,
+            fallback_reason,
+            root_filename=root_filename,
+            tree_name=tree_name,
+            missing_required_branches=missing_required_branches,
+        )
+        return _empty_component_payload(
+            component_name,
+            root_filename,
+            tree_name,
+            phi_setting,
+            context,
+            setting_shape,
+            setting_shape_full,
+            fallback_reason,
+            t_bins=t_bins,
+            phi_bins=phi_bins,
+            diagnostic_updates=tree_diagnostic_updates,
+        )
+    if required_branch_names and tree_entries == 0:
+        input_file.Close()
+        fallback_reason = failure_reasons.get("zero_entry_tree", "SIMC tree has zero entries")
+        _warn_component_load(
+            component_name,
+            phi_setting,
+            fallback_reason,
+            root_filename=root_filename,
+            tree_name=tree_name,
+        )
+        return _empty_component_payload(
+            component_name,
+            root_filename,
+            tree_name,
+            phi_setting,
+            context,
+            setting_shape,
+            setting_shape_full,
+            fallback_reason,
+            t_bins=t_bins,
+            phi_bins=phi_bins,
+            diagnostic_updates=tree_diagnostic_updates,
         )
 
     set_val(inpDict)
@@ -450,7 +643,7 @@ def load_pion_simc_component_shape(
     n_events_seen = 0
     n_events_passed = 0
     n_events_passed_mm_window = 0
-    total_entries = tree_simc.GetEntries()
+    total_entries = tree_entries
 
     print(
         "\nGrabbing {} {} SIMC template...".format(
@@ -529,10 +722,22 @@ def load_pion_simc_component_shape(
     fallback_used = False
     if n_events_passed == 0:
         fallback_used = True
-        fallback_reason = "no SIMC events passed component-shape cuts"
+        fallback_reason = failure_reasons.get(
+            "no_events_passed_component_shape_cuts",
+            "no SIMC events passed component-shape cuts",
+        )
+    elif full_integral_before_norm <= 0.0:
+        fallback_used = True
+        fallback_reason = failure_reasons.get(
+            "weighted_integral_non_positive",
+            "component full-shape integral was non-positive",
+        )
     elif not full_normalized:
         fallback_used = True
-        fallback_reason = "component full-shape integral was non-positive"
+        fallback_reason = failure_reasons.get(
+            "normalization_failed",
+            "component full-shape normalization failed",
+        )
 
     if fallback_used:
         _warn_component_load(
@@ -565,6 +770,7 @@ def load_pion_simc_component_shape(
         "n_binned_shapes": total_binned_shapes,
         "n_normalized_binned_shapes": normalized_binned_shapes,
     }
+    diagnostics.update(tree_diagnostic_updates)
 
     print(
         "[SIMC TEMPLATE] {} {} tree={} seen={} passed={} mm_passed={} full_before={:.6e} full_after={:.6e}".format(
@@ -715,17 +921,78 @@ def load_kaon_simc_sigma0_shape(
     use_full_mm_range=True,
     context="",
 ):
-    return load_kaon_simc_extra_shape(
+    resolved_root_filename, root_resolution = resolve_kaon_simc_sigma0_root_filename(
         root_filename,
         inpDict,
         phi_setting,
+    )
+    required_branches = list(_KAON_SIMC_REQUIRED_BRANCHES)
+    if t_bins is not None and phi_bins is not None:
+        required_branches.extend(_KAON_SIMC_BINNED_REQUIRED_BRANCHES)
+    payload = load_pion_simc_component_shape(
+        resolved_root_filename,
+        inpDict,
+        phi_setting,
+        "kaon",
         "k_sigma0_signal",
         t_bins=t_bins,
         phi_bins=phi_bins,
         hgcer_cutg=hgcer_cutg,
         use_full_mm_range=use_full_mm_range,
         context=context,
+        source_provenance=root_resolution,
+        required_branch_names=required_branches,
+        failure_reasons={
+            "no_source_configured": "no_source_configured",
+            "configured_path_does_not_exist": "configured_path_does_not_exist",
+            "root_open_failed": "root_open_failed",
+            "missing_simc_tree": "missing_simc_tree",
+            "incompatible_tree_missing_branches": "incompatible_tree_missing_branches",
+            "zero_entry_tree": "zero_entry_tree",
+            "no_events_passed_component_shape_cuts": "no_events_passed_component_shape_cuts",
+            "weighted_integral_non_positive": "weighted_integral_non_positive",
+            "normalization_failed": "normalization_failed",
+        },
+        cache_identity=root_resolution.get("source_identity"),
     )
+    diagnostics = dict(payload.get("diagnostics") or {}) if isinstance(payload, dict) else {}
+    if diagnostics:
+        diagnostics["root_resolution"] = deepcopy(root_resolution)
+        payload["diagnostics"] = diagnostics
+        identity = diagnostics.get("source_identity") or {}
+        prefix = "[SIMC K-SIGMA0] phi={} Q2={} W={} EPSSET={}".format(
+            identity.get("phi_setting", phi_setting),
+            identity.get("Q2", ""),
+            identity.get("W", ""),
+            identity.get("EPSSET", ""),
+        )
+        if diagnostics.get("fallback_used"):
+            print(
+                "{} UNAVAILABLE requested={} resolved={} source={} exists={} reason={}".format(
+                    prefix,
+                    diagnostics.get("requested_root"),
+                    diagnostics.get("resolved_root"),
+                    diagnostics.get("resolution_source"),
+                    diagnostics.get("path_exists"),
+                    diagnostics.get("fallback_reason"),
+                )
+            )
+        else:
+            print(
+                "{} requested={} resolved={} source={} tree={} entries={} seen={} passed={} mm_passed={} normalized={}".format(
+                    prefix,
+                    diagnostics.get("requested_root"),
+                    diagnostics.get("resolved_root"),
+                    diagnostics.get("resolution_source"),
+                    diagnostics.get("tree_name"),
+                    diagnostics.get("tree_entries"),
+                    diagnostics.get("n_events_seen"),
+                    diagnostics.get("n_events_passed"),
+                    diagnostics.get("n_events_passed_mm_window"),
+                    diagnostics.get("normalized"),
+                )
+            )
+    return payload
 
 
 def attach_pion_component_payload(hist_dict, component_payload):

@@ -7769,7 +7769,7 @@ def _print_component_step_pages(
 
 def _format_component_template_diag_line(component_label, diagnostics):
     diagnostics = diagnostics or {}
-    return (
+    summary = (
         "{}: seen={} passed={} mm_passed={} norm={} fallback={}".format(
             component_label,
             int(diagnostics.get("n_events_seen", 0) or 0),
@@ -7778,6 +7778,22 @@ def _format_component_template_diag_line(component_label, diagnostics):
             bool(diagnostics.get("normalized", False)),
             bool(diagnostics.get("fallback_used", False)),
         )
+    )
+    if component_label != "K-Sigma0":
+        return summary
+
+    identity = diagnostics.get("source_identity") or {}
+    return "{} source={} Q{} W{} {} {} tree={} entries={} missing_branches={} reason={}".format(
+        summary,
+        diagnostics.get("resolution_source", "unknown"),
+        identity.get("Q2", ""),
+        identity.get("W", ""),
+        identity.get("EPSSET", ""),
+        identity.get("phi_setting", ""),
+        diagnostics.get("tree_name", ""),
+        diagnostics.get("tree_entries", ""),
+        len(diagnostics.get("missing_required_branches") or []),
+        diagnostics.get("fallback_reason") or "none",
     )
 
 
@@ -8165,6 +8181,30 @@ def _print_protected_pi_delta_status_page(
             "protected status: {}".format(render_state.get("diagnostic_status") or "unknown"),
             "failure reason: {}".format(diagnostic.get("failure_reason") or "not reported"),
         ]
+
+    sigma0_source = component_payload.get("kaon_sigma0_source_diagnostics") or {}
+    if sigma0_source:
+        identity = sigma0_source.get("source_identity") or {}
+        detail_lines.extend(
+            [
+                "K-Sigma0 source: {} Q{} W{} {} {}".format(
+                    sigma0_source.get("resolution_source", "unknown"),
+                    identity.get("Q2", ""),
+                    identity.get("W", ""),
+                    identity.get("EPSSET", ""),
+                    identity.get("phi_setting", ""),
+                ),
+                "K-Sigma0 requested: {}".format(sigma0_source.get("requested_root")),
+                "K-Sigma0 resolved: {}".format(sigma0_source.get("resolved_root")),
+                "K-Sigma0 loader: exists={} tree_exists={} entries={} missing_branches={} reason={}".format(
+                    sigma0_source.get("path_exists"),
+                    sigma0_source.get("tree_exists"),
+                    sigma0_source.get("tree_entries"),
+                    len(sigma0_source.get("missing_required_branches") or []),
+                    sigma0_source.get("fallback_reason") or "none",
+                ),
+            ]
+        )
 
     if str(failure_policy).strip().lower() == "zero_pi_delta":
         detail_lines.append("No pi-delta subtraction applied for this scope")

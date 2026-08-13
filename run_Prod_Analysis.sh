@@ -147,7 +147,7 @@ export_background_sample_paths() {
     export LT_BG_SAMPLE_W="${w}"
     export LT_BG_SAMPLE_EPSILON="${eps_token}"
 
-    for background in neutron delta sidis sigma0; do
+    for background in neutron delta sidis; do
         background_upper="$(printf '%s' "${background}" | tr '[:lower:]' '[:upper:]')"
         background_dir="${base_dir}/${background}"
         for phi in right left center; do

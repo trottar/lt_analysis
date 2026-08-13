@@ -48,6 +48,7 @@ from background_config import (
     resolve_simc_tree_name,
     get_proton_contamination_cleaning_config,
 )
+from background_sample_manifest import build_background_sample_manifest
 from correction_ledger import build_correction_ledger, write_correction_ledger
 from epsilon_correction_compare import load_ledgers_and_compare, validate_epsilon_compare
 from frozen_manifest import (
@@ -126,52 +127,6 @@ if inp_debug == "False":
     DEBUG = False # Flag for no plot splash
 else:
     DEBUG = True # Flag for plot splash
-
-BACKGROUND_SAMPLE_PHI_ENV = {
-    "Right": "RIGHT",
-    "Left": "LEFT",
-    "Center": "CENTER",
-}
-
-BACKGROUND_SAMPLE_SUFFIXES = {
-    "base": "",
-    "root": ".root",
-    "hist": ".hist",
-    "gen": ".gen",
-    "geni": ".geni",
-    "random_state": "_start_random_state.dat",
-}
-
-def build_background_sample_manifest(ltanapath, q2, w, epsset):
-    env_base_dir = os.environ.get("LT_BG_SAMPLE_BASE")
-    base_dir = env_base_dir or os.path.join(ltanapath, "background_samples", "OUTPUTS")
-    sample_q2 = os.environ.get("LT_BG_SAMPLE_Q2", q2)
-    sample_w = os.environ.get("LT_BG_SAMPLE_W", w)
-    sample_eps = os.environ.get("LT_BG_SAMPLE_EPSILON", epsset)
-    manifest = {
-        "base_dir": base_dir,
-        "q2": sample_q2,
-        "w": sample_w,
-        "epsilon": sample_eps,
-        "by_background": {},
-        "by_phi": {phi_label: {} for phi_label in BACKGROUND_SAMPLE_PHI_ENV},
-    }
-
-    for background in ("neutron", "delta", "sidis", "sigma0"):
-        env_background = background.upper()
-        manifest["by_background"][background] = {}
-        for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
-            env_prefix = f"LT_BG_{env_background}_{phi_env}"
-            sample_name = f"Prod_Coin_Q{sample_q2}W{sample_w}{phi_label.lower()}_{sample_eps}e"
-            default_base = os.path.join(base_dir, background, sample_name)
-            sample_entry = {}
-            for key, suffix in BACKGROUND_SAMPLE_SUFFIXES.items():
-                env_name = f"{env_prefix}_{key.upper()}"
-                sample_entry[key] = os.environ.get(env_name, f"{default_base}{suffix}")
-            manifest["by_background"][background][phi_label] = sample_entry
-            manifest["by_phi"][phi_label][background] = sample_entry
-
-    return manifest
 
 if int(POL) == 1:
     pol_str = "pl"
