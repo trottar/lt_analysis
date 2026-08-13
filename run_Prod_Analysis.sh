@@ -134,6 +134,80 @@ build_background_sample_base() {
     fi
 }
 
+sigma0_external_environment_variable() {
+    local phi_setting="$1"
+    local epsilon="$2"
+    local phi_upper epsilon_upper
+
+    case "${phi_setting}" in
+        Right|Left|Center)
+            phi_upper="$(printf '%s' "${phi_setting}" | tr '[:lower:]' '[:upper:]')"
+            ;;
+        *)
+            echo "ERROR: unknown K-Sigma0 phi setting ${phi_setting}" >&2
+            return 1
+            ;;
+    esac
+    case "${epsilon}" in
+        low|high)
+            epsilon_upper="$(printf '%s' "${epsilon}" | tr '[:lower:]' '[:upper:]')"
+            ;;
+        *)
+            echo "ERROR: K-Sigma0 EPSSET must be low or high; received ${epsilon}" >&2
+            return 1
+            ;;
+    esac
+    printf 'LT_BG_SIGMA0_%s_%s_ROOT\n' "${phi_upper}" "${epsilon_upper}"
+}
+
+report_external_sigma0_sources() {
+    local epsilon="$1"
+    local phi_setting environment_variable configured_root
+
+    for phi_setting in Right Left Center; do
+        environment_variable="$(sigma0_external_environment_variable "${phi_setting}" "${epsilon}")" || return 1
+        configured_root="${!environment_variable:-}"
+        printf 'K-Sigma0 external source: EPSSET=%s phi=%s env=%s configured=%s path=%s\n' \
+            "${epsilon}" "${phi_setting}" "${environment_variable}" \
+            "$([[ -n "${configured_root}" ]] && printf 'true' || printf 'false')" \
+            "${configured_root:-None}"
+    done
+}
+
+path_is_within_worktree() {
+    local candidate_path="${1%/}"
+    local worktree_root="${2%/}"
+    [[ "${candidate_path}" == "${worktree_root}" || "${candidate_path}" == "${worktree_root}/"* ]]
+}
+
+validate_external_sigma0_paths_before_cleanup() {
+    local worktree_root epsilon phi_setting environment_variable configured_root resolved_root
+
+    worktree_root="$(resolve_real_path "${LTANAPATH}")"
+    for epsilon in low high; do
+        for phi_setting in Right Left Center; do
+            environment_variable="$(sigma0_external_environment_variable "${phi_setting}" "${epsilon}")" || return 1
+            configured_root="${!environment_variable:-}"
+            [[ -z "${configured_root}" ]] && continue
+
+            resolved_root="$(resolve_real_path "${configured_root}")"
+            # readlink may leave a missing relative path untouched; treat it as
+            # repository-relative so an in-tree configured source is still
+            # protected before the destructive cleanup.
+            if [[ "${resolved_root}" != /* ]]; then
+                resolved_root="$(resolve_real_path "${worktree_root}/${resolved_root}")"
+            fi
+            if path_is_within_worktree "${resolved_root}" "${worktree_root}"; then
+                echo "ERROR: refusing git clean -fdx because ${environment_variable} points inside the repository" >&2
+                echo "  configured path: ${configured_root}" >&2
+                echo "  resolved path: ${resolved_root}" >&2
+                echo "  repository root: ${worktree_root}" >&2
+                return 1
+            fi
+        done
+    done
+}
+
 export_background_sample_paths() {
     local q2="$1"
     local w="$2"
@@ -169,6 +243,10 @@ export_background_sample_paths() {
             export "${var_name}=${sample_base}_start_random_state.dat"
         done
     done
+
+    # K-Sigma0 remains an external, setting-specific input.  Report the exact
+    # authoritative variables without synthesizing or exporting a path.
+    report_external_sigma0_sources "${eps_token}"
 }
 
 SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
@@ -249,6 +327,9 @@ fi
 
 # Clean all untracked files and recreate symlinks
 if [[ $i_flag != "true" && $a_flag != "true" ]]; then
+    if ! validate_external_sigma0_paths_before_cleanup; then
+        exit 1
+    fi
     git clean -fdx
     ./set_SymLinks.sh $ParticleType
 fi

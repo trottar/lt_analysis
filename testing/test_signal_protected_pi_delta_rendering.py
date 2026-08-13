@@ -249,6 +249,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         payload = self._fit_payload(diagnostic=True, status="missing_required_template")
         payload["kaon_sigma0_source_diagnostics"] = {
             "resolution_source": "configured_path_does_not_exist",
+            "requested_environment_variable": "LT_BG_SIGMA0_LEFT_LOW_ROOT",
             "requested_root": "/external/sigma0/left.root",
             "resolved_root": "/external/sigma0/left.root",
             "path_exists": False,
@@ -269,6 +270,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
 
         body = text_pages[0][2]
         self.assertTrue(any("K-Sigma0 source: configured_path_does_not_exist Q4p4 W2p74 low Left" in line for line in body))
+        self.assertTrue(any("K-Sigma0 environment: LT_BG_SIGMA0_LEFT_LOW_ROOT" in line for line in body))
         self.assertTrue(any("K-Sigma0 requested: /external/sigma0/left.root" in line for line in body))
 
     def test_disabled_mode_retains_legacy_kaon_sequence(self):

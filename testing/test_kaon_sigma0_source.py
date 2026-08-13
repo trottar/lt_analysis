@@ -5,6 +5,8 @@ from __future__ import annotations
 import copy
 import math
 import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -26,7 +28,11 @@ for relative_path in ("src/cuts", "src/utility"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from background_sample_manifest import BACKGROUND_SAMPLE_SUFFIXES, build_background_sample_manifest
+from background_sample_manifest import (
+    BACKGROUND_SAMPLE_SUFFIXES,
+    build_background_sample_manifest,
+    sigma0_environment_variable,
+)
 
 
 class Sigma0ManifestTests(unittest.TestCase):
@@ -42,30 +48,196 @@ class Sigma0ManifestTests(unittest.TestCase):
             entry["source_identity"],
             {"Q2": "4p4", "W": "2p74", "EPSSET": "low", "phi_setting": "Left"},
         )
-        self.assertEqual(set(BACKGROUND_SAMPLE_SUFFIXES) | {"source_strategy", "configured", "source_identity"}, set(entry))
+        self.assertEqual(
+            set(BACKGROUND_SAMPLE_SUFFIXES)
+            | {"source_strategy", "configured", "environment_variable", "source_identity"},
+            set(entry),
+        )
+        self.assertEqual(entry["environment_variable"], "LT_BG_SIGMA0_LEFT_LOW_ROOT")
         self.assertTrue(all(entry[key] is None for key in BACKGROUND_SAMPLE_SUFFIXES))
 
-    def test_explicit_phi_root_is_the_only_sigma0_configuration(self):
+    def test_low_and_high_phi_roots_are_independent(self):
         with mock.patch.dict(
             os.environ,
-            {"LT_BG_SIGMA0_LEFT_ROOT": "D:/sigma0/Q4p4W2p74left_low.root"},
+            {
+                "LT_BG_SIGMA0_LEFT_LOW_ROOT": "D:/sigma0/Q4p4W2p74left_low.root",
+                "LT_BG_SIGMA0_LEFT_HIGH_ROOT": "D:/sigma0/Q4p4W2p74left_high.root",
+                "LT_BG_SIGMA0_RIGHT_LOW_ROOT": "D:/sigma0/Q4p4W2p74right_low.root",
+            },
+            clear=True,
+        ):
+            low_manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "low")
+            high_manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "high")
+
+        low_left = low_manifest["by_phi"]["Left"]["sigma0"]
+        high_left = high_manifest["by_phi"]["Left"]["sigma0"]
+        low_right = low_manifest["by_phi"]["Right"]["sigma0"]
+        self.assertEqual(low_left["root"], "D:/sigma0/Q4p4W2p74left_low.root")
+        self.assertEqual(low_left["environment_variable"], "LT_BG_SIGMA0_LEFT_LOW_ROOT")
+        self.assertEqual(high_left["root"], "D:/sigma0/Q4p4W2p74left_high.root")
+        self.assertEqual(high_left["environment_variable"], "LT_BG_SIGMA0_LEFT_HIGH_ROOT")
+        self.assertEqual(low_right["root"], "D:/sigma0/Q4p4W2p74right_low.root")
+        self.assertEqual(low_right["source_identity"]["phi_setting"], "Right")
+        self.assertEqual(high_left["source_identity"]["EPSSET"], "high")
+
+    def test_low_only_configuration_leaves_high_unconfigured(self):
+        with mock.patch.dict(
+            os.environ,
+            {"LT_BG_SIGMA0_LEFT_LOW_ROOT": "D:/sigma0/Q4p4W2p74left_low.root"},
+            clear=True,
+        ):
+            high_manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "high")
+
+        high_left = high_manifest["by_phi"]["Left"]["sigma0"]
+        self.assertFalse(high_left["configured"])
+        self.assertIsNone(high_left["root"])
+        self.assertEqual(high_left["environment_variable"], "LT_BG_SIGMA0_LEFT_HIGH_ROOT")
+
+    def test_manifest_epsilon_selects_the_matching_sigma0_variable(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "LT_BG_SAMPLE_EPSILON": "high",
+                "LT_BG_SIGMA0_CENTER_HIGH_ROOT": "D:/sigma0/Q4p4W2p74center_high.root",
+            },
+            clear=True,
+        ):
+            manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "low")
+
+        center = manifest["by_phi"]["Center"]["sigma0"]
+        self.assertEqual(manifest["epsilon"], "high")
+        self.assertEqual(center["environment_variable"], "LT_BG_SIGMA0_CENTER_HIGH_ROOT")
+        self.assertEqual(center["root"], "D:/sigma0/Q4p4W2p74center_high.root")
+        self.assertEqual(center["source_identity"]["EPSSET"], "high")
+
+    def test_generic_phi_only_variable_is_ignored(self):
+        with mock.patch.dict(
+            os.environ,
+            {"LT_BG_SIGMA0_LEFT_ROOT": "D:/sigma0/legacy_left.root"},
             clear=True,
         ):
             manifest = build_background_sample_manifest("C:/analysis", "4p4", "2p74", "low")
 
         left = manifest["by_phi"]["Left"]["sigma0"]
-        right = manifest["by_phi"]["Right"]["sigma0"]
-        self.assertTrue(left["configured"])
-        self.assertEqual(left["root"], "D:/sigma0/Q4p4W2p74left_low.root")
-        self.assertIsNone(left["base"])
-        self.assertFalse(right["configured"])
-        self.assertIsNone(right["root"])
+        self.assertFalse(left["configured"])
+        self.assertIsNone(left["root"])
+        self.assertEqual(left["environment_variable"], "LT_BG_SIGMA0_LEFT_LOW_ROOT")
 
-    def test_launcher_does_not_export_a_generated_sigma0_default(self):
+    def test_only_low_and_high_epsilon_tokens_are_accepted(self):
+        self.assertEqual(sigma0_environment_variable("Center", "LOW"), "LT_BG_SIGMA0_CENTER_LOW_ROOT")
+        with self.assertRaises(ValueError):
+            sigma0_environment_variable("Left", "mid")
+
+    @staticmethod
+    def _launcher_bash():
+        if os.name == "nt":
+            git_bash = Path(r"C:\Program Files\Git\bin\bash.exe")
+            return str(git_bash) if git_bash.is_file() else None
+        return shutil.which("bash")
+
+    def _run_launcher_cleanup_guard(self, worktree_root, configured):
+        bash = self._launcher_bash()
+        if bash is None:
+            self.skipTest("a local Bash executable is required for launcher guard coverage")
+        environment = os.environ.copy()
+        for epsilon in ("LOW", "HIGH"):
+            for phi in ("RIGHT", "LEFT", "CENTER"):
+                environment.pop("LT_BG_SIGMA0_{}_{}_ROOT".format(phi, epsilon), None)
+        environment.update(configured)
+        shell_driver = r'''
+to_shell_path() {
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$1"
+    else
+        printf '%s\n' "$1"
+    fi
+}
+source <(
+    sed -n \
+        -e '/^resolve_real_path()/,/^}/p' \
+        -e '/^sigma0_external_environment_variable()/,/^}/p' \
+        -e '/^path_is_within_worktree()/,/^}/p' \
+        -e '/^validate_external_sigma0_paths_before_cleanup()/,/^}/p' \
+        "$1"
+)
+LTANAPATH="$(to_shell_path "$2")"
+for sigma0_variable in LT_BG_SIGMA0_RIGHT_LOW_ROOT LT_BG_SIGMA0_LEFT_LOW_ROOT LT_BG_SIGMA0_CENTER_LOW_ROOT LT_BG_SIGMA0_RIGHT_HIGH_ROOT LT_BG_SIGMA0_LEFT_HIGH_ROOT LT_BG_SIGMA0_CENTER_HIGH_ROOT; do
+    if [[ -n "${!sigma0_variable:-}" ]]; then
+        printf -v "${sigma0_variable}" '%s' "$(to_shell_path "${!sigma0_variable}")"
+    fi
+done
+validate_external_sigma0_paths_before_cleanup
+'''
+        return subprocess.run(
+            [bash, "-c", shell_driver, "bash", str(REPO_ROOT / "run_Prod_Analysis.sh"), str(worktree_root)],
+            env=environment,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+    def test_launcher_cleanup_guard_rejects_in_tree_and_allows_external_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            worktree_root = Path(directory) / "repo"
+            worktree_root.mkdir()
+            blocked = self._run_launcher_cleanup_guard(
+                worktree_root,
+                {"LT_BG_SIGMA0_LEFT_LOW_ROOT": str(worktree_root / "sigma0" / "left.root")},
+            )
+            outside_link = Path(directory) / "external_link_to_repo"
+            try:
+                outside_link.symlink_to(worktree_root, target_is_directory=True)
+            except OSError:
+                symlink_blocked = None
+            else:
+                symlink_blocked = self._run_launcher_cleanup_guard(
+                    worktree_root,
+                    {"LT_BG_SIGMA0_RIGHT_LOW_ROOT": str(outside_link / "sigma0" / "right.root")},
+                )
+            volatile = self._run_launcher_cleanup_guard(
+                worktree_root,
+                {"LT_BG_SIGMA0_RIGHT_HIGH_ROOT": "/volatile/sigma0/right.root"},
+            )
+            work = self._run_launcher_cleanup_guard(
+                worktree_root,
+                {"LT_BG_SIGMA0_CENTER_HIGH_ROOT": "/work/sigma0/center.root"},
+            )
+            legacy = self._run_launcher_cleanup_guard(
+                worktree_root,
+                {"LT_BG_SIGMA0_LEFT_ROOT": str(worktree_root / "legacy.root")},
+            )
+
+        self.assertNotEqual(blocked.returncode, 0)
+        self.assertIn("LT_BG_SIGMA0_LEFT_LOW_ROOT", blocked.stderr)
+        if symlink_blocked is not None:
+            self.assertNotEqual(symlink_blocked.returncode, 0)
+            self.assertIn("LT_BG_SIGMA0_RIGHT_LOW_ROOT", symlink_blocked.stderr)
+        self.assertEqual(volatile.returncode, 0, volatile.stderr)
+        self.assertEqual(work.returncode, 0, work.stderr)
+        self.assertEqual(legacy.returncode, 0, legacy.stderr)
+
+    def test_launcher_preserves_external_sigma0_contract_and_cleanup_order(self):
         launcher = (REPO_ROOT / "run_Prod_Analysis.sh").read_text(encoding="utf-8")
         function_body = launcher.split("export_background_sample_paths()", 1)[1].split("SKIM_OUTPUT_DIR=", 1)[0]
         self.assertIn("for background in neutron delta sidis; do", function_body)
-        self.assertNotIn("sigma0", function_body.lower())
+        self.assertNotRegex(function_body, r"for background in .*sigma0")
+        self.assertIn('report_external_sigma0_sources "${eps_token}"', function_body)
+        self.assertNotRegex(function_body, r"export .*LT_BG_SIGMA0")
+        self.assertEqual(launcher.count('export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"'), 2)
+
+        cleanup_block = launcher.split("# Clean all untracked files and recreate symlinks", 1)[1]
+        self.assertLess(
+            cleanup_block.index("validate_external_sigma0_paths_before_cleanup"),
+            cleanup_block.index("git clean -fdx"),
+        )
+        guard_body = launcher.split("validate_external_sigma0_paths_before_cleanup()", 1)[1].split(
+            "export_background_sample_paths()", 1
+        )[0]
+        self.assertIn("for epsilon in low high; do", guard_body)
+        self.assertIn("for phi_setting in Right Left Center; do", guard_body)
+        self.assertIn('resolve_real_path "${LTANAPATH}"', guard_body)
+        self.assertIn('resolve_real_path "${configured_root}"', guard_body)
 
 
 @unittest.skipUnless(ROOT is not None, "PyROOT is required for K-Sigma0 ROOT source tests")
@@ -102,6 +274,7 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
                         "sigma0": {
                             "source_strategy": "external_required",
                             "configured": bool(root_filename),
+                            "environment_variable": "LT_BG_SIGMA0_LEFT_LOW_ROOT",
                             "root": root_filename,
                             "source_identity": {
                                 "Q2": "4p4",
@@ -183,6 +356,8 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
         self.assertFalse(diagnostics["fallback_used"])
         self.assertGreater(payload["setting_shape_full"].Integral(), 0.0)
         self.assertEqual(diagnostics["source_identity"]["phi_setting"], "Left")
+        self.assertEqual(diagnostics["source_identity"]["EPSSET"], "low")
+        self.assertEqual(diagnostics["requested_environment_variable"], "LT_BG_SIGMA0_LEFT_LOW_ROOT")
 
     def test_unconfigured_and_missing_sources_are_distinct(self):
         unconfigured = self._load(None)["diagnostics"]
@@ -240,7 +415,7 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
         root_filename = self._write_root("plumbing_sigma0.root")
         with mock.patch.dict(
             os.environ,
-            {"LT_BG_SIGMA0_LEFT_ROOT": root_filename},
+            {"LT_BG_SIGMA0_LEFT_LOW_ROOT": root_filename},
             clear=True,
         ):
             input_dict = self._inp(None)
@@ -308,7 +483,11 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
         self.assertTrue(protected["template_availability"]["k_sigma0_signal"])
         self.assertTrue(protected["template_availability"]["pi_delta"])
         self.assertTrue(math.isfinite(result["A_delta"]))
-        self.assertGreaterEqual(result["A_delta"], 0.0)
+        self.assertGreater(result["A_delta"], 0.0)
+        self.assertEqual(
+            sigma0_payload["diagnostics"]["requested_environment_variable"],
+            "LT_BG_SIGMA0_LEFT_LOW_ROOT",
+        )
 
 
 if __name__ == "__main__":

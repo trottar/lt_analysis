@@ -684,14 +684,25 @@ unit-area MM template.
 
 The K-$\Sigma^0$ template used by the signal-protected final kaon-side
 $\pi$-$\Delta$ fit is an explicitly configured external SIMC source, not a
-generated background sample.  The active phi setting must export
-\texttt{LT\_BG\_SIGMA0\_RIGHT\_ROOT},
-\texttt{LT\_BG\_SIGMA0\_LEFT\_ROOT}, or
-\texttt{LT\_BG\_SIGMA0\_CENTER\_ROOT}.  The loader records the active
-$(Q^2,W,\epsilon,\phi)$ identity, validates the configured tree and required
-branches, and never infers K-$\Sigma^0$ from K-$\Lambda$ or pion-background
-sources.  An absent or incompatible source retains the protected fit's
-conservative \texttt{zero\_pi\_delta} behavior.
+generated background sample.  It must be stored outside the analysis working
+tree and selected with the exact active $(\phi,\epsilon)$ variable:
+\begin{itemize}[leftmargin=2em]
+  \item \texttt{LT\_BG\_SIGMA0\_RIGHT\_LOW\_ROOT},
+        \texttt{LT\_BG\_SIGMA0\_LEFT\_LOW\_ROOT}, or
+        \texttt{LT\_BG\_SIGMA0\_CENTER\_LOW\_ROOT};
+  \item \texttt{LT\_BG\_SIGMA0\_RIGHT\_HIGH\_ROOT},
+        \texttt{LT\_BG\_SIGMA0\_LEFT\_HIGH\_ROOT}, or
+        \texttt{LT\_BG\_SIGMA0\_CENTER\_HIGH\_ROOT}.
+\end{itemize}
+There is no generated default, low/high inheritance, or source discovery.
+The generic variables such as \texttt{LT\_BG\_SIGMA0\_LEFT\_ROOT} are
+rejected as configuration inputs.  The launcher reports the authoritative
+variable for each active epsilon and refuses its pre-clean step if any of the
+six configured locations resolve inside the repository.  The loader records
+the active $(Q^2,W,\epsilon,\phi)$ identity, validates the configured tree and
+required branches, and never infers K-$\Sigma^0$ from K-$\Lambda$ or
+pion-background sources.  An absent or incompatible source retains the
+protected fit's conservative \texttt{zero\_pi\_delta} behavior.
 
 Templates can be resolved at setting-wide and $(t,\phi)$ scope.  For a sparse
 fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then

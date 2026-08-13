@@ -88,6 +88,7 @@ def resolve_kaon_simc_sigma0_root_filename(root_filename, inpDict, phi_setting):
         sample_entry.get("source_identity") or _sigma0_source_identity(inpDict, phi_setting)
     )
     source_strategy = str(sample_entry.get("source_strategy") or "external_required")
+    requested_environment_variable = sample_entry.get("environment_variable") or None
     candidate_roots = [requested_root] if requested_root else []
     existing_roots = [candidate for candidate in candidate_roots if os.path.isfile(candidate)]
     if not requested_root:
@@ -110,6 +111,7 @@ def resolve_kaon_simc_sigma0_root_filename(root_filename, inpDict, phi_setting):
         "configured": bool(requested_root),
         "source_strategy": source_strategy,
         "source_identity": source_identity,
+        "requested_environment_variable": requested_environment_variable,
         "resolution_source": resolution_source,
     }
 

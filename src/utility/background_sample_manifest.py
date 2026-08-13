@@ -24,6 +24,7 @@ BACKGROUND_SAMPLE_SUFFIXES = {
 
 GENERATED_BACKGROUND_SAMPLES = ("neutron", "delta", "sidis")
 EXTERNAL_BACKGROUND_SAMPLES = ("sigma0",)
+SIGMA0_EPSILON_TOKENS = ("low", "high")
 
 
 def _source_identity(q2, w, epsset, phi_setting):
@@ -35,8 +36,42 @@ def _source_identity(q2, w, epsset, phi_setting):
     }
 
 
-def _explicit_sigma0_root(phi_env):
-    value = str(os.environ.get("LT_BG_SIGMA0_{}_ROOT".format(phi_env), "")).strip()
+def normalize_sigma0_epsilon(epsset):
+    """Return the only supported K-Sigma0 epsilon token.
+
+    The external K-Sigma0 source is keyed by epsilon.  Accepting anything
+    other than ``low`` or ``high`` would make it possible to select a source
+    from a different analysis setting, so this normalizer is deliberately
+    stricter than the generated-background naming convention.
+    """
+    normalized = str(epsset or "").strip().lower()
+    if normalized not in SIGMA0_EPSILON_TOKENS:
+        raise ValueError(
+            "K-Sigma0 EPSSET must be one of {}; received {!r}".format(
+                ", ".join(SIGMA0_EPSILON_TOKENS), epsset
+            )
+        )
+    return normalized
+
+
+def sigma0_environment_variable(phi_setting, epsset):
+    """Build the authoritative K-Sigma0 external-source variable name."""
+    try:
+        phi_env = BACKGROUND_SAMPLE_PHI_ENV[phi_setting]
+    except KeyError as exc:
+        raise ValueError(
+            "Unknown K-Sigma0 phi setting {!r}; expected one of {}".format(
+                phi_setting, ", ".join(BACKGROUND_SAMPLE_PHI_ENV)
+            )
+        ) from exc
+    epsilon = normalize_sigma0_epsilon(epsset)
+    return "LT_BG_SIGMA0_{}_{}_ROOT".format(phi_env, epsilon.upper())
+
+
+def _explicit_sigma0_root(phi_setting, epsset, environ=None):
+    environment_variable = sigma0_environment_variable(phi_setting, epsset)
+    source_environ = os.environ if environ is None else environ
+    value = str(source_environ.get(environment_variable, "")).strip()
     return value or None
 
 
@@ -51,7 +86,9 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
     base_dir = env_base_dir or os.path.join(ltanapath, "background_samples", "OUTPUTS")
     sample_q2 = os.environ.get("LT_BG_SAMPLE_Q2", q2)
     sample_w = os.environ.get("LT_BG_SAMPLE_W", w)
-    sample_eps = os.environ.get("LT_BG_SAMPLE_EPSILON", epsset)
+    sample_eps = normalize_sigma0_epsilon(
+        os.environ.get("LT_BG_SAMPLE_EPSILON", epsset)
+    )
     manifest = {
         "base_dir": base_dir,
         "q2": sample_q2,
@@ -91,10 +128,12 @@ def build_background_sample_manifest(ltanapath, q2, w, epsset):
 
     manifest["by_background"]["sigma0"] = {}
     for phi_label, phi_env in BACKGROUND_SAMPLE_PHI_ENV.items():
-        root_filename = _explicit_sigma0_root(phi_env)
+        environment_variable = sigma0_environment_variable(phi_label, sample_eps)
+        root_filename = _explicit_sigma0_root(phi_label, sample_eps)
         sample_entry = {
             "source_strategy": "external_required",
             "configured": bool(root_filename),
+            "environment_variable": environment_variable,
             "source_identity": _source_identity(
                 sample_q2,
                 sample_w,

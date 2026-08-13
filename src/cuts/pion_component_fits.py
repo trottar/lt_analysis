@@ -8194,6 +8194,9 @@ def _print_protected_pi_delta_status_page(
                     identity.get("EPSSET", ""),
                     identity.get("phi_setting", ""),
                 ),
+                "K-Sigma0 environment: {}".format(
+                    sigma0_source.get("requested_environment_variable") or "not recorded"
+                ),
                 "K-Sigma0 requested: {}".format(sigma0_source.get("requested_root")),
                 "K-Sigma0 resolved: {}".format(sigma0_source.get("resolved_root")),
                 "K-Sigma0 loader: exists={} tree_exists={} entries={} missing_branches={} reason={}".format(
