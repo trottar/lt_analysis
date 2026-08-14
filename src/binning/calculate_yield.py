@@ -202,6 +202,11 @@ def _clone_hist_for_plot(hist):
     return cloned_hist
 
 
+def _clone_optional_hist_for_plot(hist):
+    """Detach a diagnostic histogram when present, preserving intentional absence."""
+    return _clone_hist_for_plot(hist) if hist is not None else None
+
+
 def _open_root_pdf_page_stream(canvas, pdf_name, opened):
     if not opened:
         canvas.Print(pdf_name + "[")
@@ -995,54 +1000,54 @@ def _apply_component_pion_subtraction_for_bin(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
             "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
-            "H_k_lambda_simc_reference": _clone_hist_for_plot(
+            "H_k_lambda_simc_reference": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_k_lambda_simc_reference")
             ),
-            "H_simc_shape_k_lambda": _clone_hist_for_plot(
+            "H_simc_shape_k_lambda": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_simc_shape_k_lambda")
             ),
-            "H_pi_delta_lambda_gauge": _clone_hist_for_plot(
+            "H_pi_delta_lambda_gauge": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_lambda_gauge")
             ),
-            "H_pi_delta_protected_fit_input": _clone_hist_for_plot(
+            "H_pi_delta_protected_fit_input": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_fit_input")
             ),
-            "H_pi_delta_protected_k_lambda": _clone_hist_for_plot(
+            "H_pi_delta_protected_k_lambda": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_k_lambda")
             ),
-            "H_pi_delta_protected_k_sigma0": _clone_hist_for_plot(
+            "H_pi_delta_protected_k_sigma0": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_k_sigma0")
-            ) if component_fit_result.get("H_pi_delta_protected_k_sigma0") is not None else None,
-            "H_pi_delta_protected_pi_delta": _clone_hist_for_plot(
+            ),
+            "H_pi_delta_protected_pi_delta": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_pi_delta")
             ),
-            "H_pi_delta_protected_fit_total": _clone_hist_for_plot(
+            "H_pi_delta_protected_fit_total": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_fit_total")
             ),
-            "H_pi_delta_protected_fit_residual": _clone_hist_for_plot(
+            "H_pi_delta_protected_fit_residual": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_fit_residual")
             ),
-            "H_pi_delta_protected_after_subtraction": _clone_hist_for_plot(
+            "H_pi_delta_protected_after_subtraction": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_after_subtraction")
             ),
-            "H_kaon_fit_k_lambda_reference": _clone_hist_for_plot(
+            "H_kaon_fit_k_lambda_reference": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_reference")
             ),
-            "H_kaon_fit_k_lambda_scaled": _clone_hist_for_plot(
+            "H_kaon_fit_k_lambda_scaled": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_scaled")
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None else None,
-            "H_kaon_fit_k_lambda_scaled_refined": _clone_hist_for_plot(
+            ),
+            "H_kaon_fit_k_lambda_scaled_refined": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined")
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined") is not None else None,
-            "H_simc_shape_k_sigma0": _clone_hist_for_plot(
+            ),
+            "H_simc_shape_k_sigma0": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_simc_shape_k_sigma0")
-            ) if component_fit_result.get("H_simc_shape_k_sigma0") is not None else None,
-            "H_kaon_fit_k_sigma0_scaled": _clone_hist_for_plot(
+            ),
+            "H_kaon_fit_k_sigma0_scaled": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_sigma0_scaled")
-            ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None else None,
-            "H_kaon_fit_k_sigma0_scaled_refined": _clone_hist_for_plot(
+            ),
+            "H_kaon_fit_k_sigma0_scaled_refined": _clone_optional_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")
-            ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None else None,
+            ),
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
             "lambda_gauge_amplitude": component_fit_result.get("lambda_gauge_amplitude"),
