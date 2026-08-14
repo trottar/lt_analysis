@@ -43,6 +43,7 @@ from utility import normalize_hist_to_unit_area
 from root_histogram_ownership import (
     clone_root_histogram,
     configure_particle_subtraction_root_ownership_debug,
+    unique_root_object_name,
 )
 
 
@@ -7669,11 +7670,21 @@ def _print_protected_overlay_page(
     """Draw protected physics curves and diagnostics on separate pads."""
     if base_hist is None:
         return
-    canvas = ROOT.TCanvas("protected_canvas", "protected_canvas", 1000, 850)
+    canvas_name = unique_root_object_name(
+        "protected_canvas",
+        scope="protected_render",
+        role="canvas",
+    )
+    canvas = ROOT.TCanvas(canvas_name, canvas_name, 1000, 850)
     canvas.Divide(1, 2)
     plot_pad = canvas.cd(1)
     plot_pad.SetPad(0.0, 0.30, 1.0, 1.0)
+    # ROOT pads and legends keep raw C++ pointers.  Retain every temporary
+    # PyROOT proxy until after Print() so a loop-local clone cannot be
+    # collected while TLegend::PaintPrimitives is dereferencing it.
+    drawn_objects = [canvas, plot_pad]
     base_clone = _clone_hist(base_hist, "{}_protected_plot".format(base_hist.GetName()))
+    drawn_objects.append(base_clone)
     base_clone.SetTitle(title)
     base_clone.SetLineColor(ROOT.kBlack)
     base_clone.SetLineWidth(2)
@@ -7687,6 +7698,7 @@ def _print_protected_overlay_page(
     base_clone.SetMinimum(0.0)
     base_clone.Draw("hist")
     legend = ROOT.TLegend(0.58, 0.56, 0.88, 0.88)
+    drawn_objects.append(legend)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     legend.AddEntry(base_clone, base_label, "lf")
@@ -7694,17 +7706,20 @@ def _print_protected_overlay_page(
         if hist is None:
             continue
         clone = _clone_hist(hist, "{}_protected_plot".format(hist.GetName()))
+        drawn_objects.append(clone)
         _style_overlay_hist(clone, color, line_style=line_style)
         clone.Draw("hist same")
         legend.AddEntry(clone, label, "l")
     if window is not None:
-        _draw_vertical_window_lines(
+        drawn_objects.extend(_draw_vertical_window_lines(
             float(window[0]), float(window[1]), 0.0, float(base_clone.GetMaximum())
-        )
+        ))
     legend.Draw()
     diagnostics_pad = canvas.cd(2)
+    drawn_objects.append(diagnostics_pad)
     diagnostics_pad.SetPad(0.0, 0.0, 1.0, 0.30)
     diagnostics_box = ROOT.TPaveText(0.03, 0.06, 0.97, 0.94, "NDC")
+    drawn_objects.append(diagnostics_box)
     diagnostics_box.SetBorderSize(0)
     diagnostics_box.SetFillStyle(0)
     diagnostics_box.SetTextAlign(12)

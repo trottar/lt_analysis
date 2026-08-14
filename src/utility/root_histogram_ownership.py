@@ -35,6 +35,17 @@ def get_particle_subtraction_root_ownership_debug_records():
     return [dict(record) for record in _DEBUG_RECORDS]
 
 
+def unique_root_object_name(name, *, scope="scope", role="object"):
+    """Allocate a collision-free ROOT object name without retaining an object."""
+    name_base = _safe_name(name, "root_object")
+    return "{}_{}_{}_{}".format(
+        name_base,
+        _safe_name(scope, "scope"),
+        _safe_name(role, "object"),
+        next(_CLONE_COUNTER),
+    )
+
+
 def clone_root_histogram(
     template_hist,
     *,
@@ -60,11 +71,10 @@ def clone_root_histogram(
 
     source_name = _safe_name(getattr(template_hist, "GetName", lambda: "source")(), "source")
     clone_base = _safe_name(name, "{}_{}_{}".format(scope, role, source_name))
-    unique_name = "{}_{}_{}_{}".format(
+    unique_name = unique_root_object_name(
         clone_base,
-        _safe_name(scope, "scope"),
-        _safe_name(role, "histogram"),
-        next(_CLONE_COUNTER),
+        scope=scope,
+        role=role,
     )
     cloned = template_hist.Clone(unique_name)
     if cloned is None:

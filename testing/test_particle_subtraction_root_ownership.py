@@ -5,6 +5,7 @@ from __future__ import annotations
 import gc
 import os
 import sys
+import tempfile
 import unittest
 
 
@@ -136,6 +137,32 @@ class ParticleSubtractionRootOwnershipTests(unittest.TestCase):
                     self.assert_payload({key: self._source("forbidden_{}".format(key))})
         with self.assertRaises(AssertionError):
             self.assert_payload({"H_pi_delta_protected_fit_total": self._source("forbidden_prefix")})
+
+    def test_protected_overlay_renders_after_temporary_clones_are_created(self):
+        import pion_component_fits as fits
+
+        base = self._source("protected_base")
+        lambda_curve = self.clone(base, scope="protected_test", role="lambda", sumw2=False)
+        delta_curve = self.clone(base, scope="protected_test", role="delta", sumw2=False)
+        lambda_curve.Scale(0.8)
+        delta_curve.Scale(0.2)
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            pdf_path = os.path.join(temporary_dir, "protected_overlay.pdf")
+            fits._print_protected_overlay_page(
+                pdf_path,
+                base,
+                "R_preDelta",
+                "protected ownership test",
+                [
+                    (lambda_curve, "K-Lambda", ROOT.kBlue + 1, 1),
+                    (delta_curve, "pi-delta", ROOT.kAzure + 2, 1),
+                ],
+                ["temporary clones retained through Print"],
+                window=(1.0, 1.2),
+            )
+            self.assertTrue(os.path.exists(pdf_path))
+        self.assertGreater(lambda_curve.Integral(), 0.0)
+        self.assertGreater(delta_curve.Integral(), 0.0)
 
 
 if __name__ == "__main__":
