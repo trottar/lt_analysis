@@ -1001,6 +1001,30 @@ def _apply_component_pion_subtraction_for_bin(
             "H_simc_shape_k_lambda": _clone_hist_for_plot(
                 component_fit_result.get("H_simc_shape_k_lambda")
             ),
+            "H_pi_delta_lambda_gauge": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_lambda_gauge")
+            ),
+            "H_pi_delta_protected_fit_input": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_fit_input")
+            ),
+            "H_pi_delta_protected_k_lambda": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_k_lambda")
+            ),
+            "H_pi_delta_protected_k_sigma0": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_k_sigma0")
+            ),
+            "H_pi_delta_protected_pi_delta": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_pi_delta")
+            ),
+            "H_pi_delta_protected_fit_total": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_fit_total")
+            ),
+            "H_pi_delta_protected_fit_residual": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_fit_residual")
+            ),
+            "H_pi_delta_protected_after_subtraction": _clone_hist_for_plot(
+                component_fit_result.get("H_pi_delta_protected_after_subtraction")
+            ),
             "H_kaon_fit_k_lambda_reference": _clone_hist_for_plot(
                 component_fit_result.get("H_kaon_fit_k_lambda_reference")
             ),
@@ -1021,6 +1045,9 @@ def _apply_component_pion_subtraction_for_bin(
             ) if component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined") is not None else None,
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
+            "lambda_gauge_amplitude": component_fit_result.get("lambda_gauge_amplitude"),
+            "lambda_gauge_amplitude_sigma": component_fit_result.get("lambda_gauge_amplitude_sigma"),
+            "lambda_display_scale": component_fit_result.get("lambda_display_scale"),
             "k_lambda_fit_amplitude": component_fit_result.get("k_lambda_fit_amplitude"),
             "k_lambda_simc_input_loaded": component_fit_result.get("k_lambda_simc_input_loaded"),
             "k_lambda_simc_reference_available": component_fit_result.get("k_lambda_simc_reference_available"),

@@ -369,7 +369,23 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             # K-Lambda + pi-delta fallback when Sigma0 is unavailable before
             # a three-template design is constructed.
             "allow_lambda_only_fallback": True,
-            "fit_window": None,
+            # The final protected subsystem is intentionally narrower than the
+            # generic MM closure range.  Lambda anchor, Sigma0, and pi-delta
+            # support all lie inside this interval.
+            "fit_window": (1.10, 1.30),
+            # None means use the canonical proton-cleaning Lambda validation
+            # window for the active setting/phi; an explicit pair overrides it.
+            "lambda_gauge_window": None,
+            "lambda_gauge_constraint_mode": "gaussian",
+            "lambda_gauge_min_relative_uncertainty": 0.05,
+            "lambda_gauge_min_fraction": None,
+            "lambda_gauge_max_fraction": None,
+            "lambda_gauge_min_fit_bins": 2,
+            "lambda_gauge_maximum_chi2_ndf": 10.0,
+            "lambda_gauge_minimum_p_value": None,
+            "lambda_gauge_min_retention_fraction": 0.90,
+            "maximum_chi2_ndf": 5.0,
+            "minimum_p_value": 1.0e-6,
             "nonnegative_amplitudes": True,
             "failure_policy": "zero_pi_delta",
             "template_corr_warn": 0.95,

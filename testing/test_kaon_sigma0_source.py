@@ -495,7 +495,7 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
             config = bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"]
             config["joint_refinement_enabled"] = False
             config["residual_component_shifts_enabled"] = False
-            config["pi_delta_signal_protected_fit"]["fit_window"] = None
+            config["pi_delta_signal_protected_fit"]["fit_window"] = (1.10, 1.30)
             result = fits.build_particle_subtraction_component_result(
                 target,
                 target,
@@ -570,7 +570,7 @@ class Sigma0ResolverAndLoaderTests(unittest.TestCase):
             config = bgcfg.PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG["kaon_nosub"]
             config["joint_refinement_enabled"] = False
             config["residual_component_shifts_enabled"] = False
-            config["pi_delta_signal_protected_fit"]["fit_window"] = None
+            config["pi_delta_signal_protected_fit"]["fit_window"] = (1.10, 1.30)
             result = fits.build_particle_subtraction_component_result(
                 target,
                 target,

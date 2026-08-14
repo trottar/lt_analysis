@@ -910,6 +910,30 @@ def _apply_component_pion_subtraction_setting(
             "H_simc_shape_k_lambda": component_fit_result.get("H_simc_shape_k_lambda").Clone(
                 "{}_clone".format(component_fit_result.get("H_simc_shape_k_lambda").GetName())
             ) if component_fit_result.get("H_simc_shape_k_lambda") is not None else None,
+            "H_pi_delta_lambda_gauge": component_fit_result.get("H_pi_delta_lambda_gauge").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_lambda_gauge").GetName())
+            ) if component_fit_result.get("H_pi_delta_lambda_gauge") is not None else None,
+            "H_pi_delta_protected_fit_input": component_fit_result.get("H_pi_delta_protected_fit_input").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_input").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_fit_input") is not None else None,
+            "H_pi_delta_protected_k_lambda": component_fit_result.get("H_pi_delta_protected_k_lambda").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_k_lambda").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_k_lambda") is not None else None,
+            "H_pi_delta_protected_k_sigma0": component_fit_result.get("H_pi_delta_protected_k_sigma0").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_k_sigma0").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_k_sigma0") is not None else None,
+            "H_pi_delta_protected_pi_delta": component_fit_result.get("H_pi_delta_protected_pi_delta").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_pi_delta").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_pi_delta") is not None else None,
+            "H_pi_delta_protected_fit_total": component_fit_result.get("H_pi_delta_protected_fit_total").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_total").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_fit_total") is not None else None,
+            "H_pi_delta_protected_fit_residual": component_fit_result.get("H_pi_delta_protected_fit_residual").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_residual").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_fit_residual") is not None else None,
+            "H_pi_delta_protected_after_subtraction": component_fit_result.get("H_pi_delta_protected_after_subtraction").Clone(
+                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_after_subtraction").GetName())
+            ) if component_fit_result.get("H_pi_delta_protected_after_subtraction") is not None else None,
             "H_kaon_fit_k_lambda_reference": component_fit_result.get("H_kaon_fit_k_lambda_reference").Clone(
                 "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_reference").GetName())
             ) if component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None else None,
@@ -921,6 +945,9 @@ def _apply_component_pion_subtraction_setting(
             ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined") is not None else None,
             "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
             "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
+            "lambda_gauge_amplitude": component_fit_result.get("lambda_gauge_amplitude"),
+            "lambda_gauge_amplitude_sigma": component_fit_result.get("lambda_gauge_amplitude_sigma"),
+            "lambda_display_scale": component_fit_result.get("lambda_display_scale"),
             "k_lambda_fit_amplitude": component_fit_result.get("k_lambda_fit_amplitude"),
             "k_lambda_simc_input_loaded": component_fit_result.get("k_lambda_simc_input_loaded"),
             "k_lambda_simc_reference_available": component_fit_result.get("k_lambda_simc_reference_available"),

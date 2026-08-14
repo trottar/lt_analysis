@@ -1049,7 +1049,18 @@ def _resolve_pi_delta_signal_protected_fit_config(fit_config):
         "require_k_lambda_template": True,
         "require_k_sigma0_template": True,
         "allow_lambda_only_fallback": True,
-        "fit_window": None,
+        "fit_window": (1.10, 1.30),
+        "lambda_gauge_window": None,
+        "lambda_gauge_constraint_mode": "gaussian",
+        "lambda_gauge_min_relative_uncertainty": 0.05,
+        "lambda_gauge_min_fraction": None,
+        "lambda_gauge_max_fraction": None,
+        "lambda_gauge_min_fit_bins": 2,
+        "lambda_gauge_maximum_chi2_ndf": 10.0,
+        "lambda_gauge_minimum_p_value": None,
+        "lambda_gauge_min_retention_fraction": 0.90,
+        "maximum_chi2_ndf": 5.0,
+        "minimum_p_value": 1.0e-6,
         "nonnegative_amplitudes": True,
         "failure_policy": "zero_pi_delta",
         "template_corr_warn": 0.95,
@@ -1095,6 +1106,88 @@ def _resolve_pi_delta_signal_protected_fit_config(fit_config):
         if not windows:
             raise ValueError("pi_delta_signal_protected_fit.fit_window must contain valid bounds")
         resolved["fit_window_collection"] = windows
+
+    lambda_gauge_window = resolved.get("lambda_gauge_window")
+    if lambda_gauge_window is None:
+        resolved["lambda_gauge_window_collection"] = None
+    else:
+        gauge_windows = _normalize_window_collection(lambda_gauge_window)
+        if len(gauge_windows) != 1:
+            raise ValueError(
+                "pi_delta_signal_protected_fit.lambda_gauge_window must contain one valid bounds pair"
+            )
+        resolved["lambda_gauge_window_collection"] = gauge_windows
+
+    constraint_mode = str(resolved.get("lambda_gauge_constraint_mode") or "").strip().lower()
+    if constraint_mode not in {"gaussian", "fixed"}:
+        raise ValueError(
+            "Unsupported pi_delta_signal_protected_fit.lambda_gauge_constraint_mode '{}'".format(
+                constraint_mode
+            )
+        )
+    resolved["lambda_gauge_constraint_mode"] = constraint_mode
+
+    numeric_nonnegative = (
+        "lambda_gauge_min_relative_uncertainty",
+        "lambda_gauge_min_retention_fraction",
+    )
+    for key in numeric_nonnegative:
+        try:
+            resolved[key] = float(resolved[key])
+        except (TypeError, ValueError):
+            raise ValueError("pi_delta_signal_protected_fit.{} must be numeric".format(key))
+        if not math.isfinite(resolved[key]) or resolved[key] < 0.0:
+            raise ValueError("pi_delta_signal_protected_fit.{} must be finite and nonnegative".format(key))
+    if resolved["lambda_gauge_min_retention_fraction"] > 1.0:
+        raise ValueError(
+            "pi_delta_signal_protected_fit.lambda_gauge_min_retention_fraction must lie in [0, 1]"
+        )
+
+    try:
+        resolved["lambda_gauge_min_fit_bins"] = int(resolved["lambda_gauge_min_fit_bins"])
+    except (TypeError, ValueError):
+        raise ValueError("pi_delta_signal_protected_fit.lambda_gauge_min_fit_bins must be an integer")
+    if resolved["lambda_gauge_min_fit_bins"] < 2:
+        raise ValueError("pi_delta_signal_protected_fit.lambda_gauge_min_fit_bins must be at least 2")
+
+    for key in ("maximum_chi2_ndf", "lambda_gauge_maximum_chi2_ndf"):
+        value = resolved.get(key)
+        if value is None:
+            continue
+        try:
+            resolved[key] = float(value)
+        except (TypeError, ValueError):
+            raise ValueError("pi_delta_signal_protected_fit.{} must be numeric or None".format(key))
+        if not math.isfinite(resolved[key]) or resolved[key] <= 0.0:
+            raise ValueError("pi_delta_signal_protected_fit.{} must be positive or None".format(key))
+
+    for key in ("minimum_p_value", "lambda_gauge_minimum_p_value"):
+        value = resolved.get(key)
+        if value is None:
+            continue
+        try:
+            resolved[key] = float(value)
+        except (TypeError, ValueError):
+            raise ValueError("pi_delta_signal_protected_fit.{} must be numeric or None".format(key))
+        if not 0.0 <= resolved[key] <= 1.0:
+            raise ValueError("pi_delta_signal_protected_fit.{} must lie in [0, 1]".format(key))
+
+    for key in ("lambda_gauge_min_fraction", "lambda_gauge_max_fraction"):
+        value = resolved.get(key)
+        if value is None:
+            continue
+        try:
+            resolved[key] = float(value)
+        except (TypeError, ValueError):
+            raise ValueError("pi_delta_signal_protected_fit.{} must be numeric or None".format(key))
+        if not math.isfinite(resolved[key]) or resolved[key] < 0.0:
+            raise ValueError("pi_delta_signal_protected_fit.{} must be finite and nonnegative".format(key))
+    lower_fraction = resolved.get("lambda_gauge_min_fraction")
+    upper_fraction = resolved.get("lambda_gauge_max_fraction")
+    if lower_fraction is not None and upper_fraction is not None and lower_fraction > upper_fraction:
+        raise ValueError(
+            "pi_delta_signal_protected_fit.lambda_gauge_min_fraction cannot exceed lambda_gauge_max_fraction"
+        )
     return resolved
 
 
@@ -1134,8 +1227,237 @@ def _resolve_protected_signal_preservation_windows(fit_config, inp_dict, phi_set
     return resolved
 
 
+def _resolve_lambda_gauge_window(protected_config, inp_dict, phi_setting):
+    """Resolve one authoritative pre-delta K-Lambda anchor window."""
+    configured = (protected_config or {}).get("lambda_gauge_window_collection")
+    if configured:
+        return {
+            "available": True,
+            "window": tuple(configured[0]),
+            "source": "pi_delta_signal_protected_fit.lambda_gauge_window",
+        }
+    try:
+        proton_config = get_proton_contamination_cleaning_config(
+            inp_dict=inp_dict,
+            phi_setting=phi_setting,
+        ) or {}
+        lambda_window = (proton_config.get("validation_windows") or {}).get("lambda_peak")
+        if isinstance(lambda_window, (list, tuple)) and len(lambda_window) == 2:
+            low, high = float(lambda_window[0]), float(lambda_window[1])
+            if math.isfinite(low) and math.isfinite(high) and high > low:
+                return {
+                    "available": True,
+                    "window": (low, high),
+                    "source": "proton_cleaning.validation_windows.lambda_peak",
+                }
+    except (TypeError, ValueError):
+        pass
+    return {
+        "available": False,
+        "window": None,
+        "source": "proton_cleaning.validation_windows.lambda_peak",
+        "reason": "lambda_gauge_window_unavailable",
+    }
+
+
 def _integrate_hist_windows(hist, windows):
     return float(sum(_integrate_hist_range(hist, low, high) for low, high in (windows or [])))
+
+
+def _fit_lambda_gauge(h_pre_delta, lambda_template, gauge_window, protected_config):
+    """Fit the immutable K-Lambda shape to R_preDelta before pi-delta fitting."""
+    result = {
+        "status": "missing_lambda_gauge",
+        "solver_success": False,
+        "quality_passed": False,
+        "window": list(gauge_window) if gauge_window is not None else None,
+        "normalization_method": "one_component_weighted_least_squares",
+        "amplitude": None,
+        "amplitude_sigma": None,
+        "relative_sigma": None,
+        "effective_sigma": None,
+        "chi2": None,
+        "ndf": None,
+        "chi2_ndf": None,
+        "p_value": None,
+        "fit_bins": 0,
+        "fit_bin_indices": [],
+        "excluded_invalid_variance_bins": [],
+        "template_integral_window": None,
+        "data_integral_window": None,
+        "gauge_predicted_yield_window": None,
+        "failure_reason": None,
+    }
+    if h_pre_delta is None or lambda_template is None or gauge_window is None:
+        result.update({"status": "missing_lambda_gauge", "failure_reason": "missing_k_lambda_template_or_pre_delta"})
+        return result
+    window_low, window_high = gauge_window
+    result["template_integral_window"] = _integrate_hist_range(lambda_template, window_low, window_high)
+    result["data_integral_window"] = _integrate_hist_range(h_pre_delta, window_low, window_high)
+    if not _is_finite_number(result["template_integral_window"]) or result["template_integral_window"] <= 0.0:
+        result.update({"status": "non_positive_k_lambda_gauge_support", "failure_reason": "non_positive_k_lambda_gauge_support"})
+        return result
+    fit_inputs = _build_multi_template_fit_inputs(
+        h_pre_delta,
+        {KAON_SIGNAL_TEMPLATE_NAME: lambda_template},
+        [KAON_SIGNAL_TEMPLATE_NAME],
+        window_low,
+        window_high,
+        include_windows=[(window_low, window_high)],
+        exclude_windows=[],
+    )
+    result["fit_bins"] = int(len(fit_inputs.get("x", [])))
+    result["fit_bin_indices"] = list(fit_inputs.get("fit_bin_indices") or [])
+    result["excluded_invalid_variance_bins"] = list(
+        fit_inputs.get("excluded_invalid_variance_bins") or []
+    )
+    if result["fit_bins"] < int(protected_config["lambda_gauge_min_fit_bins"]):
+        result.update({"status": "insufficient_lambda_gauge_bins", "failure_reason": "insufficient_lambda_gauge_bins"})
+        return result
+    try:
+        sigma = fit_inputs["sigma"]
+        template = fit_inputs["template_columns"][KAON_SIGNAL_TEMPLATE_NAME]
+        target = fit_inputs["y"]
+        weighted_template = template / sigma
+        weighted_target = target / sigma
+        denominator = float(np.dot(weighted_template, weighted_template))
+        numerator = float(np.dot(weighted_template, weighted_target))
+    except (KeyError, TypeError, ValueError, FloatingPointError) as exc:
+        result.update({"status": "nonfinite_lambda_gauge_design", "failure_reason": str(exc)})
+        return result
+    if (
+        not math.isfinite(denominator)
+        or denominator <= 0.0
+        or not math.isfinite(numerator)
+        or not np.all(np.isfinite(weighted_template))
+        or not np.all(np.isfinite(weighted_target))
+    ):
+        result.update({"status": "nonfinite_lambda_gauge_design", "failure_reason": "nonfinite_lambda_gauge_design"})
+        return result
+    amplitude = max(float(numerator / denominator), 0.0)
+    amplitude_sigma = float(1.0 / math.sqrt(denominator))
+    if not math.isfinite(amplitude) or not math.isfinite(amplitude_sigma):
+        result.update({"status": "nonfinite_lambda_gauge_amplitude", "failure_reason": "nonfinite_lambda_gauge_amplitude"})
+        return result
+    residual = weighted_target - amplitude * weighted_template
+    chi2_value = float(np.sum(np.square(residual)))
+    ndf_value = int(result["fit_bins"] - 1)
+    chi2_ndf = float(chi2_value / ndf_value) if ndf_value > 0 else None
+    p_value = float(chi2_dist.sf(chi2_value, ndf_value)) if ndf_value > 0 else None
+    floor = float(protected_config["lambda_gauge_min_relative_uncertainty"]) * amplitude
+    effective_sigma = max(amplitude_sigma, floor)
+    quality_passed = bool(
+        ndf_value > 0
+        and math.isfinite(chi2_ndf)
+        and (
+            protected_config.get("lambda_gauge_maximum_chi2_ndf") is None
+            or chi2_ndf <= float(protected_config["lambda_gauge_maximum_chi2_ndf"])
+        )
+        and (
+            protected_config.get("lambda_gauge_minimum_p_value") is None
+            or (p_value is not None and p_value >= float(protected_config["lambda_gauge_minimum_p_value"]))
+        )
+    )
+    result.update(
+        {
+            "status": "success" if quality_passed else "poor_lambda_gauge_quality",
+            "solver_success": True,
+            "quality_passed": quality_passed,
+            "amplitude": amplitude,
+            "amplitude_sigma": amplitude_sigma,
+            "relative_sigma": (float(amplitude_sigma / amplitude) if amplitude > 0.0 else None),
+            "effective_sigma": effective_sigma,
+            "chi2": chi2_value,
+            "ndf": ndf_value,
+            "chi2_ndf": chi2_ndf,
+            "p_value": p_value,
+            "gauge_predicted_yield_window": float(amplitude * result["template_integral_window"]),
+            "failure_reason": None if quality_passed else "poor_lambda_gauge_quality",
+        }
+    )
+    return result
+
+
+def _lambda_preservation_constraint(h_pre_delta, lambda_template, pi_delta_template, lambda_gauge, retention_fraction):
+    """Return the pre-solver Lambda-retention bound and its explicit status."""
+    result = {
+        "status": "not_evaluated",
+        "lambda_gauge_predicted_yield": None,
+        "lambda_pre_delta_yield": None,
+        "pi_delta_template_yield": None,
+        "minimum_required_retention": None,
+        "a_delta_max": None,
+        "bound_applied": False,
+        "reason": None,
+    }
+    window = (lambda_gauge or {}).get("window")
+    amplitude = (lambda_gauge or {}).get("amplitude")
+    if window is None or not _is_finite_number(amplitude):
+        result.update({"status": "unavailable", "reason": "missing_lambda_gauge"})
+        return result
+    low, high = window
+    lambda_integral = _integrate_hist_range(lambda_template, low, high)
+    pre_delta_yield = _integrate_hist_range(h_pre_delta, low, high)
+    delta_integral = _integrate_hist_range(pi_delta_template, low, high)
+    gauge_yield = float(amplitude) * lambda_integral
+    required_yield = float(retention_fraction) * gauge_yield
+    result.update(
+        {
+            "lambda_gauge_predicted_yield": gauge_yield,
+            "lambda_pre_delta_yield": pre_delta_yield,
+            "pi_delta_template_yield": delta_integral,
+            "minimum_required_retention": required_yield,
+        }
+    )
+    if not all(_is_finite_number(value) for value in (gauge_yield, pre_delta_yield, delta_integral, required_yield)):
+        result.update({"status": "unavailable", "reason": "nonfinite_lambda_preservation_inputs"})
+        return result
+    if pre_delta_yield < required_yield - 1.0e-10:
+        result.update({"status": "lambda_pre_delta_deficit", "reason": "lambda_pre_delta_deficit", "a_delta_max": 0.0})
+        return result
+    if delta_integral <= 0.0:
+        result.update({"status": "pi_delta_no_lambda_support", "reason": "pi_delta_no_lambda_support"})
+        return result
+    result.update(
+        {
+            "status": "bounded",
+            "a_delta_max": max(float((pre_delta_yield - required_yield) / delta_integral), 0.0),
+            "bound_applied": True,
+        }
+    )
+    return result
+
+
+def _evaluate_lambda_preservation_gate(constraint, applied_a_delta):
+    """Recheck retention after the constrained solution is proposed/applied."""
+    result = deepcopy(constraint or {})
+    if result.get("status") == "lambda_pre_delta_deficit":
+        result.update({"gate_passed": False, "gate_reason": "lambda_pre_delta_deficit"})
+        return result
+    if result.get("status") == "unavailable":
+        result.update({"gate_passed": False, "gate_reason": result.get("reason") or "unavailable"})
+        return result
+    delta_template_yield = result.get("pi_delta_template_yield")
+    pre_delta_yield = result.get("lambda_pre_delta_yield")
+    gauge_yield = result.get("lambda_gauge_predicted_yield")
+    required_yield = result.get("minimum_required_retention")
+    if not all(_is_finite_number(value) for value in (delta_template_yield, pre_delta_yield, gauge_yield, required_yield)):
+        result.update({"gate_passed": False, "gate_reason": "nonfinite_lambda_preservation_inputs"})
+        return result
+    removed = float(applied_a_delta) * float(delta_template_yield)
+    after = float(pre_delta_yield) - removed
+    result.update(
+        {
+            "lambda_pi_delta_removed_yield": removed,
+            "lambda_after_delta_yield": after,
+            "lambda_after_over_gauge": (float(after / gauge_yield) if gauge_yield > 0.0 else None),
+            "lambda_removed_fraction_of_pre_delta": (float(removed / pre_delta_yield) if pre_delta_yield != 0.0 else None),
+            "lambda_removed_fraction_of_gauge": (float(removed / gauge_yield) if gauge_yield > 0.0 else None),
+            "gate_passed": bool(after >= float(required_yield) - 1.0e-10),
+        }
+    )
+    result["gate_reason"] = "pass" if result["gate_passed"] else "lambda_preservation_rejected"
+    return result
 
 
 def _signal_preservation_metrics(h_pre_delta, h_after_delta, scaled_signal_hists, windows):
@@ -1380,21 +1702,118 @@ def _apply_signal_protected_pi_delta_fit(
                 sigma0_availability_reason or "not reported"
             )
 
+    gauge_window_payload = _resolve_lambda_gauge_window(
+        protected_config,
+        inp_dict,
+        phi_setting,
+    )
+    lambda_gauge = {
+        "status": "not_attempted",
+        "solver_success": False,
+        "quality_passed": False,
+        "window": gauge_window_payload.get("window"),
+        "source_histogram": "R_preDelta",
+        "template_source": "immutable_aligned_k_lambda_simc",
+        "failure_reason": None,
+    }
+    if failure_status is not None:
+        # Preserve the primary template/support failure while making the
+        # non-authoritative gauge state explicit for payload consumers.
+        lambda_gauge.update(
+            {
+                "status": "missing_lambda_gauge",
+                "failure_reason": failure_reason or failure_status,
+            }
+        )
     fit_inputs = None
     solver_result = None
     coefficients = {name: 0.0 for name in all_fit_names}
+    proposed_coefficients = {name: None for name in all_fit_names}
     uncertainties = {name: None for name in all_fit_names}
     matrix_diagnostics = {}
     covariance_matrix = {}
     coefficient_correlation_matrix = {}
+    constraint_metrics = {
+        "mode": protected_config["lambda_gauge_constraint_mode"],
+        "prior_chi2": None,
+        "total_chi2": None,
+        "total_ndf": None,
+        "total_chi2_ndf": None,
+        "total_p_value": None,
+        "prior_augmented_covariance_matrix": {},
+        "prior_augmented_coefficient_correlation_matrix": {},
+    }
     fit_metrics = {
         "chi2": None,
         "ndf": None,
         "chi2_ndf": None,
         "fit_p_value": None,
         "n_fit_bins": 0,
+        "n_free_spectrum_parameters": 0,
     }
+    lambda_gauge_hist = None
+    preservation_constraint = {"status": "not_evaluated"}
+    lambda_preservation = {"gate_passed": False, "gate_reason": "not_evaluated"}
+    solver_success = False
+    fit_quality_passed = False
+    physics_acceptance_passed = False
+    free_fit_names = []
+    spectrum_design = None
+    spectrum_target = None
+    solver_design = None
+    solver_target = None
+    if failure_status is None and not bool(gauge_window_payload.get("available")):
+        failure_status = "missing_lambda_gauge"
+        failure_reason = gauge_window_payload.get("reason") or "lambda_gauge_window_unavailable"
+        lambda_gauge.update({"status": failure_status, "failure_reason": failure_reason})
     if failure_status is None:
+        lambda_gauge = _fit_lambda_gauge(
+            h_pre_delta,
+            lambda_template,
+            gauge_window_payload["window"],
+            protected_config,
+        )
+        lambda_gauge.update(
+            {
+                "source_histogram": "R_preDelta",
+                "template_source": "immutable_aligned_k_lambda_simc",
+                "window_source": gauge_window_payload.get("source"),
+            }
+        )
+        if _is_finite_number(lambda_gauge.get("amplitude")):
+            lambda_gauge_hist = _build_scaled_hist_map(
+                {KAON_SIGNAL_TEMPLATE_NAME: lambda_template},
+                {KAON_SIGNAL_TEMPLATE_NAME: lambda_gauge["amplitude"]},
+                "A_pi_delta_lambda_gauge",
+                context or "scope",
+            ).get(KAON_SIGNAL_TEMPLATE_NAME)
+        if not bool(lambda_gauge.get("solver_success")):
+            failure_status = "missing_lambda_gauge"
+            failure_reason = lambda_gauge.get("failure_reason") or lambda_gauge.get("status")
+        elif not bool(lambda_gauge.get("quality_passed")):
+            failure_status = "poor_lambda_gauge_quality"
+            failure_reason = lambda_gauge.get("failure_reason") or "poor_lambda_gauge_quality"
+    if failure_status is None:
+        preservation_constraint = _lambda_preservation_constraint(
+            h_pre_delta,
+            lambda_template,
+            h_pi_delta_shape,
+            lambda_gauge,
+            protected_config["lambda_gauge_min_retention_fraction"],
+        )
+        if preservation_constraint.get("status") == "lambda_pre_delta_deficit":
+            failure_status = "lambda_pre_delta_deficit"
+            failure_reason = "lambda_pre_delta_deficit"
+        elif preservation_constraint.get("status") == "unavailable":
+            failure_status = "lambda_preservation_rejected"
+            failure_reason = preservation_constraint.get("reason")
+
+    if failure_status is None:
+        if protected_config["lambda_gauge_constraint_mode"] == "fixed":
+            free_fit_names = [name for name in fit_names if name != KAON_SIGNAL_TEMPLATE_NAME]
+            proposed_coefficients[KAON_SIGNAL_TEMPLATE_NAME] = float(lambda_gauge["amplitude"])
+        else:
+            free_fit_names = list(fit_names)
         fit_inputs = _build_multi_template_fit_inputs(
             h_pre_delta,
             template_hists,
@@ -1406,74 +1825,170 @@ def _apply_signal_protected_pi_delta_fit(
         )
         n_fit_bins = int(len(fit_inputs.get("x", [])))
         fit_metrics["n_fit_bins"] = n_fit_bins
-        if n_fit_bins <= len(fit_names):
+        fit_metrics["n_free_spectrum_parameters"] = int(len(free_fit_names))
+        if n_fit_bins <= len(free_fit_names):
             failure_status = "insufficient_support"
-            failure_reason = "{} fit bins for {} protected templates".format(n_fit_bins, len(fit_names))
+            failure_reason = "{} fit bins for {} free protected templates".format(
+                n_fit_bins,
+                len(free_fit_names),
+            )
 
-    weighted_design = None
     if failure_status is None:
         try:
-            weighted_design = np.column_stack(
-                [fit_inputs["template_columns"][name] / fit_inputs["sigma"] for name in fit_names]
-            )
             weighted_target = fit_inputs["y"] / fit_inputs["sigma"]
+            spectrum_design = np.column_stack(
+                [fit_inputs["template_columns"][name] / fit_inputs["sigma"] for name in free_fit_names]
+            )
+            spectrum_target = np.asarray(weighted_target, dtype=float)
+            if protected_config["lambda_gauge_constraint_mode"] == "fixed":
+                spectrum_target = spectrum_target - (
+                    float(lambda_gauge["amplitude"])
+                    * fit_inputs["template_columns"][KAON_SIGNAL_TEMPLATE_NAME]
+                    / fit_inputs["sigma"]
+                )
         except (KeyError, ValueError, TypeError, FloatingPointError) as exc:
             failure_status = "insufficient_support"
-            failure_reason = "unable to build protected fit design: {}".format(exc)
+            failure_reason = "unable to build protected spectrum design: {}".format(exc)
         if failure_status is None and (
-            not np.all(np.isfinite(weighted_design)) or not np.all(np.isfinite(weighted_target))
+            not np.all(np.isfinite(spectrum_design)) or not np.all(np.isfinite(spectrum_target))
         ):
             failure_status = "nonfinite_solution"
-            failure_reason = "non-finite protected fit design"
+            failure_reason = "non-finite protected spectrum design"
 
     if failure_status is None:
-        matrix_diagnostics = _compute_template_matrix_diagnostics(weighted_design, fit_names)
+        # Deliberately diagnose physical spectrum columns before adding a prior.
+        matrix_diagnostics = _compute_template_matrix_diagnostics(spectrum_design, free_fit_names)
         effective_rank = matrix_diagnostics.get("weighted_design_effective_rank")
         condition_number = matrix_diagnostics.get("weighted_design_condition_number")
-        if effective_rank != len(fit_names) or not _is_finite_number(condition_number):
+        if effective_rank != len(free_fit_names) or not _is_finite_number(condition_number):
             failure_status = "rank_deficient"
-            failure_reason = "protected template design is rank deficient or ill-defined"
+            failure_reason = "protected physical spectrum design is rank deficient or ill-defined"
 
     if failure_status is None:
+        solver_design = spectrum_design
+        solver_target = spectrum_target
+        if protected_config["lambda_gauge_constraint_mode"] == "gaussian":
+            lambda_index = free_fit_names.index(KAON_SIGNAL_TEMPLATE_NAME)
+            effective_sigma = float(lambda_gauge["effective_sigma"])
+            prior_row = np.zeros(len(free_fit_names), dtype=float)
+            prior_row[lambda_index] = 1.0 / effective_sigma
+            solver_design = np.vstack((spectrum_design, prior_row))
+            solver_target = np.concatenate(
+                (spectrum_target, np.asarray([float(lambda_gauge["amplitude"]) / effective_sigma]))
+            )
+        lower_bounds = np.zeros(len(free_fit_names), dtype=float)
+        upper_bounds = np.full(len(free_fit_names), np.inf, dtype=float)
+        if KAON_SIGNAL_TEMPLATE_NAME in free_fit_names:
+            lambda_index = free_fit_names.index(KAON_SIGNAL_TEMPLATE_NAME)
+            lower_fraction = protected_config.get("lambda_gauge_min_fraction")
+            upper_fraction = protected_config.get("lambda_gauge_max_fraction")
+            if lower_fraction is not None:
+                lower_bounds[lambda_index] = float(lower_fraction) * float(lambda_gauge["amplitude"])
+            if upper_fraction is not None:
+                upper_bounds[lambda_index] = float(upper_fraction) * float(lambda_gauge["amplitude"])
+        if (
+            preservation_constraint.get("status") == "bounded"
+            and "pi_delta" in free_fit_names
+        ):
+            upper_bounds[free_fit_names.index("pi_delta")] = float(
+                preservation_constraint["a_delta_max"]
+            )
+            preservation_constraint["bound_applied"] = True
         try:
             solver_result = lsq_linear(
-                weighted_design,
-                weighted_target,
-                bounds=(0.0, np.inf),
+                solver_design,
+                solver_target,
+                bounds=(lower_bounds, upper_bounds),
                 method="trf",
             )
         except Exception as exc:
             failure_status = "solver_failure"
-            failure_reason = "protected nonnegative solver raised: {}".format(exc)
+            failure_reason = "protected constrained solver raised: {}".format(exc)
         if failure_status is None and not bool(getattr(solver_result, "success", False)):
             failure_status = "solver_failure"
             failure_reason = str(getattr(solver_result, "message", "solver did not converge"))
         if failure_status is None and not np.all(np.isfinite(solver_result.x)):
             failure_status = "nonfinite_solution"
-            failure_reason = "protected nonnegative solver returned non-finite amplitudes"
+            failure_reason = "protected constrained solver returned non-finite amplitudes"
 
     if failure_status is None:
-        fitted_coefficients = {
-            template_name: float(solver_result.x[index])
-            for index, template_name in enumerate(fit_names)
-        }
-        coefficients.update(fitted_coefficients)
-        covariance_matrix, coefficient_correlation_matrix, fitted_uncertainties = _compute_parameter_covariance(
-            weighted_design,
-            fit_names,
-        )
-        uncertainties.update(fitted_uncertainties)
-        residual_vector = weighted_target - np.dot(weighted_design, solver_result.x)
-        chi2_value = float(np.sum(np.square(residual_vector)))
-        ndf_value = int(len(weighted_target) - len(fit_names))
-        fit_metrics.update(
+        solver_success = True
+        proposed_coefficients.update(
             {
-                "chi2": chi2_value,
-                "ndf": ndf_value,
-                "chi2_ndf": (float(chi2_value / ndf_value) if ndf_value > 0 else None),
-                "fit_p_value": (float(chi2_dist.sf(chi2_value, ndf_value)) if ndf_value > 0 else None),
+                template_name: float(solver_result.x[index])
+                for index, template_name in enumerate(free_fit_names)
             }
         )
+        # Physical rank, condition, and correlations must describe only the
+        # measured spectrum.  Retain the prior-augmented covariance separately
+        # for the constrained Gaussian solution.
+        covariance_matrix, coefficient_correlation_matrix, _physical_uncertainties = _compute_parameter_covariance(
+            spectrum_design,
+            free_fit_names,
+        )
+        (
+            prior_augmented_covariance,
+            prior_augmented_correlation,
+            fitted_uncertainties,
+        ) = _compute_parameter_covariance(solver_design, free_fit_names)
+        uncertainties.update(fitted_uncertainties)
+        spectrum_residual = spectrum_target - np.dot(spectrum_design, solver_result.x)
+        spectrum_chi2 = float(np.sum(np.square(spectrum_residual)))
+        spectrum_ndf = int(len(spectrum_target) - len(free_fit_names))
+        fit_metrics.update(
+            {
+                "chi2": spectrum_chi2,
+                "ndf": spectrum_ndf,
+                "chi2_ndf": (float(spectrum_chi2 / spectrum_ndf) if spectrum_ndf > 0 else None),
+                "fit_p_value": (float(chi2_dist.sf(spectrum_chi2, spectrum_ndf)) if spectrum_ndf > 0 else None),
+            }
+        )
+        total_residual = solver_target - np.dot(solver_design, solver_result.x)
+        total_chi2 = float(np.sum(np.square(total_residual)))
+        total_ndf = int(len(solver_target) - len(free_fit_names))
+        prior_chi2 = float(total_chi2 - spectrum_chi2)
+        constraint_metrics.update(
+            {
+                "prior_chi2": prior_chi2 if protected_config["lambda_gauge_constraint_mode"] == "gaussian" else 0.0,
+                "total_chi2": total_chi2,
+                "total_ndf": total_ndf,
+                "total_chi2_ndf": (float(total_chi2 / total_ndf) if total_ndf > 0 else None),
+                "total_p_value": (float(chi2_dist.sf(total_chi2, total_ndf)) if total_ndf > 0 else None),
+                "prior_augmented_covariance_matrix": prior_augmented_covariance,
+                "prior_augmented_coefficient_correlation_matrix": prior_augmented_correlation,
+            }
+        )
+        fit_quality_passed = bool(
+            spectrum_ndf > 0
+            and _is_finite_number(fit_metrics["chi2_ndf"])
+            and (
+                protected_config.get("maximum_chi2_ndf") is None
+                or fit_metrics["chi2_ndf"] <= float(protected_config["maximum_chi2_ndf"])
+            )
+            and (
+                protected_config.get("minimum_p_value") is None
+                or fit_metrics["fit_p_value"] >= float(protected_config["minimum_p_value"])
+            )
+        )
+        lambda_preservation = _evaluate_lambda_preservation_gate(
+            preservation_constraint,
+            proposed_coefficients.get("pi_delta") or 0.0,
+        )
+        if not fit_quality_passed:
+            failure_status = "fit_quality_rejected"
+            failure_reason = "protected spectrum fit quality rejected"
+        elif not bool(lambda_preservation.get("gate_passed")):
+            failure_status = "lambda_preservation_rejected"
+            failure_reason = lambda_preservation.get("gate_reason")
+        else:
+            physics_acceptance_passed = True
+            coefficients.update(
+                {
+                    name: float(proposed_coefficients[name])
+                    for name in all_fit_names
+                    if proposed_coefficients.get(name) is not None
+                }
+            )
 
     selected_template_hists = {
         name: template_hists[name] for name in fit_names
@@ -1569,7 +2084,7 @@ def _apply_signal_protected_pi_delta_fit(
         phi_setting,
         mm_offset_data,
     )
-    fit_succeeded = failure_status is None
+    fit_succeeded = bool(physics_acceptance_passed)
     fit_variant = selected_fit_variant if fit_succeeded else "zero_pi_delta_failure"
     fallback_used = bool(
         fit_succeeded and selected_fit_variant == "lambda_only_protected_fallback"
@@ -1607,6 +2122,7 @@ def _apply_signal_protected_pi_delta_fit(
         "resolved_configuration": deepcopy(protected_config),
         "fit_input_stage": "kaon_nosub_after_applied_pi_n_pi_sidis",
         "fit_window": deepcopy(protected_config.get("fit_window_collection") or []),
+        "lambda_gauge_window": deepcopy(lambda_gauge.get("window")),
         "excluded_windows": deepcopy(excluded_windows or []),
         "template_sources": {
             KAON_SIGNAL_TEMPLATE_NAME: "H_k_lambda_simc_reference",
@@ -1620,6 +2136,20 @@ def _apply_signal_protected_pi_delta_fit(
         "early_amplitudes_frozen": deepcopy(early_amplitudes),
         "legacy_staged_A_delta": legacy_a_delta,
         "legacy_A_delta_role": "diagnostic_only_after_alignment_selection",
+        "solver_status": (
+            "success" if solver_success else (failure_status or "not_attempted")
+        ),
+        "solver_success": bool(solver_success),
+        "fit_quality_passed": bool(fit_quality_passed),
+        "lambda_preservation_passed": bool(lambda_preservation.get("gate_passed")),
+        "physics_acceptance_passed": bool(physics_acceptance_passed),
+        "lambda_gauge_solver_success": bool(lambda_gauge.get("solver_success")),
+        "lambda_gauge_quality_passed": bool(lambda_gauge.get("quality_passed")),
+        "lambda_gauge_status": lambda_gauge.get("status"),
+        "lambda_gauge": deepcopy(lambda_gauge),
+        "lambda_preservation": deepcopy(lambda_preservation),
+        "proposed_amplitudes": deepcopy(proposed_coefficients),
+        "proposed_A_delta": proposed_coefficients.get("pi_delta"),
         "applied_A_delta": float(coefficients["pi_delta"]),
         "protected_applied_amplitudes": deepcopy(pion_amplitudes),
         "signal_amplitudes": {
@@ -1636,13 +2166,18 @@ def _apply_signal_protected_pi_delta_fit(
         },
         "amplitude_uncertainties": deepcopy(uncertainties),
         "fit_metrics": deepcopy(fit_metrics),
+        "constraint_metrics": deepcopy(constraint_metrics),
         "fit_bin_indices": list((fit_inputs or {}).get("fit_bin_indices") or []),
         "excluded_invalid_variance_bins": list((fit_inputs or {}).get("excluded_invalid_variance_bins") or []),
         "matrix_diagnostics": deepcopy(matrix_diagnostics),
         "coefficient_covariance_matrix": deepcopy(covariance_matrix),
         "coefficient_correlation_matrix": deepcopy(coefficient_correlation_matrix),
         "bound_hit_flags": {
-            name: bool(abs(float(coefficients[name])) <= 1e-12) for name in fit_names
+            name: bool(
+                proposed_coefficients.get(name) is not None
+                and abs(float(proposed_coefficients[name])) <= 1e-12
+            )
+            for name in free_fit_names
         },
         "high_template_correlation_warnings": corr_warn_pairs,
         "lambda_reference_integrity": reference_integrity,
@@ -1730,6 +2265,9 @@ def _apply_signal_protected_pi_delta_fit(
         float(coefficients[KAON_SIGMA0_TEMPLATE_NAME]) if sigma0_fitted else None
     )
     legacy_payload["k_lambda_fit_amplitude"] = legacy_payload["S_lambda"]
+    legacy_payload["lambda_gauge_amplitude"] = lambda_gauge.get("amplitude")
+    legacy_payload["lambda_gauge_amplitude_sigma"] = lambda_gauge.get("amplitude_sigma")
+    legacy_payload["lambda_display_scale"] = legacy_payload.get("k_lambda_reference_scale")
     legacy_payload["pi_n_scaled_hist"] = early_scaled_hists.get("pi_n")
     legacy_payload["pi_delta_scaled_hist"] = scaled_signal_hists.get("pi_delta")
     legacy_payload["pi_sidis_scaled_hist"] = early_scaled_hists.get("pi_sidis")
@@ -1751,6 +2289,7 @@ def _apply_signal_protected_pi_delta_fit(
     legacy_payload["residual_hist"] = h_after_delta
     legacy_payload["refined_residual_hist"] = h_after_delta
     legacy_payload["H_pi_delta_protected_fit_input"] = h_pre_delta
+    legacy_payload["H_pi_delta_lambda_gauge"] = lambda_gauge_hist
     legacy_payload["H_pi_delta_protected_k_lambda"] = scaled_signal_hists.get(KAON_SIGNAL_TEMPLATE_NAME)
     legacy_payload["H_pi_delta_protected_k_sigma0"] = scaled_signal_hists.get(KAON_SIGMA0_TEMPLATE_NAME)
     legacy_payload["H_pi_delta_protected_pi_delta"] = scaled_signal_hists.get("pi_delta")
@@ -1840,6 +2379,23 @@ def _clone_lambda_reference_candidate(payload, hist_key, hist_name):
 def _resolve_kaon_lambda_reference_for_plot(payload, target_hist, cut_window, scope_label, hist_name):
     if not isinstance(payload, dict):
         return None, None, "missing payload"
+
+    diagnostics = payload.get("diagnostics") or {}
+    protected = diagnostics.get("pi_delta_signal_protected_fit") or (
+        diagnostics.get("kaon") or {}
+    ).get("pi_delta_signal_protected_fit") or {}
+    if bool(protected.get("enabled")):
+        gauge = protected.get("lambda_gauge") or {}
+        gauge_hist = payload.get("H_pi_delta_lambda_gauge")
+        if gauge_hist is not None and gauge.get("status") == "success":
+            return (
+                _clone_hist(gauge_hist, "{}_{}".format(hist_name, str(scope_label).replace(" ", "_"))),
+                gauge.get("amplitude"),
+                "authoritative pre-delta K-Lambda gauge",
+            )
+        # A protected fit must never revive the old post-subtraction display
+        # normalization when its authoritative gauge is unavailable.
+        return None, gauge.get("amplitude"), "authoritative pre-delta K-Lambda gauge unavailable"
 
     input_loaded = bool(payload.get("k_lambda_simc_input_loaded", False))
     canonical_reference = (
@@ -6524,6 +7080,11 @@ def build_particle_subtraction_component_result(
         "S_sigma0": s_sigma0,
         "S_lambda_reference_scale": kaon_fit.get("S_lambda_reference_scale"),
         "k_lambda_reference_scale": kaon_fit.get("k_lambda_reference_scale", kaon_fit.get("S_lambda_reference_scale")),
+        # Compatibility-only display scale remains separate from the
+        # authoritative pre-pi-delta Lambda gauge used by protected fits.
+        "lambda_gauge_amplitude": kaon_fit.get("lambda_gauge_amplitude"),
+        "lambda_gauge_amplitude_sigma": kaon_fit.get("lambda_gauge_amplitude_sigma"),
+        "lambda_display_scale": kaon_fit.get("lambda_display_scale"),
         "k_lambda_fit_amplitude": s_lambda,
         "k_lambda_simc_input_loaded": bool(k_lambda_simc_input_loaded),
         "k_lambda_simc_reference_available": bool(k_lambda_simc_reference_available),
@@ -6624,6 +7185,7 @@ def build_particle_subtraction_component_result(
         ),
         "H_simc_shape_k_sigma0": k_sigma0_simc_reference_hist,
         "H_pi_delta_protected_fit_input": kaon_fit.get("H_pi_delta_protected_fit_input"),
+        "H_pi_delta_lambda_gauge": kaon_fit.get("H_pi_delta_lambda_gauge"),
         "H_pi_delta_protected_k_lambda": kaon_fit.get("H_pi_delta_protected_k_lambda"),
         "H_pi_delta_protected_k_sigma0": kaon_fit.get("H_pi_delta_protected_k_sigma0"),
         "H_pi_delta_protected_pi_delta": kaon_fit.get("H_pi_delta_protected_pi_delta"),
@@ -7082,6 +7644,65 @@ def _print_component_overlay_page(
 
         canvas.Print(pdf_name)
         canvas.Close()
+
+
+def _print_protected_overlay_page(
+    pdf_name,
+    base_hist,
+    base_label,
+    title,
+    overlay_specs,
+    diagnostics_lines,
+    window=None,
+):
+    """Draw protected physics curves and diagnostics on separate pads."""
+    if base_hist is None:
+        return
+    canvas = ROOT.TCanvas("protected_canvas", "protected_canvas", 1000, 850)
+    canvas.Divide(1, 2)
+    plot_pad = canvas.cd(1)
+    plot_pad.SetPad(0.0, 0.30, 1.0, 1.0)
+    base_clone = _clone_hist(base_hist, "{}_protected_plot".format(base_hist.GetName()))
+    base_clone.SetTitle(title)
+    base_clone.SetLineColor(ROOT.kBlack)
+    base_clone.SetLineWidth(2)
+    base_clone.SetFillStyle(3001)
+    base_clone.SetFillColor(ROOT.kGray + 1)
+    y_max = max(float(base_clone.GetMaximum()), 0.0)
+    for hist, _, _, _ in overlay_specs:
+        if hist is not None:
+            y_max = max(y_max, float(hist.GetMaximum()))
+    base_clone.SetMaximum(1.20 * y_max if y_max > 0.0 else 1.0)
+    base_clone.SetMinimum(0.0)
+    base_clone.Draw("hist")
+    legend = ROOT.TLegend(0.58, 0.56, 0.88, 0.88)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    legend.AddEntry(base_clone, base_label, "lf")
+    for hist, label, color, line_style in overlay_specs:
+        if hist is None:
+            continue
+        clone = _clone_hist(hist, "{}_protected_plot".format(hist.GetName()))
+        _style_overlay_hist(clone, color, line_style=line_style)
+        clone.Draw("hist same")
+        legend.AddEntry(clone, label, "l")
+    if window is not None:
+        _draw_vertical_window_lines(
+            float(window[0]), float(window[1]), 0.0, float(base_clone.GetMaximum())
+        )
+    legend.Draw()
+    diagnostics_pad = canvas.cd(2)
+    diagnostics_pad.SetPad(0.0, 0.0, 1.0, 0.30)
+    diagnostics_box = ROOT.TPaveText(0.03, 0.06, 0.97, 0.94, "NDC")
+    diagnostics_box.SetBorderSize(0)
+    diagnostics_box.SetFillStyle(0)
+    diagnostics_box.SetTextAlign(12)
+    diagnostics_box.SetTextSize(0.055)
+    for line in diagnostics_lines:
+        diagnostics_box.AddText(str(line))
+    diagnostics_box.Draw()
+    canvas.Print(pdf_name)
+    canvas.Close()
 
 
 def _format_mm_range(range_values):
@@ -8300,6 +8921,7 @@ def _resolve_protected_pi_delta_render_state(component_payload):
     fit_variant = str(protected_diagnostic.get("fit_variant") or "").strip()
     required_histogram_keys = (
         "H_pi_delta_protected_fit_input",
+        "H_pi_delta_lambda_gauge",
         "H_pi_delta_protected_k_lambda",
         "H_pi_delta_protected_pi_delta",
         "H_pi_delta_protected_fit_total",
@@ -8369,6 +8991,7 @@ def _print_protected_pi_delta_status_page(
 ):
     """Render an explicit unavailable page instead of a staged-kaon fallback."""
     diagnostic = render_state.get("diagnostic") or {}
+    lambda_gauge = diagnostic.get("lambda_gauge") or {}
     availability = diagnostic.get("template_availability") or {}
     sigma0_source_availability = diagnostic.get("sigma0_source_availability") or {}
     sigma0_scope_availability = diagnostic.get("sigma0_scope_template_availability") or {}
@@ -8443,6 +9066,12 @@ def _print_protected_pi_delta_status_page(
     detail_lines.extend(
         [
             "failure policy: {}".format(failure_policy),
+            "Lambda gauge: status={} solver={} quality={} reason={}".format(
+                lambda_gauge.get("status") or "not attempted",
+                bool(lambda_gauge.get("solver_success")),
+                bool(lambda_gauge.get("quality_passed")),
+                lambda_gauge.get("failure_reason") or "none",
+            ),
             "applied A_delta={}".format(
                 _format_fit_number(diagnostic.get("applied_A_delta"))
             ),
@@ -8464,7 +9093,7 @@ def _print_protected_pi_delta_status_page(
     )
 
 
-def _print_protected_pi_delta_pages(
+def _print_legacy_protected_pi_delta_pages(
     pdf_name,
     component_fit_result,
     render_state,
@@ -8645,6 +9274,137 @@ def _print_protected_pi_delta_pages(
             ),
         ],
         cut_window=cut_window,
+    )
+
+
+def _print_protected_pi_delta_pages(
+    pdf_name,
+    component_fit_result,
+    render_state,
+    title_prefix="",
+    cut_window=None,
+):
+    """Render the authoritative gauge, constrained-fit, and retention pages."""
+    protected = render_state.get("diagnostic") or {}
+    gauge = protected.get("lambda_gauge") or {}
+    preservation = protected.get("lambda_preservation") or {}
+    metrics = protected.get("fit_metrics") or {}
+    constraint_metrics = protected.get("constraint_metrics") or {}
+    amplitudes = protected.get("signal_amplitudes") or {}
+    proposed = protected.get("proposed_amplitudes") or {}
+    matrix = protected.get("matrix_diagnostics") or {}
+    fit_variant = str(protected.get("fit_variant") or "").strip()
+    scope = component_fit_result.get("analysis_scope", "unknown")
+    title_prefix = "{} ".format(title_prefix.strip()) if title_prefix else ""
+    gauge_window = gauge.get("window")
+    gauge_hist = component_fit_result.get("H_pi_delta_lambda_gauge")
+
+    _print_protected_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pi_delta_protected_fit_input"),
+        "R_{pre#Delta}",
+        "{}K-Lambda pre-pi-delta gauge".format(title_prefix),
+        [(gauge_hist, "immutable K-Lambda × S_{gauge}", ROOT.kBlue + 1, 1)],
+        [
+            "scope: {}".format(scope),
+            "window: {} ({})".format(_format_window_list([gauge_window] if gauge_window else []), gauge.get("window_source") or "unknown"),
+            "S_lambda,gauge={} +/- {}  status={}".format(
+                _format_fit_number(gauge.get("amplitude")),
+                _format_fit_number(gauge.get("amplitude_sigma")),
+                gauge.get("status") or "unknown",
+            ),
+            "gauge chi2/ndf={}  p={}  bins={}  quality={}".format(
+                _format_fit_metric(gauge.get("chi2_ndf")),
+                _format_fit_metric(gauge.get("p_value")),
+                gauge.get("fit_bins", 0),
+                "PASS" if bool(gauge.get("quality_passed")) else "FAIL",
+            ),
+            "Lambda data/gauge yield={}/{}".format(
+                _format_fit_number(gauge.get("data_integral_window")),
+                _format_fit_number(gauge.get("gauge_predicted_yield_window")),
+            ),
+        ],
+        window=gauge_window,
+    )
+
+    overlays = [
+        (component_fit_result.get("H_pi_delta_protected_k_lambda"), "constrained K-Lambda", ROOT.kBlue + 1, 1),
+    ]
+    if fit_variant == "lambda_sigma0_protected":
+        overlays.append((component_fit_result.get("H_pi_delta_protected_k_sigma0"), "K-Sigma0", ROOT.kCyan + 2, 1))
+    overlays.extend(
+        [
+            (component_fit_result.get("H_pi_delta_protected_pi_delta"), "applied pi-delta", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pi_delta_protected_fit_total"), "protected fit total", ROOT.kGreen + 2, 2),
+        ]
+    )
+    _print_protected_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pi_delta_protected_fit_input"),
+        "R_{pre#Delta}",
+        "{}Signal-protected final pi-delta fit - K-Lambda gauged{}".format(
+            title_prefix,
+            " + K-Sigma0" if fit_variant == "lambda_sigma0_protected" else "",
+        ),
+        overlays,
+        [
+            "scope: {}  mode={}".format(scope, constraint_metrics.get("mode") or "unknown"),
+            "S_lambda constrained/gauge={}/{}  ratio={}".format(
+                _format_fit_number(amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME)),
+                _format_fit_number(gauge.get("amplitude")),
+                _format_fit_metric(
+                    float(amplitudes[KAON_SIGNAL_TEMPLATE_NAME]) / float(gauge["amplitude"])
+                    if _is_finite_number(amplitudes.get(KAON_SIGNAL_TEMPLATE_NAME)) and float(gauge.get("amplitude") or 0.0) > 0.0 else None
+                ),
+            ),
+            "A_delta proposed/applied={}/{}  legacy diagnostic={}".format(
+                _format_fit_number(proposed.get("pi_delta")),
+                _format_fit_number(protected.get("applied_A_delta")),
+                _format_fit_number(protected.get("legacy_staged_A_delta")),
+            ),
+            "spectrum chi2/ndf={}  p={}  Nfree={}".format(
+                _format_fit_metric(metrics.get("chi2_ndf")),
+                _format_fit_metric(metrics.get("fit_p_value")),
+                metrics.get("n_free_spectrum_parameters", 0),
+            ),
+            "rank={}  cond={}  fit quality={}".format(
+                matrix.get("weighted_design_effective_rank"),
+                _format_fit_metric(matrix.get("weighted_design_condition_number")),
+                "PASS" if bool(protected.get("fit_quality_passed")) else "FAIL",
+            ),
+        ],
+        window=(protected.get("fit_window") or [None])[0],
+    )
+
+    _print_protected_overlay_page(
+        pdf_name,
+        component_fit_result.get("H_pi_delta_protected_fit_input"),
+        "R_{pre#Delta}",
+        "{}Protected pi-delta subtraction - Lambda preservation".format(title_prefix),
+        [
+            (gauge_hist, "K-Lambda gauge", ROOT.kBlue + 1, 1),
+            (component_fit_result.get("H_pi_delta_protected_pi_delta"), "pi-delta removed", ROOT.kAzure + 2, 1),
+            (component_fit_result.get("H_pi_delta_protected_after_subtraction"), "R_{pre#Delta} - pi-delta", ROOT.kOrange + 7, 2),
+        ],
+        [
+            "gauge/pre/removed/after={}/{}/{}/{}".format(
+                _format_fit_number(preservation.get("lambda_gauge_predicted_yield")),
+                _format_fit_number(preservation.get("lambda_pre_delta_yield")),
+                _format_fit_number(preservation.get("lambda_pi_delta_removed_yield")),
+                _format_fit_number(preservation.get("lambda_after_delta_yield")),
+            ),
+            "after/gauge={}  removed/gauge={}".format(
+                _format_fit_metric(preservation.get("lambda_after_over_gauge")),
+                _format_fit_metric(preservation.get("lambda_removed_fraction_of_gauge")),
+            ),
+            "minimum retention={}  bound={}  gate={}".format(
+                _format_fit_number(preservation.get("minimum_required_retention")),
+                _format_fit_number(preservation.get("a_delta_max")),
+                "PASS" if bool(preservation.get("gate_passed")) else "FAIL: {}".format(preservation.get("gate_reason") or "unknown"),
+            ),
+            "ONLY pi-delta is subtracted; K-Lambda and K-Sigma0 remain signal templates.",
+        ],
+        window=gauge_window,
     )
 
 
@@ -9380,7 +10140,7 @@ def print_particle_subtraction_component_application_pages(
                 else "n/a"
             ),
             "K-Lambda comparison source={}".format(lambda_reference_source),
-            "K-Lambda gauge scale={}".format(
+            "K-Lambda gauge amplitude={}".format(
                 _format_fit_number(lambda_reference_scale)
                 if lambda_reference_scale is not None
                 else "n/a"

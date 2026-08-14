@@ -715,17 +715,60 @@ configured physical input sample.
 
 \subsection{Signal-Protected Final $\pi$-$\Delta$ Fit}
 
-The preferred final kaon-side model fits K-$\Lambda$, K-$\Sigma^0$, and
-$\pi$-$\Delta$ together after the early $\pi$-$n$ and $\pi$-SIDIS amplitudes
-are frozen.  Only the fitted $\pi$-$\Delta$ term is propagated into the pion
-subtraction weight.  If the K-$\Sigma^0$ source or the actual template for a
-given scope is unavailable before the fit design is constructed, the explicit
-K-$\Lambda$-only protected fallback fits K-$\Lambda$ and $\pi$-$\Delta$ and
-still subtracts only $\pi$-$\Delta$.  This fallback is less complete than the
-three-template model and is reported as such.  K-$\Lambda$ and $\pi$-$\Delta$
-remain mandatory.  Once a usable K-$\Sigma^0$ template has selected the
-three-template model, rank, design, covariance, or solver failures do not
-retry without it; they retain conservative \texttt{zero\_pi\_delta} behavior.
+The final kaon-side protection starts with an independent K-$\Lambda$ gauge,
+not a free K-$\Lambda$ basis vector.  After the early $\pi$-$n$ and
+$\pi$-SIDIS terms have been frozen and removed, the immutable aligned
+K-$\Lambda$ template is fitted to the pre-$\pi$-$\Delta$ residual
+$R_{\mathrm{pre}\Delta}$ only in the canonical $[1.105,1.125]$~GeV
+K-$\Lambda$ validation window.  A setting override may choose another
+explicit gauge window.  The gauge requires at least two valid
+histogram-error-weighted bins and has its own quality gate,
+$\chi^2/\mathrm{ndf}\leq10$, without a narrow-window $p$-value requirement.
+The stored payload distinguishes gauge solver success, gauge-quality success,
+and the gauge status; a finite amplitude from a poor gauge is not authoritative.
+
+The protected spectrum solve uses $[1.10,1.30]$~GeV.  By default it applies
+the gauge as a Gaussian K-$\Lambda$ prior with an effective uncertainty no
+smaller than $5\%$ of the gauge amplitude.  The alternative supported mode is
+fixed K-$\Lambda$, in which the gauge contribution is removed before fitting
+the remaining spectrum columns.  There is no production free-K-$\Lambda$
+mode.  The spectrum-only quality gate is
+$\chi^2/\mathrm{ndf}\leq5$ and $p\geq10^{-6}$.  Its number of degrees of
+freedom counts physical spectrum amplitudes only: the Gaussian K-$\Lambda$
+amplitude remains free, while fixed K-$\Lambda$ does not count as a free
+parameter.  Rank, condition number, and template correlations are likewise
+calculated before the Gaussian prior row is added (and only among unfixed
+physical columns in fixed mode).
+
+Before that solve, the allowed nonnegative $\pi$-$\Delta$ amplitude is bounded
+by K-$\Lambda$ preservation:
+\begin{align}
+  A_{\Delta,\max}=
+  \frac{Y_{\mathrm{pre}\Delta}^{\Lambda}
+   -0.90Y_{\Lambda,\mathrm{gauge}}}
+       {\int_{\Lambda}T_\Delta\,dMM}.
+\end{align}
+If the pre-$\Delta$ Lambda yield is already below $90\%$ of the gauge yield,
+the explicit status is \texttt{lambda\_pre\_delta\_deficit}; no Delta solution
+is attempted and the applied amplitude is zero.  If the Delta template has no
+support in the gauge window, the bound is recorded as inapplicable and the
+post-fit preservation gate is still evaluated.  Any gauge, rank, solver,
+spectrum-quality, or preservation failure retains proposed diagnostics but
+applies zero $\pi$-$\Delta$; the legacy staged amplitude is never revived.
+
+In full mode the constrained fit has gauged K-$\Lambda$, free nonnegative
+K-$\Sigma^0$, and $\pi$-$\Delta$; in no-Sigma mode it has gauged K-$\Lambda$
+and $\pi$-$\Delta$.  The external-only K-$\Sigma^0$ ownership and its
+no-substitution policy remain unchanged.  Only accepted $\pi$-$\Delta$ enters
+the pion subtraction weight.  K-$\Lambda$ and K-$\Sigma^0$ are never
+subtracted or entered in that weight.
+
+The diagnostics render three protected pages at every successful scope: the
+pre-$\Delta$ gauge, the constrained final fit, and the Lambda-preservation
+check.  The same gauge-scaled histogram is reused on the later final-spectrum
+comparison page; it is never renormalized against post-subtraction data.  The
+old \texttt{k\_lambda\_reference\_scale} remains display-only compatibility
+data and is not a protected-fit input.
 
 \subsection{Dynamic Template Alignment}
 
@@ -784,12 +827,14 @@ setting/$\phi$ override, remains authoritative for a production result.
   \end{tabular}
 \end{table}
 
-The $K\Sigma^0$ stage and its $[1.17,1.23]$~GeV window remain configured but
-are disabled in both current fits.  The pion-control path may regularize a
-joint non-negative refinement around its staged solution.  The kaon
-no-subtraction path is presently staged-only.  All active post-fit and
-post-refinement component scales are unity, so the control-model denominator
-is not phenomenologically rescaled.
+The generic $K\Sigma^0$ stage and its $[1.17,1.23]$~GeV window remain disabled
+in the ordinary staged fits.  The separately configured signal-protected final
+fit may nevertheless include its required external K-$\Sigma^0$ template as a
+free nuisance component.  The pion-control path may regularize a joint
+non-negative refinement around its staged solution.  The kaon no-subtraction
+path is presently staged-only before this final protected stage.  All active
+post-fit and post-refinement component scales are unity, so the control-model
+denominator is not phenomenologically rescaled.
 
 For a least-squares staged component $T_j$ with residual $R_{j-1}$,
 \begin{align}

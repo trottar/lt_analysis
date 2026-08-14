@@ -52,7 +52,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
     def setUp(self):
         self.objects = {key: object() for key in (
             "pion_input", "kaon_input", "pi_n", "pi_sidis", "pi_delta",
-            "protected_input", "protected_lambda", "protected_sigma",
+            "protected_input", "protected_gauge", "protected_lambda", "protected_sigma",
             "protected_delta", "protected_total", "protected_after",
         )}
 
@@ -60,12 +60,22 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         return {
             "enabled": True,
             "status": status,
+            "fit_variant": "lambda_sigma0_protected",
+            "selected_fit_variant": "lambda_sigma0_protected",
             "failure_reason": "missing K-Sigma0" if status != "success" else None,
             "failure_policy": "zero_pi_delta",
             "applied_A_delta": 0.25 if status == "success" else 0.0,
+            "physics_acceptance_passed": status == "success",
+            "solver_success": status == "success",
+            "fit_quality_passed": status == "success",
+            "lambda_gauge_solver_success": status == "success",
+            "lambda_gauge_quality_passed": status == "success",
+            "lambda_gauge_status": "success" if status == "success" else "poor_lambda_gauge_quality",
             "legacy_staged_A_delta": 3.0,
             "signal_amplitudes": {"k_lambda_signal": 2.0, "k_sigma0_signal": 0.8},
-            "fit_metrics": {"chi2_ndf": 1.2, "fit_p_value": 0.4, "n_fit_bins": 25},
+            "proposed_amplitudes": {"k_lambda_signal": 2.0, "k_sigma0_signal": 0.8, "pi_delta": 0.25},
+            "fit_metrics": {"chi2_ndf": 1.2, "fit_p_value": 0.4, "n_fit_bins": 25, "n_free_spectrum_parameters": 3},
+            "constraint_metrics": {"mode": "gaussian", "prior_chi2": 0.1, "total_chi2": 2.5, "total_ndf": 23},
             "matrix_diagnostics": {
                 "weighted_design_effective_rank": 3,
                 "weighted_design_condition_number": 12.0,
@@ -76,6 +86,34 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
                 "pi_delta": True,
             },
             "lambda_reference_integrity": {"shape_identical": True},
+            "lambda_gauge": {
+                "status": "success" if status == "success" else "poor_lambda_gauge_quality",
+                "solver_success": status == "success",
+                "quality_passed": status == "success",
+                "window": [1.105, 1.125],
+                "window_source": "proton_cleaning.validation_windows.lambda_peak",
+                "amplitude": 2.0,
+                "amplitude_sigma": 0.10,
+                "effective_sigma": 0.10,
+                "chi2_ndf": 1.0,
+                "p_value": 0.5,
+                "fit_bins": 4,
+                "data_integral_window": 2.0,
+                "gauge_predicted_yield_window": 2.0,
+            },
+            "lambda_preservation": {
+                "status": "bounded",
+                "gate_passed": status == "success",
+                "gate_reason": None if status == "success" else "fit_not_accepted",
+                "lambda_gauge_predicted_yield": 2.0,
+                "lambda_pre_delta_yield": 2.1,
+                "lambda_pi_delta_removed_yield": 0.05,
+                "lambda_after_delta_yield": 2.05,
+                "lambda_after_over_gauge": 1.025,
+                "lambda_removed_fraction_of_gauge": 0.025,
+                "minimum_required_retention": 1.8,
+                "a_delta_max": 0.5,
+            },
             "early_amplitudes_frozen_integrity": {"unchanged": True},
             "signal_preservation": {
                 "k_lambda_signal": {"pi_delta_removed_fraction": 0.01},
@@ -132,6 +170,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         if enabled and diagnostic and status == "success":
             payload.update({
                 "H_pi_delta_protected_fit_input": self.objects["protected_input"],
+                "H_pi_delta_lambda_gauge": self.objects["protected_gauge"],
                 "H_pi_delta_protected_k_lambda": self.objects["protected_lambda"],
                 "H_pi_delta_protected_k_sigma0": self.objects["protected_sigma"],
                 "H_pi_delta_protected_pi_delta": self.objects["protected_delta"],
@@ -179,6 +218,10 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             if base is not None and overlays:
                 overlay_pages.append((title, base, list(overlays), list(lines)))
 
+        def protected_overlay(_pdf, base, _label, title, overlays, lines, **_kwargs):
+            if base is not None and overlays:
+                overlay_pages.append((title, base, list(overlays), list(lines)))
+
         def text(_pdf, title, header, body):
             text_pages.append((title, list(header), list(body)))
 
@@ -192,6 +235,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
 
         patches = {
             "_print_component_overlay_page": overlay,
+            "_print_protected_overlay_page": protected_overlay,
             "_print_component_text_page": text,
             "_print_joint_refinement_overlay_page": joint,
             "_print_kaon_pion_bg_comparison_page": comparison,
@@ -203,17 +247,23 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         }
         return patches, overlay_pages, text_pages, step_calls, amplitude_calls, joint_pages, comparison_pages
 
-    def test_success_uses_two_protected_pages_and_filters_kaon_steps(self):
+    def test_success_uses_gauge_fit_preservation_pages_and_filters_kaon_steps(self):
         payload = self._fit_payload()
         patches, overlay_pages, text_pages, step_calls, amplitude_calls, joint_pages, comparison_pages = self._fit_page_recorders()
         with mock.patch.multiple(fits, **patches):
             fits.print_particle_subtraction_component_fit_pages("ignored.pdf", payload)
 
         titles = [page[0] for page in overlay_pages]
-        protected_titles = [title for title in titles if "protected" in title.lower()]
+        protected_titles = [
+            title for title in titles
+            if "K-Lambda pre-pi-delta gauge" in title
+            or "K-Lambda gauged" in title
+            or "Lambda preservation" in title
+        ]
         self.assertEqual(protected_titles, [
-            "Signal-protected final #pi#Delta fit",
-            "Protected #pi#Delta subtraction - only #pi#Delta removed",
+            "K-Lambda pre-pi-delta gauge",
+            "Signal-protected final pi-delta fit - K-Lambda gauged + K-Sigma0",
+            "Protected pi-delta subtraction - Lambda preservation",
         ])
         self.assertFalse(text_pages)
         self.assertFalse(any("kaon no-sub staged" in title for title in titles))
@@ -223,12 +273,17 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         self.assertIs(first_protected[1], self.objects["protected_input"])
         self.assertEqual(
             [overlay[0] for overlay in first_protected[2]],
-            [self.objects["protected_lambda"], self.objects["protected_sigma"], self.objects["protected_delta"], self.objects["protected_total"]],
+            [self.objects["protected_gauge"]],
         )
         second_protected = overlay_pages[titles.index(protected_titles[1])]
         self.assertEqual(
             [overlay[0] for overlay in second_protected[2]],
-            [self.objects["protected_delta"], self.objects["protected_after"]],
+            [self.objects["protected_lambda"], self.objects["protected_sigma"], self.objects["protected_delta"], self.objects["protected_total"]],
+        )
+        third_protected = overlay_pages[titles.index(protected_titles[2])]
+        self.assertEqual(
+            [overlay[0] for overlay in third_protected[2]],
+            [self.objects["protected_gauge"], self.objects["protected_delta"], self.objects["protected_after"]],
         )
         pion_steps = next(steps for label, steps in step_calls if label == "pion-control")
         kaon_steps = next(steps for label, steps in step_calls if label == "kaon no-sub")
@@ -268,11 +323,11 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         with mock.patch.multiple(fits, **patches):
             fits.print_particle_subtraction_component_fit_pages("ignored.pdf", payload)
 
-        protected_pages = [page for page in overlay_pages if "K-Lambda-only fallback" in page[0]]
-        self.assertEqual(len(protected_pages), 2)
+        protected_pages = [page for page in overlay_pages if "K-Lambda" in page[0] or "Lambda preservation" in page[0]]
+        self.assertEqual(len(protected_pages), 3)
         self.assertFalse(text_pages)
         self.assertEqual(
-            [overlay[0] for overlay in protected_pages[0][2]],
+            [overlay[0] for overlay in protected_pages[1][2]],
             [
                 self.objects["protected_lambda"],
                 self.objects["protected_delta"],
@@ -280,7 +335,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             ],
         )
         self.assertTrue(
-            any("ONLY pi-delta is subtracted" in line for line in protected_pages[0][3])
+            any("A_delta proposed/applied" in line for line in protected_pages[1][3])
         )
 
     def test_enabled_failure_or_missing_payload_gets_status_not_legacy_kaon_pages(self):
@@ -296,6 +351,26 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
                 self.assertIn(expected, text_pages[0][1][1])
                 self.assertFalse(any("kaon no-sub staged" in page[0] for page in overlay_pages))
                 self.assertFalse(any("signal-protected final #pi#Delta fit" == page[0] for page in overlay_pages))
+
+    def test_protected_final_comparison_reuses_gauge_without_postsubtraction_scaling(self):
+        payload = self._fit_payload()
+        with mock.patch.object(fits, "_clone_hist", side_effect=lambda hist, _name, **_kwargs: hist), \
+             mock.patch.object(fits, "_build_scaled_reference_hist_with_fallback", side_effect=AssertionError):
+            histogram, scale, source = fits._resolve_kaon_lambda_reference_for_plot(
+                payload, object(), (1.105, 1.125), "setting-wide", "gauge_check"
+            )
+        self.assertIs(histogram, self.objects["protected_gauge"])
+        self.assertEqual(scale, 2.0)
+        self.assertEqual(source, "authoritative pre-delta K-Lambda gauge")
+
+        payload.pop("H_pi_delta_lambda_gauge")
+        with mock.patch.object(fits, "_build_scaled_reference_hist_with_fallback", side_effect=AssertionError):
+            histogram, scale, source = fits._resolve_kaon_lambda_reference_for_plot(
+                payload, object(), (1.105, 1.125), "setting-wide", "gauge_missing"
+            )
+        self.assertIsNone(histogram)
+        self.assertEqual(scale, 2.0)
+        self.assertIn("unavailable", source)
 
     def test_unavailable_status_includes_sigma0_source_provenance_when_present(self):
         payload = self._fit_payload(diagnostic=True, status="missing_required_template")
