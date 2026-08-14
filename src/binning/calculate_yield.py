@@ -91,7 +91,6 @@ from pion_component_shapes import (
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
-    clone_kaon_lambda_comparison_payload,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_fit_pages,
     print_particle_subtraction_component_template_pages,
@@ -102,6 +101,7 @@ from pion_component_fits import (
 )
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
+    assert_component_subtraction_payload_ownership,
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
     fill_simc_shape_pion_subtraction_templates,
@@ -111,6 +111,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
     get_kaon_proton_cleaning_event_payload,
     print_kaon_proton_cleaning_pages,
@@ -195,11 +196,14 @@ def _hist_integral(hist):
         return 0.0
 
 
-def _clone_hist_for_plot(hist):
-    cloned_hist = hist.Clone()
-    if hasattr(cloned_hist, "SetDirectory"):
-        cloned_hist.SetDirectory(0)
-    return cloned_hist
+def _clone_hist_for_plot(hist, scope="yield", role="display"):
+    return clone_root_histogram(
+        hist,
+        scope=scope,
+        role=role,
+        optional=True,
+        sumw2=False,
+    )
 
 
 def _clone_optional_hist_for_plot(hist):
@@ -848,12 +852,6 @@ def _apply_component_pion_subtraction_for_bin(
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
-    payload.update(
-        clone_kaon_lambda_comparison_payload(
-            component_fit_result,
-            context="yield_t{}_phi{}".format(int(j) + 1, int(k) + 1),
-        )
-    )
     if not gate_result["accepted"]:
         return handle_particle_subtraction_fallback(
             payload,
@@ -986,9 +984,6 @@ def _apply_component_pion_subtraction_for_bin(
             "H_weighted_pion_control_model_stage": stage_weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM_stage": stage_weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
-            "H_pion_control_input": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
-            "H_kaon_nosub_input": _clone_hist_for_plot(component_fit_result.get("H_kaon_nosub_input")),
-            "H_pion_control_unscaled": _clone_hist_for_plot(component_fit_result.get("H_pion_control_input")),
             "H_pion_subtraction_template_MM": template_hists["mm"],
             "H_pion_subtraction_template_MM_nosub": template_hists["mm_nosub"],
             "H_pion_subtraction_template_t": template_hists["t"],
@@ -998,66 +993,6 @@ def _apply_component_pion_subtraction_for_bin(
             "H_MM_nosub_after_pion_subtraction": h_mm_nosub_after,
             "H_MM_nosub_after_pion_subtraction_model_stage": h_mm_nosub_after_stage_model,
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
-            "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
-            "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
-            "H_k_lambda_simc_reference": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_k_lambda_simc_reference")
-            ),
-            "H_simc_shape_k_lambda": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_simc_shape_k_lambda")
-            ),
-            "H_pi_delta_lambda_gauge": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_lambda_gauge")
-            ),
-            "H_pi_delta_protected_fit_input": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_fit_input")
-            ),
-            "H_pi_delta_protected_k_lambda": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_k_lambda")
-            ),
-            "H_pi_delta_protected_k_sigma0": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_k_sigma0")
-            ),
-            "H_pi_delta_protected_pi_delta": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_pi_delta")
-            ),
-            "H_pi_delta_protected_fit_total": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_fit_total")
-            ),
-            "H_pi_delta_protected_fit_residual": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_fit_residual")
-            ),
-            "H_pi_delta_protected_after_subtraction": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_pi_delta_protected_after_subtraction")
-            ),
-            "H_kaon_fit_k_lambda_reference": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_kaon_fit_k_lambda_reference")
-            ),
-            "H_kaon_fit_k_lambda_scaled": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_kaon_fit_k_lambda_scaled")
-            ),
-            "H_kaon_fit_k_lambda_scaled_refined": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined")
-            ),
-            "H_simc_shape_k_sigma0": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_simc_shape_k_sigma0")
-            ),
-            "H_kaon_fit_k_sigma0_scaled": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_kaon_fit_k_sigma0_scaled")
-            ),
-            "H_kaon_fit_k_sigma0_scaled_refined": _clone_optional_hist_for_plot(
-                component_fit_result.get("H_kaon_fit_k_sigma0_scaled_refined")
-            ),
-            "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
-            "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
-            "lambda_gauge_amplitude": component_fit_result.get("lambda_gauge_amplitude"),
-            "lambda_gauge_amplitude_sigma": component_fit_result.get("lambda_gauge_amplitude_sigma"),
-            "lambda_display_scale": component_fit_result.get("lambda_display_scale"),
-            "k_lambda_fit_amplitude": component_fit_result.get("k_lambda_fit_amplitude"),
-            "k_lambda_simc_input_loaded": component_fit_result.get("k_lambda_simc_input_loaded"),
-            "k_lambda_simc_reference_available": component_fit_result.get("k_lambda_simc_reference_available"),
-            "k_lambda_simc_reference_source": component_fit_result.get("k_lambda_simc_reference_source"),
-            "k_lambda_simc_reference_integral": component_fit_result.get("k_lambda_simc_reference_integral"),
             "diagnostics": {
                 **deepcopy(weight_payload["diagnostics"]),
                 "weight_diagnostics_stage": deepcopy(stage_weight_payload.get("diagnostics") or {}),
@@ -1067,6 +1002,7 @@ def _apply_component_pion_subtraction_for_bin(
             },
         }
     )
+    assert_component_subtraction_payload_ownership(payload)
     return payload
 
 
@@ -1786,8 +1722,12 @@ def process_hist_data(
             hist_bin_dict["H_ssyptar_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
             hist_bin_dict["H_t_vs_tmin_DUMMY_{}_{}".format(j, k)].Scale(normfac_dummy)
 
-            dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)] = hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)].Clone(
-                "H_MM_DUMMY_NORM_{}_{}".format(j, k)
+            dummy_norm_hist_dict["H_MM_DUMMY_NORM_{}_{}".format(j, k)] = clone_root_histogram(
+                hist_bin_dict["H_MM_DUMMY_{}_{}".format(j, k)],
+                scope="yield_t{}_phi{}".format(j + 1, k + 1),
+                role="dummy_normalized",
+                name="H_MM_DUMMY_NORM_{}_{}".format(j, k),
+                sumw2=False,
             )
             stage_snapshot_dict["H_MM_AFTER_RANDOM_DATA_{}_{}".format(j, k)] = _clone_hist_for_plot(
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)]
@@ -2426,6 +2366,7 @@ def process_hist_data(
                                 component_payload,
                                 title_prefix="{} t{} phi{}".format(phi_setting, j + 1, k + 1),
                                 cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                                component_fit_result=component_fit_results[j][k],
                             )
 
                     # Create a new canvas for each plot
@@ -2823,9 +2764,9 @@ def bin_data(
             else:
                 arr_bg_fit2_frac_err[j][k] = 0.0
 
-            mm_hist_data.append(H_MM_DATA.Clone())
-            mm_hist_dummy_norm.append(H_MM_DUMMY_NORM.Clone())
-            mm_hist_sub.append(H_MM_SUB_DATA.Clone())
+            mm_hist_data.append(_clone_hist_for_plot(H_MM_DATA, scope="yield", role="data_mm"))
+            mm_hist_dummy_norm.append(_clone_hist_for_plot(H_MM_DUMMY_NORM, scope="yield", role="dummy_mm"))
+            mm_hist_sub.append(_clone_hist_for_plot(H_MM_SUB_DATA, scope="yield", role="subtracted_mm"))
 
             # Initialize lists for tmp_binned_t_data, tmp_binned_hist_data, and tmp_binned_hist_sub
             tmp_binned_t_data = []
@@ -3305,7 +3246,7 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
             H_t_SIMC = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["H_t_SIMC"]
             NumEvts_bin_MM_SIMC_unweighted = processed_dict["t_bin{}phi_bin{}".format(j+1, k+1)]["NumEvts_bin_MM_SIMC_unweighted"]
 
-            mm_hist_simc.append(H_MM_SIMC.Clone())            
+            mm_hist_simc.append(_clone_hist_for_plot(H_MM_SIMC, scope="yield", role="simc_mm"))
             
             # Initialize lists for tmp_binned_t_simc, tmp_binned_hist_simc, and tmp_binned_hist_dummy
             tmp_binned_t_simc = []

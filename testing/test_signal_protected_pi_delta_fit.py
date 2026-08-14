@@ -45,6 +45,10 @@ class SignalProtectedPiDeltaConfigTests(unittest.TestCase):
         self.assertAlmostEqual(protected["lambda_gauge_maximum_chi2_ndf"], 10.0)
         self.assertIsNone(protected["lambda_gauge_minimum_p_value"])
         self.assertEqual(protected["lambda_gauge_min_fit_bins"], 2)
+        self.assertFalse(bgcfg.resolve_particle_subtraction_root_ownership_debug())
+        self.assertTrue(bgcfg.resolve_particle_subtraction_root_ownership_debug(
+            {"particle_subtraction_root_ownership_debug": True}
+        ))
 
         merged = bgcfg._deep_merge_particle_subtraction_config(
             default,

@@ -83,7 +83,6 @@ from background_config import (
 )
 from pion_component_fits import (
     build_particle_subtraction_component_result,
-    clone_kaon_lambda_comparison_payload,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_component_template_pages,
     print_particle_subtraction_component_fit_pages,
@@ -98,6 +97,7 @@ from pion_component_shapes import (
 )
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
+    assert_component_subtraction_payload_ownership,
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
     handle_particle_subtraction_fallback,
@@ -105,6 +105,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
     audit_timing_t_hgcer_display_targets,
     apply_kaon_proton_cleaning_to_targets,
@@ -231,9 +232,13 @@ def _draw_hgcer_signed_display(hist, title, status_payload=None):
         text.AddText("See timing-t HGCer fill/audit diagnostics")
         text.Draw()
         return text
-    display = hist.Clone("{}_display_{}".format(hist.GetName(), abs(id(hist))))
-    display.SetDirectory(0)
-    display.SetTitle(str(title))
+    display = clone_root_histogram(
+        hist,
+        scope="hgcer_display",
+        role="signed_display",
+        title=title,
+        sumw2=False,
+    )
     maximum = max(abs(float(display.GetMinimum())), abs(float(display.GetMaximum())), 1.0e-12)
     if int(status_payload.get("negative_bin_count", 0) or 0) > 0:
         # Symmetric limits retain random/dummy-subtracted negative structure.
@@ -398,13 +403,14 @@ def _hist_integral(hist):
 
 
 def _clone_hist_detached(hist, name=None):
-    if hist is None:
-        return None
-    clone_name = str(name) if name else "{}_clone".format(hist.GetName())
-    cloned = hist.Clone(clone_name)
-    if hasattr(cloned, "SetDirectory"):
-        cloned.SetDirectory(0)
-    return cloned
+    return clone_root_histogram(
+        hist,
+        scope="rand_sub",
+        role="working_histogram",
+        name=name,
+        optional=True,
+        sumw2=False,
+    )
 
 
 def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
@@ -746,12 +752,6 @@ def _apply_component_pion_subtraction_setting(
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
-    payload.update(
-        clone_kaon_lambda_comparison_payload(
-            component_fit_result,
-            context="{}_setting".format(phi_setting),
-        )
-    )
     if not gate_result["accepted"]:
         return handle_particle_subtraction_fallback(
             payload,
@@ -885,15 +885,6 @@ def _apply_component_pion_subtraction_setting(
             "H_weighted_pion_control_model_stage": stage_weight_payload.get("H_weighted_pion_control_model"),
             "H_pion_weight_vs_MM_stage": stage_weight_payload["H_pion_weight_vs_MM"],
             "weights": weight_payload["weights"],
-            "H_pion_control_input": component_fit_result.get("H_pion_control_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
-            ) if component_fit_result.get("H_pion_control_input") is not None else None,
-            "H_kaon_nosub_input": component_fit_result.get("H_kaon_nosub_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_nosub_input").GetName())
-            ) if component_fit_result.get("H_kaon_nosub_input") is not None else None,
-            "H_pion_control_unscaled": component_fit_result.get("H_pion_control_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_pion_control_input").GetName())
-            ) if component_fit_result.get("H_pion_control_input") is not None else None,
             "H_pion_subtraction_template_MM": template_hists.get("h_mm"),
             "H_pion_subtraction_template_MM_nosub": template_hists.get("h_mm_full"),
             "H_MM_before_pion_subtraction": h_mm_before,
@@ -902,57 +893,6 @@ def _apply_component_pion_subtraction_setting(
             "H_MM_nosub_after_pion_subtraction": h_mm_full_after,
             "H_MM_nosub_after_pion_subtraction_model_stage": h_mm_full_after_stage_model,
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_full_after_final_model,
-            "H_pion_fit_step_overlays": deepcopy(component_fit_result.get("H_pion_fit_step_overlays") or []),
-            "H_kaon_fit_step_overlays": deepcopy(component_fit_result.get("H_kaon_fit_step_overlays") or []),
-            "H_k_lambda_simc_reference": component_fit_result.get("H_k_lambda_simc_reference").Clone(
-                "{}_clone".format(component_fit_result.get("H_k_lambda_simc_reference").GetName())
-            ) if component_fit_result.get("H_k_lambda_simc_reference") is not None else None,
-            "H_simc_shape_k_lambda": component_fit_result.get("H_simc_shape_k_lambda").Clone(
-                "{}_clone".format(component_fit_result.get("H_simc_shape_k_lambda").GetName())
-            ) if component_fit_result.get("H_simc_shape_k_lambda") is not None else None,
-            "H_pi_delta_lambda_gauge": component_fit_result.get("H_pi_delta_lambda_gauge").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_lambda_gauge").GetName())
-            ) if component_fit_result.get("H_pi_delta_lambda_gauge") is not None else None,
-            "H_pi_delta_protected_fit_input": component_fit_result.get("H_pi_delta_protected_fit_input").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_input").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_fit_input") is not None else None,
-            "H_pi_delta_protected_k_lambda": component_fit_result.get("H_pi_delta_protected_k_lambda").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_k_lambda").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_k_lambda") is not None else None,
-            "H_pi_delta_protected_k_sigma0": component_fit_result.get("H_pi_delta_protected_k_sigma0").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_k_sigma0").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_k_sigma0") is not None else None,
-            "H_pi_delta_protected_pi_delta": component_fit_result.get("H_pi_delta_protected_pi_delta").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_pi_delta").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_pi_delta") is not None else None,
-            "H_pi_delta_protected_fit_total": component_fit_result.get("H_pi_delta_protected_fit_total").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_total").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_fit_total") is not None else None,
-            "H_pi_delta_protected_fit_residual": component_fit_result.get("H_pi_delta_protected_fit_residual").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_fit_residual").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_fit_residual") is not None else None,
-            "H_pi_delta_protected_after_subtraction": component_fit_result.get("H_pi_delta_protected_after_subtraction").Clone(
-                "{}_clone".format(component_fit_result.get("H_pi_delta_protected_after_subtraction").GetName())
-            ) if component_fit_result.get("H_pi_delta_protected_after_subtraction") is not None else None,
-            "H_kaon_fit_k_lambda_reference": component_fit_result.get("H_kaon_fit_k_lambda_reference").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_reference").GetName())
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_reference") is not None else None,
-            "H_kaon_fit_k_lambda_scaled": component_fit_result.get("H_kaon_fit_k_lambda_scaled").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_scaled").GetName())
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled") is not None else None,
-            "H_kaon_fit_k_lambda_scaled_refined": component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined").Clone(
-                "{}_clone".format(component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined").GetName())
-            ) if component_fit_result.get("H_kaon_fit_k_lambda_scaled_refined") is not None else None,
-            "S_lambda_reference_scale": component_fit_result.get("S_lambda_reference_scale"),
-            "k_lambda_reference_scale": component_fit_result.get("k_lambda_reference_scale"),
-            "lambda_gauge_amplitude": component_fit_result.get("lambda_gauge_amplitude"),
-            "lambda_gauge_amplitude_sigma": component_fit_result.get("lambda_gauge_amplitude_sigma"),
-            "lambda_display_scale": component_fit_result.get("lambda_display_scale"),
-            "k_lambda_fit_amplitude": component_fit_result.get("k_lambda_fit_amplitude"),
-            "k_lambda_simc_input_loaded": component_fit_result.get("k_lambda_simc_input_loaded"),
-            "k_lambda_simc_reference_available": component_fit_result.get("k_lambda_simc_reference_available"),
-            "k_lambda_simc_reference_source": component_fit_result.get("k_lambda_simc_reference_source"),
-            "k_lambda_simc_reference_integral": component_fit_result.get("k_lambda_simc_reference_integral"),
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
                 "weight_diagnostics_stage": dict(stage_weight_payload.get("diagnostics") or {}),
@@ -962,6 +902,7 @@ def _apply_component_pion_subtraction_setting(
             },
         }
     )
+    assert_component_subtraction_payload_ownership(payload)
     return payload
 
 
@@ -3189,14 +3130,20 @@ def rand_sub(
     binning_phi_hist = None
     if ParticleType == "kaon":
         # Freeze the bin-counting inputs before slow-proton and pion subtraction.
-        binning_t_hist = H_t_DATA.Clone(
-            "H_t_DATA_pre_particle_subtraction_{}".format(phi_setting)
+        binning_t_hist = clone_root_histogram(
+            H_t_DATA,
+            scope="{}_setting".format(phi_setting),
+            role="pre_particle_subtraction_t",
+            name="H_t_DATA_pre_particle_subtraction_{}".format(phi_setting),
+            sumw2=False,
         )
-        binning_phi_hist = H_ph_q_DATA.Clone(
-            "H_ph_q_DATA_pre_particle_subtraction_{}".format(phi_setting)
+        binning_phi_hist = clone_root_histogram(
+            H_ph_q_DATA,
+            scope="{}_setting".format(phi_setting),
+            role="pre_particle_subtraction_phi",
+            name="H_ph_q_DATA_pre_particle_subtraction_{}".format(phi_setting),
+            sumw2=False,
         )
-        binning_t_hist.SetDirectory(0)
-        binning_phi_hist.SetDirectory(0)
 
     component_fit_result = None
     component_subtraction_payload = None
@@ -4790,6 +4737,7 @@ def rand_sub(
             component_subtraction_payload,
             title_prefix="{} {}".format(phi_setting, ParticleType),
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            component_fit_result=component_fit_result,
         )
 
     ###

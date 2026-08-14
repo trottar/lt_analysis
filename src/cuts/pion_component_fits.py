@@ -37,8 +37,13 @@ from background_config import (
     get_proton_contamination_cleaning_config,
     resolve_particle_subtraction_component_fit_windows,
     resolve_particle_subtraction_mode,
+    resolve_particle_subtraction_root_ownership_debug,
 )
 from utility import normalize_hist_to_unit_area
+from root_histogram_ownership import (
+    clone_root_histogram,
+    configure_particle_subtraction_root_ownership_debug,
+)
 
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
@@ -112,15 +117,16 @@ def _is_finite_number(value):
 
 
 def _clone_hist(template_hist, name, title=None, reset=False):
-    if template_hist is None:
-        return None
-    cloned = template_hist.Clone(name)
-    cloned.SetDirectory(0)
-    if title is not None:
-        cloned.SetTitle(title)
-    if reset:
-        cloned.Reset()
-    return cloned
+    return clone_root_histogram(
+        template_hist,
+        scope="component_fit",
+        role="fit_histogram",
+        name=name,
+        optional=True,
+        reset=reset,
+        sumw2=False,
+        title=title,
+    )
 
 
 def _hist_integral(hist):
@@ -3342,7 +3348,9 @@ def _apply_joint_component_refinement(
         "pi_delta": result.get("pi_delta_scaled_hist"),
         "pi_sidis": result.get("pi_sidis_scaled_hist"),
     }
-    staged_scaled_hist_map.update(deepcopy(result.get("extra_scaled_hists") or {}))
+    # Values in this map are ROOT histograms.  The fit result remains their
+    # single owner, so a shallow map copy is the intentional handoff.
+    staged_scaled_hist_map.update(dict(result.get("extra_scaled_hists") or {}))
 
     def _retain_staged_solution(joint_refinement_summary, message_override=None):
         retained_stage_validation = deepcopy(stage_validation)
@@ -5637,23 +5645,13 @@ def _require_kaon_lambda_simc_shape(kaon_signal_shape, analysis_scope, phi_setti
 
 
 def clone_kaon_lambda_comparison_payload(component_fit_result, context=""):
-    """Copy the immutable K-Lambda comparison state into an application payload."""
+    """Return scalar K-Lambda comparison metadata for legacy callers.
+
+    Histogram comparison state is fit-owned and is intentionally not copied
+    into application payloads.  Renderers receive the fit result explicitly.
+    """
     result = component_fit_result if isinstance(component_fit_result, dict) else {}
-    suffix = str(context or "scope").replace(" ", "_")
-    hist_keys = (
-        "H_k_lambda_simc_reference",
-        "H_simc_shape_k_lambda",
-        "H_kaon_fit_k_lambda_reference",
-        "H_kaon_fit_k_lambda_scaled",
-        "H_kaon_fit_k_lambda_scaled_refined",
-    )
-    payload = {
-        hist_key: _clone_hist(
-            result.get(hist_key),
-            "{}_{}_comparison".format(hist_key, suffix),
-        )
-        for hist_key in hist_keys
-    }
+    payload = {}
     for scalar_key in (
         "S_lambda_reference_scale",
         "k_lambda_reference_scale",
@@ -6853,6 +6851,9 @@ def build_particle_subtraction_component_result(
     alignment_bin_key=None,
     kaon_sigma0_source_diagnostics=None,
 ):
+    configure_particle_subtraction_root_ownership_debug(
+        resolve_particle_subtraction_root_ownership_debug(inpDict)
+    )
     mode = resolve_particle_subtraction_mode(inpDict)
     if mode != PARTICLE_SUBTRACTION_MODE_COMPONENTS:
         return {
@@ -9808,6 +9809,7 @@ def print_particle_subtraction_component_application_pages(
     component_payload,
     title_prefix="",
     cut_window=None,
+    component_fit_result=None,
 ):
     if not isinstance(component_payload, dict):
         return
@@ -9827,7 +9829,12 @@ def print_particle_subtraction_component_application_pages(
         or "staged_only"
     ).strip().lower()
     joint_mode_active = fit_mode in ("staged_plus_joint", "staged_plus_regularized_joint")
-    protected_render_state = _resolve_protected_pi_delta_render_state(component_payload)
+    fit_render_result = (
+        component_fit_result
+        if isinstance(component_fit_result, dict)
+        else component_payload
+    )
+    protected_render_state = _resolve_protected_pi_delta_render_state(fit_render_result)
     protected_kaon_mode = bool(
         protected_render_state.get("suppress_deprecated_kaon_pages")
     )
@@ -9854,7 +9861,7 @@ def print_particle_subtraction_component_application_pages(
     kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
     lambda_reference_hist, lambda_reference_scale, lambda_reference_source = (
         _resolve_kaon_lambda_reference_for_plot(
-            component_payload,
+            fit_render_result,
             component_payload.get("H_MM_nosub_after_pion_subtraction")
             or component_payload.get("H_MM_nosub_before_pion_subtraction"),
             cut_window,

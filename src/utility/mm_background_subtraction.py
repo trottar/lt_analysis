@@ -7,13 +7,18 @@
 import math
 import numpy as np
 
+from root_histogram_ownership import clone_root_histogram
+
 
 def clone_reset_hist(hist, suffix):
-    template = hist.Clone("{}{}".format(hist.GetName(), suffix))
-    if hasattr(template, "SetDirectory"):
-        template.SetDirectory(0)
-    template.Reset()
-    return template
+    return clone_root_histogram(
+        hist,
+        scope="mm_background",
+        role="reset_template",
+        name="{}{}".format(hist.GetName(), suffix),
+        reset=True,
+        sumw2=False,
+    )
 
 
 def _resolve_lambda_window(sample_hist, lambda_window=None):

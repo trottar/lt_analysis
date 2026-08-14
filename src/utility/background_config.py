@@ -154,6 +154,7 @@ PARTICLE_SUBTRACTION_MODES = (
     PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
 )
+PARTICLE_SUBTRACTION_ROOT_OWNERSHIP_DEBUG_DEFAULT = False
 PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT = "error"
 #PARTICLE_SUBTRACTION_FALLBACK_MODE_DEFAULT = PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
 PARTICLE_SUBTRACTION_FALLBACK_MODES = (
@@ -1859,6 +1860,18 @@ def resolve_particle_subtraction_mode(inp_dict=None, mode=None):
     elif mode is None:
         mode = PARTICLE_SUBTRACTION_MODE_DEFAULT
     return _normalize_particle_subtraction_mode(mode)
+
+
+def resolve_particle_subtraction_root_ownership_debug(inp_dict=None):
+    """Return the opt-in ROOT ownership tracker setting."""
+    if isinstance(inp_dict, dict):
+        return bool(
+            inp_dict.get(
+                "particle_subtraction_root_ownership_debug",
+                PARTICLE_SUBTRACTION_ROOT_OWNERSHIP_DEBUG_DEFAULT,
+            )
+        )
+    return bool(PARTICLE_SUBTRACTION_ROOT_OWNERSHIP_DEBUG_DEFAULT)
 
 
 def _normalize_particle_subtraction_fallback_mode(value):

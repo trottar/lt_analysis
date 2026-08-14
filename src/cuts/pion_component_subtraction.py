@@ -12,11 +12,52 @@ from background_config import (
     resolve_particle_subtraction_fallback_mode,
 )
 from mm_background_subtraction import mm_background_weight_from_value
+from root_histogram_ownership import clone_root_histogram
 
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
 KAON_SIGNAL_TEMPLATE_NAME = "k_lambda_signal"
 KAON_SIGMA0_TEMPLATE_NAME = "k_sigma0_signal"
+
+# Application payloads are deliberately forbidden from carrying these
+# fit-owned objects.  Renderers receive the component fit result explicitly.
+FIT_OWNED_APPLICATION_PAYLOAD_KEYS = frozenset(
+    (
+        "H_pion_control_input",
+        "H_pion_control_unscaled",
+        "H_kaon_nosub_input",
+        "H_pion_fit_step_overlays",
+        "H_kaon_fit_step_overlays",
+        "H_pi_delta_lambda_gauge",
+        "H_k_lambda_simc_reference",
+        "H_simc_shape_k_lambda",
+        "H_simc_shape_k_sigma0",
+    )
+)
+FIT_OWNED_APPLICATION_PAYLOAD_PREFIXES = (
+    "H_pi_delta_protected_",
+    "H_kaon_fit_",
+    "H_pion_fit_",
+)
+
+
+def assert_component_subtraction_payload_ownership(payload):
+    """Reject accidental fit-state aliases in an application payload."""
+    if not isinstance(payload, dict):
+        return True
+    forbidden = sorted(
+        key
+        for key in payload
+        if key in FIT_OWNED_APPLICATION_PAYLOAD_KEYS
+        or any(str(key).startswith(prefix) for prefix in FIT_OWNED_APPLICATION_PAYLOAD_PREFIXES)
+    )
+    if forbidden:
+        raise AssertionError(
+            "Application payload contains fit-owned ROOT state: {}".format(
+                ", ".join(forbidden)
+            )
+        )
+    return True
 
 
 def _is_root_object(obj):
@@ -71,16 +112,15 @@ def _json_ready_particle_subtraction_value(value):
 
 
 def _clone_hist(template_hist, name, reset=False):
-    if template_hist is None:
-        return None
-    cloned = template_hist.Clone(name)
-    if hasattr(cloned, "SetDirectory"):
-        cloned.SetDirectory(0)
-    if hasattr(cloned, "Sumw2"):
-        cloned.Sumw2()
-    if reset:
-        cloned.Reset()
-    return cloned
+    return clone_root_histogram(
+        template_hist,
+        scope="component_subtraction",
+        role="application_template",
+        name=name,
+        optional=True,
+        reset=reset,
+        sumw2=True,
+    )
 
 
 def _hist_bin_signature(hist):
@@ -239,6 +279,7 @@ def handle_particle_subtraction_fallback(payload, reason, context="particle subt
                 reason,
             )
         )
+    assert_component_subtraction_payload_ownership(payload)
     return payload
 
 

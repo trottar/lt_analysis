@@ -439,8 +439,8 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         self.assertEqual([entry["component_name"] for entry in kaon_steps], ["pi_n", "pi_sidis", "pi_delta"])
 
     def test_application_pages_label_protected_model_and_hide_staged_comparisons(self):
-        payload = self._fit_payload()
-        payload.update({
+        fit_result = self._fit_payload()
+        payload = {
             "accepted": True,
             "fit_mode": "staged_plus_joint",
             "H_pion_weight_vs_MM": object(),
@@ -451,18 +451,28 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             "H_pion_subtraction_template_MM_nosub": object(),
             "H_MM_nosub_before_pion_subtraction": object(),
             "H_MM_nosub_after_pion_subtraction": object(),
-            "diagnostics": {"pion": {}, "kaon": payload["diagnostics"]["kaon"]},
-        })
+            "diagnostics": {"pion": {}, "kaon": {}},
+        }
+        self.assertFalse(any(
+            key.startswith("H_pi_delta_protected_")
+            or key in {"H_pi_delta_lambda_gauge", "H_k_lambda_simc_reference", "H_simc_shape_k_lambda"}
+            for key in payload
+        ))
         titles = []
         labels = []
-        with mock.patch.object(fits, "_resolve_kaon_lambda_reference_for_plot", return_value=(None, None, "test")), \
+        with mock.patch.object(fits, "_resolve_protected_pi_delta_render_state", wraps=fits._resolve_protected_pi_delta_render_state) as protected_state, \
+             mock.patch.object(fits, "_resolve_kaon_lambda_reference_for_plot", return_value=(None, None, "test")) as lambda_reference, \
              mock.patch.object(fits, "_print_single_hist_page", side_effect=lambda _pdf, _hist, _label, title, *_args, **_kwargs: titles.append(title)), \
              mock.patch.object(fits, "_print_component_overlay_page", side_effect=lambda _pdf, _hist, label, title, *_args, **_kwargs: (labels.append(label), titles.append(title))):
-            fits.print_particle_subtraction_component_application_pages("ignored.pdf", payload)
+            fits.print_particle_subtraction_component_application_pages(
+                "ignored.pdf", payload, component_fit_result=fit_result
+            )
 
         self.assertTrue(any("protected applied" in title for title in titles))
         self.assertIn("protected applied pion-background model", labels)
         self.assertFalse(any("staged vs refined" in title for title in titles))
+        self.assertIs(protected_state.call_args.args[0], fit_result)
+        self.assertIs(lambda_reference.call_args.args[0], fit_result)
 
 
 if __name__ == "__main__":
