@@ -89,6 +89,12 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
         hist.SetDirectory(0)
         return hist
 
+    def test_single_pair_protected_fit_window_is_normalized(self):
+        resolved = self.fits._resolve_pi_delta_signal_protected_fit_config(
+            {"pi_delta_signal_protected_fit": {"fit_window": (1.10, 1.30)}}
+        )
+        self.assertEqual(resolved["fit_window_collection"], [(1.10, 1.30)])
+
     def _target(self, k_sigma=None):
         target = self.pi_n.Clone("kaon_target")
         target.SetDirectory(0)

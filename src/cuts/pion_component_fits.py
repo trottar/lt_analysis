@@ -5842,6 +5842,16 @@ def _immutable_source_metadata(hist, component_name):
 
 
 def _normalize_window_collection(windows):
+    # A protected-fit window is commonly configured as one numeric pair,
+    # while the component-window callers supply an iterable of such pairs.
+    # Normalize the former into the latter before iterating so a valid
+    # ``(min, max)`` configuration is not mistaken for two malformed windows.
+    if (
+        isinstance(windows, (list, tuple))
+        and len(windows) == 2
+        and all(_is_finite_number(value) for value in windows)
+    ):
+        windows = (windows,)
     normalized = []
     for window in windows or []:
         if not isinstance(window, (list, tuple)) or len(window) != 2:
