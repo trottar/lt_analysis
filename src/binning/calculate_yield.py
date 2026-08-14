@@ -1012,7 +1012,7 @@ def _apply_component_pion_subtraction_for_bin(
             ),
             "H_pi_delta_protected_k_sigma0": _clone_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_k_sigma0")
-            ),
+            ) if component_fit_result.get("H_pi_delta_protected_k_sigma0") is not None else None,
             "H_pi_delta_protected_pi_delta": _clone_hist_for_plot(
                 component_fit_result.get("H_pi_delta_protected_pi_delta")
             ),
