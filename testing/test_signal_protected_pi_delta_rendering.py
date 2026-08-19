@@ -68,6 +68,8 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             "physics_acceptance_passed": status == "success",
             "solver_success": status == "success",
             "fit_quality_passed": status == "success",
+            "k_lambda_source_available": True,
+            "k_lambda_scope_template_available": True,
             "lambda_gauge_solver_success": status == "success",
             "lambda_gauge_quality_passed": status == "success",
             "lambda_gauge_status": "success" if status == "success" else "poor_lambda_gauge_quality",
@@ -75,7 +77,16 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             "signal_amplitudes": {"k_lambda_signal": 2.0, "k_sigma0_signal": 0.8},
             "proposed_amplitudes": {"k_lambda_signal": 2.0, "k_sigma0_signal": 0.8, "pi_delta": 0.25},
             "fit_metrics": {"chi2_ndf": 1.2, "fit_p_value": 0.4, "n_fit_bins": 25, "n_free_spectrum_parameters": 3},
-            "constraint_metrics": {"mode": "gaussian", "prior_chi2": 0.1, "total_chi2": 2.5, "total_ndf": 23},
+            "constraint_metrics": {
+                "mode": "gaussian",
+                "requested_mode": "gaussian",
+                "applied_mode": "gaussian",
+                "source": "protected_lambda_gauge",
+                "effective_sigma": 0.10,
+                "prior_chi2": 0.1,
+                "total_chi2": 2.5,
+                "total_ndf": 23,
+            },
             "matrix_diagnostics": {
                 "weighted_design_effective_rank": 3,
                 "weighted_design_condition_number": 12.0,
@@ -100,6 +111,12 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
                 "fit_bins": 4,
                 "data_integral_window": 2.0,
                 "gauge_predicted_yield_window": 2.0,
+            },
+            "lambda_constraint": {
+                "source": "protected_lambda_gauge",
+                "applied_mode": "gaussian",
+                "amplitude": 2.0,
+                "effective_sigma": 0.10,
             },
             "lambda_preservation": {
                 "status": "bounded",
@@ -152,6 +169,8 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             "H_kaon_fit_total_refined": object(),
             "H_kaon_pion_bg_fit_total_refined": object(),
             "H_kaon_pion_bg_fit_total_refined_pre_postrefine": object(),
+            "H_k_lambda_simc_reference": object(),
+            "k_lambda_simc_input_loaded": True,
             "H_pion_fit_step_overlays": [
                 {"component_name": "pi_n"},
                 {"component_name": "pi_sidis"},
@@ -243,7 +262,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             "_print_residual_shift_scan_pages": lambda *_args, **_kwargs: None,
             "_print_component_step_pages": lambda _pdf, _target, steps, _prefix, label: step_calls.append((label, list(steps or []))),
             "_print_component_amplitude_pages": lambda _pdf, _target, steps, _prefix, label: amplitude_calls.append((label, list(steps or []))),
-            "_resolve_kaon_lambda_reference_for_plot": lambda *_args, **_kwargs: (None, None, "test"),
+            "_resolve_kaon_lambda_reference_for_plot": lambda *_args, **_kwargs: (None, None, "test", "test"),
         }
         return patches, overlay_pages, text_pages, step_calls, amplitude_calls, joint_pages, comparison_pages
 
@@ -352,25 +371,59 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
                 self.assertFalse(any("kaon no-sub staged" in page[0] for page in overlay_pages))
                 self.assertFalse(any("signal-protected final #pi#Delta fit" == page[0] for page in overlay_pages))
 
-    def test_protected_final_comparison_reuses_gauge_without_postsubtraction_scaling(self):
+    def test_protected_final_comparison_uses_gauge_or_canonical_fallback(self):
         payload = self._fit_payload()
         with mock.patch.object(fits, "_clone_hist", side_effect=lambda hist, _name, **_kwargs: hist), \
              mock.patch.object(fits, "_build_scaled_reference_hist_with_fallback", side_effect=AssertionError):
-            histogram, scale, source = fits._resolve_kaon_lambda_reference_for_plot(
+            histogram, scale, source, normalization = fits._resolve_kaon_lambda_reference_for_plot(
                 payload, object(), (1.105, 1.125), "setting-wide", "gauge_check"
             )
         self.assertIs(histogram, self.objects["protected_gauge"])
         self.assertEqual(scale, 2.0)
-        self.assertEqual(source, "authoritative pre-delta K-Lambda gauge")
+        self.assertEqual(source, "canonical immutable K-Lambda SIMC")
+        self.assertEqual(normalization, "protected Lambda gauge")
 
-        payload.pop("H_pi_delta_lambda_gauge")
-        with mock.patch.object(fits, "_build_scaled_reference_hist_with_fallback", side_effect=AssertionError):
-            histogram, scale, source = fits._resolve_kaon_lambda_reference_for_plot(
-                payload, object(), (1.105, 1.125), "setting-wide", "gauge_missing"
+        protected = payload["diagnostics"]["kaon"]["pi_delta_signal_protected_fit"]
+        protected["lambda_gauge"].update(
+            {"status": "poor_lambda_gauge_quality", "quality_passed": False}
+        )
+        with mock.patch.object(
+            fits,
+            "_build_scaled_reference_hist_with_fallback",
+            return_value=("canonical_fallback", 1.8, "cut-window normalized K-Lambda SIMC"),
+        ):
+            histogram, scale, source, normalization = fits._resolve_kaon_lambda_reference_for_plot(
+                payload, object(), (1.105, 1.125), "setting-wide", "poor_gauge"
             )
-        self.assertIsNone(histogram)
-        self.assertEqual(scale, 2.0)
-        self.assertIn("unavailable", source)
+        self.assertEqual(histogram, "canonical_fallback")
+        self.assertEqual(scale, 1.8)
+        self.assertEqual(source, "canonical immutable K-Lambda SIMC")
+        self.assertIn("historical", normalization)
+
+    def test_disabled_protected_fit_still_resolves_canonical_lambda_comparison(self):
+        payload = self._fit_payload(enabled=False, diagnostic=False)
+        with mock.patch.object(
+            fits,
+            "_build_scaled_reference_hist_with_fallback",
+            return_value=("canonical_fallback", 1.5, "full-range normalized K-Lambda SIMC fallback"),
+        ):
+            histogram, scale, source, normalization = fits._resolve_kaon_lambda_reference_for_plot(
+                payload, object(), (1.105, 1.125), "setting-wide", "disabled"
+            )
+        self.assertEqual(histogram, "canonical_fallback")
+        self.assertEqual(scale, 1.5)
+        self.assertEqual(source, "canonical immutable K-Lambda SIMC")
+        self.assertIn("historical", normalization)
+
+    def test_missing_lambda_source_raises_instead_of_rendering_missing_comparison(self):
+        with self.assertRaisesRegex(RuntimeError, "K-Lambda SIMC comparison is mandatory"):
+            fits._resolve_kaon_lambda_reference_for_plot(
+                {"k_lambda_simc_input_loaded": False},
+                object(),
+                (1.105, 1.125),
+                "setting-wide",
+                "missing_source",
+            )
 
     def test_unavailable_status_includes_sigma0_source_provenance_when_present(self):
         payload = self._fit_payload(diagnostic=True, status="missing_required_template")
@@ -461,7 +514,7 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
         titles = []
         labels = []
         with mock.patch.object(fits, "_resolve_protected_pi_delta_render_state", wraps=fits._resolve_protected_pi_delta_render_state) as protected_state, \
-             mock.patch.object(fits, "_resolve_kaon_lambda_reference_for_plot", return_value=(None, None, "test")) as lambda_reference, \
+             mock.patch.object(fits, "_resolve_kaon_lambda_reference_for_plot", return_value=(None, None, "test", "test")) as lambda_reference, \
              mock.patch.object(fits, "_print_single_hist_page", side_effect=lambda _pdf, _hist, _label, title, *_args, **_kwargs: titles.append(title)), \
              mock.patch.object(fits, "_print_component_overlay_page", side_effect=lambda _pdf, _hist, label, title, *_args, **_kwargs: (labels.append(label), titles.append(title))):
             fits.print_particle_subtraction_component_application_pages(

@@ -39,6 +39,7 @@ class SignalProtectedPiDeltaConfigTests(unittest.TestCase):
         self.assertIsNone(protected["lambda_gauge_window"])
         self.assertEqual(protected["lambda_gauge_constraint_mode"], "gaussian")
         self.assertAlmostEqual(protected["lambda_gauge_min_relative_uncertainty"], 0.05)
+        self.assertAlmostEqual(protected["lambda_gauge_poor_relative_uncertainty"], 0.35)
         self.assertAlmostEqual(protected["lambda_gauge_min_retention_fraction"], 0.90)
         self.assertAlmostEqual(protected["maximum_chi2_ndf"], 5.0)
         self.assertAlmostEqual(protected["minimum_p_value"], 1.0e-6)
@@ -170,6 +171,11 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
         self.assertTrue(diagnostic["lambda_gauge_quality_passed"])
         self.assertEqual(diagnostic["lambda_gauge_status"], "success")
         self.assertEqual(diagnostic["constraint_metrics"]["mode"], "gaussian")
+        self.assertEqual(diagnostic["constraint_metrics"]["source"], "protected_lambda_gauge")
+        self.assertTrue(diagnostic["k_lambda_source_available"])
+        self.assertTrue(diagnostic["k_lambda_scope_template_available"])
+        self.assertTrue(diagnostic["protected_fit_attempted"])
+        self.assertTrue(diagnostic["protected_fit_succeeded"])
         self.assertEqual(diagnostic["fit_metrics"]["n_free_spectrum_parameters"], 3)
         self.assertTrue(diagnostic["lambda_preservation"]["gate_passed"])
         self.assertIsNotNone(result["H_pi_delta_lambda_gauge"])
@@ -380,13 +386,16 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
         self.assertEqual(result["A_delta"], 0.0)
 
     def test_lambda_or_pi_delta_remains_mandatory(self):
+        missing_payload = self._legacy_payload()
+        missing_payload.pop("H_k_lambda_simc_reference")
         missing_lambda = self.fits._apply_signal_protected_pi_delta_fit(
-            self._legacy_payload(), self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
+            missing_payload, self._target(), self.pi_n, self.pi_delta, self.pi_sidis,
             None, self.k_sigma, self.config, 0.70, 1.30, [], self.inp, "Center", 0.0,
             context="missing_lambda",
         )
         diagnostic = missing_lambda["diagnostics"]["pi_delta_signal_protected_fit"]
         self.assertEqual(diagnostic["fit_variant"], "zero_pi_delta_failure")
+        self.assertFalse(diagnostic["k_lambda_source_available"])
         self.assertFalse(diagnostic["fallback_attempted"])
         self.assertEqual(missing_lambda["A_delta"], 0.0)
 
@@ -441,7 +450,7 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
             places=12,
         )
 
-    def test_poor_gauge_quality_rejects_pi_delta_application(self):
+    def test_poor_gauge_quality_uses_an_inflated_lambda_constraint(self):
         config = copy.deepcopy(self.config)
         config["pi_delta_signal_protected_fit"]["lambda_gauge_maximum_chi2_ndf"] = 1.0e-12
         result = self.fits._apply_signal_protected_pi_delta_fit(
@@ -450,10 +459,40 @@ class SignalProtectedPiDeltaFitTests(unittest.TestCase):
             [], self.inp, "Center", 0.0, context="poor_gauge",
         )
         diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
-        self.assertEqual(diagnostic["status"], "poor_lambda_gauge_quality")
+        self.assertEqual(diagnostic["status"], "success")
         self.assertFalse(diagnostic["lambda_gauge_quality_passed"])
-        self.assertEqual(result["A_delta"], 0.0)
-        self.assertIsNone(diagnostic["proposed_A_delta"])
+        self.assertEqual(diagnostic["constraint_metrics"]["mode"], "gaussian_inflated")
+        self.assertEqual(
+            diagnostic["lambda_constraint"]["source"],
+            "protected_lambda_gauge_poor_quality",
+        )
+        self.assertEqual(diagnostic["fit_metrics"]["n_free_spectrum_parameters"], 3)
+        self.assertGreater(result["A_delta"], 0.0)
+        self.assertGreater(result["S_lambda"], 0.0)
+
+    def test_failed_gauge_uses_canonical_pre_delta_lambda_constraint(self):
+        failed_gauge = {
+            "status": "insufficient_lambda_gauge_bins",
+            "solver_success": False,
+            "quality_passed": False,
+            "window": (1.105, 1.125),
+            "amplitude": None,
+            "amplitude_sigma": None,
+            "effective_sigma": None,
+            "failure_reason": "insufficient_lambda_gauge_bins",
+        }
+        with mock.patch.object(self.fits, "_fit_lambda_gauge", return_value=failed_gauge):
+            result = self._apply(self._target())
+        diagnostic = result["diagnostics"]["pi_delta_signal_protected_fit"]
+        self.assertEqual(diagnostic["status"], "success")
+        self.assertEqual(diagnostic["constraint_metrics"]["mode"], "gaussian_inflated")
+        self.assertEqual(
+            diagnostic["lambda_constraint"]["source"],
+            "canonical_k_lambda_simc_pre_delta",
+        )
+        self.assertFalse(diagnostic["lambda_gauge_solver_success"])
+        self.assertGreater(diagnostic["lambda_constraint"]["amplitude"], 0.0)
+        self.assertGreater(result["S_lambda"], 0.0)
 
     def test_pre_delta_lambda_deficit_is_explicit_and_never_attempts_delta(self):
         target = self._target()

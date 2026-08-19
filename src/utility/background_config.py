@@ -379,6 +379,9 @@ PARTICLE_SUBTRACTION_COMPONENT_FIT_WINDOW_CONFIG = {
             "lambda_gauge_window": None,
             "lambda_gauge_constraint_mode": "gaussian",
             "lambda_gauge_min_relative_uncertainty": 0.05,
+            # A failed or poor standalone gauge keeps Lambda constrained with
+            # a deliberately broad pre-delta canonical-SIMC prior.
+            "lambda_gauge_poor_relative_uncertainty": 0.35,
             "lambda_gauge_min_fraction": None,
             "lambda_gauge_max_fraction": None,
             "lambda_gauge_min_fit_bins": 2,
