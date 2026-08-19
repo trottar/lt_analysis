@@ -414,6 +414,57 @@ class PreParticleSubtractionBinningTests(unittest.TestCase):
         self.assertEqual(support["signed_weighted_yield_by_t_bin"].tolist(), [0.0])
         self.assertEqual(support["absolute_weighted_support_by_t_bin"].tolist(), [4.0])
 
+    def test_explicit_seven_phi_request_is_never_increased_by_minimum(self):
+        phi_values = np.linspace(-170.0, 170.0, 7)
+        edges, counts, diagnostics = self.find_bins._find_phi_bins(
+            phi_values,
+            7,
+            quiet=True,
+            return_diagnostics=True,
+            min_phi_bins=8,
+        )
+        self.assertEqual(len(edges) - 1, 7)
+        self.assertEqual(counts.tolist(), [1] * 7)
+        self.assertEqual(diagnostics["minimum_phi_bins"], 7)
+        self.assertFalse(diagnostics["phi_bin_reduction_applied"])
+
+    def test_shared_preflight_requires_support_for_both_epsilons(self):
+        def dense_payload(label):
+            records = []
+            for t_value in (0.2, 0.8):
+                for phi_deg in (-135.0, -45.0, 45.0, 135.0):
+                    records.append(
+                        {
+                            "source_label": label,
+                            "entry_index": len(records),
+                            "adj_t": t_value,
+                            "phi_value": math.radians(phi_deg),
+                            "physical_coefficient": 1.0,
+                        }
+                    )
+            return [{"records": records}]
+
+        with tempfile.TemporaryDirectory() as directory:
+            self.find_bins.LTANAPATH = directory
+            (Path(directory) / "src" / "kaon").mkdir(parents=True)
+            inp = self._inp()
+            inp.update({"NumPhiBins": 4, "auto_rebin_phi": True, "t_phi_support_policy": "all_cells"})
+            result = self.find_bins.resolve_shared_canonical_phi_preflight(
+                {"low": dense_payload("low"), "high": dense_payload("high")},
+                inp,
+                quiet=True,
+            )
+            self.assertEqual(len(result["t_bins"]) - 1, 2)
+            self.assertEqual(len(result["phi_bins"]) - 1, 4)
+            self.assertTrue(result["support"]["epsilon_support"]["low"]["passed"])
+            self.assertTrue(result["support"]["epsilon_support"]["high"]["passed"])
+            self.assertEqual(result["metadata"]["source"], "shared_low_high_raw_support_preflight")
+            high_inp = dict(inp, EPSSET="high")
+            reused = self.find_bins.resolve_canonical_analysis_bins_pre_subtraction(
+                dense_payload("high"), high_inp, quiet=True
+            )
+            self.assertEqual(reused["source"], "validated_authoritative_interval_file")
+
 
 if __name__ == "__main__":
     unittest.main()

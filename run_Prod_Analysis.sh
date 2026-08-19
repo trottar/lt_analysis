@@ -307,7 +307,10 @@ formatted_date=$(date +%Y%B%d_H%HM%MS%S)
 DEBUG="False" # Flag for no plot splash
 #DEBUG="True" # Flag for plot splash
 
-RATIO_THRESHOLD_SPREAD=15 # Threshold spread of ratio in percent for automated iteration algorithm
+# Analysis ranges, bin counts, MM limits, and automated ratio policy are
+# resolved by src/utility/background_config.py.  The legacy positional slots
+# remain only as this explicit sentinel during the compatibility migration.
+ANALYSIS_CONFIG_SENTINEL="__CONFIG__"
 
 if [[ $p_flag != "true" ]]; then
     ParticleType="kaon"
@@ -921,130 +924,8 @@ do
     fi
 done
 
-##############
-# HARD CODED #
-##############
-
-# TMIN should not equal zero (unless calc_xsect.f is adapted)
-# Make sure 3 sig figs (no more)
-
-# Full spectrum
-#MissMassMin=0.7
-#MissMassMax=1.3
-# MM cut (kaon)
-MissMassMin=1.10
-MissMassMax=1.16
-#MissMassMax=1.14
-#MissMassMax=1.13
-# MM cut (pion, Vijay)
-#MissMassMin=0.91
-#MissMassMax=0.98
-
-# Pion Q2 = 0.38, Vijay
-if [[ $Q2 = "0p4" && $W = "2p20" ]]; then
-    # Q2=0p4, W=2p20
-    NumtBins=5
-    NumPhiBins=16
-    TMIN=0.001
-    TMAX=0.035    
-elif [[ $Q2 = "2p1" && $W = "2p95" ]]; then
-    # Q2=2p1, W=2p95
-    #NumtBins=3
-    #NumPhiBins=9	
-	NumtBins=4
-    NumPhiBins=8
-    TMIN=0.150
-    TMAX=0.400
-    #TMIN=0.100
-    #TMAX=0.600
-    #TMIN=0.150 # Center low
-    #TMAX=0.400 # Center low
-elif [[ $Q2 = "3p0" && $W = "2p32" ]]; then
-    # Q2=3p0, W=2p32
-    #NumtBins=8
-    #NumPhiBins=12
-    #TMIN=0.450
-    #TMAX=0.850
-    #TMIN=0.350
-    #TMAX=0.850
-    #
-    #NumtBins=4
-    #NumPhiBins=12
-    #TMIN=0.400
-    #TMAX=0.750
-    #
-    #NumtBins=4
-    ##NumPhiBins=12
-	#NumtBins=3
-	NumtBins=4
-    NumPhiBins=9
-    TMIN=0.400
-    TMAX=0.800
-elif [[ $Q2 = "3p0" && $W = "3p14" ]]; then
-    # Q2=3p0, W=3p14
-    #NumtBins=6
-    #NumPhiBins=8
-    #TMIN=0.150
-    #TMAX=0.450
-    #NumtBins=6
-    #NumPhiBins=16    
-    #TMIN=0.175
-    #TMAX=0.400
-    # Good
-    #NumtBins=5
-    #NumPhiBins=10
-    #TMIN=0.160
-    #TMAX=0.360
-    #
-    NumtBins=4
-    NumPhiBins=10
-    TMIN=0.180
-    TMAX=0.600
-elif [[ $Q2 = "4p4" && $W = "2p74" ]]; then
-    # Q2=4p4, W=2p74
-    #NumtBins=6
-    #NumPhiBins=8
-    #TMIN=0.350
-    #TMAX=0.950
-    #NumtBins=10
-    #NumPhiBins=15
-    #TMIN=0.350
-    #TMAX=0.950
-    #
-    #NumtBins=5
-    #NumPhiBins=10
-    ##NumtBins=4
-    ##NumPhiBins=12
-	#NumtBins=7
-    #NumPhiBins=9
-    #TMIN=0.350
-    ##TMIN=0.400
-    #TMAX=0.850
-    ##TMAX=0.750
-	# Kin
-	#NumtBins=4
-    #NumPhiBins=12
-	#NumtBins=3
-	NumtBins=4
-    NumPhiBins=9
-    TMIN=0.400
-	TMAX=0.900	
-    #TMAX=0.750	
-elif [[ $Q2 = "5p5" && $W = "3p02" ]]; then
-    # Q2=5p5, W=3p02
-    NumtBins=2
-    NumPhiBins=7
-    TMIN=0.400
-    TMAX=0.900
-else
-    # For testing
-    NumtBins=1
-    NumPhiBins=1
-    #NumtBins=2
-    #NumPhiBins=8
-    TMIN=0.001
-    TMAX=0.990    
-fi
+# `main.py`, `main_iter.py`, and `main_auto.py` resolve all binning/range
+# fields from the authoritative central config after receiving this sentinel.
 
 # Define global variables for lt_analysis scripts
 POL="+1" # All KaonLT is positive polarity
@@ -1083,10 +964,7 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 	echo
 	echo "Beginning analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
 	echo
-	echo "                       Number of t bins: ${NumtBins}"
-	echo "                       Range of t: ${TMIN} - ${TMAX}"
-	echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"
-	echo "                       Number of Phi bins: ${NumPhiBins}"
+	echo "                       Binning/ranges: resolved by background_config.py"
 	echo
 	echo "---------------------------------------------------------"
 	echo
@@ -1776,31 +1654,21 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 		    echo "Using low epsilon t/phi bins for high epsilon..."
 		fi
 
-			export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
-
 			cd "${LTANAPATH}/src"
 
-			if [ ${#data_right[@]} -eq 0 ]; then
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
-	    # Check the exit status of the Python script
-	    if [ $? -ne 0 ]; then
-		echo
-		echo
-		echo "1 ERROR: Python script failed!"
-		echo "       See error above..."
-		exit 1
-	    fi
-	else
-	    python3 main.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${TMIN} ${TMAX} ${MissMassMin} ${MissMassMax} ${NumtBins} ${NumPhiBins} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG}
-	    # Check the exit status of the Python script
-	    if [ $? -ne 0 ]; then
-		echo
-		echo
-		echo "1 ERROR: Python script failed!"
-		echo "       See error above..."
-		exit 1
-	    fi
-	fi	
+		# Preserve the fully quoted invocation while both epsilons are prepared.
+		# The actual production calls occur only after their shared raw-support
+		# preflight below has published one canonical interval pair.
+		if [ ${#data_right[@]} -eq 0 ]; then
+		    main_args=( ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} "0" "${data_left[*]}" "${data_center[*]}" "0" ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} "0" ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} "0" ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} "0" ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "0" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "0" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "0" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "0" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG} )
+		else
+		    main_args=( ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${OutDATAFilename} ${OutDUMMYFilename} ${OutFullAnalysisFilename} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} "${data_right[*]}" "${data_left[*]}" "${data_center[*]}" ${TotDataEffChargeValRight} ${TotDataEffChargeValLeft} ${TotDataEffChargeValCenter} ${TotDummyEffChargeValRight} ${TotDummyEffChargeValLeft} ${TotDummyEffChargeValCenter} ${TotDataEffChargeErrRight} ${TotDataEffChargeErrLeft} ${TotDataEffChargeErrCenter} ${TotDummyEffChargeErrRight} ${TotDummyEffChargeErrLeft} ${TotDummyEffChargeErrCenter} "${DataEffValRight[*]}" "${DataEffValLeft[*]}" "${DataEffValCenter[*]}" "${DataEffErrRight[*]}" "${DataEffErrLeft[*]}" "${DataEffErrCenter[*]}" ${EffData} ${ParticleType} $j "${DatapThetaValRight[*]}" "${DatapThetaValLeft[*]}" "${DatapThetaValCenter[*]}" "${DataEbeamValRight[*]}" "${DataEbeamValLeft[*]}" "${DataEbeamValCenter[*]}" ${POL} ${formatted_date} ${DEBUG} )
+		fi
+		if [ "$j" = "low" ]; then
+		    main_args_low=( "${main_args[@]}" )
+		else
+		    main_args_high=( "${main_args[@]}" )
+		fi
 
 # For pion, center only	
 #	if [ ${#data_right[@]} -eq 0 ]; then
@@ -1825,19 +1693,35 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 #	    fi
 #	fi	
 	
-	if [ $j = "low" ]; then
-	    echo
-	    echo
-	    echo
-	    echo "Low Epsilon Completed!"
-	else
-	    echo
-	    echo
-	    echo
-	    echo "High Epsilon Completed!"	
-	fi
-    done
+	    done
 
+	    # Both epsilon input bundles now exist.  Capture only the canonical raw
+	    # selected records, resolve the finest common phi grid once, then run the
+	    # two independent analyses against that paired metadata.
+	    cd "${LTANAPATH}/src"
+	    if [ "$ParticleType" = "kaon" ]; then
+		preflight_dir=$(mktemp -d "${TMPDIR:-/tmp}/kaonlt_canonical_preflight.XXXXXX")
+		low_capture="${preflight_dir}/low.npz"
+		high_capture="${preflight_dir}/high.npz"
+		EPSILON="low"
+		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+		LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE="${low_capture}" python3 main.py "${main_args_low[@]}" || exit 1
+		EPSILON="high"
+		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+		LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE="${high_capture}" python3 main.py "${main_args_high[@]}" || exit 1
+		python3 utility/shared_canonical_binning_preflight.py "${Q2}" "${W}" "${ParticleType}" "${low_capture}" "${high_capture}" || exit 1
+	    fi
+	    for j in "low" "high"; do
+		EPSILON="$j"
+		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
+		if [ "$j" = "low" ]; then
+		    python3 main.py "${main_args_low[@]}" || exit 1
+		else
+		    python3 main.py "${main_args_high[@]}" || exit 1
+		fi
+		echo
+		echo "${j^} Epsilon Completed!"
+	    done
 elif [[ $i_flag = "true" && $a_flag != "true" ]]; then
     # Run for N iterations
     for ((iter=1; iter<=iterations; iter++)); do
@@ -1887,10 +1771,7 @@ elif [[ $i_flag = "true" && $a_flag != "true" ]]; then
 	    echo "Running weight iteration analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
 	    echo
 	    echo "                       Iteration: ${iter}/${iterations}"
-	    echo "                       Number of t bins: ${NumtBins}"
-	    echo "                       Range of t: ${TMIN} - ${TMAX}"
-	    echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"	
-	    echo "                       Number of Phi bins: ${NumPhiBins}"
+	    echo "                       Binning/ranges: resolved by background_config.py"
 	    echo
 	    echo "---------------------------------------------------------"
 	    echo
@@ -2213,7 +2094,7 @@ elif [[ $i_flag = "true" && $a_flag != "true" ]]; then
 	    fi
 
 	    cd "${LTANAPATH}/src"	    
-	    python3 main_iter.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG}
+		    python3 main_iter.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${DEBUG}
 
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then
@@ -2286,10 +2167,7 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
 	    echo "Running weight iteration analysis for Q2=${Q2}, W=${W}, ${EPSILON} setting..."
 	    echo
 	    echo "                       Iteration: ${iter} (maximum 50)"
-	    echo "                       Number of t bins: ${NumtBins}"
-	    echo "                       Range of t: ${TMIN} - ${TMAX}"
-	    echo "                       Missing Mass range: ${MissMassMin} - ${MissMassMax}"	
-	    echo "                       Number of Phi bins: ${NumPhiBins}"
+	    echo "                       Binning/ranges: resolved by background_config.py"
 	    echo
 	    echo "---------------------------------------------------------"
 	    echo
@@ -2614,7 +2492,7 @@ elif [[ $i_flag != "true" && $a_flag = "true" ]]; then
 		    export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
 
 		    cd "${LTANAPATH}/src"
-		    python3 main_auto.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${NumtBins} ${NumPhiBins} ${DEBUG} ${RATIO_THRESHOLD_SPREAD}
+		    python3 main_auto.py ${KIN} ${W} ${Q2} ${LOEPS} ${HIEPS} ${ParticleType} $j ${POL} ${OutFullAnalysisFilename} ${formatted_date} ${ANALYSIS_CONFIG_SENTINEL} ${ANALYSIS_CONFIG_SENTINEL} ${DEBUG} ${ANALYSIS_CONFIG_SENTINEL}
 
 	    # Check the exit status of the Python script
 	    if [ $? -ne 0 ]; then

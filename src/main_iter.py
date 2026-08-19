@@ -40,6 +40,7 @@ from time import perf_counter
 sys.path.append("utility")
 from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, last_iter, get_histogram, hist_in_dir, custom_encoder, notify_email, request_yn_response, run_bash_script
 from background_config import (
+    resolve_analysis_runtime_config,
     resolve_particle_subtraction_mode,
     resolve_simc_pion_component_files,
     resolve_simc_tree_name,
@@ -78,8 +79,25 @@ EPSSET = sys.argv[7]
 POL = sys.argv[8]
 OutFilename = sys.argv[9]
 formatted_date = sys.argv[10]
-NumtBins = sys.argv[11]
-NumPhiBins = sys.argv[12]
+analysis_runtime_config = resolve_analysis_runtime_config(Q2, W)
+
+
+def _resolve_legacy_bin_count(raw_value, config_key):
+    expected = int(analysis_runtime_config[config_key])
+    if str(raw_value).strip() == "__CONFIG__":
+        return expected
+    value = int(raw_value)
+    if value != expected:
+        raise ValueError(
+            "Deprecated positional {}={} conflicts with authoritative configuration value {}".format(
+                config_key, raw_value, expected
+            )
+        )
+    return value
+
+
+NumtBins = _resolve_legacy_bin_count(sys.argv[11], "num_t_bins")
+NumPhiBins = _resolve_legacy_bin_count(sys.argv[12], "num_phi_bins")
 inp_debug =  sys.argv[13]
 
 if inp_debug == "False":

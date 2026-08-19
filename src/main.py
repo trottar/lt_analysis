@@ -44,6 +44,7 @@ from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_ob
 from background_config import (
     get_active_bg_profile_name,
     resolve_particle_subtraction_mode,
+    resolve_analysis_runtime_config,
     resolve_simc_pion_component_files,
     resolve_simc_tree_name,
     get_proton_contamination_cleaning_config,
@@ -83,12 +84,34 @@ HIEPS = sys.argv[5]
 InDATAFilename = sys.argv[6]
 InDUMMYFilename = sys.argv[7]
 OutFilename = sys.argv[8]
-tmin = float(sys.argv[9])
-tmax = float(sys.argv[10])
-mm_min = float(sys.argv[11])
-mm_max = float(sys.argv[12])
-NumtBins = int(sys.argv[13])
-NumPhiBins = int(sys.argv[14])
+analysis_runtime_config = resolve_analysis_runtime_config(Q2, W)
+
+
+def _resolve_legacy_analysis_argument(raw_value, config_key, caster):
+    """Accept the temporary positional contract without granting it authority."""
+    configured_value = analysis_runtime_config[config_key]
+    if str(raw_value).strip() == "__CONFIG__":
+        return caster(configured_value), "config_only"
+    legacy_value = caster(raw_value)
+    if isinstance(legacy_value, float):
+        matches = math.isclose(legacy_value, float(configured_value), rel_tol=0.0, abs_tol=1.0e-12)
+    else:
+        matches = legacy_value == caster(configured_value)
+    if not matches:
+        raise ValueError(
+            "Deprecated positional {}={} conflicts with authoritative configuration value {}".format(
+                config_key, raw_value, configured_value
+            )
+        )
+    return legacy_value, "legacy_validated"
+
+
+tmin, _legacy_tmin = _resolve_legacy_analysis_argument(sys.argv[9], "tmin", float)
+tmax, _legacy_tmax = _resolve_legacy_analysis_argument(sys.argv[10], "tmax", float)
+mm_min, _legacy_mm_min = _resolve_legacy_analysis_argument(sys.argv[11], "mm_min", float)
+mm_max, _legacy_mm_max = _resolve_legacy_analysis_argument(sys.argv[12], "mm_max", float)
+NumtBins, _legacy_num_t = _resolve_legacy_analysis_argument(sys.argv[13], "num_t_bins", int)
+NumPhiBins, _legacy_num_phi = _resolve_legacy_analysis_argument(sys.argv[14], "num_phi_bins", int)
 runNumRight = sys.argv[15]
 runNumLeft = sys.argv[16]
 runNumCenter = sys.argv[17]
@@ -155,6 +178,30 @@ inpDict = {
     "mm_max" : mm_max,    
     "NumtBins" : NumtBins,
     "NumPhiBins" : NumPhiBins,
+    "analysis_runtime_config": analysis_runtime_config,
+    "analysis_runtime_config_hash": analysis_runtime_config["config_hash"],
+    "analysis_runtime_argument_sources": {
+        "tmin": _legacy_tmin,
+        "tmax": _legacy_tmax,
+        "mm_min": _legacy_mm_min,
+        "mm_max": _legacy_mm_max,
+        "num_t_bins": _legacy_num_t,
+        "num_phi_bins": _legacy_num_phi,
+    },
+    "auto_rebin_phi": analysis_runtime_config["auto_rebin_phi"],
+    "min_phi_bins": analysis_runtime_config["min_phi_bins"],
+    "t_phi_support_policy": analysis_runtime_config["t_phi_support_policy"],
+    "t_phi_support_min_events": analysis_runtime_config["t_phi_support_min_events"],
+    "pion_subtraction_scope": analysis_runtime_config["pion_subtraction_scope"],
+    "emit_setting_wide_pion_diagnostic": analysis_runtime_config[
+        "emit_setting_wide_pion_diagnostic"
+    ],
+    "require_shared_canonical_preflight": analysis_runtime_config[
+        "require_shared_canonical_preflight"
+    ],
+    "allow_unpaired_canonical_binning": os.environ.get(
+        "LT_ANALYSIS_ALLOW_UNPAIRED_CANONICAL_BINNING", ""
+    ).strip().lower() in {"1", "true", "yes"},
     "runNumRight" : runNumRight,
     "runNumLeft" : runNumLeft,
     "runNumCenter" : runNumCenter,
@@ -662,6 +709,29 @@ pion_component_payloads = {}
 kaon_signal_shape_payloads = {}
 kaon_sigma0_shape_payloads = {}
 kaon_model_simc_roots = {}
+# The launcher invokes this raw-record-only mode twice, after both input
+# bundles exist but before either full analysis starts.  Keep it ahead of SIMC
+# preparation so shared binning has no fit/model side effects.
+preflight_capture_path = os.environ.get("LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE")
+if preflight_capture_path and ParticleType == "kaon":
+    capture_records = []
+    for phiset in phisetlist:
+        payload = build_pre_particle_subtraction_binning_payload(phiset, inpDict)
+        capture_records.extend(payload.get("records") or [])
+    np.savez_compressed(
+        preflight_capture_path,
+        adj_t=np.asarray([record["adj_t"] for record in capture_records], dtype=float),
+        phi_value=np.asarray([record["phi_value"] for record in capture_records], dtype=float),
+        physical_coefficient=np.asarray(
+            [record["physical_coefficient"] for record in capture_records], dtype=float
+        ),
+    )
+    print(
+        "Captured {} selected pre-particle records for shared canonical preflight: {}".format(
+            len(capture_records), preflight_capture_path
+        )
+    )
+    sys.exit(0)
 if inpDict.get("particle_subtraction_mode") == "simc_shape_components":
     if str(ParticleType).strip().lower() == "kaon":
         stage_start = perf_counter()
@@ -1187,8 +1257,21 @@ output_file_lst.append(outputpdf)
 sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
 from xsect_support import write_xsect_support
+from ave_per_bin import ave_per_bin_data, build_t_bin_pion_parents
 
 yieldDict = {}
+# Build authoritative RF-restored t parents before any t/phi yield
+# application.  The later averages pass still consumes the yield cache for its
+# established MM-background stage, but it reuses these parent fit results.
+stage_start = perf_counter()
+debug_checkpoint(
+    "Step 6 RF-restored t-bin pion parents start",
+    hist_count=len(histlist),
+)
+for hist in histlist:
+    build_t_bin_pion_parents(hist, t_bins, phi_bins, inpDict)
+record_stage_time("Step 6 RF-restored t-bin pion parents", stage_start)
+
 stage_start = perf_counter()
 yieldDict.update(find_yield_data(histlist, inpDict))
 record_stage_time("Step 6 data yields", stage_start)
@@ -1247,9 +1330,6 @@ debug_checkpoint(
 )
 ratioDict.update(find_ratio(histlist, inpDict, yieldDict))
 record_stage_time("Step 6 ratios", stage_start)
-
-sys.path.append("binning")
-from ave_per_bin import ave_per_bin_data
 
 aveDict = {}
 stage_start = perf_counter()

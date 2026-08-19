@@ -114,7 +114,16 @@ def _collect_bin_samples(histlist, inpDict):
     return h_t_combined, h_phi_combined
 
 
-def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False, return_diagnostics=False):
+def _find_phi_bins(
+    phi_values,
+    requested_num_phi_bins,
+    quiet=False,
+    return_diagnostics=False,
+    *,
+    auto_rebin_phi=True,
+    min_phi_bins=None,
+    support_evaluator=None,
+):
     """Resolve equal-width phi bins without losing the original request.
 
     The canonical sidecar must distinguish the configured request from the
@@ -124,22 +133,41 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False, return_diagn
         print("\nFinding phi bins...")
 
     original_requested = int(requested_num_phi_bins)
-    num_phi_bins = max(MIN_PHI_BINS, original_requested)
+    if original_requested < 1:
+        raise ValueError("requested_num_phi_bins must be positive")
+    configured_minimum = MIN_PHI_BINS if min_phi_bins is None else int(min_phi_bins)
+    # A configured minimum limits automatic *reduction*; it must never enlarge
+    # an explicitly requested lower-resolution grid.
+    effective_minimum = min(original_requested, max(1, configured_minimum))
+    num_phi_bins = original_requested
     initial_num_phi_bins = int(num_phi_bins)
     reduction_iterations = 0
     bin_edges = _build_uniform_phi_bins(num_phi_bins)
 
     while True:
         counts, bins = np.histogram(phi_values, bin_edges)
-        bad_bins = np.where(counts < PHI_BIN_MIN_EVENTS)[0]
-        if len(bad_bins) == 0:
+        support = (
+            dict(support_evaluator(bin_edges) or {})
+            if support_evaluator is not None
+            else {
+                "passed": bool(np.all(counts >= PHI_BIN_MIN_EVENTS)),
+                "final_phi_event_counts": [int(value) for value in counts],
+                "support_policy": "all_phi_bins",
+                "support_threshold": int(PHI_BIN_MIN_EVENTS),
+            }
+        )
+        support.setdefault("final_phi_event_counts", [int(value) for value in counts])
+        support.setdefault("support_policy", "all_phi_bins")
+        support.setdefault("support_threshold", int(PHI_BIN_MIN_EVENTS))
+        if bool(support.get("passed")):
             break
-
+        if not bool(auto_rebin_phi):
+            break
         num_phi_bins -= 1
-        if num_phi_bins < MIN_PHI_BINS:
+        if num_phi_bins < effective_minimum:
             raise ValueError(
-                "Only {} phi-bins achieve a minimum of {} events.".format(
-                    num_phi_bins, PHI_BIN_MIN_EVENTS
+                "No phi grid from {} down to {} passes {} support.".format(
+                    original_requested, effective_minimum, support["support_policy"]
                 )
             )
         bin_edges = _build_uniform_phi_bins(num_phi_bins)
@@ -166,12 +194,18 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False, return_diagn
         "actual_num_phi_bins": int(len(bins) - 1),
         "phi_bin_reduction_applied": bool(len(bins) - 1 < initial_num_phi_bins),
         "phi_bin_reduction_reason": (
-            "minimum_event_requirement" if len(bins) - 1 < initial_num_phi_bins else None
+            "support_requirement" if len(bins) - 1 < initial_num_phi_bins else None
         ),
         "phi_bin_reduction_iterations": int(reduction_iterations),
-        "minimum_phi_events": int(PHI_BIN_MIN_EVENTS),
-        "final_phi_event_counts": [int(value) for value in counts],
-        "status": "accepted",
+        "minimum_phi_events": int(support["support_threshold"]),
+        "minimum_phi_bins": int(effective_minimum),
+        "auto_rebin_phi": bool(auto_rebin_phi),
+        "final_phi_event_counts": list(support["final_phi_event_counts"]),
+        "support": _json_ready(support),
+        "status": "accepted" if bool(support.get("passed")) else "continued_with_requested_phi_binning",
+        "continued_with_requested_phi_binning": bool(
+            not bool(support.get("passed")) and not bool(auto_rebin_phi)
+        ),
     }
     if return_diagnostics:
         return bins, counts, diagnostics
@@ -180,6 +214,87 @@ def _find_phi_bins(phi_values, requested_num_phi_bins, quiet=False, return_diagn
 
 def _build_uniform_phi_bins(num_phi_bins):
     return np.linspace(float(PHI_BIN_MIN_DEG), float(PHI_BIN_MAX_DEG), int(num_phi_bins) + 1)
+
+
+def evaluate_t_phi_raw_support(records, t_edges, phi_edges, *, minimum_events=PHI_BIN_MIN_EVENTS, policy="all_cells"):
+    """Evaluate canonical raw-record support without using signed yields.
+
+    ``records`` intentionally uses the same selected pre-particle record
+    representation as the canonical t resolver.  Detector-setting coverage is
+    therefore naturally aggregateable while the caller may retain source-wise
+    diagnostics separately.
+    """
+    if str(policy).strip().lower() != "all_cells":
+        raise ValueError("Unsupported t/phi support policy '{}'".format(policy))
+    t_values = []
+    phi_degrees = []
+    for record in records or ():
+        try:
+            t_value = float(record["adj_t"])
+            phi_value = float(record["phi_value"]) * (180.0 / math.pi)
+        except (KeyError, TypeError, ValueError):
+            continue
+        if math.isfinite(t_value) and math.isfinite(phi_value):
+            t_values.append(t_value)
+            phi_degrees.append(phi_value)
+    counts, _, _ = np.histogram2d(
+        np.asarray(t_values, dtype=float),
+        np.asarray(phi_degrees, dtype=float),
+        bins=(np.asarray(t_edges, dtype=float), np.asarray(phi_edges, dtype=float)),
+    )
+    counts = counts.astype(int)
+    threshold = int(minimum_events)
+    supported = counts >= threshold
+    marginal = (counts > 0) & ~supported
+    unsupported = counts == 0
+    return {
+        "support_policy": "all_cells",
+        "support_threshold": threshold,
+        "raw_event_count_matrix": counts.tolist(),
+        "supported_cells": int(np.count_nonzero(supported)),
+        "marginal_cells": int(np.count_nonzero(marginal)),
+        "unsupported_cells": int(np.count_nonzero(unsupported)),
+        "total_cells": int(counts.size),
+        "support_fraction": float(np.count_nonzero(supported) / counts.size) if counts.size else 0.0,
+        "passed": bool(counts.size and np.all(supported)),
+        "final_phi_event_counts": [int(value) for value in np.sum(counts, axis=0)],
+    }
+
+
+def resolve_phi_bins_from_t_phi_support(
+    records,
+    t_edges,
+    requested_num_phi_bins,
+    *,
+    auto_rebin_phi=True,
+    min_phi_bins=None,
+    minimum_events=PHI_BIN_MIN_EVENTS,
+    policy="all_cells",
+    quiet=False,
+):
+    """Use the established equal-width reducer with canonical t/phi support."""
+    phi_values = [
+        float(record["phi_value"]) * (180.0 / math.pi)
+        for record in records or ()
+        if isinstance(record, dict) and "phi_value" in record
+    ]
+    if not phi_values:
+        raise ValueError("No selected phi records available for t/phi support")
+    return _find_phi_bins(
+        np.asarray(phi_values, dtype=float),
+        requested_num_phi_bins,
+        quiet=quiet,
+        return_diagnostics=True,
+        auto_rebin_phi=auto_rebin_phi,
+        min_phi_bins=min_phi_bins,
+        support_evaluator=lambda edges: evaluate_t_phi_raw_support(
+            records,
+            t_edges,
+            edges,
+            minimum_events=minimum_events,
+            policy=policy,
+        ),
+    )
 
 
 def _calculate_edge_scaling(index, total_bins, edge_bias):
@@ -448,6 +563,10 @@ def _build_canonical_phi_metadata(canonical_metadata, phi_edges, paths):
         "phi_bin_reduction_reason": metadata.get("phi_bin_reduction_reason"),
         "phi_bin_reduction_iterations": int(metadata.get("phi_bin_reduction_iterations", 0)),
         "final_phi_event_counts": metadata.get("final_phi_event_counts", []),
+        "t_phi_support_policy": metadata.get("t_phi_support_policy"),
+        "t_phi_support_min_events": metadata.get("t_phi_support_min_events"),
+        "shared_epsilon_support": metadata.get("shared_epsilon_support", {}),
+        "shared_preflight_stage": metadata.get("shared_preflight_stage"),
         "binning_config": metadata.get("phi_binning_config"),
         "binning_config_hash": metadata.get("phi_binning_config_hash"),
         "algorithm_identifier": metadata.get("phi_algorithm_identifier", "find_bins_phi_minimum_events"),
@@ -462,14 +581,22 @@ def _build_canonical_phi_metadata(canonical_metadata, phi_edges, paths):
 
 def _canonical_phi_binning_semantic_config(inp_dict, t_binning_config):
     """Stable choices that determine the shared canonical phi proposal."""
+    requested = int(inp_dict["NumPhiBins"])
+    configured_minimum = int(inp_dict.get("min_phi_bins", MIN_PHI_BINS))
     return {
-        "requested_num_phi_bins": int(inp_dict["NumPhiBins"]),
+        "requested_num_phi_bins": requested,
         "phi_min_deg": float(PHI_BIN_MIN_DEG),
         "phi_max_deg": float(PHI_BIN_MAX_DEG),
-        "minimum_phi_bins": int(MIN_PHI_BINS),
-        "minimum_phi_events": int(PHI_BIN_MIN_EVENTS),
-        "algorithm_identifier": "find_bins_phi_minimum_events",
-        "algorithm_version": 1,
+        # This is a reduction floor, not permission to increase an explicit
+        # lower-resolution request such as Nphi=7.
+        "minimum_phi_bins": int(min(requested, max(1, configured_minimum))),
+        "minimum_phi_events": int(
+            inp_dict.get("t_phi_support_min_events", PHI_BIN_MIN_EVENTS)
+        ),
+        "auto_rebin_phi": bool(inp_dict.get("auto_rebin_phi", True)),
+        "t_phi_support_policy": str(inp_dict.get("t_phi_support_policy", "all_cells")),
+        "algorithm_identifier": "find_bins_t_phi_raw_support",
+        "algorithm_version": 2,
     }
 
 
@@ -531,8 +658,8 @@ def _validate_authoritative_phi_interval(inp_dict, consumer_epsilon):
             (bool(metadata.get("shared_with_high_epsilon", False)), "low_to_high_sharing_not_enabled"),
             (metadata.get("requested_num_phi_bins") == int(inp_dict["NumPhiBins"]), "requested_bin_count_mismatch"),
             (metadata.get("binning_config_hash") == expected_hash, "binning_config_hash_mismatch"),
-            (metadata.get("algorithm_identifier") in set(t_binning.get("allowed_phi_algorithm_identifiers") or ("find_bins_phi_minimum_events",)), "algorithm_identifier_not_allowed"),
-            (metadata.get("algorithm_version") in set(t_binning.get("allowed_phi_algorithm_versions") or (1,)), "algorithm_version_not_allowed"),
+            (metadata.get("algorithm_identifier") in set(t_binning.get("allowed_phi_algorithm_identifiers") or ("find_bins_phi_minimum_events", "find_bins_t_phi_raw_support")), "algorithm_identifier_not_allowed"),
+            (metadata.get("algorithm_version") in set(t_binning.get("allowed_phi_algorithm_versions") or (1, 2)), "algorithm_version_not_allowed"),
         )
         for valid, reason in checks:
             if not valid:
@@ -888,6 +1015,21 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         inp_dict["canonical_t_binning"] = canonical
         raise RuntimeError("No compatible low-epsilon canonical t/phi interval pair is available for high epsilon.")
     else:
+        if bool(inp_dict.get("require_shared_canonical_preflight", False)) and not bool(
+            inp_dict.get("allow_unpaired_canonical_binning", False)
+        ):
+            inp_dict["canonical_t_binning"] = {
+                "source": "unpaired_canonical_preflight_missing",
+                "resolution_status": "non_pairable_rejected",
+                "validation_rejection_reasons": pair_rejection_reasons,
+                "consumer_epsilon": "low",
+                "shared_with_high_epsilon": False,
+                "created_before_proton_cleaning": True,
+            }
+            raise RuntimeError(
+                "No shared low/high canonical t/phi preflight pair is available. "
+                "Set LT_ANALYSIS_ALLOW_UNPAIRED_CANONICAL_BINNING only for explicit development use."
+            )
         proposal_values = t_values.copy()
         proposal_values[np.argmin(proposal_values)] = float(inp_dict["tmin"])
         proposal_values[np.argmax(proposal_values)] = float(inp_dict["tmax"])
@@ -904,8 +1046,15 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         metadata = {}
         phi_metadata = {}
         phi_degrees = phi_values * (180.0 / math.pi)
-        phi_edges, _, phi_resolution = _find_phi_bins(
-            phi_degrees, requested_phi, quiet=quiet, return_diagnostics=True
+        phi_edges, _, phi_resolution = resolve_phi_bins_from_t_phi_support(
+            records,
+            t_edges,
+            requested_phi,
+            quiet=quiet,
+            auto_rebin_phi=bool(inp_dict.get("auto_rebin_phi", True)),
+            min_phi_bins=inp_dict.get("min_phi_bins", MIN_PHI_BINS),
+            minimum_events=int(inp_dict.get("t_phi_support_min_events", PHI_BIN_MIN_EVENTS)),
+            policy=str(inp_dict.get("t_phi_support_policy", "all_cells")),
         )
 
     phi_degrees = phi_values * (180.0 / math.pi)
@@ -962,8 +1111,8 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         "binning_config_hash": _canonical_binning_config_hash(semantic_config),
         "phi_binning_config": _json_ready(phi_semantic_config),
         "phi_binning_config_hash": _canonical_binning_config_hash(phi_semantic_config),
-        "phi_algorithm_identifier": "find_bins_phi_minimum_events",
-        "phi_algorithm_version": 1,
+        "phi_algorithm_identifier": "find_bins_t_phi_raw_support",
+        "phi_algorithm_version": 2,
         "algorithm_identifier": "find_bins_adjust_t_bins",
         "algorithm_version": 1,
         "input_provenance": {"source_stats": source_stats, "record_count": int(len(records))},
@@ -1006,6 +1155,180 @@ def resolve_canonical_analysis_bins_pre_subtraction(
         "source": source,
         "metadata": canonical,
         "support": support,
+    }
+
+
+def resolve_shared_canonical_phi_preflight(
+    prepass_by_epsilon,
+    inp_dict,
+    *,
+    write_interval_files=True,
+    quiet=False,
+):
+    """Resolve one low/high-epsilon canonical interval pair from raw support.
+
+    This helper deliberately consumes only the lightweight records captured
+    before particle subtraction.  It is suitable for the launcher-level common
+    orchestration point: no fitted amplitudes, normalized yields, or signed
+    weights contribute to the grid decision.  The t proposal remains
+    low-epsilon-authoritative for compatibility; only the phi grid is required
+    to pass raw support for *both* epsilon members.
+    """
+    if not isinstance(prepass_by_epsilon, dict):
+        raise TypeError("prepass_by_epsilon must map low/high epsilon to prepass payloads")
+
+    def _epsilon_payloads(epsilon):
+        payloads = prepass_by_epsilon.get(epsilon)
+        if isinstance(payloads, dict):
+            payloads = list(payloads.values())
+        return list(payloads or ())
+
+    low_records = _prepass_records(_epsilon_payloads("low"))
+    high_records = _prepass_records(_epsilon_payloads("high"))
+    if not low_records or not high_records:
+        missing = [
+            epsilon
+            for epsilon, records in (("low", low_records), ("high", high_records))
+            if not records
+        ]
+        raise ValueError(
+            "shared_canonical_preflight_missing_selected_records:{}".format(
+                ",".join(missing)
+            )
+        )
+
+    requested_t = int(inp_dict["NumtBins"])
+    requested_phi = int(inp_dict["NumPhiBins"])
+    t_binning = _canonical_t_binning_config(inp_dict)
+    low_t_values = np.asarray([record["adj_t"] for record in low_records], dtype=float)
+    low_weights = np.asarray(
+        [record["physical_coefficient"] for record in low_records], dtype=float
+    )
+    proposal_values = low_t_values.copy()
+    proposal_values[np.argmin(proposal_values)] = float(inp_dict["tmin"])
+    proposal_values[np.argmax(proposal_values)] = float(inp_dict["tmax"])
+    t_edges, _ = _find_t_bins_from_prepass(
+        proposal_values,
+        low_weights,
+        requested_t,
+        str(t_binning.get("canonical_bin_support_metric", "raw_event_count")),
+        t_binning.get("canonical_bin_support_threshold", T_BIN_MIN_EVENTS),
+        quiet=quiet,
+    )
+    policy = str(inp_dict.get("t_phi_support_policy", "all_cells"))
+    threshold = int(inp_dict.get("t_phi_support_min_events", PHI_BIN_MIN_EVENTS))
+    all_records = low_records + high_records
+
+    def _shared_support(phi_edges):
+        low_support = evaluate_t_phi_raw_support(
+            low_records, t_edges, phi_edges, minimum_events=threshold, policy=policy
+        )
+        high_support = evaluate_t_phi_raw_support(
+            high_records, t_edges, phi_edges, minimum_events=threshold, policy=policy
+        )
+        return {
+            "passed": bool(low_support["passed"] and high_support["passed"]),
+            "support_policy": policy,
+            "support_threshold": threshold,
+            "final_phi_event_counts": [
+                int(value)
+                for value in np.histogram(
+                    [record["phi_value"] * (180.0 / math.pi) for record in all_records],
+                    bins=phi_edges,
+                )[0]
+            ],
+            "epsilon_support": {"low": low_support, "high": high_support},
+        }
+
+    phi_degrees = np.asarray(
+        [record["phi_value"] * (180.0 / math.pi) for record in all_records], dtype=float
+    )
+    phi_edges, phi_counts, phi_resolution = _find_phi_bins(
+        phi_degrees,
+        requested_phi,
+        quiet=quiet,
+        return_diagnostics=True,
+        auto_rebin_phi=bool(inp_dict.get("auto_rebin_phi", True)),
+        min_phi_bins=inp_dict.get("min_phi_bins", MIN_PHI_BINS),
+        support_evaluator=_shared_support,
+    )
+    support = _support_summaries(low_t_values, low_weights, t_edges)
+    paths = _interval_paths(inp_dict)
+    semantic_config = _canonical_binning_semantic_config(inp_dict, t_binning)
+    phi_semantic_config = _canonical_phi_binning_semantic_config(inp_dict, t_binning)
+    shared_support = dict(phi_resolution.get("support") or {})
+    canonical = {
+        "schema_version": int(t_binning.get("metadata_schema_version", 1)),
+        "particle_type": inp_dict["ParticleType"],
+        "Q2_token": inp_dict["Q2"],
+        "W_token": inp_dict["W"],
+        "kinematic_key": "Q{}W{}".format(inp_dict["Q2"], inp_dict["W"]),
+        "source_epsilon": "low",
+        "consumer_epsilon": "low",
+        "shared_with_high_epsilon": True,
+        # Keep the established authoritative-interval contract: this is still
+        # pre-particle-subtraction data, with the shared orchestration recorded
+        # separately below.
+        "source_stage": "pre_particle_subtraction",
+        "shared_preflight_stage": "low_high_common_orchestration",
+        "source": "shared_low_high_raw_support_preflight",
+        "resolution_status": "computed_shared_preflight",
+        "validation_status": "computed_shared_preflight",
+        "interval_file": paths["t_path"],
+        "metadata_file": paths["t_metadata_path"],
+        "requested_num_t_bins": requested_t,
+        "actual_num_t_bins": int(len(t_edges) - 1),
+        "tmin": float(inp_dict["tmin"]),
+        "tmax": float(inp_dict["tmax"]),
+        "t_edges": _json_ready(t_edges),
+        "phi_interval_file": paths["phi_path"],
+        "phi_metadata_file": paths["phi_metadata_path"],
+        "requested_num_phi_bins": requested_phi,
+        "actual_num_phi_bins": int(len(phi_edges) - 1),
+        "phi_edges": _json_ready(phi_edges),
+        "phi_bin_reduction_applied": bool(phi_resolution["phi_bin_reduction_applied"]),
+        "phi_bin_reduction_reason": phi_resolution["phi_bin_reduction_reason"],
+        "phi_bin_reduction_iterations": int(phi_resolution["phi_bin_reduction_iterations"]),
+        "final_phi_event_counts": list(phi_resolution["final_phi_event_counts"]),
+        "shared_epsilon_support": _json_ready(shared_support.get("epsilon_support") or {}),
+        "t_phi_support_policy": policy,
+        "t_phi_support_min_events": threshold,
+        "raw_event_count_by_t_bin": _json_ready(support["raw_event_count_by_t_bin"]),
+        "binning_config": _json_ready(semantic_config),
+        "binning_config_hash": _canonical_binning_config_hash(semantic_config),
+        "phi_binning_config": _json_ready(phi_semantic_config),
+        "phi_binning_config_hash": _canonical_binning_config_hash(phi_semantic_config),
+        "phi_algorithm_identifier": "find_bins_t_phi_raw_support",
+        "phi_algorithm_version": 2,
+        "algorithm_identifier": "find_bins_adjust_t_bins",
+        "algorithm_version": 1,
+        "input_provenance": {
+            "low_record_count": int(len(low_records)),
+            "high_record_count": int(len(high_records)),
+            "selection": "raw_pre_particle_selected_records",
+        },
+        "created_before_proton_cleaning": True,
+        "creation_timestamp": datetime.now(timezone.utc).isoformat(),
+        "edge_match": True,
+        "canonical_interval_pair_id": uuid.uuid4().hex,
+    }
+    phi_metadata = _build_canonical_phi_metadata(canonical, phi_edges, paths)
+    canonical["canonical_interval_pair_hash"] = _canonical_interval_pair_hash(
+        canonical, phi_metadata
+    )
+    inp_dict["t_bins"] = np.asarray(t_edges, dtype=float)
+    inp_dict["phi_bins"] = np.asarray(phi_edges, dtype=float)
+    inp_dict["canonical_t_binning"] = canonical
+    artifacts = _interval_paths(inp_dict)
+    if write_interval_files:
+        artifacts = write_bin_interval_files(inp_dict, t_edges, phi_edges, canonical_metadata=canonical)
+    canonical["artifacts"] = artifacts
+    return {
+        "t_bins": np.asarray(t_edges, dtype=float),
+        "phi_bins": np.asarray(phi_edges, dtype=float),
+        "phi_counts": np.asarray(phi_counts, dtype=int),
+        "metadata": canonical,
+        "support": shared_support,
     }
 
 

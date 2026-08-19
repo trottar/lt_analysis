@@ -261,7 +261,12 @@ validate_external_sigma0_paths_before_cleanup
         self.assertNotRegex(function_body, r"for background in .*sigma0")
         self.assertIn('report_external_sigma0_sources "${eps_token}"', function_body)
         self.assertNotRegex(function_body, r"export .*LT_BG_SIGMA0")
-        self.assertEqual(launcher.count('export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"'), 2)
+        # The normal production path resolves paths twice for raw-support
+        # capture and twice for its actual low/high analyses.  The automatic
+        # iteration path retains one additional call site.
+        self.assertEqual(launcher.count('export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"'), 4)
+        self.assertIn("LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE", launcher)
+        self.assertIn("shared_canonical_binning_preflight.py", launcher)
 
         cleanup_block = launcher.split("# Clean all untracked files and recreate symlinks", 1)[1]
         self.assertLess(

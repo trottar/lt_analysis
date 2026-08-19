@@ -83,6 +83,7 @@ from background_config import (
     resolve_bg_stat_scale2,
     get_particle_subtraction_setting_key,
     get_proton_contamination_cleaning_config,
+    resolve_pion_subtraction_scope,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -1228,6 +1229,8 @@ def process_hist_data(
     kaon_sigma0_shape_payload=None,
     proton_cleaning_result=None,
     parent_pion_alignment=None,
+    pion_t_bin_parent_results=None,
+    require_t_bin_parent=False,
 ):
     emit_plots = inpDict.get("yield_emit_plots", True)
     suppress_scale_warnings = bool(inpDict.get("suppress_bg_opt_warnings", False))
@@ -1304,6 +1307,13 @@ def process_hist_data(
     n_t = len(t_bins) - 1
     n_phi = len(phi_bins) - 1
     particle_subtraction_mode = resolve_particle_subtraction_mode(inpDict)
+    pion_subtraction_scope = resolve_pion_subtraction_scope(inpDict)
+    use_t_bin_parent = bool(
+        ParticleType == "kaon"
+        and particle_subtraction_mode == "simc_shape_components"
+        and pion_subtraction_scope == "t_bin"
+    )
+    parent_results = list(pion_t_bin_parent_results or ())
     component_shape_payload = None
     component_fit_results = [[None for _ in range(n_phi)] for _ in range(n_t)]
     component_subtraction_payloads = [[None for _ in range(n_phi)] for _ in range(n_t)]
@@ -1320,7 +1330,7 @@ def process_hist_data(
         SubtractedParticle = "pion"
         subDict = {}
         fitDict = {}
-        if particle_subtraction_mode == "simc_shape_components":
+        if particle_subtraction_mode == "simc_shape_components" and not use_t_bin_parent:
             component_shape_payload = load_setting_pion_component_shapes(
                 inpDict,
                 phi_setting,
@@ -1778,7 +1788,67 @@ def process_hist_data(
                 component_payload = None
                 use_legacy_scalar_subtraction = True
 
-                if component_shape_payload is not None:
+                if use_t_bin_parent:
+                    parent_entry = parent_results[j] if j < len(parent_results) else None
+                    if isinstance(parent_entry, dict):
+                        scope_result = parent_entry.get("fit_result") or parent_entry.get(
+                            "particle_subtraction_component_fit"
+                        )
+                    else:
+                        scope_result = parent_entry
+                    if not isinstance(scope_result, dict):
+                        if require_t_bin_parent:
+                            raise RuntimeError(
+                                "missing_authoritative_t_bin_pion_parent:{}:t{}".format(
+                                    phi_setting, int(j) + 1
+                                )
+                            )
+                    else:
+                        # The parent owns every fit/protected ROOT object.  This
+                        # child only builds a local event/control template from
+                        # the parent's MM-dependent accepted weight.
+                        component_fit_results[j][k] = scope_result
+                        component_payload = _apply_component_pion_subtraction_for_bin(
+                            hist_bin_dict,
+                            j,
+                            k,
+                            scope_result,
+                            sub_event_cache,
+                            normfac_data,
+                            normfac_dummy,
+                            nWindows,
+                            ParticleType,
+                            POL,
+                            {**inpDict, "phi_setting": phi_setting},
+                        )
+                        component_payload["parent_scope"] = "t_bin{}".format(j + 1)
+                        component_payload["child_application_mode"] = "parent_weight_times_child_control"
+                        component_subtraction_payloads[j][k] = component_payload
+                        if component_payload.get("accepted"):
+                            use_legacy_scalar_subtraction = False
+                            scale_factor = float(
+                                component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0
+                            )
+                        else:
+                            fallback_mode = component_payload.get("fallback_mode") or "single_scale"
+                            if fallback_mode == "error":
+                                raise RuntimeError(
+                                    "calculate_yield parent pion subtraction ({}, t{}, phi{}) rejected: {}".format(
+                                        phi_setting,
+                                        int(j) + 1,
+                                        int(k) + 1,
+                                        component_payload.get("fallback_reason") or "unknown reason",
+                                    )
+                                )
+                            if fallback_mode == "single_scale":
+                                use_legacy_scalar_subtraction = True
+                            elif fallback_mode in ("zero", "skip_bin"):
+                                use_legacy_scalar_subtraction = False
+                                scale_factor = 0.0
+                            else:
+                                use_legacy_scalar_subtraction = True
+
+                elif component_shape_payload is not None:
                     scope_component_shapes = resolve_scope_component_shapes(
                         component_shape_payload,
                         analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
@@ -2691,6 +2761,8 @@ def bin_data(
     kaon_sigma0_shape_payload=None,
     proton_cleaning_result=None,
     parent_pion_alignment=None,
+    pion_t_bin_parent_results=None,
+    require_t_bin_parent=False,
 ):
 
     if data_base_cache is None:
@@ -2709,6 +2781,8 @@ def bin_data(
             kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
             proton_cleaning_result=proton_cleaning_result,
             parent_pion_alignment=parent_pion_alignment,
+            pion_t_bin_parent_results=pion_t_bin_parent_results,
+            require_t_bin_parent=require_t_bin_parent,
         )
     else:
         processed_dict, support_hist_dict, ave_event_cache, sub_event_cache = _process_hist_data_from_base_cache(
@@ -2829,7 +2903,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_max = inpDict["mm_max"]
 
     data_base_cache = None
-    if inpDict.get("bg_opt_use_data_cache"):
+    if inpDict.get("bg_opt_use_data_cache") and resolve_pion_subtraction_scope(inpDict) != "t_bin":
         data_base_cache = hist.get("_bg_opt_data_base_cache")
     kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
         hist,
@@ -2868,6 +2942,12 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
         parent_pion_alignment=parent_pion_alignment,
         proton_cleaning_result=proton_cleaning_result,
+        pion_t_bin_parent_results=hist.get("_pion_t_bin_parent_results"),
+        require_t_bin_parent=(
+            resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+            and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+            and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
+        ),
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache

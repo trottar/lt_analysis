@@ -9,6 +9,7 @@ fallback BG scale, binning thresholds, and optimizer search behavior.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from copy import deepcopy
@@ -116,6 +117,80 @@ PHI_BIN_MAX_DEG = 180.0
 T_BIN_ADJUST_TOLERANCE = 1e-3
 T_BIN_ADJUST_MAX_ITERATIONS = 50000
 T_BIN_EDGE_BIAS = 2.0
+
+# Analysis-level kinematic choices belong here rather than in the production
+# launcher.  Keep the historical values verbatim while the command-line
+# interface transitions to configuration-owned inputs.
+ANALYSIS_RUNTIME_DEFAULTS = {
+    "mm_min": 1.10,
+    "mm_max": 1.16,
+    "ratio_threshold_spread_percent": 15.0,
+    "auto_rebin_phi": True,
+    "min_phi_bins": MIN_PHI_BINS,
+    "t_phi_support_policy": "all_cells",
+    "t_phi_support_min_events": PHI_BIN_MIN_EVENTS,
+    "pion_subtraction_scope": "t_bin",
+    "emit_setting_wide_pion_diagnostic": True,
+    "require_shared_canonical_preflight": True,
+}
+
+ANALYSIS_BINNING_CONFIG = {
+    ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
+    ("2p1", "2p95"): {"num_t_bins": 4, "num_phi_bins": 8, "tmin": 0.150, "tmax": 0.400},
+    ("3p0", "2p32"): {"num_t_bins": 4, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.800},
+    ("3p0", "3p14"): {"num_t_bins": 4, "num_phi_bins": 10, "tmin": 0.180, "tmax": 0.600},
+    ("4p4", "2p74"): {"num_t_bins": 4, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.900},
+    ("5p5", "3p02"): {"num_t_bins": 2, "num_phi_bins": 7, "tmin": 0.400, "tmax": 0.900},
+}
+
+# This was the launcher's historical catch-all.  Name it explicitly so a
+# production setting can never silently receive test binning.
+ANALYSIS_TEST_BINNING_CONFIG = {
+    "num_t_bins": 1,
+    "num_phi_bins": 1,
+    "tmin": 0.001,
+    "tmax": 0.990,
+}
+ANALYSIS_TEST_SETTING_KEYS = frozenset({("0p5", "2p40")})
+ANALYSIS_RUNTIME_CONFIG_SENTINEL = "__CONFIG__"
+
+
+def resolve_analysis_runtime_config(q2, w, *, allow_test_setting=True):
+    """Return the single authoritative runtime configuration for ``Q2,W``.
+
+    The result is JSON-safe and carries a stable hash for interval/provenance
+    validation.  Unknown settings are never silently assigned test values.
+    """
+    key = (str(q2).strip(), str(w).strip())
+    if key in ANALYSIS_BINNING_CONFIG:
+        resolved = deepcopy(ANALYSIS_RUNTIME_DEFAULTS)
+        resolved.update(deepcopy(ANALYSIS_BINNING_CONFIG[key]))
+        source = "production_setting"
+    elif key in ANALYSIS_TEST_SETTING_KEYS and bool(allow_test_setting):
+        resolved = deepcopy(ANALYSIS_RUNTIME_DEFAULTS)
+        resolved.update(deepcopy(ANALYSIS_TEST_BINNING_CONFIG))
+        source = "explicit_test_setting"
+    else:
+        raise ValueError(
+            "No authoritative analysis runtime configuration for Q{} W{}. "
+            "Add an explicit ANALYSIS_BINNING_CONFIG entry instead of using test defaults.".format(
+                key[0], key[1]
+            )
+        )
+    resolved.update({"Q2": key[0], "W": key[1], "source": source})
+    serialized = json.dumps(resolved, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    resolved["config_hash"] = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+    return resolved
+
+
+def resolve_pion_subtraction_scope(inp_dict=None):
+    value = (inp_dict or {}).get(
+        "pion_subtraction_scope", ANALYSIS_RUNTIME_DEFAULTS["pion_subtraction_scope"]
+    )
+    scope = str(value).strip().lower()
+    if scope not in {"t_bin", "setting_wide"}:
+        raise ValueError("pion_subtraction_scope must be 't_bin' or 'setting_wide'")
+    return scope
 
 # Joint optimizer search space.
 # The bash-script bin counts are assumed to be close, so only scan local
@@ -531,8 +606,11 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
         ),
         "allowed_algorithm_identifiers": ("find_bins_adjust_t_bins",),
         "allowed_algorithm_versions": (1,),
-        "allowed_phi_algorithm_identifiers": ("find_bins_phi_minimum_events",),
-        "allowed_phi_algorithm_versions": (1,),
+        "allowed_phi_algorithm_identifiers": (
+            "find_bins_phi_minimum_events",
+            "find_bins_t_phi_raw_support",
+        ),
+        "allowed_phi_algorithm_versions": (1, 2),
     },
     "t_cell_fit": {
         "maximum_chi2_ndf": 5.0,

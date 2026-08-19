@@ -71,6 +71,7 @@ from background_config import (
     BG_OVERSUB_WARN_MAX_RATIO,
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     resolve_particle_subtraction_mode,
+    resolve_pion_subtraction_scope,
     resolve_particle_subtraction_windows,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
@@ -3511,6 +3512,11 @@ def rand_sub(
                 pion_component_alignment=setting_alignment,
                 alignment_bin_key=alignment_bin_key,
             )
+            setting_wide_diagnostic_only = (
+                resolve_pion_subtraction_scope(inpDict) == "t_bin"
+            )
+            component_fit_result["diagnostic_only"] = setting_wide_diagnostic_only
+            component_fit_result["application_authoritative"] = not setting_wide_diagnostic_only
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):
                 alignment_payload["persistence_status"] = alignment_status
@@ -3519,23 +3525,28 @@ def rand_sub(
                 for path in alignment_paths:
                     if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):
                         inpDict["pion_component_alignment_artifacts"].append(path)
-            component_subtraction_payload = _apply_component_pion_subtraction_setting(
-                component_fit_result,
-                sub_tree_bundle,
-                phi_setting,
-                inpDict,
-                ParticleType,
-                MM_offset_DATA,
-                hole_contains,
-                evaluate_data_event,
-                get_shifted_t,
-                mm_min,
-                mm_max,
-                norm_factor_data,
-                norm_factor_dummy,
-                nWindows,
-                active_component_targets,
-            )
+            if setting_wide_diagnostic_only:
+                # In t-bin production this fit remains a comparison diagnostic.
+                # It must never alter a later child pion weight or spectrum.
+                component_subtraction_payload = None
+            else:
+                component_subtraction_payload = _apply_component_pion_subtraction_setting(
+                    component_fit_result,
+                    sub_tree_bundle,
+                    phi_setting,
+                    inpDict,
+                    ParticleType,
+                    MM_offset_DATA,
+                    hole_contains,
+                    evaluate_data_event,
+                    get_shifted_t,
+                    mm_min,
+                    mm_max,
+                    norm_factor_data,
+                    norm_factor_dummy,
+                    nWindows,
+                    active_component_targets,
+                )
             histDict["_particle_subtraction_component_fit_setting"] = component_fit_result
             histDict["particle_subtraction_component_fit_setting"] = (
                 serialize_particle_subtraction_component_result(component_fit_result)
@@ -3577,6 +3588,8 @@ def rand_sub(
         scale_components = None
         scale_factor = 0.0
         use_legacy_scalar_subtraction = True
+        if component_fit_result is not None and bool(component_fit_result.get("diagnostic_only")):
+            use_legacy_scalar_subtraction = False
         if isinstance(component_subtraction_payload, dict):
             if component_subtraction_payload.get("accepted"):
                 use_legacy_scalar_subtraction = False

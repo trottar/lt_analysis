@@ -713,6 +713,40 @@ fine bin, the fallback sequence is direct $(t,\phi)$, then $t$-aggregated, then
 setting-wide.  This is a template-support fallback and does not replace the
 configured physical input sample.
 
+\subsection{RF-Restored Per-$t$ Pion Parents}
+
+The production pion correction is authoritative per spectrometer setting and
+canonical $t$ bin.  Its input follows the same committed event ordering as the
+final kaon yield:
+\begin{align}
+  \text{no-RF kaons}
+  \to\text{slow-proton cleaning per }t
+  \to\text{normal RF restoration}
+  \to\text{pion parent fit per }(\mathrm{setting},t).
+\end{align}
+In particular, the parent uses the cleaner's final event factor, which includes
+the RF acceptance decision.  It is not a fit to the pre-RF cleaned spectrum.
+
+The parent fit determines the MM-dependent pion weight parameters.  A daughter
+$(t_i,\phi_j)$ cell does not receive the parent's integrated pion histogram and
+does not perform another component fit.  Instead it applies the parent weight
+to its own accepted control events,
+\begin{align}
+  H_{\pi,\mathrm{child}}^{ij}(MM)
+  =w_{\pi}^{(i)}(MM)P_{\mathrm{ctrl}}^{ij}(MM).
+\end{align}
+Thus different phi cells share the fitted parent parameters but retain their
+own event support, random/dummy signs, and normalization.  The setting-wide
+fit may still be rendered as a diagnostic in this mode, but it is explicitly
+non-authoritative and cannot alter a production pion weight or amplitude.
+
+Canonical $t$ is never automatically rebinned.  A launcher-level raw-support
+preflight captures the selected records for both epsilon settings and writes
+one paired interval metadata set before either full analysis runs.  The phi
+resolver may only reduce the requested equal-width grid; it never increases an
+explicit request.  The nominal support policy is configurable and requires all
+raw $(t,\phi)$ cells to meet the configured minimum for both epsilons.
+
 \subsection{Signal-Protected Final $\pi$-$\Delta$ Fit}
 
 The final kaon-side protection starts with an independent K-$\Lambda$ gauge,
