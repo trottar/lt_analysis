@@ -2548,9 +2548,13 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
     base_inp["yield_emit_plots"] = False
     base_inp["yield_show_progress"] = False
     base_inp["suppress_bg_opt_warnings"] = True
-    # Step-4 candidate scans should not abort on a single bad component-template
-    # bin. Fall back to the legacy scalar subtraction inside the optimizer
-    # prepass and keep the stricter runtime policy for the normal analysis path.
+    # This cache is constructed during the Step-4 optimizer, before the
+    # authoritative RF-restored per-t pion parents exist.  Force the supported
+    # non-authoritative scalar-prepass *mode* (not merely its fallback mode) so
+    # the cache neither requires a parent nor performs a free (t, phi) fit.
+    # The normal production path retains its configured component mode and
+    # strict authoritative-parent contract.
+    base_inp["particle_subtraction_mode"] = "single_scale"
     base_inp["particle_subtraction_fallback_mode"] = "single_scale"
     base_inp["bg_stat_scale1"] = 0.0
     base_inp["bg_stat_scale1_by_setting"] = {

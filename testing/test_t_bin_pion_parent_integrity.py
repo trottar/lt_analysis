@@ -220,6 +220,18 @@ class CalculateYieldPayloadScopeTests(unittest.TestCase):
         )
         self.assertEqual(source.count(subtraction), 1)
 
+    def test_bg_optimizer_cache_is_explicit_single_scale_prepass(self):
+        source = self._function_source("prepare_bg_opt_data_base_cache")
+        mode_assignment = source.index(
+            'base_inp["particle_subtraction_mode"] = "single_scale"'
+        )
+        process_call = source.index("processed_dict, _, ave_event_cache, sub_event_cache = process_hist_data(")
+        self.assertLess(mode_assignment, process_call)
+        self.assertIn(
+            'base_inp["particle_subtraction_fallback_mode"] = "single_scale"',
+            source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
