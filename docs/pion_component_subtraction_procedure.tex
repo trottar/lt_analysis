@@ -740,6 +740,19 @@ own event support, random/dummy signs, and normalization.  The setting-wide
 fit may still be rendered as a diagnostic in this mode, but it is explicitly
 non-authoritative and cannot alter a production pion weight or amplitude.
 
+Every authoritative parent carries a deterministic provenance identity formed
+from the analysis $Q^2$, $W$, epsilon, spectrometer setting, canonical $t$
+index and edges, paired canonical-interval identity, and subtraction scope.
+Each daughter records that same parent identity together with its own control
+support and application status.  Thus a missing or malformed parent is a hard
+production error, while a valid parent whose correction is rejected remains a
+separate child-application fallback decision.  The parent is fit-only: the
+daughter applies the pion subtraction exactly once,
+\begin{align}
+  H_{\mathrm{final}}^{ij}
+  =H_{\mathrm{before\ pion}}^{ij}-H_{\pi,\mathrm{child}}^{ij}.
+\end{align}
+
 Canonical $t$ is never automatically rebinned.  A launcher-level raw-support
 preflight captures the selected records for both epsilon settings and writes
 one paired interval metadata set before either full analysis runs.  The phi

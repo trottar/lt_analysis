@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from copy import deepcopy
 
@@ -9,6 +11,7 @@ import numpy as np
 
 from background_config import (
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
+    get_proton_contamination_cleaning_config,
     resolve_particle_subtraction_fallback_mode,
 )
 from mm_background_subtraction import mm_background_weight_from_value
@@ -39,6 +42,122 @@ FIT_OWNED_APPLICATION_PAYLOAD_PREFIXES = (
     "H_kaon_fit_",
     "H_pion_fit_",
 )
+
+
+def _canonical_json_hash(payload):
+    """Return a deterministic SHA-256 identity for scalar provenance payloads."""
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges):
+    """Build the immutable ownership identity for one authoritative t parent."""
+    inp_dict = inp_dict or {}
+    canonical = inp_dict.get("canonical_t_binning") or {}
+    pair_id = canonical.get("canonical_interval_pair_id")
+    pair_hash = canonical.get("canonical_interval_pair_hash")
+    require_pair = bool(inp_dict.get("require_shared_canonical_preflight", False))
+    if require_pair and (not pair_id or not pair_hash):
+        raise RuntimeError(
+            "authoritative_t_bin_pion_parent_missing_canonical_pair_identity"
+        )
+
+    try:
+        edges = [float(t_edges[0]), float(t_edges[1])]
+    except (IndexError, TypeError, ValueError):
+        raise RuntimeError("invalid_authoritative_t_bin_pion_parent:t_edges")
+    if not all(math.isfinite(value) for value in edges) or edges[1] <= edges[0]:
+        raise RuntimeError("invalid_authoritative_t_bin_pion_parent:t_edges")
+
+    identity = {
+        "Q2": str(inp_dict.get("Q2", "")),
+        "W": str(inp_dict.get("W", "")),
+        "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
+        "phi_setting": str(phi_setting),
+        "t_bin_index": int(t_bin_index),
+        "t_edges": edges,
+        "canonical_interval_pair_id": pair_id,
+        "canonical_interval_pair_hash": pair_hash,
+        "pion_subtraction_scope": str(inp_dict.get("pion_subtraction_scope", "")).strip().lower(),
+    }
+    return {
+        **identity,
+        "pion_parent_id": "pion_parent_{}".format(_canonical_json_hash(identity)),
+    }
+
+
+def validate_authoritative_t_bin_pion_parent(
+    parent,
+    inp_dict,
+    phi_setting,
+    t_bin_index,
+    t_edges,
+):
+    """Validate and return the fit result for a production t-bin parent.
+
+    A missing or malformed parent is a production-integrity error.  A valid
+    parent whose pion application is later rejected is deliberately handled by
+    the established component-subtraction fallback policy instead.
+    """
+    if not isinstance(parent, dict):
+        raise RuntimeError("missing_authoritative_t_bin_pion_parent")
+
+    expected = build_t_bin_pion_parent_identity(
+        inp_dict, phi_setting, t_bin_index, t_edges
+    )
+    reasons = []
+    try:
+        parent_t_bin_index = int(parent.get("t_bin_index"))
+    except (TypeError, ValueError):
+        parent_t_bin_index = None
+    if parent_t_bin_index != int(t_bin_index):
+        reasons.append("t_bin_index")
+    expected_scope = "t_bin{}".format(int(t_bin_index) + 1)
+    if str(parent.get("analysis_scope", "")) != expected_scope:
+        reasons.append("analysis_scope")
+    if str(parent.get("phi_setting", "")) != str(phi_setting):
+        reasons.append("phi_setting")
+    if str(parent.get("epsilon", "")).strip().lower() != expected["epsilon"]:
+        reasons.append("epsilon")
+    if parent.get("canonical_interval_pair_id") != expected["canonical_interval_pair_id"]:
+        reasons.append("canonical_interval_pair_id")
+    if parent.get("canonical_interval_pair_hash") != expected["canonical_interval_pair_hash"]:
+        reasons.append("canonical_interval_pair_hash")
+    if str(parent.get("pion_subtraction_scope", "")).strip().lower() != expected["pion_subtraction_scope"]:
+        reasons.append("pion_subtraction_scope")
+
+    try:
+        actual_edges = np.asarray(parent.get("t_edges"), dtype=float)
+    except (TypeError, ValueError):
+        actual_edges = np.asarray([], dtype=float)
+    expected_edges = np.asarray(expected["t_edges"], dtype=float)
+    config = get_proton_contamination_cleaning_config(inp_dict=inp_dict)
+    tolerance = float((config.get("t_binning") or {}).get("edge_tolerance", 1.0e-9))
+    if not (
+        actual_edges.shape == expected_edges.shape
+        and np.all(np.isfinite(actual_edges))
+        and np.allclose(actual_edges, expected_edges, rtol=0.0, atol=tolerance)
+    ):
+        raise RuntimeError(
+            "pion parent canonical t-edge mismatch: expected {} got {}".format(
+                expected["t_edges"], parent.get("t_edges")
+            )
+        )
+    if parent.get("pion_parent_id") != expected["pion_parent_id"]:
+        reasons.append("pion_parent_id")
+
+    fit_result = parent.get("fit_result")
+    if not isinstance(fit_result, dict):
+        reasons.append("fit_result")
+    elif str(fit_result.get("analysis_scope", "")) != expected_scope:
+        reasons.append("fit_result.analysis_scope")
+    if reasons:
+        raise RuntimeError(
+            "invalid_authoritative_t_bin_pion_parent:{}".format(
+                ",".join(reasons)
+            )
+        )
+    return fit_result
 
 
 def assert_component_subtraction_payload_ownership(payload):

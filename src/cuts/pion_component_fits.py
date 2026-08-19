@@ -8128,6 +8128,22 @@ def _print_component_application_status_page(
             "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail"
         )
     )
+    if component_payload.get("pion_parent_id"):
+        parent_id = str(component_payload.get("pion_parent_id"))
+        details.AddText("parent id: {}".format(parent_id[:28]))
+        details.AddText(
+            "child application: {} ({})".format(
+                component_payload.get("child_application_status") or "unknown",
+                component_payload.get("child_application_mode") or "unknown",
+            )
+        )
+        support = component_payload.get("child_control_support") or {}
+        details.AddText(
+            "child controls: allcuts={} nommcuts={}".format(
+                support.get("n_events_allcuts", "n/a"),
+                support.get("n_events_nommcuts", "n/a"),
+            )
+        )
 
     fallback_reason = str(
         component_payload.get("fallback_reason")

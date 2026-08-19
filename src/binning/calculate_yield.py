@@ -103,6 +103,7 @@ from pion_component_fits import (
 from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
     assert_component_subtraction_payload_ownership,
+    build_t_bin_pion_parent_identity,
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
     fill_simc_shape_pion_subtraction_templates,
@@ -111,6 +112,7 @@ from pion_component_subtraction import (
     print_particle_subtraction_weight_support_warning,
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
+    validate_authoritative_t_bin_pion_parent,
 )
 from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
@@ -819,6 +821,38 @@ def _build_yield_component_template_hists(hist_bin_dict, j, k):
     }
 
 
+def _accepted_component_payload(payload):
+    """Return one accepted component application payload or ``None``.
+
+    Both empirical MM-background stages for a cell must receive this same
+    object.  Resolving it once prevents a stale payload from another control
+    flow from entering either stage.
+    """
+    return payload if isinstance(payload, dict) and payload.get("accepted") else None
+
+
+def _resolve_required_t_bin_parent(parent_results, inpDict, phi_setting, t_index, t_bins):
+    """Return the validated authoritative parent for one yield t bin."""
+    parent = parent_results[t_index] if t_index < len(parent_results) else None
+    t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
+    fit_result = validate_authoritative_t_bin_pion_parent(
+        parent,
+        inpDict,
+        phi_setting,
+        t_index,
+        t_edges,
+    )
+    expected_identity = build_t_bin_pion_parent_identity(
+        inpDict,
+        phi_setting,
+        t_index,
+        t_edges,
+    )
+    if parent.get("pion_parent_id") != expected_identity["pion_parent_id"]:
+        raise RuntimeError("invalid_authoritative_t_bin_pion_parent:pion_parent_id")
+    return parent, fit_result
+
+
 def _apply_component_pion_subtraction_for_bin(
     hist_bin_dict,
     j,
@@ -831,6 +865,7 @@ def _apply_component_pion_subtraction_for_bin(
     particle_type,
     pol,
     inpDict,
+    parent_metadata=None,
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
     payload = {
@@ -853,7 +888,20 @@ def _apply_component_pion_subtraction_for_bin(
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
+    if isinstance(parent_metadata, dict):
+        payload.update(
+            {
+                "pion_parent_id": parent_metadata.get("pion_parent_id"),
+                "parent_t_bin_index": parent_metadata.get("t_bin_index"),
+                "parent_fit_status": (parent_metadata.get("fit_result") or {}).get("fit_status_kaon"),
+                "child_application_mode": "parent_weight_times_child_control",
+                "child_application_status": "pending",
+                "child_application_accepted": False,
+                "child_control_support": {},
+            }
+        )
     if not gate_result["accepted"]:
+        payload["child_application_status"] = "parent_fit_rejected_by_policy"
         return handle_particle_subtraction_fallback(
             payload,
             payload["fallback_reason"],
@@ -864,6 +912,7 @@ def _apply_component_pion_subtraction_for_bin(
             ),
         )
     if sub_event_cache is None:
+        payload["child_application_status"] = "missing_child_control_cache"
         return handle_particle_subtraction_fallback(
             payload,
             "missing sub_event_cache for component-weight subtraction",
@@ -1003,6 +1052,18 @@ def _apply_component_pion_subtraction_for_bin(
             },
         }
     )
+    if isinstance(parent_metadata, dict):
+        payload.update(
+            {
+                "child_application_status": "accepted",
+                "child_application_accepted": True,
+                "child_control_support": {
+                    "n_events_allcuts": int(fill_stats.get("n_events_allcuts", 0)),
+                    "n_events_nommcuts": int(fill_stats.get("n_events_nommcuts", 0)),
+                    "sum_event_weight": float(fill_stats.get("sum_event_weight", 0.0)),
+                },
+            }
+        )
     assert_component_subtraction_payload_ownership(payload)
     return payload
 
@@ -1789,66 +1850,60 @@ def process_hist_data(
                 use_legacy_scalar_subtraction = True
 
                 if use_t_bin_parent:
-                    parent_entry = parent_results[j] if j < len(parent_results) else None
-                    if isinstance(parent_entry, dict):
-                        scope_result = parent_entry.get("fit_result") or parent_entry.get(
-                            "particle_subtraction_component_fit"
+                    parent_entry, scope_result = _resolve_required_t_bin_parent(
+                        parent_results,
+                        inpDict,
+                        phi_setting,
+                        j,
+                        t_bins,
+                    )
+                    # The parent owns every fit/protected ROOT object.  This
+                    # child only builds a local event/control template from
+                    # the parent's MM-dependent accepted weight.
+                    component_fit_results[j][k] = scope_result
+                    component_payload = _apply_component_pion_subtraction_for_bin(
+                        hist_bin_dict,
+                        j,
+                        k,
+                        scope_result,
+                        sub_event_cache,
+                        normfac_data,
+                        normfac_dummy,
+                        nWindows,
+                        ParticleType,
+                        POL,
+                        {**inpDict, "phi_setting": phi_setting},
+                        parent_metadata=parent_entry,
+                    )
+                    component_payload["parent_scope"] = "t_bin{}".format(j + 1)
+                    component_subtraction_payloads[j][k] = component_payload
+                    if component_payload.get("accepted"):
+                        use_legacy_scalar_subtraction = False
+                        scale_factor = float(
+                            component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0
                         )
                     else:
-                        scope_result = parent_entry
-                    if not isinstance(scope_result, dict):
-                        if require_t_bin_parent:
+                        fallback_mode = component_payload.get("fallback_mode") or "single_scale"
+                        if fallback_mode == "error":
                             raise RuntimeError(
-                                "missing_authoritative_t_bin_pion_parent:{}:t{}".format(
-                                    phi_setting, int(j) + 1
+                                "calculate_yield parent pion subtraction ({}, t{}, phi{}) rejected: {}".format(
+                                    phi_setting,
+                                    int(j) + 1,
+                                    int(k) + 1,
+                                    component_payload.get("fallback_reason") or "unknown reason",
                                 )
                             )
-                    else:
-                        # The parent owns every fit/protected ROOT object.  This
-                        # child only builds a local event/control template from
-                        # the parent's MM-dependent accepted weight.
-                        component_fit_results[j][k] = scope_result
-                        component_payload = _apply_component_pion_subtraction_for_bin(
-                            hist_bin_dict,
-                            j,
-                            k,
-                            scope_result,
-                            sub_event_cache,
-                            normfac_data,
-                            normfac_dummy,
-                            nWindows,
-                            ParticleType,
-                            POL,
-                            {**inpDict, "phi_setting": phi_setting},
-                        )
-                        component_payload["parent_scope"] = "t_bin{}".format(j + 1)
-                        component_payload["child_application_mode"] = "parent_weight_times_child_control"
-                        component_subtraction_payloads[j][k] = component_payload
-                        if component_payload.get("accepted"):
+                        if fallback_mode == "single_scale":
+                            use_legacy_scalar_subtraction = True
+                        elif fallback_mode in ("zero", "skip_bin"):
                             use_legacy_scalar_subtraction = False
-                            scale_factor = float(
-                                component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0
-                            )
+                            scale_factor = 0.0
                         else:
-                            fallback_mode = component_payload.get("fallback_mode") or "single_scale"
-                            if fallback_mode == "error":
-                                raise RuntimeError(
-                                    "calculate_yield parent pion subtraction ({}, t{}, phi{}) rejected: {}".format(
-                                        phi_setting,
-                                        int(j) + 1,
-                                        int(k) + 1,
-                                        component_payload.get("fallback_reason") or "unknown reason",
-                                    )
-                                )
-                            if fallback_mode == "single_scale":
-                                use_legacy_scalar_subtraction = True
-                            elif fallback_mode in ("zero", "skip_bin"):
-                                use_legacy_scalar_subtraction = False
-                                scale_factor = 0.0
-                            else:
-                                use_legacy_scalar_subtraction = True
+                            use_legacy_scalar_subtraction = True
 
                 elif component_shape_payload is not None:
+                    if pion_subtraction_scope == "t_bin":
+                        raise RuntimeError("free_t_phi_pion_fit_forbidden_in_t_bin_scope")
                     scope_component_shapes = resolve_scope_component_shapes(
                         component_shape_payload,
                         analysis_scope="t_bin{}phi_bin{}".format(j + 1, k + 1),
@@ -2046,6 +2101,12 @@ def process_hist_data(
             # ----------------------------------------------------------------
             residual_bg_weights1 = None
 
+            # Resolve the current cell once.  Fit 1 and Fit 2 must see the
+            # same accepted parent/child application payload.
+            active_component_payload = _accepted_component_payload(
+                component_subtraction_payloads[j][k]
+            )
+
             if inpDict["bg_stat_scale1"] > 0.0:
                 # Fit background and subtract
                 fitDict["background_fit1_{}_{}".format(j, k)] = bg_fit(
@@ -2059,12 +2120,6 @@ def process_hist_data(
                 )
 
                 mm_stage1_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
-                active_component_payload = component_subtraction_payloads[j][k]
-                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
-                    active_component_payload = None
-                active_component_payload = entry.get("particle_subtraction_component_payload")
-                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
-                    active_component_payload = None
                 bg_weights1, fit1_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
@@ -2167,9 +2222,6 @@ def process_hist_data(
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
-                active_component_payload = component_subtraction_payloads[j][k]
-                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
-                    active_component_payload = None
                 _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
@@ -2576,6 +2628,11 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
     for j in range(len(t_bins) - 1):
         for k in range(len(phi_bins) - 1):
             entry = processed_dict["t_bin{}phi_bin{}".format(j + 1, k + 1)]
+            # Resolve once per cached cell so both empirical-background stages
+            # receive the identical accepted application payload.
+            active_component_payload = _accepted_component_payload(
+                entry.get("particle_subtraction_component_payload")
+            )
             residual_bg_weights1 = None
             entry.setdefault("oversub_diagnostics", {})
             if bg_scale1 > 0.0 or bg_scale2 > 0.0:
@@ -2667,9 +2724,6 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
                 )
 
                 mm_stage2_input = _clone_hist_for_plot(entry["H_MM_DATA"])
-                active_component_payload = entry.get("particle_subtraction_component_payload")
-                if not (isinstance(active_component_payload, dict) and active_component_payload.get("accepted")):
-                    active_component_payload = None
                 _, fit2_diagnostics = _subtract_yield_mm_background_for_bin(
                     hist_bin_dict,
                     j,
