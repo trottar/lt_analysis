@@ -103,6 +103,7 @@ from pion_component_subtraction import (
     compute_hist_closure_metrics,
     evaluate_component_pion_application_proposal,
     evaluate_particle_subtraction_component_fit_result,
+    fingerprint_histogram_content_error,
     handle_particle_subtraction_fallback,
     print_particle_subtraction_weight_support_warning,
     simc_shape_pion_weight_from_value,
@@ -486,6 +487,7 @@ def _open_kaon_proton_cleaning_tree_bundle(
     infile_data,
     infile_dummy,
     particle_type,
+    pol,
     epsset,
     phi_setting,
     norm_factor_data,
@@ -586,6 +588,7 @@ def _process_component_weighted_subtracted_particle_tree(
     stats=None,
     tree_label=None,
     t_edges=None,
+    mm_only=False,
 ):
     if tree is None:
         raise RuntimeError("Subtracted-particle tree '{}' is None".format(tree_label or "unnamed"))
@@ -638,11 +641,558 @@ def _process_component_weighted_subtracted_particle_tree(
         if not allcuts:
             continue
 
-        _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, pion_weight, template_hists)
+        if mm_only:
+            # Parent diagnostics intentionally own only MM targets.  Do not
+            # route this sparse map through the full HGCer/detector filler.
+            if template_hists.get("h_mm") is not None:
+                template_hists["h_mm"].Fill(adj_MM, pion_weight)
+        else:
+            _fill_rand_sub_allcuts_weighted(
+                evt, adj_MM, adj_t, adj_hsdelta, pion_weight, template_hists
+            )
         if stats is not None:
             stats["n_events_allcuts"] += 1
             stats["sum_event_weight"] += float(pion_weight)
             stats["sum_event_weight_sq"] += float(pion_weight * pion_weight)
+
+
+def _canonical_t_index(value, t_bins):
+    for t_index in range(max(0, len(t_bins) - 1)):
+        if float(t_bins[t_index]) <= float(value) < float(t_bins[t_index + 1]):
+            return int(t_index)
+    return None
+
+
+def _build_authoritative_pion_control_source_cache(
+    sub_tree_bundle,
+    *,
+    proton_t_products,
+    t_bins,
+    phi_bins,
+    particle_type,
+    pol,
+    mm_offset_data,
+    hole_contains,
+    evaluate_event,
+    shifted_t_getter,
+    mm_min,
+    mm_max,
+    norm_factor_data,
+    norm_factor_dummy,
+    n_windows,
+):
+    """Build the one signed pion-control population used by t-bin parents.
+
+    The records deliberately contain only immutable scalar source information.
+    A parent fit consumes the cached t projection; later child consumers may
+    project the same record definition locally without applying any proton
+    factor to pion-control events.
+    """
+    products = list(proton_t_products or ())
+    if len(products) != max(0, len(t_bins) - 1):
+        raise RuntimeError("pion_control_cache_requires_one_proton_product_per_canonical_t")
+    if not isinstance(sub_tree_bundle, dict):
+        raise RuntimeError("pion_control_cache_requires_subtracted_particle_tree_bundle")
+
+    child_cache_fields = (
+        "source_label", "entry_index", "coefficient",
+        "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
+        "ssxptar", "ssyptar", "hsxptar", "hsyptar", "allcuts",
+        "nommcuts", "t_index", "phi_index",
+    )
+    child_cache = {
+        source: {field: [] for field in child_cache_fields}
+        for source in ("prompt", "rand", "dummy", "dummy_rand")
+    }
+    cache = {
+        "by_t": [], "source_accounting": {}, "records": [],
+        "child_event_cache": child_cache,
+    }
+    for t_index, product in enumerate(products):
+        final_targets = product.get("final_targets") or {}
+        full_source = final_targets.get("h_mm_nosub")
+        cut_source = final_targets.get("h_mm")
+        if full_source is None or cut_source is None:
+            raise RuntimeError("pion_control_cache_missing_proton_final_mm_target:t{}".format(t_index + 1))
+        cache["by_t"].append({
+            "t_index": int(t_index),
+            "t_edges": [float(t_bins[t_index]), float(t_bins[t_index + 1])],
+            "H_pion_control": clone_root_histogram(
+                full_source,
+                scope="pion_control_t{}".format(t_index + 1),
+                role="authoritative_parent_full",
+                name="H_MM_pion_control_parent_t{}_full".format(t_index + 1),
+                reset=True,
+                sumw2=True,
+            ),
+            "H_pion_control_cut": clone_root_histogram(
+                cut_source,
+                scope="pion_control_t{}".format(t_index + 1),
+                role="authoritative_parent_cut",
+                name="H_MM_pion_control_parent_t{}_cut".format(t_index + 1),
+                reset=True,
+                sumw2=True,
+            ),
+            "records": [],
+            "source_accounting": {},
+        })
+
+    source_specs = (
+        ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data)),
+        ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(n_windows)),
+        ("dummy", sub_tree_bundle.get("dummy_prompt_tree"), -float(norm_factor_dummy)),
+        ("dummy_rand", sub_tree_bundle.get("dummy_rand_tree"), float(norm_factor_dummy) / float(n_windows)),
+    )
+    mm_offset_correction = 0.0 if get_shift_mode() == "shifted" else float(mm_offset_data)
+    for source_label, tree, coefficient in source_specs:
+        source_audit = cache["source_accounting"].setdefault(source_label, {
+            "tree_entries_seen": 0,
+            "selected_records": 0,
+            "records_inside_canonical_t": 0,
+            "allcuts_records": 0,
+            "nommcuts_records": 0,
+            "signed_weight_sum": 0.0,
+            "absolute_weight_support": 0.0,
+            "coefficient": float(coefficient),
+            "canonical_t_counts": {
+                str(t_index): 0 for t_index in range(max(0, len(t_bins) - 1))
+            },
+        })
+        if tree is None:
+            continue
+        try:
+            source_audit["tree_entries_seen"] = int(tree.GetEntries())
+        except Exception:
+            source_audit["tree_entries_seen"] = 0
+        for entry_index, evt in enumerate(tree):
+            base_allcuts, base_nommcuts, _ = evaluate_event(
+                evt, mm_min, mm_max, mm_offset=mm_offset_correction
+            )
+            hole_rejected = (
+                hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
+                if hole_contains is not None else False
+            )
+            pid_pass = evt.P_hgcer_npeSum > 2.0 if particle_type == "kaon" else True
+            allcuts = bool(base_allcuts and not hole_rejected and pid_pass)
+            nommcuts = bool(base_nommcuts and not hole_rejected and pid_pass)
+            if not (allcuts or nommcuts):
+                continue
+            source_audit["selected_records"] += 1
+            adj_mm = float(get_shifted_mm(evt, mm_offset=mm_offset_correction))
+            adj_t = float(shifted_t_getter(evt))
+            t_index = _canonical_t_index(adj_t, t_bins)
+            if t_index is None:
+                continue
+            source_audit["records_inside_canonical_t"] += 1
+            source_audit["canonical_t_counts"][str(t_index)] += 1
+            source_audit["allcuts_records"] += int(allcuts)
+            source_audit["nommcuts_records"] += int(nommcuts)
+            source_audit["signed_weight_sum"] += float(coefficient)
+            source_audit["absolute_weight_support"] += abs(float(coefficient))
+            t_source_audit = cache["by_t"][t_index]["source_accounting"].setdefault(
+                source_label,
+                {
+                    "selected_records": 0,
+                    "allcuts_records": 0,
+                    "nommcuts_records": 0,
+                    "signed_weight_sum": 0.0,
+                    "absolute_weight_support": 0.0,
+                    "coefficient": float(coefficient),
+                },
+            )
+            t_source_audit["selected_records"] += 1
+            t_source_audit["allcuts_records"] += int(allcuts)
+            t_source_audit["nommcuts_records"] += int(nommcuts)
+            t_source_audit["signed_weight_sum"] += float(coefficient)
+            t_source_audit["absolute_weight_support"] += abs(float(coefficient))
+            record = {
+                "source_label": source_label,
+                "entry_index": int(entry_index),
+                "coefficient": float(coefficient),
+                "adj_MM": adj_mm,
+                "adj_t": adj_t,
+                "phi": float(evt.ph_q),
+                "allcuts": bool(allcuts),
+                "nommcuts": bool(nommcuts),
+                "proton_cleaning_factor": None,
+            }
+            cache["records"].append(record)
+            cache["by_t"][t_index]["records"].append(record)
+            if nommcuts:
+                cache["by_t"][t_index]["H_pion_control"].Fill(adj_mm, coefficient)
+            if allcuts:
+                cache["by_t"][t_index]["H_pion_control_cut"].Fill(adj_mm, coefficient)
+            phi_degrees = float(evt.ph_q) * (180.0 / math.pi)
+            phi_index = _canonical_t_index(phi_degrees, phi_bins)
+            if phi_index is not None:
+                try:
+                    from theta_cm import calculate_theta_cm_deg
+                    theta_cm_deg = float(
+                        calculate_theta_cm_deg(
+                            particle_type, pol, evt.W, evt.Q2, adj_t
+                        )
+                    )
+                except Exception:
+                    theta_cm_deg = float("nan")
+                child_record = {
+                    "source_label": source_label,
+                    "entry_index": int(entry_index),
+                    "coefficient": float(coefficient),
+                    "adj_t": adj_t,
+                    "adj_MM": adj_mm,
+                    "theta_cm_deg": theta_cm_deg,
+                    "Q2": float(evt.Q2),
+                    "W": float(evt.W),
+                    "epsilon": float(evt.epsilon),
+                    "ssxptar": float(evt.ssxptar),
+                    "ssyptar": float(evt.ssyptar),
+                    "hsxptar": float(evt.hsxptar),
+                    "hsyptar": float(evt.hsyptar),
+                    "allcuts": bool(allcuts),
+                    "nommcuts": bool(nommcuts),
+                    "t_index": int(t_index),
+                    "phi_index": int(phi_index),
+                }
+                for field, value in child_record.items():
+                    child_cache[source_label][field].append(value)
+
+    cache["records"] = tuple(cache["records"])
+    for entry in cache["by_t"]:
+        entry["records"] = tuple(entry["records"])
+    cache["by_t"] = tuple(cache["by_t"])
+    frozen_child_cache = {}
+    for source_label, section in child_cache.items():
+        frozen = {
+            field: np.asarray(
+                values,
+                dtype=(str if field == "source_label" else bool if field in ("allcuts", "nommcuts") else np.int32
+                       if field in ("t_index", "phi_index") else np.float64),
+            )
+            for field, values in section.items()
+        }
+        allcut_index, nommcut_index = {}, {}
+        for index, (t_index, phi_index) in enumerate(
+            zip(frozen["t_index"], frozen["phi_index"])
+        ):
+            key = (int(t_index), int(phi_index))
+            if bool(frozen["allcuts"][index]):
+                allcut_index.setdefault(key, []).append(int(index))
+            if bool(frozen["nommcuts"][index]):
+                nommcut_index.setdefault(key, []).append(int(index))
+        frozen["allcut_bin_index"] = {
+            key: np.asarray(indices, dtype=np.int32)
+            for key, indices in allcut_index.items()
+        }
+        frozen["nommcut_bin_index"] = {
+            key: np.asarray(indices, dtype=np.int32)
+            for key, indices in nommcut_index.items()
+        }
+        frozen_child_cache[source_label] = frozen
+    cache["child_event_cache"] = frozen_child_cache
+    if cache["by_t"]:
+        global_full = clone_root_histogram(
+            cache["by_t"][0]["H_pion_control"],
+            scope="pion_control_global",
+            role="authoritative_setting_wide_full",
+            name="H_MM_pion_control_authoritative_canonical_t_global_full",
+            reset=True,
+            sumw2=True,
+        )
+        global_cut = clone_root_histogram(
+            cache["by_t"][0]["H_pion_control_cut"],
+            scope="pion_control_global",
+            role="authoritative_setting_wide_cut",
+            name="H_MM_pion_control_authoritative_canonical_t_global_cut",
+            reset=True,
+            sumw2=True,
+        )
+        for entry in cache["by_t"]:
+            global_full.Add(entry["H_pion_control"])
+            global_cut.Add(entry["H_pion_control_cut"])
+        cache["H_pion_control_global"] = global_full
+        cache["H_pion_control_global_cut"] = global_cut
+    cache["definition"] = "one_signed_pion_control_source_cache_no_proton_weight"
+    cache["immutable_record_contract"] = True
+    return cache
+
+
+def _fill_mm_only_authoritative_pion_control_templates(
+    records,
+    template_hists,
+    pion_reference_hist,
+    pion_mm_weights,
+):
+    """Apply a parent weight to the frozen signed pion-control records.
+
+    This is deliberately MM-only.  Parent diagnostics receive detached MM
+    products from the proton stage, so invoking the generic detector filler
+    would incorrectly require HGCer and unrelated target maps.
+    """
+    stats = {
+        "n_events_allcuts": 0,
+        "n_events_nommcuts": 0,
+        "sum_event_weight": 0.0,
+        "sum_event_weight_sq": 0.0,
+        "source_weight_sums": {},
+    }
+    for record in records or ():
+        adj_mm = float(record["adj_MM"])
+        event_weight = float(record["coefficient"]) * simc_shape_pion_weight_from_value(
+            adj_mm,
+            pion_reference_hist,
+            pion_mm_weights,
+        )
+        if event_weight == 0.0 or not math.isfinite(event_weight):
+            continue
+        source_label = str(record.get("source_label") or "unknown")
+        source_stats = stats["source_weight_sums"].setdefault(
+            source_label,
+            {"signed_sum": 0.0, "absolute_support": 0.0, "allcuts_records": 0, "nommcuts_records": 0},
+        )
+        source_stats["signed_sum"] += event_weight
+        source_stats["absolute_support"] += abs(event_weight)
+        if bool(record.get("nommcuts")):
+            if template_hists.get("h_mm_full") is not None:
+                template_hists["h_mm_full"].Fill(adj_mm, event_weight)
+            stats["n_events_nommcuts"] += 1
+            source_stats["nommcuts_records"] += 1
+        if bool(record.get("allcuts")):
+            if template_hists.get("h_mm") is not None:
+                template_hists["h_mm"].Fill(adj_mm, event_weight)
+            stats["n_events_allcuts"] += 1
+            stats["sum_event_weight"] += event_weight
+            stats["sum_event_weight_sq"] += event_weight * event_weight
+            source_stats["allcuts_records"] += 1
+    return stats
+
+
+def _build_authoritative_parent_mm_diagnostic_proposal(
+    fit_result,
+    parent_input,
+    *,
+    inp_dict,
+    scope,
+):
+    """Build a proposal from the cuts-layer cache without re-looping trees."""
+    proposal_check = evaluate_component_pion_application_proposal(fit_result)
+    if not proposal_check.get("available"):
+        raise ValueError(proposal_check.get("reason") or "proposal model unavailable")
+    cut_before = parent_input.get("H_proton_cleaned_final_rf_cut")
+    full_before = parent_input.get("H_proton_cleaned_final_rf")
+    records = parent_input.get("pion_control_records")
+    if cut_before is None or full_before is None or records is None:
+        raise RuntimeError("authoritative_parent_mm_diagnostic_missing_input")
+
+    clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inp_dict)
+    weight_payload = build_simc_shape_pion_control_weights(
+        fit_result,
+        clip_min=clip_min,
+        clip_max=clip_max,
+        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inp_dict),
+        proposal_mode=True,
+    )
+    stage_weight_payload = build_simc_shape_pion_control_weights(
+        fit_result,
+        clip_min=clip_min,
+        clip_max=clip_max,
+        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inp_dict),
+        model_variant="staged",
+        proposal_mode=True,
+    )
+    templates = {
+        "h_mm": clone_root_histogram(
+            cut_before, scope=scope, role="authoritative_parent_template_cut", reset=True, sumw2=True
+        ),
+        "h_mm_full": clone_root_histogram(
+            full_before, scope=scope, role="authoritative_parent_template_full", reset=True, sumw2=True
+        ),
+    }
+    stats = _fill_mm_only_authoritative_pion_control_templates(
+        records,
+        templates,
+        weight_payload["H_pion_control_model"],
+        weight_payload["weights"],
+    )
+    before = clone_root_histogram(cut_before, scope=scope, role="authoritative_parent_before_cut")
+    full_before_copy = clone_root_histogram(
+        full_before, scope=scope, role="authoritative_parent_before_full"
+    )
+    after = clone_root_histogram(before, scope=scope, role="authoritative_parent_after_cut")
+    full_after = clone_root_histogram(
+        full_before_copy, scope=scope, role="authoritative_parent_after_full"
+    )
+    after.Add(templates["h_mm"], -1.0)
+    full_after.Add(templates["h_mm_full"], -1.0)
+    model_after_stage = clone_root_histogram(
+        full_before_copy, scope=scope, role="authoritative_parent_after_stage_model"
+    )
+    model_after_final = clone_root_histogram(
+        full_before_copy, scope=scope, role="authoritative_parent_after_final_model"
+    )
+    if stage_weight_payload.get("H_kaon_pion_model") is not None:
+        model_after_stage.Add(stage_weight_payload["H_kaon_pion_model"], -1.0)
+    if weight_payload.get("H_kaon_pion_model") is not None:
+        model_after_final.Add(weight_payload["H_kaon_pion_model"], -1.0)
+    weighted_full = _hist_integral(templates["h_mm_full"])
+    control_integral = _hist_integral(parent_input.get("H_pion_control"))
+    payload = {
+        "accepted": True,
+        "fallback_used": False,
+        "fallback_reason": "",
+        "proposal_available": True,
+        "diagnostic_only": True,
+        "application_authoritative": False,
+        "production_applied": False,
+        "diagnostic_role": "proposal",
+        "analysis_scope": fit_result.get("analysis_scope"),
+        "input_selection": "no_rf_proton_cleaning_then_rf_restored",
+        "source_target_state": "post_proton_post_rf",
+        "H_pion_control_model": weight_payload["H_pion_control_model"],
+        "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
+        "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
+        "H_pion_weight_vs_MM": weight_payload["H_pion_weight_vs_MM"],
+        "H_pion_control_model_stage": stage_weight_payload["H_pion_control_model"],
+        "H_kaon_pion_model_stage": stage_weight_payload["H_kaon_pion_model"],
+        "H_weighted_pion_control_model_stage": stage_weight_payload.get("H_weighted_pion_control_model"),
+        "H_pion_weight_vs_MM_stage": stage_weight_payload["H_pion_weight_vs_MM"],
+        "weights": weight_payload["weights"],
+        "H_pion_subtraction_template_MM": templates["h_mm"],
+        "H_pion_subtraction_template_MM_nosub": templates["h_mm_full"],
+        "H_MM_before_pion_subtraction": before,
+        "H_MM_after_pion_subtraction": after,
+        "H_MM_nosub_before_pion_subtraction": full_before_copy,
+        "H_MM_nosub_after_pion_subtraction": full_after,
+        "H_MM_nosub_after_pion_subtraction_model_stage": model_after_stage,
+        "H_MM_nosub_after_pion_subtraction_model_final": model_after_final,
+        "weighted_pion_integral": weighted_full,
+        "weighted_pion_integral_cut": _hist_integral(templates["h_mm"]),
+        "weighted_pion_integral_full": weighted_full,
+        "particle_subtraction_effective_scale": (
+            weighted_full / control_integral if control_integral > 0.0 else 0.0
+        ),
+        "kaon_integral_before_pion_sub": _hist_integral(before),
+        "kaon_integral_after_pion_sub": _hist_integral(after),
+        "kaon_integral_before_pion_sub_full": _hist_integral(full_before_copy),
+        "kaon_integral_after_pion_sub_full": _hist_integral(full_after),
+        "diagnostics": {
+            **dict(weight_payload.get("diagnostics") or {}),
+            "weight_diagnostics_stage": dict(stage_weight_payload.get("diagnostics") or {}),
+            **stats,
+            "source_definition": "authoritative_pion_control_cache",
+            "event_template_closure": compute_hist_closure_metrics(
+                weight_payload.get("H_kaon_pion_model"), templates["h_mm_full"]
+            ),
+            "final_closure": compute_hist_closure_metrics(
+                full_before_copy, full_after
+            ),
+        },
+    }
+    assert_component_subtraction_payload_ownership(payload)
+    return payload
+
+
+def _build_authoritative_parent_single_scale_final(
+    proposal_payload,
+    production_evaluation,
+    parent_input,
+    *,
+    inp_dict,
+    phi_setting,
+    mm_offset_data,
+    scope,
+):
+    """Apply the established single-scale fallback to the same frozen records."""
+    before = proposal_payload.get("H_MM_before_pion_subtraction")
+    full_before = proposal_payload.get("H_MM_nosub_before_pion_subtraction")
+    reference = proposal_payload.get("H_pion_control_model")
+    if before is None or full_before is None or reference is None:
+        raise RuntimeError("missing_source_histogram")
+    templates = {
+        "h_mm": clone_root_histogram(before, scope=scope, role="single_scale_cached_template_cut", reset=True, sumw2=True),
+        "h_mm_full": clone_root_histogram(full_before, scope=scope, role="single_scale_cached_template_full", reset=True, sumw2=True),
+    }
+    unit_weights = np.ones(int(reference.GetNbinsX()) + 2, dtype=np.float64)
+    stats = _fill_mm_only_authoritative_pion_control_templates(
+        parent_input.get("pion_control_records"), templates, reference, unit_weights
+    )
+    windows = resolve_particle_subtraction_windows(
+        "kaon", "pion", mm_offset_data, inp_dict=inp_dict, phi_setting=phi_setting
+    )
+    try:
+        scale_components = compute_staged_particle_subtraction_scales(
+            full_before,
+            templates["h_mm_full"],
+            windows,
+            context="parent diagnostic single-scale ({})".format(phi_setting),
+        )
+        scale_factor = float(scale_components["total_scale_factor"])
+    except ZeroDivisionError:
+        scale_components = None
+        scale_factor = 0.0
+    for histogram in templates.values():
+        histogram.Scale(scale_factor)
+    after = clone_root_histogram(before, scope=scope, role="single_scale_cached_after_cut")
+    full_after = clone_root_histogram(full_before, scope=scope, role="single_scale_cached_after_full")
+    after.Add(templates["h_mm"], -1.0)
+    full_after.Add(templates["h_mm_full"], -1.0)
+    final_weight = clone_root_histogram(reference, scope=scope, role="single_scale_cached_weight", reset=True)
+    for bin_index in range(1, final_weight.GetNbinsX() + 1):
+        final_weight.SetBinContent(bin_index, scale_factor)
+        final_weight.SetBinError(bin_index, 0.0)
+    expected_after = clone_root_histogram(
+        full_before, scope=scope, role="single_scale_cached_expected_after"
+    )
+    expected_after.Add(templates["h_mm_full"], -1.0)
+    final = {
+        "accepted": True,
+        "proposal_available": False,
+        "diagnostic_role": "final",
+        "final_application_status": "applied_fallback",
+        "production_evaluation_accepted": False,
+        "production_rejection_reasons": [
+            reason.strip() for reason in str(production_evaluation.get("reason") or "").split(";") if reason.strip()
+        ],
+        "fallback_used": True,
+        "fallback_mode": "single_scale",
+        "fallback_reason": production_evaluation.get("reason") or "component-fit result rejected",
+        "diagnostic_only": True,
+        "application_authoritative": False,
+        "production_applied": False,
+        "analysis_scope": proposal_payload.get("analysis_scope"),
+        "input_selection": proposal_payload.get("input_selection"),
+        "source_target_state": proposal_payload.get("source_target_state"),
+        "H_pion_control_model": clone_root_histogram(reference, scope=scope, role="single_scale_cached_control"),
+        "H_kaon_pion_model": clone_root_histogram(templates["h_mm_full"], scope=scope, role="single_scale_cached_model"),
+        "H_weighted_pion_control_model": clone_root_histogram(templates["h_mm_full"], scope=scope, role="single_scale_cached_weighted_model"),
+        "H_pion_weight_vs_MM": final_weight,
+        "weights": np.full(int(reference.GetNbinsX()) + 2, scale_factor, dtype=np.float64),
+        "H_pion_subtraction_template_MM": templates["h_mm"],
+        "H_pion_subtraction_template_MM_nosub": templates["h_mm_full"],
+        "H_MM_before_pion_subtraction": clone_root_histogram(before, scope=scope, role="single_scale_cached_before"),
+        "H_MM_after_pion_subtraction": after,
+        "H_MM_nosub_before_pion_subtraction": clone_root_histogram(full_before, scope=scope, role="single_scale_cached_full_before"),
+        "H_MM_nosub_after_pion_subtraction": full_after,
+        "H_MM_nosub_after_pion_subtraction_model_stage": clone_root_histogram(full_after, scope=scope, role="single_scale_cached_stage_model"),
+        "H_MM_nosub_after_pion_subtraction_model_final": clone_root_histogram(full_after, scope=scope, role="single_scale_cached_final_model"),
+        "particle_subtraction_effective_scale": scale_factor,
+        "weighted_pion_integral": _hist_integral(templates["h_mm_full"]),
+        "weighted_pion_integral_cut": _hist_integral(templates["h_mm"]),
+        "weighted_pion_integral_full": _hist_integral(templates["h_mm_full"]),
+        "kaon_integral_before_pion_sub": _hist_integral(before),
+        "kaon_integral_after_pion_sub": _hist_integral(after),
+        "kaon_integral_before_pion_sub_full": _hist_integral(full_before),
+        "kaon_integral_after_pion_sub_full": _hist_integral(full_after),
+        "diagnostics": {
+            **stats,
+            "source_definition": "authoritative_pion_control_cache",
+            "fallback_mode": "single_scale",
+            "scale_components": scale_components,
+            "event_template_closure": compute_hist_closure_metrics(templates["h_mm_full"], templates["h_mm_full"]),
+            "final_closure": compute_hist_closure_metrics(expected_after, full_after),
+        },
+    }
+    assert_component_subtraction_payload_ownership(final)
+    return final
 
 
 def _process_rand_sub_background_tree(
@@ -770,6 +1320,7 @@ def _apply_component_pion_subtraction_setting(
     source_target_state="post_proton_post_rf",
     t_edges=None,
     proposal_only=False,
+    mm_only=False,
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
     payload = {
@@ -891,6 +1442,7 @@ def _apply_component_pion_subtraction_setting(
             stats=stats,
             tree_label="component {}".format(label),
             t_edges=t_edges,
+            mm_only=bool(mm_only),
         )
 
     h_mm_before = clone_reset_hist(data_targets["h_mm"], "_before_pion_sub")
@@ -991,6 +1543,7 @@ def build_component_pion_application_proposal(
     input_selection="no_rf_proton_cleaning_then_rf_restored",
     source_target_state="post_proton_post_rf",
     t_edges=None,
+    mm_only=False,
 ):
     """Build an evaluable, detached parent diagnostic proposal.
 
@@ -1023,6 +1576,7 @@ def build_component_pion_application_proposal(
         source_target_state=source_target_state,
         t_edges=t_edges,
         proposal_only=True,
+        mm_only=bool(mm_only),
     )
 
 
@@ -1187,6 +1741,7 @@ def _build_single_scale_parent_diagnostic_final(
             stats=stats,
             tree_label="single-scale {}".format(label),
             t_edges=t_edges,
+            mm_only=True,
         )
     windows = resolve_particle_subtraction_windows(
         particle_type,
@@ -3594,7 +4149,14 @@ def rand_sub(
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
-        particle_subtraction_cuts(histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg)
+        authoritative_component_t_bin = (
+            resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+            and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+        )
+        if not authoritative_component_t_bin:
+            particle_subtraction_cuts(
+                histDict, subDict, inpDict, SubtractedParticle, hgcer_cutg
+            )
 
         if resolve_particle_subtraction_mode(inpDict) == "simc_shape_components":
             proton_cleaning_output_pdf = outputpdf.replace(
@@ -3748,6 +4310,9 @@ def rand_sub(
             }
             active_component_targets = component_targets
             component_fit_kaon_input = H_MM_nosub_DATA
+            pion_control_cache = None
+            frozen_t_bins = None
+            frozen_phi_bins = None
 
             if isinstance(proton_cleaning_result, dict):
                 if bool(proton_cleaning_result.get("accepted")):
@@ -3846,6 +4411,51 @@ def rand_sub(
                         H_pmy_DATA = active_component_targets.get("h_pmy")
                         H_pmz_DATA = active_component_targets.get("h_pmz")
 
+                if (
+                    resolve_pion_subtraction_scope(inpDict) == "t_bin"
+                    and str(ParticleType).strip().lower() == "kaon"
+                ):
+                    canonical_binning = inpDict.get("canonical_t_binning") or {}
+                    frozen_t_bins = inpDict.get("t_bins")
+                    frozen_phi_bins = inpDict.get("phi_bins")
+                    if frozen_t_bins is None:
+                        frozen_t_bins = canonical_binning.get("t_edges")
+                    if frozen_phi_bins is None:
+                        frozen_phi_bins = canonical_binning.get("phi_edges")
+                    if frozen_t_bins is None or frozen_phi_bins is None:
+                        raise RuntimeError(
+                            "authoritative_t_bin_pion_parents_require_frozen_canonical_bins"
+                        )
+                    proton_t_products = tuple(
+                        (proton_cleaning_application or {}).get("canonical_t_products") or ()
+                    )
+                    if len(proton_t_products) != len(frozen_t_bins) - 1:
+                        raise RuntimeError(
+                            "authoritative_t_bin_pion_parents_require_direct_proton_products"
+                        )
+                    pion_control_cache = _build_authoritative_pion_control_source_cache(
+                        sub_tree_bundle,
+                        proton_t_products=proton_t_products,
+                        t_bins=frozen_t_bins,
+                        phi_bins=frozen_phi_bins,
+                        particle_type=ParticleType,
+                        pol=inpDict.get("POL"),
+                        mm_offset_data=MM_offset_DATA,
+                        hole_contains=hole_contains,
+                        evaluate_event=evaluate_data_event,
+                        shifted_t_getter=get_shifted_t,
+                        mm_min=mm_min,
+                        mm_max=mm_max,
+                        norm_factor_data=norm_factor_data,
+                        norm_factor_dummy=norm_factor_dummy,
+                        n_windows=nWindows,
+                    )
+                    histDict["_authoritative_pion_control_source_cache"] = pion_control_cache
+                    histDict["pion_control_source_audit"] = {
+                        "definition": pion_control_cache.get("definition"),
+                        "source_accounting": pion_control_cache.get("source_accounting"),
+                    }
+
                 histDict["proton_contamination_cleaning_result_setting"] = (
                     serialize_kaon_proton_cleaning_result(proton_cleaning_result)
                 )
@@ -3874,6 +4484,15 @@ def rand_sub(
                 kaon_signal_shape_payload,
                 analysis_scope="setting-wide",
             )
+            component_pion_control_input = subDict["H_MM_nosub_SUB_DATA"]
+            if resolve_pion_subtraction_scope(inpDict) == "t_bin":
+                component_pion_control_input = (pion_control_cache or {}).get(
+                    "H_pion_control_global"
+                )
+                if component_pion_control_input is None:
+                    raise RuntimeError(
+                        "authoritative_t_bin_setting_wide_diagnostic_requires_pion_control_cache"
+                    )
             signal_shape_diagnostics = (
                 dict(kaon_signal_shape_payload.get("diagnostics") or {})
                 if isinstance(kaon_signal_shape_payload, dict)
@@ -3923,13 +4542,13 @@ def rand_sub(
                     EPSSET,
                     "setting-wide",
                     alignment_bin_key,
-                    subDict["H_MM_nosub_SUB_DATA"],
+                    component_pion_control_input,
                     scope_shapes,
                     inp_dict=inpDict,
                     common_setting_shift_gev=MM_offset_DATA,
                 )
             component_fit_result = build_particle_subtraction_component_result(
-                subDict["H_MM_nosub_SUB_DATA"],
+                component_pion_control_input,
                 component_fit_kaon_input,
                 scope_shapes,
                 inpDict,
@@ -3968,25 +4587,42 @@ def rand_sub(
                 # It must never alter a later child pion weight or spectrum.
                 component_subtraction_payload = None
                 if bool(inpDict.get("emit_setting_wide_pion_diagnostic", True)):
-                    component_diagnostic_payload = _apply_component_pion_subtraction_setting(
+                    setting_parent_input = {
+                        "H_proton_cleaned_final_rf_cut": active_component_targets.get("h_mm"),
+                        "H_proton_cleaned_final_rf": active_component_targets.get("h_mm_nosub"),
+                        "H_pion_control": (pion_control_cache or {}).get("H_pion_control_global"),
+                        "pion_control_records": (pion_control_cache or {}).get("records"),
+                    }
+                    setting_scope = "pion_setting_wide_diagnostic"
+                    proposal = _build_authoritative_parent_mm_diagnostic_proposal(
                         component_fit_result,
-                        sub_tree_bundle,
-                        phi_setting,
-                        inpDict,
-                        ParticleType,
-                        MM_offset_DATA,
-                        hole_contains,
-                        evaluate_data_event,
-                        get_shifted_t,
-                        mm_min,
-                        mm_max,
-                        norm_factor_data,
-                        norm_factor_dummy,
-                        nWindows,
-                        _clone_component_targets_for_setting_wide_diagnostic(
-                            active_component_targets
-                        ),
-                        diagnostic_only=True,
+                        setting_parent_input,
+                        inp_dict=inpDict,
+                        scope=setting_scope,
+                    )
+                    setting_evaluation = evaluate_particle_subtraction_component_fit_result(
+                        component_fit_result, inpDict
+                    )
+                    component_diagnostic_payload, setting_final_status = (
+                        resolve_parent_diagnostic_final_application(
+                            proposal,
+                            setting_evaluation,
+                            fallback_context=lambda: _build_authoritative_parent_single_scale_final(
+                                proposal,
+                                setting_evaluation,
+                                setting_parent_input,
+                                inp_dict=inpDict,
+                                phi_setting=phi_setting,
+                                mm_offset_data=MM_offset_DATA,
+                                scope=setting_scope,
+                            ),
+                        )
+                    )
+                    if component_diagnostic_payload is None:
+                        component_diagnostic_payload = proposal
+                    component_diagnostic_payload["setting_wide_final_status"] = setting_final_status
+                    component_diagnostic_payload["setting_wide_label"] = (
+                        "SETTING-WIDE DIAGNOSTIC FIT - NON-AUTHORITATIVE"
                     )
             else:
                 component_subtraction_payload = _apply_component_pion_subtraction_setting(
@@ -4023,85 +4659,84 @@ def rand_sub(
                 and str(ParticleType).strip().lower() == "kaon"
             ):
                 canonical_binning = inpDict.get("canonical_t_binning") or {}
-                frozen_t_bins = inpDict.get("t_bins")
-                frozen_phi_bins = inpDict.get("phi_bins")
-                if frozen_t_bins is None:
-                    frozen_t_bins = canonical_binning.get("t_edges")
-                if frozen_phi_bins is None:
-                    frozen_phi_bins = canonical_binning.get("phi_edges")
-                if frozen_t_bins is None or frozen_phi_bins is None:
+                proton_t_products = tuple(
+                    (proton_cleaning_application or {}).get("canonical_t_products") or ()
+                )
+                if len(proton_t_products) != len(frozen_t_bins) - 1:
                     raise RuntimeError(
-                        "authoritative_t_bin_pion_parents_require_frozen_canonical_bins"
+                        "authoritative_t_bin_pion_parents_require_direct_proton_products"
                     )
+                if pion_control_cache is None:
+                    raise RuntimeError(
+                        "authoritative_t_bin_pion_parent_cache_not_built_at_cuts_stage"
+                    )
+                parent_inputs = []
+                for t_index, proton_product in enumerate(proton_t_products):
+                    final_t_targets = proton_product.get("final_targets") or {}
+                    raw_t_targets = proton_product.get("raw_targets") or {}
+                    proton_t_targets = proton_product.get("proton_targets") or {}
+                    cleaned_t_targets = proton_product.get("cleaned_targets_pre_rf") or {}
+                    control_t = pion_control_cache["by_t"][t_index]
+                    final_proton_output = final_t_targets.get("h_mm_nosub")
+                    if final_proton_output is None:
+                        raise RuntimeError(
+                            "authoritative_t_bin_parent_missing_final_proton_output:t{}".format(
+                                t_index + 1
+                            )
+                        )
+                    parent_inputs.append({
+                        "t_index": int(t_index),
+                        "t_edges": list(proton_product.get("t_edges") or ()),
+                        "H_random_dummy_subtracted_kaon": raw_t_targets.get("h_mm_nosub"),
+                        "H_proton_estimate": proton_t_targets.get("h_mm_nosub"),
+                        "H_proton_cleaned": cleaned_t_targets.get("h_mm_nosub"),
+                        "H_proton_cleaned_final_rf": final_proton_output,
+                        "H_proton_cleaned_final_rf_cut": final_t_targets.get("h_mm"),
+                        "H_pion_control": control_t.get("H_pion_control"),
+                        "H_pion_control_cut": control_t.get("H_pion_control_cut"),
+                        "pion_control_records": control_t.get("records"),
+                        "source_accounting": proton_product.get("source_accounting"),
+                        "pion_control_source_accounting": control_t.get("source_accounting"),
+                        "proton_final_output_fingerprint": fingerprint_histogram_content_error(
+                            final_proton_output
+                        ),
+                        "source_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
+                        "consumer_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
+                        "canonical_interval_pair_id": canonical_binning.get("canonical_interval_pair_id"),
+                        "canonical_interval_pair_hash": canonical_binning.get("canonical_interval_pair_hash"),
+                    })
 
                 def _build_parent_diagnostic_application(
-                    *, fit_result, processed_entry, t_index, t_edges
+                    *, fit_result, parent_input, t_index, t_edges
                 ):
                     """Build proposal and final policy state on detached t sources."""
-                    cut_source = processed_entry.get("H_MM_DATA")
-                    full_source = processed_entry.get("H_MM_nosub_DATA")
+                    cut_source = parent_input.get("H_proton_cleaned_final_rf_cut")
+                    full_source = parent_input.get("H_proton_cleaned_final_rf")
                     if cut_source is None or full_source is None:
                         raise RuntimeError("missing_t_integrated_parent_diagnostic_source")
-                    diagnostic_targets = {
-                        "h_mm": clone_root_histogram(
-                            cut_source,
-                            scope="pion_parent_t{}".format(int(t_index) + 1),
-                            role="diagnostic_cut_target",
-                            name="H_MM_parent_t{}_diagnostic_cut".format(int(t_index) + 1),
-                        ),
-                        "h_mm_full": clone_root_histogram(
-                            full_source,
-                            scope="pion_parent_t{}".format(int(t_index) + 1),
-                            role="diagnostic_full_target",
-                            name="H_MM_parent_t{}_diagnostic_full".format(int(t_index) + 1),
-                        ),
-                    }
                     production_evaluation = evaluate_particle_subtraction_component_fit_result(
                         fit_result,
                         inpDict,
                     )
-                    proposal = build_component_pion_application_proposal(
+                    parent_scope = "pion_parent_t{}".format(int(t_index) + 1)
+                    proposal = _build_authoritative_parent_mm_diagnostic_proposal(
                         fit_result,
-                        sub_tree_bundle,
-                        phi_setting,
-                        inpDict,
-                        ParticleType,
-                        MM_offset_DATA,
-                        hole_contains,
-                        evaluate_data_event,
-                        get_shifted_t,
-                        mm_min,
-                        mm_max,
-                        norm_factor_data,
-                        norm_factor_dummy,
-                        nWindows,
-                        diagnostic_targets,
-                        input_selection="no_rf_proton_cleaning_then_rf_restored",
-                        source_target_state="post_proton_post_rf",
-                        t_edges=t_edges,
+                        parent_input,
+                        inp_dict=inpDict,
+                        scope=parent_scope,
                     )
                     try:
                         final_payload, final_status = resolve_parent_diagnostic_final_application(
                             proposal,
                             production_evaluation,
-                            fallback_context=lambda: _build_single_scale_parent_diagnostic_final(
+                            fallback_context=lambda: _build_authoritative_parent_single_scale_final(
                                 proposal,
                                 production_evaluation,
-                                sub_tree_bundle,
-                                phi_setting,
-                                inpDict,
-                                ParticleType,
-                                MM_offset_DATA,
-                                hole_contains,
-                                evaluate_data_event,
-                                get_shifted_t,
-                                mm_min,
-                                mm_max,
-                                norm_factor_data,
-                                norm_factor_dummy,
-                                nWindows,
-                                t_edges,
-                                "pion_parent_t{}".format(int(t_index) + 1),
+                                parent_input,
+                                inp_dict=inpDict,
+                                phi_setting=phi_setting,
+                                mm_offset_data=MM_offset_DATA,
+                                scope=parent_scope,
                             ),
                         )
                     except Exception as exc:
@@ -4133,16 +4768,14 @@ def rand_sub(
                 build_setting_t_bin_pion_parents(
                     histDict,
                     inpDict,
-                    tree_data=InFile_DATA,
-                    tree_dummy=InFile_DUMMY,
-                    n_windows=nWindows,
                     t_bins=frozen_t_bins,
-                    phi_bins=frozen_phi_bins,
+                    parent_inputs=parent_inputs,
+                    pion_component_shape_payload=scope_payload,
                     kaon_signal_shape_payload=kaon_signal_shape_payload,
                     kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
-                    proton_cleaning_result=proton_cleaning_result,
                     parent_pion_alignment=component_fit_result.get("pion_component_alignment"),
-                    hgcer_cutg=hgcer_cutg,
+                    alignment_outpath=OUTPATH,
+                    mm_offset_data=MM_offset_DATA,
                     diagnostic_application_builder=_build_parent_diagnostic_application,
                 )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
@@ -5327,12 +5960,15 @@ def rand_sub(
         if isinstance(component_subtraction_payload, dict)
         else component_diagnostic_payload
     )
+    setting_wide_title = "{} {} SETTING-WIDE DIAGNOSTIC FIT - NON-AUTHORITATIVE".format(
+        phi_setting, ParticleType
+    )
 
     if setting_wide_pages_enabled and component_payload is not None:
         print_particle_subtraction_component_template_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_payload,
-            title_prefix="{} {}".format(phi_setting, ParticleType),
+            title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             kaon_signal_payload=kaon_signal_shape_payload,
             kaon_sigma0_payload=kaon_sigma0_shape_payload,
@@ -5345,7 +5981,7 @@ def rand_sub(
         print_particle_subtraction_component_fit_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_fit_result,
-            title_prefix="{} {}".format(phi_setting, ParticleType),
+            title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             page_manifest=component_page_manifest,
             page_id_prefix="pion.setting_wide",
@@ -5355,7 +5991,7 @@ def rand_sub(
         print_particle_subtraction_component_application_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             setting_wide_render_payload,
-            title_prefix="{} {}".format(phi_setting, ParticleType),
+            title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             component_fit_result=component_fit_result,
             include_lambda_page=False,
@@ -5368,7 +6004,7 @@ def rand_sub(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_fit_result,
             setting_wide_render_payload,
-            title_prefix="{} {}".format(phi_setting, ParticleType),
+            title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             page_manifest=component_page_manifest,
             page_id_prefix="pion.setting_wide",
@@ -5386,6 +6022,7 @@ def rand_sub(
             title_prefix="{} {}".format(phi_setting, ParticleType),
             page_manifest=component_page_manifest,
             setting_wide_summary=(histDict.get("pion_t_parent_diagnostics") or {}).get("setting_wide"),
+            canonical_t_global=histDict.get("_pion_authoritative_canonical_t_global"),
             setting_wide_enabled=setting_wide_pages_enabled,
         )
 

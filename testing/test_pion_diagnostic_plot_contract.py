@@ -48,7 +48,7 @@ PION_T_PARENT_PATH = REPO_ROOT / "src" / "cuts" / "pion_t_bin_parents.py"
 
 
 class PionDiagnosticPlotContractTests(unittest.TestCase):
-    def test_setting_wide_reconstruction_is_explicitly_cloned_from_active_targets(self):
+    def test_setting_wide_diagnostic_consumes_the_authoritative_control_cache(self):
         source = RAND_SUB_PATH.read_text(encoding="utf-8")
         tree = ast.parse(source)
         function_sources = {
@@ -57,13 +57,16 @@ class PionDiagnosticPlotContractTests(unittest.TestCase):
             if isinstance(node, ast.FunctionDef)
         }
         self.assertIn("active_component_targets", function_sources["rand_sub"])
+        self.assertIn("H_pion_control_global", function_sources["rand_sub"])
         self.assertIn(
-            "_clone_component_targets_for_setting_wide_diagnostic(\n                            active_component_targets",
+            "_build_authoritative_parent_mm_diagnostic_proposal(",
             function_sources["rand_sub"],
         )
-        diagnostic_builder = function_sources["_clone_component_targets_for_setting_wide_diagnostic"]
-        self.assertIn('scope="setting_wide_diagnostic"', diagnostic_builder)
-        self.assertIn('role="application_target_{}".format(key)', diagnostic_builder)
+        diagnostic_builder = function_sources[
+            "_build_authoritative_parent_mm_diagnostic_proposal"
+        ]
+        self.assertIn('"source_definition": "authoritative_pion_control_cache"', diagnostic_builder)
+        self.assertIn('"H_pion_subtraction_template_MM"', diagnostic_builder)
         application_builder = function_sources["_apply_component_pion_subtraction_setting"]
         self.assertIn('"input_selection": str(input_selection)', application_builder)
         self.assertIn('"source_target_state": str(source_target_state)', application_builder)

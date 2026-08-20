@@ -9140,6 +9140,80 @@ def _clone_target_map(target_templates, suffix):
     return cloned
 
 
+def _clone_mm_target_map(target_templates, suffix):
+    """Clone only the MM products needed by a canonical-t parent.
+
+    The proton cleaner owns the full display target maps.  Per-t pion parents
+    must consume the *same event loop* without retaining a second copy of all
+    detector histograms, so this intentionally keeps only the cut and full-MM
+    products.
+    """
+    return {
+        key: _clone_hist(hist, "{}{}".format(hist.GetName(), suffix), reset=True)
+        if hist is not None else None
+        for key, hist in (target_templates or {}).items()
+        if key in ("h_mm", "h_mm_nosub")
+    }
+
+
+def _new_canonical_t_source_accounting(t_index, t_edges):
+    return {
+        "t_index": int(t_index),
+        "t_edges": [float(t_edges[t_index]), float(t_edges[t_index + 1])],
+        "sources": {},
+        "selected_records": 0,
+        "allcuts_records": 0,
+        "nommcuts_records": 0,
+        "signed_raw_weight": 0.0,
+        "absolute_raw_support": 0.0,
+        "signed_final_proton_cleaned_weight": 0.0,
+        "absolute_final_proton_cleaned_support": 0.0,
+    }
+
+
+def _record_canonical_t_source_accounting(accounting, source_name, *, allcuts, nommcuts,
+                                          raw_weight, final_cleaned_weight):
+    source = accounting["sources"].setdefault(str(source_name), {
+        "selected_records": 0,
+        "allcuts_records": 0,
+        "nommcuts_records": 0,
+        "signed_raw_weight": 0.0,
+        "absolute_raw_support": 0.0,
+        "signed_final_proton_cleaned_weight": 0.0,
+        "absolute_final_proton_cleaned_support": 0.0,
+    })
+    for destination in (accounting, source):
+        destination["selected_records"] += 1
+        destination["allcuts_records"] += int(bool(allcuts))
+        destination["nommcuts_records"] += int(bool(nommcuts))
+        destination["signed_raw_weight"] += float(raw_weight)
+        destination["absolute_raw_support"] += abs(float(raw_weight))
+        destination["signed_final_proton_cleaned_weight"] += float(final_cleaned_weight)
+        destination["absolute_final_proton_cleaned_support"] += abs(
+            float(final_cleaned_weight)
+        )
+
+
+def _canonical_t_mm_audit(histogram):
+    """Return content/Sumw2 closure inputs without changing a ROOT product."""
+    if histogram is None:
+        return {"present": False, "content_sum": 0.0, "error_squared_sum": 0.0}
+    try:
+        content_sum = 0.0
+        error_squared_sum = 0.0
+        for bin_index in range(0, int(histogram.GetNbinsX()) + 2):
+            content_sum += float(histogram.GetBinContent(bin_index))
+            error = float(histogram.GetBinError(bin_index))
+            error_squared_sum += error * error
+        return {
+            "present": True,
+            "content_sum": content_sum,
+            "error_squared_sum": error_squared_sum,
+        }
+    except Exception:
+        return {"present": False, "content_sum": 0.0, "error_squared_sum": 0.0}
+
+
 def apply_kaon_proton_cleaning_to_targets(
     cleaning_result,
     source_bundle,
@@ -9172,6 +9246,31 @@ def apply_kaon_proton_cleaning_to_targets(
     proton_targets = _clone_target_map(target_templates, "_proton_clean_proton")
     cleaned_targets_pre_rf = _clone_target_map(target_templates, "_proton_clean_cleaned_prerf")
     final_targets = _clone_target_map(target_templates, "_proton_clean_final")
+    # The parent pion fit consumes these products directly.  They are filled
+    # below alongside the established setting-wide targets; no later kaon-tree
+    # reconstruction is permitted for the authoritative t-bin path.
+    canonical_t_products = []
+    if len(t_edges) >= 2:
+        for t_index in range(len(t_edges) - 1):
+            canonical_t_products.append({
+                "t_index": int(t_index),
+                "t_edges": [float(t_edges[t_index]), float(t_edges[t_index + 1])],
+                "raw_targets": _clone_mm_target_map(
+                    target_templates, "_proton_clean_t{}_raw".format(t_index + 1)
+                ),
+                "proton_targets": _clone_mm_target_map(
+                    target_templates, "_proton_clean_t{}_proton".format(t_index + 1)
+                ),
+                "cleaned_targets_pre_rf": _clone_mm_target_map(
+                    target_templates, "_proton_clean_t{}_cleaned_prerf".format(t_index + 1)
+                ),
+                "final_targets": _clone_mm_target_map(
+                    target_templates, "_proton_clean_t{}_final".format(t_index + 1)
+                ),
+                "source_accounting": _new_canonical_t_source_accounting(
+                    t_index, t_edges
+                ),
+            })
 
     h_weight_sum_delta = ROOT.TH1D(
         "H_proton_weight_sum_delta",
@@ -9349,6 +9448,28 @@ def apply_kaon_proton_cleaning_to_targets(
             proton_component_weight = float(coefficient) * float(proton_weight)
             cleaned_weight = float(coefficient) * float(cleaned_factor)
             final_cleaned_weight = float(coefficient) * float(final_cleaned_factor)
+            canonical_t_index = -1
+            if method_is_t_binned:
+                canonical_t_index = int(secondary_index)
+            else:
+                for candidate_index in range(len(t_edges) - 1):
+                    if float(t_edges[candidate_index]) <= adj_t < float(t_edges[candidate_index + 1]):
+                        canonical_t_index = candidate_index
+                        break
+            canonical_t_product = (
+                canonical_t_products[canonical_t_index]
+                if 0 <= canonical_t_index < len(canonical_t_products)
+                else None
+            )
+            if canonical_t_product is not None:
+                _record_canonical_t_source_accounting(
+                    canonical_t_product["source_accounting"],
+                    source_name,
+                    allcuts=allcuts,
+                    nommcuts=nommcuts,
+                    raw_weight=raw_weight,
+                    final_cleaned_weight=final_cleaned_weight,
+                )
             if allcuts:
                 mm_fill_counters["events_sent_to_mm_filling"] += 1
                 mm_fill_counters["raw_mm_fills"] += 1
@@ -9366,6 +9487,12 @@ def apply_kaon_proton_cleaning_to_targets(
                 noholecuts=noholecuts,
                 hgcer_counters=hgcer_fill_counters["raw"],
             )
+            if canonical_t_product is not None:
+                _fill_standard_target_hists(
+                    evt, adj_mm, adj_t, adj_hsdelta, raw_weight,
+                    canonical_t_product["raw_targets"], allcuts=allcuts,
+                    nommcuts=nommcuts, noholecuts=noholecuts,
+                )
             _fill_standard_target_hists(
                 evt,
                 adj_mm,
@@ -9378,6 +9505,12 @@ def apply_kaon_proton_cleaning_to_targets(
                 noholecuts=noholecuts,
                 hgcer_counters=hgcer_fill_counters["estimated_proton"],
             )
+            if canonical_t_product is not None:
+                _fill_standard_target_hists(
+                    evt, adj_mm, adj_t, adj_hsdelta, proton_component_weight,
+                    canonical_t_product["proton_targets"], allcuts=allcuts,
+                    nommcuts=nommcuts, noholecuts=noholecuts,
+                )
             _fill_standard_target_hists(
                 evt,
                 adj_mm,
@@ -9390,6 +9523,12 @@ def apply_kaon_proton_cleaning_to_targets(
                 noholecuts=noholecuts,
                 hgcer_counters=hgcer_fill_counters["cleaned_pre_rf"],
             )
+            if canonical_t_product is not None:
+                _fill_standard_target_hists(
+                    evt, adj_mm, adj_t, adj_hsdelta, cleaned_weight,
+                    canonical_t_product["cleaned_targets_pre_rf"], allcuts=allcuts,
+                    nommcuts=nommcuts, noholecuts=noholecuts,
+                )
             if rf_accept:
                 rf_counts["accepted"] += 1
                 if allcuts:
@@ -9406,6 +9545,12 @@ def apply_kaon_proton_cleaning_to_targets(
                     noholecuts=noholecuts,
                     hgcer_counters=hgcer_fill_counters["final_cleaned"],
                 )
+                if canonical_t_product is not None:
+                    _fill_standard_target_hists(
+                        evt, adj_mm, adj_t, adj_hsdelta, final_cleaned_weight,
+                        canonical_t_product["final_targets"], allcuts=allcuts,
+                        nommcuts=nommcuts, noholecuts=noholecuts,
+                    )
             else:
                 rf_counts["rejected"] += 1
             _fill_proton_weight_coordinate_histograms(
@@ -9462,12 +9607,27 @@ def apply_kaon_proton_cleaning_to_targets(
             else:
                 h_proton_fraction_vs_mm.SetBinContent(bin_index, 0.0)
 
+    for product in canonical_t_products:
+        raw_mm = (product.get("raw_targets") or {}).get("h_mm_nosub")
+        proton_mm = (product.get("proton_targets") or {}).get("h_mm_nosub")
+        cleaned_mm = (product.get("cleaned_targets_pre_rf") or {}).get("h_mm_nosub")
+        final_mm = (product.get("final_targets") or {}).get("h_mm_nosub")
+        final_cut_mm = (product.get("final_targets") or {}).get("h_mm")
+        product["mm_sumw2_closure"] = {
+            "raw": _canonical_t_mm_audit(raw_mm),
+            "proton_estimate": _canonical_t_mm_audit(proton_mm),
+            "proton_cleaned": _canonical_t_mm_audit(cleaned_mm),
+            "final_post_rf": _canonical_t_mm_audit(final_mm),
+            "final_post_rf_cut": _canonical_t_mm_audit(final_cut_mm),
+        }
+
     application = {
         "accepted": True,
         "raw_targets": raw_targets,
         "proton_targets": proton_targets,
         "cleaned_targets_pre_rf": cleaned_targets_pre_rf,
         "final_targets": final_targets,
+        "canonical_t_products": tuple(canonical_t_products),
         "H_MM_before_proton_cleaning": h_mm_raw,
         "H_MM_estimated_proton": h_mm_proton,
         "H_MM_after_proton_cleaning": h_mm_cleaned,
@@ -9509,6 +9669,15 @@ def apply_kaon_proton_cleaning_to_targets(
             "lambda_preservation_gate": _json_ready_value(
                 (cleaning_result.get("diagnostics") or {}).get("lambda_preservation_gate") or {}
             ),
+            "canonical_t_source_audit": _json_ready_value([
+                {
+                    "t_index": product.get("t_index"),
+                    "t_edges": product.get("t_edges"),
+                    "source_accounting": product.get("source_accounting"),
+                    "mm_sumw2_closure": product.get("mm_sumw2_closure"),
+                }
+                for product in canonical_t_products
+            ]),
         },
     }
     diagnostics_payload["cross_stage_t_consistency"] = _json_ready_value(cross_stage_rows)

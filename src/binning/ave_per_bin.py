@@ -817,6 +817,11 @@ def process_hist_data(
     hgcer_cutg=None,
 ):
 
+    if t_integrated_fit_only:
+        raise RuntimeError(
+            "retired_t_integrated_parent_comparison_route: "
+            "canonical-t parents must be built from the cuts-stage direct handoff"
+        )
     processed_dict = {}
 
     OutFilename = inpDict["OutFilename"]    
@@ -896,7 +901,7 @@ def process_hist_data(
     dummy_rand_hists = _init_ave_hist_group(("Q2", "W", "t", "epsilon", "mm", "fit1sub", "pisub", "nosub"), n_t)
 
     # Pion subtraction by scaling simc to peak size
-    if ParticleType == "kaon":
+    if ParticleType == "kaon" and not use_t_bin_parents:
         from particle_subtraction import particle_subtraction_ave
         SubtractedParticle = "pion"
         subDict = {}
@@ -1016,7 +1021,7 @@ def process_hist_data(
         dummy_rand_hists["nosub"][j] = hist_bin_dict["H_MM_nosub_DUMMY_RAND_{}".format(j)]
 
         # Pion subtraction by scaling simc to peak size
-        if ParticleType == "kaon":
+        if ParticleType == "kaon" and not use_t_bin_parents:
             
             subDict["H_Q2_SUB_DATA_{}".format(j)]       = TH1D("H_Q2_SUB_DATA_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
             subDict["H_W_SUB_DATA_{}".format(j)]  = TH1D("H_W_SUB_DATA_{}".format(j),"W ", 100, inpDict["Wmin"], inpDict["Wmax"])
@@ -1134,7 +1139,7 @@ def process_hist_data(
         )
 
     # Pion subtraction by scaling simc to peak size
-    if ParticleType == "kaon":
+    if ParticleType == "kaon" and not use_t_bin_parents:
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
@@ -1269,16 +1274,11 @@ def process_hist_data(
                     use_legacy_scalar_subtraction = False
                     scale_factor = float(component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0)
                 else:
-                    fallback_mode = component_payload.get("fallback_mode") or "single_scale"
-                    if fallback_mode == "error":
-                        raise RuntimeError(
-                            "ave_per_bin parent pion subtraction ({}, t{}) rejected: {}".format(
-                                phi_setting,
-                                int(j) + 1,
-                                component_payload.get("fallback_reason") or "unknown reason",
-                            )
-                        )
-                    use_legacy_scalar_subtraction = fallback_mode not in ("zero", "skip_bin")
+                    # A rejected frozen-parent proposal is diagnostic only.
+                    # The authoritative child route never substitutes the old
+                    # averages-built scalar template for it.
+                    use_legacy_scalar_subtraction = False
+                    scale_factor = 0.0
             elif component_shape_payload is not None:
                 if use_t_bin_parents and not t_integrated_fit_only:
                     raise RuntimeError("free_t_phi_pion_fit_forbidden_in_t_bin_scope")

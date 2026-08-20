@@ -44,8 +44,9 @@ class _FakeRootHistogram:
         def GetXmax(self):
             return self._high
 
-    def __init__(self, contents, low=1.0, high=1.3):
+    def __init__(self, contents, errors=None, low=1.0, high=1.3):
         self._contents = [float(value) for value in contents]
+        self._errors = [float(value) for value in (errors or [0.0] * len(contents))]
         self._axis = self._Axis(low, high)
 
     def InheritsFrom(self, name):
@@ -59,6 +60,16 @@ class _FakeRootHistogram:
 
     def Integral(self):
         return sum(self._contents)
+
+    def GetBinContent(self, index):
+        if 1 <= int(index) <= len(self._contents):
+            return self._contents[int(index) - 1]
+        return 0.0
+
+    def GetBinError(self, index):
+        if 1 <= int(index) <= len(self._errors):
+            return self._errors[int(index) - 1]
+        return 0.0
 
 
 def _load_pion_component_subtraction():
@@ -103,6 +114,24 @@ def _inp():
     }
 
 
+def _configured_inp():
+    inp_dict = _inp()
+    inp_dict.update({
+        "analysis_runtime_config_hash": "analysis-config-hash",
+        "analysis_runtime_config": {"config_hash": "analysis-config-hash"},
+    })
+    inp_dict["canonical_t_binning"] = {
+        **inp_dict["canonical_t_binning"],
+        "t_edges": [0.0, 0.4, 0.8],
+        "phi_edges": [-180.0, 0.0, 180.0],
+        "requested_num_t_bins": 2,
+        "actual_num_t_bins": 2,
+        "requested_num_phi_bins": 2,
+        "actual_num_phi_bins": 2,
+    }
+    return inp_dict
+
+
 def _parent(module, inp_dict, t_index=0, edges=(0.0, 0.4)):
     identity = module.build_t_bin_pion_parent_identity(
         inp_dict, "Left", t_index, edges
@@ -131,6 +160,50 @@ class TBinPionParentIdentityTests(unittest.TestCase):
         )
         self.assertEqual(first["pion_parent_id"], repeat["pion_parent_id"])
         self.assertNotEqual(first["pion_parent_id"], second_t["pion_parent_id"])
+
+    def test_parent_identity_covers_runtime_and_canonical_contract(self):
+        configured = _configured_inp()
+        baseline = self.module.build_t_bin_pion_parent_identity(
+            configured, "Left", 0, (0.0, 0.4)
+        )
+        changed_config = _configured_inp()
+        changed_config["analysis_runtime_config_hash"] = "other-config-hash"
+        changed_config["analysis_runtime_config"]["config_hash"] = "other-config-hash"
+        changed_pair = _configured_inp()
+        changed_pair["canonical_t_binning"]["canonical_interval_pair_hash"] = "other-pair"
+        changed_phi = _configured_inp()
+        changed_phi["canonical_t_binning"]["phi_edges"] = [-180.0, -30.0, 180.0]
+
+        self.assertNotEqual(
+            baseline["pion_parent_id"],
+            self.module.build_t_bin_pion_parent_identity(changed_config, "Left", 0, (0.0, 0.4))["pion_parent_id"],
+        )
+        self.assertNotEqual(
+            baseline["pion_parent_id"],
+            self.module.build_t_bin_pion_parent_identity(changed_pair, "Left", 0, (0.0, 0.4))["pion_parent_id"],
+        )
+        self.assertNotEqual(
+            baseline["pion_parent_id"],
+            self.module.build_t_bin_pion_parent_identity(changed_phi, "Left", 0, (0.0, 0.4))["pion_parent_id"],
+        )
+
+    def test_histogram_fingerprint_includes_axis_contents_and_errors(self):
+        baseline = _FakeRootHistogram((1.0, 2.0, 3.0), errors=(0.1, 0.2, 0.3))
+        same = _FakeRootHistogram((1.0, 2.0, 3.0), errors=(0.1, 0.2, 0.3))
+        changed_content = _FakeRootHistogram((1.0, 2.1, 3.0), errors=(0.1, 0.2, 0.3))
+        changed_error = _FakeRootHistogram((1.0, 2.0, 3.0), errors=(0.1, 0.25, 0.3))
+        changed_axis = _FakeRootHistogram((1.0, 2.0, 3.0), errors=(0.1, 0.2, 0.3), high=1.4)
+
+        baseline_fingerprint = self.module.fingerprint_histogram_content_error(baseline)
+        self.assertEqual(
+            baseline_fingerprint,
+            self.module.fingerprint_histogram_content_error(same),
+        )
+        for histogram in (changed_content, changed_error, changed_axis):
+            self.assertNotEqual(
+                baseline_fingerprint,
+                self.module.fingerprint_histogram_content_error(histogram),
+            )
 
     def test_parent_validation_rejects_wrong_identity_or_edges(self):
         parent = _parent(self.module, _inp())
@@ -261,6 +334,19 @@ class TBinPionParentIdentityTests(unittest.TestCase):
         self.assertAlmostEqual(second["mm"].integral, 5.0)
         self.assertNotEqual(first["mm"].entries, second["mm"].entries)
         self.assertAlmostEqual(12.0 - first["mm"].integral, 7.0)
+
+    def test_authoritative_cache_coefficients_are_used_per_record(self):
+        source_spec = {
+            "cache_section": {"coefficient": np.asarray([2.0, -3.0])},
+            "coefficient": -5.0,
+            "base_coefficient": 5.0,
+        }
+        self.assertAlmostEqual(
+            self.module._component_cache_event_coefficient(source_spec, 0), -2.0
+        )
+        self.assertAlmostEqual(
+            self.module._component_cache_event_coefficient(source_spec, 1), 3.0
+        )
 
 
 class CalculateYieldPayloadScopeTests(unittest.TestCase):

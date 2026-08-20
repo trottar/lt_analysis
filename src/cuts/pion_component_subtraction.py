@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import struct
 from copy import deepcopy
 
 import numpy as np
@@ -50,6 +51,33 @@ def _canonical_json_hash(payload):
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def fingerprint_histogram_content_error(hist):
+    """Return a stable, exact provenance fingerprint for a TH1-like object."""
+    if hist is None:
+        raise RuntimeError("cannot fingerprint missing histogram")
+    try:
+        axis = hist.GetXaxis()
+        nbins = int(hist.GetNbinsX())
+        values = [
+            float(nbins),
+            float(axis.GetXmin()),
+            float(axis.GetXmax()),
+        ]
+        for bin_index in range(0, nbins + 2):
+            values.extend((
+                float(hist.GetBinContent(bin_index)),
+                float(hist.GetBinError(bin_index)),
+            ))
+    except Exception as exc:
+        raise RuntimeError("cannot fingerprint histogram: {}".format(exc))
+    if not all(math.isfinite(value) for value in values):
+        raise RuntimeError("cannot fingerprint histogram with nonfinite content or error")
+    digest = hashlib.sha256()
+    for value in values:
+        digest.update(struct.pack("!d", value))
+    return digest.hexdigest()
+
+
 def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges):
     """Build the immutable ownership identity for one authoritative t parent."""
     inp_dict = inp_dict or {}
@@ -78,6 +106,19 @@ def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges
         "t_edges": edges,
         "canonical_interval_pair_id": pair_id,
         "canonical_interval_pair_hash": pair_hash,
+        "analysis_runtime_config_hash": str(
+            inp_dict.get("analysis_runtime_config_hash")
+            or (inp_dict.get("analysis_runtime_config") or {}).get("config_hash")
+            or ""
+        ),
+        "canonical_t_edges": [float(value) for value in (canonical.get("t_edges") or ())],
+        "canonical_phi_edges": [float(value) for value in (canonical.get("phi_edges") or ())],
+        "source_epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
+        "consumer_epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
+        "requested_num_t_bins": canonical.get("requested_num_t_bins"),
+        "actual_num_t_bins": canonical.get("actual_num_t_bins"),
+        "requested_num_phi_bins": canonical.get("requested_num_phi_bins"),
+        "actual_num_phi_bins": canonical.get("actual_num_phi_bins"),
         "pion_subtraction_scope": str(inp_dict.get("pion_subtraction_scope", "")).strip().lower(),
     }
     return {
@@ -123,6 +164,19 @@ def validate_authoritative_t_bin_pion_parent(
         reasons.append("canonical_interval_pair_id")
     if parent.get("canonical_interval_pair_hash") != expected["canonical_interval_pair_hash"]:
         reasons.append("canonical_interval_pair_hash")
+    for field in (
+        "analysis_runtime_config_hash",
+        "canonical_t_edges",
+        "canonical_phi_edges",
+        "source_epsilon",
+        "consumer_epsilon",
+        "requested_num_t_bins",
+        "actual_num_t_bins",
+        "requested_num_phi_bins",
+        "actual_num_phi_bins",
+    ):
+        if parent.get(field) != expected[field]:
+            reasons.append(field)
     if str(parent.get("pion_subtraction_scope", "")).strip().lower() != expected["pion_subtraction_scope"]:
         reasons.append("pion_subtraction_scope")
 
@@ -804,26 +858,34 @@ def iter_component_control_source_specs(sub_event_cache, normfac_data, normfac_d
     if sub_event_cache is None:
         return []
     sign = 1.0 if positive_template else -1.0
+    prompt_coefficient = float(normfac_data)
+    rand_coefficient = -float(normfac_data) / float(nWindows)
+    dummy_coefficient = -float(normfac_dummy)
+    dummy_rand_coefficient = float(normfac_dummy) / float(nWindows)
     return [
         {
             "label": "prompt",
             "cache_section": sub_event_cache.get("prompt"),
-            "coefficient": sign * float(normfac_data),
+            "coefficient": sign * prompt_coefficient,
+            "base_coefficient": prompt_coefficient,
         },
         {
             "label": "rand",
             "cache_section": sub_event_cache.get("rand"),
-            "coefficient": sign * (-float(normfac_data) / float(nWindows)),
+            "coefficient": sign * rand_coefficient,
+            "base_coefficient": rand_coefficient,
         },
         {
             "label": "dummy",
             "cache_section": sub_event_cache.get("dummy"),
-            "coefficient": sign * (-float(normfac_dummy)),
+            "coefficient": sign * dummy_coefficient,
+            "base_coefficient": dummy_coefficient,
         },
         {
             "label": "dummy_rand",
             "cache_section": sub_event_cache.get("dummy_rand"),
-            "coefficient": sign * (float(normfac_dummy) / float(nWindows)),
+            "coefficient": sign * dummy_rand_coefficient,
+            "base_coefficient": dummy_rand_coefficient,
         },
     ]
 
@@ -893,6 +955,25 @@ def _fill_template_hist_keys(template_hists, cache_section, idx, event_weight, p
             template_hists["t_vs_tmin"].Fill(minus_tmin, adj_t, event_weight)
 
 
+def _component_cache_event_coefficient(source_spec, idx):
+    """Return a cached signed coefficient while preserving caller template sign."""
+    cache_section = source_spec.get("cache_section") or {}
+    coefficient = float(source_spec.get("coefficient", 0.0) or 0.0)
+    cached_coefficients = cache_section.get("coefficient")
+    if cached_coefficients is None:
+        return coefficient
+    try:
+        cached_coefficient = float(cached_coefficients[idx])
+    except (IndexError, TypeError, ValueError):
+        return coefficient
+    if not math.isfinite(cached_coefficient):
+        return coefficient
+    base_coefficient = float(source_spec.get("base_coefficient", 0.0) or 0.0)
+    if base_coefficient == 0.0:
+        return coefficient
+    return cached_coefficient * (coefficient / base_coefficient)
+
+
 def fill_simc_shape_pion_subtraction_templates(
     template_hists,
     source_specs,
@@ -924,7 +1005,7 @@ def fill_simc_shape_pion_subtraction_templates(
         for idx in nommcut_indices:
             adj_mm = float(cache_section["adj_MM"][idx])
             pion_weight = simc_shape_pion_weight_from_value(adj_mm, h_pion_reference, pion_mm_weights)
-            event_weight = coefficient * pion_weight
+            event_weight = _component_cache_event_coefficient(source_spec, idx) * pion_weight
             if event_weight == 0.0:
                 continue
             if "mm_nosub" in template_hists:
@@ -938,7 +1019,7 @@ def fill_simc_shape_pion_subtraction_templates(
         for idx in allcut_indices:
             adj_mm = float(cache_section["adj_MM"][idx])
             pion_weight = simc_shape_pion_weight_from_value(adj_mm, h_pion_reference, pion_mm_weights)
-            event_weight = coefficient * pion_weight
+            event_weight = _component_cache_event_coefficient(source_spec, idx) * pion_weight
             if mm_background_reference_hist is not None and mm_background_weights is not None:
                 event_weight *= mm_background_weight_from_value(
                     adj_mm,

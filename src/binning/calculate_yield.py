@@ -1729,13 +1729,29 @@ def process_hist_data(
         proton_cleaning_result=proton_cleaning_result,
     )
 
-    # Pion subtraction by scaling pion background to peak size
+    # Component t-bin production consumes the cuts-stage pion-control cache.
+    # It is the same signed source definition used to construct the frozen
+    # parents, not a second pion-control tree loop.
     if ParticleType == "kaon":
-        subDict["nWindows"] = nWindows
-        subDict["phi_setting"] = phi_setting
-        subDict["MM_offset_DATA"] = MM_offset_DATA
-        particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)        
-        sub_event_cache = subDict.get("_sub_event_cache")
+        authoritative_cache = (
+            (inpDict.get("_authoritative_pion_control_cache_by_phi") or {})
+            .get(phi_setting)
+        )
+        if (
+            particle_subtraction_mode == "simc_shape_components"
+            and pion_subtraction_scope == "t_bin"
+        ):
+            sub_event_cache = (authoritative_cache or {}).get("child_event_cache")
+            if sub_event_cache is None:
+                raise RuntimeError(
+                    "missing_authoritative_pion_control_cache_for_t_bin_consumer"
+                )
+        else:
+            subDict["nWindows"] = nWindows
+            subDict["phi_setting"] = phi_setting
+            subDict["MM_offset_DATA"] = MM_offset_DATA
+            particle_subtraction_yield(t_bins, phi_bins, subDict, inpDict, SubtractedParticle, hgcer_cutg)
+            sub_event_cache = subDict.get("_sub_event_cache")
         
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
@@ -2675,6 +2691,18 @@ def _process_hist_data_from_base_cache(data_base_cache, t_bins, phi_bins, phi_se
     processed_dict = _clone_processed_dict(data_base_cache["processed_dict"])
     ave_event_cache = data_base_cache["ave_event_cache"]
     sub_event_cache = data_base_cache["sub_event_cache"]
+    authoritative_cache = (
+        (inpDict.get("_authoritative_pion_control_cache_by_phi") or {})
+        .get(phi_setting)
+    )
+    if (
+        resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+        and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
+    ):
+        sub_event_cache = (authoritative_cache or {}).get("child_event_cache")
+        if sub_event_cache is None:
+            raise RuntimeError("missing_authoritative_pion_control_cache_for_t_bin_consumer")
     support_hist_dict = _init_hist_group_matrices(
         ("Q2", "W", "q2_w", "theta_cm", "theta_cm_true", "mm", "t", "t_vs_tmin", "xptar", "yptar", "ssxptar", "ssyptar", "hsxptar", "hsyptar"),
         len(t_bins) - 1,
@@ -3051,6 +3079,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
     ):
         validate_frozen_t_bin_pion_parent_collection(hist, inpDict, t_bins)
+        inpDict.setdefault("_authoritative_pion_control_cache_by_phi", {})[
+            phi_setting
+        ] = hist.get("_authoritative_pion_control_source_cache")
     parent_pion_alignment = (
         (hist.get("_particle_subtraction_component_fit_setting") or {}).get("pion_component_alignment")
     )

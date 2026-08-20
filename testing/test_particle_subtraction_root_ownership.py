@@ -129,6 +129,26 @@ class ParticleSubtractionRootOwnershipTests(unittest.TestCase):
             self.assertGreater(application_payload["H_MM_before_pion_subtraction"].Integral(), 0.0)
         self.configure_debug(False)
 
+    def test_dynamic_canonical_t_parent_counts_keep_detached_ownership(self):
+        for n_t in (2, 4, 5):
+            with self.subTest(n_t=n_t):
+                self.configure_debug(True)
+                source = self._source("dynamic_matrix_source_{}".format(n_t))
+                retained = []
+                for t_index in range(n_t):
+                    retained.append(self.clone(
+                        source,
+                        scope="dynamic_t{}".format(t_index + 1),
+                        role="canonical_parent_input",
+                        sumw2=True,
+                    ))
+                gc.collect()
+                self.assertEqual(len(retained), n_t)
+                self.assertEqual(len({hist.GetName() for hist in retained}), n_t)
+                self.assertTrue(all(hist.GetDirectory() is None for hist in retained))
+                self.assertEqual(len(self.debug_records()), n_t)
+                self.configure_debug(False)
+
     def test_application_payload_rejects_fit_owned_histograms(self):
         self.assert_payload({"H_pion_weight_vs_MM": self._source("application_ok")})
         for key in self.forbidden_keys:
