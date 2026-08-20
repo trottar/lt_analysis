@@ -131,6 +131,7 @@ ANALYSIS_RUNTIME_DEFAULTS = {
     "t_phi_support_min_events": PHI_BIN_MIN_EVENTS,
     "pion_subtraction_scope": "t_bin",
     "emit_setting_wide_pion_diagnostic": True,
+    "pion_parent_diagnostic_strict": False,
     "require_shared_canonical_preflight": True,
 }
 

@@ -42,6 +42,11 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
     def test_parent_state_and_page_contract_are_explicit(self):
         for field in (
             '"fit_result": fit_result',
+            '"proposed_diagnostic_application_result"',
+            '"proposed_diagnostic_application_status"',
+            '"final_diagnostic_application_result"',
+            '"final_diagnostic_application_status"',
+            '"production_application_policy"',
             '"diagnostic_application_result"',
             '"diagnostic_application_status"',
             '"application_result": None',
@@ -58,8 +63,19 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
             "before_after",
             "lambda_comparison",
             "overview",
+            "application_gate",
+            "proposal_final_transition",
         ):
-            self.assertIn('"{}"'.format(page_key), self.parent_source)
+            self.assertIn(page_key, self.parent_source)
+
+    def test_parent_diagnostic_preserves_proposal_but_applies_final_policy(self):
+        self.assertIn("evaluate_component_pion_application_proposal", self.rand_source)
+        self.assertIn("proposal_only=True", self.rand_source)
+        self.assertIn("resolve_parent_diagnostic_final_application", self.rand_source)
+        self.assertIn("_build_zero_parent_diagnostic_final", self.rand_source)
+        self.assertIn("_build_single_scale_parent_diagnostic_final", self.rand_source)
+        self.assertIn("pion_parent_diagnostic_strict", self.parent_source)
+        self.assertIn("_parent_plot_contract", self.parent_source)
 
     def test_step_six_and_averages_are_consumer_only(self):
         self.assertNotIn("build_t_bin_pion_parents", self.main_source)

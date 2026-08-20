@@ -512,16 +512,78 @@ def evaluate_particle_subtraction_component_fit_result(component_fit_result, inp
     }
 
 
+def evaluate_component_pion_application_proposal(component_fit_result):
+    """Validate only the prerequisites for a diagnostic pion proposal.
+
+    This is intentionally narrower than the production gate above: a poor
+    fit-quality/validation result can still have a finite, compatible pion
+    model that is valuable to display.  Missing or incompatible templates and
+    non-finite/negative amplitudes remain proposal failures.
+    """
+    failures = []
+    diagnostics = {}
+    if not isinstance(component_fit_result, dict):
+        return {
+            "available": False,
+            "reason": "component_fit_result is missing",
+            "diagnostics": diagnostics,
+        }
+    if component_fit_result.get("particle_subtraction_mode") != PARTICLE_SUBTRACTION_MODE_COMPONENTS:
+        failures.append("particle_subtraction_mode is not simc_shape_components")
+
+    amplitudes = {}
+    for amplitude_name in ("A_n", "A_delta", "A_sidis", "B_n", "B_delta", "B_sidis"):
+        try:
+            amplitude_value = float(component_fit_result.get(amplitude_name))
+        except Exception:
+            amplitude_value = float("nan")
+        amplitudes[amplitude_name] = amplitude_value
+        if not math.isfinite(amplitude_value):
+            failures.append("{} is non-finite".format(amplitude_name))
+        elif amplitude_value < 0.0:
+            failures.append("{} is negative".format(amplitude_name))
+    diagnostics["amplitudes"] = amplitudes
+
+    active_component_names = _resolve_active_component_names(component_fit_result)
+    diagnostics["active_component_names"] = list(active_component_names)
+    component_templates = _resolve_component_template_map(component_fit_result)
+    template_signature = None
+    for component_name in active_component_names:
+        template_hist = component_templates.get(component_name)
+        if not _is_root_hist(template_hist):
+            failures.append("missing template {}".format(component_name))
+            continue
+        signature = _hist_bin_signature(template_hist)
+        if template_signature is None:
+            template_signature = signature
+        elif signature != template_signature:
+            failures.append("template binning mismatch for {}".format(component_name))
+        if _hist_integral(template_hist) <= 0.0:
+            failures.append("non-positive template integral for {}".format(component_name))
+    diagnostics["template_signature"] = template_signature
+    return {
+        "available": not failures,
+        "reason": "; ".join(failures),
+        "diagnostics": diagnostics,
+    }
+
+
 def build_simc_shape_pion_control_weights(
     component_fit_result,
     clip_min=0.0,
     clip_max=None,
     denom_floor=1e-12,
     model_variant="final",
+    proposal_mode=False,
 ):
-    gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result)
-    if not gate_result["accepted"]:
-        raise ValueError(gate_result["reason"] or "component-fit result rejected")
+    if proposal_mode:
+        proposal_result = evaluate_component_pion_application_proposal(component_fit_result)
+        if not proposal_result["available"]:
+            raise ValueError(proposal_result["reason"] or "component proposal is unavailable")
+    else:
+        gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result)
+        if not gate_result["accepted"]:
+            raise ValueError(gate_result["reason"] or "component-fit result rejected")
 
     template_map = _resolve_component_template_map(component_fit_result)
     active_component_names = _resolve_active_component_names(component_fit_result)

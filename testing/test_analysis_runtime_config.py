@@ -38,6 +38,7 @@ class AnalysisRuntimeConfigTests(unittest.TestCase):
                 self.assertEqual(config["mm_min"], 1.10)
                 self.assertEqual(config["mm_max"], 1.16)
                 self.assertEqual(config["pion_subtraction_scope"], "t_bin")
+                self.assertFalse(config["pion_parent_diagnostic_strict"])
 
     def test_test_setting_is_explicit_and_unknown_setting_is_rejected(self):
         test_config = resolve_analysis_runtime_config("0p5", "2p40")

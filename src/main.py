@@ -196,6 +196,9 @@ inpDict = {
     "emit_setting_wide_pion_diagnostic": analysis_runtime_config[
         "emit_setting_wide_pion_diagnostic"
     ],
+    "pion_parent_diagnostic_strict": analysis_runtime_config[
+        "pion_parent_diagnostic_strict"
+    ],
     "require_shared_canonical_preflight": analysis_runtime_config[
         "require_shared_canonical_preflight"
     ],

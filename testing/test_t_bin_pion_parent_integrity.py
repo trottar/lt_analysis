@@ -30,6 +30,37 @@ class _FakeHistogram:
         return sum(weight for _, weight in self.entries)
 
 
+class _FakeRootHistogram:
+    """Small TH1-compatible test double for structural proposal validation."""
+
+    class _Axis:
+        def __init__(self, low, high):
+            self._low = float(low)
+            self._high = float(high)
+
+        def GetXmin(self):
+            return self._low
+
+        def GetXmax(self):
+            return self._high
+
+    def __init__(self, contents, low=1.0, high=1.3):
+        self._contents = [float(value) for value in contents]
+        self._axis = self._Axis(low, high)
+
+    def InheritsFrom(self, name):
+        return name in ("TH1", "TObject")
+
+    def GetNbinsX(self):
+        return len(self._contents)
+
+    def GetXaxis(self):
+        return self._axis
+
+    def Integral(self):
+        return sum(self._contents)
+
+
 def _load_pion_component_subtraction():
     fake_background_config = types.ModuleType("background_config")
     fake_background_config.PARTICLE_SUBTRACTION_MODE_COMPONENTS = "simc_shape_components"
@@ -153,6 +184,40 @@ class TBinPionParentIdentityTests(unittest.TestCase):
                 _inp(),
                 (0.0, 0.4, 0.8),
             )
+
+    def test_proposal_validation_is_structural_not_the_production_quality_gate(self):
+        template = _FakeRootHistogram((1.0, 2.0, 3.0))
+        fit_result = {
+            "particle_subtraction_mode": "simc_shape_components",
+            "fit_status_pion": "quality_rejected",
+            "fit_status_kaon": "quality_rejected",
+            "fallback_used": False,
+            "A_n": 0.4,
+            "A_delta": 0.2,
+            "A_sidis": 0.1,
+            "B_n": 0.0,
+            "B_delta": 0.0,
+            "B_sidis": 0.0,
+            "H_simc_shape_pi_n": template,
+            "H_simc_shape_pi_delta": template,
+            "H_simc_shape_pi_sidis": template,
+            "diagnostics": {
+                "pion": {"validation": {"accepted": False}},
+                "kaon": {"validation": {"accepted": False}},
+            },
+        }
+        production_gate = self.module.evaluate_particle_subtraction_component_fit_result(
+            fit_result, {"particle_subtraction_fallback_mode": "zero"}
+        )
+        proposal_gate = self.module.evaluate_component_pion_application_proposal(
+            fit_result
+        )
+        self.assertFalse(production_gate["accepted"])
+        self.assertTrue(proposal_gate["available"])
+        self.assertEqual(
+            proposal_gate["diagnostics"]["active_component_names"],
+            ["pi_n", "pi_delta", "pi_sidis"],
+        )
 
     def test_event_level_children_keep_their_own_control_support(self):
         weights = {1.11: 2.0, 1.13: 3.0, 1.15: 5.0}

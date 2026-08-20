@@ -67,7 +67,7 @@ class PionDiagnosticPlotContractTests(unittest.TestCase):
         application_builder = function_sources["_apply_component_pion_subtraction_setting"]
         self.assertIn('"input_selection": str(input_selection)', application_builder)
         self.assertIn('"source_target_state": str(source_target_state)', application_builder)
-        self.assertIn('"production_applied": not bool(diagnostic_only)', application_builder)
+        self.assertIn('"production_applied": not bool(diagnostic_only) and not bool(proposal_only)', application_builder)
 
     def test_setting_wide_emission_is_gated_without_suppressing_per_t_pages(self):
         rand_source = RAND_SUB_PATH.read_text(encoding="utf-8")
@@ -160,6 +160,41 @@ class PionDiagnosticPlotContractTests(unittest.TestCase):
             [entry["page_id"] for entry in manifest],
             ["pion.t_bin.0.lambda_comparison"],
         )
+
+    def test_lambda_page_keeps_final_after_primary_and_proposal_as_overlay(self):
+        final_after = object()
+        proposed_after = object()
+        canonical_hist = object()
+        fit_result = {"analysis_scope": "t_bin1", "diagnostics": {}}
+        final_payload = {
+            "analysis_scope": "t_bin1",
+            "accepted": True,
+            "final_application_status": "zero",
+            "H_MM_nosub_after_pion_subtraction": final_after,
+        }
+        proposal_payload = {
+            "analysis_scope": "t_bin1",
+            "H_MM_nosub_after_pion_subtraction": proposed_after,
+        }
+        with mock.patch.object(
+            fits,
+            "_resolve_kaon_lambda_reference_for_plot",
+            return_value=(canonical_hist, 1.0, "canonical", "historical"),
+        ) as resolver, mock.patch.object(
+            fits,
+            "_print_component_overlay_page",
+            return_value=True,
+        ) as page:
+            fits.print_particle_subtraction_kaon_lambda_comparison_page(
+                "ignored.pdf",
+                fit_result,
+                final_payload,
+                proposal_payload=proposal_payload,
+            )
+        self.assertIs(resolver.call_args.args[1], final_after)
+        overlays = page.call_args.args[4]
+        self.assertEqual(overlays[1][0], proposed_after)
+        self.assertIn("proposed component after-pion", overlays[1][1])
 
     def test_rejected_application_is_status_only_and_can_still_render_lambda(self):
         rejected = {"accepted": False, "analysis_scope": "setting-wide"}

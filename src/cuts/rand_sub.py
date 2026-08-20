@@ -101,6 +101,7 @@ from pion_component_subtraction import (
     build_simc_shape_pion_control_weights,
     assert_component_subtraction_payload_ownership,
     compute_hist_closure_metrics,
+    evaluate_component_pion_application_proposal,
     evaluate_particle_subtraction_component_fit_result,
     handle_particle_subtraction_fallback,
     print_particle_subtraction_weight_support_warning,
@@ -768,6 +769,7 @@ def _apply_component_pion_subtraction_setting(
     input_selection="no_rf_proton_cleaning_then_rf_restored",
     source_target_state="post_proton_post_rf",
     t_edges=None,
+    proposal_only=False,
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
     payload = {
@@ -792,10 +794,18 @@ def _apply_component_pion_subtraction_setting(
         "diagnostic_only": bool(diagnostic_only),
         "application_authoritative": not bool(diagnostic_only),
         "production_applied": False,
+        "proposal_available": False,
+        "diagnostic_role": "proposal" if proposal_only else "production",
+        "production_evaluation_accepted": bool(gate_result.get("accepted")),
+        "production_rejection_reasons": [
+            reason.strip()
+            for reason in str(gate_result.get("reason") or "").split(";")
+            if reason.strip()
+        ],
         "input_selection": str(input_selection),
         "source_target_state": str(source_target_state),
     }
-    if not gate_result["accepted"]:
+    if not gate_result["accepted"] and not proposal_only:
         if diagnostic_only:
             assert_component_subtraction_payload_ownership(payload)
             return payload
@@ -821,6 +831,7 @@ def _apply_component_pion_subtraction_setting(
         clip_min=clip_min,
         clip_max=clip_max,
         denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+        proposal_mode=bool(proposal_only),
     )
     stage_weight_payload = build_simc_shape_pion_control_weights(
         component_fit_result,
@@ -828,6 +839,7 @@ def _apply_component_pion_subtraction_setting(
         clip_max=clip_max,
         denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
         model_variant="staged",
+        proposal_mode=bool(proposal_only),
     )
     print_particle_subtraction_weight_support_warning(
         weight_payload,
@@ -919,7 +931,8 @@ def _apply_component_pion_subtraction_setting(
             "accepted": True,
             "fallback_used": False,
             "fallback_reason": "",
-            "production_applied": not bool(diagnostic_only),
+            "proposal_available": True,
+            "production_applied": not bool(diagnostic_only) and not bool(proposal_only),
             "particle_subtraction_effective_scale": float(effective_scale),
             "weighted_pion_integral": float(weighted_pion_integral_full),
             "weighted_pion_integral_cut": float(weighted_pion_integral_cut),
@@ -956,6 +969,377 @@ def _apply_component_pion_subtraction_setting(
     )
     assert_component_subtraction_payload_ownership(payload)
     return payload
+
+
+def build_component_pion_application_proposal(
+    component_fit_result,
+    sub_tree_bundle,
+    phi_setting,
+    inpDict,
+    particle_type,
+    mm_offset_data,
+    hole_contains,
+    evaluate_event,
+    shifted_t_getter,
+    mm_min,
+    mm_max,
+    norm_factor_data,
+    norm_factor_dummy,
+    nWindows,
+    detached_targets,
+    *,
+    input_selection="no_rf_proton_cleaning_then_rf_restored",
+    source_target_state="post_proton_post_rf",
+    t_edges=None,
+):
+    """Build an evaluable, detached parent diagnostic proposal.
+
+    Production acceptance is deliberately not consulted here.  The proposal
+    still rejects malformed/non-finite component models, but a fit-quality
+    rejection remains visible as a proposed correction rather than becoming an
+    empty diagnostic payload.
+    """
+    proposal_check = evaluate_component_pion_application_proposal(component_fit_result)
+    if not proposal_check.get("available"):
+        raise ValueError(proposal_check.get("reason") or "proposal model unavailable")
+    return _apply_component_pion_subtraction_setting(
+        component_fit_result,
+        sub_tree_bundle,
+        phi_setting,
+        inpDict,
+        particle_type,
+        mm_offset_data,
+        hole_contains,
+        evaluate_event,
+        shifted_t_getter,
+        mm_min,
+        mm_max,
+        norm_factor_data,
+        norm_factor_dummy,
+        nWindows,
+        detached_targets,
+        diagnostic_only=True,
+        input_selection=input_selection,
+        source_target_state=source_target_state,
+        t_edges=t_edges,
+        proposal_only=True,
+    )
+
+
+def _clone_parent_diagnostic_histogram(histogram, scope, role, *, reset=False):
+    if histogram is None:
+        return None
+    return clone_root_histogram(
+        histogram,
+        scope=scope,
+        role=role,
+        reset=reset,
+    )
+
+
+def _build_zero_parent_diagnostic_final(proposal_payload, production_evaluation, scope):
+    """Represent the configured zero fallback on detached before spectra."""
+    before = proposal_payload.get("H_MM_before_pion_subtraction")
+    full_before = proposal_payload.get("H_MM_nosub_before_pion_subtraction")
+    if before is None or full_before is None:
+        raise RuntimeError("missing_source_histogram")
+    zero_cut = _clone_parent_diagnostic_histogram(
+        before, scope, "zero_fallback_template_cut", reset=True
+    )
+    zero_full = _clone_parent_diagnostic_histogram(
+        full_before, scope, "zero_fallback_template_full", reset=True
+    )
+    final_before = _clone_parent_diagnostic_histogram(before, scope, "zero_fallback_before")
+    final_full_before = _clone_parent_diagnostic_histogram(
+        full_before, scope, "zero_fallback_full_before")
+    final_after = _clone_parent_diagnostic_histogram(before, scope, "zero_fallback_after")
+    final_full_after = _clone_parent_diagnostic_histogram(full_before, scope, "zero_fallback_full_after")
+    final_weight = _clone_parent_diagnostic_histogram(
+        proposal_payload.get("H_pion_weight_vs_MM") or before,
+        scope,
+        "zero_fallback_weight",
+        reset=True,
+    )
+    final_control_model = _clone_parent_diagnostic_histogram(
+        proposal_payload.get("H_pion_control_model") or before,
+        scope,
+        "zero_fallback_control_model",
+        reset=True,
+    )
+    final_kaon_model = _clone_parent_diagnostic_histogram(
+        proposal_payload.get("H_kaon_pion_model") or before,
+        scope,
+        "zero_fallback_kaon_model",
+        reset=True,
+    )
+    final_weighted_model = _clone_parent_diagnostic_histogram(
+        proposal_payload.get("H_kaon_pion_model") or before,
+        scope,
+        "zero_fallback_weighted_model",
+        reset=True,
+    )
+    final = {
+        "accepted": True,
+        "proposal_available": False,
+        "diagnostic_role": "final",
+        "final_application_status": "zero",
+        "production_evaluation_accepted": False,
+        "production_rejection_reasons": [
+            reason.strip()
+            for reason in str(production_evaluation.get("reason") or "").split(";")
+            if reason.strip()
+        ],
+        "fallback_used": True,
+        "fallback_mode": "zero",
+        "fallback_reason": production_evaluation.get("reason") or "component-fit result rejected",
+        "diagnostic_only": True,
+        "application_authoritative": False,
+        "production_applied": False,
+        "analysis_scope": proposal_payload.get("analysis_scope"),
+        "input_selection": proposal_payload.get("input_selection"),
+        "source_target_state": proposal_payload.get("source_target_state"),
+        "H_pion_control_model": final_control_model,
+        "H_kaon_pion_model": final_kaon_model,
+        "H_weighted_pion_control_model": final_weighted_model,
+        "H_pion_weight_vs_MM": final_weight,
+        "weights": np.zeros(int(final_weight.GetNbinsX()) + 2, dtype=np.float64),
+        "H_pion_subtraction_template_MM": zero_cut,
+        "H_pion_subtraction_template_MM_nosub": zero_full,
+        "H_MM_before_pion_subtraction": final_before,
+        "H_MM_after_pion_subtraction": final_after,
+        "H_MM_nosub_before_pion_subtraction": final_full_before,
+        "H_MM_nosub_after_pion_subtraction": final_full_after,
+        "H_MM_nosub_after_pion_subtraction_model_stage": _clone_parent_diagnostic_histogram(
+            full_before, scope, "zero_fallback_stage_model"
+        ),
+        "H_MM_nosub_after_pion_subtraction_model_final": _clone_parent_diagnostic_histogram(
+            full_before, scope, "zero_fallback_final_model"
+        ),
+        "weighted_pion_integral": 0.0,
+        "weighted_pion_integral_cut": 0.0,
+        "weighted_pion_integral_full": 0.0,
+        "kaon_integral_before_pion_sub": _hist_integral(final_before),
+        "kaon_integral_after_pion_sub": _hist_integral(final_after),
+        "kaon_integral_before_pion_sub_full": _hist_integral(final_full_before),
+        "kaon_integral_after_pion_sub_full": _hist_integral(final_full_after),
+        "diagnostics": {
+            "final_closure": compute_hist_closure_metrics(final_full_before, final_full_after),
+            "event_template_closure": compute_hist_closure_metrics(zero_full, zero_full),
+            "fallback_mode": "zero",
+        },
+    }
+    assert_component_subtraction_payload_ownership(final)
+    return final
+
+
+def _build_single_scale_parent_diagnostic_final(
+    proposal_payload,
+    production_evaluation,
+    sub_tree_bundle,
+    phi_setting,
+    inpDict,
+    particle_type,
+    mm_offset_data,
+    hole_contains,
+    evaluate_event,
+    shifted_t_getter,
+    mm_min,
+    mm_max,
+    norm_factor_data,
+    norm_factor_dummy,
+    nWindows,
+    t_edges,
+    scope,
+):
+    """Build the real legacy scalar fallback for one detached parent scope."""
+    before = proposal_payload.get("H_MM_before_pion_subtraction")
+    full_before = proposal_payload.get("H_MM_nosub_before_pion_subtraction")
+    reference = proposal_payload.get("H_pion_control_model")
+    if before is None or full_before is None or reference is None:
+        raise RuntimeError("missing_source_histogram")
+    targets = {
+        "h_mm": _clone_parent_diagnostic_histogram(before, scope, "single_scale_target_cut"),
+        "h_mm_full": _clone_parent_diagnostic_histogram(full_before, scope, "single_scale_target_full"),
+    }
+    templates = _create_rand_sub_component_templates(targets)
+    unit_weights = np.ones(int(reference.GetNbinsX()) + 2, dtype=np.float64)
+    stats = {"n_events_allcuts": 0, "n_events_nommcuts": 0, "sum_event_weight": 0.0, "sum_event_weight_sq": 0.0}
+    source_specs = (
+        ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data)),
+        ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(nWindows)),
+        ("dummy", sub_tree_bundle.get("dummy_prompt_tree"), -float(norm_factor_dummy)),
+        ("dummy_rand", sub_tree_bundle.get("dummy_rand_tree"), float(norm_factor_dummy) / float(nWindows)),
+    )
+    for label, tree, coefficient in source_specs:
+        _process_component_weighted_subtracted_particle_tree(
+            tree,
+            mm_offset_data,
+            templates,
+            particle_type,
+            hole_contains,
+            evaluate_event,
+            shifted_t_getter,
+            mm_min,
+            mm_max,
+            coefficient,
+            reference,
+            unit_weights,
+            stats=stats,
+            tree_label="single-scale {}".format(label),
+            t_edges=t_edges,
+        )
+    windows = resolve_particle_subtraction_windows(
+        particle_type,
+        "pion",
+        mm_offset_data,
+        inp_dict=inpDict,
+        phi_setting=phi_setting,
+    )
+    try:
+        scale_components = compute_staged_particle_subtraction_scales(
+            full_before,
+            templates["h_mm_full"],
+            windows,
+            context="parent diagnostic single-scale ({})".format(phi_setting),
+        )
+        scale_factor = float(scale_components["total_scale_factor"])
+    except ZeroDivisionError:
+        scale_components = None
+        scale_factor = 0.0
+    for histogram in templates.values():
+        histogram.Scale(scale_factor)
+    for key, target in targets.items():
+        target.Add(templates[key], -1.0)
+    final_weight = _clone_parent_diagnostic_histogram(reference, scope, "single_scale_weight", reset=True)
+    for bin_index in range(1, final_weight.GetNbinsX() + 1):
+        final_weight.SetBinContent(bin_index, scale_factor)
+        final_weight.SetBinError(bin_index, 0.0)
+    final_control = _clone_parent_diagnostic_histogram(reference, scope, "single_scale_control")
+    final_model = _clone_parent_diagnostic_histogram(templates["h_mm_full"], scope, "single_scale_model")
+    final_weighted_model = _clone_parent_diagnostic_histogram(
+        templates["h_mm_full"], scope, "single_scale_weighted_model"
+    )
+    expected_after = _clone_parent_diagnostic_histogram(
+        full_before, scope, "single_scale_expected_after"
+    )
+    expected_after.Add(templates["h_mm_full"], -1.0)
+    final = {
+        "accepted": True,
+        "proposal_available": False,
+        "diagnostic_role": "final",
+        "final_application_status": "applied_fallback",
+        "production_evaluation_accepted": False,
+        "production_rejection_reasons": [
+            reason.strip()
+            for reason in str(production_evaluation.get("reason") or "").split(";")
+            if reason.strip()
+        ],
+        "fallback_used": True,
+        "fallback_mode": "single_scale",
+        "fallback_reason": production_evaluation.get("reason") or "component-fit result rejected",
+        "diagnostic_only": True,
+        "application_authoritative": False,
+        "production_applied": False,
+        "analysis_scope": proposal_payload.get("analysis_scope"),
+        "input_selection": proposal_payload.get("input_selection"),
+        "source_target_state": proposal_payload.get("source_target_state"),
+        "H_pion_control_model": final_control,
+        "H_kaon_pion_model": final_model,
+        "H_weighted_pion_control_model": final_weighted_model,
+        "H_pion_weight_vs_MM": final_weight,
+        "weights": np.full(int(reference.GetNbinsX()) + 2, scale_factor, dtype=np.float64),
+        "H_pion_subtraction_template_MM": templates["h_mm"],
+        "H_pion_subtraction_template_MM_nosub": templates["h_mm_full"],
+        "H_MM_before_pion_subtraction": _clone_parent_diagnostic_histogram(before, scope, "single_scale_before"),
+        "H_MM_after_pion_subtraction": targets["h_mm"],
+        "H_MM_nosub_before_pion_subtraction": _clone_parent_diagnostic_histogram(full_before, scope, "single_scale_full_before"),
+        "H_MM_nosub_after_pion_subtraction": targets["h_mm_full"],
+        "H_MM_nosub_after_pion_subtraction_model_stage": _clone_parent_diagnostic_histogram(targets["h_mm_full"], scope, "single_scale_stage_model"),
+        "H_MM_nosub_after_pion_subtraction_model_final": _clone_parent_diagnostic_histogram(targets["h_mm_full"], scope, "single_scale_final_model"),
+        "particle_subtraction_effective_scale": scale_factor,
+        "weighted_pion_integral": _hist_integral(templates["h_mm_full"]),
+        "weighted_pion_integral_cut": _hist_integral(templates["h_mm"]),
+        "weighted_pion_integral_full": _hist_integral(templates["h_mm_full"]),
+        "kaon_integral_before_pion_sub": _hist_integral(before),
+        "kaon_integral_after_pion_sub": _hist_integral(targets["h_mm"]),
+        "kaon_integral_before_pion_sub_full": _hist_integral(full_before),
+        "kaon_integral_after_pion_sub_full": _hist_integral(targets["h_mm_full"]),
+        "diagnostics": {
+            **stats,
+            "fallback_mode": "single_scale",
+            "scale_components": scale_components,
+            "event_template_closure": compute_hist_closure_metrics(final_model, templates["h_mm_full"]),
+            "final_closure": compute_hist_closure_metrics(
+                expected_after, targets["h_mm_full"]
+            ),
+        },
+    }
+    assert_component_subtraction_payload_ownership(final)
+    return final
+
+
+def resolve_parent_diagnostic_final_application(
+    proposal_payload,
+    production_evaluation,
+    *,
+    fallback_context=None,
+):
+    """Return the final diagnostic state without changing production policy.
+
+    The caller supplies a fallback factory only for the one policy that needs
+    event-level reconstruction (``single_scale``).  ``zero`` is represented
+    here from detached proposal-before histograms; skip/error intentionally
+    retain no fabricated final spectrum.
+    """
+    if not isinstance(proposal_payload, dict):
+        return None, {
+            "status": "unavailable",
+            "final_status": "unavailable",
+            "final_reason": "proposal_unavailable",
+        }
+    if bool(production_evaluation.get("accepted")):
+        final = dict(proposal_payload)
+        final.update(
+            {
+                "diagnostic_role": "final",
+                "final_application_status": "applied_component",
+                "production_evaluation_accepted": True,
+                "production_rejection_reasons": [],
+                "production_applied": False,
+            }
+        )
+        return final, {
+            "status": "available",
+            "final_status": "applied_component",
+            "final_reason": None,
+        }
+
+    fallback_mode = str(production_evaluation.get("fallback_mode") or "").strip().lower()
+    scope = "pion_parent_{}".format(proposal_payload.get("analysis_scope") or "unknown")
+    if fallback_mode == "zero":
+        return _build_zero_parent_diagnostic_final(proposal_payload, production_evaluation, scope), {
+            "status": "available",
+            "final_status": "zero",
+            "final_reason": production_evaluation.get("reason"),
+        }
+    if fallback_mode == "single_scale" and callable(fallback_context):
+        final = fallback_context()
+        return final, {
+            "status": "available",
+            "final_status": "applied_fallback",
+            "final_reason": production_evaluation.get("reason"),
+        }
+    if fallback_mode == "single_scale":
+        return None, {
+            "status": "unavailable",
+            "final_status": "unavailable",
+            "final_reason": "single_scale_fallback_builder_missing",
+        }
+    return None, {
+        "status": "partial",
+        "final_status": fallback_mode or "error",
+        "final_reason": production_evaluation.get("reason") or "component-fit result rejected",
+    }
 
 
 def _process_rand_sub_tree(
@@ -3653,7 +4037,7 @@ def rand_sub(
                 def _build_parent_diagnostic_application(
                     *, fit_result, processed_entry, t_index, t_edges
                 ):
-                    """Apply one parent weight to its own detached t source."""
+                    """Build proposal and final policy state on detached t sources."""
                     cut_source = processed_entry.get("H_MM_DATA")
                     full_source = processed_entry.get("H_MM_nosub_DATA")
                     if cut_source is None or full_source is None:
@@ -3672,7 +4056,11 @@ def rand_sub(
                             name="H_MM_parent_t{}_diagnostic_full".format(int(t_index) + 1),
                         ),
                     }
-                    return _apply_component_pion_subtraction_setting(
+                    production_evaluation = evaluate_particle_subtraction_component_fit_result(
+                        fit_result,
+                        inpDict,
+                    )
+                    proposal = build_component_pion_application_proposal(
                         fit_result,
                         sub_tree_bundle,
                         phi_setting,
@@ -3688,11 +4076,59 @@ def rand_sub(
                         norm_factor_dummy,
                         nWindows,
                         diagnostic_targets,
-                        diagnostic_only=True,
                         input_selection="no_rf_proton_cleaning_then_rf_restored",
                         source_target_state="post_proton_post_rf",
                         t_edges=t_edges,
                     )
+                    try:
+                        final_payload, final_status = resolve_parent_diagnostic_final_application(
+                            proposal,
+                            production_evaluation,
+                            fallback_context=lambda: _build_single_scale_parent_diagnostic_final(
+                                proposal,
+                                production_evaluation,
+                                sub_tree_bundle,
+                                phi_setting,
+                                inpDict,
+                                ParticleType,
+                                MM_offset_DATA,
+                                hole_contains,
+                                evaluate_data_event,
+                                get_shifted_t,
+                                mm_min,
+                                mm_max,
+                                norm_factor_data,
+                                norm_factor_dummy,
+                                nWindows,
+                                t_edges,
+                                "pion_parent_t{}".format(int(t_index) + 1),
+                            ),
+                        )
+                    except Exception as exc:
+                        unexpected = not any(
+                            token in str(exc).lower()
+                            for token in ("hist", "template", "tree", "event", "clone")
+                        )
+                        if bool(inpDict.get("pion_parent_diagnostic_strict", False)) and unexpected:
+                            raise
+                        final_payload = None
+                        final_status = {
+                            "status": "unavailable",
+                            "final_status": "unavailable",
+                            "final_reason": "fallback_build_failed",
+                            "detail": str(exc),
+                        }
+                    return {
+                        "proposed_diagnostic_application_result": proposal,
+                        "proposed_diagnostic_application_status": {
+                            "status": "available",
+                            "reason": None,
+                            "detail": None,
+                        },
+                        "final_diagnostic_application_result": final_payload,
+                        "final_diagnostic_application_status": final_status,
+                        "production_evaluation": production_evaluation,
+                    }
 
                 build_setting_t_bin_pion_parents(
                     histDict,
@@ -4940,7 +5376,7 @@ def rand_sub(
         )
     t_bin_parent_results = histDict.get("_pion_t_bin_parent_results") or []
     if t_bin_parent_results:
-        render_setting_t_bin_pion_parent_pages(
+        histDict["pion_component_plot_contract"] = render_setting_t_bin_pion_parent_pages(
             outputpdf.replace(
                 "{}_FullAnalysis_".format(ParticleType),
                 "{}_{}_rand_sub_".format(phi_setting, ParticleType),
@@ -4949,6 +5385,8 @@ def rand_sub(
             inpDict,
             title_prefix="{} {}".format(phi_setting, ParticleType),
             page_manifest=component_page_manifest,
+            setting_wide_summary=(histDict.get("pion_t_parent_diagnostics") or {}).get("setting_wide"),
+            setting_wide_enabled=setting_wide_pages_enabled,
         )
 
     ###

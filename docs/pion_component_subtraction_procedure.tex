@@ -746,6 +746,21 @@ own event support, random/dummy signs, and normalization.  The setting-wide
 fit may still be rendered as a diagnostic in this mode, but it is explicitly
 non-authoritative and cannot alter a production pion weight or amplitude.
 
+Each parent diagnostic records two deliberately separate application states.
+The \emph{proposal} is built from detached post-proton, RF-restored parent
+targets whenever the fitted pion model is structurally evaluable: its active
+templates must be compatible and positive and its amplitudes finite and
+non-negative.  This construction does not use fit-quality or production-gate
+acceptance.  The \emph{final displayed state} is then resolved using the
+unchanged production policy.  An accepted component result displays the
+proposal; a \texttt{zero} fallback displays an explicit zero pion template and
+an unchanged after spectrum; and a \texttt{single_scale} fallback displays the
+same signed-source scalar correction and normalization windows used by the
+legacy path.  For \texttt{skip_bin} and \texttt{error}, the evaluable proposal
+and rejection status remain visible but no final spectrum is invented.  Thus a
+diagnostic proposal never changes child application, parent acceptance, or
+production fail-closed behavior.
+
 Every authoritative parent carries a deterministic provenance identity formed
 from the analysis $Q^2$, $W$, epsilon, spectrometer setting, canonical $t$
 index and edges, paired canonical-interval identity, and subtraction scope.

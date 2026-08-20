@@ -10164,6 +10164,7 @@ def print_particle_subtraction_kaon_lambda_comparison_page(
     page_manifest=None,
     page_id_prefix=None,
     authoritative=False,
+    proposal_payload=None,
 ):
     """Render the mandatory K-Lambda comparison independently of pion acceptance.
 
@@ -10175,6 +10176,7 @@ def print_particle_subtraction_kaon_lambda_comparison_page(
         return False
 
     application_payload = component_payload if isinstance(component_payload, dict) else {}
+    proposal_application_payload = proposal_payload if isinstance(proposal_payload, dict) else {}
     scope_label = (
         application_payload.get("analysis_scope")
         or application_payload.get("analysis_scope_label")
@@ -10183,7 +10185,15 @@ def print_particle_subtraction_kaon_lambda_comparison_page(
     )
     after_hist = application_payload.get("H_MM_nosub_after_pion_subtraction")
     before_hist = application_payload.get("H_MM_nosub_before_pion_subtraction")
-    target_hist = after_hist or before_hist or component_fit_result.get("H_kaon_nosub_input")
+    proposed_after_hist = proposal_application_payload.get("H_MM_nosub_after_pion_subtraction")
+    proposed_before_hist = proposal_application_payload.get("H_MM_nosub_before_pion_subtraction")
+    target_hist = (
+        after_hist
+        or before_hist
+        or proposed_after_hist
+        or proposed_before_hist
+        or component_fit_result.get("H_kaon_nosub_input")
+    )
     if target_hist is None:
         raise RuntimeError(
             "K-Lambda SIMC comparison requires the {} scope kaon spectrum".format(
@@ -10211,7 +10221,19 @@ def print_particle_subtraction_kaon_lambda_comparison_page(
     if title_prefix:
         title_prefix = "{} ".format(title_prefix)
     has_after_spectrum = after_hist is not None
-    base_label = "after pion subtraction" if has_after_spectrum else "kaon spectrum before pion subtraction"
+    has_proposed_after_spectrum = proposed_after_hist is not None
+    final_state = application_payload.get("final_application_status") or (
+        "applied_component" if bool(application_payload.get("accepted")) else "unavailable"
+    )
+    if has_after_spectrum:
+        base_label = "final after pion subtraction ({})".format(final_state)
+    elif has_proposed_after_spectrum:
+        base_label = "proposed after pion subtraction (no final spectrum)"
+    else:
+        base_label = "kaon spectrum before pion subtraction"
+    overlays = [(lambda_reference_hist, "K-Lambda SIMC comparison", ROOT.kBlue + 1, 2)]
+    if proposed_after_hist is not None and proposed_after_hist is not target_hist:
+        overlays.append((proposed_after_hist, "proposed component after-pion", ROOT.kRed + 1, 3))
     emitted = _print_component_overlay_page(
         pdf_name,
         target_hist,
@@ -10220,15 +10242,16 @@ def print_particle_subtraction_kaon_lambda_comparison_page(
             title_prefix,
             "after pion subtraction" if has_after_spectrum else "available kaon spectrum",
         ),
-        [(lambda_reference_hist, "K-Lambda SIMC comparison", ROOT.kBlue + 1, 2)],
+        overlays,
         [
             "scope: {}".format(scope_label),
             "application status={}".format(
-                "accepted" if bool(application_payload.get("accepted")) else "not applied"
+                "accepted" if bool(application_payload.get("production_evaluation_accepted", application_payload.get("accepted"))) else "rejected"
             ),
             "comparison spectrum={}".format(
-                "after pion subtraction" if has_after_spectrum else "before/status fallback"
+                base_label
             ),
+            "final application state={}".format(final_state),
             "K-Lambda comparison full integral={}".format(
                 _format_fit_number(_hist_integral(lambda_reference_hist))
             ),
