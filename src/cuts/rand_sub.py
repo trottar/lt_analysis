@@ -4192,7 +4192,7 @@ def rand_sub(
                 InFile_DATA,
                 InFile_DUMMY,
                 ParticleType,
-                POL,
+                inpDict.get("POL"),
                 EPSSET,
                 phi_setting,
                 norm_factor_data,
