@@ -726,6 +726,12 @@ final kaon yield:
 \end{align}
 In particular, the parent uses the cleaner's final event factor, which includes
 the RF acceptance decision.  It is not a fit to the pre-RF cleaned spectrum.
+The parent collection is built and frozen in the particle-subtraction
+(\texttt{rand\_sub}) stage, before its diagnostic PDF is closed.  The PDF
+therefore contains the setting-wide diagnostic-only solution together with one
+authoritative section per canonical $t$ interval.  Later yield extraction and
+averaging stages validate and consume the frozen collection; they do not fit,
+replace, or overwrite a parent.
 
 The parent fit determines the MM-dependent pion weight parameters.  A daughter
 $(t_i,\phi_j)$ cell does not receive the parent's integrated pion histogram and

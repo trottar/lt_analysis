@@ -136,6 +136,24 @@ class TBinPionParentIdentityTests(unittest.TestCase):
                 parent, _inp(), "Left", 0, (0.0, 0.5)
             )
 
+    def test_frozen_collection_requires_exact_canonical_parent_set(self):
+        first = _parent(self.module, _inp(), 0, (0.0, 0.4))
+        second = _parent(self.module, _inp(), 1, (0.4, 0.8))
+        hist = {
+            "phi_setting": "Left",
+            "_pion_t_bin_parent_results": [first, second],
+        }
+        resolved = self.module.validate_frozen_t_bin_pion_parent_collection(
+            hist, _inp(), (0.0, 0.4, 0.8)
+        )
+        self.assertIs(resolved[0], first)
+        with self.assertRaisesRegex(RuntimeError, "collection:count"):
+            self.module.validate_frozen_t_bin_pion_parent_collection(
+                {**hist, "_pion_t_bin_parent_results": [first]},
+                _inp(),
+                (0.0, 0.4, 0.8),
+            )
+
     def test_event_level_children_keep_their_own_control_support(self):
         weights = {1.11: 2.0, 1.13: 3.0, 1.15: 5.0}
         self.module.simc_shape_pion_weight_from_value = (

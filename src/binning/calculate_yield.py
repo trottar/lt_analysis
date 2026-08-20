@@ -116,6 +116,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
     validate_authoritative_t_bin_pion_parent,
+    validate_frozen_t_bin_pion_parent_collection,
 )
 from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
@@ -3044,6 +3045,12 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         "calculate_yield_sigma0",
     )
     proton_cleaning_result = hist.get("_proton_contamination_cleaning_result_setting")
+    if (
+        resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+        and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
+    ):
+        validate_frozen_t_bin_pion_parent_collection(hist, inpDict, t_bins)
     parent_pion_alignment = (
         (hist.get("_particle_subtraction_component_fit_setting") or {}).get("pion_component_alignment")
     )

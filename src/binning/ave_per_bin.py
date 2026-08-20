@@ -114,6 +114,7 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
     validate_authoritative_t_bin_pion_parent,
+    validate_frozen_t_bin_pion_parent_collection,
 )
 from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
@@ -812,8 +813,7 @@ def process_hist_data(
     proton_cleaning_result=None,
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
-    parent_only=False,
-    component_page_manifest=None,
+    t_integrated_fit_only=False,
 ):
 
     processed_dict = {}
@@ -918,6 +918,7 @@ def process_hist_data(
     render_setting_wide_template_diagnostics = (
         ParticleType == "kaon"
         and component_shape_payload is not None
+        and not t_integrated_fit_only
         and (
             resolve_pion_subtraction_scope(inpDict) != "t_bin"
             or bool(inpDict.get("emit_setting_wide_pion_diagnostic", True))
@@ -936,11 +937,6 @@ def process_hist_data(
             kaon_sigma0_payload=kaon_sigma0_shape_payload,
         )
 
-    component_page_manifest = (
-        component_page_manifest
-        if isinstance(component_page_manifest, list)
-        else []
-    )
     for j in range(len(t_bins)-1):
 
         hist_bin_dict["H_Q2_DATA_{}".format(j)]       = TH1D("H_Q2_DATA_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
@@ -1239,7 +1235,7 @@ def process_hist_data(
             use_legacy_scalar_subtraction = True
             parent_entry = None
             parent_scope_result = None
-            if use_t_bin_parents and not parent_only:
+            if use_t_bin_parents and not t_integrated_fit_only:
                 parent_entry = parent_results[j] if j < len(parent_results) else None
                 parent_scope_result = validate_authoritative_t_bin_pion_parent(
                     parent_entry,
@@ -1280,11 +1276,11 @@ def process_hist_data(
                         )
                     use_legacy_scalar_subtraction = fallback_mode not in ("zero", "skip_bin")
             elif component_shape_payload is not None:
-                if use_t_bin_parents and not parent_only:
+                if use_t_bin_parents and not t_integrated_fit_only:
                     raise RuntimeError("free_t_phi_pion_fit_forbidden_in_t_bin_scope")
-                # ``parent_only`` is the one allowed construction path for a
-                # new authoritative parent.  It fits the integrated t scope
-                # and deliberately does not apply subtraction here.
+                # The cuts-level particle-subtraction producer requests this
+                # integrated t fit input.  A normal averages pass only
+                # consumes an already frozen parent.
                 scope_component_shapes = resolve_scope_component_shapes(
                     component_shape_payload,
                     analysis_scope="t_bin{}".format(j + 1),
@@ -1350,7 +1346,7 @@ def process_hist_data(
                     for path in alignment_paths:
                         if path not in inpDict.setdefault("pion_component_alignment_artifacts", []):
                             inpDict["pion_component_alignment_artifacts"].append(path)
-                if parent_only:
+                if t_integrated_fit_only:
                     # The parent producer owns the fit only.  Its application
                     # is constructed from each child/t-level control source at
                     # the point of use, never from an integrated parent curve.
@@ -1446,7 +1442,7 @@ def process_hist_data(
                 hist_bin_dict["H_MM_pisub_DATA_{}".format(j)].Add(subDict["H_MM_nosub_SUB_DATA_{}".format(j)],-1)
                 hist_bin_dict["H_MM_DATA_{}".format(j)].Add(subDict["H_MM_SUB_DATA_{}".format(j)],-1)
 
-        if parent_only:
+        if t_integrated_fit_only:
             continue
 
         # Fit background and subtract
@@ -1602,6 +1598,7 @@ def process_hist_data(
             "H_t_DATA" : hist_bin_dict["H_t_DATA_{}".format(j)],
             "H_epsilon_DATA" : hist_bin_dict["H_epsilon_DATA_{}".format(j)],
             "H_MM_DATA" : hist_bin_dict["H_MM_DATA_{}".format(j)],
+            "H_MM_nosub_DATA" : hist_bin_dict["H_MM_nosub_DATA_{}".format(j)],
             "H_Q2_DUMMY" : hist_bin_dict["H_Q2_DUMMY_{}".format(j)],
             "H_W_DUMMY" : hist_bin_dict["H_W_DUMMY_{}".format(j)],
             "H_t_DUMMY" : hist_bin_dict["H_t_DUMMY_{}".format(j)],
@@ -1628,6 +1625,11 @@ def process_hist_data(
         processed_dict["t_bin{}".format(j+1)] = {key : processed_dict["t_bin{}".format(j+1)][key] \
                                                  for key in sorted(processed_dict["t_bin{}".format(j+1)].keys())}
 
+        # The particle-subtraction stage owns all authoritative parent pages.
+        # This shared input-builder mode returns records only.
+        if t_integrated_fit_only:
+            continue
+
         # Include Stat box
         ROOT.gStyle.SetOptStat(1)
         for i, (key,val) in enumerate(processed_dict["t_bin{}".format(j+1)].items()):
@@ -1648,41 +1650,9 @@ def process_hist_data(
             pdf_opened = _open_root_pdf_page_stream(canvas, pdf_name, pdf_opened)
             canvas.Print(pdf_name)
 
-            if key == "H_MM_DATA" and component_fit_results[j] is not None:
-                print_particle_subtraction_component_fit_pages(
-                    pdf_name,
-                    component_fit_results[j],
-                    title_prefix="{} t{}".format(phi_setting, j + 1),
-                    cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
-                    page_manifest=component_page_manifest,
-                    page_id_prefix="pion.t_bin.{}".format(j),
-                    authoritative=True,
-                )
-                if isinstance(component_subtraction_payloads[j], dict):
-                    print_particle_subtraction_component_application_pages(
-                        pdf_name,
-                        component_subtraction_payloads[j],
-                        title_prefix="{} t{}".format(phi_setting, j + 1),
-                        cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
-                        component_fit_result=component_fit_results[j],
-                        include_lambda_page=False,
-                        page_manifest=component_page_manifest,
-                        page_id_prefix="pion.t_bin.{}".format(j),
-                        authoritative=True,
-                    )
-                print_particle_subtraction_kaon_lambda_comparison_page(
-                    pdf_name,
-                    component_fit_results[j],
-                    component_subtraction_payloads[j],
-                    title_prefix="{} t{}".format(phi_setting, j + 1),
-                    cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
-                    page_manifest=component_page_manifest,
-                    page_id_prefix="pion.t_bin.{}".format(j),
-                    authoritative=True,
-                )
             del canvas
 
-    if isinstance(proton_cleaning_result, dict):
+    if not t_integrated_fit_only and isinstance(proton_cleaning_result, dict):
         if not pdf_opened:
             open_canvas = ROOT.TCanvas("averages_data_open_{}".format(phi_setting), "Canvas", 10, 10)
             pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
@@ -1718,8 +1688,7 @@ def bin_data(
     proton_cleaning_result=None,
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
-    parent_only=False,
-    component_page_manifest=None,
+    t_integrated_fit_only=False,
 ):
 
     processed_dict = process_hist_data(
@@ -1738,8 +1707,7 @@ def bin_data(
         proton_cleaning_result=proton_cleaning_result,
         parent_pion_alignment=parent_pion_alignment,
         pion_t_bin_parent_results=pion_t_bin_parent_results,
-        parent_only=parent_only,
-        component_page_manifest=component_page_manifest,
+        t_integrated_fit_only=t_integrated_fit_only,
     )
     
     binned_dict = {}
@@ -1847,147 +1815,8 @@ def bin_data(
             "kin_hist_dummy" : kin_hist_dummy
         }
         
-    # The t-scoped component result is a first-class production parent.  Keep
-    # it outside the numerical-average leaves so downstream yield processing
-    # can share fit-owned ROOT state without cloning it into every child cell.
-    binned_dict["_pion_parent_processed_dict"] = processed_dict
     return binned_dict
     
-def build_t_bin_pion_parents(hist, t_bins, phi_bins, inpDict):
-    """Build the authoritative RF-restored pion fit once per canonical t bin.
-
-    The existing no-RF tree selection and proton cleaner are retained by
-    ``process_hist_data``.  Its event-level ``final_cleaned_factor`` includes
-    ``rf_accept``, so the fitted parent sees exactly the post-proton,
-    normal-RF population that will later feed child yield application.
-    """
-    if not (
-        str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
-        and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
-        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
-    ):
-        hist["_pion_t_bin_parent_results"] = []
-        return []
-    phi_setting = hist["phi_setting"]
-    kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
-        hist, inpDict, t_bins, phi_bins, "pion_t_parent_signal"
-    )
-    kaon_sigma0_shape_payload = _get_cached_kaon_sigma0_shape_payload(
-        hist, inpDict, t_bins, phi_bins, "pion_t_parent_sigma0"
-    )
-    processed_dict = process_hist_data(
-        hist["InFile_DATA"],
-        hist["InFile_DUMMY"],
-        t_bins,
-        phi_bins,
-        hist["nWindows"],
-        phi_setting,
-        inpDict,
-        particle_subtraction_scale_factor=None,
-        kaon_signal_shape_payload=kaon_signal_shape_payload,
-        kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
-        proton_cleaning_result=hist.get("_proton_contamination_cleaning_result_setting"),
-        parent_pion_alignment=(
-            (hist.get("_particle_subtraction_component_fit_setting") or {}).get(
-                "pion_component_alignment"
-            )
-        ),
-        parent_only=True,
-        component_page_manifest=hist.setdefault("pion_component_page_manifest", []),
-    )
-    parents = []
-    for t_index in range(len(t_bins) - 1):
-        entry = processed_dict.get("t_bin{}".format(t_index + 1)) or {}
-        fit_result = entry.get("particle_subtraction_component_fit")
-        t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
-        parent_identity = build_t_bin_pion_parent_identity(
-            inpDict,
-            phi_setting,
-            t_index,
-            t_edges,
-        )
-        parent = {
-            **parent_identity,
-            "t_bin_index": int(t_index),
-            "t_edges": t_edges,
-            "analysis_scope": "t_bin{}".format(t_index + 1),
-            "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-            "fit_result": fit_result,
-            "application_result": None,
-            "fit_summary": entry.get("particle_subtraction_component_fit_summary"),
-            "application_summary": None,
-        }
-        # Fail before yield extraction if the parent builder did not create a
-        # structurally valid parent for an active canonical t interval.
-        validate_authoritative_t_bin_pion_parent(
-            parent,
-            inpDict,
-            phi_setting,
-            t_index,
-            t_edges,
-        )
-        parents.append(parent)
-    hist["_pion_t_bin_parent_results"] = parents
-    hist["_pion_t_bin_parent_source"] = "rf_restored_no_rf_proton_cleaning"
-    amplitude_table = []
-    for parent in parents:
-        fit_result = parent.get("fit_result") or {}
-        amplitude_table.append(
-            {
-                "t_bin": int(parent["t_bin_index"]) + 1,
-                "t_edges": list(parent["t_edges"]),
-                "pion_parent_id": parent.get("pion_parent_id"),
-                "A_n": fit_result.get("A_n"),
-                "A_delta": fit_result.get("A_delta"),
-                "A_sidis": fit_result.get("A_sidis"),
-                "S_lambda": fit_result.get("S_lambda"),
-                "chi2_ndf": fit_result.get("chi2_ndf_kaon"),
-                "p_value": fit_result.get("fit_p_value_kaon"),
-                "parent_fit_status": fit_result.get("fit_status_kaon"),
-                "status": fit_result.get("fit_status_kaon"),
-                "protected_fit_variant": (fit_result.get("diagnostics") or {}).get("kaon", {}).get("fit_variant"),
-                "protected_fit_attempted": (fit_result.get("diagnostics") or {}).get("kaon", {}).get("protected_fit_attempted"),
-                "protected_fit_succeeded": (fit_result.get("diagnostics") or {}).get("kaon", {}).get("protected_fit_succeeded"),
-                "parent_pi_delta_applied": (fit_result.get("diagnostics") or {}).get("kaon", {}).get("pi_delta_applied"),
-                "parent_failure_reason": (fit_result.get("diagnostics") or {}).get("kaon", {}).get("failure_reason"),
-            }
-        )
-    hist["pion_t_amplitude_table"] = amplitude_table
-    setting_wide_fit = hist.get("_particle_subtraction_component_fit_setting") or {}
-    setting_wide_row = {
-        "scope": "setting_wide_diagnostic",
-        "A_n": setting_wide_fit.get("A_n"),
-        "A_delta": setting_wide_fit.get("A_delta"),
-        "A_sidis": setting_wide_fit.get("A_sidis"),
-        "S_lambda": setting_wide_fit.get("S_lambda"),
-        "chi2_ndf": setting_wide_fit.get("chi2_ndf_kaon"),
-        "p_value": setting_wide_fit.get("fit_p_value_kaon"),
-        "status": setting_wide_fit.get("fit_status_kaon"),
-        "protected_fit_variant": (setting_wide_fit.get("diagnostics") or {}).get("kaon", {}).get("fit_variant"),
-        "diagnostic_only": bool(setting_wide_fit.get("diagnostic_only", True)),
-    }
-    hist["pion_t_parent_diagnostics"] = {
-        "phi_setting": phi_setting,
-        "epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
-        "setting_wide": setting_wide_row,
-        "parents": amplitude_table,
-    }
-    print("[SIMC pion parents] {} RF-restored t-bin amplitudes".format(phi_setting))
-    print(
-        "  setting-wide diagnostic A_n={A_n} A_delta={A_delta} "
-        "A_SIDIS={A_sidis} S_Lambda={S_lambda} chi2/ndf={chi2_ndf} "
-        "p={p_value} status={status}".format(**setting_wide_row)
-    )
-    print("  t_bin       A_n       A_delta       A_SIDIS      S_Lambda   chi2/ndf       p  status")
-    for row in amplitude_table:
-        print(
-            "  {t_bin:>5} {A_n!s:>9} {A_delta!s:>13} {A_sidis!s:>13} {S_lambda!s:>13} {chi2_ndf!s:>10} {p_value!s:>7}  {status}".format(
-                **row
-            )
-        )
-    return parents
-
-
 def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
@@ -2023,6 +1852,13 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         )
     )
     existing_parent_results = hist.get("_pion_t_bin_parent_results")
+    if (
+        resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+    ):
+        # Parents are constructed and frozen by rand_sub.  Averages consumes
+        # them but may never reconstruct or replace the collection.
+        validate_frozen_t_bin_pion_parent_collection(hist, inpDict, t_bins)
     binned_dict = bin_data(
         kinematic_types,
         tree_data,
@@ -2041,28 +1877,6 @@ def calculate_ave_data(kinematic_types, hist, t_bins, phi_bins, inpDict):
         parent_pion_alignment=parent_pion_alignment,
         pion_t_bin_parent_results=existing_parent_results,
     )
-    if str(inpDict.get("pion_subtraction_scope", "t_bin")).strip().lower() == "t_bin":
-        parent_processed = binned_dict.get("_pion_parent_processed_dict") or {}
-        parent_results = []
-        for t_index in range(len(t_bins) - 1):
-            parent_entry = parent_processed.get("t_bin{}".format(t_index + 1)) or {}
-            parent_results.append(
-                {
-                    "t_bin_index": int(t_index),
-                    "t_edges": [float(t_bins[t_index]), float(t_bins[t_index + 1])],
-                    "analysis_scope": "t_bin{}".format(t_index + 1),
-                    # This is the existing no-RF tree path after its committed
-                    # final_cleaned_factor/rf_accept event gate.
-                    "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-                    "fit_result": parent_entry.get("particle_subtraction_component_fit"),
-                    "application_result": parent_entry.get("particle_subtraction_component_payload"),
-                    "fit_summary": parent_entry.get("particle_subtraction_component_fit_summary"),
-                    "application_summary": parent_entry.get("particle_subtraction_component_payload_summary"),
-                }
-            )
-        hist["_pion_t_bin_parent_results"] = parent_results
-        hist["_pion_t_bin_parent_source"] = "ave_per_bin_rf_restored"
-
     group_dict = {}
     bad_bins = set()  # <-- collect (tbin_index, phibin_index) that have sem==1000.0 anywhere
     

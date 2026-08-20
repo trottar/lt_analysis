@@ -44,6 +44,7 @@ def _load_fits_without_root():
 fits = _load_fits_without_root()
 RAND_SUB_PATH = REPO_ROOT / "src" / "cuts" / "rand_sub.py"
 AVE_PER_BIN_PATH = REPO_ROOT / "src" / "binning" / "ave_per_bin.py"
+PION_T_PARENT_PATH = REPO_ROOT / "src" / "cuts" / "pion_t_bin_parents.py"
 
 
 class PionDiagnosticPlotContractTests(unittest.TestCase):
@@ -70,25 +71,27 @@ class PionDiagnosticPlotContractTests(unittest.TestCase):
 
     def test_setting_wide_emission_is_gated_without_suppressing_per_t_pages(self):
         rand_source = RAND_SUB_PATH.read_text(encoding="utf-8")
-        ave_source = AVE_PER_BIN_PATH.read_text(encoding="utf-8")
+        parent_source = PION_T_PARENT_PATH.read_text(encoding="utf-8")
         self.assertIn("setting_wide_pages_enabled", rand_source)
         self.assertIn('emit_setting_wide_pion_diagnostic", True', rand_source)
-        self.assertIn("render_setting_wide_template_diagnostics", ave_source)
-        self.assertIn('page_id_prefix="pion.t_bin.{}".format(j)', ave_source)
-        self.assertIn("print_particle_subtraction_kaon_lambda_comparison_page(", ave_source)
+        self.assertIn("render_setting_t_bin_pion_parent_pages(", rand_source)
+        self.assertIn('page_prefix = "pion.t_bin.{}"', parent_source)
+        self.assertIn("print_particle_subtraction_kaon_lambda_comparison_page(", parent_source)
 
-    def test_parent_builder_owns_the_manifest_not_process_hist_data(self):
-        source = AVE_PER_BIN_PATH.read_text(encoding="utf-8")
+    def test_particle_stage_parent_builder_owns_the_manifest_not_averages(self):
+        source = PION_T_PARENT_PATH.read_text(encoding="utf-8")
         tree = ast.parse(source)
         function_sources = {
             node.name: ast.get_source_segment(source, node)
             for node in ast.walk(tree)
             if isinstance(node, ast.FunctionDef)
         }
-        process_source = function_sources["process_hist_data"]
-        self.assertIn("component_page_manifest=None", process_source)
-        self.assertNotIn("hist.setdefault", process_source)
-        self.assertIn("component_page_manifest=hist.setdefault", function_sources["build_t_bin_pion_parents"])
+        builder_source = function_sources["build_setting_t_bin_pion_parents"]
+        self.assertIn('hist.setdefault("pion_component_page_manifest", [])', builder_source)
+        self.assertIn('hist["_pion_t_bin_parent_results"] = frozen_parents', builder_source)
+        ave_source = AVE_PER_BIN_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("def build_t_bin_pion_parents", ave_source)
+        self.assertNotIn('hist["_pion_t_bin_parent_results"] =', ave_source)
 
     def test_page_manifest_rejects_duplicates_and_preserves_scope_authority(self):
         manifest = []

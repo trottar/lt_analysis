@@ -1257,20 +1257,25 @@ output_file_lst.append(outputpdf)
 sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
 from xsect_support import write_xsect_support
-from ave_per_bin import ave_per_bin_data, build_t_bin_pion_parents
+from ave_per_bin import ave_per_bin_data
+from pion_component_subtraction import validate_frozen_t_bin_pion_parent_collection
 
 yieldDict = {}
-# Build authoritative RF-restored t parents before any t/phi yield
-# application.  The later averages pass still consumes the yield cache for its
-# established MM-background stage, but it reuses these parent fit results.
+# Parents were built, diagnosed, and frozen during rand_sub after committed
+# proton cleaning and RF restoration.  Step 6 is strictly consumer-only.
 stage_start = perf_counter()
 debug_checkpoint(
-    "Step 6 RF-restored t-bin pion parents start",
+    "Step 6 validating frozen particle-subtraction-stage pion parents",
     hist_count=len(histlist),
 )
 for hist in histlist:
-    build_t_bin_pion_parents(hist, t_bins, phi_bins, inpDict)
-record_stage_time("Step 6 RF-restored t-bin pion parents", stage_start)
+    parents = validate_frozen_t_bin_pion_parent_collection(hist, inpDict, t_bins)
+    print(
+        "[SIMC PION PARENTS] Step 6 validated setting={} parent_count={} canonical_count={}".format(
+            hist.get("phi_setting"), len(parents), len(t_bins) - 1
+        )
+    )
+record_stage_time("Step 6 frozen t-bin pion parent validation", stage_start)
 
 stage_start = perf_counter()
 yieldDict.update(find_yield_data(histlist, inpDict))

@@ -107,6 +107,10 @@ from pion_component_subtraction import (
     simc_shape_pion_weight_from_value,
     summarize_particle_subtraction_component_payload,
 )
+from pion_t_bin_parents import (
+    build_setting_t_bin_pion_parents,
+    render_setting_t_bin_pion_parent_pages,
+)
 from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
     audit_timing_t_hgcer_display_targets,
@@ -580,6 +584,7 @@ def _process_component_weighted_subtracted_particle_tree(
     pion_mm_weights,
     stats=None,
     tree_label=None,
+    t_edges=None,
 ):
     if tree is None:
         raise RuntimeError("Subtracted-particle tree '{}' is None".format(tree_label or "unnamed"))
@@ -602,6 +607,11 @@ def _process_component_weighted_subtracted_particle_tree(
             continue
 
         adj_MM = get_shifted_mm(evt, mm_offset=mm_offset_correction)
+        adj_t = shifted_t_getter(evt)
+        if t_edges is not None:
+            t_low, t_high = float(t_edges[0]), float(t_edges[1])
+            if adj_t < t_low or adj_t >= t_high:
+                continue
         pion_weight = source_coeff * simc_shape_pion_weight_from_value(
             adj_MM,
             pion_reference_hist,
@@ -627,7 +637,6 @@ def _process_component_weighted_subtracted_particle_tree(
         if not allcuts:
             continue
 
-        adj_t = shifted_t_getter(evt)
         _fill_rand_sub_allcuts_weighted(evt, adj_MM, adj_t, adj_hsdelta, pion_weight, template_hists)
         if stats is not None:
             stats["n_events_allcuts"] += 1
@@ -758,6 +767,7 @@ def _apply_component_pion_subtraction_setting(
     diagnostic_only=False,
     input_selection="no_rf_proton_cleaning_then_rf_restored",
     source_target_state="post_proton_post_rf",
+    t_edges=None,
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
     payload = {
@@ -868,6 +878,7 @@ def _apply_component_pion_subtraction_setting(
             weight_payload["weights"],
             stats=stats,
             tree_label="component {}".format(label),
+            t_edges=t_edges,
         )
 
     h_mm_before = clone_reset_hist(data_targets["h_mm"], "_before_pion_sub")
@@ -3623,6 +3634,80 @@ def rand_sub(
             histDict["particle_subtraction_component_diagnostic_payload_setting"] = (
                 summarize_particle_subtraction_component_payload(component_diagnostic_payload)
             )
+            if (
+                resolve_pion_subtraction_scope(inpDict) == "t_bin"
+                and str(ParticleType).strip().lower() == "kaon"
+            ):
+                canonical_binning = inpDict.get("canonical_t_binning") or {}
+                frozen_t_bins = inpDict.get("t_bins")
+                frozen_phi_bins = inpDict.get("phi_bins")
+                if frozen_t_bins is None:
+                    frozen_t_bins = canonical_binning.get("t_edges")
+                if frozen_phi_bins is None:
+                    frozen_phi_bins = canonical_binning.get("phi_edges")
+                if frozen_t_bins is None or frozen_phi_bins is None:
+                    raise RuntimeError(
+                        "authoritative_t_bin_pion_parents_require_frozen_canonical_bins"
+                    )
+
+                def _build_parent_diagnostic_application(
+                    *, fit_result, processed_entry, t_index, t_edges
+                ):
+                    """Apply one parent weight to its own detached t source."""
+                    cut_source = processed_entry.get("H_MM_DATA")
+                    full_source = processed_entry.get("H_MM_nosub_DATA")
+                    if cut_source is None or full_source is None:
+                        raise RuntimeError("missing_t_integrated_parent_diagnostic_source")
+                    diagnostic_targets = {
+                        "h_mm": clone_root_histogram(
+                            cut_source,
+                            scope="pion_parent_t{}".format(int(t_index) + 1),
+                            role="diagnostic_cut_target",
+                            name="H_MM_parent_t{}_diagnostic_cut".format(int(t_index) + 1),
+                        ),
+                        "h_mm_full": clone_root_histogram(
+                            full_source,
+                            scope="pion_parent_t{}".format(int(t_index) + 1),
+                            role="diagnostic_full_target",
+                            name="H_MM_parent_t{}_diagnostic_full".format(int(t_index) + 1),
+                        ),
+                    }
+                    return _apply_component_pion_subtraction_setting(
+                        fit_result,
+                        sub_tree_bundle,
+                        phi_setting,
+                        inpDict,
+                        ParticleType,
+                        MM_offset_DATA,
+                        hole_contains,
+                        evaluate_data_event,
+                        get_shifted_t,
+                        mm_min,
+                        mm_max,
+                        norm_factor_data,
+                        norm_factor_dummy,
+                        nWindows,
+                        diagnostic_targets,
+                        diagnostic_only=True,
+                        input_selection="no_rf_proton_cleaning_then_rf_restored",
+                        source_target_state="post_proton_post_rf",
+                        t_edges=t_edges,
+                    )
+
+                build_setting_t_bin_pion_parents(
+                    histDict,
+                    inpDict,
+                    tree_data=InFile_DATA,
+                    tree_dummy=InFile_DUMMY,
+                    n_windows=nWindows,
+                    t_bins=frozen_t_bins,
+                    phi_bins=frozen_phi_bins,
+                    kaon_signal_shape_payload=kaon_signal_shape_payload,
+                    kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
+                    proton_cleaning_result=proton_cleaning_result,
+                    parent_pion_alignment=component_fit_result.get("pion_component_alignment"),
+                    diagnostic_application_builder=_build_parent_diagnostic_application,
+                )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
             histDict["H_simc_shape_pi_sidis_SIMC"] = component_fit_result.get("H_simc_shape_pi_sidis")
@@ -4851,6 +4936,18 @@ def rand_sub(
             page_manifest=component_page_manifest,
             page_id_prefix="pion.setting_wide",
             authoritative=not bool(component_fit_result.get("diagnostic_only")),
+        )
+    t_bin_parent_results = histDict.get("_pion_t_bin_parent_results") or []
+    if t_bin_parent_results:
+        render_setting_t_bin_pion_parent_pages(
+            outputpdf.replace(
+                "{}_FullAnalysis_".format(ParticleType),
+                "{}_{}_rand_sub_".format(phi_setting, ParticleType),
+            ),
+            t_bin_parent_results,
+            inpDict,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+            page_manifest=component_page_manifest,
         )
 
     ###

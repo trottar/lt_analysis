@@ -160,6 +160,36 @@ def validate_authoritative_t_bin_pion_parent(
     return fit_result
 
 
+def validate_frozen_t_bin_pion_parent_collection(hist, inp_dict, t_bins):
+    """Validate the immutable production parent collection for one setting.
+
+    Parent construction belongs to the particle-subtraction stage.  Every
+    downstream consumer calls this helper instead of rebuilding the fits.
+    """
+    if not isinstance(hist, dict):
+        raise RuntimeError("missing_authoritative_t_bin_pion_parent_collection")
+    phi_setting = hist.get("phi_setting")
+    parents = hist.get("_pion_t_bin_parent_results")
+    if not isinstance(parents, (list, tuple)):
+        raise RuntimeError("missing_authoritative_t_bin_pion_parent_collection")
+    expected_count = max(0, len(t_bins) - 1)
+    if len(parents) != expected_count:
+        raise RuntimeError(
+            "invalid_authoritative_t_bin_pion_parent_collection:count:{}:{}".format(
+                len(parents), expected_count
+            )
+        )
+    for t_index, parent in enumerate(parents):
+        validate_authoritative_t_bin_pion_parent(
+            parent,
+            inp_dict,
+            phi_setting,
+            t_index,
+            [float(t_bins[t_index]), float(t_bins[t_index + 1])],
+        )
+    return parents
+
+
 def assert_component_subtraction_payload_ownership(payload):
     """Reject accidental fit-state aliases in an application payload."""
     if not isinstance(payload, dict):
