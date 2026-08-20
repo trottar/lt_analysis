@@ -40,7 +40,7 @@ from time import perf_counter
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, set_dynamic_axis_ranges, notify_email, request_yn_response, run_bash_script
+from utility import open_root_file, show_pdf_with_evince, create_dir, is_root_obj, is_hist, hist_to_root, custom_encoder, json_ready_value, set_dynamic_axis_ranges, notify_email, request_yn_response, run_bash_script
 from background_config import (
     get_active_bg_profile_name,
     resolve_particle_subtraction_mode,
@@ -1465,7 +1465,7 @@ combineDict.update({ "histlist" : tmp_lst})
 # Save combined dictionary to json file
 # Open the file in write mode and use json.dump() to save the dictionary to JSON
 with open(foutjson, 'w') as f_json:
-    json.dump(combineDict, f_json, default=custom_encoder)
+    json.dump(json_ready_value(combineDict), f_json, default=custom_encoder)
 output_file_lst.append(foutjson)
 debug_file_status("Combined analysis JSON", foutjson)
 record_stage_time("Step 6 JSON export", stage_start)

@@ -568,9 +568,71 @@ def hist_to_root(hist, file_name_or_root, directory_name, directory_cache=None):
 
 ################################################################################################################################################    
 
+# Sentinel used by ``json_ready_value`` when a nested ROOT object is omitted
+# from a JSON-only diagnostic payload.
+_JSON_SKIP = object()
+
+
+def _is_any_root_object(obj):
+    """Return true for every PyROOT TObject, not only histogram classes."""
+    try:
+        return bool(obj is not None and obj.InheritsFrom("TObject"))
+    except Exception:
+        return False
+
+
+def json_ready_value(value):
+    """Recursively produce a JSON-safe diagnostic value.
+
+    The ROOT file is the authoritative home for ROOT-owned objects.  JSON
+    records only their scalar diagnostics, so nested ROOT values must not leak
+    through public metadata dictionaries just because their parent is not a
+    ROOT object itself.
+    """
+    if _is_any_root_object(value) or isinstance(value, TFitResultPtr):
+        return _JSON_SKIP
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, array):
+        return value.tolist()
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    if isinstance(value, dict):
+        cleaned = {}
+        for key, child_value in value.items():
+            child = json_ready_value(child_value)
+            if child is _JSON_SKIP:
+                continue
+            cleaned[str(key)] = child
+        return cleaned
+    if isinstance(value, (list, tuple)):
+        cleaned = []
+        for child_value in value:
+            child = json_ready_value(child_value)
+            if child is not _JSON_SKIP:
+                cleaned.append(child)
+        return cleaned
+    if isinstance(value, set):
+        cleaned = [
+            child
+            for child in (json_ready_value(child_value) for child_value in value)
+            if child is not _JSON_SKIP
+        ]
+        return sorted(cleaned, key=repr)
+    return value
+
+
 # Used to check if object is non-serializable and converts to a list
-# so that it can be saved in json file
+# so that it can be saved in json file.  ``json_ready_value`` handles the
+# recursive public payload; this remains a narrow final guard for callers
+# that use ``json.dump(..., default=custom_encoder)`` directly.
 def custom_encoder(obj):
+    if _is_any_root_object(obj) or isinstance(obj, TFitResultPtr):
+        return None
     if isinstance(obj, np.ndarray):
         return obj.tolist()
     if isinstance(obj, np.integer):
@@ -579,7 +641,13 @@ def custom_encoder(obj):
         return float(obj)
     if isinstance(obj, np.bool_):
         return bool(obj)
-    raise TypeError("Type not serializable")
+    if isinstance(obj, array):
+        return obj.tolist()
+    if isinstance(obj, Path):
+        return str(obj)
+    if isinstance(obj, bytes):
+        return obj.decode("utf-8", errors="replace")
+    raise TypeError("Type not serializable: {}".format(type(obj).__name__))
 
 ################################################################################################################################################
 
