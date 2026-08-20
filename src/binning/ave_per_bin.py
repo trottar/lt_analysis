@@ -814,6 +814,7 @@ def process_hist_data(
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
     t_integrated_fit_only=False,
+    hgcer_cutg=None,
 ):
 
     processed_dict = {}
@@ -848,8 +849,11 @@ def process_hist_data(
 
     ################################################################################################################################################
     # Define HGCer hole cut for KaonLT 2018-19
-    hgcer_cutg = None
-    if ParticleType in ("kaon", "pion"):
+    # The particle-subtraction stage can supply its still-live HGCer cut for
+    # the RF-restored parent input.  Reconstructing a same-named TCutG while
+    # rand_sub owns and later draws its cut leaves ROOT with a dangling
+    # graphics object after the temporary parent builder returns.
+    if hgcer_cutg is None and ParticleType in ("kaon", "pion"):
         sys.path.append("cuts")
         from hgcer_hole import apply_HGCer_hole_cut
         hgcer_cutg = apply_HGCer_hole_cut(Q2, W, EPSSET, phi_setting)
@@ -1689,6 +1693,7 @@ def bin_data(
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
     t_integrated_fit_only=False,
+    hgcer_cutg=None,
 ):
 
     processed_dict = process_hist_data(
@@ -1708,6 +1713,7 @@ def bin_data(
         parent_pion_alignment=parent_pion_alignment,
         pion_t_bin_parent_results=pion_t_bin_parent_results,
         t_integrated_fit_only=t_integrated_fit_only,
+        hgcer_cutg=hgcer_cutg,
     )
     
     binned_dict = {}

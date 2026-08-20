@@ -165,6 +165,7 @@ def build_setting_t_bin_pion_parents(
     kaon_sigma0_shape_payload,
     proton_cleaning_result,
     parent_pion_alignment,
+    hgcer_cutg=None,
     diagnostic_application_builder=None,
 ):
     """Fit, validate, and freeze one RF-restored parent per canonical t bin."""
@@ -191,6 +192,7 @@ def build_setting_t_bin_pion_parents(
         proton_cleaning_result=proton_cleaning_result,
         parent_pion_alignment=parent_pion_alignment,
         t_integrated_fit_only=True,
+        hgcer_cutg=hgcer_cutg,
     )
 
     parents = []

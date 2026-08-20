@@ -29,8 +29,11 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
         )
         self.assertGreater(builder_call, committed_targets)
         self.assertIn("proton_cleaning_result=proton_cleaning_result", self.rand_source[builder_call:])
-        self.assertIn("t_integrated_fit_only=True", self.parent_source)
         ave_source = (REPO_ROOT / "src" / "binning" / "ave_per_bin.py").read_text(encoding="utf-8")
+        self.assertIn("t_integrated_fit_only=True", self.parent_source)
+        self.assertIn("hgcer_cutg=hgcer_cutg", self.parent_source)
+        self.assertIn("hgcer_cutg=hgcer_cutg", self.rand_source)
+        self.assertIn("if hgcer_cutg is None and ParticleType", ave_source)
         self.assertIn("final_cleaned_factor", ave_source)
         self.assertIn("strict=True", ave_source)
         for source_label in ("prompt", "rand", "dummy_prompt", "dummy_rand"):

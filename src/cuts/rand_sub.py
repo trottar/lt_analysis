@@ -3706,6 +3706,7 @@ def rand_sub(
                     kaon_sigma0_shape_payload=kaon_sigma0_shape_payload,
                     proton_cleaning_result=proton_cleaning_result,
                     parent_pion_alignment=component_fit_result.get("pion_component_alignment"),
+                    hgcer_cutg=hgcer_cutg,
                     diagnostic_application_builder=_build_parent_diagnostic_application,
                 )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
