@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
+import hashlib
 import math
-import struct
 from copy import deepcopy
 
 import numpy as np
@@ -13,10 +12,24 @@ import numpy as np
 from background_config import (
     PARTICLE_SUBTRACTION_MODE_COMPONENTS,
     get_proton_contamination_cleaning_config,
+    get_pion_component_dynamic_alignment_config,
     resolve_particle_subtraction_fallback_mode,
+    resolve_particle_subtraction_component_cleanup_validation_mm_max,
+    resolve_particle_subtraction_component_fit_excluded_windows,
+    resolve_particle_subtraction_component_fit_mode,
+    resolve_particle_subtraction_component_fit_windows,
+    resolve_particle_subtraction_component_postfit_scales,
+    resolve_particle_subtraction_component_postrefine_scales,
+    resolve_particle_subtraction_component_prior_scales,
+    resolve_particle_subtraction_component_residual_shift_settings,
+    resolve_particle_subtraction_component_stage_amplitude_modes,
+    resolve_particle_subtraction_component_stage_amplitude_windows,
+    resolve_particle_subtraction_mode,
+    resolve_particle_subtraction_weight_clip_bounds,
+    resolve_particle_subtraction_weight_denominator_floor,
 )
 from mm_background_subtraction import mm_background_weight_from_value
-from root_histogram_ownership import clone_root_histogram
+from root_histogram_ownership import clone_root_histogram, fingerprint_histogram_content_error
 
 
 COMPONENT_NAMES = ("pi_n", "pi_delta", "pi_sidis")
@@ -51,31 +64,50 @@ def _canonical_json_hash(payload):
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def fingerprint_histogram_content_error(hist):
-    """Return a stable, exact provenance fingerprint for a TH1-like object."""
-    if hist is None:
-        raise RuntimeError("cannot fingerprint missing histogram")
-    try:
-        axis = hist.GetXaxis()
-        nbins = int(hist.GetNbinsX())
-        values = [
-            float(nbins),
-            float(axis.GetXmin()),
-            float(axis.GetXmax()),
-        ]
-        for bin_index in range(0, nbins + 2):
-            values.extend((
-                float(hist.GetBinContent(bin_index)),
-                float(hist.GetBinError(bin_index)),
-            ))
-    except Exception as exc:
-        raise RuntimeError("cannot fingerprint histogram: {}".format(exc))
-    if not all(math.isfinite(value) for value in values):
-        raise RuntimeError("cannot fingerprint histogram with nonfinite content or error")
-    digest = hashlib.sha256()
-    for value in values:
-        digest.update(struct.pack("!d", value))
-    return digest.hexdigest()
+def _parent_fit_relevant_configuration(inp_dict, phi_setting=None):
+    """Resolve only configuration that can alter a canonical-t parent fit.
+
+    This intentionally excludes pair/run provenance and the downstream phi
+    partition.  The object is retained verbatim in parent audit metadata and
+    hashed into the physics identity below.
+    """
+    inp_dict = inp_dict or {}
+    phi_setting = str(
+        phi_setting if phi_setting is not None else inp_dict.get("phi_setting", "")
+    )
+    def _for_targets(resolver, *args, **kwargs):
+        return {
+            target: resolver(
+                target,
+                *args,
+                inp_dict=inp_dict,
+                phi_setting=phi_setting,
+                **kwargs
+            )
+            for target in ("pion_control", "kaon_nosub")
+        }
+
+    return {
+        "particle_subtraction_mode": resolve_particle_subtraction_mode(inp_dict),
+        "pion_subtraction_scope": str(inp_dict.get("pion_subtraction_scope", "")).strip().lower(),
+        "weight_clip_bounds": list(resolve_particle_subtraction_weight_clip_bounds(inp_dict)),
+        "weight_denominator_floor": resolve_particle_subtraction_weight_denominator_floor(inp_dict),
+        "component_fit_windows": _for_targets(resolve_particle_subtraction_component_fit_windows),
+        "component_fit_excluded_windows": _for_targets(resolve_particle_subtraction_component_fit_excluded_windows),
+        "component_stage_amplitude_windows": _for_targets(resolve_particle_subtraction_component_stage_amplitude_windows),
+        "component_stage_amplitude_modes": _for_targets(resolve_particle_subtraction_component_stage_amplitude_modes),
+        "component_prior_scales": _for_targets(resolve_particle_subtraction_component_prior_scales),
+        "component_fit_mode": _for_targets(resolve_particle_subtraction_component_fit_mode),
+        "component_postfit_scales": _for_targets(resolve_particle_subtraction_component_postfit_scales),
+        "component_postrefine_scales": _for_targets(resolve_particle_subtraction_component_postrefine_scales),
+        "component_residual_shift_settings": _for_targets(resolve_particle_subtraction_component_residual_shift_settings),
+        "component_cleanup_validation_mm_max": _for_targets(resolve_particle_subtraction_component_cleanup_validation_mm_max),
+        "pion_component_dynamic_alignment": get_pion_component_dynamic_alignment_config(inp_dict, phi_setting=phi_setting),
+        "pi_delta_signal_protected_fit": inp_dict.get("pi_delta_signal_protected_fit") or {},
+        "mm_min": inp_dict.get("mm_min"),
+        "mm_max": inp_dict.get("mm_max"),
+        "shift_mode": inp_dict.get("shift_mode"),
+    }
 
 
 def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges):
@@ -97,13 +129,19 @@ def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges
     if not all(math.isfinite(value) for value in edges) or edges[1] <= edges[0]:
         raise RuntimeError("invalid_authoritative_t_bin_pion_parent:t_edges")
 
-    identity = {
+    parent_physics = {
         "Q2": str(inp_dict.get("Q2", "")),
         "W": str(inp_dict.get("W", "")),
         "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
         "phi_setting": str(phi_setting),
         "t_bin_index": int(t_bin_index),
         "t_edges": edges,
+        "pion_subtraction_scope": str(inp_dict.get("pion_subtraction_scope", "")).strip().lower(),
+        "parent_fit_configuration_hash": _canonical_json_hash(
+            _parent_fit_relevant_configuration(inp_dict, phi_setting)
+        ),
+    }
+    provenance = {
         "canonical_interval_pair_id": pair_id,
         "canonical_interval_pair_hash": pair_hash,
         "analysis_runtime_config_hash": str(
@@ -119,11 +157,13 @@ def build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_bin_index, t_edges
         "actual_num_t_bins": canonical.get("actual_num_t_bins"),
         "requested_num_phi_bins": canonical.get("requested_num_phi_bins"),
         "actual_num_phi_bins": canonical.get("actual_num_phi_bins"),
-        "pion_subtraction_scope": str(inp_dict.get("pion_subtraction_scope", "")).strip().lower(),
     }
     return {
-        **identity,
-        "pion_parent_id": "pion_parent_{}".format(_canonical_json_hash(identity)),
+        **parent_physics,
+        **provenance,
+        "parent_physics_identity": parent_physics,
+        "parent_fit_configuration": _parent_fit_relevant_configuration(inp_dict, phi_setting),
+        "pion_parent_id": "pion_parent_{}".format(_canonical_json_hash(parent_physics)),
     }
 
 
@@ -160,23 +200,28 @@ def validate_authoritative_t_bin_pion_parent(
         reasons.append("phi_setting")
     if str(parent.get("epsilon", "")).strip().lower() != expected["epsilon"]:
         reasons.append("epsilon")
+    provenance_mismatches = []
     if parent.get("canonical_interval_pair_id") != expected["canonical_interval_pair_id"]:
-        reasons.append("canonical_interval_pair_id")
+        provenance_mismatches.append("canonical_interval_pair_id")
     if parent.get("canonical_interval_pair_hash") != expected["canonical_interval_pair_hash"]:
-        reasons.append("canonical_interval_pair_hash")
+        provenance_mismatches.append("canonical_interval_pair_hash")
     for field in (
-        "analysis_runtime_config_hash",
         "canonical_t_edges",
-        "canonical_phi_edges",
         "source_epsilon",
         "consumer_epsilon",
         "requested_num_t_bins",
         "actual_num_t_bins",
+    ):
+        if parent.get(field) != expected[field]:
+            reasons.append(field)
+    for field in (
+        "analysis_runtime_config_hash",
+        "canonical_phi_edges",
         "requested_num_phi_bins",
         "actual_num_phi_bins",
     ):
         if parent.get(field) != expected[field]:
-            reasons.append(field)
+            provenance_mismatches.append(field)
     if str(parent.get("pion_subtraction_scope", "")).strip().lower() != expected["pion_subtraction_scope"]:
         reasons.append("pion_subtraction_scope")
 
@@ -200,6 +245,9 @@ def validate_authoritative_t_bin_pion_parent(
     if parent.get("pion_parent_id") != expected["pion_parent_id"]:
         reasons.append("pion_parent_id")
 
+    if parent.get("parent_fit_configuration_hash") != expected["parent_fit_configuration_hash"]:
+        reasons.append("parent_fit_configuration_hash")
+
     fit_result = parent.get("fit_result")
     if not isinstance(fit_result, dict):
         reasons.append("fit_result")
@@ -211,6 +259,9 @@ def validate_authoritative_t_bin_pion_parent(
                 ",".join(reasons)
             )
         )
+    # Phi-only changes are valid downstream provenance changes.  The caller
+    # records them in its run audit; validation itself must not mutate a frozen
+    # parent after the particle stage returns.
     return fit_result
 
 
@@ -563,6 +614,53 @@ def evaluate_particle_subtraction_component_fit_result(component_fit_result, inp
         "fallback_mode": fallback_mode,
         "reason": "; ".join(failures),
         "diagnostics": diagnostics,
+    }
+
+
+def resolve_frozen_parent_application_policy(parent, inp_dict=None):
+    """Resolve one frozen parent's only allowed child application action.
+
+    Consumers may construct child-local templates, but must not reinterpret a
+    rejected fit or replace a parent.  ``skip_bin`` is intentionally distinct
+    from an applied zero: it retains diagnostics while invalidating the child
+    for yield/table/cross-section use.
+    """
+    if not isinstance(parent, dict):
+        return {
+            "parent_id": None,
+            "fit_accepted": False,
+            "fallback_mode": "error",
+            "action": "error",
+            "reason": "missing_authoritative_t_bin_pion_parent",
+            "child_valid": False,
+        }
+    evaluation = evaluate_particle_subtraction_component_fit_result(
+        parent.get("fit_result"), inp_dict
+    )
+    fallback_mode = str(evaluation.get("fallback_mode") or "error").strip().lower()
+    if bool(evaluation.get("accepted")):
+        action = "component_weight"
+        child_valid = True
+    elif fallback_mode == "single_scale":
+        action = "single_scale"
+        child_valid = True
+    elif fallback_mode == "zero":
+        action = "zero"
+        child_valid = True
+    elif fallback_mode == "skip_bin":
+        action = "skip_bin"
+        child_valid = False
+    else:
+        action = "error"
+        child_valid = False
+    return {
+        "parent_id": parent.get("pion_parent_id"),
+        "fit_accepted": bool(evaluation.get("accepted")),
+        "fallback_mode": fallback_mode,
+        "action": action,
+        "reason": evaluation.get("reason") or None,
+        "child_valid": child_valid,
+        "evaluation": evaluation,
     }
 
 

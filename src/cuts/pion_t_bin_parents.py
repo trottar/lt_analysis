@@ -29,6 +29,7 @@ from pion_component_subtraction import (
     build_t_bin_pion_parent_identity,
     evaluate_particle_subtraction_component_fit_result,
     fingerprint_histogram_content_error,
+    resolve_frozen_parent_application_policy,
     validate_authoritative_t_bin_pion_parent,
     validate_frozen_t_bin_pion_parent_collection,
 )
@@ -146,10 +147,10 @@ def _classify_diagnostic_exception(exc):
 
 def _normalize_parent_diagnostic_outcome(outcome, fit_result, inp_dict):
     """Normalize legacy and proposal/final diagnostic callback results."""
-    production_evaluation = evaluate_particle_subtraction_component_fit_result(
-        fit_result,
-        inp_dict,
+    application_policy = resolve_frozen_parent_application_policy(
+        {"fit_result": fit_result}, inp_dict
     )
+    production_evaluation = dict(application_policy.get("evaluation") or {})
     if isinstance(outcome, dict) and "proposed_diagnostic_application_result" in outcome:
         proposed = outcome.get("proposed_diagnostic_application_result")
         proposed_status = dict(outcome.get("proposed_diagnostic_application_status") or {})
@@ -188,6 +189,8 @@ def _normalize_parent_diagnostic_outcome(outcome, fit_result, inp_dict):
         "production_evaluation": "accepted" if production_accepted else "rejected",
         "production_rejection_reasons": rejection_reasons,
         "fallback_mode": production_evaluation.get("fallback_mode"),
+        "application_action": application_policy.get("action"),
+        "application_policy": application_policy,
         "final_status": final_status.get("final_status") or ("applied_component" if final_available else "unavailable"),
         "final_reason": final_status.get("final_reason"),
         "detail": final_status.get("detail"),
@@ -224,28 +227,58 @@ def _parent_summary(parent):
     }
 
 
-def _sum_parent_histograms(parents, getter, *, role):
-    """Return a detached sum of one histogram field across canonical parents."""
-    source = None
-    for parent in parents:
-        candidate = getter(parent)
-        if candidate is not None:
-            source = candidate
-            break
-    if source is None:
-        return None
+def _sum_parent_histograms(parents, getter, *, role, required=False):
+    """Return a complete-only canonical parent sum and its audit record.
+
+    A global is meaningful only when every resolved canonical parent supplied
+    the requested product.  In particular, a rejected proposal/final state
+    must never silently turn into a partial authoritative global curve.
+    """
+    parents = tuple(parents or ())
+    candidates = [getter(parent) for parent in parents]
+    missing = [
+        int(parent.get("t_bin_index", index))
+        for index, (parent, candidate) in enumerate(zip(parents, candidates))
+        if candidate is None
+    ]
+    record = {
+        "role": role,
+        "expected_parent_count": len(parents),
+        "available_parent_count": len(parents) - len(missing),
+        "missing_t_bins": missing,
+        "source_parent_ids": [parent.get("pion_parent_id") for parent in parents],
+        "complete": not missing,
+        "histogram": None,
+        "bin_error_closure": {
+            "checked_bins_including_underflow_overflow": 0,
+            "fingerprint": None,
+            "passed": False,
+        },
+    }
+    if required and missing:
+        raise RuntimeError(
+            "authoritative_canonical_t_global_missing_required_input:{}".format(
+                ",".join("t{}".format(index + 1) for index in missing)
+            )
+        )
+    if missing or not candidates:
+        return record
     total = clone_root_histogram(
-        source,
+        candidates[0],
         scope="pion_canonical_t_global",
         role=role,
         reset=True,
         sumw2=True,
     )
-    for parent in parents:
-        candidate = getter(parent)
-        if candidate is not None:
-            total.Add(candidate)
-    return total
+    for candidate in candidates:
+        total.Add(candidate)
+    record["histogram"] = total
+    record["bin_error_closure"] = {
+        "checked_bins_including_underflow_overflow": int(total.GetNbinsX()) + 2,
+        "fingerprint": fingerprint_histogram_content_error(total),
+        "passed": True,
+    }
+    return record
 
 
 def _build_authoritative_canonical_t_global(parents):
@@ -255,38 +288,59 @@ def _build_authoritative_canonical_t_global(parents):
     never enters this object.  This distinction keeps a diagnostic fit from
     being mistaken for the production canonical-t result.
     """
-    before = _sum_parent_histograms(
-        parents, lambda parent: parent.get("H_proton_cleaned_final_rf"), role="input"
+    before_record = _sum_parent_histograms(
+        parents, lambda parent: parent.get("H_proton_cleaned_final_rf"), role="input", required=True
     )
-    estimated = _sum_parent_histograms(
+    estimated_record = _sum_parent_histograms(
         parents,
         lambda parent: (parent.get("proposed_diagnostic_application_result") or {}).get(
             "H_pion_subtraction_template_MM_nosub"
         ),
         role="estimated_contamination",
     )
-    proposed_after = _sum_parent_histograms(
+    proposed_record = _sum_parent_histograms(
         parents,
         lambda parent: (parent.get("proposed_diagnostic_application_result") or {}).get(
             "H_MM_nosub_after_pion_subtraction"
         ),
         role="proposed_clean",
     )
-    final_after = _sum_parent_histograms(
+    final_record = _sum_parent_histograms(
         parents,
         lambda parent: (parent.get("final_diagnostic_application_result") or {}).get(
             "H_MM_nosub_after_pion_subtraction"
         ),
         role="final_clean",
     )
+    complete = all(record["complete"] for record in (
+        before_record, estimated_record, proposed_record, final_record
+    ))
+    missing_products = {
+        record["role"]: list(record["missing_t_bins"])
+        for record in (before_record, estimated_record, proposed_record, final_record)
+        if not record["complete"]
+    }
+    before = before_record["histogram"]
+    estimated = estimated_record["histogram"]
+    proposed_after = proposed_record["histogram"]
+    final_after = final_record["histogram"]
     return {
         "label": "AUTHORITATIVE CANONICAL-t GLOBAL",
         "source": "strict_sum_of_frozen_canonical_t_parent_products",
         "t_parent_count": len(parents),
-        "H_MM_input": before,
-        "H_MM_estimated_contamination": estimated,
-        "H_MM_proposed_clean": proposed_after,
-        "H_MM_final_clean": final_after,
+        "complete": complete,
+        "status": "complete" if complete else "incomplete",
+        "missing_products": missing_products,
+        "sum_records": {
+            record["role"]: {
+                key: value for key, value in record.items() if key != "histogram"
+            }
+            for record in (before_record, estimated_record, proposed_record, final_record)
+        },
+        "H_MM_input": before if complete else None,
+        "H_MM_estimated_contamination": estimated if complete else None,
+        "H_MM_proposed_clean": proposed_after if complete else None,
+        "H_MM_final_clean": final_after if complete else None,
         "integrals": {
             "input": _hist_integral(before),
             "estimated_contamination": _hist_integral(estimated),
@@ -294,6 +348,82 @@ def _build_authoritative_canonical_t_global(parents):
             "final_clean": _hist_integral(final_after),
         },
     }
+
+
+def _parent_input_contract(parent_input, *, inp_dict, phi_setting, t_index, t_edges):
+    """Validate the direct producer handoff without cloning or refitting it."""
+    if not isinstance(parent_input, dict):
+        raise RuntimeError("authoritative_t_bin_parent_input_missing:t{}".format(t_index + 1))
+    if int(parent_input.get("t_index")) != int(t_index):
+        raise RuntimeError("authoritative_t_bin_parent_input_index_mismatch:t{}".format(t_index + 1))
+    input_edges = [float(value) for value in (parent_input.get("t_edges") or ())]
+    if input_edges != list(t_edges):
+        raise RuntimeError("authoritative_t_bin_parent_input_edges_mismatch:t{}".format(t_index + 1))
+    proton_histogram = parent_input.get("H_proton_cleaned_final_rf")
+    pion_control = parent_input.get("H_pion_control")
+    if proton_histogram is None or pion_control is None:
+        raise RuntimeError("authoritative_t_bin_parent_input_missing_histogram:t{}".format(t_index + 1))
+    recomputed_proton_fingerprint = fingerprint_histogram_content_error(proton_histogram)
+    producer_fingerprint = str(parent_input.get("proton_final_output_fingerprint") or "")
+    if not producer_fingerprint or producer_fingerprint != recomputed_proton_fingerprint:
+        raise RuntimeError(
+            "authoritative_t_bin_proton_output_fingerprint_mismatch:t{}".format(t_index + 1)
+        )
+    recomputed_pion_control_fingerprint = fingerprint_histogram_content_error(pion_control)
+    declared_pion_control_fingerprint = str(parent_input.get("pion_control_input_fingerprint") or "")
+    if not declared_pion_control_fingerprint or declared_pion_control_fingerprint != recomputed_pion_control_fingerprint:
+        raise RuntimeError(
+            "authoritative_t_bin_pion_control_input_fingerprint_mismatch:t{}".format(t_index + 1)
+        )
+    expected_epsilon = str(inp_dict.get("EPSSET", "")).strip().lower()
+    if str(parent_input.get("source_epsilon", "")).strip().lower() != expected_epsilon:
+        raise RuntimeError("authoritative_t_bin_parent_source_epsilon_mismatch:t{}".format(t_index + 1))
+    if str(parent_input.get("consumer_epsilon", "")).strip().lower() != expected_epsilon:
+        raise RuntimeError("authoritative_t_bin_parent_consumer_epsilon_mismatch:t{}".format(t_index + 1))
+    return {
+        "identity": build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_index, t_edges),
+        "proton_histogram": proton_histogram,
+        "pion_control": pion_control,
+        "proton_producer_fingerprint": producer_fingerprint,
+        "proton_input_fingerprint": recomputed_proton_fingerprint,
+        "pion_control_input_fingerprint": recomputed_pion_control_fingerprint,
+    }
+
+
+def _finalize_frozen_parent_collection(hist, inp_dict, parents, t_bins, *, reuse=None):
+    """Publish immutable parents and their complete-only global diagnostics."""
+    frozen_parents = tuple(parents)
+    hist.update({"_pion_t_bin_parent_results": frozen_parents})
+    hist["_pion_t_bin_parent_source"] = "particle_subtraction_stage_rf_restored"
+    hist["pion_t_parent_collection_frozen"] = True
+    hist["pion_t_amplitude_table"] = [_parent_summary(parent) for parent in frozen_parents]
+    canonical_t_global = _build_authoritative_canonical_t_global(frozen_parents)
+    hist["_pion_authoritative_canonical_t_global"] = canonical_t_global
+    hist["pion_authoritative_canonical_t_global_summary"] = {
+        key: value for key, value in canonical_t_global.items() if not key.startswith("H_")
+    }
+    setting_fit = hist.get("_particle_subtraction_component_fit_setting") or {}
+    hist["pion_t_parent_diagnostics"] = {
+        "phi_setting": hist.get("phi_setting"),
+        "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
+        "reuse": dict(reuse or {"reused": False}),
+        "setting_wide": {
+            "scope": "setting_wide_diagnostic",
+            "A_n": setting_fit.get("A_n"),
+            "A_delta": setting_fit.get("A_delta"),
+            "A_sidis": setting_fit.get("A_sidis"),
+            "S_lambda": setting_fit.get("S_lambda"),
+            "chi2_ndf": setting_fit.get("chi2_ndf_kaon"),
+            "p_value": setting_fit.get("fit_p_value_kaon"),
+            "status": setting_fit.get("fit_status_kaon"),
+            "diagnostic_only": bool(setting_fit.get("diagnostic_only", True)),
+            "label": "SETTING-WIDE DIAGNOSTIC FIT - NON-AUTHORITATIVE",
+        },
+        "authoritative_canonical_t_global": hist["pion_authoritative_canonical_t_global_summary"],
+        "parents": list(hist["pion_t_amplitude_table"]),
+    }
+    validate_frozen_t_bin_pion_parent_collection(hist, inp_dict, t_bins)
+    return frozen_parents
 
 
 def build_setting_t_bin_pion_parents(
@@ -331,43 +461,84 @@ def build_setting_t_bin_pion_parents(
     if pion_component_shape_payload is None:
         raise RuntimeError("authoritative_t_bin_parents_require_component_shapes")
 
+    contracts = []
+    for t_index in range(expected_count):
+        t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
+        contracts.append(_parent_input_contract(
+            parent_inputs[t_index],
+            inp_dict=inp_dict,
+            phi_setting=phi_setting,
+            t_index=t_index,
+            t_edges=t_edges,
+        ))
+
+    # Reuse is deliberately in-memory only.  A phi-only adaptation can keep
+    # a frozen parent fit, but no change in its physics identity or either
+    # producer fingerprint is allowed to cross this boundary.
+    existing_parents = hist.get("_pion_t_bin_parent_results")
+    if isinstance(existing_parents, tuple) and len(existing_parents) == expected_count:
+        reusable = True
+        provenance_changes = []
+        for t_index, (parent, contract) in enumerate(zip(existing_parents, contracts)):
+            t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
+            try:
+                validate_authoritative_t_bin_pion_parent(
+                    parent, inp_dict, phi_setting, t_index, t_edges
+                )
+            except RuntimeError:
+                reusable = False
+                break
+            if (
+                parent.get("pion_parent_id") != contract["identity"]["pion_parent_id"]
+                or parent.get("proton_producer_fingerprint", parent.get("proton_output_fingerprint"))
+                != contract["proton_producer_fingerprint"]
+                or parent.get("pion_control_input_fingerprint")
+                != contract["pion_control_input_fingerprint"]
+            ):
+                reusable = False
+                break
+            previous_provenance = {
+                key: parent.get(key)
+                for key in (
+                    "canonical_interval_pair_id", "canonical_interval_pair_hash",
+                    "analysis_runtime_config_hash", "canonical_phi_edges",
+                    "requested_num_phi_bins", "actual_num_phi_bins",
+                )
+            }
+            current_provenance = {
+                key: contract["identity"].get(key)
+                for key in previous_provenance
+            }
+            if previous_provenance != current_provenance:
+                provenance_changes.append({
+                    "t_bin_index": t_index,
+                    "previous": previous_provenance,
+                    "current": current_provenance,
+                })
+        if reusable:
+            return _finalize_frozen_parent_collection(
+                hist,
+                inp_dict,
+                existing_parents,
+                t_bins,
+                reuse={
+                    "reused": True,
+                    "reason": "matching_parent_physics_and_producer_fingerprints",
+                    "provenance_only_changes": provenance_changes,
+                },
+            )
+
     parents = []
     for t_index in range(len(t_bins) - 1):
         parent_input = parent_inputs[t_index]
-        if not isinstance(parent_input, dict):
-            raise RuntimeError("authoritative_t_bin_parent_input_missing:t{}".format(t_index + 1))
         t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
-        input_index = parent_input.get("t_index")
-        if int(input_index) != t_index:
-            raise RuntimeError("authoritative_t_bin_parent_input_index_mismatch:t{}".format(t_index + 1))
-        input_edges = [float(value) for value in (parent_input.get("t_edges") or ())]
-        if input_edges != t_edges:
-            raise RuntimeError("authoritative_t_bin_parent_input_edges_mismatch:t{}".format(t_index + 1))
-        kaon_input = parent_input.get("H_proton_cleaned_final_rf")
-        pion_control = parent_input.get("H_pion_control")
-        if kaon_input is None or pion_control is None:
-            raise RuntimeError("authoritative_t_bin_parent_input_missing_histogram:t{}".format(t_index + 1))
-        proton_fingerprint = fingerprint_histogram_content_error(kaon_input)
-        declared_fingerprint = str(parent_input.get("proton_final_output_fingerprint") or "")
-        if not declared_fingerprint or declared_fingerprint != proton_fingerprint:
-            raise RuntimeError(
-                "authoritative_t_bin_proton_output_fingerprint_mismatch:t{}".format(
-                    t_index + 1
-                )
-            )
-        expected_epsilon = str(inp_dict.get("EPSSET", "")).strip().lower()
-        if str(parent_input.get("source_epsilon", "")).strip().lower() != expected_epsilon:
-            raise RuntimeError("authoritative_t_bin_parent_source_epsilon_mismatch:t{}".format(t_index + 1))
-        if str(parent_input.get("consumer_epsilon", "")).strip().lower() != expected_epsilon:
-            raise RuntimeError("authoritative_t_bin_parent_consumer_epsilon_mismatch:t{}".format(t_index + 1))
-        identity = build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_index, t_edges)
-        for field in ("canonical_interval_pair_id", "canonical_interval_pair_hash"):
-            if parent_input.get(field) != identity.get(field):
-                raise RuntimeError(
-                    "authoritative_t_bin_parent_{}_mismatch:t{}".format(field, t_index + 1)
-                )
+        contract = contracts[t_index]
+        identity = contract["identity"]
+        kaon_input = contract["proton_histogram"]
+        pion_control = contract["pion_control"]
+        proton_fingerprint = contract["proton_input_fingerprint"]
         pion_input = kaon_input
-        pion_fingerprint = fingerprint_histogram_content_error(pion_input)
+        pion_fingerprint = contract["proton_input_fingerprint"]
         if proton_fingerprint != pion_fingerprint:
             raise RuntimeError("authoritative_t_bin_proton_pion_handoff_mismatch:t{}".format(t_index + 1))
 
@@ -452,9 +623,14 @@ def build_setting_t_bin_pion_parents(
             "pion_control_source_accounting": dict(
                 parent_input.get("pion_control_source_accounting") or {}
             ),
+            "proton_producer_fingerprint": contract["proton_producer_fingerprint"],
             "proton_output_fingerprint": proton_fingerprint,
             "pion_input_fingerprint": pion_fingerprint,
-            "handoff_match": True,
+            "pion_control_input_fingerprint": contract["pion_control_input_fingerprint"],
+            "handoff_match": bool(
+                contract["proton_producer_fingerprint"] == proton_fingerprint
+            ),
+            "handoff_status": "matched_producer_fingerprint",
             "pion_fit_input_is_proton_output": True,
             "application_result": None,
             "fit_summary": None,
@@ -557,6 +733,7 @@ def build_setting_t_bin_pion_parents(
             "production_evaluation": "accepted" if production_evaluation.get("accepted") else "rejected",
             "fallback_mode": production_evaluation.get("fallback_mode"),
             "rejection_reasons": list(diagnostic_status.get("production_rejection_reasons") or []),
+            "application_action": resolve_frozen_parent_application_policy(parent, inp_dict).get("action"),
         }
         parent["diagnostic_application_result"] = final
         parent["diagnostic_application_status"] = diagnostic_status
@@ -567,37 +744,16 @@ def build_setting_t_bin_pion_parents(
     # that parent for the lifetime of the setting, but Step 6/yield/average
     # code cannot append, remove, or replace parent slots.
     frozen_parents = tuple(parents)
+    # Keep the producer-owned freeze visible at the particle-stage boundary;
+    # the shared finalizer only derives scalar summaries and global products.
     hist["_pion_t_bin_parent_results"] = frozen_parents
-    hist["_pion_t_bin_parent_source"] = "particle_subtraction_stage_rf_restored"
-    hist["pion_t_parent_collection_frozen"] = True
-    hist["pion_t_amplitude_table"] = [_parent_summary(parent) for parent in frozen_parents]
-    canonical_t_global = _build_authoritative_canonical_t_global(frozen_parents)
-    hist["_pion_authoritative_canonical_t_global"] = canonical_t_global
-    hist["pion_authoritative_canonical_t_global_summary"] = {
-        key: value
-        for key, value in canonical_t_global.items()
-        if not key.startswith("H_")
-    }
-    setting_fit = hist.get("_particle_subtraction_component_fit_setting") or {}
-    hist["pion_t_parent_diagnostics"] = {
-        "phi_setting": phi_setting,
-        "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
-        "setting_wide": {
-            "scope": "setting_wide_diagnostic",
-            "A_n": setting_fit.get("A_n"),
-            "A_delta": setting_fit.get("A_delta"),
-            "A_sidis": setting_fit.get("A_sidis"),
-            "S_lambda": setting_fit.get("S_lambda"),
-            "chi2_ndf": setting_fit.get("chi2_ndf_kaon"),
-            "p_value": setting_fit.get("fit_p_value_kaon"),
-            "status": setting_fit.get("fit_status_kaon"),
-            "diagnostic_only": bool(setting_fit.get("diagnostic_only", True)),
-            "label": "SETTING-WIDE DIAGNOSTIC FIT - NON-AUTHORITATIVE",
-        },
-        "authoritative_canonical_t_global": hist["pion_authoritative_canonical_t_global_summary"],
-        "parents": list(hist["pion_t_amplitude_table"]),
-    }
-    validate_frozen_t_bin_pion_parent_collection(hist, inp_dict, t_bins)
+    frozen_parents = _finalize_frozen_parent_collection(
+        hist,
+        inp_dict,
+        frozen_parents,
+        t_bins,
+        reuse={"reused": False, "reason": "new_particle_stage_parent_fit"},
+    )
     print("[SIMC PION PARENTS] {} {} -- post-proton/RF-restored".format(
         phi_setting, inp_dict.get("EPSSET", "")
     ))
@@ -857,6 +1013,15 @@ def _print_authoritative_canonical_t_global_page(pdf_name, global_payload, manif
     """Render the canonical-t sum separately from the setting-wide fit."""
     if not isinstance(global_payload, dict):
         return False
+    if not bool(global_payload.get("complete")):
+        return _print_parent_status_page(
+            pdf_name,
+            manifest,
+            "pion.canonical_t_global.incomplete_status",
+            scope="canonical_t_global",
+            title="{} AUTHORITATIVE CANONICAL-t GLOBAL INCOMPLETE".format(title_prefix),
+            detail="missing products: {}".format(global_payload.get("missing_products") or {}),
+        )
     try:
         import ROOT
 
@@ -896,6 +1061,34 @@ def _print_authoritative_canonical_t_global_page(pdf_name, global_payload, manif
             "pion.canonical_t_global.before_estimated_proposed_final",
             scope="canonical_t_global",
         )
+        return True
+    except Exception:
+        return False
+
+
+def _print_parent_status_page(pdf_name, manifest, page_id, *, scope, title, detail):
+    """Emit a real PDF status page for an unavailable required plot slot."""
+    try:
+        import ROOT
+
+        canvas = ROOT.TCanvas(
+            "pion_status_{}".format(page_id.replace(".", "_")[-48:]),
+            "Pion diagnostic status",
+            900,
+            600,
+        )
+        text = ROOT.TPaveText(0.08, 0.12, 0.92, 0.88, "NDC")
+        text.SetFillStyle(0)
+        text.SetBorderSize(0)
+        text.SetTextAlign(12)
+        text.SetTextSize(0.030)
+        text.AddText(str(title))
+        for line in textwrap.wrap(str(detail or "unavailable"), width=90):
+            text.AddText(line)
+        text.Draw()
+        canvas.Print(pdf_name)
+        canvas.Close()
+        _record_parent_page_if_absent(manifest, page_id, scope=scope)
         return True
     except Exception:
         return False
@@ -948,16 +1141,35 @@ def _print_parent_summary_page(
 def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
     page_ids = [entry.get("page_id") for entry in page_manifest if isinstance(entry, dict)]
     duplicate_ids = sorted({page_id for page_id in page_ids if page_ids.count(page_id) > 1})
-    required = ["pion.canonical_t_global.before_estimated_proposed_final"]
+    required = [
+        "pion.canonical_t_global.before_estimated_proposed_final",
+        "pion.canonical_t_global.incomplete_status",
+    ]
     if setting_wide_enabled:
-        required.append("pion.setting_wide.lambda_comparison")
+        required.extend(
+            "pion.setting_wide.{}".format(slot)
+            for slot in (
+                "pion_control_fit", "protected_fit_or_status", "weight",
+                "model_closure", "event_template_closure", "before_after",
+                "lambda_comparison",
+            )
+        )
     for parent in parents:
         prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
         required.extend((
-            "{}.overview".format(prefix),
-            "{}.application_gate".format(prefix),
-            "{}.lambda_comparison".format(prefix),
+            "{}.{}".format(prefix, slot)
+            for slot in (
+                "overview", "pion_control_fit", "protected_fit_or_status", "weight",
+                "model_closure", "event_template_closure", "before_after",
+                "application_gate", "proposal_final_transition", "lambda_comparison",
+            )
         ))
+    # Global is a terminal either/or slot, never both.
+    global_complete = "pion.canonical_t_global.before_estimated_proposed_final" in page_ids
+    global_incomplete = "pion.canonical_t_global.incomplete_status" in page_ids
+    required = [page_id for page_id in required if not page_id.startswith("pion.canonical_t_global")]
+    if not (global_complete ^ global_incomplete):
+        required.append("pion.canonical_t_global.terminal_exactly_once")
     missing = [page_id for page_id in required if page_id not in page_ids]
     by_scope = {}
     for page_id in page_ids:
@@ -981,6 +1193,51 @@ def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
     print("  duplicate page IDs: {}".format(len(duplicate_ids)))
     print("  missing mandatory page IDs: {}".format(missing))
     return report
+
+
+def _ensure_required_parent_plot_slots(
+    pdf_name, manifest, parents, *, title_prefix, canonical_t_global, setting_wide_enabled,
+):
+    """Backfill every required slot with a rendered status page if necessary."""
+    existing = {
+        entry.get("page_id") for entry in manifest if isinstance(entry, dict)
+    }
+    desired_global = (
+        "pion.canonical_t_global.before_estimated_proposed_final"
+        if bool((canonical_t_global or {}).get("complete"))
+        else "pion.canonical_t_global.incomplete_status"
+    )
+    desired = [(desired_global, "canonical_t_global")]
+    if setting_wide_enabled:
+        desired.extend((
+            ("pion.setting_wide.{}".format(slot), "setting_wide")
+            for slot in (
+                "pion_control_fit", "protected_fit_or_status", "weight",
+                "model_closure", "event_template_closure", "before_after",
+                "lambda_comparison",
+            )
+        ))
+    for parent in parents:
+        prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
+        desired.extend((
+            ("{}.{}".format(prefix, slot), parent["analysis_scope"])
+            for slot in (
+                "overview", "pion_control_fit", "protected_fit_or_status", "weight",
+                "model_closure", "event_template_closure", "before_after",
+                "application_gate", "proposal_final_transition", "lambda_comparison",
+            )
+        ))
+    for page_id, scope in desired:
+        if page_id not in existing:
+            _print_parent_status_page(
+                pdf_name,
+                manifest,
+                page_id,
+                scope=scope,
+                title="{} diagnostic status".format(title_prefix),
+                detail="required plot slot unavailable: {}".format(page_id),
+            )
+            existing.add(page_id)
 
 
 def render_setting_t_bin_pion_parent_pages(
@@ -1079,6 +1336,14 @@ def render_setting_t_bin_pion_parent_pages(
                     "{}.{}".format(page_prefix, stable_name),
                     scope=scope,
                 )
+    _ensure_required_parent_plot_slots(
+        pdf_name,
+        page_manifest,
+        parents,
+        title_prefix=title_prefix,
+        canonical_t_global=canonical_t_global,
+        setting_wide_enabled=bool(setting_wide_enabled),
+    )
     return _parent_plot_contract(
         page_manifest,
         parents,

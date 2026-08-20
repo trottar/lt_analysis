@@ -46,6 +46,8 @@ from background_config import (  # noqa: E402
     resolve_proton_contamination_cleaning_tree_policy,
 )
 from prompt_trees import normalize_epsset  # noqa: E402
+from canonical_binning import find_canonical_bin  # noqa: E402
+from root_histogram_ownership import fingerprint_histogram_content_error  # noqa: E402
 
 
 SUPPORT_UNSUPPORTED = "unsupported"
@@ -204,6 +206,103 @@ def _hist_integral(hist):
         return float(hist.Integral())
     except Exception:
         return 0.0
+
+
+def _canonical_t_histogram_closure(expected_hist, actual_hist, *, absolute_tolerance=1.0e-10, relative_tolerance=1.0e-12):
+    """Compare a canonical sum with its setting-wide product, including errors."""
+    result = {
+        "available": expected_hist is not None and actual_hist is not None,
+        "absolute_tolerance": float(absolute_tolerance),
+        "relative_tolerance": float(relative_tolerance),
+        "axis_match": False,
+        "bin_count_match": False,
+        "content_max_absolute_difference": None,
+        "error_max_absolute_difference": None,
+        "content_max_relative_difference": None,
+        "error_max_relative_difference": None,
+        "integral_expected": _hist_integral(expected_hist),
+        "integral_actual": _hist_integral(actual_hist),
+        "passed": False,
+    }
+    if not result["available"]:
+        result["reason"] = "missing_histogram"
+        return result
+    try:
+        expected_axis = expected_hist.GetXaxis()
+        actual_axis = actual_hist.GetXaxis()
+        expected_bins = int(expected_hist.GetNbinsX())
+        actual_bins = int(actual_hist.GetNbinsX())
+        result["bin_count_match"] = expected_bins == actual_bins
+        expected_edges = []
+        actual_edges = []
+        for bin_index in range(1, expected_bins + 2):
+            try:
+                expected_edge = float(expected_axis.GetBinLowEdge(bin_index))
+            except Exception:
+                expected_edge = float(expected_axis.GetXmin()) + (
+                    float(expected_axis.GetXmax()) - float(expected_axis.GetXmin())
+                ) * float(bin_index - 1) / float(max(expected_bins, 1))
+            try:
+                actual_edge = float(actual_axis.GetBinLowEdge(bin_index))
+            except Exception:
+                actual_edge = float(actual_axis.GetXmin()) + (
+                    float(actual_axis.GetXmax()) - float(actual_axis.GetXmin())
+                ) * float(bin_index - 1) / float(max(actual_bins, 1))
+            expected_edges.append(expected_edge)
+            actual_edges.append(actual_edge)
+        result["axis_match"] = bool(
+            result["bin_count_match"]
+            and len(expected_edges) == len(actual_edges)
+            and all(
+                abs(expected_edge - actual_edge) <= absolute_tolerance
+                for expected_edge, actual_edge in zip(expected_edges, actual_edges)
+            )
+        )
+    except Exception as exc:
+        result["reason"] = "unreadable_histogram:{}".format(exc)
+        return result
+    if not result["axis_match"]:
+        result["reason"] = "axis_mismatch"
+        return result
+    content_abs = error_abs = content_rel = error_rel = 0.0
+    for bin_index in range(0, expected_bins + 2):
+        expected_content = float(expected_hist.GetBinContent(bin_index))
+        actual_content = float(actual_hist.GetBinContent(bin_index))
+        expected_error = float(expected_hist.GetBinError(bin_index))
+        actual_error = float(actual_hist.GetBinError(bin_index))
+        content_difference = abs(expected_content - actual_content)
+        error_difference = abs(expected_error - actual_error)
+        content_abs = max(content_abs, content_difference)
+        error_abs = max(error_abs, error_difference)
+        content_rel = max(content_rel, content_difference / max(abs(expected_content), abs(actual_content), absolute_tolerance))
+        error_rel = max(error_rel, error_difference / max(abs(expected_error), abs(actual_error), absolute_tolerance))
+    result.update({
+        "content_max_absolute_difference": content_abs,
+        "error_max_absolute_difference": error_abs,
+        "content_max_relative_difference": content_rel,
+        "error_max_relative_difference": error_rel,
+    })
+    threshold = absolute_tolerance + relative_tolerance * max(
+        1.0, abs(result["integral_expected"]), abs(result["integral_actual"])
+    )
+    result["passed"] = bool(content_abs <= threshold and error_abs <= threshold)
+    if not result["passed"]:
+        result["reason"] = "content_or_error_closure_mismatch"
+    return result
+
+
+def _sum_canonical_t_histograms(products, target_field, *, role):
+    """Build one detached complete canonical-t sum for a target field."""
+    candidates = [
+        ((product.get(target_field) or {}).get("h_mm_nosub"))
+        for product in (products or ())
+    ]
+    if not candidates or any(candidate is None for candidate in candidates):
+        return None
+    total = _clone_hist(candidates[0], "H_canonical_t_sum_{}".format(role), reset=True)
+    for candidate in candidates:
+        total.Add(candidate)
+    return total
 
 
 def _hist_absolute_integral(hist, first_bin=None, last_bin=None):
@@ -3995,19 +4094,8 @@ def _run_timing_probe(
 
 
 def _find_collection_bin(value, edges):
-    if len(edges) < 2:
-        return -1
-    value = float(value)
-    if value < float(edges[0]) or value > float(edges[-1]):
-        return -1
-    if value == float(edges[-1]):
-        return len(edges) - 2
-    for index in range(len(edges) - 1):
-        low_edge = float(edges[index])
-        high_edge = float(edges[index + 1])
-        if low_edge <= value < high_edge:
-            return index
-    return -1
+    """Compatibility alias for the shared canonical membership contract."""
+    return find_canonical_bin(value, edges)
 
 
 def _empty_frozen_coordinate_integrity(tolerance, applicable=True):
@@ -9452,10 +9540,7 @@ def apply_kaon_proton_cleaning_to_targets(
             if method_is_t_binned:
                 canonical_t_index = int(secondary_index)
             else:
-                for candidate_index in range(len(t_edges) - 1):
-                    if float(t_edges[candidate_index]) <= adj_t < float(t_edges[candidate_index + 1]):
-                        canonical_t_index = candidate_index
-                        break
+                canonical_t_index = find_canonical_bin(adj_t, t_edges)
             canonical_t_product = (
                 canonical_t_products[canonical_t_index]
                 if 0 <= canonical_t_index < len(canonical_t_products)
@@ -9620,6 +9705,46 @@ def apply_kaon_proton_cleaning_to_targets(
             "final_post_rf": _canonical_t_mm_audit(final_mm),
             "final_post_rf_cut": _canonical_t_mm_audit(final_cut_mm),
         }
+        product["raw_output_fingerprint"] = fingerprint_histogram_content_error(raw_mm)
+        product["proton_estimate_output_fingerprint"] = fingerprint_histogram_content_error(proton_mm)
+        product["proton_cleaned_output_fingerprint"] = fingerprint_histogram_content_error(cleaned_mm)
+        product["final_output_fingerprint"] = fingerprint_histogram_content_error(final_mm)
+
+    closure_tolerance = (config.get("canonical_t_global_closure") or {})
+    closure_absolute_tolerance = float(closure_tolerance.get("absolute_tolerance", 1.0e-10))
+    closure_relative_tolerance = float(closure_tolerance.get("relative_tolerance", 1.0e-12))
+    canonical_t_global_closure = {}
+    closure_specs = (
+        ("raw", "raw_targets", h_mm_raw),
+        ("proton_estimate", "proton_targets", h_mm_proton),
+        ("proton_cleaned_pre_rf", "cleaned_targets_pre_rf", h_mm_cleaned),
+        ("final_post_rf", "final_targets", h_mm_cleaned_final_rf),
+    )
+    for closure_name, target_field, setting_wide_histogram in closure_specs:
+        canonical_sum = _sum_canonical_t_histograms(
+            canonical_t_products, target_field, role=closure_name
+        )
+        canonical_t_global_closure[closure_name] = {
+            **_canonical_t_histogram_closure(
+                canonical_sum,
+                setting_wide_histogram,
+                absolute_tolerance=closure_absolute_tolerance,
+                relative_tolerance=closure_relative_tolerance,
+            ),
+            "expected_t_bins": len(canonical_t_products),
+            "available_t_bins": len(canonical_t_products),
+            "missing_t_bins": [],
+        }
+    failed_closures = [
+        name for name, closure in canonical_t_global_closure.items()
+        if not bool(closure.get("passed"))
+    ]
+    if failed_closures and strict_timing_t_diagnostics:
+        raise RuntimeError(
+            "canonical_t_proton_global_closure_failed:{}".format(
+                ",".join(failed_closures)
+            )
+        )
 
     application = {
         "accepted": True,
@@ -9643,6 +9768,7 @@ def apply_kaon_proton_cleaning_to_targets(
             "rf_counts": rf_counts,
             "support_counts": support_counts,
             "raw_mm_integral": _hist_integral(h_mm_raw),
+            "canonical_t_global_closure": canonical_t_global_closure,
             "estimated_proton_mm_integral": _hist_integral(h_mm_proton),
             "cleaned_mm_integral": _hist_integral(h_mm_cleaned),
             "cleaned_final_rf_mm_integral": _hist_integral(h_mm_cleaned_final_rf),
@@ -12963,6 +13089,43 @@ def _print_timing_t_lambda_preservation_gate_pages(output_pdf, cleaning_result, 
     _print_timing_t_page(canvas, output_pdf, config=cleaning_result.get("settings") or {}, body=body)
 
 
+def _print_canonical_t_proton_closure_page(output_pdf, cleaning_result, title_prefix):
+    """Render a compact scalar closure page for the four proton products."""
+    application = (cleaning_result or {}).get("application") or {}
+    closure = ((application.get("diagnostics") or {}).get("canonical_t_global_closure") or {})
+    if not closure:
+        return False
+    try:
+        canvas = TCanvas(
+            "C_proton_canonical_t_global_closure",
+            "{} canonical-t proton closure".format(title_prefix),
+            1100,
+            650,
+        )
+        text = TPaveText(0.08, 0.10, 0.92, 0.90, "NDC")
+        text.SetFillStyle(0)
+        text.SetBorderSize(0)
+        text.SetTextAlign(12)
+        text.AddText("{} canonical-t proton global closure".format(title_prefix))
+        text.AddText("stage                 status   content max abs   error max abs    integral expected / actual")
+        for name in ("raw", "proton_estimate", "proton_cleaned_pre_rf", "final_post_rf"):
+            row = closure.get(name) or {}
+            text.AddText("{:<21} {:<7} {:>15} {:>15} {:>12} / {:<12}".format(
+                name,
+                "PASS" if row.get("passed") else "FAIL",
+                row.get("content_max_absolute_difference"),
+                row.get("error_max_absolute_difference"),
+                row.get("integral_expected"),
+                row.get("integral_actual"),
+            ))
+        text.Draw()
+        canvas.Print(output_pdf)
+        canvas.Close()
+        return True
+    except Exception:
+        return False
+
+
 def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix=""):
     if not isinstance(cleaning_result, dict):
         return
@@ -12980,6 +13143,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
         _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix)
         _print_timing_t_final_summary_page(output_pdf, cleaning_result, prefix)
         _print_timing_t_lambda_preservation_gate_pages(output_pdf, cleaning_result, prefix)
+        _print_canonical_t_proton_closure_page(output_pdf, cleaning_result, prefix)
         return
 
     _print_timing_probe_comparison_page(output_pdf, cleaning_result, prefix)
@@ -12987,6 +13151,7 @@ def print_kaon_proton_cleaning_pages(output_pdf, cleaning_result, title_prefix="
     _print_low_aero_offset_diagnostics_page(output_pdf, cleaning_result, prefix)
     _print_proton_aerogel_diagnostics_page(output_pdf, cleaning_result, prefix)
     _print_timing_t_validation_pages(output_pdf, cleaning_result, prefix)
+    _print_canonical_t_proton_closure_page(output_pdf, cleaning_result, prefix)
 
     h_global_pid = cleaning_result.get("H_global_pid")
     if h_global_pid is not None:

@@ -107,6 +107,7 @@ from pion_component_subtraction import (
     build_t_bin_pion_parent_identity,
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
+    resolve_frozen_parent_application_policy,
     fill_simc_shape_pion_subtraction_templates,
     handle_particle_subtraction_fallback,
     iter_component_control_source_specs,
@@ -520,8 +521,13 @@ def _apply_component_pion_subtraction_for_tbin(
     particle_type,
     pol,
     inpDict,
+    parent_metadata=None,
 ):
-    gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
+    policy = resolve_frozen_parent_application_policy(
+        parent_metadata if isinstance(parent_metadata, dict) else {"fit_result": component_fit_result},
+        inpDict,
+    )
+    gate_result = dict(policy.get("evaluation") or evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict))
     payload = {
         "accepted": False,
         "fallback_used": True,
@@ -541,8 +547,28 @@ def _apply_component_pion_subtraction_for_tbin(
         "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
+        "pion_parent_id": policy.get("parent_id"),
+        "parent_fit_accepted": policy.get("fit_accepted"),
+        "application_action": policy.get("action"),
+        "application_policy": dict(policy),
+        "child_valid": bool(policy.get("child_valid")),
     }
-    if not gate_result["accepted"]:
+    if policy["action"] == "error":
+        raise RuntimeError("ave_per_bin frozen-parent policy error: {}".format(policy.get("reason")))
+    if policy["action"] == "skip_bin":
+        payload["fallback_mode"] = "skip_bin"
+        payload["fallback_reason"] = policy.get("reason")
+        return payload
+    if policy["action"] == "zero":
+        payload.update({
+            "accepted": True,
+            "fallback_mode": "zero",
+            "applied_zero": True,
+            "particle_subtraction_effective_scale": 0.0,
+        })
+        return payload
+    single_scale_fallback = policy["action"] == "single_scale"
+    if not gate_result["accepted"] and not single_scale_fallback:
         return handle_particle_subtraction_fallback(
             payload,
             payload["fallback_reason"],
@@ -561,20 +587,34 @@ def _apply_component_pion_subtraction_for_tbin(
             ),
         )
 
-    clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
-    weight_payload = build_simc_shape_pion_control_weights(
-        component_fit_result,
-        clip_min=clip_min,
-        clip_max=clip_max,
-        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
-    )
-    stage_weight_payload = build_simc_shape_pion_control_weights(
-        component_fit_result,
-        clip_min=clip_min,
-        clip_max=clip_max,
-        denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
-        model_variant="staged",
-    )
+    if single_scale_fallback:
+        reference = component_fit_result.get("H_pion_control_input")
+        if reference is None:
+            raise RuntimeError("ave_per_bin_single_scale_missing_parent_control_input")
+        weight_payload = {
+            "H_pion_control_model": reference,
+            "H_kaon_pion_model": None,
+            "H_weighted_pion_control_model": None,
+            "H_pion_weight_vs_MM": None,
+            "weights": np.ones(int(reference.GetNbinsX()) + 2, dtype=np.float64),
+            "diagnostics": {"source_definition": "authoritative_pion_control_cache"},
+        }
+        stage_weight_payload = dict(weight_payload)
+    else:
+        clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inpDict)
+        weight_payload = build_simc_shape_pion_control_weights(
+            component_fit_result,
+            clip_min=clip_min,
+            clip_max=clip_max,
+            denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+        )
+        stage_weight_payload = build_simc_shape_pion_control_weights(
+            component_fit_result,
+            clip_min=clip_min,
+            clip_max=clip_max,
+            denom_floor=resolve_particle_subtraction_weight_denominator_floor(inpDict),
+            model_variant="staged",
+        )
     print_particle_subtraction_weight_support_warning(
         weight_payload,
         context="ave_per_bin component pion subtraction",
@@ -582,7 +622,7 @@ def _apply_component_pion_subtraction_for_tbin(
         t_bin=int(j) + 1,
     )
 
-    if weight_payload["diagnostics"]["pion_weight_max"] > resolve_particle_subtraction_weight_warn_max(inpDict):
+    if weight_payload["diagnostics"].get("pion_weight_max", 0.0) > resolve_particle_subtraction_weight_warn_max(inpDict):
         print(
             "WARNING: pion component weight exceeded threshold\n"
             "  phi_setting = {}\n"
@@ -610,6 +650,21 @@ def _apply_component_pion_subtraction_for_tbin(
         particle_type,
         pol,
     )
+    scale_components = None
+    if single_scale_fallback:
+        windows = resolve_particle_subtraction_windows(
+            particle_type, "pion", 0.0, inp_dict=inpDict, phi_setting=inpDict.get("phi_setting")
+        )
+        try:
+            scale_components = compute_staged_particle_subtraction_scales(
+                hist_bin_dict["H_MM_nosub_DATA_{}".format(j)], template_hists["mm_nosub"], windows,
+                context="ave frozen-parent single-scale t{}".format(j + 1),
+            )
+            scale_factor = float(scale_components["total_scale_factor"])
+        except ZeroDivisionError:
+            scale_factor = 0.0
+        for template in template_hists.values():
+            template.Scale(scale_factor)
 
     h_mm_before = clone_reset_hist(hist_bin_dict["H_MM_DATA_{}".format(j)], "_before_pion_sub")
     h_mm_before.Add(hist_bin_dict["H_MM_DATA_{}".format(j)])
@@ -650,8 +705,9 @@ def _apply_component_pion_subtraction_for_tbin(
     payload.update(
         {
             "accepted": True,
-            "fallback_used": False,
-            "fallback_reason": "",
+            "fallback_used": bool(single_scale_fallback),
+            "fallback_reason": policy.get("reason") if single_scale_fallback else "",
+            "fallback_mode": "single_scale" if single_scale_fallback else None,
             "particle_subtraction_effective_scale": float(effective_scale),
             "weighted_pion_integral": float(weighted_pion_integral_full),
             "weighted_pion_integral_cut": float(weighted_pion_integral_cut),
@@ -679,6 +735,7 @@ def _apply_component_pion_subtraction_for_tbin(
             "H_MM_nosub_after_pion_subtraction_model_final": h_mm_nosub_after_final_model,
             "diagnostics": {
                 **dict(weight_payload["diagnostics"]),
+                "scale_components": scale_components,
                 "weight_diagnostics_stage": dict(stage_weight_payload.get("diagnostics") or {}),
                 "model_closure_stage": dict((stage_weight_payload.get("diagnostics") or {}).get("model_closure") or {}),
                 **dict(fill_stats),
@@ -1368,6 +1425,7 @@ def process_hist_data(
                         ParticleType,
                         inpDict["POL"],
                         {**inpDict, "phi_setting": phi_setting},
+                        parent_metadata=parent_entry,
                     )
                     component_subtraction_payloads[j] = component_payload
                     if component_payload.get("accepted"):

@@ -103,6 +103,7 @@ from pion_component_subtraction import (
     compute_hist_closure_metrics,
     evaluate_component_pion_application_proposal,
     evaluate_particle_subtraction_component_fit_result,
+    resolve_frozen_parent_application_policy,
     fingerprint_histogram_content_error,
     handle_particle_subtraction_fallback,
     print_particle_subtraction_weight_support_warning,
@@ -114,6 +115,7 @@ from pion_t_bin_parents import (
     render_setting_t_bin_pion_parent_pages,
 )
 from root_histogram_ownership import clone_root_histogram
+from canonical_binning import find_canonical_bin
 from proton_contamination_weights import (
     audit_timing_t_hgcer_display_targets,
     apply_kaon_proton_cleaning_to_targets,
@@ -657,10 +659,8 @@ def _process_component_weighted_subtracted_particle_tree(
 
 
 def _canonical_t_index(value, t_bins):
-    for t_index in range(max(0, len(t_bins) - 1)):
-        if float(t_bins[t_index]) <= float(value) < float(t_bins[t_index + 1]):
-            return int(t_index)
-    return None
+    index = find_canonical_bin(value, t_bins)
+    return int(index) if index >= 0 else None
 
 
 def _build_authoritative_pion_control_source_cache(
@@ -1846,13 +1846,26 @@ def resolve_parent_diagnostic_final_application(
     here from detached proposal-before histograms; skip/error intentionally
     retain no fabricated final spectrum.
     """
+    policy = {
+        "fit_accepted": bool(production_evaluation.get("accepted")),
+        "fallback_mode": str(production_evaluation.get("fallback_mode") or "error").strip().lower(),
+        "reason": production_evaluation.get("reason") or None,
+    }
+    policy["action"] = (
+        "component_weight" if policy["fit_accepted"] else
+        "single_scale" if policy["fallback_mode"] == "single_scale" else
+        "zero" if policy["fallback_mode"] == "zero" else
+        "skip_bin" if policy["fallback_mode"] == "skip_bin" else "error"
+    )
+    policy["child_valid"] = policy["action"] not in ("skip_bin", "error")
     if not isinstance(proposal_payload, dict):
         return None, {
             "status": "unavailable",
             "final_status": "unavailable",
             "final_reason": "proposal_unavailable",
+            "application_policy": policy,
         }
-    if bool(production_evaluation.get("accepted")):
+    if policy["action"] == "component_weight":
         final = dict(proposal_payload)
         final.update(
             {
@@ -1867,15 +1880,17 @@ def resolve_parent_diagnostic_final_application(
             "status": "available",
             "final_status": "applied_component",
             "final_reason": None,
+            "application_policy": policy,
         }
 
-    fallback_mode = str(production_evaluation.get("fallback_mode") or "").strip().lower()
+    fallback_mode = policy["fallback_mode"]
     scope = "pion_parent_{}".format(proposal_payload.get("analysis_scope") or "unknown")
     if fallback_mode == "zero":
         return _build_zero_parent_diagnostic_final(proposal_payload, production_evaluation, scope), {
             "status": "available",
             "final_status": "zero",
             "final_reason": production_evaluation.get("reason"),
+            "application_policy": policy,
         }
     if fallback_mode == "single_scale" and callable(fallback_context):
         final = fallback_context()
@@ -1883,17 +1898,20 @@ def resolve_parent_diagnostic_final_application(
             "status": "available",
             "final_status": "applied_fallback",
             "final_reason": production_evaluation.get("reason"),
+            "application_policy": policy,
         }
     if fallback_mode == "single_scale":
         return None, {
             "status": "unavailable",
             "final_status": "unavailable",
             "final_reason": "single_scale_fallback_builder_missing",
+            "application_policy": policy,
         }
     return None, {
         "status": "partial",
         "final_status": fallback_mode or "error",
         "final_reason": production_evaluation.get("reason") or "component-fit result rejected",
+        "application_policy": policy,
     }
 
 
@@ -4328,6 +4346,9 @@ def rand_sub(
                         mm_max,
                     )
                     if bool((proton_cleaning_application or {}).get("accepted")):
+                        # Retain the producer's detached application record for
+                        # proton closure diagnostics and its ordered PDF pages.
+                        proton_cleaning_result["application"] = proton_cleaning_application
                         production_map_key = (
                             "H_proton_weight_vs_delta_t"
                             if str(proton_cleaning_result.get("method") or "") == "timing_t_event_weight"
@@ -4697,8 +4718,13 @@ def rand_sub(
                         "pion_control_records": control_t.get("records"),
                         "source_accounting": proton_product.get("source_accounting"),
                         "pion_control_source_accounting": control_t.get("source_accounting"),
-                        "proton_final_output_fingerprint": fingerprint_histogram_content_error(
-                            final_proton_output
+                        # Propagate the proton-stage producer value unchanged;
+                        # the parent boundary recomputes it and fails on drift.
+                        "proton_final_output_fingerprint": str(
+                            proton_product.get("final_output_fingerprint") or ""
+                        ),
+                        "pion_control_input_fingerprint": fingerprint_histogram_content_error(
+                            control_t.get("H_pion_control")
                         ),
                         "source_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
                         "consumer_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
@@ -4714,10 +4740,10 @@ def rand_sub(
                     full_source = parent_input.get("H_proton_cleaned_final_rf")
                     if cut_source is None or full_source is None:
                         raise RuntimeError("missing_t_integrated_parent_diagnostic_source")
-                    production_evaluation = evaluate_particle_subtraction_component_fit_result(
-                        fit_result,
-                        inpDict,
+                    diagnostic_policy = resolve_frozen_parent_application_policy(
+                        {"fit_result": fit_result}, inpDict
                     )
+                    production_evaluation = dict(diagnostic_policy.get("evaluation") or {})
                     parent_scope = "pion_parent_t{}".format(int(t_index) + 1)
                     proposal = _build_authoritative_parent_mm_diagnostic_proposal(
                         fit_result,
@@ -4753,6 +4779,7 @@ def rand_sub(
                             "final_reason": "fallback_build_failed",
                             "detail": str(exc),
                         }
+                    final_status.setdefault("application_policy", diagnostic_policy)
                     return {
                         "proposed_diagnostic_application_result": proposal,
                         "proposed_diagnostic_application_status": {

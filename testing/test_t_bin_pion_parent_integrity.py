@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import importlib.util
 import sys
 import types
@@ -16,6 +17,7 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PION_SUBTRACTION_PATH = REPO_ROOT / "src" / "cuts" / "pion_component_subtraction.py"
 CALCULATE_YIELD_PATH = REPO_ROOT / "src" / "binning" / "calculate_yield.py"
+CANONICAL_BINNING_PATH = REPO_ROOT / "src" / "utility" / "canonical_binning.py"
 
 
 class _FakeHistogram:
@@ -75,7 +77,24 @@ class _FakeRootHistogram:
 def _load_pion_component_subtraction():
     fake_background_config = types.ModuleType("background_config")
     fake_background_config.PARTICLE_SUBTRACTION_MODE_COMPONENTS = "simc_shape_components"
-    fake_background_config.resolve_particle_subtraction_fallback_mode = lambda *_args, **_kwargs: "error"
+    fake_background_config.resolve_particle_subtraction_mode = lambda *_args, **_kwargs: "simc_shape_components"
+    fake_background_config.resolve_particle_subtraction_fallback_mode = lambda inp=None, **_kwargs: str((inp or {}).get("particle_subtraction_fallback_mode", "error"))
+    fake_background_config.resolve_particle_subtraction_weight_clip_bounds = lambda *_args, **_kwargs: (0.0, None)
+    fake_background_config.resolve_particle_subtraction_weight_denominator_floor = lambda inp=None, **_kwargs: float((inp or {}).get("particle_subtraction_weight_denominator_floor", 1.0e-12))
+    fake_background_config.get_pion_component_dynamic_alignment_config = lambda *_args, **_kwargs: {}
+    for name, value in {
+        "resolve_particle_subtraction_component_fit_windows": {},
+        "resolve_particle_subtraction_component_fit_excluded_windows": [],
+        "resolve_particle_subtraction_component_stage_amplitude_windows": {},
+        "resolve_particle_subtraction_component_stage_amplitude_modes": {},
+        "resolve_particle_subtraction_component_prior_scales": {},
+        "resolve_particle_subtraction_component_fit_mode": "staged_plus_joint",
+        "resolve_particle_subtraction_component_postfit_scales": {},
+        "resolve_particle_subtraction_component_postrefine_scales": {},
+        "resolve_particle_subtraction_component_residual_shift_settings": {},
+        "resolve_particle_subtraction_component_cleanup_validation_mm_max": None,
+    }.items():
+        setattr(fake_background_config, name, lambda *_args, _value=value, **_kwargs: _value)
     fake_background_config.get_proton_contamination_cleaning_config = lambda **_kwargs: {
         "t_binning": {"edge_tolerance": 1.0e-9}
     }
@@ -83,6 +102,16 @@ def _load_pion_component_subtraction():
     fake_mm_background.mm_background_weight_from_value = lambda *_args, **_kwargs: 1.0
     fake_ownership = types.ModuleType("root_histogram_ownership")
     fake_ownership.clone_root_histogram = lambda histogram, **_kwargs: histogram
+    def _fingerprint(histogram):
+        values = [
+            float(histogram.GetNbinsX()),
+            float(histogram.GetXaxis().GetXmin()),
+            float(histogram.GetXaxis().GetXmax()),
+        ]
+        for index in range(0, int(histogram.GetNbinsX()) + 2):
+            values.extend((float(histogram.GetBinContent(index)), float(histogram.GetBinError(index))))
+        return hashlib.sha256(repr(values).encode("utf-8")).hexdigest()
+    fake_ownership.fingerprint_histogram_content_error = _fingerprint
 
     with mock.patch.dict(
         sys.modules,
@@ -132,6 +161,13 @@ def _configured_inp():
     return inp_dict
 
 
+def _load_canonical_binning():
+    spec = importlib.util.spec_from_file_location("canonical_binning_test", CANONICAL_BINNING_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _parent(module, inp_dict, t_index=0, edges=(0.0, 0.4)):
     identity = module.build_t_bin_pion_parent_identity(
         inp_dict, "Left", t_index, edges
@@ -161,7 +197,7 @@ class TBinPionParentIdentityTests(unittest.TestCase):
         self.assertEqual(first["pion_parent_id"], repeat["pion_parent_id"])
         self.assertNotEqual(first["pion_parent_id"], second_t["pion_parent_id"])
 
-    def test_parent_identity_covers_runtime_and_canonical_contract(self):
+    def test_parent_identity_separates_parent_physics_from_phi_run_provenance(self):
         configured = _configured_inp()
         baseline = self.module.build_t_bin_pion_parent_identity(
             configured, "Left", 0, (0.0, 0.4)
@@ -174,17 +210,23 @@ class TBinPionParentIdentityTests(unittest.TestCase):
         changed_phi = _configured_inp()
         changed_phi["canonical_t_binning"]["phi_edges"] = [-180.0, -30.0, 180.0]
 
-        self.assertNotEqual(
+        self.assertEqual(
             baseline["pion_parent_id"],
             self.module.build_t_bin_pion_parent_identity(changed_config, "Left", 0, (0.0, 0.4))["pion_parent_id"],
         )
-        self.assertNotEqual(
+        self.assertEqual(
             baseline["pion_parent_id"],
             self.module.build_t_bin_pion_parent_identity(changed_pair, "Left", 0, (0.0, 0.4))["pion_parent_id"],
         )
-        self.assertNotEqual(
+        self.assertEqual(
             baseline["pion_parent_id"],
             self.module.build_t_bin_pion_parent_identity(changed_phi, "Left", 0, (0.0, 0.4))["pion_parent_id"],
+        )
+        changed_fit = _configured_inp()
+        changed_fit["particle_subtraction_weight_denominator_floor"] = 1.0e-6
+        self.assertNotEqual(
+            baseline["pion_parent_id"],
+            self.module.build_t_bin_pion_parent_identity(changed_fit, "Left", 0, (0.0, 0.4))["pion_parent_id"],
         )
 
     def test_histogram_fingerprint_includes_axis_contents_and_errors(self):
@@ -225,10 +267,10 @@ class TBinPionParentIdentityTests(unittest.TestCase):
             )
 
         wrong_pair = dict(parent, canonical_interval_pair_hash="other-pair")
-        with self.assertRaisesRegex(RuntimeError, "canonical_interval_pair_hash"):
-            self.module.validate_authoritative_t_bin_pion_parent(
-                wrong_pair, _inp(), "Left", 0, (0.0, 0.4)
-            )
+        self.module.validate_authoritative_t_bin_pion_parent(
+            wrong_pair, _inp(), "Left", 0, (0.0, 0.4)
+        )
+        self.assertNotIn("provenance_validation", wrong_pair)
 
         with self.assertRaisesRegex(RuntimeError, "missing_authoritative"):
             self.module.validate_authoritative_t_bin_pion_parent(
@@ -347,6 +389,42 @@ class TBinPionParentIdentityTests(unittest.TestCase):
         self.assertAlmostEqual(
             self.module._component_cache_event_coefficient(source_spec, 1), 3.0
         )
+
+    def test_frozen_parent_policy_keeps_zero_and_skip_bin_distinct(self):
+        template = _FakeRootHistogram((1.0, 2.0, 3.0))
+        fit = {
+            "particle_subtraction_mode": "simc_shape_components",
+            "fit_status_pion": "rejected",
+            "fit_status_kaon": "rejected",
+            "fallback_used": False,
+            "A_n": 0.0, "A_delta": 0.0, "A_sidis": 0.0,
+            "B_n": 0.0, "B_delta": 0.0, "B_sidis": 0.0,
+            "H_simc_shape_pi_n": template,
+            "H_simc_shape_pi_delta": template,
+            "H_simc_shape_pi_sidis": template,
+            "diagnostics": {"pion": {"validation": {"accepted": False}}, "kaon": {"validation": {"accepted": False}}},
+        }
+        parent = {"pion_parent_id": "parent", "fit_result": fit}
+        zero = self.module.resolve_frozen_parent_application_policy(
+            parent, {"particle_subtraction_fallback_mode": "zero"}
+        )
+        skipped = self.module.resolve_frozen_parent_application_policy(
+            parent, {"particle_subtraction_fallback_mode": "skip_bin"}
+        )
+        self.assertEqual(zero["action"], "zero")
+        self.assertTrue(zero["child_valid"])
+        self.assertEqual(skipped["action"], "skip_bin")
+        self.assertFalse(skipped["child_valid"])
+
+
+class CanonicalBinningTests(unittest.TestCase):
+    def test_final_endpoint_belongs_to_final_canonical_bin(self):
+        module = _load_canonical_binning()
+        edges = (0.0, 0.4, 0.8)
+        self.assertEqual(module.find_canonical_bin(0.0, edges), 0)
+        self.assertEqual(module.find_canonical_bin(0.4, edges), 1)
+        self.assertEqual(module.find_canonical_bin(0.8, edges), 1)
+        self.assertEqual(module.find_canonical_bin(0.800001, edges), -1)
 
 
 class CalculateYieldPayloadScopeTests(unittest.TestCase):

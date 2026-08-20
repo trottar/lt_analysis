@@ -9,12 +9,52 @@ directory, then hand the object to exactly one result container.
 from __future__ import annotations
 
 import itertools
+import hashlib
+import math
 import re
+import struct
 
 
 _CLONE_COUNTER = itertools.count(1)
 _DEBUG_ENABLED = False
 _DEBUG_RECORDS = []
+
+
+def fingerprint_histogram_content_error(hist):
+    """Return a stable SHA-256 fingerprint for a TH1-like detached product.
+
+    Histogram ownership is intentionally independent of this helper.  The
+    fingerprint is a scalar producer/consumer contract and covers the axis,
+    every bin (including under/overflow), and its stored uncertainty.
+    """
+    if hist is None:
+        raise RuntimeError("cannot fingerprint missing histogram")
+    try:
+        axis = hist.GetXaxis()
+        nbins = int(hist.GetNbinsX())
+        values = [float(nbins), float(axis.GetXmin()), float(axis.GetXmax())]
+        # Xmin/Xmax alone does not identify variable-width ROOT axes.
+        for bin_index in range(1, nbins + 2):
+            try:
+                edge = float(axis.GetBinLowEdge(bin_index))
+            except Exception:
+                edge = float(axis.GetXmin()) + (
+                    float(axis.GetXmax()) - float(axis.GetXmin())
+                ) * float(bin_index - 1) / float(max(nbins, 1))
+            values.append(edge)
+        for bin_index in range(0, nbins + 2):
+            values.extend((
+                float(hist.GetBinContent(bin_index)),
+                float(hist.GetBinError(bin_index)),
+            ))
+    except Exception as exc:
+        raise RuntimeError("cannot fingerprint histogram: {}".format(exc))
+    if not all(math.isfinite(value) for value in values):
+        raise RuntimeError("cannot fingerprint histogram with nonfinite content or error")
+    digest = hashlib.sha256()
+    for value in values:
+        digest.update(struct.pack("!d", value))
+    return digest.hexdigest()
 
 
 def _safe_name(value, fallback):

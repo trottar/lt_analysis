@@ -109,6 +109,7 @@ from pion_component_subtraction import (
     build_t_bin_pion_parent_identity,
     compute_hist_closure_metrics,
     evaluate_particle_subtraction_component_fit_result,
+    resolve_frozen_parent_application_policy,
     fill_simc_shape_pion_subtraction_templates,
     handle_particle_subtraction_fallback,
     iter_component_control_source_specs,
@@ -911,6 +912,116 @@ def _resolve_required_t_bin_parent(parent_results, inpDict, phi_setting, t_index
     return parent, fit_result
 
 
+def _apply_zero_parent_pion_subtraction_for_bin(hist_bin_dict, j, k, policy):
+    """Record an explicit applied-zero child result without mutating data."""
+    empty_mm = clone_reset_hist(
+        hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)], "_pion_parent_applied_zero"
+    )
+    empty_full = clone_reset_hist(
+        hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)], "_pion_parent_applied_zero"
+    )
+    return {
+        "accepted": True,
+        "applied_zero": True,
+        "fallback_used": True,
+        "fallback_mode": "zero",
+        "application_action": "zero",
+        "child_valid": True,
+        "pion_parent_id": policy.get("parent_id"),
+        "parent_fit_accepted": policy.get("fit_accepted"),
+        "fallback_reason": policy.get("reason"),
+        "H_pion_subtraction_template_MM": empty_mm,
+        "H_pion_subtraction_template_MM_nosub": empty_full,
+        "particle_subtraction_effective_scale": 0.0,
+        "weighted_pion_integral": 0.0,
+        "weighted_pion_integral_cut": 0.0,
+        "weighted_pion_integral_full": 0.0,
+        "application_policy": dict(policy),
+    }
+
+
+def _apply_single_scale_parent_pion_subtraction_for_bin(
+    hist_bin_dict, j, k, component_fit_result, sub_event_cache,
+    normfac_data, normfac_dummy, nWindows, particle_type, pol, inpDict, policy,
+):
+    """Use the frozen signed child cache for a scalar fallback, never trees."""
+    if sub_event_cache is None:
+        raise RuntimeError("single_scale_parent_fallback_missing_authoritative_child_cache")
+    reference = (component_fit_result or {}).get("H_pion_control_input")
+    if reference is None:
+        raise RuntimeError("single_scale_parent_fallback_missing_parent_control_input")
+    templates = _build_yield_component_template_hists(hist_bin_dict, j, k)
+    unit_weights = np.ones(int(reference.GetNbinsX()) + 2, dtype=np.float64)
+    fill_stats = fill_simc_shape_pion_subtraction_templates(
+        templates,
+        iter_component_control_source_specs(
+            sub_event_cache, normfac_data, normfac_dummy, nWindows, positive_template=True
+        ),
+        reference,
+        unit_weights,
+        {"t_index": j, "phi_index": k},
+        particle_type,
+        pol,
+    )
+    windows = resolve_particle_subtraction_windows(
+        particle_type, "pion", 0.0, inp_dict=inpDict, phi_setting=inpDict.get("phi_setting")
+    )
+    try:
+        scale_components = compute_staged_particle_subtraction_scales(
+            hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+            templates["mm_nosub"], windows,
+            context="frozen-parent single-scale ({}, t{}, phi{})".format(
+                inpDict.get("phi_setting", ""), j + 1, k + 1
+            ),
+        )
+        scale_factor = float(scale_components["total_scale_factor"])
+    except ZeroDivisionError:
+        scale_components, scale_factor = None, 0.0
+    for template in templates.values():
+        template.Scale(scale_factor)
+    before = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+    before_full = _clone_hist_for_plot(hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)])
+    for key, template_key in (
+        ("H_Q2_DATA_{}_{}", "Q2"), ("H_W_DATA_{}_{}", "W"),
+        ("H_Q2_vs_W_DATA_{}_{}", "q2_w"), ("H_theta_cm_DATA_{}_{}", "theta_cm"),
+        ("H_t_DATA_{}_{}", "t"), ("H_hsxptar_DATA_{}_{}", "hsxptar"),
+        ("H_hsyptar_DATA_{}_{}", "hsyptar"), ("H_ssxptar_DATA_{}_{}", "ssxptar"),
+        ("H_ssyptar_DATA_{}_{}", "ssyptar"), ("H_t_vs_tmin_DATA_{}_{}", "t_vs_tmin"),
+        ("H_MM_fit1sub_DATA_{}_{}", "mm_nosub"), ("H_MM_pisub_DATA_{}_{}", "mm_nosub"),
+        ("H_MM_DATA_{}_{}", "mm"),
+    ):
+        hist_bin_dict[key.format(j, k)].Add(templates[template_key], -1.0)
+    after = _clone_hist_for_plot(hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)])
+    after_full = _clone_hist_for_plot(before_full)
+    after_full.Add(templates["mm_nosub"], -1.0)
+    return {
+        "accepted": True,
+        "fallback_used": True,
+        "fallback_mode": "single_scale",
+        "application_action": "single_scale",
+        "child_valid": True,
+        "pion_parent_id": policy.get("parent_id"),
+        "parent_fit_accepted": policy.get("fit_accepted"),
+        "fallback_reason": policy.get("reason"),
+        "H_pion_subtraction_template_MM": templates["mm"],
+        "H_pion_subtraction_template_MM_nosub": templates["mm_nosub"],
+        "H_MM_before_pion_subtraction": before,
+        "H_MM_after_pion_subtraction": after,
+        "H_MM_nosub_before_pion_subtraction": before_full,
+        "H_MM_nosub_after_pion_subtraction": after_full,
+        "particle_subtraction_effective_scale": scale_factor,
+        "weighted_pion_integral": _hist_integral(templates["mm_nosub"]),
+        "weighted_pion_integral_cut": _hist_integral(templates["mm"]),
+        "weighted_pion_integral_full": _hist_integral(templates["mm_nosub"]),
+        "application_policy": dict(policy),
+        "diagnostics": {
+            "source_definition": "authoritative_pion_control_cache",
+            "scale_components": scale_components,
+            **dict(fill_stats or {}),
+        },
+    }
+
+
 def _apply_component_pion_subtraction_for_bin(
     hist_bin_dict,
     j,
@@ -947,11 +1058,15 @@ def _apply_component_pion_subtraction_for_bin(
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
     }
     if isinstance(parent_metadata, dict):
+        parent_policy = resolve_frozen_parent_application_policy(parent_metadata, inpDict)
         payload.update(
             {
                 "pion_parent_id": parent_metadata.get("pion_parent_id"),
                 "parent_t_bin_index": parent_metadata.get("t_bin_index"),
                 "parent_fit_status": (parent_metadata.get("fit_result") or {}).get("fit_status_kaon"),
+                "parent_fit_accepted": parent_policy.get("fit_accepted"),
+                "application_action": parent_policy.get("action"),
+                "application_policy": parent_policy,
                 "child_application_mode": "parent_weight_times_child_control",
                 "child_application_status": "pending",
                 "child_application_accepted": False,
@@ -1935,20 +2050,53 @@ def process_hist_data(
                     # child only builds a local event/control template from
                     # the parent's MM-dependent accepted weight.
                     component_fit_results[j][k] = scope_result
-                    component_payload = _apply_component_pion_subtraction_for_bin(
-                        hist_bin_dict,
-                        j,
-                        k,
-                        scope_result,
-                        sub_event_cache,
-                        normfac_data,
-                        normfac_dummy,
-                        nWindows,
-                        ParticleType,
-                        POL,
-                        {**inpDict, "phi_setting": phi_setting},
-                        parent_metadata=parent_entry,
+                    parent_policy = resolve_frozen_parent_application_policy(
+                        parent_entry, {**inpDict, "phi_setting": phi_setting}
                     )
+                    if parent_policy["action"] == "component_weight":
+                        component_payload = _apply_component_pion_subtraction_for_bin(
+                            hist_bin_dict,
+                            j,
+                            k,
+                            scope_result,
+                            sub_event_cache,
+                            normfac_data,
+                            normfac_dummy,
+                            nWindows,
+                            ParticleType,
+                            POL,
+                            {**inpDict, "phi_setting": phi_setting},
+                            parent_metadata=parent_entry,
+                        )
+                    elif parent_policy["action"] == "single_scale":
+                        component_payload = _apply_single_scale_parent_pion_subtraction_for_bin(
+                            hist_bin_dict, j, k, scope_result, sub_event_cache,
+                            normfac_data, normfac_dummy, nWindows, ParticleType, POL,
+                            {**inpDict, "phi_setting": phi_setting}, parent_policy,
+                        )
+                    elif parent_policy["action"] == "zero":
+                        component_payload = _apply_zero_parent_pion_subtraction_for_bin(
+                            hist_bin_dict, j, k, parent_policy
+                        )
+                    elif parent_policy["action"] == "skip_bin":
+                        component_payload = {
+                            "accepted": False,
+                            "fallback_used": True,
+                            "fallback_mode": "skip_bin",
+                            "application_action": "skip_bin",
+                            "child_valid": False,
+                            "pion_parent_id": parent_policy.get("parent_id"),
+                            "parent_fit_accepted": parent_policy.get("fit_accepted"),
+                            "fallback_reason": parent_policy.get("reason"),
+                            "application_policy": dict(parent_policy),
+                        }
+                    else:
+                        raise RuntimeError(
+                            "calculate_yield parent pion subtraction ({}, t{}, phi{}) rejected: {}".format(
+                                phi_setting, int(j) + 1, int(k) + 1,
+                                parent_policy.get("reason") or "policy=error",
+                            )
+                        )
                     component_payload["parent_scope"] = "t_bin{}".format(j + 1)
                     component_subtraction_payloads[j][k] = component_payload
                     if component_payload.get("accepted"):
@@ -1957,23 +2105,10 @@ def process_hist_data(
                             component_payload.get("particle_subtraction_effective_scale", 0.0) or 0.0
                         )
                     else:
-                        fallback_mode = component_payload.get("fallback_mode") or "single_scale"
-                        if fallback_mode == "error":
-                            raise RuntimeError(
-                                "calculate_yield parent pion subtraction ({}, t{}, phi{}) rejected: {}".format(
-                                    phi_setting,
-                                    int(j) + 1,
-                                    int(k) + 1,
-                                    component_payload.get("fallback_reason") or "unknown reason",
-                                )
-                            )
-                        if fallback_mode == "single_scale":
-                            use_legacy_scalar_subtraction = True
-                        elif fallback_mode in ("zero", "skip_bin"):
-                            use_legacy_scalar_subtraction = False
-                            scale_factor = 0.0
-                        else:
-                            use_legacy_scalar_subtraction = True
+                        # ``skip_bin`` is diagnostic-only: do not reconstruct
+                        # an averages/tree scalar fallback for an invalid child.
+                        use_legacy_scalar_subtraction = False
+                        scale_factor = 0.0
 
                 elif component_shape_payload is not None:
                     if pion_subtraction_scope == "t_bin":
@@ -2440,6 +2575,16 @@ def process_hist_data(
                 "particle_subtraction_component_applied" : bool(
                     isinstance(component_subtraction_payloads[j][k], dict)
                     and component_subtraction_payloads[j][k].get("accepted")
+                ),
+                "child_valid": bool(
+                    not isinstance(component_subtraction_payloads[j][k], dict)
+                    or component_subtraction_payloads[j][k].get("child_valid", True)
+                ),
+                "child_invalid_reason": (
+                    (component_subtraction_payloads[j][k] or {}).get("fallback_reason")
+                    if isinstance(component_subtraction_payloads[j][k], dict)
+                    and not bool(component_subtraction_payloads[j][k].get("child_valid", True))
+                    else None
                 ),
                 # Fractional background-fit error for this bin
                 "bg_fit1_frac_err" : bg_fit1_frac_err[j][k],        
@@ -3018,6 +3163,13 @@ def bin_data(
             binned_hist_data.append(tmp_binned_hist_data[0])
             binned_hist_sub.append(tmp_binned_hist_sub[0])
 
+    child_validity = [
+        [
+            bool(processed_dict["t_bin{}phi_bin{}".format(j + 1, k + 1)].get("child_valid", True))
+            for k in range(n_phi)
+        ]
+        for j in range(n_t)
+    ]
     binned_dict[kin_type] = {
         "processed_dict": processed_dict,
         "binned_t_data" : binned_t_data,
@@ -3027,6 +3179,7 @@ def bin_data(
         "mm_hist_dummy_norm" : mm_hist_dummy_norm,
         "mm_hist_sub" : mm_hist_sub,
         "scale_factor" : arr_scale_factor,                                  
+        "child_validity": child_validity,
     }
     if inpDict["bg_stat_scale1"] > 0.0:                 
         binned_dict[kin_type]["bg_fit1_frac_err"] = arr_bg_fit1_frac_err                  
@@ -3122,6 +3275,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_hist_data = binned_dict[kin_type]["mm_hist_data"]
     mm_hist_dummy_norm = binned_dict[kin_type]["mm_hist_dummy_norm"]
     mm_hist_sub = binned_dict[kin_type]["mm_hist_sub"]
+    child_validity = binned_dict[kin_type].get("child_validity") or []
 
     # Initialize list saving scaled pion values    
     n_t = len(t_bins) - 1
@@ -3205,12 +3359,27 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     i = 0
     dict_lst = []
+    invalid_child_bins = []
     for j in range(len(t_bins) - 1):
         tbin_index = j
         for k in range(len(phi_bins) - 1):
             phibin_index = k
             yield_val = yield_hist[i]
             yield_err_val = yield_err_hist[i]
+            is_valid_child = bool(
+                j < len(child_validity)
+                and k < len(child_validity[j])
+                and child_validity[j][k]
+            )
+            if not is_valid_child:
+                invalid_child_bins.append({
+                    "t_bin_index": j,
+                    "phi_bin_index": k,
+                    "reason": "frozen_parent_skip_bin",
+                })
+                print("Skipping invalid data yield for t-bin {} phi-bin {}".format(j + 1, k + 1))
+                i += 1
+                continue
             print("Data yield for t-bin {} phi-bin {}: {:.3e} +/- {:.3e}".format(j+1, k+1, yield_val, yield_err_val))
             dict_lst.append((tbin_index, phibin_index, yield_val, yield_err_val))
             i+=1
@@ -3223,6 +3392,8 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             "{}".format(kin_type) : tup[2],
             "{}_err".format(kin_type) : tup[3],
         }            
+    if invalid_child_bins:
+        hist.setdefault("_pion_invalid_child_bins", []).extend(invalid_child_bins)
             
     return groups
 
