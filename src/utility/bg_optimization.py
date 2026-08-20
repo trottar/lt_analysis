@@ -11,11 +11,13 @@ import numpy as np
 
 from frozen_manifest import load_zeroth_iteration_input_bundle
 from background_config import (
+    BG_OPT_PREPASS_CONTEXT,
     BG_STAT_SCALE1,
     BG_STAT_SCALE2,
     BG_STAT_SCALE2_FINALIST_COUNT,
     KINEMATIC_SCORE_VARS,
     RATIO_SIGMA_THRESHOLD,
+    build_bg_optimization_prepass_config,
     build_bin_count_candidates,
     get_active_bg_profile,
     get_active_metric_weights,
@@ -31,6 +33,7 @@ from background_config import (
     get_resolved_bg_profile_settings,
     resolve_bg_stat_scale1,
     resolve_bg_stat_scale2,
+    validate_bg_optimization_prepass_config,
     use_common_epsilon_scales,
 )
 
@@ -40,6 +43,16 @@ from find_bins import apply_bin_proposal, propose_bins, write_bin_interval_files
 
 def _log(message):
     print("[BG OPT] {}".format(message))
+
+
+def _bg_opt_prepass_provenance():
+    return {
+        "pion_subtraction_context": BG_OPT_PREPASS_CONTEXT,
+        "particle_subtraction_mode": "single_scale",
+        "particle_subtraction_fallback_mode": "single_scale",
+        "authoritative_pion_parent_used": False,
+        "free_component_fit_used": False,
+    }
 
 
 def _canonical_bin_proposal(inp_dict):
@@ -534,12 +547,9 @@ def _evaluate_fixed_result(
 
 
 def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale1, bg_scale2, t_bins, phi_bins, simc_yield_dict, simc_support, data_base_cache):
-    candidate_inp = dict(inpDict)
+    candidate_inp = build_bg_optimization_prepass_config(inpDict)
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
-    candidate_inp["yield_emit_plots"] = False
-    candidate_inp["yield_show_progress"] = False
-    candidate_inp["suppress_bg_opt_warnings"] = True
     candidate_inp["bg_opt_use_data_cache"] = True
     candidate_inp["bg_stat_scale1"] = float(bg_scale1)
     candidate_inp["bg_stat_scale2"] = float(bg_scale2)
@@ -551,9 +561,27 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale1, bg_scale
     }
 
     sys.path.append("binning")
-    from calculate_yield import find_yield_data
+    from calculate_yield import find_yield_data, _validate_bg_opt_data_cache_contract
     from calculate_ratio import find_ratio
 
+    validate_bg_optimization_prepass_config(candidate_inp)
+    _validate_bg_opt_data_cache_contract(
+        data_base_cache,
+        candidate_inp,
+        phi_setting,
+        t_bins,
+        phi_bins,
+    )
+    _log(
+        "CANDIDATE {} {} BG1={:.3f} BG2={:.3f} cache={}/{}".format(
+            phi_setting,
+            candidate_inp["EPSSET"],
+            float(bg_scale1),
+            float(bg_scale2),
+            BG_OPT_PREPASS_CONTEXT,
+            candidate_inp["particle_subtraction_mode"],
+        )
+    )
     candidate_hist = _prepare_candidate_hist(base_hist, t_bins, phi_bins)
     candidate_hist["_xsect_support_simc"] = simc_support
     candidate_hist["_bg_opt_data_base_cache"] = data_base_cache
@@ -577,6 +605,8 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale1, bg_scale
         )) and metrics["valid_ratio_bins"] > 0,
         "metrics": metrics,
         "hist": candidate_hist,
+        "prepass_contract": dict(data_base_cache["_cache_contract"]),
+        **_bg_opt_prepass_provenance(),
     }
 
 
@@ -740,6 +770,16 @@ def _optimize_phi_scale(base_hist, inpDict, t_bins, phi_bins):
     sys.path.append("binning")
     from calculate_yield import prepare_bg_opt_data_base_cache
 
+    prepass_inp = build_bg_optimization_prepass_config(inpDict)
+    _log(
+        "PREPASS phi={} epsilon={} context={} subtraction_mode={} pion_scope={} parent_required=false free_component_fit=false".format(
+            phi_setting,
+            prepass_inp["EPSSET"],
+            prepass_inp["analysis_subtraction_context"],
+            prepass_inp["particle_subtraction_mode"],
+            prepass_inp.get("pion_subtraction_scope", ""),
+        )
+    )
     simc_yield_dict, simc_support = _build_simc_reference(base_hist, inpDict, t_bins, phi_bins)
     data_base_cache = prepare_bg_opt_data_base_cache(base_hist, inpDict, t_bins, phi_bins)
     initial_scale1 = resolve_bg_stat_scale1(inpDict, phi_setting)
@@ -1067,6 +1107,9 @@ def _build_summary_report(inpDict, mode, proposal, phi_results):
             len(proposal["t_bins"]) - 1,
             len(proposal["phi_bins"]) - 1,
         ),
+        "Pion subtraction context: {} (single_scale prepass; no authoritative parent)".format(
+            BG_OPT_PREPASS_CONTEXT
+        ),
     ]
     for result in phi_results:
         status = "fallback" if result.get("fallback") else "selected"
@@ -1107,6 +1150,16 @@ def _base_csv_row(
     valid=None,
 ):
     proposal = proposal or {}
+    cache_contract = {
+        **_bg_opt_prepass_provenance(),
+        "Q2": str(inpDict.get("Q2", "")),
+        "W": str(inpDict.get("W", "")),
+        "epsilon": str(inpDict.get("EPSSET", "")),
+        "phi_setting": str(phi_setting),
+        "shift_mode": str(inpDict.get("shift_mode", "raw")),
+        "t_edges": _serialize_result(proposal.get("t_bins", [])),
+        "phi_edges": _serialize_result(proposal.get("phi_bins", [])),
+    }
     row = {
         "mode": summary.get("mode", ""),
         "active_profile": summary.get("active_profile"),
@@ -1133,6 +1186,8 @@ def _base_csv_row(
         "requested_num_phi_bins": proposal.get("requested_num_phi_bins"),
         "actual_num_t_bins": proposal.get("actual_num_t_bins"),
         "actual_num_phi_bins": proposal.get("actual_num_phi_bins"),
+        **_bg_opt_prepass_provenance(),
+        "cache_contract_json": json.dumps(cache_contract, sort_keys=True),
     }
     return row
 
@@ -1477,6 +1532,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
         _log("Falling back to configured binning/scales for low epsilon")
         summary = {
             "mode": "low",
+            **_bg_opt_prepass_provenance(),
             "selection_mode": _get_selection_mode(),
             "active_profile": profile_meta["active_profile"],
             "resolved_profile": profile_meta["resolved_profile"],
@@ -1542,6 +1598,7 @@ def optimize_low_epsilon_configuration(histlist, inpDict):
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scale2s
     summary = {
         "mode": "low",
+        **_bg_opt_prepass_provenance(),
         "selection_mode": _get_selection_mode(),
         "active_profile": profile_meta["active_profile"],
         "resolved_profile": profile_meta["resolved_profile"],
@@ -1624,6 +1681,7 @@ def optimize_high_epsilon_configuration(histlist, inpDict):
     inpDict["bg_stat_scale2_by_setting"] = selected_bg_scale2s
     summary = {
         "mode": "high",
+        **_bg_opt_prepass_provenance(),
         "selection_mode": _get_selection_mode(),
         "active_profile": profile_meta["active_profile"],
         "resolved_profile": profile_meta["resolved_profile"],
@@ -1693,6 +1751,12 @@ def write_optimization_csv(summary, inpDict, csv_path):
         "selection_score",
         "test_model_chi2",
         "error",
+        "pion_subtraction_context",
+        "particle_subtraction_mode",
+        "particle_subtraction_fallback_mode",
+        "authoritative_pion_parent_used",
+        "free_component_fit_used",
+        "cache_contract_json",
     ]
     with open(csv_path, "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)

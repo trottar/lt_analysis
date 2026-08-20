@@ -1978,6 +1978,46 @@ def resolve_particle_subtraction_fallback_mode(inp_dict=None, mode=None):
     return _normalize_particle_subtraction_fallback_mode(mode)
 
 
+BG_OPT_PREPASS_CONTEXT = "bg_optimizer_pre_parent"
+
+
+def build_bg_optimization_prepass_config(inp_dict):
+    """Build the local, non-authoritative pion-subtraction optimizer config.
+
+    The early residual-background optimizer runs before RF-restored per-t pion
+    parents exist.  It must therefore use the legacy scalar pion prepass for
+    both its base cache and candidate evaluations, without altering the final
+    production configuration supplied by the caller.
+    """
+    if not isinstance(inp_dict, dict):
+        raise TypeError("bg optimizer prepass configuration requires a dictionary")
+    result = dict(inp_dict)
+    result["particle_subtraction_mode"] = PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
+    result["particle_subtraction_fallback_mode"] = PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
+    result["bg_opt_prepass_mode"] = True
+    result["analysis_subtraction_context"] = BG_OPT_PREPASS_CONTEXT
+    result["yield_emit_plots"] = False
+    result["yield_show_progress"] = False
+    result["suppress_bg_opt_warnings"] = True
+    return result
+
+
+def validate_bg_optimization_prepass_config(inp_dict):
+    """Validate the explicit scalar-only contract used by BG optimization."""
+    if not isinstance(inp_dict, dict) or not bool(inp_dict.get("bg_opt_prepass_mode")):
+        raise RuntimeError("bg_optimizer_data_cache_requires_prepass_mode")
+    if str(inp_dict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT:
+        raise RuntimeError("bg_optimizer_prepass_context_mismatch")
+    if (
+        resolve_particle_subtraction_mode(inp_dict)
+        != PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
+        or resolve_particle_subtraction_fallback_mode(inp_dict)
+        != PARTICLE_SUBTRACTION_MODE_SINGLE_SCALE
+    ):
+        raise RuntimeError("bg_optimizer_prepass_requires_single_scale_particle_subtraction")
+    return True
+
+
 def resolve_particle_subtraction_weight_denominator_floor(inp_dict=None):
     if isinstance(inp_dict, dict):
         return float(

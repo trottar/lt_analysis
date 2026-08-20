@@ -70,9 +70,11 @@ from prompt_trees import get_prompt_tree_name, get_rand_tree_name
 from background_config import (
     BG_OPT_MM_PLOT_MAX,
     BG_OPT_MM_PLOT_MIN,
+    BG_OPT_PREPASS_CONTEXT,
     BG_OVERSUB_WARN_FRACTION,
     BG_OVERSUB_WARN_MAX_RATIO,
     get_bg_scale_setting_key,
+    build_bg_optimization_prepass_config,
     resolve_particle_subtraction_fallback_mode,
     resolve_particle_subtraction_mode,
     resolve_particle_subtraction_weight_clip_bounds,
@@ -84,6 +86,7 @@ from background_config import (
     get_particle_subtraction_setting_key,
     get_proton_contamination_cleaning_config,
     resolve_pion_subtraction_scope,
+    validate_bg_optimization_prepass_config,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -315,6 +318,60 @@ def _make_bg_opt_bin_cache_key(t_bins, phi_bins, shift_mode):
         tuple(round(float(val), 8) for val in np.asarray(phi_bins, dtype=float)),
         str(shift_mode),
     )
+
+
+def _normalized_bg_opt_cache_edges(edges):
+    return [round(float(value), 8) for value in np.asarray(edges, dtype=float)]
+
+
+def _build_bg_opt_data_cache_contract(inpDict, phi_setting, t_bins, phi_bins):
+    """Describe the non-authoritative prepass cache and its source identity."""
+    validate_bg_optimization_prepass_config(inpDict)
+    return {
+        "context": BG_OPT_PREPASS_CONTEXT,
+        "particle_subtraction_mode": resolve_particle_subtraction_mode(inpDict),
+        "particle_subtraction_fallback_mode": resolve_particle_subtraction_fallback_mode(inpDict),
+        "authoritative_pion_parent_used": False,
+        "free_component_fit_used": False,
+        "Q2": str(inpDict.get("Q2", "")),
+        "W": str(inpDict.get("W", "")),
+        "epsilon": str(inpDict.get("EPSSET", "")),
+        "phi_setting": str(phi_setting),
+        "shift_mode": str(inpDict.get("shift_mode", "raw")),
+        "t_edges": _normalized_bg_opt_cache_edges(t_bins),
+        "phi_edges": _normalized_bg_opt_cache_edges(phi_bins),
+    }
+
+
+def _validate_bg_opt_data_cache_contract(data_base_cache, inpDict, phi_setting, t_bins, phi_bins):
+    if not isinstance(data_base_cache, dict):
+        raise RuntimeError("bg_optimizer_candidate_missing_prepass_cache")
+    expected = _build_bg_opt_data_cache_contract(inpDict, phi_setting, t_bins, phi_bins)
+    actual = data_base_cache.get("_cache_contract")
+    if not isinstance(actual, dict):
+        raise RuntimeError("bg_optimizer_candidate_cache_contract_mismatch: missing_contract")
+    for key, expected_value in expected.items():
+        if actual.get(key) != expected_value:
+            raise RuntimeError(
+                "bg_optimizer_candidate_cache_contract_mismatch: {}".format(key)
+            )
+    return True
+
+
+def _resolve_bg_opt_prepass_data_cache(hist, inpDict, t_bins, phi_bins, phi_setting):
+    """Return a validated prepass cache; never treat it as a production cache."""
+    if not bool(inpDict.get("bg_opt_use_data_cache")):
+        return None
+    validate_bg_optimization_prepass_config(inpDict)
+    data_base_cache = hist.get("_bg_opt_data_base_cache")
+    _validate_bg_opt_data_cache_contract(
+        data_base_cache,
+        inpDict,
+        phi_setting,
+        t_bins,
+        phi_bins,
+    )
+    return data_base_cache
 
 
 def _warn_if_oversub_diagnostics(inpDict, diagnostics, phi_setting, t_bin_index, phi_bin_index, fit_stage):
@@ -2539,23 +2596,27 @@ def process_hist_data(
 
 
 def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
-    cache_key = _make_bg_opt_bin_cache_key(t_bins, phi_bins, inpDict.get("shift_mode", "raw"))
+    base_inp = build_bg_optimization_prepass_config(inpDict)
+    cache_key = _make_bg_opt_bin_cache_key(t_bins, phi_bins, base_inp.get("shift_mode", "raw"))
     cache_store = hist.setdefault("_bg_opt_data_base_cache_store", {})
+    cache_contract = _build_bg_opt_data_cache_contract(
+        base_inp,
+        hist["phi_setting"],
+        t_bins,
+        phi_bins,
+    )
     if cache_key in cache_store:
+        _validate_bg_opt_data_cache_contract(
+            cache_store[cache_key],
+            base_inp,
+            hist["phi_setting"],
+            t_bins,
+            phi_bins,
+        )
         return cache_store[cache_key]
 
-    base_inp = dict(inpDict)
-    base_inp["yield_emit_plots"] = False
-    base_inp["yield_show_progress"] = False
-    base_inp["suppress_bg_opt_warnings"] = True
-    # This cache is constructed during the Step-4 optimizer, before the
-    # authoritative RF-restored per-t pion parents exist.  Force the supported
-    # non-authoritative scalar-prepass *mode* (not merely its fallback mode) so
-    # the cache neither requires a parent nor performs a free (t, phi) fit.
-    # The normal production path retains its configured component mode and
-    # strict authoritative-parent contract.
-    base_inp["particle_subtraction_mode"] = "single_scale"
-    base_inp["particle_subtraction_fallback_mode"] = "single_scale"
+    # The early optimizer runs before authoritative RF-restored per-t parents
+    # exist.  Its cache is therefore a scalar-only, non-authoritative baseline.
     base_inp["bg_stat_scale1"] = 0.0
     base_inp["bg_stat_scale1_by_setting"] = {
         get_bg_scale_setting_key(base_inp["EPSSET"], hist["phi_setting"]): 0.0
@@ -2567,14 +2628,14 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
 
     kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
         hist,
-        inpDict,
+        base_inp,
         t_bins,
         phi_bins,
         "calculate_yield_bg_opt_signal",
     )
     kaon_sigma0_shape_payload = _get_cached_kaon_sigma0_shape_payload(
         hist,
-        inpDict,
+        base_inp,
         t_bins,
         phi_bins,
         "calculate_yield_bg_opt_sigma0",
@@ -2603,6 +2664,7 @@ def prepare_bg_opt_data_base_cache(hist, inpDict, t_bins, phi_bins):
         "processed_dict": _clone_processed_dict(processed_dict),
         "ave_event_cache": ave_event_cache,
         "sub_event_cache": sub_event_cache,
+        "_cache_contract": cache_contract,
     }
     cache_store[cache_key] = base_cache
     return base_cache
@@ -2960,9 +3022,13 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     mm_min = inpDict["mm_min"] 
     mm_max = inpDict["mm_max"]
 
-    data_base_cache = None
-    if inpDict.get("bg_opt_use_data_cache") and resolve_pion_subtraction_scope(inpDict) != "t_bin":
-        data_base_cache = hist.get("_bg_opt_data_base_cache")
+    data_base_cache = _resolve_bg_opt_prepass_data_cache(
+        hist,
+        inpDict,
+        t_bins,
+        phi_bins,
+        phi_setting,
+    )
     kaon_signal_shape_payload = _get_cached_kaon_signal_shape_payload(
         hist,
         inpDict,
