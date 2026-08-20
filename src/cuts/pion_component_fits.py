@@ -139,6 +139,41 @@ def _hist_integral(hist):
         return 0.0
 
 
+def record_particle_subtraction_page(page_manifest, page_id, *, scope, authoritative):
+    """Append one serializable, uniquely identified particle-subtraction page.
+
+    The manifest is deliberately caller-owned: renderers only append scalar
+    records after they have emitted their page, so it cannot prolong a ROOT
+    object's lifetime or conceal duplicate diagnostic output.
+    """
+    if page_manifest is None:
+        return
+    if not isinstance(page_manifest, list):
+        raise TypeError("particle-subtraction page manifest must be a list")
+    normalized_id = str(page_id or "").strip()
+    if not normalized_id:
+        raise ValueError("particle-subtraction page manifest requires a page_id")
+    if any(str((entry or {}).get("page_id") or "") == normalized_id for entry in page_manifest):
+        raise RuntimeError("duplicate_particle_subtraction_page_id:{}".format(normalized_id))
+    page_manifest.append(
+        {
+            "page_id": normalized_id,
+            "scope": str(scope or "unknown"),
+            "authoritative": bool(authoritative),
+        }
+    )
+
+
+def _record_component_page(page_manifest, page_id_prefix, page_key, *, scope, authoritative):
+    if page_id_prefix:
+        record_particle_subtraction_page(
+            page_manifest,
+            "{}.{}".format(str(page_id_prefix).rstrip("."), page_key),
+            scope=scope,
+            authoritative=authoritative,
+        )
+
+
 def _sample_hist_value_and_variance(hist, x_value, interpolation_mode="linear"):
     if hist is None or not _is_finite_number(x_value):
         return 0.0, 0.0
@@ -7842,7 +7877,7 @@ def _print_component_overlay_page(
     cut_window=None,
 ):
     if base_hist is None or not overlay_specs:
-        return
+        return False
 
     canvas = ROOT.TCanvas()
     drawn_hists = []
@@ -7901,8 +7936,9 @@ def _print_component_overlay_page(
         stats_box.Draw()
         drawn_hists.append(stats_box)
 
-        canvas.Print(pdf_name)
-        canvas.Close()
+    canvas.Print(pdf_name)
+    canvas.Close()
+    return True
 
 
 def _print_protected_overlay_page(
@@ -7996,7 +8032,7 @@ def _print_single_hist_page(
     line_color=None,
 ):
     if hist is None:
-        return
+        return False
 
     canvas = ROOT.TCanvas()
     hist_clone = _clone_hist(hist, "{}_single_plot".format(hist.GetName()))
@@ -8040,6 +8076,7 @@ def _print_single_hist_page(
 
     canvas.Print(pdf_name)
     canvas.Close()
+    return True
 
 
 def _print_component_application_status_page(
@@ -8048,7 +8085,7 @@ def _print_component_application_status_page(
     title_prefix="",
 ):
     if not isinstance(component_payload, dict):
-        return
+        return False
 
     title_prefix = (title_prefix or "").strip()
     if title_prefix:
@@ -8157,6 +8194,7 @@ def _print_component_application_status_page(
 
     canvas.Print(pdf_name)
     canvas.Close()
+    return True
 
 
 def _build_difference_hist(data_hist, model_hist, name, divide_by_sigma=False):
@@ -10014,6 +10052,9 @@ def print_particle_subtraction_component_template_pages(
     cut_window=None,
     kaon_signal_payload=None,
     kaon_sigma0_payload=None,
+    page_manifest=None,
+    page_id_prefix=None,
+    authoritative=False,
 ):
     component_shape_payload = component_shape_payload or {}
     component_map = component_shape_payload.get("components") or {}
@@ -10077,7 +10118,7 @@ def print_particle_subtraction_component_template_pages(
 
     full_base, full_label, full_overlays, full_stats = _build_page("setting_shape_full")
     if full_base is not None:
-        _print_component_overlay_page(
+        if _print_component_overlay_page(
             pdf_name,
             full_base,
             full_label,
@@ -10085,11 +10126,18 @@ def print_particle_subtraction_component_template_pages(
             full_overlays,
             full_stats,
             cut_window=cut_window,
-        )
+        ):
+            _record_component_page(
+                page_manifest,
+                page_id_prefix,
+                "component_templates_full",
+                scope="setting-wide",
+                authoritative=authoritative,
+            )
 
     cut_base, cut_label, cut_overlays, cut_stats = _build_page("setting_shape")
     if cut_base is not None:
-        _print_component_overlay_page(
+        if _print_component_overlay_page(
             pdf_name,
             cut_base,
             cut_label,
@@ -10097,7 +10145,122 @@ def print_particle_subtraction_component_template_pages(
             cut_overlays,
             cut_stats,
             cut_window=cut_window,
+        ):
+            _record_component_page(
+                page_manifest,
+                page_id_prefix,
+                "component_templates_cut",
+                scope="setting-wide",
+                authoritative=authoritative,
+            )
+
+
+def print_particle_subtraction_kaon_lambda_comparison_page(
+    pdf_name,
+    component_fit_result,
+    component_payload=None,
+    title_prefix="",
+    cut_window=None,
+    page_manifest=None,
+    page_id_prefix=None,
+    authoritative=False,
+):
+    """Render the mandatory K-Lambda comparison independently of pion acceptance.
+
+    The fit result owns the immutable SIMC reference.  The optional application
+    payload supplies the actual scope's after-pion spectrum, so a per-t parent
+    comparison never silently falls back to a setting-wide input.
+    """
+    if not isinstance(component_fit_result, dict):
+        return False
+
+    application_payload = component_payload if isinstance(component_payload, dict) else {}
+    scope_label = (
+        application_payload.get("analysis_scope")
+        or application_payload.get("analysis_scope_label")
+        or component_fit_result.get("analysis_scope")
+        or "unknown"
+    )
+    after_hist = application_payload.get("H_MM_nosub_after_pion_subtraction")
+    before_hist = application_payload.get("H_MM_nosub_before_pion_subtraction")
+    target_hist = after_hist or before_hist or component_fit_result.get("H_kaon_nosub_input")
+    if target_hist is None:
+        raise RuntimeError(
+            "K-Lambda SIMC comparison requires the {} scope kaon spectrum".format(
+                scope_label
+            )
         )
+
+    lambda_reference_hist, lambda_reference_scale, lambda_reference_source, lambda_reference_normalization = (
+        _resolve_kaon_lambda_reference_for_plot(
+            component_fit_result,
+            target_hist,
+            cut_window,
+            scope_label,
+            "H_k_lambda_reference_application",
+        )
+    )
+    protected_lambda_diagnostic = (
+        (component_fit_result.get("diagnostics") or {}).get("pi_delta_signal_protected_fit")
+        or ((component_fit_result.get("diagnostics") or {}).get("kaon") or {}).get(
+            "pi_delta_signal_protected_fit"
+        )
+        or {}
+    )
+    title_prefix = (title_prefix or "").strip()
+    if title_prefix:
+        title_prefix = "{} ".format(title_prefix)
+    has_after_spectrum = after_hist is not None
+    base_label = "after pion subtraction" if has_after_spectrum else "kaon spectrum before pion subtraction"
+    emitted = _print_component_overlay_page(
+        pdf_name,
+        target_hist,
+        base_label,
+        "{}Part 3 {} vs K-Lambda comparison".format(
+            title_prefix,
+            "after pion subtraction" if has_after_spectrum else "available kaon spectrum",
+        ),
+        [(lambda_reference_hist, "K-Lambda SIMC comparison", ROOT.kBlue + 1, 2)],
+        [
+            "scope: {}".format(scope_label),
+            "application status={}".format(
+                "accepted" if bool(application_payload.get("accepted")) else "not applied"
+            ),
+            "comparison spectrum={}".format(
+                "after pion subtraction" if has_after_spectrum else "before/status fallback"
+            ),
+            "K-Lambda comparison full integral={}".format(
+                _format_fit_number(_hist_integral(lambda_reference_hist))
+            ),
+            "K-Lambda comparison source={}".format(lambda_reference_source),
+            "comparison normalization={}".format(lambda_reference_normalization),
+            "K-Lambda display scale={}".format(
+                _format_fit_number(lambda_reference_scale)
+                if lambda_reference_scale is not None
+                else "n/a"
+            ),
+            "Lambda gauge quality={} (diagnostic only)".format(
+                "PASS"
+                if bool(protected_lambda_diagnostic.get("lambda_gauge_quality_passed"))
+                else "POOR/UNAVAILABLE"
+            ),
+            "K-Lambda fitted amplitude={}".format(
+                _format_fit_number(application_payload.get("k_lambda_fit_amplitude"))
+                if application_payload.get("k_lambda_fit_amplitude") is not None
+                else _format_fit_number(component_fit_result.get("S_lambda"))
+            ),
+        ],
+        cut_window=cut_window,
+    )
+    if emitted:
+        _record_component_page(
+            page_manifest,
+            page_id_prefix,
+            "lambda_comparison",
+            scope=scope_label,
+            authoritative=authoritative,
+        )
+    return emitted
 
 
 def print_particle_subtraction_component_application_pages(
@@ -10106,10 +10269,37 @@ def print_particle_subtraction_component_application_pages(
     title_prefix="",
     cut_window=None,
     component_fit_result=None,
+    include_lambda_page=True,
+    page_manifest=None,
+    page_id_prefix=None,
+    authoritative=False,
 ):
     if not isinstance(component_payload, dict):
         return
     if not bool(component_payload.get("accepted")):
+        if _print_component_application_status_page(
+            pdf_name,
+            component_payload,
+            title_prefix=title_prefix,
+        ):
+            _record_component_page(
+                page_manifest,
+                page_id_prefix,
+                "application_status",
+                scope=(component_payload.get("analysis_scope") or "unknown"),
+                authoritative=authoritative,
+            )
+        if include_lambda_page and isinstance(component_fit_result, dict):
+            print_particle_subtraction_kaon_lambda_comparison_page(
+                pdf_name,
+                component_fit_result,
+                component_payload,
+                title_prefix=title_prefix,
+                cut_window=cut_window,
+                page_manifest=page_manifest,
+                page_id_prefix=page_id_prefix,
+                authoritative=authoritative,
+            )
         return
 
     title_prefix = (title_prefix or "").strip()
@@ -10155,30 +10345,7 @@ def print_particle_subtraction_component_application_pages(
     pion_postrefine_scales = pion_diag.get("postrefine_component_scales") or {}
     kaon_postrefine_scales = kaon_diag.get("postrefine_component_scales") or {}
     kaon_manual_scaling_active = _component_scale_map_has_nonunity(kaon_postfit_scales) or _component_scale_map_has_nonunity(kaon_postrefine_scales)
-    lambda_reference_hist, lambda_reference_scale, lambda_reference_source, lambda_reference_normalization = (
-        _resolve_kaon_lambda_reference_for_plot(
-            fit_render_result,
-            component_payload.get("H_MM_nosub_after_pion_subtraction")
-            or component_payload.get("H_MM_nosub_before_pion_subtraction"),
-            cut_window,
-            scope_label,
-            "H_k_lambda_reference_application",
-        )
-    )
-    lambda_reference_label = (
-        "K-Lambda SIMC comparison"
-        if lambda_reference_hist is not None
-        else "K-Lambda SIMC comparison unavailable"
-    )
-    protected_lambda_diagnostic = (
-        (fit_render_result.get("diagnostics") or {}).get("pi_delta_signal_protected_fit")
-        or ((fit_render_result.get("diagnostics") or {}).get("kaon") or {}).get(
-            "pi_delta_signal_protected_fit"
-        )
-        or {}
-    )
-
-    _print_single_hist_page(
+    if _print_single_hist_page(
         pdf_name,
         component_payload.get("H_pion_weight_vs_MM"),
         "w_pi(MM)",
@@ -10209,7 +10376,8 @@ def print_particle_subtraction_component_application_pages(
         ],
         cut_window=cut_window,
         line_color=ROOT.kViolet + 1,
-    )
+    ):
+        _record_component_page(page_manifest, page_id_prefix, "pion_weight", scope=scope_label, authoritative=authoritative)
 
     if (
         not protected_kaon_mode
@@ -10248,7 +10416,7 @@ def print_particle_subtraction_component_application_pages(
             cut_window=cut_window,
         )
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
         kaon_model_label,
@@ -10292,9 +10460,10 @@ def print_particle_subtraction_component_application_pages(
             "pion-control post-refine scales: {}".format(_format_component_scale_map(pion_postrefine_scales)),
         ],
         cut_window=cut_window,
-    )
+    ):
+        _record_component_page(page_manifest, page_id_prefix, "model_closure", scope=scope_label, authoritative=authoritative)
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_kaon_pion_model"),
         kaon_model_label,
@@ -10331,9 +10500,10 @@ def print_particle_subtraction_component_application_pages(
             "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
         ],
         cut_window=cut_window,
-    )
+    ):
+        _record_component_page(page_manifest, page_id_prefix, "event_template_closure", scope=scope_label, authoritative=authoritative)
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_MM_nosub_before_pion_subtraction"),
         "kaon data before pion subtraction",
@@ -10365,7 +10535,8 @@ def print_particle_subtraction_component_application_pages(
             "kaon-side post-refine scales: {}".format(_format_component_scale_map(kaon_postrefine_scales)),
         ],
         cut_window=cut_window,
-    )
+    ):
+        _record_component_page(page_manifest, page_id_prefix, "data_vs_pion_model", scope=scope_label, authoritative=authoritative)
 
     if (
         not protected_kaon_mode
@@ -10403,7 +10574,7 @@ def print_particle_subtraction_component_application_pages(
             cut_window=cut_window,
         )
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         component_payload.get("H_MM_nosub_before_pion_subtraction"),
         "before pion subtraction",
@@ -10433,56 +10604,20 @@ def print_particle_subtraction_component_application_pages(
             ),
         ],
         cut_window=cut_window,
-    )
+    ):
+        _record_component_page(page_manifest, page_id_prefix, "before_after", scope=scope_label, authoritative=authoritative)
 
-    lambda_page_title = "{}Part 3 after pion subtraction vs K-Lambda comparison".format(
-        title_prefix
-    )
-    _print_component_overlay_page(
-        pdf_name,
-        component_payload.get("H_MM_nosub_after_pion_subtraction"),
-        "after pion subtraction",
-        lambda_page_title,
-        [
-            (lambda_reference_hist, lambda_reference_label, ROOT.kBlue + 1, 2),
-        ],
-        [
-            "scope: {}".format(scope_label),
-            "after full integral={}".format(
-                _format_fit_number(component_payload.get("kaon_integral_after_pion_sub_full"))
-            ),
-            "K-Lambda comparison status={}".format(
-                "available" if lambda_reference_hist is not None else "missing"
-            ),
-            "K-Lambda comparison full integral={}".format(
-                _format_fit_number(_hist_integral(lambda_reference_hist))
-                if lambda_reference_hist is not None
-                else "n/a"
-            ),
-            "K-Lambda comparison source={}".format(lambda_reference_source),
-            "comparison normalization={}".format(lambda_reference_normalization),
-            "K-Lambda display scale={}".format(
-                _format_fit_number(lambda_reference_scale)
-                if lambda_reference_scale is not None
-                else "n/a"
-            ),
-            "Lambda gauge quality={} (diagnostic only)".format(
-                "PASS"
-                if bool(protected_lambda_diagnostic.get("lambda_gauge_quality_passed"))
-                else "POOR/UNAVAILABLE"
-            ),
-            "K-Lambda fitted amplitude={}".format(
-                _format_fit_number(component_payload.get("k_lambda_fit_amplitude"))
-                if component_payload.get("k_lambda_fit_amplitude") is not None
-                else "n/a"
-            ),
-            "fit validation pion/kaon={}/{}".format(
-                "pass" if bool(component_payload.get("fit_validation_pion")) else "fail",
-                "pass" if bool(component_payload.get("fit_validation_kaon")) else "fail",
-            ),
-        ],
-        cut_window=cut_window,
-    )
+    if include_lambda_page:
+        print_particle_subtraction_kaon_lambda_comparison_page(
+            pdf_name,
+            fit_render_result,
+            component_payload,
+            title_prefix=title_prefix,
+            cut_window=cut_window,
+            page_manifest=page_manifest,
+            page_id_prefix=page_id_prefix,
+            authoritative=authoritative,
+        )
 
 
 def print_particle_subtraction_component_fit_pages(
@@ -10490,6 +10625,9 @@ def print_particle_subtraction_component_fit_pages(
     component_fit_result,
     title_prefix="",
     cut_window=None,
+    page_manifest=None,
+    page_id_prefix=None,
+    authoritative=False,
 ):
     if not isinstance(component_fit_result, dict):
         return
@@ -10559,7 +10697,7 @@ def print_particle_subtraction_component_fit_pages(
         if not bool(alignment_payload.get("accepted", False)):
             alignment_pdf_lines.append("alignment proposal rejected; baseline map applied")
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         component_fit_result.get("H_pion_control_input"),
         "pion-control data",
@@ -10615,7 +10753,14 @@ def print_particle_subtraction_component_fit_pages(
                 )
             ),
         ],
-    )
+    ):
+        _record_component_page(
+            page_manifest,
+            page_id_prefix,
+            "pion_control_fit",
+            scope=component_fit_result.get("analysis_scope") or "unknown",
+            authoritative=authoritative,
+        )
 
     kaon_signal_reference_hist, kaon_signal_reference_scale, kaon_signal_reference_source, kaon_signal_reference_normalization = (
         _resolve_kaon_lambda_reference_for_plot(
@@ -10651,7 +10796,7 @@ def print_particle_subtraction_component_fit_pages(
         (component_fit_result.get("H_kaon_pion_bg_fit_total"), "pion-bg sum", ROOT.kOrange + 7, 2)
     )
 
-    _print_component_overlay_page(
+    if _print_component_overlay_page(
         pdf_name,
         (
             component_fit_result.get("H_kaon_nosub_input")
@@ -10712,7 +10857,14 @@ def print_particle_subtraction_component_fit_pages(
             ),
         ],
         cut_window=cut_window,
-    )
+    ):
+        _record_component_page(
+            page_manifest,
+            page_id_prefix,
+            "kaon_fit",
+            scope=component_fit_result.get("analysis_scope") or "unknown",
+            authoritative=authoritative,
+        )
 
     if protected_render_state.get("render_success_pages"):
         _print_protected_pi_delta_pages(
@@ -10722,12 +10874,26 @@ def print_particle_subtraction_component_fit_pages(
             title_prefix=title_prefix,
             cut_window=cut_window,
         )
+        _record_component_page(
+            page_manifest,
+            page_id_prefix,
+            "protected_fit",
+            scope=component_fit_result.get("analysis_scope") or "unknown",
+            authoritative=authoritative,
+        )
     elif protected_kaon_mode:
         _print_protected_pi_delta_status_page(
             pdf_name,
             component_fit_result,
             protected_render_state,
             title_prefix=title_prefix,
+        )
+        _record_component_page(
+            page_manifest,
+            page_id_prefix,
+            "protected_status",
+            scope=component_fit_result.get("analysis_scope") or "unknown",
+            authoritative=authoritative,
         )
 
     _print_joint_refinement_overlay_page(

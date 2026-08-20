@@ -87,6 +87,7 @@ from pion_component_shapes import (
 from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
+    print_particle_subtraction_kaon_lambda_comparison_page,
     print_particle_subtraction_component_fit_pages,
     print_particle_subtraction_component_template_pages,
     resolve_scope_component_shapes,
@@ -913,7 +914,15 @@ def process_hist_data(
     pdf_name = outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_averages_data_".format(phi_setting, ParticleType))
     pdf_opened = False
 
-    if ParticleType == "kaon" and component_shape_payload is not None:
+    render_setting_wide_template_diagnostics = (
+        ParticleType == "kaon"
+        and component_shape_payload is not None
+        and (
+            resolve_pion_subtraction_scope(inpDict) != "t_bin"
+            or bool(inpDict.get("emit_setting_wide_pion_diagnostic", True))
+        )
+    )
+    if render_setting_wide_template_diagnostics:
         open_canvas = ROOT.TCanvas("averages_component_templates_open_{}".format(phi_setting), "Canvas", 10, 10)
         pdf_opened = _open_root_pdf_page_stream(open_canvas, pdf_name, pdf_opened)
         open_canvas.Close()
@@ -926,6 +935,7 @@ def process_hist_data(
             kaon_sigma0_payload=kaon_sigma0_shape_payload,
         )
 
+    component_page_manifest = hist.setdefault("pion_component_page_manifest", [])
     for j in range(len(t_bins)-1):
 
         hist_bin_dict["H_Q2_DATA_{}".format(j)]       = TH1D("H_Q2_DATA_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
@@ -1639,6 +1649,9 @@ def process_hist_data(
                     component_fit_results[j],
                     title_prefix="{} t{}".format(phi_setting, j + 1),
                     cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                    page_manifest=component_page_manifest,
+                    page_id_prefix="pion.t_bin.{}".format(j),
+                    authoritative=True,
                 )
                 if isinstance(component_subtraction_payloads[j], dict):
                     print_particle_subtraction_component_application_pages(
@@ -1647,7 +1660,21 @@ def process_hist_data(
                         title_prefix="{} t{}".format(phi_setting, j + 1),
                         cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
                         component_fit_result=component_fit_results[j],
+                        include_lambda_page=False,
+                        page_manifest=component_page_manifest,
+                        page_id_prefix="pion.t_bin.{}".format(j),
+                        authoritative=True,
                     )
+                print_particle_subtraction_kaon_lambda_comparison_page(
+                    pdf_name,
+                    component_fit_results[j],
+                    component_subtraction_payloads[j],
+                    title_prefix="{} t{}".format(phi_setting, j + 1),
+                    cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                    page_manifest=component_page_manifest,
+                    page_id_prefix="pion.t_bin.{}".format(j),
+                    authoritative=True,
+                )
             del canvas
 
     if isinstance(proton_cleaning_result, dict):

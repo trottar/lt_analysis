@@ -85,6 +85,7 @@ from background_config import (
 from pion_component_fits import (
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
+    print_particle_subtraction_kaon_lambda_comparison_page,
     print_particle_subtraction_component_template_pages,
     print_particle_subtraction_component_fit_pages,
     resolve_scope_component_shapes,
@@ -414,6 +415,29 @@ def _clone_hist_detached(hist, name=None):
     )
 
 
+def _clone_component_targets_for_setting_wide_diagnostic(data_targets):
+    """Clone the committed production target set for read-only diagnostics.
+
+    ``active_component_targets`` has already passed the no-RF proton cleaning
+    and normal RF restoration contract when this helper is called.  The common
+    application builder may therefore perform its usual in-place subtraction
+    on these detached clones without changing the production histograms.
+    """
+    if not isinstance(data_targets, dict):
+        raise RuntimeError("setting-wide diagnostic requires active component targets")
+    diagnostic_targets = {}
+    for key, histogram in data_targets.items():
+        diagnostic_targets[key] = clone_root_histogram(
+            histogram,
+            scope="setting_wide_diagnostic",
+            role="application_target_{}".format(key),
+            name="{}_setting_wide_diagnostic".format(key),
+            optional=True,
+            sumw2=False,
+        )
+    return diagnostic_targets
+
+
 def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
     sub_data_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{data_filename}.root"
     sub_dummy_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{dummy_filename}.root"
@@ -731,6 +755,9 @@ def _apply_component_pion_subtraction_setting(
     norm_factor_dummy,
     nWindows,
     data_targets,
+    diagnostic_only=False,
+    input_selection="no_rf_proton_cleaning_then_rf_restored",
+    source_target_state="post_proton_post_rf",
 ):
     gate_result = evaluate_particle_subtraction_component_fit_result(component_fit_result, inpDict)
     payload = {
@@ -752,14 +779,26 @@ def _apply_component_pion_subtraction_setting(
         "fit_status_kaon": component_fit_result.get("fit_status_kaon") if isinstance(component_fit_result, dict) else None,
         "fit_validation_pion": bool((gate_result.get("diagnostics") or {}).get("fit_validation_pion")),
         "fit_validation_kaon": bool((gate_result.get("diagnostics") or {}).get("fit_validation_kaon")),
+        "diagnostic_only": bool(diagnostic_only),
+        "application_authoritative": not bool(diagnostic_only),
+        "production_applied": False,
+        "input_selection": str(input_selection),
+        "source_target_state": str(source_target_state),
     }
     if not gate_result["accepted"]:
+        if diagnostic_only:
+            assert_component_subtraction_payload_ownership(payload)
+            return payload
         return handle_particle_subtraction_fallback(
             payload,
             payload["fallback_reason"],
             context="rand_sub component pion subtraction ({})".format(phi_setting),
         )
     if not isinstance(sub_tree_bundle, dict):
+        if diagnostic_only:
+            payload["fallback_reason"] = "missing subtraction-tree bundle for component-weight subtraction"
+            assert_component_subtraction_payload_ownership(payload)
+            return payload
         return handle_particle_subtraction_fallback(
             payload,
             "missing subtraction-tree bundle for component-weight subtraction",
@@ -869,6 +908,7 @@ def _apply_component_pion_subtraction_setting(
             "accepted": True,
             "fallback_used": False,
             "fallback_reason": "",
+            "production_applied": not bool(diagnostic_only),
             "particle_subtraction_effective_scale": float(effective_scale),
             "weighted_pion_integral": float(weighted_pion_integral_full),
             "weighted_pion_integral_cut": float(weighted_pion_integral_cut),
@@ -3148,6 +3188,7 @@ def rand_sub(
 
     component_fit_result = None
     component_subtraction_payload = None
+    component_diagnostic_payload = None
     sub_tree_bundle = None
     proton_cleaning_result = None
     proton_cleaning_application = None
@@ -3517,6 +3558,8 @@ def rand_sub(
             )
             component_fit_result["diagnostic_only"] = setting_wide_diagnostic_only
             component_fit_result["application_authoritative"] = not setting_wide_diagnostic_only
+            component_fit_result["input_selection"] = "no_rf_proton_cleaning_then_rf_restored"
+            component_fit_result["source_target_state"] = "post_proton_post_rf"
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):
                 alignment_payload["persistence_status"] = alignment_status
@@ -3529,6 +3572,27 @@ def rand_sub(
                 # In t-bin production this fit remains a comparison diagnostic.
                 # It must never alter a later child pion weight or spectrum.
                 component_subtraction_payload = None
+                if bool(inpDict.get("emit_setting_wide_pion_diagnostic", True)):
+                    component_diagnostic_payload = _apply_component_pion_subtraction_setting(
+                        component_fit_result,
+                        sub_tree_bundle,
+                        phi_setting,
+                        inpDict,
+                        ParticleType,
+                        MM_offset_DATA,
+                        hole_contains,
+                        evaluate_data_event,
+                        get_shifted_t,
+                        mm_min,
+                        mm_max,
+                        norm_factor_data,
+                        norm_factor_dummy,
+                        nWindows,
+                        _clone_component_targets_for_setting_wide_diagnostic(
+                            active_component_targets
+                        ),
+                        diagnostic_only=True,
+                    )
             else:
                 component_subtraction_payload = _apply_component_pion_subtraction_setting(
                     component_fit_result,
@@ -3554,6 +3618,10 @@ def rand_sub(
             histDict["_particle_subtraction_component_payload_setting"] = component_subtraction_payload
             histDict["particle_subtraction_component_payload_setting"] = summarize_particle_subtraction_component_payload(
                 component_subtraction_payload
+            )
+            histDict["_particle_subtraction_component_diagnostic_payload_setting"] = component_diagnostic_payload
+            histDict["particle_subtraction_component_diagnostic_payload_setting"] = (
+                summarize_particle_subtraction_component_payload(component_diagnostic_payload)
             )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
@@ -4727,7 +4795,18 @@ def rand_sub(
             title_prefix="{} {}".format(phi_setting, ParticleType),
         )
 
-    if component_payload is not None:
+    component_page_manifest = histDict.setdefault("pion_component_page_manifest", [])
+    setting_wide_pages_enabled = bool(component_fit_result is not None) and (
+        not bool(component_fit_result.get("diagnostic_only"))
+        or bool(inpDict.get("emit_setting_wide_pion_diagnostic", True))
+    )
+    setting_wide_render_payload = (
+        component_subtraction_payload
+        if isinstance(component_subtraction_payload, dict)
+        else component_diagnostic_payload
+    )
+
+    if setting_wide_pages_enabled and component_payload is not None:
         print_particle_subtraction_component_template_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_payload,
@@ -4735,22 +4814,43 @@ def rand_sub(
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             kaon_signal_payload=kaon_signal_shape_payload,
             kaon_sigma0_payload=kaon_sigma0_shape_payload,
+            page_manifest=component_page_manifest,
+            page_id_prefix="pion.setting_wide",
+            authoritative=not bool(component_fit_result.get("diagnostic_only")),
         )
 
-    if component_fit_result is not None:
+    if setting_wide_pages_enabled:
         print_particle_subtraction_component_fit_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
             component_fit_result,
             title_prefix="{} {}".format(phi_setting, ParticleType),
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            page_manifest=component_page_manifest,
+            page_id_prefix="pion.setting_wide",
+            authoritative=not bool(component_fit_result.get("diagnostic_only")),
         )
-    if isinstance(component_subtraction_payload, dict):
+    if setting_wide_pages_enabled and isinstance(setting_wide_render_payload, dict):
         print_particle_subtraction_component_application_pages(
             outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
-            component_subtraction_payload,
+            setting_wide_render_payload,
             title_prefix="{} {}".format(phi_setting, ParticleType),
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
             component_fit_result=component_fit_result,
+            include_lambda_page=False,
+            page_manifest=component_page_manifest,
+            page_id_prefix="pion.setting_wide",
+            authoritative=not bool(component_fit_result.get("diagnostic_only")),
+        )
+    if setting_wide_pages_enabled:
+        print_particle_subtraction_kaon_lambda_comparison_page(
+            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            component_fit_result,
+            setting_wide_render_payload,
+            title_prefix="{} {}".format(phi_setting, ParticleType),
+            cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+            page_manifest=component_page_manifest,
+            page_id_prefix="pion.setting_wide",
+            authoritative=not bool(component_fit_result.get("diagnostic_only")),
         )
 
     ###
