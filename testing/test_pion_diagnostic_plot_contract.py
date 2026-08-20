@@ -77,6 +77,19 @@ class PionDiagnosticPlotContractTests(unittest.TestCase):
         self.assertIn('page_id_prefix="pion.t_bin.{}".format(j)', ave_source)
         self.assertIn("print_particle_subtraction_kaon_lambda_comparison_page(", ave_source)
 
+    def test_parent_builder_owns_the_manifest_not_process_hist_data(self):
+        source = AVE_PER_BIN_PATH.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        function_sources = {
+            node.name: ast.get_source_segment(source, node)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef)
+        }
+        process_source = function_sources["process_hist_data"]
+        self.assertIn("component_page_manifest=None", process_source)
+        self.assertNotIn("hist.setdefault", process_source)
+        self.assertIn("component_page_manifest=hist.setdefault", function_sources["build_t_bin_pion_parents"])
+
     def test_page_manifest_rejects_duplicates_and_preserves_scope_authority(self):
         manifest = []
         fits.record_particle_subtraction_page(

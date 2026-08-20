@@ -813,6 +813,7 @@ def process_hist_data(
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
     parent_only=False,
+    component_page_manifest=None,
 ):
 
     processed_dict = {}
@@ -935,7 +936,11 @@ def process_hist_data(
             kaon_sigma0_payload=kaon_sigma0_shape_payload,
         )
 
-    component_page_manifest = hist.setdefault("pion_component_page_manifest", [])
+    component_page_manifest = (
+        component_page_manifest
+        if isinstance(component_page_manifest, list)
+        else []
+    )
     for j in range(len(t_bins)-1):
 
         hist_bin_dict["H_Q2_DATA_{}".format(j)]       = TH1D("H_Q2_DATA_{}".format(j),"Q2", 100, inpDict["Q2min"], inpDict["Q2max"])
@@ -1714,6 +1719,7 @@ def bin_data(
     parent_pion_alignment=None,
     pion_t_bin_parent_results=None,
     parent_only=False,
+    component_page_manifest=None,
 ):
 
     processed_dict = process_hist_data(
@@ -1733,6 +1739,7 @@ def bin_data(
         parent_pion_alignment=parent_pion_alignment,
         pion_t_bin_parent_results=pion_t_bin_parent_results,
         parent_only=parent_only,
+        component_page_manifest=component_page_manifest,
     )
     
     binned_dict = {}
@@ -1886,6 +1893,7 @@ def build_t_bin_pion_parents(hist, t_bins, phi_bins, inpDict):
             )
         ),
         parent_only=True,
+        component_page_manifest=hist.setdefault("pion_component_page_manifest", []),
     )
     parents = []
     for t_index in range(len(t_bins) - 1):
