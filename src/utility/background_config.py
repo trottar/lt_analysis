@@ -137,10 +137,10 @@ ANALYSIS_RUNTIME_DEFAULTS = {
 
 ANALYSIS_BINNING_CONFIG = {
     ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
-    ("2p1", "2p95"): {"num_t_bins": 4, "num_phi_bins": 8, "tmin": 0.150, "tmax": 0.400},
-    ("3p0", "2p32"): {"num_t_bins": 4, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.800},
-    ("3p0", "3p14"): {"num_t_bins": 4, "num_phi_bins": 10, "tmin": 0.180, "tmax": 0.600},
-    ("4p4", "2p74"): {"num_t_bins": 4, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.900},
+    ("2p1", "2p95"): {"num_t_bins": 3, "num_phi_bins": 8, "tmin": 0.150, "tmax": 0.400},
+    ("3p0", "2p32"): {"num_t_bins": 3, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.800},
+    ("3p0", "3p14"): {"num_t_bins": 3, "num_phi_bins": 10, "tmin": 0.180, "tmax": 0.600},
+    ("4p4", "2p74"): {"num_t_bins": 3, "num_phi_bins": 9, "tmin": 0.400, "tmax": 0.900},
     ("5p5", "3p02"): {"num_t_bins": 2, "num_phi_bins": 7, "tmin": 0.400, "tmax": 0.900},
 }
 
