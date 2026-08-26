@@ -135,6 +135,36 @@ ANALYSIS_RUNTIME_DEFAULTS = {
     "require_shared_canonical_preflight": True,
 }
 
+# Part 1 of the pion HGCer study is a read-only diagnostic.  It deliberately
+# lives outside the pion-component and proton-cleaning physics settings: its
+# thresholds only control page/status classification, never an event weight or
+# a production selection.
+PION_HGCER_DIAGNOSTIC_CONFIG = {
+    "enabled": True,
+    "delta_range": (-10.0, 20.0),
+    "delta_bins": 10,
+    # Prefer the resolved proton timing-#delta edges.  The explicit range/bin
+    # values remain the deterministic fallback for disabled/missing cleaners.
+    "reuse_proton_delta_edges": True,
+    "hgcer_npe_range": (0.0, 20.0),
+    "hgcer_npe_bins": 100,
+    "mm_range": (0.70, 1.50),
+    "mm_bins": 100,
+    "support_thresholds": {
+        "supported_absolute_weight": 1.0e-2,
+        "marginal_absolute_weight": 1.0e-3,
+        "supported_effective_entries": 10.0,
+        "marginal_effective_entries": 1.0,
+    },
+    # ``supported_marginal`` exposes sparse cells without manufacturing an
+    # adaptive merge or a physics decision from them.
+    "emit_cell_pages": "supported_marginal",
+    "emit_status_pages": True,
+    "production_hgcer_threshold": 2.0,
+}
+PION_HGCER_DIAGNOSTIC_CONFIG_OVERRIDES = {}
+PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS = frozenset({"support_thresholds"})
+
 ANALYSIS_BINNING_CONFIG = {
     ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
     ("2p1", "2p95"): {"num_t_bins": 3, "num_phi_bins": 8, "tmin": 0.150, "tmax": 0.400},
@@ -2382,6 +2412,66 @@ def get_proton_contamination_cleaning_config(
         phi_setting=resolved_phi_setting,
         override_layers=["runtime_global"] + [layer.get("path") for layer in override_layers],
     )
+
+
+def get_pion_hgcer_diagnostic_config(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    """Resolve the non-authoritative Part-1 HGCer diagnostic configuration.
+
+    The returned mapping is intentionally separate from production pion and
+    proton configuration.  Runtime/setting overrides can change diagnostic
+    presentation and support labels only; callers must not consult it for a
+    production selection or weight.
+    """
+    config = deepcopy(PION_HGCER_DIAGNOSTIC_CONFIG)
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PION_HGCER_DIAGNOSTIC_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+    for override_layer in override_layers:
+        config = _deep_merge_particle_subtraction_config(
+            config,
+            override_layer.get("payload"),
+            merge_keys=PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS,
+        )
+    runtime_override = (
+        inp_dict.get("pion_hgcer_diagnostic_config")
+        if isinstance(inp_dict, dict)
+        else None
+    )
+    config = _deep_merge_particle_subtraction_config(
+        config,
+        runtime_override,
+        merge_keys=PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS,
+    )
+    delta_range = config.get("delta_range") or (-10.0, 20.0)
+    npe_range = config.get("hgcer_npe_range") or (0.0, 20.0)
+    mm_range = config.get("mm_range") or (0.70, 1.50)
+    for key, bounds in (("delta_range", delta_range), ("hgcer_npe_range", npe_range), ("mm_range", mm_range)):
+        if len(bounds) != 2 or not float(bounds[0]) < float(bounds[1]):
+            raise ValueError("Pion HGCer diagnostic {} must be an increasing pair".format(key))
+    for key in ("delta_bins", "hgcer_npe_bins", "mm_bins"):
+        if int(config.get(key, 0)) <= 0:
+            raise ValueError("Pion HGCer diagnostic {} must be positive".format(key))
+    emit_cell_pages = str(config.get("emit_cell_pages") or "supported_marginal").strip().lower()
+    if emit_cell_pages not in {"none", "supported", "supported_marginal", "all"}:
+        raise ValueError("Unsupported pion HGCer diagnostic emit_cell_pages '{}'".format(emit_cell_pages))
+    config["emit_cell_pages"] = emit_cell_pages
+    config["pion_hgcer_diagnostic_setting_key"] = resolved_setting_key
+    config["pion_hgcer_diagnostic_phi_setting"] = resolved_phi_setting
+    config["pion_hgcer_diagnostic_override_layers"] = [
+        layer.get("path") for layer in override_layers
+    ] + (["runtime"] if isinstance(runtime_override, dict) else [])
+    return config
 
 
 def _resolve_proton_contamination_cleaning_method(value):

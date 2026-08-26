@@ -79,6 +79,7 @@ from background_config import (
     resolve_particle_subtraction_weight_denominator_floor,
     resolve_particle_subtraction_weight_warn_max,
     get_proton_contamination_cleaning_config,
+    get_pion_hgcer_diagnostic_config,
     get_particle_subtraction_setting_key,
     get_pion_component_dynamic_alignment_config,
 )
@@ -141,6 +142,12 @@ from apply_cuts import (
     set_shift_context,
 )
 from data_coordinates import raw_event_coordinates, validate_kaon_data_coordinate_contract
+from pion_hgcer_diagnostics import (
+    build_pion_hgcer_tdelta_diagnostic,
+    render_pion_hgcer_tdelta_pages,
+    serialize_pion_hgcer_tdelta_diagnostic,
+    write_pion_hgcer_tdelta_json,
+)
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -4305,6 +4312,8 @@ def rand_sub(
     sub_tree_bundle = None
     proton_cleaning_result = None
     proton_cleaning_application = None
+    pion_hgcer_tdelta_diagnostic = None
+    pion_hgcer_tdelta_json = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -4658,6 +4667,72 @@ def rand_sub(
                         "coordinate_fingerprint": pion_control_cache.get("coordinate_fingerprint"),
                         "kaon_data_coordinate": pion_control_cache.get("kaon_data_coordinate"),
                     }
+                    pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
+                        inp_dict=inpDict,
+                        phi_setting=phi_setting,
+                    )
+                    if bool(pion_hgcer_diagnostic_config.get("enabled", False)):
+                        try:
+                            pion_hgcer_tdelta_diagnostic = (
+                                build_pion_hgcer_tdelta_diagnostic(
+                                    kaon_source_bundle=proton_cleaning_tree_bundle,
+                                    pion_tree_bundle=sub_tree_bundle,
+                                    proton_cleaning_result=proton_cleaning_result,
+                                    proton_coordinate_fingerprint=(
+                                        (proton_cleaning_application or {}).get(
+                                            "coordinate_fingerprint"
+                                        )
+                                    ),
+                                    pion_control_cache=pion_control_cache,
+                                    coordinate_contract=coordinate_contract,
+                                    t_edges=frozen_t_bins,
+                                    config=pion_hgcer_diagnostic_config,
+                                    hole_contains=hole_contains,
+                                    evaluate_pion_event=evaluate_data_event,
+                                    mm_min=mm_min,
+                                    mm_max=mm_max,
+                                )
+                            )
+                        except Exception as exc:
+                            # Part 1 is intentionally observational.  A
+                            # missing branch or an unreadable diagnostic tree
+                            # is reported, never promoted into a production
+                            # pion/proton decision.
+                            pion_hgcer_tdelta_diagnostic = {
+                                "status": "unavailable",
+                                "diagnostic_label": (
+                                    "PION HGCer t-DELTA DIAGNOSTICS — PART 1 "
+                                    "— NON-AUTHORITATIVE"
+                                ),
+                                "non_authoritative": True,
+                                "production_side_effect_free": True,
+                                "production_hgcer_pid_unchanged": True,
+                                "reason": str(exc),
+                                "config": pion_hgcer_diagnostic_config,
+                                "coordinate_fingerprint": (
+                                    (coordinate_contract or {}).get("coordinate_fingerprint")
+                                ),
+                                "t_edges": list(frozen_t_bins or ()),
+                            }
+                        pion_hgcer_tdelta_json = os.path.join(
+                            OUTPATH,
+                            "{}_{}_pion_hgcer_tdelta_diagnostic.json".format(
+                                phi_setting, OutFilename
+                            ),
+                        )
+                        write_pion_hgcer_tdelta_json(
+                            pion_hgcer_tdelta_json,
+                            pion_hgcer_tdelta_diagnostic,
+                        )
+                        histDict["pion_hgcer_tdelta_diagnostic"] = (
+                            serialize_pion_hgcer_tdelta_diagnostic(
+                                pion_hgcer_tdelta_diagnostic,
+                                include_records=False,
+                            )
+                        )
+                        histDict["pion_hgcer_tdelta_diagnostic_artifacts"] = [
+                            pion_hgcer_tdelta_json
+                        ]
 
                 histDict["proton_contamination_cleaning_result_setting"] = (
                     serialize_kaon_proton_cleaning_result(proton_cleaning_result)
@@ -6437,7 +6512,42 @@ def rand_sub(
 
         c_hgcer_hole.Draw()
 
-        c_hgcer_hole.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')      
+        diagnostic_pdf = outputpdf.replace(
+            "{}_FullAnalysis_".format(ParticleType),
+            "{}_{}_rand_sub_".format(phi_setting, ParticleType),
+        )
+        if isinstance(pion_hgcer_tdelta_diagnostic, dict):
+            # Keep every historical rand_sub page in its original order, then
+            # append the Part-1 section as the terminal PDF content.  The
+            # diagnostic renderer owns the final close only in this branch.
+            c_hgcer_hole.Print(diagnostic_pdf)
+            emitted_hgcer_pages = render_pion_hgcer_tdelta_pages(
+                diagnostic_pdf,
+                pion_hgcer_tdelta_diagnostic,
+                title_prefix="{} {}".format(phi_setting, ParticleType),
+                page_manifest=histDict.setdefault(
+                    "pion_hgcer_tdelta_diagnostic_page_manifest", []
+                ),
+                close_pdf=True,
+            )
+            histDict["pion_hgcer_tdelta_diagnostic"] = (
+                serialize_pion_hgcer_tdelta_diagnostic(
+                    pion_hgcer_tdelta_diagnostic,
+                    include_records=False,
+                )
+            )
+            if pion_hgcer_tdelta_json is not None:
+                write_pion_hgcer_tdelta_json(
+                    pion_hgcer_tdelta_json,
+                    pion_hgcer_tdelta_diagnostic,
+                )
+            _print_rand_debug(
+                "pion HGCer t-delta diagnostic pages",
+                emitted=len(emitted_hgcer_pages),
+                status=pion_hgcer_tdelta_diagnostic.get("status"),
+            )
+        else:
+            c_hgcer_hole.Print(diagnostic_pdf + ')')
 
     _print_rand_timer("rand_sub plotting {}".format(phi_setting), perf_counter() - stage_start)
     _print_rand_timer("rand_sub total {}".format(phi_setting), perf_counter() - total_start)
