@@ -762,6 +762,8 @@ def _build_authoritative_pion_control_source_cache(
             ),
             "records": [],
             "source_accounting": {},
+            "kaon_data_coordinate": dict(coordinate_contract),
+            "coordinate_fingerprint": coordinate_fingerprint,
         })
 
     # Diagnostic-only source overlays are detached from every production fit.
@@ -4914,7 +4916,9 @@ def rand_sub(
                             proton_product.get("coordinate_fingerprint") or ""
                         ),
                         "pion_control_coordinate_fingerprint": str(
-                            control_t.get("coordinate_fingerprint") or ""
+                            control_t.get("coordinate_fingerprint")
+                            or pion_control_cache.get("coordinate_fingerprint")
+                            or ""
                         ),
                         # Propagate the proton-stage producer value unchanged;
                         # the parent boundary recomputes it and fails on drift.
