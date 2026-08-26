@@ -133,7 +133,14 @@ from mm_background_subtraction import (
     clone_reset_hist,
     mm_background_weight_from_value,
 )
-from apply_cuts import get_shift_mode, get_shifted_mm, get_shifted_t, set_shift_context
+from apply_cuts import (
+    get_kaon_data_coordinate,
+    get_shift_mode,
+    get_shifted_mm,
+    get_shifted_t,
+    set_shift_context,
+)
+from data_coordinates import raw_event_coordinates, validate_kaon_data_coordinate_contract
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -686,6 +693,7 @@ def _build_authoritative_pion_control_source_cache(
     particle_type,
     pol,
     mm_offset_data,
+    coordinate_contract,
     hole_contains,
     evaluate_event,
     shifted_t_getter,
@@ -702,6 +710,9 @@ def _build_authoritative_pion_control_source_cache(
     project the same record definition locally without applying any proton
     factor to pion-control events.
     """
+    coordinate_contract = validate_kaon_data_coordinate_contract(coordinate_contract)
+    coordinate_fingerprint = coordinate_contract["coordinate_fingerprint"]
+    coordinate_name_suffix = coordinate_fingerprint[-12:]
     products = list(proton_t_products or ())
     if len(products) != max(0, len(t_bins) - 1):
         raise RuntimeError("pion_control_cache_requires_one_proton_product_per_canonical_t")
@@ -710,7 +721,7 @@ def _build_authoritative_pion_control_source_cache(
 
     child_cache_fields = (
         "source_label", "entry_index", "coefficient",
-        "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
+        "raw_t", "raw_MM", "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
         "ssxptar", "ssyptar", "hsxptar", "hsyptar", "allcuts",
         "nommcuts", "t_index", "phi_index",
     )
@@ -721,6 +732,8 @@ def _build_authoritative_pion_control_source_cache(
     cache = {
         "by_t": [], "source_accounting": {}, "records": [],
         "child_event_cache": child_cache,
+        "kaon_data_coordinate": dict(coordinate_contract),
+        "coordinate_fingerprint": coordinate_fingerprint,
     }
     for t_index, product in enumerate(products):
         final_targets = product.get("final_targets") or {}
@@ -751,6 +764,53 @@ def _build_authoritative_pion_control_source_cache(
             "source_accounting": {},
         })
 
+    # Diagnostic-only source overlays are detached from every production fit.
+    # They make a raw-versus-analysis-frame mismatch visible without adding a
+    # second control loop or changing any source normalization.
+    source_coordinate_hists = {}
+    if cache["by_t"]:
+        for source_label in ("prompt", "rand", "dummy", "dummy_rand"):
+            source_coordinate_hists[source_label] = {
+                "H_MM_raw": clone_root_histogram(
+                    cache["by_t"][0]["H_pion_control"],
+                    scope="pion_coordinate_{}".format(source_label),
+                    role="raw_mm_display",
+                    name="H_MM_pion_coordinate_{}_raw_{}".format(
+                        source_label, coordinate_name_suffix
+                    ),
+                    reset=True,
+                    sumw2=True,
+                ),
+                "H_MM_analysis": clone_root_histogram(
+                    cache["by_t"][0]["H_pion_control"],
+                    scope="pion_coordinate_{}".format(source_label),
+                    role="analysis_mm_display",
+                    name="H_MM_pion_coordinate_{}_analysis_{}".format(
+                        source_label, coordinate_name_suffix
+                    ),
+                    reset=True,
+                    sumw2=True,
+                ),
+                "H_t_raw": TH1D(
+                    "H_t_pion_coordinate_{}_raw_{}".format(
+                        source_label, coordinate_name_suffix
+                    ),
+                    "Pion control raw |t|;|t| [GeV^2];signed yield",
+                    240, float(t_bins[0]), float(t_bins[-1]),
+                ),
+                "H_t_analysis": TH1D(
+                    "H_t_pion_coordinate_{}_analysis_{}".format(
+                        source_label, coordinate_name_suffix
+                    ),
+                    "Pion control analysis |t|;|t| [GeV^2];signed yield",
+                    240, float(t_bins[0]), float(t_bins[-1]),
+                ),
+            }
+            for histogram in source_coordinate_hists[source_label].values():
+                histogram.SetDirectory(0)
+                histogram.Sumw2()
+    cache["coordinate_diagnostics"] = source_coordinate_hists
+
     source_specs = (
         ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data)),
         ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(n_windows)),
@@ -768,6 +828,15 @@ def _build_authoritative_pion_control_source_cache(
             "signed_weight_sum": 0.0,
             "absolute_weight_support": 0.0,
             "coefficient": float(coefficient),
+            "coordinate_fingerprint": coordinate_fingerprint,
+            "coordinate_closure": {
+                "checked_records": 0,
+                "mm_residual_sum": 0.0,
+                "t_residual_sum": 0.0,
+                "maximum_abs_mm_residual": 0.0,
+                "maximum_abs_t_residual": 0.0,
+            },
+            "t_bin_migration": {},
             "canonical_t_counts": {
                 str(t_index): 0 for t_index in range(max(0, len(t_bins) - 1))
             },
@@ -792,9 +861,36 @@ def _build_authoritative_pion_control_source_cache(
             if not (allcuts or nommcuts):
                 continue
             source_audit["selected_records"] += 1
+            raw_mm, raw_t = raw_event_coordinates(evt)
             adj_mm = float(get_shifted_mm(evt, mm_offset=mm_offset_correction))
             adj_t = float(shifted_t_getter(evt))
+            expected_mm = raw_mm + float(coordinate_contract["mm_shift"])
+            expected_t = raw_t + float(coordinate_contract["t_shift"])
+            closure = source_audit["coordinate_closure"]
+            closure["checked_records"] += 1
+            closure["mm_residual_sum"] += adj_mm - expected_mm
+            closure["t_residual_sum"] += adj_t - expected_t
+            closure["maximum_abs_mm_residual"] = max(
+                closure["maximum_abs_mm_residual"], abs(adj_mm - expected_mm)
+            )
+            closure["maximum_abs_t_residual"] = max(
+                closure["maximum_abs_t_residual"], abs(adj_t - expected_t)
+            )
+            raw_t_index = _canonical_t_index(raw_t, t_bins)
             t_index = _canonical_t_index(adj_t, t_bins)
+            migration_key = "{}->{}".format(
+                "out" if raw_t_index is None else raw_t_index,
+                "out" if t_index is None else t_index,
+            )
+            source_audit["t_bin_migration"][migration_key] = (
+                source_audit["t_bin_migration"].get(migration_key, 0) + 1
+            )
+            if nommcuts:
+                diagnostic_hists = source_coordinate_hists.get(source_label) or {}
+                diagnostic_hists.get("H_MM_raw").Fill(raw_mm, coefficient)
+                diagnostic_hists.get("H_MM_analysis").Fill(adj_mm, coefficient)
+                diagnostic_hists.get("H_t_raw").Fill(raw_t, coefficient)
+                diagnostic_hists.get("H_t_analysis").Fill(adj_t, coefficient)
             if t_index is None:
                 continue
             source_audit["records_inside_canonical_t"] += 1
@@ -823,8 +919,11 @@ def _build_authoritative_pion_control_source_cache(
                 "source_label": source_label,
                 "entry_index": int(entry_index),
                 "coefficient": float(coefficient),
+                "raw_MM": raw_mm,
+                "raw_t": raw_t,
                 "adj_MM": adj_mm,
                 "adj_t": adj_t,
+                "coordinate_fingerprint": coordinate_fingerprint,
                 "phi": float(evt.ph_q),
                 "allcuts": bool(allcuts),
                 "nommcuts": bool(nommcuts),
@@ -852,8 +951,11 @@ def _build_authoritative_pion_control_source_cache(
                     "source_label": source_label,
                     "entry_index": int(entry_index),
                     "coefficient": float(coefficient),
+                    "raw_MM": raw_mm,
+                    "raw_t": raw_t,
                     "adj_t": adj_t,
                     "adj_MM": adj_mm,
+                    "coordinate_fingerprint": coordinate_fingerprint,
                     "theta_cm_deg": theta_cm_deg,
                     "Q2": float(evt.Q2),
                     "W": float(evt.W),
@@ -879,7 +981,7 @@ def _build_authoritative_pion_control_source_cache(
         frozen = {
             field: np.asarray(
                 values,
-                dtype=(str if field == "source_label" else bool if field in ("allcuts", "nommcuts") else np.int32
+                dtype=(str if field in ("source_label", "coordinate_fingerprint") else bool if field in ("allcuts", "nommcuts") else np.int32
                        if field in ("t_index", "phi_index") else np.float64),
             )
             for field, values in section.items()
@@ -903,6 +1005,15 @@ def _build_authoritative_pion_control_source_cache(
         }
         frozen_child_cache[source_label] = frozen
     cache["child_event_cache"] = frozen_child_cache
+    for source_audit in cache["source_accounting"].values():
+        closure = source_audit.get("coordinate_closure") or {}
+        closure["tolerance"] = 1.0e-12
+        closure["passed"] = bool(
+            closure.get("maximum_abs_mm_residual", float("inf")) <= closure["tolerance"]
+            and closure.get("maximum_abs_t_residual", float("inf")) <= closure["tolerance"]
+        )
+        closure["mm_shift"] = float(coordinate_contract["mm_shift"])
+        closure["t_shift"] = float(coordinate_contract["t_shift"])
     if cache["by_t"]:
         global_full = clone_root_histogram(
             cache["by_t"][0]["H_pion_control"],
@@ -1948,7 +2059,6 @@ def _process_rand_sub_tree(
     mm_min,
     mm_max,
     progress_bar,
-    update_mm_offset=False,
 ):
     # Keep downstream filling on the same no-particle-subtraction selection and
     # shifted-variable implementation used by the canonical prepass and the
@@ -1962,7 +2072,6 @@ def _process_rand_sub_tree(
     nohole_xy_fill = fills["nohole_xy"]
     nohole_x_mm_fill = fills["nohole_x_mm"]
     nohole_y_mm_fill = fills["nohole_y_mm"]
-    mm_offset_value = None
 
     for i, evt in enumerate(tree):
         progress_start = perf_counter()
@@ -1994,14 +2103,11 @@ def _process_rand_sub_tree(
 
         if allcuts:
             _fill_rand_sub_allcuts(evt, adj_MM, adj_t, adj_hsdelta, fills)
-            if update_mm_offset:
-                mm_offset_value = adj_MM - evt.MM
 
     loop_elapsed = perf_counter() - loop_start
     _print_rand_timer(timer_label, loop_elapsed, entries)
     _print_rand_timer("{} progressBar".format(timer_label), progress_time, entries)
     _print_rand_timer("{} other".format(timer_label), max(loop_elapsed - progress_time, 0.0), entries)
-    return mm_offset_value
 
 
 def _resolve_prepass_random_window_count(inp_dict, phi_setting):
@@ -2600,6 +2706,7 @@ def rand_sub(
         evaluate_data_cut_bools,
         evaluate_data_event,
         get_shift_mode,
+        get_kaon_data_coordinate,
         get_shifted_mm,
         get_shifted_t,
         set_shift_context,
@@ -2607,6 +2714,18 @@ def rand_sub(
     )
     set_val(inpDict) # Set global variables for optimization
     set_shift_context(phi_setting=phi_setting, shift_mode=shift_mode)
+    coordinate_contract = get_kaon_data_coordinate(
+        required=(
+            ParticleType == "kaon"
+            and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+            and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+        )
+    )
+    if coordinate_contract is not None:
+        histDict["kaon_data_coordinate"] = dict(coordinate_contract)
+        histDict["kaon_data_coordinate_fingerprint"] = coordinate_contract[
+            "coordinate_fingerprint"
+        ]
     
     ################################################################################################################################################
     # Define data root file trees of interest
@@ -3409,7 +3528,7 @@ def rand_sub(
         H_MM_nosub_DATA.Fill,
     )
 
-    MM_offset_DATA = _process_rand_sub_tree(
+    _process_rand_sub_tree(
         TBRANCH_DATA,
         "\nGrabbing {} {} data...".format(phi_setting, ParticleType),
         "rand_sub data loop {}".format(phi_setting),
@@ -3423,8 +3542,12 @@ def rand_sub(
         mm_min,
         mm_max,
         Misc.progressBar,
-        update_mm_offset=True,
     )
+    # All experimental values now arrive in the kaon analysis coordinate.
+    # Keep the historical value for audit only; passing it again would shift
+    # prompt trees twice and leave pion control trees inconsistent.
+    event_derived_mm_offset = None
+    MM_offset_DATA = 0.0
 
     ################################################################################################################################################
     # Fill dummy histograms for various trees called above
@@ -4187,6 +4310,18 @@ def rand_sub(
         subDict["nWindows"] = nWindows
         subDict["phi_setting"] = phi_setting
         subDict["MM_offset_DATA"] = MM_offset_DATA
+        subDict["legacy_MM_offset_DATA"] = {
+            "effective_value": float(MM_offset_DATA or 0.0),
+            "status": "disabled_by_kaon_data_coordinate"
+            if coordinate_contract is not None else "legacy_raw_coordinate",
+            "event_derived_value": (
+                None if event_derived_mm_offset is None else float(event_derived_mm_offset)
+            ),
+            "coordinate_fingerprint": (
+                coordinate_contract.get("coordinate_fingerprint")
+                if coordinate_contract is not None else None
+            ),
+        }
         authoritative_component_t_bin = (
             resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
             and resolve_pion_subtraction_scope(inpDict) == "t_bin"
@@ -4371,6 +4506,20 @@ def rand_sub(
                         mm_max,
                     )
                     if bool((proton_cleaning_application or {}).get("accepted")):
+                        if coordinate_contract is not None:
+                            proton_cleaning_application["kaon_data_coordinate"] = dict(
+                                coordinate_contract
+                            )
+                            proton_cleaning_application["coordinate_fingerprint"] = (
+                                coordinate_contract["coordinate_fingerprint"]
+                            )
+                            for product in (
+                                proton_cleaning_application.get("canonical_t_products") or ()
+                            ):
+                                product["kaon_data_coordinate"] = dict(coordinate_contract)
+                                product["coordinate_fingerprint"] = coordinate_contract[
+                                    "coordinate_fingerprint"
+                                ]
                         # Retain the producer's detached application record for
                         # proton closure diagnostics and its ordered PDF pages.
                         proton_cleaning_result["application"] = proton_cleaning_application
@@ -4490,6 +4639,7 @@ def rand_sub(
                         particle_type=ParticleType,
                         pol=inpDict.get("POL"),
                         mm_offset_data=MM_offset_DATA,
+                        coordinate_contract=coordinate_contract,
                         hole_contains=hole_contains,
                         evaluate_event=evaluate_data_event,
                         shifted_t_getter=get_shifted_t,
@@ -4503,6 +4653,8 @@ def rand_sub(
                     histDict["pion_control_source_audit"] = {
                         "definition": pion_control_cache.get("definition"),
                         "source_accounting": pion_control_cache.get("source_accounting"),
+                        "coordinate_fingerprint": pion_control_cache.get("coordinate_fingerprint"),
+                        "kaon_data_coordinate": pion_control_cache.get("kaon_data_coordinate"),
                     }
 
                 histDict["proton_contamination_cleaning_result_setting"] = (
@@ -4563,6 +4715,9 @@ def rand_sub(
                 "epsilon": EPSSET,
                 "phi_setting": phi_setting,
                 "analysis_scope": "setting-wide",
+                "kaon_data_coordinate_fingerprint": str(
+                    (coordinate_contract or {}).get("coordinate_fingerprint") or ""
+                ),
                 "t_bin": None,
                 "phi_bin": None,
                 "active_dimensions": {
@@ -4594,7 +4749,12 @@ def rand_sub(
                     component_pion_control_input,
                     scope_shapes,
                     inp_dict=inpDict,
-                    common_setting_shift_gev=MM_offset_DATA,
+                    # Model-only SIMC alignment retains the explicit kaon
+                    # correction; experimental histograms are already in the
+                    # analysis coordinate and receive no legacy offset.
+                    common_setting_shift_gev=float(
+                        (coordinate_contract or {}).get("mm_shift", 0.0)
+                    ),
                 )
             component_fit_result = build_particle_subtraction_component_result(
                 component_pion_control_input,
@@ -4747,6 +4907,15 @@ def rand_sub(
                         "pion_control_records": control_t.get("records"),
                         "source_accounting": proton_product.get("source_accounting"),
                         "pion_control_source_accounting": control_t.get("source_accounting"),
+                        "kaon_data_coordinate": dict(
+                            proton_product.get("kaon_data_coordinate") or {}
+                        ),
+                        "coordinate_fingerprint": str(
+                            proton_product.get("coordinate_fingerprint") or ""
+                        ),
+                        "pion_control_coordinate_fingerprint": str(
+                            control_t.get("coordinate_fingerprint") or ""
+                        ),
                         # Propagate the proton-stage producer value unchanged;
                         # the parent boundary recomputes it and fails on drift.
                         "proton_final_output_fingerprint": str(
@@ -4833,6 +5002,7 @@ def rand_sub(
                     parent_pion_alignment=component_fit_result.get("pion_component_alignment"),
                     alignment_outpath=OUTPATH,
                     mm_offset_data=MM_offset_DATA,
+                    coordinate_contract=coordinate_contract,
                     diagnostic_application_builder=_build_parent_diagnostic_application,
                 )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
@@ -6081,6 +6251,12 @@ def rand_sub(
             setting_wide_summary=(histDict.get("pion_t_parent_diagnostics") or {}).get("setting_wide"),
             canonical_t_global=histDict.get("_pion_authoritative_canonical_t_global"),
             setting_wide_enabled=setting_wide_pages_enabled,
+            coordinate_audit=histDict.get("pion_control_source_audit"),
+            coordinate_diagnostics=(
+                (histDict.get("_authoritative_pion_control_source_cache") or {}).get(
+                    "coordinate_diagnostics"
+                )
+            ),
         )
 
     ###

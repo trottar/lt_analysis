@@ -35,6 +35,7 @@ from pion_component_subtraction import (
     validate_frozen_t_bin_pion_parent_collection,
 )
 from root_histogram_ownership import clone_root_histogram
+from data_coordinates import validate_kaon_data_coordinate_contract
 
 
 def _is_component_t_bin_production(inp_dict):
@@ -355,7 +356,9 @@ def _build_authoritative_canonical_t_global(parents):
     }
 
 
-def _parent_input_contract(parent_input, *, inp_dict, phi_setting, t_index, t_edges):
+def _parent_input_contract(
+    parent_input, *, inp_dict, phi_setting, t_index, t_edges, coordinate_contract
+):
     """Validate the direct producer handoff without cloning or refitting it."""
     if not isinstance(parent_input, dict):
         raise RuntimeError("authoritative_t_bin_parent_input_missing:t{}".format(t_index + 1))
@@ -385,6 +388,15 @@ def _parent_input_contract(parent_input, *, inp_dict, phi_setting, t_index, t_ed
         raise RuntimeError("authoritative_t_bin_parent_source_epsilon_mismatch:t{}".format(t_index + 1))
     if str(parent_input.get("consumer_epsilon", "")).strip().lower() != expected_epsilon:
         raise RuntimeError("authoritative_t_bin_parent_consumer_epsilon_mismatch:t{}".format(t_index + 1))
+    parent_coordinate = validate_kaon_data_coordinate_contract(
+        parent_input.get("kaon_data_coordinate"), phi_setting=phi_setting
+    )
+    if parent_coordinate["coordinate_fingerprint"] != coordinate_contract["coordinate_fingerprint"]:
+        raise RuntimeError("authoritative_t_bin_parent_coordinate_fingerprint_mismatch:t{}".format(t_index + 1))
+    if str(parent_input.get("coordinate_fingerprint") or "") != parent_coordinate["coordinate_fingerprint"]:
+        raise RuntimeError("authoritative_t_bin_parent_coordinate_contract_missing:t{}".format(t_index + 1))
+    if str(parent_input.get("pion_control_coordinate_fingerprint") or "") != parent_coordinate["coordinate_fingerprint"]:
+        raise RuntimeError("authoritative_t_bin_pion_control_coordinate_mismatch:t{}".format(t_index + 1))
     return {
         "identity": build_t_bin_pion_parent_identity(inp_dict, phi_setting, t_index, t_edges),
         "proton_histogram": proton_histogram,
@@ -392,6 +404,8 @@ def _parent_input_contract(parent_input, *, inp_dict, phi_setting, t_index, t_ed
         "proton_producer_fingerprint": producer_fingerprint,
         "proton_input_fingerprint": recomputed_proton_fingerprint,
         "pion_control_input_fingerprint": recomputed_pion_control_fingerprint,
+        "kaon_data_coordinate": parent_coordinate,
+        "coordinate_fingerprint": parent_coordinate["coordinate_fingerprint"],
     }
 
 
@@ -443,6 +457,7 @@ def build_setting_t_bin_pion_parents(
     parent_pion_alignment,
     alignment_outpath,
     mm_offset_data,
+    coordinate_contract,
     diagnostic_application_builder=None,
 ):
     """Fit and freeze one parent from direct proton-stage products.
@@ -454,6 +469,9 @@ def build_setting_t_bin_pion_parents(
     if not _is_component_t_bin_production(inp_dict):
         return []
     phi_setting = hist.get("phi_setting")
+    coordinate_contract = validate_kaon_data_coordinate_contract(
+        coordinate_contract, phi_setting=phi_setting
+    )
     manifest = hist.setdefault("pion_component_page_manifest", [])
     parent_inputs = tuple(parent_inputs or ())
     expected_count = max(0, len(t_bins) - 1)
@@ -475,6 +493,7 @@ def build_setting_t_bin_pion_parents(
             phi_setting=phi_setting,
             t_index=t_index,
             t_edges=t_edges,
+            coordinate_contract=coordinate_contract,
         ))
 
     # Reuse is deliberately in-memory only.  A phi-only adaptation can keep
@@ -499,6 +518,8 @@ def build_setting_t_bin_pion_parents(
                 != contract["proton_producer_fingerprint"]
                 or parent.get("pion_control_input_fingerprint")
                 != contract["pion_control_input_fingerprint"]
+                or parent.get("coordinate_fingerprint")
+                != contract["coordinate_fingerprint"]
             ):
                 reusable = False
                 break
@@ -544,8 +565,6 @@ def build_setting_t_bin_pion_parents(
         proton_fingerprint = contract["proton_input_fingerprint"]
         pion_input = kaon_input
         pion_fingerprint = contract["proton_input_fingerprint"]
-        if proton_fingerprint != pion_fingerprint:
-            raise RuntimeError("authoritative_t_bin_proton_pion_handoff_mismatch:t{}".format(t_index + 1))
 
         scope = "t_bin{}".format(t_index + 1)
         scope_component_shapes = resolve_scope_component_shapes(
@@ -558,6 +577,9 @@ def build_setting_t_bin_pion_parents(
             "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
             "phi_setting": phi_setting,
             "analysis_scope": "authoritative_particle_stage_t_bin",
+            "kaon_data_coordinate_fingerprint": coordinate_contract[
+                "coordinate_fingerprint"
+            ],
             "t_bin": {"index": int(t_index), "edges": t_edges},
             "phi_bin": None,
             "active_dimensions": {
@@ -578,7 +600,7 @@ def build_setting_t_bin_pion_parents(
                 scope_component_shapes,
                 parent_alignment=parent_pion_alignment,
                 inp_dict=inp_dict,
-                common_setting_shift_gev=float(mm_offset_data or 0.0),
+                common_setting_shift_gev=float(coordinate_contract["mm_shift"]),
             )
         )
         fit_result = build_particle_subtraction_component_result(
@@ -637,6 +659,8 @@ def build_setting_t_bin_pion_parents(
             "proton_output_fingerprint": proton_fingerprint,
             "pion_input_fingerprint": pion_fingerprint,
             "pion_control_input_fingerprint": contract["pion_control_input_fingerprint"],
+            "kaon_data_coordinate": dict(contract["kaon_data_coordinate"]),
+            "coordinate_fingerprint": contract["coordinate_fingerprint"],
             "handoff_match": bool(
                 contract["proton_producer_fingerprint"] == proton_fingerprint
             ),
@@ -831,9 +855,19 @@ def _print_parent_overview_page(pdf_name, parent, title_prefix, manifest, page_p
             float(parent["t_edges"][0]),
             float(parent["t_edges"][1]),
         ))
-        text.AddText("input: post-proton, RF-restored")
+        text.AddText("input: {}".format(
+            "post-proton, RF-restored"
+            if parent.get("source_target_state") == "post_proton_post_rf"
+            else "post-proton, RF not restored"
+        ))
         text.AddText("source target state: {}".format(parent.get("source_target_state")))
         text.AddText("parent: {}".format(parent.get("pion_parent_id")))
+        coordinate = parent.get("kaon_data_coordinate") or {}
+        text.AddText("kaon coordinate: dMM={:+.6g}, dt={:+.6g}, fp={}".format(
+            float(coordinate.get("mm_shift", 0.0)),
+            float(coordinate.get("t_shift", 0.0)),
+            str(parent.get("coordinate_fingerprint") or "")[-16:],
+        ))
         text.AddText("fit status pion/kaon: {} / {}".format(
             fit_result.get("fit_status_pion"), fit_result.get("fit_status_kaon")
         ))
@@ -1163,6 +1197,100 @@ def _print_parent_summary_page(
         return False
 
 
+def _print_coordinate_closure_page(
+    pdf_name,
+    coordinate_audit,
+    coordinate_diagnostics,
+    manifest,
+    title_prefix,
+    *,
+    axis_label,
+    raw_hist_key,
+    analysis_hist_key,
+    page_id,
+):
+    """Render the shared kaon-frame closure before parent-specific pages."""
+    try:
+        import ROOT
+
+        audit = dict(coordinate_audit or {})
+        contract = dict(audit.get("kaon_data_coordinate") or {})
+        source_accounting = dict(audit.get("source_accounting") or {})
+        canvas = ROOT.TCanvas(
+            "pion_coordinate_closure_{}".format(
+                "{}_{}".format(
+                    page_id.replace(".", "_"),
+                    str(contract.get("coordinate_fingerprint") or "unknown")[-12:],
+                )
+            ),
+            "Pion coordinate closure",
+            1050,
+            800,
+        )
+        canvas.Divide(2, 2)
+        for pad_index, source_label in enumerate(
+            ("prompt", "rand", "dummy", "dummy_rand"), start=1
+        ):
+            canvas.cd(pad_index)
+            hists = (coordinate_diagnostics or {}).get(source_label) or {}
+            raw_hist = hists.get(raw_hist_key)
+            analysis_hist = hists.get(analysis_hist_key)
+            if raw_hist is not None:
+                raw_hist.SetLineColor(ROOT.kBlack)
+                raw_hist.SetTitle(
+                    "{} {} {} coordinate closure;{};signed yield".format(
+                        title_prefix, source_label, axis_label, axis_label
+                    )
+                )
+                raw_hist.Draw("hist")
+            if analysis_hist is not None:
+                analysis_hist.SetLineColor(ROOT.kBlue + 1)
+                analysis_hist.Draw("hist same")
+            legend = ROOT.TLegend(0.48, 0.70, 0.88, 0.88)
+            if raw_hist is not None:
+                legend.AddEntry(raw_hist, "raw experimental {}".format(axis_label), "l")
+            if analysis_hist is not None:
+                legend.AddEntry(analysis_hist, "kaon analysis {}".format(axis_label), "l")
+            closure = (source_accounting.get(source_label) or {}).get(
+                "coordinate_closure"
+            ) or {}
+            legend.SetHeader(
+                "shift={:+.4g}, pass={}, migration={}".format(
+                    float(contract.get(
+                        "mm_shift" if raw_hist_key == "H_MM_raw" else "t_shift", 0.0
+                    )),
+                    closure.get("passed"),
+                    ", ".join(
+                        "{}:{}".format(key, value)
+                        for key, value in sorted(
+                            ((source_accounting.get(source_label) or {}).get(
+                                "t_bin_migration"
+                            ) or {}).items()
+                        )
+                    ) or "none",
+                ),
+                "C",
+            )
+            legend.Draw()
+        canvas.Print(pdf_name)
+        canvas.Close()
+        _record_parent_page_if_absent(
+            manifest, page_id, scope="setting"
+        )
+        return True
+    except Exception as exc:
+        return _print_parent_status_page(
+            pdf_name,
+            manifest,
+            page_id,
+            scope="setting",
+            title="{} pion {} coordinate closure unavailable".format(
+                title_prefix, axis_label
+            ),
+            detail=str(exc),
+        )
+
+
 def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
     page_ids = [entry.get("page_id") for entry in page_manifest if isinstance(entry, dict)]
     duplicate_ids = sorted({page_id for page_id in page_ids if page_ids.count(page_id) > 1})
@@ -1275,6 +1403,8 @@ def render_setting_t_bin_pion_parent_pages(
     setting_wide_summary=None,
     canonical_t_global=None,
     setting_wide_enabled=True,
+    coordinate_audit=None,
+    coordinate_diagnostics=None,
 ):
     """Render all authoritative parent sections before ``rand_sub`` returns."""
     _print_parent_summary_page(
@@ -1282,6 +1412,28 @@ def render_setting_t_bin_pion_parent_pages(
     )
     _print_authoritative_canonical_t_global_page(
         pdf_name, canonical_t_global, page_manifest, title_prefix
+    )
+    _print_coordinate_closure_page(
+        pdf_name,
+        coordinate_audit,
+        coordinate_diagnostics,
+        page_manifest,
+        title_prefix,
+        axis_label="MM [GeV]",
+        raw_hist_key="H_MM_raw",
+        analysis_hist_key="H_MM_analysis",
+        page_id="pion.coordinate_mm_closure",
+    )
+    _print_coordinate_closure_page(
+        pdf_name,
+        coordinate_audit,
+        coordinate_diagnostics,
+        page_manifest,
+        title_prefix,
+        axis_label="|t| [GeV^2]",
+        raw_hist_key="H_t_raw",
+        analysis_hist_key="H_t_analysis",
+        page_id="pion.coordinate_t_closure",
     )
     for parent in parents:
         fit_result = parent["fit_result"]

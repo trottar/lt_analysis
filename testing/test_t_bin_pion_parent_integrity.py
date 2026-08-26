@@ -282,6 +282,24 @@ class TBinPionParentIdentityTests(unittest.TestCase):
                 parent, _inp(), "Left", 0, (0.0, 0.5)
             )
 
+    def test_parent_validation_rejects_active_coordinate_mismatch(self):
+        inp_dict = _configured_inp()
+        inp_dict["kaon_data_coordinate_summary"] = {
+            "Left": {"coordinate_fingerprint": "kaon-coordinate-a"}
+        }
+        parent = _parent(self.module, inp_dict)
+        parent["coordinate_fingerprint"] = "kaon-coordinate-a"
+        parent["kaon_data_coordinate"] = {"coordinate_fingerprint": "kaon-coordinate-a"}
+        self.module.validate_authoritative_t_bin_pion_parent(
+            parent, inp_dict, "Left", 0, (0.0, 0.4)
+        )
+
+        parent["coordinate_fingerprint"] = "kaon-coordinate-b"
+        with self.assertRaisesRegex(RuntimeError, "coordinate_fingerprint"):
+            self.module.validate_authoritative_t_bin_pion_parent(
+                parent, inp_dict, "Left", 0, (0.0, 0.4)
+            )
+
     def test_frozen_collection_requires_exact_canonical_parent_set(self):
         first = _parent(self.module, _inp(), 0, (0.0, 0.4))
         second = _parent(self.module, _inp(), 1, (0.4, 0.8))

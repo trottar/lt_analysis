@@ -13,6 +13,11 @@
 import numpy as np
 import sys, os, math
 
+from data_coordinates import (
+    analysis_event_coordinates,
+    validate_kaon_data_coordinate_contract,
+)
+
 BINNING_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "binning"))
 if BINNING_PATH not in sys.path:
     sys.path.append(BINNING_PATH)
@@ -41,6 +46,8 @@ ACTIVE_PHI_SETTING = ""
 SHIFT_MODE = "raw"
 MM_SHIFT_SUMMARY = {}
 T_SHIFT_SUMMARY = {}
+KAON_DATA_COORDINATE_SUMMARY = {}
+KAON_DATA_COORDINATE = None
 #TMIN_RESOLUTION_THRESHOLD = 0.0
 #TMIN_RESOLUTION_THRESHOLD = -1e-3 # 1 MeV^2, adjust as needed based on resolution studies
 TMIN_RESOLUTION_THRESHOLD = 1e-5
@@ -73,9 +80,17 @@ def _point_in_convex_poly(x, y, poly, eps=1e-12):
     return True
 
 # Then, set global variables which is called with arguments
-def set_shift_context(phi_setting=None, shift_mode=None, mm_shift_summary=None, t_shift_summary=None):
+def set_shift_context(
+    phi_setting=None,
+    shift_mode=None,
+    mm_shift_summary=None,
+    t_shift_summary=None,
+    kaon_data_coordinate=None,
+    kaon_data_coordinate_summary=None,
+):
 
     global ACTIVE_PHI_SETTING, SHIFT_MODE, MM_SHIFT_SUMMARY, T_SHIFT_SUMMARY
+    global KAON_DATA_COORDINATE_SUMMARY, KAON_DATA_COORDINATE
 
     if phi_setting is not None:
         ACTIVE_PHI_SETTING = phi_setting
@@ -85,13 +100,45 @@ def set_shift_context(phi_setting=None, shift_mode=None, mm_shift_summary=None, 
         MM_SHIFT_SUMMARY = mm_shift_summary
     if t_shift_summary is not None:
         T_SHIFT_SUMMARY = t_shift_summary
+    if kaon_data_coordinate_summary is not None:
+        KAON_DATA_COORDINATE_SUMMARY = kaon_data_coordinate_summary
+    if kaon_data_coordinate is not None:
+        KAON_DATA_COORDINATE = validate_kaon_data_coordinate_contract(
+            kaon_data_coordinate, phi_setting=ACTIVE_PHI_SETTING or None
+        )
+    elif ACTIVE_PHI_SETTING:
+        candidate = (KAON_DATA_COORDINATE_SUMMARY or {}).get(ACTIVE_PHI_SETTING)
+        KAON_DATA_COORDINATE = (
+            validate_kaon_data_coordinate_contract(
+                candidate, phi_setting=ACTIVE_PHI_SETTING
+            )
+            if candidate is not None
+            else None
+        )
 
 
 def get_shift_mode():
-    return SHIFT_MODE
+    # Existing consumers use this as an offset-application guard.  A resolved
+    # kaon coordinate contract is already shifted even when old callers pass
+    # ``shift_mode='raw'`` for compatibility.
+    return "shifted" if KAON_DATA_COORDINATE is not None else SHIFT_MODE
+
+
+def get_kaon_data_coordinate(*, required=False):
+    if KAON_DATA_COORDINATE is None and required:
+        raise RuntimeError(
+            "kaon_data_coordinate_contract_required_for_phi:{}".format(
+                ACTIVE_PHI_SETTING or "unknown"
+            )
+        )
+    return KAON_DATA_COORDINATE
 
 
 def _get_active_shift(summary_dict):
+    coordinate = get_kaon_data_coordinate()
+    if coordinate is not None:
+        key = "mm_shift" if summary_dict is MM_SHIFT_SUMMARY else "t_shift"
+        return float(coordinate[key])
     if SHIFT_MODE != "shifted":
         return 0.0
     if not ACTIVE_PHI_SETTING:
@@ -113,7 +160,7 @@ def get_active_t_shift():
 
 
 def get_effective_mm_offset(mm_offset=0.0):
-    if SHIFT_MODE == "shifted":
+    if get_kaon_data_coordinate() is not None or SHIFT_MODE == "shifted":
         return 0.0
     return mm_offset
 
@@ -239,8 +286,9 @@ def set_val(inpDict):
     set_shift_context(
         phi_setting=inpDict.get("phi_setting"),
         shift_mode=inpDict.get("shift_mode"),
-        mm_shift_summary=inpDict.get("mm_shift_summary"),
-        t_shift_summary=inpDict.get("t_shift_summary"),
+        mm_shift_summary=inpDict.get("mm_shift_summary", {}),
+        t_shift_summary=inpDict.get("t_shift_summary", {}),
+        kaon_data_coordinate_summary=inpDict.get("kaon_data_coordinate_summary", {}),
     )
             
     ##############
@@ -269,10 +317,10 @@ def _passes_tmin_resolution(minus_t, w, q2):
 
 
 def get_shifted_mm(evt, mm_offset=0.0):
-    try:
-        return evt.MM_shift
-    except AttributeError:
-        return evt.MM + get_effective_mm_offset(mm_offset) + get_active_mm_shift()
+    coordinate = get_kaon_data_coordinate()
+    if coordinate is not None:
+        return analysis_event_coordinates(evt, coordinate)["analysis_mm"]
+    return evt.MM + get_effective_mm_offset(mm_offset) + get_active_mm_shift()
 
 
 def _compute_data_cut_state(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
@@ -336,10 +384,10 @@ def apply_data_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):
 ###############################################################################################################################################
 
 def get_shifted_t(evt):
-    try:
-        return evt.t_shift
-    except AttributeError:
-        return -evt.MandelT + get_active_t_shift()
+    coordinate = get_kaon_data_coordinate()
+    if coordinate is not None:
+        return analysis_event_coordinates(evt, coordinate)["analysis_t"]
+    return -evt.MandelT + get_active_t_shift()
 
 # Subtraction cuts
 def apply_data_sub_cuts(evt, mm_min=0.7, mm_max=1.5, mm_offset=0.0):

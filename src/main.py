@@ -519,8 +519,10 @@ for phiset in phisetlist:
 stage_start = perf_counter()
 mm_shift_summary = {}
 t_shift_summary = {}
+kaon_data_coordinate_summary = {}
 
 sys.path.append("cuts")
+from data_coordinates import build_kaon_data_coordinate_contract
 from shift_prep import shift_prep
 
 for phiset in phisetlist:
@@ -534,6 +536,19 @@ for phiset in phisetlist:
     mm_shift_summary[phiset] = prep_result["mm_shift"]
     if prep_result.get("t_shift") and prep_result["t_shift"].get("shift") is not None:
         t_shift_summary[phiset] = prep_result["t_shift"]
+    try:
+        kaon_data_coordinate_summary[phiset] = build_kaon_data_coordinate_contract(
+            phiset,
+            prep_result["mm_shift"],
+            prep_result.get("t_shift"),
+            require_t_shift=(str(ParticleType).strip().lower() == "kaon"),
+        )
+    except RuntimeError as exc:
+        raise RuntimeError(
+            "Unable to resolve authoritative kaon data coordinate for {}: {}".format(
+                phiset, exc
+            )
+        ) from exc
 
     for artifact_key in ("json_filename", "root_filename", "mm_plot_filename", "t_plot_filename"):
         artifact = prep_result.get("artifacts", {}).get(artifact_key)
@@ -544,13 +559,17 @@ for phiset in phisetlist:
 
 inpDict["mm_shift_summary"] = mm_shift_summary
 inpDict["t_shift_summary"] = t_shift_summary
+inpDict["kaon_data_coordinate_summary"] = kaon_data_coordinate_summary
 inpDict["shift_mode"] = "raw"
 record_stage_time("MM/t shift setup total", stage_start)
 
 # shift_prep is the existing availability gate for phi settings.  Do not
 # prepare SIMC templates or run subtraction for settings without input files.
-available_phisetlist = [phiset for phiset in phisetlist if phiset in mm_shift_summary]
-skipped_phisetlist = [phiset for phiset in phisetlist if phiset not in mm_shift_summary]
+available_phisetlist = [
+    phiset for phiset in phisetlist
+    if phiset in mm_shift_summary and phiset in kaon_data_coordinate_summary
+]
+skipped_phisetlist = [phiset for phiset in phisetlist if phiset not in available_phisetlist]
 if skipped_phisetlist:
     print("Skipping unavailable phi settings: {}".format(", ".join(skipped_phisetlist)))
 if not available_phisetlist:

@@ -248,6 +248,28 @@ def validate_authoritative_t_bin_pion_parent(
     if parent.get("parent_fit_configuration_hash") != expected["parent_fit_configuration_hash"]:
         reasons.append("parent_fit_configuration_hash")
 
+    # Coordinate provenance is independent of the parent-physics ID, but a
+    # child may only consume a parent produced in the active kaon analysis
+    # frame.  Older callers without a resolved coordinate contract retain the
+    # established validation behavior.
+    active_coordinate = (
+        (inp_dict.get("kaon_data_coordinate_summary") or {}).get(phi_setting)
+    )
+    if active_coordinate is not None:
+        expected_coordinate_fingerprint = str(
+            active_coordinate.get("coordinate_fingerprint") or ""
+        )
+        if not expected_coordinate_fingerprint:
+            reasons.append("kaon_data_coordinate")
+        elif str(parent.get("coordinate_fingerprint") or "") != expected_coordinate_fingerprint:
+            reasons.append("coordinate_fingerprint")
+        elif not isinstance(parent.get("kaon_data_coordinate"), dict):
+            reasons.append("kaon_data_coordinate")
+        elif str(
+            parent["kaon_data_coordinate"].get("coordinate_fingerprint") or ""
+        ) != expected_coordinate_fingerprint:
+            reasons.append("kaon_data_coordinate")
+
     fit_result = parent.get("fit_result")
     if not isinstance(fit_result, dict):
         reasons.append("fit_result")

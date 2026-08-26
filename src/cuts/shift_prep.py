@@ -117,7 +117,13 @@ def _build_cut_data_hists(phi_setting, particle_type, data_filename, inpDict, mm
     from apply_cuts import apply_data_sub_cuts, set_shift_context, set_val
 
     set_val(inpDict)
-    set_shift_context(phi_setting=phi_setting, shift_mode="raw", mm_shift_summary={}, t_shift_summary={})
+    set_shift_context(
+        phi_setting=phi_setting,
+        shift_mode="raw",
+        mm_shift_summary={},
+        t_shift_summary={},
+        kaon_data_coordinate_summary={},
+    )
 
     hole_contains = None
     if particle_type in ("kaon", "pion"):
@@ -154,7 +160,13 @@ def _build_cut_simc_hists(phi_setting, simc_filename, inpDict, mm_min, mm_max, t
     from apply_cuts import apply_simc_sub_cuts, set_shift_context, set_val
 
     set_val(inpDict)
-    set_shift_context(phi_setting=phi_setting, shift_mode="raw", mm_shift_summary={}, t_shift_summary={})
+    set_shift_context(
+        phi_setting=phi_setting,
+        shift_mode="raw",
+        mm_shift_summary={},
+        t_shift_summary={},
+        kaon_data_coordinate_summary={},
+    )
 
     root_file, tree = _open_tree(simc_filename, "h10")
 
