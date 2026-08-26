@@ -572,6 +572,9 @@ PROTON_CONTAMINATION_CLEANING_DEFAULTS = {
     "failure_policy": "bypass",
     "allow_missing_norf_trees": False,
     "allow_missing_rf_reference": False,
+    # RF membership is a separate post-cleaning decision.  Keep it opt-in so
+    # the final kaon product can remain on the no-RF proton-cleaning source.
+    "apply_post_proton_rf": False,
     "apply_only_low_epsilon_rf": True,
     "signature_round_digits": 9,
     "rf_signature_fields": (

@@ -1,8 +1,9 @@
 """Particle-subtraction-stage ownership for authoritative per-t pion parents.
 
-The cuts layer supplies the sole signed pion-control cache and direct
-post-proton/RF kaon objects.  This module owns only parent fitting, freezing,
-diagnostics, and PDF rendering; it never rebuilds parent inputs from averages.
+The cuts layer supplies the sole signed pion-control cache and direct final
+proton-stage kaon objects, with RF restoration applied only when configured.
+This module owns only parent fitting, freezing, diagnostics, and PDF
+rendering; it never rebuilds parent inputs from averages.
 """
 
 from __future__ import annotations
@@ -328,6 +329,10 @@ def _build_authoritative_canonical_t_global(parents):
         "label": "AUTHORITATIVE CANONICAL-t GLOBAL",
         "source": "strict_sum_of_frozen_canonical_t_parent_products",
         "t_parent_count": len(parents),
+        "source_target_states": sorted({
+            str(parent.get("source_target_state") or "unknown")
+            for parent in parents
+        }),
         "complete": complete,
         "status": "complete" if complete else "incomplete",
         "missing_products": missing_products,
@@ -611,8 +616,13 @@ def build_setting_t_bin_pion_parents(
             "t_bin_index": int(t_index),
             "t_edges": t_edges,
             "analysis_scope": scope,
-            "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-            "source_target_state": "post_proton_post_rf",
+            "input_selection": str(
+                parent_input.get("input_selection")
+                or "no_rf_proton_cleaning_then_rf_restored"
+            ),
+            "source_target_state": str(
+                parent_input.get("source_target_state") or "post_proton_post_rf"
+            ),
             "fit_result": fit_result,
             "H_random_dummy_subtracted_kaon": parent_input.get("H_random_dummy_subtracted_kaon"),
             "H_proton_estimate": parent_input.get("H_proton_estimate"),
@@ -754,8 +764,12 @@ def build_setting_t_bin_pion_parents(
         t_bins,
         reuse={"reused": False, "reason": "new_particle_stage_parent_fit"},
     )
-    print("[SIMC PION PARENTS] {} {} -- post-proton/RF-restored".format(
-        phi_setting, inp_dict.get("EPSSET", "")
+    source_states = sorted({
+        str(parent.get("source_target_state") or "unknown")
+        for parent in parents
+    })
+    print("[SIMC PION PARENTS] {} {} -- {}".format(
+        phi_setting, inp_dict.get("EPSSET", ""), ", ".join(source_states)
     ))
     print("  canonical t bins: {}".format(len(frozen_parents)))
     for row in hist["pion_t_amplitude_table"]:
@@ -967,8 +981,13 @@ def _print_parent_proposal_final_pages(pdf_name, parent, title_prefix, manifest,
         canvas.cd(2)
         legend_spectrum = ROOT.TLegend(0.52, 0.62, 0.90, 0.90)
         spectrum_drawn = False
+        input_label = (
+            "post-proton/RF input"
+            if parent.get("source_target_state") == "post_proton_post_rf"
+            else "post-proton input (RF not restored)"
+        )
         for histogram, label, color, style in (
-            (before, "post-proton/RF input", ROOT.kBlack, 1),
+            (before, input_label, ROOT.kBlack, 1),
             (
                 proposal.get("H_pion_subtraction_template_MM_nosub"),
                 "estimated pion contamination",
@@ -1029,8 +1048,14 @@ def _print_authoritative_canonical_t_global_page(pdf_name, global_payload, manif
         legend = ROOT.TLegend(0.50, 0.62, 0.90, 0.90)
         drawn = False
         display_hists = []
+        source_states = set(global_payload.get("source_target_states") or [])
+        input_label = (
+            "input: post-proton/RF"
+            if source_states == {"post_proton_post_rf"}
+            else "input: post-proton (RF not restored)"
+        )
         for histogram, label, color, style in (
-            (global_payload.get("H_MM_input"), "input: post-proton/RF", ROOT.kBlack, 1),
+            (global_payload.get("H_MM_input"), input_label, ROOT.kBlack, 1),
             (global_payload.get("H_MM_estimated_contamination"), "estimated pion contamination", ROOT.kRed + 1, 3),
             (global_payload.get("H_MM_proposed_clean"), "proposed clean result", ROOT.kOrange + 7, 2),
             (global_payload.get("H_MM_final_clean"), "final applied result", ROOT.kGreen + 2, 1),

@@ -203,6 +203,25 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         # ROOT.TH1D, so retain this import-level regression guard.
         self.assertTrue(hasattr(proton_cleaning, "TH1D"))
 
+    def test_post_proton_rf_requires_explicit_enablement(self):
+        config = {
+            "apply_post_proton_rf": False,
+            "apply_only_low_epsilon_rf": True,
+        }
+        policy, enabled, applied = proton_cleaning._resolve_post_proton_rf_application(
+            config, {"EPSSET": "low"}, None
+        )
+        self.assertEqual(policy, "epsset_default_after_cleaning")
+        self.assertFalse(enabled)
+        self.assertFalse(applied)
+
+        config["apply_post_proton_rf"] = True
+        _policy, enabled, applied = proton_cleaning._resolve_post_proton_rf_application(
+            config, {"EPSSET": "low"}, None
+        )
+        self.assertTrue(enabled)
+        self.assertTrue(applied)
+
     def test_proton_weight_diagnostics_fill_physical_delta_and_t_coordinates(self):
         delta_sum = _RecordingHistogram()
         delta_norm = _RecordingHistogram()

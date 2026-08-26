@@ -426,10 +426,10 @@ def _clone_hist_detached(hist, name=None):
 def _clone_component_targets_for_setting_wide_diagnostic(data_targets):
     """Clone the committed production target set for read-only diagnostics.
 
-    ``active_component_targets`` has already passed the no-RF proton cleaning
-    and normal RF restoration contract when this helper is called.  The common
-    application builder may therefore perform its usual in-place subtraction
-    on these detached clones without changing the production histograms.
+    ``active_component_targets`` has already passed no-RF proton cleaning and
+    any configured post-proton RF restoration when this helper is called.  The
+    common application builder may therefore perform its usual in-place
+    subtraction on these detached clones without changing production histograms.
     """
     if not isinstance(data_targets, dict):
         raise RuntimeError("setting-wide diagnostic requires active component targets")
@@ -444,6 +444,20 @@ def _clone_component_targets_for_setting_wide_diagnostic(data_targets):
             sumw2=False,
         )
     return diagnostic_targets
+
+
+def _post_proton_cleaning_input_metadata(proton_cleaning_application):
+    """Describe whether the final proton product restored RF membership."""
+    diagnostics = (proton_cleaning_application or {}).get("diagnostics") or {}
+    if bool(diagnostics.get("rf_applied", False)):
+        return {
+            "input_selection": "no_rf_proton_cleaning_then_rf_restored",
+            "source_target_state": "post_proton_post_rf",
+        }
+    return {
+        "input_selection": "no_rf_proton_cleaning_without_rf_restoration",
+        "source_target_state": "post_proton_pre_rf",
+    }
 
 
 def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
@@ -1045,8 +1059,13 @@ def _build_authoritative_parent_mm_diagnostic_proposal(
         "production_applied": False,
         "diagnostic_role": "proposal",
         "analysis_scope": fit_result.get("analysis_scope"),
-        "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-        "source_target_state": "post_proton_post_rf",
+        "input_selection": str(
+            parent_input.get("input_selection")
+            or "no_rf_proton_cleaning_then_rf_restored"
+        ),
+        "source_target_state": str(
+            parent_input.get("source_target_state") or "post_proton_post_rf"
+        ),
         "H_pion_control_model": weight_payload["H_pion_control_model"],
         "H_kaon_pion_model": weight_payload["H_kaon_pion_model"],
         "H_weighted_pion_control_model": weight_payload.get("H_weighted_pion_control_model"),
@@ -4330,6 +4349,10 @@ def rand_sub(
             }
             active_component_targets = component_targets
             component_fit_kaon_input = H_MM_nosub_DATA
+            component_input_metadata = {
+                "input_selection": "no_rf_proton_cleaning_then_rf_restored",
+                "source_target_state": "post_proton_post_rf",
+            }
             pion_control_cache = None
             frozen_t_bins = None
             frozen_phi_bins = None
@@ -4378,6 +4401,9 @@ def rand_sub(
 
                         active_component_targets = proton_cleaning_application.get("final_targets") or component_targets
                         component_fit_kaon_input = active_component_targets.get("h_mm_nosub") or H_MM_nosub_DATA
+                        component_input_metadata = _post_proton_cleaning_input_metadata(
+                            proton_cleaning_application
+                        )
 
                         P_hgcer_xAtCer_vs_yAtCer_DATA = active_component_targets.get("hgcer_xy")
                         P_hgcer_nohole_xAtCer_vs_yAtCer_DATA = active_component_targets.get("hgcer_xy_nohole")
@@ -4595,8 +4621,8 @@ def rand_sub(
             )
             component_fit_result["diagnostic_only"] = setting_wide_diagnostic_only
             component_fit_result["application_authoritative"] = not setting_wide_diagnostic_only
-            component_fit_result["input_selection"] = "no_rf_proton_cleaning_then_rf_restored"
-            component_fit_result["source_target_state"] = "post_proton_post_rf"
+            component_fit_result["input_selection"] = component_input_metadata["input_selection"]
+            component_fit_result["source_target_state"] = component_input_metadata["source_target_state"]
             alignment_payload = component_fit_result.get("pion_component_alignment")
             if isinstance(alignment_payload, dict):
                 alignment_payload["persistence_status"] = alignment_status
@@ -4615,6 +4641,7 @@ def rand_sub(
                         "H_proton_cleaned_final_rf": active_component_targets.get("h_mm_nosub"),
                         "H_pion_control": (pion_control_cache or {}).get("H_pion_control_global"),
                         "pion_control_records": (pion_control_cache or {}).get("records"),
+                        **component_input_metadata,
                     }
                     setting_scope = "pion_setting_wide_diagnostic"
                     proposal = _build_authoritative_parent_mm_diagnostic_proposal(
@@ -4728,6 +4755,7 @@ def rand_sub(
                         "pion_control_input_fingerprint": fingerprint_histogram_content_error(
                             control_t.get("H_pion_control")
                         ),
+                        **component_input_metadata,
                         "source_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
                         "consumer_epsilon": str(inpDict.get("EPSSET", "")).strip().lower(),
                         "canonical_interval_pair_id": canonical_binning.get("canonical_interval_pair_id"),

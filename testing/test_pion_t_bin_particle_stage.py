@@ -32,6 +32,8 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
         self.assertIn("_build_authoritative_pion_control_source_cache", self.rand_source)
         self.assertIn("canonical_t_products", self.rand_source)
         self.assertIn("H_proton_cleaned_final_rf", self.rand_source)
+        self.assertIn("_post_proton_cleaning_input_metadata", self.rand_source)
+        self.assertIn("post_proton_pre_rf", self.rand_source)
         ave_source = (REPO_ROOT / "src" / "binning" / "ave_per_bin.py").read_text(encoding="utf-8")
         self.assertNotIn("t_integrated_fit_only", self.parent_source)
         self.assertNotIn("process_hist_data", self.parent_source)
@@ -75,8 +77,8 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
             '"diagnostic_application_result"',
             '"diagnostic_application_status"',
             '"application_result": None',
-            '"input_selection": "no_rf_proton_cleaning_then_rf_restored"',
-            '"source_target_state": "post_proton_post_rf"',
+            'parent_input.get("input_selection")',
+            'parent_input.get("source_target_state")',
         ):
             self.assertIn(field, self.parent_source)
         for page_key in (

@@ -1771,6 +1771,22 @@ def apply_low_epsilon_rf_after_proton_cleaning(cleaning_result, source_label, ev
     return _make_signature(evt, fields, round_digits) in accepted
 
 
+def _resolve_post_proton_rf_application(config, inp_dict, phi_setting):
+    """Resolve the explicit post-proton-cleaning RF restoration switch."""
+    rf_policy = resolve_proton_contamination_cleaning_rf_policy(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+    )
+    post_proton_rf_enabled = bool((config or {}).get("apply_post_proton_rf", False))
+    apply_rf = (
+        post_proton_rf_enabled
+        and rf_policy == "epsset_default_after_cleaning"
+        and bool((config or {}).get("apply_only_low_epsilon_rf", True))
+        and normalize_epsset((inp_dict or {}).get("EPSSET")) == "low"
+    )
+    return rf_policy, post_proton_rf_enabled, bool(apply_rf)
+
+
 def _find_peak_seed(histogram, x_min, x_max):
     if histogram is None:
         return 0.0, 0.5 * (float(x_min) + float(x_max))
@@ -7787,15 +7803,11 @@ def _build_timing_t_event_weight_result(
         result["fallback_reason"] = "timing-t setting support gate rejected the available delta/t cells"
         return result
 
-    rf_policy = resolve_proton_contamination_cleaning_rf_policy(
-        inp_dict=inp_dict, phi_setting=phi_setting
-    )
-    apply_rf = (
-        rf_policy == "epsset_default_after_cleaning"
-        and bool(config.get("apply_only_low_epsilon_rf", True))
-        and normalize_epsset(inp_dict.get("EPSSET")) == "low"
+    rf_policy, post_proton_rf_enabled, apply_rf = _resolve_post_proton_rf_application(
+        config, inp_dict, phi_setting
     )
     result["diagnostics"]["rf_policy"] = rf_policy
+    result["diagnostics"]["post_proton_rf_enabled"] = bool(post_proton_rf_enabled)
     result["diagnostics"]["rf_applied"] = bool(apply_rf)
     result["diagnostics"]["rf_signature_fields"] = list(config.get("rf_signature_fields") or [])
     result["diagnostics"]["signature_round_digits"] = int(
@@ -8990,16 +9002,11 @@ def build_kaon_proton_cleaning_result(
         result["fallback_reason"] = "no supported or marginal delta bins for proton cleaning"
         return result
 
-    rf_policy = resolve_proton_contamination_cleaning_rf_policy(
-        inp_dict=inpDict,
-        phi_setting=phi_setting,
-    )
-    apply_rf = (
-        rf_policy == "epsset_default_after_cleaning"
-        and bool(config.get("apply_only_low_epsilon_rf", True))
-        and normalize_epsset(inpDict.get("EPSSET")) == "low"
+    rf_policy, post_proton_rf_enabled, apply_rf = _resolve_post_proton_rf_application(
+        config, inpDict, phi_setting
     )
     result["diagnostics"]["rf_policy"] = rf_policy
+    result["diagnostics"]["post_proton_rf_enabled"] = bool(post_proton_rf_enabled)
     result["diagnostics"]["rf_applied"] = bool(apply_rf)
     result["diagnostics"]["rf_signature_fields"] = list(config.get("rf_signature_fields") or [])
     result["diagnostics"]["signature_round_digits"] = int(config.get("signature_round_digits", 9) or 9)

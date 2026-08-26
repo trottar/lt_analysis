@@ -41,6 +41,13 @@ class ProtonCleaningConfigTests(unittest.TestCase):
             config["proton_contamination_override_layers"],
         )
 
+    def test_post_proton_rf_is_disabled_by_default(self):
+        config = background_config.get_proton_contamination_cleaning_config(
+            inp_dict={"Q2": "4p4", "W": "2p74", "EPSSET": "low"},
+        )
+
+        self.assertFalse(config["apply_post_proton_rf"])
+
     def test_partial_timing_t_nested_overrides_preserve_defaults(self):
         override = {
             "t_binning": {"edge_tolerance": 2.5e-10},
