@@ -56,7 +56,10 @@ class ParticleStageTBinPionParentTests(unittest.TestCase):
         self.assertIn("child_event_cache", yield_source)
         self.assertIn("missing_authoritative_pion_control_cache_for_t_bin_consumer", yield_source)
         self.assertIn("one_signed_pion_control_source_cache_no_proton_weight", self.rand_source)
-        for field in ("source_label", "entry_index", "coefficient", "canonical_t_counts"):
+        for field in (
+            "source_label", "entry_index", "coefficient", "coordinate_fingerprint",
+            "canonical_t_counts",
+        ):
             self.assertIn('"{}"'.format(field), self.rand_source)
 
     def test_parent_and_setting_wide_diagnostics_apply_the_cache_not_trees(self):

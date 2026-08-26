@@ -720,7 +720,7 @@ def _build_authoritative_pion_control_source_cache(
         raise RuntimeError("pion_control_cache_requires_subtracted_particle_tree_bundle")
 
     child_cache_fields = (
-        "source_label", "entry_index", "coefficient",
+        "source_label", "entry_index", "coefficient", "coordinate_fingerprint",
         "raw_t", "raw_MM", "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
         "ssxptar", "ssyptar", "hsxptar", "hsyptar", "allcuts",
         "nommcuts", "t_index", "phi_index",
