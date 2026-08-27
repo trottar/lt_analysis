@@ -31,6 +31,16 @@ DIAGNOSTIC_LABEL = "PION HGCer t-DELTA DIAGNOSTICS — PART 1 — NON-AUTHORITAT
 _SIDES = ("kaon", "pion")
 
 
+def _iter_or_empty(value):
+    """Return an iterable without applying boolean coercion to NumPy arrays."""
+    return () if value is None else value
+
+
+def _float_edges(edges):
+    """Copy a possibly NumPy-backed edge sequence into plain Python floats."""
+    return [float(edge) for edge in _iter_or_empty(edges)]
+
+
 def canonical_t_delta_index(value, edges):
     """Use the shared [low, high) / final-edge-inclusive bin membership."""
     try:
@@ -39,7 +49,7 @@ def canonical_t_delta_index(value, edges):
         return None
     if not math.isfinite(scalar):
         return None
-    index = find_canonical_bin(scalar, tuple(float(edge) for edge in (edges or ())))
+    index = find_canonical_bin(scalar, tuple(_float_edges(edges)))
     return int(index) if index >= 0 else None
 
 
@@ -48,9 +58,9 @@ def resolve_pion_hgcer_delta_edges(config, proton_cleaning_result=None):
     resolved = dict(config or {})
     proton_edges = []
     if bool(resolved.get("reuse_proton_delta_edges", True)):
-        proton_edges = [
-            float(edge) for edge in ((proton_cleaning_result or {}).get("delta_edges") or ())
-        ]
+        proton_edges = _float_edges(
+            (proton_cleaning_result or {}).get("delta_edges")
+        )
     if len(proton_edges) >= 2 and all(
         proton_edges[index] < proton_edges[index + 1]
         for index in range(len(proton_edges) - 1)
@@ -82,6 +92,8 @@ def _json_ready(value):
     if isinstance(value, float):
         return value if math.isfinite(value) else None
     try:
+        if hasattr(value, "tolist"):
+            return _json_ready(value.tolist())
         if hasattr(value, "item"):
             return _json_ready(value.item())
     except Exception:
@@ -350,7 +362,7 @@ def build_pion_hgcer_tdelta_diagnostic(
     _require_root()
     coordinate = validate_kaon_data_coordinate_contract(coordinate_contract)
     coordinate_fingerprint = str(coordinate["coordinate_fingerprint"])
-    t_edges = [float(edge) for edge in (t_edges or ())]
+    t_edges = _float_edges(t_edges)
     if len(t_edges) < 2 or any(t_edges[index] >= t_edges[index + 1] for index in range(len(t_edges) - 1)):
         raise ValueError("pion HGCer diagnostic requires resolved increasing canonical t edges")
     config = deepcopy(config or {})
@@ -644,7 +656,8 @@ def build_pion_hgcer_tdelta_diagnostic(
 def serialize_pion_hgcer_tdelta_diagnostic(payload, include_records=True):
     """Return a JSON-safe Part-1 diagnostic payload without ROOT objects."""
     payload = payload or {}
-    records = payload.get("records") or {}
+    records = payload.get("records")
+    records = {} if records is None else records
     result = {
         "status": payload.get("status", "unavailable"),
         "reason": payload.get("reason"),
@@ -658,16 +671,20 @@ def serialize_pion_hgcer_tdelta_diagnostic(payload, include_records=True):
         "coordinate_fingerprint": payload.get("coordinate_fingerprint"),
         "config": payload.get("config") or {},
         "config_fingerprint": payload.get("config_fingerprint"),
-        "t_edges": payload.get("t_edges") or [],
-        "delta_edges": payload.get("delta_edges") or [],
+        "t_edges": _iter_or_empty(payload.get("t_edges")),
+        "delta_edges": _iter_or_empty(payload.get("delta_edges")),
         "delta_edge_source": payload.get("delta_edge_source"),
         "source_audit": payload.get("source_audit") or {},
-        "cells": payload.get("cells") or [],
-        "page_manifest": payload.get("page_manifest") or [],
-        "record_counts": {side: len(records.get(side) or ()) for side in _SIDES},
+        "cells": _iter_or_empty(payload.get("cells")),
+        "page_manifest": _iter_or_empty(payload.get("page_manifest")),
+        "record_counts": {
+            side: len(_iter_or_empty(records.get(side))) for side in _SIDES
+        },
     }
     if include_records:
-        result["records"] = {side: list(records.get(side) or ()) for side in _SIDES}
+        result["records"] = {
+            side: list(_iter_or_empty(records.get(side))) for side in _SIDES
+        }
     return _json_ready(result)
 
 
@@ -730,7 +747,7 @@ def _projection(records, side, *, t_index=None, delta_index=None, quantity="npe"
         lower, upper = [float(value) for value in config["mm_range"]]
         histogram = _new_hist_1d(name, "Shifted MM;shifted MM [GeV];{}".format("signed weighted yield" if weight_mode == "weighted" else "absolute support"), int(config["mm_bins"]), lower, upper)
         field = "analysis_MM"
-    for record in records.get(side) or ():
+    for record in _iter_or_empty(records.get(side)):
         if t_index is not None and int(record["canonical_t_index"]) != int(t_index):
             continue
         if delta_index is not None and int(record["delta_index"]) != int(delta_index):
@@ -747,7 +764,7 @@ def _npe_vs_delta(records, side, t_index, delta_edges, config, name):
         delta_edges,
         int(config["hgcer_npe_bins"]), lower, upper,
     )
-    for record in records.get(side) or ():
+    for record in _iter_or_empty(records.get(side)):
         if int(record["canonical_t_index"]) == int(t_index):
             histogram.Fill(float(record["ssdelta"]), float(record["P_hgcer_npeSum"]), abs(float(record["diagnostic_weight"])))
     return histogram
@@ -764,7 +781,7 @@ def expected_pion_hgcer_page_manifest(payload):
     payload = payload or {}
     if str(payload.get("status") or "unavailable") != "available":
         return [{"page_id": "{}.status".format(prefix), "scope": "setting-wide", "authoritative": False}]
-    t_edges = payload.get("t_edges") or ()
+    t_edges = _iter_or_empty(payload.get("t_edges"))
     config = payload.get("config") or {}
     manifest = [
         {"page_id": "{}.audit".format(prefix), "scope": "setting-wide", "authoritative": False},
@@ -773,7 +790,7 @@ def expected_pion_hgcer_page_manifest(payload):
     ]
     for t_index in range(max(0, len(t_edges) - 1)):
         manifest.append({"page_id": "{}.t{}".format(prefix, t_index + 1), "scope": "t{}".format(t_index + 1), "authoritative": False})
-    for cell in payload.get("cells") or ():
+    for cell in _iter_or_empty(payload.get("cells")):
         status = str(cell.get("support_class") or "unsupported")
         t_index = int(cell["t_index"])
         delta_index = int(cell["delta_index"])
@@ -810,10 +827,11 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
         payload["page_manifest"] = [entry]
         return [entry]
     config = payload.get("config") or {}
-    records = payload.get("records") or {}
+    records = payload.get("records")
+    records = {} if records is None else records
     histograms = payload.get("histograms") or {}
-    t_edges = payload.get("t_edges") or []
-    delta_edges = payload.get("delta_edges") or []
+    t_edges = _iter_or_empty(payload.get("t_edges"))
+    delta_edges = _iter_or_empty(payload.get("delta_edges"))
     pages = []
 
     audit_lines = [
@@ -892,7 +910,7 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
         page._pion_hgcer_local = (kaon_delta, pion_delta, kaon_npe_weighted, pion_npe_weighted, kaon_npe, pion_npe, kaon_mm, pion_mm, t_info)
         pages.append(("{}.t{}".format(prefix, t_index + 1), page, "t{}".format(t_index + 1)))
 
-    for cell in payload.get("cells") or ():
+    for cell in _iter_or_empty(payload.get("cells")):
         status = str(cell.get("support_class") or "unsupported")
         if not _should_emit_cell(status, config.get("emit_cell_pages")):
             if bool(config.get("emit_status_pages", True)):

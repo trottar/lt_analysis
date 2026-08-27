@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import gc
 import importlib.util
+import json
 import sys
 import unittest
 from pathlib import Path
+
+import numpy as np
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +50,32 @@ class PionHGCerTDeltaPurePythonTests(unittest.TestCase):
         )
         self.assertEqual(edges, [-10.0, -2.0, 3.0, 20.0])
         self.assertEqual(source, "proton_cleaning_result.delta_edges")
+
+    def test_numpy_backed_canonical_and_delta_edges_are_accepted(self):
+        t_edges = np.array((0.4, 0.6, 0.9), dtype=float)
+        delta_edges = np.array((-10.0, -2.0, 20.0), dtype=float)
+        self.assertEqual(diagnostics.canonical_t_delta_index(0.9, t_edges), 1)
+        self.assertEqual(diagnostics.canonical_t_delta_index(20.0, delta_edges), 1)
+        self.assertEqual(diagnostics._float_edges(t_edges), [0.4, 0.6, 0.9])
+        resolved, source = diagnostics.resolve_pion_hgcer_delta_edges(
+            {"reuse_proton_delta_edges": True},
+            {"delta_edges": delta_edges},
+        )
+        self.assertEqual(resolved, [-10.0, -2.0, 20.0])
+        self.assertEqual(source, "proton_cleaning_result.delta_edges")
+
+    def test_numpy_backed_edges_serialize_without_truth_value_coercion(self):
+        serialized = diagnostics.serialize_pion_hgcer_tdelta_diagnostic(
+            {
+                "status": "unavailable",
+                "t_edges": np.array((0.4, 0.6, 0.9), dtype=float),
+                "delta_edges": np.array((-10.0, 20.0), dtype=float),
+                "cells": np.array((), dtype=object),
+            }
+        )
+        self.assertEqual(serialized["t_edges"], [0.4, 0.6, 0.9])
+        self.assertEqual(serialized["delta_edges"], [-10.0, 20.0])
+        json.dumps(serialized, allow_nan=False)
 
     def test_support_requires_non_cancelling_support_on_both_sides(self):
         thresholds = {

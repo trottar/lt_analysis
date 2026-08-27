@@ -4712,7 +4712,11 @@ def rand_sub(
                                 "coordinate_fingerprint": (
                                     (coordinate_contract or {}).get("coordinate_fingerprint")
                                 ),
-                                "t_edges": list(frozen_t_bins or ()),
+                                "t_edges": (
+                                    list(frozen_t_bins)
+                                    if frozen_t_bins is not None
+                                    else []
+                                ),
                             }
                         pion_hgcer_tdelta_json = os.path.join(
                             OUTPATH,
