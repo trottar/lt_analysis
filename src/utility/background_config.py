@@ -184,6 +184,35 @@ PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS = frozenset({
     "boundary_readiness_thresholds",
 })
 
+# Part 2 consumes the detached Part-1/1.5 records but remains a diagnostic
+# product.  None of these controls may be read by the authoritative pion or
+# proton subtraction paths.
+PION_HGCER_TRANSFER_CONFIG = {
+    "enabled": True,
+    "response_family": "auto",
+    "fit_range": (0.0, 20.0),
+    "integer_tolerance": 1.0e-6,
+    "minimum_prompt_pion_records": 20,
+    "toy_count": 2000,
+    "minimum_accepted_toy_fraction": 0.50,
+    "profile_delta_nll": 0.5,
+    "profile_scan_log_mu_half_width": 3.0,
+    "profile_scan_points": 31,
+    "correlation_condition_number_max": 1.0e8,
+    "pair_correlation_abs_max": 0.995,
+    "fit_parameter_bound_margin": 1.0e-5,
+    "fallback": {
+        "delta_interpolation_relative_uncertainty": 0.20,
+        "edge_neighbor_relative_uncertainty": 0.30,
+        "minimum_pooled_prompt_pion_records": 20,
+        "allow_setting_wide": False,
+        "setting_fallback_relative_uncertainty": 0.50,
+    },
+    "render_direct_fit_cells": True,
+}
+PION_HGCER_TRANSFER_CONFIG_OVERRIDES = {}
+PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS = frozenset({"fallback"})
+
 ANALYSIS_BINNING_CONFIG = {
     ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
     ("2p1", "2p95"): {"num_t_bins": 3, "num_phi_bins": 8, "tmin": 0.150, "tmax": 0.400},
@@ -2536,6 +2565,97 @@ def get_pion_hgcer_diagnostic_config(
     config["pion_hgcer_diagnostic_setting_key"] = resolved_setting_key
     config["pion_hgcer_diagnostic_phi_setting"] = resolved_phi_setting
     config["pion_hgcer_diagnostic_override_layers"] = [
+        layer.get("path") for layer in override_layers
+    ] + (["runtime"] if isinstance(runtime_override, dict) else [])
+    return config
+
+
+def get_pion_hgcer_transfer_config(
+    inp_dict=None,
+    phi_setting=None,
+    setting_key=None,
+):
+    """Resolve the detached Part-2 HGCer transfer-map configuration.
+
+    This deliberately has no overlap with the production pion-component
+    configuration.  It controls only response diagnostics and proposed
+    non-authoritative products.
+    """
+    config = deepcopy(PION_HGCER_TRANSFER_CONFIG)
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict,
+        phi_setting=phi_setting,
+        setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PION_HGCER_TRANSFER_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+    for override_layer in override_layers:
+        config = _deep_merge_particle_subtraction_config(
+            config,
+            override_layer.get("payload"),
+            merge_keys=PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS,
+        )
+    runtime_override = (
+        inp_dict.get("pion_hgcer_transfer_config")
+        if isinstance(inp_dict, dict)
+        else None
+    )
+    config = _deep_merge_particle_subtraction_config(
+        config,
+        runtime_override,
+        merge_keys=PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS,
+    )
+    family = str(config.get("response_family") or "auto").strip().lower()
+    if family not in {"auto", "poisson", "compound_poisson"}:
+        raise ValueError("Unsupported pion HGCer transfer response_family '{}'".format(family))
+    config["response_family"] = family
+    fit_range = tuple(float(value) for value in (config.get("fit_range") or ()))
+    if len(fit_range) != 2 or not fit_range[0] >= 0.0 or not fit_range[0] < fit_range[1]:
+        raise ValueError("Pion HGCer transfer fit_range must be an increasing non-negative pair")
+    config["fit_range"] = fit_range
+    for key in ("minimum_prompt_pion_records", "toy_count", "profile_scan_points"):
+        if int(config.get(key, 0)) <= 0:
+            raise ValueError("Pion HGCer transfer {} must be positive".format(key))
+        config[key] = int(config[key])
+    for key in (
+        "integer_tolerance",
+        "minimum_accepted_toy_fraction",
+        "profile_delta_nll",
+        "profile_scan_log_mu_half_width",
+        "correlation_condition_number_max",
+        "pair_correlation_abs_max",
+        "fit_parameter_bound_margin",
+    ):
+        value = float(config.get(key, 0.0))
+        if not value > 0.0:
+            raise ValueError("Pion HGCer transfer {} must be positive".format(key))
+        config[key] = value
+    if config["minimum_accepted_toy_fraction"] > 1.0:
+        raise ValueError("Pion HGCer transfer minimum_accepted_toy_fraction must not exceed one")
+    if config["pair_correlation_abs_max"] >= 1.0:
+        raise ValueError("Pion HGCer transfer pair_correlation_abs_max must be below one")
+    fallback = dict(config.get("fallback") or {})
+    for key in (
+        "delta_interpolation_relative_uncertainty",
+        "edge_neighbor_relative_uncertainty",
+        "setting_fallback_relative_uncertainty",
+    ):
+        value = float(fallback.get(key, 0.0))
+        if value < 0.0:
+            raise ValueError("Pion HGCer transfer fallback {} must be non-negative".format(key))
+        fallback[key] = value
+    if int(fallback.get("minimum_pooled_prompt_pion_records", 0)) <= 0:
+        raise ValueError("Pion HGCer transfer minimum_pooled_prompt_pion_records must be positive")
+    fallback["minimum_pooled_prompt_pion_records"] = int(fallback["minimum_pooled_prompt_pion_records"])
+    fallback["allow_setting_wide"] = bool(fallback.get("allow_setting_wide", False))
+    config["fallback"] = fallback
+    config["render_direct_fit_cells"] = bool(config.get("render_direct_fit_cells", True))
+    config["pion_hgcer_transfer_setting_key"] = resolved_setting_key
+    config["pion_hgcer_transfer_phi_setting"] = resolved_phi_setting
+    config["pion_hgcer_transfer_override_layers"] = [
         layer.get("path") for layer in override_layers
     ] + (["runtime"] if isinstance(runtime_override, dict) else [])
     return config
