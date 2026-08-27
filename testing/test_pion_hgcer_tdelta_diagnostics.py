@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import gc
+from copy import deepcopy
 import importlib.util
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -111,6 +113,26 @@ class PionHGCerTDeltaPurePythonTests(unittest.TestCase):
         self.assertEqual(serialized["reason"], "synthetic missing tree")
         self.assertNotIn("histograms", serialized)
 
+    def test_unavailable_payload_preserves_concise_staged_error_metadata(self):
+        original = IndexError("Replacement index 2 out of range for positional args tuple")
+        failure = diagnostics._PionHGCerDiagnosticBuildFailure(
+            "histogram_construction", original
+        )
+        self.assertEqual(failure.diagnostic_stage, "histogram_construction")
+        self.assertIs(failure.original_exception, original)
+        serialized = diagnostics.serialize_pion_hgcer_tdelta_diagnostic(
+            {
+                "status": "unavailable",
+                "reason": str(failure.original_exception),
+                "exception_type": type(failure.original_exception).__name__,
+                "exception_message": str(failure.original_exception),
+                "diagnostic_stage": failure.diagnostic_stage,
+            }
+        )
+        self.assertEqual(serialized["exception_type"], "IndexError")
+        self.assertEqual(serialized["exception_message"], str(original))
+        self.assertEqual(serialized["diagnostic_stage"], "histogram_construction")
+
     def test_renderer_manifest_tracks_actual_canonical_t_and_cell_status_slots(self):
         for n_t in (2, 3, 5):
             payload = {
@@ -136,6 +158,15 @@ class PionHGCerTDeltaPurePythonTests(unittest.TestCase):
 
 @unittest.skipUnless(diagnostics.ROOT is not None, "PyROOT is unavailable")
 class PionHGCerTDeltaRootTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._root_was_batch = bool(diagnostics.ROOT.gROOT.IsBatch())
+        diagnostics.ROOT.gROOT.SetBatch(True)
+
+    @classmethod
+    def tearDownClass(cls):
+        diagnostics.ROOT.gROOT.SetBatch(cls._root_was_batch)
+
     def _config(self):
         return {
             "enabled": True,
@@ -155,6 +186,192 @@ class PionHGCerTDeltaRootTests(unittest.TestCase):
             "emit_cell_pages": "none",
             "production_hgcer_threshold": 2.0,
         }
+
+    def test_histogram_construction_is_detached_sumw2_and_fully_labeled(self):
+        t_edges = [0.4, 0.5666667, 0.7333333, 0.9]
+        delta_edges = [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0, 17.0, 20.0]
+        histograms = diagnostics._make_histograms(
+            t_edges, delta_edges, self._config()
+        )
+        expected_keys = {"H_support_class"}
+        for side in ("kaon", "pion"):
+            expected_keys.update(
+                {
+                    "H_support_absolute_{}".format(side),
+                    "H_support_effective_{}".format(side),
+                }
+            )
+            for weighting in ("weighted", "absolute"):
+                for quantity in (
+                    "H_hgcer",
+                    "H_delta",
+                    "H_mm",
+                    "H_hgcer_vs_delta",
+                    "H_hgcer_vs_t",
+                    "H_mm_vs_delta",
+                    "H_mm_vs_hgcer",
+                ):
+                    expected_keys.add("{}_{}_{}".format(quantity, side, weighting))
+        self.assertEqual(set(histograms), expected_keys)
+        for histogram in histograms.values():
+            self.assertFalse(bool(histogram.GetDirectory()))
+            self.assertGreater(histogram.GetSumw2N(), 0)
+            self.assertTrue(histogram.GetTitle())
+            self.assertTrue(histogram.GetXaxis().GetTitle())
+        title = histograms["H_hgcer_kaon_weighted"].GetTitle()
+        self.assertIn("P_hgcer_npeSum", title)
+        self.assertIn("signed weighted yield", title)
+
+    def _build_renderable_synthetic_result(self):
+        contract = build_kaon_data_coordinate_contract(
+            "Center", {"shift": 0.0}, {"shift": 0.0}, require_t_shift=True
+        )
+        events = [
+            _Event(mm=1.08, mandel_t=-0.4, delta=-10.0, npe=0.5),
+            _Event(mm=1.12, mandel_t=-0.9, delta=20.0, npe=3.0),
+        ]
+        proton_cleaning_result = {
+            "accepted": True,
+            "coordinate_fingerprint": contract["coordinate_fingerprint"],
+            "delta_edges": (-10.0, 5.0, 20.0),
+            "_prepared_event_weight_lookup": {
+                "prompt:0": {"cleaned_factor": 0.5},
+                "prompt:1": {"cleaned_factor": 0.5},
+            },
+        }
+        pion_control_cache = {
+            "coordinate_fingerprint": contract["coordinate_fingerprint"]
+        }
+        proton_cleaning_before = deepcopy(proton_cleaning_result)
+        pion_control_before = deepcopy(pion_control_cache)
+        kaon_bundle = {
+            "sources": {
+                "prompt": {
+                    "tree": events,
+                    "tree_name": "Cut_Kaon_Events_prompt_noRF",
+                    "coefficient": 1.0,
+                }
+            },
+            "prepared_sources": {
+                "prompt": {
+                    "entries": {
+                        0: {"allcuts": True, "nommcuts": True},
+                        1: {"allcuts": True, "nommcuts": True},
+                    }
+                }
+            },
+        }
+        pion_bundle = {
+            "prompt_tree": events,
+            "rand_tree": (),
+            "dummy_prompt_tree": (),
+            "dummy_rand_tree": (),
+            "prompt_tree_name": "Cut_Pion_Events_prompt_RF",
+            "rand_tree_name": "Cut_Pion_Events_rand_RF",
+        }
+        config = self._config()
+        config.update(
+            {
+                "emit_cell_pages": "supported_marginal",
+                "emit_status_pages": True,
+                "support_thresholds": {
+                    "supported_absolute_weight": 0.75,
+                    "marginal_absolute_weight": 0.1,
+                    "supported_effective_entries": 1.0,
+                    "marginal_effective_entries": 1.0,
+                },
+            }
+        )
+        return (
+            diagnostics.build_pion_hgcer_tdelta_diagnostic(
+                kaon_source_bundle=kaon_bundle,
+                pion_tree_bundle=pion_bundle,
+                proton_cleaning_result=proton_cleaning_result,
+                pion_control_cache=pion_control_cache,
+                coordinate_contract=contract,
+                t_edges=(0.4, 0.6, 0.9),
+                config=config,
+                hole_contains=lambda *_args: False,
+                evaluate_pion_event=lambda *_args, **_kwargs: (True, True, 0.0),
+                mm_min=1.1,
+                mm_max=1.16,
+            ),
+            proton_cleaning_result,
+            pion_control_cache,
+            proton_cleaning_before,
+            pion_control_before,
+        )
+
+    def test_synthetic_build_serialize_and_render_cover_cells_and_final_edges(self):
+        (
+            result,
+            proton_cleaning_result,
+            pion_control_cache,
+            proton_cleaning_before,
+            pion_control_before,
+        ) = (
+            self._build_renderable_synthetic_result()
+        )
+        self.assertEqual(result["status"], "available")
+        self.assertEqual(proton_cleaning_result, proton_cleaning_before)
+        self.assertEqual(pion_control_cache, pion_control_before)
+        self.assertEqual(
+            [record["canonical_t_index"] for record in result["records"]["kaon"]],
+            [0, 1],
+        )
+        self.assertEqual(
+            [record["delta_index"] for record in result["records"]["pion"]],
+            [0, 1],
+        )
+        self.assertEqual(
+            result["source_audit"]["kaon"]["prompt"]["hgc_below_threshold_records"],
+            1,
+        )
+        self.assertEqual(
+            result["source_audit"]["pion"]["prompt"]["hgc_at_or_above_threshold_records"],
+            1,
+        )
+        self.assertEqual(
+            [record["proton_cleaning_factor"] for record in result["records"]["kaon"]],
+            [0.5, 0.5],
+        )
+        self.assertTrue(
+            all(
+                record["proton_cleaning_factor"] is None
+                for record in result["records"]["pion"]
+            )
+        )
+        self.assertEqual(
+            {cell["support_class"] for cell in result["cells"]},
+            {"marginal", "unsupported"},
+        )
+        serialized = diagnostics.serialize_pion_hgcer_tdelta_diagnostic(result)
+        json.dumps(serialized, allow_nan=False)
+        self.assertNotIn("histograms", serialized)
+        expected_manifest = diagnostics.expected_pion_hgcer_page_manifest(result)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            pdf_path = Path(temporary_directory) / "pion_hgcer_part1.pdf"
+            opener = diagnostics.ROOT.TCanvas(
+                diagnostics.unique_root_object_name(
+                    "C_pion_hgcer_test_open", scope="pion_hgcer", role="test"
+                ),
+                "Part-1 test PDF opener",
+                100,
+                100,
+            )
+            opener.Print(str(pdf_path) + "(")
+            emitted = diagnostics.render_pion_hgcer_tdelta_pages(
+                str(pdf_path), result, close_pdf=True
+            )
+            self.assertEqual(emitted, expected_manifest)
+            self.assertTrue(
+                any(entry["page_id"].endswith(".status") for entry in emitted)
+            )
+            self.assertTrue(pdf_path.is_file())
+            self.assertGreater(pdf_path.stat().st_size, 0)
+        histogram = result["histograms"]["H_hgcer_kaon_absolute"]
+        gc.collect()
+        self.assertGreater(histogram.Integral(), 0.0)
 
     def test_pre_hgcer_populations_share_coordinates_and_preserve_factor_scope(self):
         contract = build_kaon_data_coordinate_contract(

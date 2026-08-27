@@ -4698,6 +4698,9 @@ def rand_sub(
                             # missing branch or an unreadable diagnostic tree
                             # is reported, never promoted into a production
                             # pion/proton decision.
+                            original_exception = getattr(
+                                exc, "original_exception", exc
+                            )
                             pion_hgcer_tdelta_diagnostic = {
                                 "status": "unavailable",
                                 "diagnostic_label": (
@@ -4707,7 +4710,14 @@ def rand_sub(
                                 "non_authoritative": True,
                                 "production_side_effect_free": True,
                                 "production_hgcer_pid_unchanged": True,
-                                "reason": str(exc),
+                                "reason": str(original_exception),
+                                "exception_type": type(
+                                    original_exception
+                                ).__name__,
+                                "exception_message": str(original_exception),
+                                "diagnostic_stage": getattr(
+                                    exc, "diagnostic_stage", "diagnostic_build"
+                                ),
                                 "config": pion_hgcer_diagnostic_config,
                                 "coordinate_fingerprint": (
                                     (coordinate_contract or {}).get("coordinate_fingerprint")

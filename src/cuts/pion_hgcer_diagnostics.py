@@ -31,6 +31,15 @@ DIAGNOSTIC_LABEL = "PION HGCer t-DELTA DIAGNOSTICS — PART 1 — NON-AUTHORITAT
 _SIDES = ("kaon", "pion")
 
 
+class _PionHGCerDiagnosticBuildFailure(RuntimeError):
+    """Tag a recoverable Part-1 build failure with its diagnostic stage."""
+
+    def __init__(self, diagnostic_stage, original_exception):
+        self.diagnostic_stage = str(diagnostic_stage)
+        self.original_exception = original_exception
+        super().__init__(str(original_exception))
+
+
 def _iter_or_empty(value):
     """Return an iterable without applying boolean coercion to NumPy arrays."""
     return () if value is None else value
@@ -227,17 +236,17 @@ def _make_histograms(t_edges, delta_edges, config):
         for weighting, title_suffix in (("weighted", "signed weighted yield"), ("absolute", "absolute support")):
             histograms["H_hgcer_{}_{}".format(side, weighting)] = _new_hist_1d(
                 "H_hgcer_{}_{}".format(side, weighting),
-                "{} HGCer NPE ({});P_hgcer_npeSum;{}".format(side_title, title_suffix),
+                f"{side_title} HGCer NPE ({title_suffix});P_hgcer_npeSum;{title_suffix}",
                 npe_bins, lower_npe, upper_npe,
             )
             histograms["H_delta_{}_{}".format(side, weighting)] = _new_variable_x_hist_1d(
                 "H_delta_{}_{}".format(side, weighting),
-                "{} SHMS #delta ({});ssdelta [%];{}".format(side_title, title_suffix),
+                f"{side_title} SHMS #delta ({title_suffix});ssdelta [%];{title_suffix}",
                 delta_edges,
             )
             histograms["H_mm_{}_{}".format(side, weighting)] = _new_hist_1d(
                 "H_mm_{}_{}".format(side, weighting),
-                "{} shifted MM ({});shifted MM [GeV];{}".format(side_title, title_suffix),
+                f"{side_title} shifted MM ({title_suffix});shifted MM [GeV];{title_suffix}",
                 mm_bins, lower_mm, upper_mm,
             )
             histograms["H_hgcer_vs_delta_{}_{}".format(side, weighting)] = _new_variable_x_hist_2d(
@@ -379,7 +388,12 @@ def build_pion_hgcer_tdelta_diagnostic(
     if application_coordinate and application_coordinate != coordinate_fingerprint:
         raise RuntimeError("pion_hgcer_diagnostic_coordinate_mismatch_with_proton_result")
 
-    histograms = _make_histograms(t_edges, delta_edges, config)
+    try:
+        histograms = _make_histograms(t_edges, delta_edges, config)
+    except Exception as exc:
+        raise _PionHGCerDiagnosticBuildFailure(
+            "histogram_construction", exc
+        ) from exc
     records = {side: [] for side in _SIDES}
     source_audit = {side: {} for side in _SIDES}
     cells = {
@@ -661,6 +675,9 @@ def serialize_pion_hgcer_tdelta_diagnostic(payload, include_records=True):
     result = {
         "status": payload.get("status", "unavailable"),
         "reason": payload.get("reason"),
+        "exception_type": payload.get("exception_type"),
+        "exception_message": payload.get("exception_message"),
+        "diagnostic_stage": payload.get("diagnostic_stage"),
         "diagnostic_label": payload.get("diagnostic_label", DIAGNOSTIC_LABEL),
         "non_authoritative": True,
         "production_side_effect_free": True,
