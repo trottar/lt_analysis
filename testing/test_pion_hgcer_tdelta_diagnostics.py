@@ -40,6 +40,43 @@ class _Event:
 
 
 class PionHGCerTDeltaPurePythonTests(unittest.TestCase):
+    def test_histogram_title_catalog_is_brace_safe_for_all_sides_and_weightings(self):
+        expected_keys = {
+            "hgcer",
+            "delta",
+            "mm",
+            "hgcer_vs_delta",
+            "hgcer_vs_t",
+            "mm_vs_delta",
+            "mm_vs_hgcer",
+            "support_absolute",
+            "support_effective",
+            "support_class",
+        }
+        side_titles = {
+            "kaon": "proton-cleaned kaon",
+            "pion": "pion control",
+        }
+        weighting_titles = {
+            "weighted": "signed weighted yield",
+            "absolute": "absolute support",
+        }
+
+        for side, side_title in side_titles.items():
+            for weighting, weighting_title in weighting_titles.items():
+                with self.subTest(side=side, weighting=weighting):
+                    titles = diagnostics._histogram_title_catalog(side, weighting)
+                    self.assertEqual(set(titles), expected_keys)
+                    for title in titles.values():
+                        self.assertTrue(title)
+                        self.assertIn(";", title)
+                        self.assertNotIn("{", title)
+                        self.assertNotIn("}", title)
+                    self.assertIn(side_title, titles["hgcer"])
+                    self.assertIn(weighting_title, titles["hgcer"])
+                    self.assertIn("GeV^2", titles["hgcer_vs_t"])
+                    self.assertIn("GeV^2", titles["support_absolute"])
+
     def test_final_edges_use_the_shared_canonical_membership_rule(self):
         self.assertEqual(diagnostics.canonical_t_delta_index(0.9, (0.4, 0.6, 0.9)), 1)
         self.assertEqual(diagnostics.canonical_t_delta_index(20.0, (-10.0, 5.0, 20.0)), 1)

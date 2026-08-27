@@ -225,6 +225,40 @@ def _new_delta_t_hist(name, title, delta_edges, t_edges):
     return histogram
 
 
+def _histogram_title_catalog(side, weighting):
+    """Build Part-1 histogram titles without requiring PyROOT."""
+    side_titles = {
+        "kaon": "proton-cleaned kaon",
+        "pion": "pion control",
+    }
+    weighting_titles = {
+        "weighted": "signed weighted yield",
+        "absolute": "absolute support",
+    }
+    try:
+        side_title = side_titles[str(side)]
+        title_suffix = weighting_titles[str(weighting)]
+    except KeyError as exc:
+        raise ValueError(
+            "unsupported pion HGCer title selector: side={!r}, weighting={!r}".format(
+                side, weighting,
+            )
+        ) from exc
+
+    return {
+        "hgcer": f"{side_title} HGCer NPE ({title_suffix});P_hgcer_npeSum;{title_suffix}",
+        "delta": f"{side_title} SHMS #delta ({title_suffix});ssdelta [%];{title_suffix}",
+        "mm": f"{side_title} shifted MM ({title_suffix});shifted MM [GeV];{title_suffix}",
+        "hgcer_vs_delta": f"{side_title} HGCer versus #delta;ssdelta [%];P_hgcer_npeSum",
+        "hgcer_vs_t": f"{side_title} HGCer versus canonical |t|;|t| [GeV^2];P_hgcer_npeSum",
+        "mm_vs_delta": f"{side_title} shifted MM versus #delta;ssdelta [%];shifted MM [GeV]",
+        "mm_vs_hgcer": f"{side_title} shifted MM versus HGCer;P_hgcer_npeSum;shifted MM [GeV]",
+        "support_absolute": f"{side_title} absolute support;SHMS #delta [%];canonical |t| [GeV^2]",
+        "support_effective": f"{side_title} effective entries;SHMS #delta [%];canonical |t| [GeV^2]",
+        "support_class": "Part-1 HGCer support class (0 unsupported, 1 marginal, 2 supported);SHMS #delta [%];canonical |t| [GeV^2]",
+    }
+
+
 def _make_histograms(t_edges, delta_edges, config):
     lower_npe, upper_npe = [float(value) for value in config["hgcer_npe_range"]]
     lower_mm, upper_mm = [float(value) for value in config["mm_range"]]
@@ -232,60 +266,62 @@ def _make_histograms(t_edges, delta_edges, config):
     mm_bins = int(config["mm_bins"])
     histograms = {}
     for side in _SIDES:
-        side_title = "proton-cleaned kaon" if side == "kaon" else "pion control"
-        for weighting, title_suffix in (("weighted", "signed weighted yield"), ("absolute", "absolute support")):
+        for weighting in ("weighted", "absolute"):
+            titles = _histogram_title_catalog(side, weighting)
             histograms["H_hgcer_{}_{}".format(side, weighting)] = _new_hist_1d(
                 "H_hgcer_{}_{}".format(side, weighting),
-                f"{side_title} HGCer NPE ({title_suffix});P_hgcer_npeSum;{title_suffix}",
+                titles["hgcer"],
                 npe_bins, lower_npe, upper_npe,
             )
             histograms["H_delta_{}_{}".format(side, weighting)] = _new_variable_x_hist_1d(
                 "H_delta_{}_{}".format(side, weighting),
-                f"{side_title} SHMS #delta ({title_suffix});ssdelta [%];{title_suffix}",
+                titles["delta"],
                 delta_edges,
             )
             histograms["H_mm_{}_{}".format(side, weighting)] = _new_hist_1d(
                 "H_mm_{}_{}".format(side, weighting),
-                f"{side_title} shifted MM ({title_suffix});shifted MM [GeV];{title_suffix}",
+                titles["mm"],
                 mm_bins, lower_mm, upper_mm,
             )
             histograms["H_hgcer_vs_delta_{}_{}".format(side, weighting)] = _new_variable_x_hist_2d(
                 "H_hgcer_vs_delta_{}_{}".format(side, weighting),
-                "{} HGCer versus #delta;ssdelta [%];P_hgcer_npeSum".format(side_title),
+                titles["hgcer_vs_delta"],
                 delta_edges,
                 npe_bins, lower_npe, upper_npe,
             )
             histograms["H_hgcer_vs_t_{}_{}".format(side, weighting)] = _new_variable_x_hist_2d(
                 "H_hgcer_vs_t_{}_{}".format(side, weighting),
-                "{} HGCer versus canonical |t|;|t| [GeV^{2}];P_hgcer_npeSum".format(side_title),
+                titles["hgcer_vs_t"],
                 t_edges,
                 npe_bins, lower_npe, upper_npe,
             )
             histograms["H_mm_vs_delta_{}_{}".format(side, weighting)] = _new_variable_x_hist_2d(
                 "H_mm_vs_delta_{}_{}".format(side, weighting),
-                "{} shifted MM versus #delta;ssdelta [%];shifted MM [GeV]".format(side_title),
+                titles["mm_vs_delta"],
                 delta_edges,
                 mm_bins, lower_mm, upper_mm,
             )
             histograms["H_mm_vs_hgcer_{}_{}".format(side, weighting)] = _new_hist_2d(
                 "H_mm_vs_hgcer_{}_{}".format(side, weighting),
-                "{} shifted MM versus HGCer;P_hgcer_npeSum;shifted MM [GeV]".format(side_title),
+                titles["mm_vs_hgcer"],
                 npe_bins, lower_npe, upper_npe,
                 mm_bins, lower_mm, upper_mm,
             )
+        support_titles = _histogram_title_catalog(side, "absolute")
         histograms["H_support_absolute_{}".format(side)] = _new_delta_t_hist(
             "H_support_absolute_{}".format(side),
-            "{} absolute support;SHMS #delta [%];canonical |t| [GeV^{2}]".format(side_title),
+            support_titles["support_absolute"],
             delta_edges, t_edges,
         )
         histograms["H_support_effective_{}".format(side)] = _new_delta_t_hist(
             "H_support_effective_{}".format(side),
-            "{} effective entries;SHMS #delta [%];canonical |t| [GeV^{2}]".format(side_title),
+            support_titles["support_effective"],
             delta_edges, t_edges,
         )
+    support_class_title = _histogram_title_catalog("kaon", "absolute")["support_class"]
     histograms["H_support_class"] = _new_delta_t_hist(
         "H_support_class",
-        "Part-1 HGCer support class (0 unsupported, 1 marginal, 2 supported);SHMS #delta [%];canonical |t| [GeV^{2}]",
+        support_class_title,
         delta_edges, t_edges,
     )
     return histograms
