@@ -144,6 +144,7 @@ from apply_cuts import (
 from data_coordinates import raw_event_coordinates, validate_kaon_data_coordinate_contract
 from pion_hgcer_diagnostics import (
     build_pion_hgcer_tdelta_diagnostic,
+    pion_hgcer_display_text,
     render_pion_hgcer_tdelta_pages,
     serialize_pion_hgcer_tdelta_diagnostic,
     write_pion_hgcer_tdelta_json,
@@ -489,8 +490,12 @@ def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_parti
     )
     sub_root_data = open_root_file(sub_data_path)
     sub_root_dummy = open_root_file(sub_dummy_path)
-    sub_prompt_tree_name = get_prompt_tree_name(subtracted_particle, epsset)
-    sub_rand_tree_name = get_rand_tree_name(subtracted_particle, epsset)
+    sub_prompt_tree_name = get_prompt_tree_name(
+        subtracted_particle, epsset, rf_state="noRF"
+    )
+    sub_rand_tree_name = get_rand_tree_name(
+        subtracted_particle, epsset, rf_state="noRF"
+    )
     bundle = {
         "sub_root_data": sub_root_data,
         "sub_root_dummy": sub_root_dummy,
@@ -2747,8 +2752,12 @@ def rand_sub(
 
     InFile_DATA = open_root_file(rootFileData)
 
-    prompt_tree_name = get_prompt_tree_name(ParticleType, EPSSET)
-    rand_tree_name = get_rand_tree_name(ParticleType, EPSSET)
+    prompt_tree_name = get_prompt_tree_name(
+        ParticleType, EPSSET, rf_state="noRF"
+    )
+    rand_tree_name = get_rand_tree_name(
+        ParticleType, EPSSET, rf_state="noRF"
+    )
 
     TBRANCH_DATA  = InFile_DATA.Get(prompt_tree_name)
 
@@ -4703,10 +4712,7 @@ def rand_sub(
                             )
                             pion_hgcer_tdelta_diagnostic = {
                                 "status": "unavailable",
-                                "diagnostic_label": (
-                                    "PION HGCer t-DELTA DIAGNOSTICS — PART 1 "
-                                    "— NON-AUTHORITATIVE"
-                                ),
+                                "diagnostic_label": pion_hgcer_display_text("part1"),
                                 "non_authoritative": True,
                                 "production_side_effect_free": True,
                                 "production_hgcer_pid_unchanged": True,
@@ -4719,6 +4725,9 @@ def rand_sub(
                                     exc, "diagnostic_stage", "diagnostic_build"
                                 ),
                                 "config": pion_hgcer_diagnostic_config,
+                                "source_provenance": getattr(
+                                    exc, "source_provenance", None
+                                ) or {},
                                 "coordinate_fingerprint": (
                                     (coordinate_contract or {}).get("coordinate_fingerprint")
                                 ),

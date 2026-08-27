@@ -27,17 +27,65 @@ from data_coordinates import analysis_event_coordinates, validate_kaon_data_coor
 from root_histogram_ownership import unique_root_object_name
 
 
-DIAGNOSTIC_LABEL = "PION HGCer t-DELTA DIAGNOSTICS — PART 1 — NON-AUTHORITATIVE"
+ROOT_SAFE_DIAGNOSTIC_LABELS = {
+    "part1": "PION HGCer t-DELTA DIAGNOSTICS - PART 1 - NON-AUTHORITATIVE",
+    "part1p5": "PION HGCer t-DELTA DIAGNOSTICS - PART 1.5 - BOUNDARY / READINESS",
+}
+DIAGNOSTIC_LABEL = ROOT_SAFE_DIAGNOSTIC_LABELS["part1"]
 _SIDES = ("kaon", "pion")
 
 
 class _PionHGCerDiagnosticBuildFailure(RuntimeError):
     """Tag a recoverable Part-1 build failure with its diagnostic stage."""
 
-    def __init__(self, diagnostic_stage, original_exception):
+    def __init__(self, diagnostic_stage, original_exception, source_provenance=None):
         self.diagnostic_stage = str(diagnostic_stage)
         self.original_exception = original_exception
+        self.source_provenance = source_provenance
         super().__init__(str(original_exception))
+
+
+def pion_hgcer_display_text(kind, *, t_index=None, delta_index=None):
+    """Return ASCII-only text for every ROOT-facing Part-1/1.5 display."""
+    static = {
+        "part1": ROOT_SAFE_DIAGNOSTIC_LABELS["part1"],
+        "part1p5": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"],
+        "part1p5_provenance": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - provenance / noRF audit",
+        "part1p5_boundary": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - setting-wide boundary zoom",
+        "part1p5_population": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - side-labelled delta and |t| populations",
+        "part1p5_boundary_support": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - near-boundary support",
+        "part1p5_readiness": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - Part-2 readiness",
+        "part1p5_summary": ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"] + " - readiness summary",
+        "compact_cell_status": ROOT_SAFE_DIAGNOSTIC_LABELS["part1"] + " - compact cell status",
+        "legend_kaon": "proton-cleaned kaon-PID side",
+        "legend_pion": "pion-PID side",
+        "projection_npe_weighted": "HGCer NPE;P_hgcer_npeSum;signed weighted yield",
+        "projection_npe_absolute": "HGCer NPE;P_hgcer_npeSum;absolute support",
+        "projection_mm_weighted": "Shifted MM;shifted MM [GeV];signed weighted yield",
+        "projection_mm_absolute": "Shifted MM;shifted MM [GeV];absolute support",
+        "npe_vs_delta": "HGCer NPE versus #delta;ssdelta [%];P_hgcer_npeSum",
+        "part1_t_note": "PID-selected source trees; no delta merge or P_{#pi} fit.",
+        "cell_no_response": "No response estimate, subtraction, or bin merge was performed.",
+        "cell_gate_note": "PID-selected source tree; downstream Python HGCer gate bypassed only",
+        "part1p5_norf_policy": "all Part-1.5 sources must be PID-selected noRF trees",
+        "part1p5_summary_note": "Diagnostic only: no pion probability, subtraction, or delta merge was performed.",
+        "kaon_pid_mm": "kaon-PID side shifted MM;shifted MM [GeV];signed weighted yield",
+        "pion_pid_mm": "pion-PID side shifted MM;shifted MM [GeV];signed weighted yield",
+    }
+    if kind == "part1p5_t_boundary":
+        return "{} - t{} boundary zoom".format(
+            ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"], int(t_index) + 1
+        )
+    if kind == "part1p5_cell_boundary":
+        return "{} - t{} delta{} boundary detail".format(
+            ROOT_SAFE_DIAGNOSTIC_LABELS["part1p5"],
+            int(t_index) + 1,
+            int(delta_index) + 1,
+        )
+    try:
+        return static[str(kind)]
+    except KeyError as exc:
+        raise ValueError("unknown pion HGCer display text '{}'".format(kind)) from exc
 
 
 def _iter_or_empty(value):
@@ -161,6 +209,47 @@ def classify_pion_hgcer_support(kaon_metrics, pion_metrics, thresholds):
     return "unsupported"
 
 
+def classify_pion_hgcer_boundary_readiness(kaon_metrics, pion_metrics, thresholds):
+    """Classify two-sided threshold-neighbourhood support without a PID model."""
+    thresholds = dict(thresholds or {})
+
+    def meets(metrics, weight_key, entries_key):
+        finalized = _finalize_metrics(metrics)
+        return (
+            float(finalized.get("absolute_weight_support", 0.0) or 0.0)
+            >= float(thresholds.get(weight_key, 0.0) or 0.0)
+            and float(finalized.get("effective_entries", 0.0) or 0.0)
+            >= float(thresholds.get(entries_key, 0.0) or 0.0)
+        )
+
+    if (
+        meets(kaon_metrics, "ready_absolute_weight", "ready_effective_entries")
+        and meets(pion_metrics, "ready_absolute_weight", "ready_effective_entries")
+    ):
+        return "ready"
+    if (
+        meets(kaon_metrics, "marginal_absolute_weight", "marginal_effective_entries")
+        and meets(pion_metrics, "marginal_absolute_weight", "marginal_effective_entries")
+    ):
+        return "marginal"
+    return "insufficient"
+
+
+def pion_hgcer_boundary_contains(side, npe, boundary):
+    """Return whether a value is in the side-specific half-open boundary band."""
+    boundary = dict(boundary or {})
+    value = _finite(npe)
+    threshold = _finite(boundary.get("threshold"))
+    width = _finite(boundary.get("boundary_band_width"))
+    if value is None or threshold is None or width is None or width <= 0.0:
+        return False
+    if str(side) == "kaon":
+        return threshold - width <= value < threshold
+    if str(side) == "pion":
+        return threshold <= value < threshold + width
+    raise ValueError("unsupported pion HGCer boundary side '{}'".format(side))
+
+
 def _require_root():
     if ROOT is None:
         raise RuntimeError("PyROOT is required to build pion HGCer diagnostic histograms")
@@ -248,6 +337,7 @@ def _histogram_title_catalog(side, weighting):
     return {
         "hgcer": f"{side_title} HGCer NPE ({title_suffix});P_hgcer_npeSum;{title_suffix}",
         "delta": f"{side_title} SHMS #delta ({title_suffix});ssdelta [%];{title_suffix}",
+        "t": f"{side_title} canonical |t| ({title_suffix});|t| [GeV^2];{title_suffix}",
         "mm": f"{side_title} shifted MM ({title_suffix});shifted MM [GeV];{title_suffix}",
         "hgcer_vs_delta": f"{side_title} HGCer versus #delta;ssdelta [%];P_hgcer_npeSum",
         "hgcer_vs_t": f"{side_title} HGCer versus canonical |t|;|t| [GeV^2];P_hgcer_npeSum",
@@ -255,7 +345,9 @@ def _histogram_title_catalog(side, weighting):
         "mm_vs_hgcer": f"{side_title} shifted MM versus HGCer;P_hgcer_npeSum;shifted MM [GeV]",
         "support_absolute": f"{side_title} absolute support;SHMS #delta [%];canonical |t| [GeV^2]",
         "support_effective": f"{side_title} effective entries;SHMS #delta [%];canonical |t| [GeV^2]",
+        "boundary_effective": f"{side_title} near-boundary effective entries;SHMS #delta [%];canonical |t| [GeV^2]",
         "support_class": "Part-1 HGCer support class (0 unsupported, 1 marginal, 2 supported);SHMS #delta [%];canonical |t| [GeV^2]",
+        "boundary_readiness": "Part-2 boundary readiness (0 insufficient, 1 marginal, 2 ready);SHMS #delta [%];canonical |t| [GeV^2]",
     }
 
 
@@ -277,6 +369,11 @@ def _make_histograms(t_edges, delta_edges, config):
                 "H_delta_{}_{}".format(side, weighting),
                 titles["delta"],
                 delta_edges,
+            )
+            histograms["H_t_{}_{}".format(side, weighting)] = _new_variable_x_hist_1d(
+                "H_t_{}_{}".format(side, weighting),
+                titles["t"],
+                t_edges,
             )
             histograms["H_mm_{}_{}".format(side, weighting)] = _new_hist_1d(
                 "H_mm_{}_{}".format(side, weighting),
@@ -318,28 +415,110 @@ def _make_histograms(t_edges, delta_edges, config):
             support_titles["support_effective"],
             delta_edges, t_edges,
         )
+        histograms["H_boundary_effective_{}".format(side)] = _new_delta_t_hist(
+            "H_boundary_effective_{}".format(side),
+            support_titles["boundary_effective"],
+            delta_edges, t_edges,
+        )
     support_class_title = _histogram_title_catalog("kaon", "absolute")["support_class"]
     histograms["H_support_class"] = _new_delta_t_hist(
         "H_support_class",
         support_class_title,
         delta_edges, t_edges,
     )
+    readiness_title = _histogram_title_catalog("kaon", "absolute")["boundary_readiness"]
+    histograms["H_boundary_readiness"] = _new_delta_t_hist(
+        "H_boundary_readiness",
+        readiness_title,
+        delta_edges, t_edges,
+    )
     return histograms
 
 
+def resolve_pion_hgcer_source_provenance(kaon_source_bundle, pion_tree_bundle):
+    """Describe and validate the PID-selected noRF sources used by Part 1.5."""
+    provenance = {side: {} for side in _SIDES}
+    kaon_sources = (kaon_source_bundle or {}).get("sources") or {}
+    source_roles = {
+        "prompt": "prompt",
+        "rand": "random",
+        "dummy_prompt": "dummy_prompt",
+        "dummy": "dummy_prompt",
+        "dummy_rand": "dummy_random",
+    }
+    for source_label, source_spec in kaon_sources.items():
+        tree_name = (source_spec or {}).get("tree_name")
+        provenance["kaon"][str(source_label)] = {
+            "side": "kaon",
+            "source_label": str(source_label),
+            "source_role": source_roles.get(str(source_label), str(source_label)),
+            "tree_name": tree_name,
+            "rf_state": "noRF" if str(tree_name).endswith("_noRF") else "RF_or_unknown",
+            "pid_role": "kaon_pid",
+            "coefficient": float((source_spec or {}).get("coefficient", 0.0) or 0.0),
+            "proton_factor_scope": "kaon_cleaned_factor_pre_rf",
+        }
+
+    pion_sources = (
+        ("prompt", "prompt", "prompt_tree", "prompt_tree_name", "prompt"),
+        ("rand", "random", "rand_tree", "rand_tree_name", "rand"),
+        ("dummy", "dummy_prompt", "dummy_prompt_tree", "prompt_tree_name", "dummy_prompt"),
+        ("dummy_rand", "dummy_random", "dummy_rand_tree", "rand_tree_name", "dummy_rand"),
+    )
+    coefficients = (kaon_source_bundle or {}).get("sources") or {}
+    for source_label, source_role, tree_key, name_key, coefficient_key in pion_sources:
+        tree = (pion_tree_bundle or {}).get(tree_key)
+        tree_name = (pion_tree_bundle or {}).get(name_key)
+        if tree is None and tree_name is None:
+            continue
+        provenance["pion"][source_label] = {
+            "side": "pion",
+            "source_label": source_label,
+            "source_role": source_role,
+            "tree_name": tree_name,
+            "rf_state": "noRF" if str(tree_name).endswith("_noRF") else "RF_or_unknown",
+            "pid_role": "pion_pid",
+            "coefficient": float((coefficients.get(coefficient_key) or {}).get("coefficient", 0.0) or 0.0),
+            "proton_factor_scope": "none",
+        }
+
+    invalid = [
+        "{}:{}={}".format(side, source_label, entry.get("tree_name"))
+        for side in _SIDES
+        for source_label, entry in provenance[side].items()
+        if not str(entry.get("tree_name")).endswith("_noRF")
+    ]
+    if invalid:
+        error = ValueError(
+            "pion_hgcer_norf_provenance_failed: {}".format(
+                ", ".join(invalid)
+            )
+        )
+        error.source_provenance = provenance
+        raise error
+    return provenance
+
+
 def _new_source_audit(side, source_label, source_spec, *, threshold, selection_state, coordinate_fingerprint):
+    source_spec = source_spec or {}
     return {
         "side": str(side),
         "source_label": str(source_label),
-        "tree_name": (source_spec or {}).get("tree_name"),
-        "rf_state": "noRF" if side == "kaon" else "production_pion_source_tree",
-        "coefficient": float((source_spec or {}).get("coefficient", 0.0) or 0.0),
+        "source_role": source_spec.get("source_role", str(source_label)),
+        "tree_name": source_spec.get("tree_name"),
+        "rf_state": source_spec.get("rf_state", "RF_or_unknown"),
+        "pid_role": source_spec.get("pid_role", "{}_pid".format(side)),
+        "coefficient": float(source_spec.get("coefficient", 0.0) or 0.0),
+        "proton_factor_scope": source_spec.get(
+            "proton_factor_scope",
+            "kaon_cleaned_factor_pre_rf" if side == "kaon" else "none",
+        ),
         "source_selection_state": str(selection_state),
         "production_hgcer_threshold": float(threshold),
-        "downstream_hgcer_threshold_bypassed": True,
+        "downstream_python_hgcer_gate_bypassed": True,
         "coordinate_fingerprint": str(coordinate_fingerprint),
         "tree_entries_seen": 0,
-        "accepted_pre_hgcer_records": 0,
+        "records_used_for_hgcer_diagnostic": 0,
         "records_inside_canonical_t": 0,
         "records_inside_delta": 0,
         "nonfinite_hgcer": 0,
@@ -348,8 +527,8 @@ def _new_source_audit(side, source_label, source_spec, *, threshold, selection_s
         "proton_factor_records": 0,
         "proton_factor_sum": 0.0,
         "proton_factor_mean": None,
-        "hgc_below_threshold_records": 0,
-        "hgc_at_or_above_threshold_records": 0,
+        "records_below_reference_boundary": 0,
+        "records_at_or_above_reference_boundary": 0,
         "raw_to_analysis_t_migration": {},
         "coordinate_closure": {
             "checked_records": 0,
@@ -413,6 +592,27 @@ def build_pion_hgcer_tdelta_diagnostic(
     config = deepcopy(config or {})
     delta_edges, delta_source = resolve_pion_hgcer_delta_edges(config, proton_cleaning_result)
     threshold = float(config.get("production_hgcer_threshold", 2.0))
+    boundary = {
+        "threshold": threshold,
+        "zoom_min": 0.0,
+        "zoom_max": 4.0,
+        "boundary_band_width": 0.5,
+        **dict(config.get("hgcer_boundary") or {}),
+    }
+    boundary["threshold"] = float(boundary["threshold"])
+    boundary["boundary_band_width"] = float(boundary["boundary_band_width"])
+    if abs(float(boundary["threshold"]) - threshold) > 1.0e-12:
+        raise ValueError("pion HGCer diagnostic boundary threshold differs from production threshold")
+    readiness_thresholds = {
+        "ready_absolute_weight": float((config.get("support_thresholds") or {}).get("supported_absolute_weight", 0.0)),
+        "marginal_absolute_weight": float((config.get("support_thresholds") or {}).get("marginal_absolute_weight", 0.0)),
+        "ready_effective_entries": float((config.get("support_thresholds") or {}).get("supported_effective_entries", 0.0)),
+        "marginal_effective_entries": float((config.get("support_thresholds") or {}).get("marginal_effective_entries", 0.0)),
+        **dict(config.get("boundary_readiness_thresholds") or {}),
+    }
+    config["hgcer_boundary"] = boundary
+    config["boundary_readiness_thresholds"] = readiness_thresholds
+    config.setdefault("emit_boundary_cell_pages", "ready_marginal")
     cache_fingerprint = str((pion_control_cache or {}).get("coordinate_fingerprint") or "")
     if cache_fingerprint and cache_fingerprint != coordinate_fingerprint:
         raise RuntimeError("pion_hgcer_diagnostic_coordinate_mismatch_with_authoritative_pion_cache")
@@ -423,6 +623,14 @@ def build_pion_hgcer_tdelta_diagnostic(
     )
     if application_coordinate and application_coordinate != coordinate_fingerprint:
         raise RuntimeError("pion_hgcer_diagnostic_coordinate_mismatch_with_proton_result")
+    try:
+        source_provenance = resolve_pion_hgcer_source_provenance(
+            kaon_source_bundle, pion_tree_bundle
+        )
+    except Exception as exc:
+        raise _PionHGCerDiagnosticBuildFailure(
+            "norf_provenance", exc, getattr(exc, "source_provenance", None)
+        ) from exc
 
     try:
         histograms = _make_histograms(t_edges, delta_edges, config)
@@ -442,6 +650,7 @@ def build_pion_hgcer_tdelta_diagnostic(
             "delta_high": float(delta_edges[delta_index + 1]),
             "kaon": _empty_metrics(),
             "pion": _empty_metrics(),
+            "boundary_support": {side: _empty_metrics() for side in _SIDES},
         }
         for t_index in range(len(t_edges) - 1)
         for delta_index in range(len(delta_edges) - 1)
@@ -459,15 +668,15 @@ def build_pion_hgcer_tdelta_diagnostic(
         )
         if not (bool(allcuts) or bool(nommcuts)):
             return
-        audit["accepted_pre_hgcer_records"] += 1
+        audit["records_used_for_hgcer_diagnostic"] += 1
         npe = _finite(getattr(evt, "P_hgcer_npeSum", None))
         if npe is None:
             audit["nonfinite_hgcer"] += 1
             return
         if npe < threshold:
-            audit["hgc_below_threshold_records"] += 1
+            audit["records_below_reference_boundary"] += 1
         else:
-            audit["hgc_at_or_above_threshold_records"] += 1
+            audit["records_at_or_above_reference_boundary"] += 1
         coordinates = analysis_event_coordinates(evt, coordinate)
         raw_mm = _finite(coordinates.get("raw_mm"))
         raw_t = _finite(coordinates.get("raw_t"))
@@ -535,10 +744,13 @@ def build_pion_hgcer_tdelta_diagnostic(
         records[side].append(record)
         _record_metric(audit, record)
         _record_metric(cells[(t_index, delta_index)][side], record)
+        if pion_hgcer_boundary_contains(side, npe, boundary):
+            _record_metric(cells[(t_index, delta_index)]["boundary_support"][side], record)
         absolute_weight = abs(diagnostic_weight)
         for weighting, fill_weight in (("weighted", diagnostic_weight), ("absolute", absolute_weight)):
             histograms["H_hgcer_{}_{}".format(side, weighting)].Fill(npe, fill_weight)
             histograms["H_delta_{}_{}".format(side, weighting)].Fill(delta_value, fill_weight)
+            histograms["H_t_{}_{}".format(side, weighting)].Fill(analysis_t, fill_weight)
             histograms["H_mm_{}_{}".format(side, weighting)].Fill(analysis_mm, fill_weight)
             histograms["H_hgcer_vs_delta_{}_{}".format(side, weighting)].Fill(delta_value, npe, fill_weight)
             histograms["H_hgcer_vs_t_{}_{}".format(side, weighting)].Fill(analysis_t, npe, fill_weight)
@@ -552,14 +764,15 @@ def build_pion_hgcer_tdelta_diagnostic(
     prepared_kaon_sources = (kaon_source_bundle or {}).get("prepared_sources") or {}
     frozen_lookup = (proton_cleaning_result or {}).get("_prepared_event_weight_lookup") or {}
     for source_label, prepared_spec in prepared_kaon_sources.items():
-        active_spec = active_kaon_sources.get(source_label) or prepared_spec or {}
+        active_spec = dict(active_kaon_sources.get(source_label) or prepared_spec or {})
+        active_spec.update(source_provenance["kaon"].get(str(source_label), {}))
         tree = active_spec.get("tree")
         entry_payloads = (prepared_spec or {}).get("entries") or {}
         if tree is None:
             source_audit["kaon"][str(source_label)] = _new_source_audit(
                 "kaon", source_label, active_spec,
                 threshold=threshold,
-                selection_state="prepared_noRF_pre_particle_subtraction",
+                selection_state="kaon_pid_tree_noRF_pre_particle_subtraction",
                 coordinate_fingerprint=coordinate_fingerprint,
             )
             continue
@@ -568,7 +781,7 @@ def build_pion_hgcer_tdelta_diagnostic(
             _new_source_audit(
                 "kaon", source_label, active_spec,
                 threshold=threshold,
-                selection_state="prepared_noRF_pre_particle_subtraction",
+                selection_state="kaon_pid_tree_noRF_pre_particle_subtraction",
                 coordinate_fingerprint=coordinate_fingerprint,
             ),
         )
@@ -591,7 +804,7 @@ def build_pion_hgcer_tdelta_diagnostic(
                 nommcuts=prepared.get("nommcuts", False),
                 proton_factor=factor,
                 factor_payload=frozen_payload,
-                selection_state="prepared_noRF_pre_particle_subtraction",
+                selection_state="kaon_pid_tree_noRF_pre_particle_subtraction",
             )
 
     # The pion side deliberately reuses the exact source trees opened for the
@@ -611,11 +824,12 @@ def build_pion_hgcer_tdelta_diagnostic(
             ),
             "coefficient": coefficient,
         }
+        source_spec.update(source_provenance["pion"].get(source_label, {}))
         if tree is None:
             source_audit["pion"][str(source_label)] = _new_source_audit(
                 "pion", source_label, source_spec,
                 threshold=threshold,
-                selection_state="same_source_tree_downstream_hgcer_bypassed:{}".format(tree_role),
+                selection_state="pion_pid_tree_noRF_downstream_python_hgcer_gate_bypassed:{}".format(tree_role),
                 coordinate_fingerprint=coordinate_fingerprint,
             )
             continue
@@ -624,7 +838,7 @@ def build_pion_hgcer_tdelta_diagnostic(
             _new_source_audit(
                 "pion", source_label, source_spec,
                 threshold=threshold,
-                selection_state="same_source_tree_downstream_hgcer_bypassed:{}".format(tree_role),
+                selection_state="pion_pid_tree_noRF_downstream_python_hgcer_gate_bypassed:{}".format(tree_role),
                 coordinate_fingerprint=coordinate_fingerprint,
             ),
         )
@@ -643,15 +857,24 @@ def build_pion_hgcer_tdelta_diagnostic(
                 allcuts=bool(base_allcuts and not hole_rejected),
                 nommcuts=bool(base_nommcuts and not hole_rejected),
                 proton_factor=1.0,
-                selection_state="same_source_tree_downstream_hgcer_bypassed:{}".format(tree_role),
+                selection_state="pion_pid_tree_noRF_downstream_python_hgcer_gate_bypassed:{}".format(tree_role),
             )
 
     serialized_cells = []
     for key, cell in cells.items():
         cell["kaon"] = _finalize_metrics(cell["kaon"])
         cell["pion"] = _finalize_metrics(cell["pion"])
+        for side in _SIDES:
+            cell["boundary_support"][side] = _finalize_metrics(
+                cell["boundary_support"][side]
+            )
         cell["support_class"] = classify_pion_hgcer_support(
             cell["kaon"], cell["pion"], config.get("support_thresholds")
+        )
+        cell["boundary_readiness"] = classify_pion_hgcer_boundary_readiness(
+            cell["boundary_support"]["kaon"],
+            cell["boundary_support"]["pion"],
+            readiness_thresholds,
         )
         support_number = {"unsupported": 0.0, "marginal": 1.0, "supported": 2.0}[cell["support_class"]]
         x_bin = int(cell["delta_index"]) + 1
@@ -663,16 +886,27 @@ def build_pion_hgcer_tdelta_diagnostic(
             histograms["H_support_effective_{}".format(side)].SetBinContent(
                 x_bin, y_bin, float(cell[side]["effective_entries"])
             )
+            histograms["H_boundary_effective_{}".format(side)].SetBinContent(
+                x_bin,
+                y_bin,
+                float(cell["boundary_support"][side]["effective_entries"]),
+            )
         histograms["H_support_class"].SetBinContent(x_bin, y_bin, support_number)
+        readiness_number = {"insufficient": 0.0, "marginal": 1.0, "ready": 2.0}[
+            cell["boundary_readiness"]
+        ]
+        histograms["H_boundary_readiness"].SetBinContent(
+            x_bin, y_bin, readiness_number
+        )
         serialized_cells.append(cell)
     for side in _SIDES:
         for audit in source_audit[side].values():
             finalized = _finalize_metrics(audit)
             audit.update(finalized)
-            audit["tree_hgcer_truncation_evidence"] = (
-                "pre_hgcer_events_observed"
-                if int(audit.get("hgc_below_threshold_records", 0)) > 0
-                else "no_below_threshold_events_observed_tree_may_be_truncated_or_statistically_empty"
+            audit["source_tree_boundary_coverage"] = (
+                "below_reference_boundary_records_observed"
+                if int(audit.get("records_below_reference_boundary", 0)) > 0
+                else "no_below_reference_boundary_records_observed_tree_may_be_truncated_or_statistically_empty"
             )
             if int(audit.get("proton_factor_records", 0)) > 0:
                 audit["proton_factor_mean"] = float(
@@ -696,6 +930,7 @@ def build_pion_hgcer_tdelta_diagnostic(
         "t_edges": t_edges,
         "delta_edges": delta_edges,
         "delta_edge_source": delta_source,
+        "source_provenance": source_provenance,
         "source_audit": source_audit,
         "records": frozen_records,
         "cells": tuple(MappingProxyType(dict(cell)) for cell in serialized_cells),
@@ -727,6 +962,7 @@ def serialize_pion_hgcer_tdelta_diagnostic(payload, include_records=True):
         "t_edges": _iter_or_empty(payload.get("t_edges")),
         "delta_edges": _iter_or_empty(payload.get("delta_edges")),
         "delta_edge_source": payload.get("delta_edge_source"),
+        "source_provenance": payload.get("source_provenance") or {},
         "source_audit": payload.get("source_audit") or {},
         "cells": _iter_or_empty(payload.get("cells")),
         "page_manifest": _iter_or_empty(payload.get("page_manifest")),
@@ -749,11 +985,18 @@ def write_pion_hgcer_tdelta_json(path, payload):
 
 
 def _normalized_clone(histogram, name):
-    clone = histogram.Clone(unique_root_object_name(name, scope="pion_hgcer", role="plot"))
-    clone.SetDirectory(0)
+    clone = _detached_clone(histogram, name)
     integral = float(clone.Integral())
     if integral > 0.0:
         clone.Scale(1.0 / integral)
+    return clone
+
+
+def _detached_clone(histogram, name):
+    clone = histogram.Clone(
+        unique_root_object_name(name, scope="pion_hgcer", role="plot")
+    )
+    clone.SetDirectory(0)
     return clone
 
 
@@ -770,10 +1013,47 @@ def _style_overlay(kaon_hist, pion_hist, *, shape=False):
     legend = ROOT.TLegend(0.57, 0.74, 0.88, 0.88)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
-    legend.AddEntry(kaon_hist, "proton-cleaned kaon", "l")
-    legend.AddEntry(pion_hist, "pion control", "l")
+    legend.AddEntry(kaon_hist, pion_hgcer_display_text("legend_kaon"), "l")
+    legend.AddEntry(pion_hist, pion_hgcer_display_text("legend_pion"), "l")
     legend.Draw()
     return legend
+
+
+def _draw_hgcer_boundary_line(threshold, reference_histogram):
+    line = ROOT.TLine(
+        float(threshold),
+        float(reference_histogram.GetMinimum()),
+        float(threshold),
+        float(reference_histogram.GetMaximum()),
+    )
+    line.SetLineColor(ROOT.kBlack)
+    line.SetLineStyle(2)
+    line.SetLineWidth(2)
+    line.Draw("same")
+    return line
+
+
+def _draw_canonical_t_lines(t_edges, reference_histogram):
+    lines = []
+    for edge in _iter_or_empty(t_edges)[1:-1]:
+        line = ROOT.TLine(
+            float(edge),
+            float(reference_histogram.GetMinimum()),
+            float(edge),
+            float(reference_histogram.GetMaximum()),
+        )
+        line.SetLineColor(ROOT.kBlack)
+        line.SetLineStyle(2)
+        line.Draw("same")
+        lines.append(line)
+    return tuple(lines)
+
+
+def _set_hgcer_zoom(histograms, boundary):
+    lower = float((boundary or {}).get("zoom_min", 0.0))
+    upper = float((boundary or {}).get("zoom_max", 4.0))
+    for histogram in histograms:
+        histogram.GetXaxis().SetRangeUser(lower, upper)
 
 
 def _page_text_canvas(title, lines):
@@ -794,11 +1074,23 @@ def _projection(records, side, *, t_index=None, delta_index=None, quantity="npe"
     config = config or {}
     if quantity == "npe":
         lower, upper = [float(value) for value in config["hgcer_npe_range"]]
-        histogram = _new_hist_1d(name, "HGCer NPE;P_hgcer_npeSum;{}".format("signed weighted yield" if weight_mode == "weighted" else "absolute support"), int(config["hgcer_npe_bins"]), lower, upper)
+        histogram = _new_hist_1d(
+            name,
+            pion_hgcer_display_text("projection_npe_{}".format(weight_mode)),
+            int(config["hgcer_npe_bins"]),
+            lower,
+            upper,
+        )
         field = "P_hgcer_npeSum"
     else:
         lower, upper = [float(value) for value in config["mm_range"]]
-        histogram = _new_hist_1d(name, "Shifted MM;shifted MM [GeV];{}".format("signed weighted yield" if weight_mode == "weighted" else "absolute support"), int(config["mm_bins"]), lower, upper)
+        histogram = _new_hist_1d(
+            name,
+            pion_hgcer_display_text("projection_mm_{}".format(weight_mode)),
+            int(config["mm_bins"]),
+            lower,
+            upper,
+        )
         field = "analysis_MM"
     for record in _iter_or_empty(records.get(side)):
         if t_index is not None and int(record["canonical_t_index"]) != int(t_index):
@@ -813,7 +1105,7 @@ def _projection(records, side, *, t_index=None, delta_index=None, quantity="npe"
 def _npe_vs_delta(records, side, t_index, delta_edges, config, name):
     lower, upper = [float(value) for value in config["hgcer_npe_range"]]
     histogram = _new_variable_x_hist_2d(
-        name, "HGCer NPE versus #delta;ssdelta [%];P_hgcer_npeSum",
+        name, pion_hgcer_display_text("npe_vs_delta"),
         delta_edges,
         int(config["hgcer_npe_bins"]), lower, upper,
     )
@@ -828,8 +1120,13 @@ def _should_emit_cell(status, mode):
     return mode == "all" or (mode == "supported" and status == "supported") or (mode == "supported_marginal" and status in {"supported", "marginal"})
 
 
+def _should_emit_boundary_cell(status, mode):
+    mode = str(mode or "none")
+    return mode == "all" or (mode == "ready" and status == "ready") or (mode == "ready_marginal" and status in {"ready", "marginal"})
+
+
 def expected_pion_hgcer_page_manifest(payload):
-    """Return the deterministic Part-1 page IDs without requiring PyROOT."""
+    """Return deterministic Part-1 and Part-1.5 page IDs without PyROOT."""
     prefix = "pion_hgcer.part1"
     payload = payload or {}
     if str(payload.get("status") or "unavailable") != "available":
@@ -855,6 +1152,27 @@ def expected_pion_hgcer_page_manifest(payload):
         else:
             continue
         manifest.append({"page_id": page_id, "scope": scope, "authoritative": False})
+    boundary_prefix = "pion_hgcer.part1p5"
+    manifest.extend([
+        {"page_id": "{}.provenance".format(boundary_prefix), "scope": "setting-wide", "authoritative": False},
+        {"page_id": "{}.boundary".format(boundary_prefix), "scope": "setting-wide", "authoritative": False},
+        {"page_id": "{}.populations".format(boundary_prefix), "scope": "setting-wide", "authoritative": False},
+        {"page_id": "{}.boundary_support".format(boundary_prefix), "scope": "setting-wide", "authoritative": False},
+        {"page_id": "{}.readiness".format(boundary_prefix), "scope": "setting-wide", "authoritative": False},
+    ])
+    for t_index in range(max(0, len(t_edges) - 1)):
+        manifest.append({"page_id": "{}.t{}".format(boundary_prefix, t_index + 1), "scope": "t{}".format(t_index + 1), "authoritative": False})
+    for cell in _iter_or_empty(payload.get("cells")):
+        readiness = str(cell.get("boundary_readiness") or "insufficient")
+        if _should_emit_boundary_cell(readiness, config.get("emit_boundary_cell_pages")):
+            t_index = int(cell["t_index"])
+            delta_index = int(cell["delta_index"])
+            manifest.append({
+                "page_id": "{}.t{}.delta{}".format(boundary_prefix, t_index + 1, delta_index + 1),
+                "scope": "t{} delta{}".format(t_index + 1, delta_index + 1),
+                "authoritative": False,
+            })
+    manifest.append({"page_id": "{}.summary".format(boundary_prefix), "scope": "setting-wide", "authoritative": False})
     return manifest
 
 
@@ -893,17 +1211,19 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
         "coordinate fingerprint: {}".format(str(payload.get("coordinate_fingerprint") or "missing")[-16:]),
         "delta edges from {}: {}".format(payload.get("delta_edge_source"), delta_edges),
         "support thresholds: {}".format((payload.get("config") or {}).get("support_thresholds") or {}),
+        "boundary: {}".format(config.get("hgcer_boundary") or {}),
+        "boundary readiness thresholds: {}".format(config.get("boundary_readiness_thresholds") or {}),
         "No production HGCer PID, pion fit, weight, or yield was changed.",
     ]
     for side in _SIDES:
         for label, audit in sorted((payload.get("source_audit") or {}).get(side, {}).items()):
             audit_lines.append(
-                "{} {}: selected={} below NPE>{:.1f}={} factor-missing={} [{}]".format(
-                    side, label, audit.get("accepted_pre_hgcer_records", 0),
+                "{} {}: records={} below NPE<{:.1f}={} factor-missing={} [{}]".format(
+                    side, label, audit.get("records_used_for_hgcer_diagnostic", 0),
                     float(audit.get("production_hgcer_threshold", 2.0)),
-                    audit.get("hgc_below_threshold_records", 0),
+                    audit.get("records_below_reference_boundary", 0),
                     audit.get("missing_frozen_proton_factor", 0),
-                    audit.get("tree_hgcer_truncation_evidence", "unknown"),
+                    audit.get("source_tree_boundary_coverage", "unknown"),
                 )
             )
             audit_lines.append(
@@ -958,7 +1278,7 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
         t_info = ROOT.TPaveText(0.08, 0.15, 0.92, 0.85, "NDC")
         t_info.SetFillStyle(0); t_info.SetBorderSize(0); t_info.SetTextAlign(12)
         t_info.AddText("canonical t{} [{:.4f}, {:.4f}]".format(t_index + 1, float(t_edges[t_index]), float(t_edges[t_index + 1])))
-        t_info.AddText("Pre-HGCer diagnostic only; no #delta merge or P_{#pi} fit.")
+        t_info.AddText(pion_hgcer_display_text("part1_t_note"))
         t_info.Draw()
         page._pion_hgcer_local = (kaon_delta, pion_delta, kaon_npe_weighted, pion_npe_weighted, kaon_npe, pion_npe, kaon_mm, pion_mm, t_info)
         pages.append(("{}.t{}".format(prefix, t_index + 1), page, "t{}".format(t_index + 1)))
@@ -970,7 +1290,7 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
                 t_index = int(cell["t_index"])
                 delta_index = int(cell["delta_index"])
                 status_canvas = _page_text_canvas(
-                    "{} — compact cell status".format(DIAGNOSTIC_LABEL),
+                    pion_hgcer_display_text("compact_cell_status"),
                     (
                         "t{} [{:.4f}, {:.4f}]  delta{} [{:.2f}, {:.2f}]".format(
                             t_index + 1, cell["t_low"], cell["t_high"],
@@ -985,7 +1305,7 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
                             float((cell.get("pion") or {}).get("absolute_weight_support", 0.0)),
                             float((cell.get("pion") or {}).get("effective_entries", 0.0)),
                         ),
-                        "No response estimate, subtraction, or bin merge was performed.",
+                        pion_hgcer_display_text("cell_no_response"),
                     ),
                 )
                 pages.append((
@@ -1016,10 +1336,297 @@ def render_pion_hgcer_tdelta_pages(pdf_name, payload, *, title_prefix="", page_m
         info.Draw()
         cell_page.cd(4)
         status_box = ROOT.TPaveText(0.08, 0.30, 0.92, 0.70, "NDC")
-        status_box.SetFillStyle(0); status_box.SetBorderSize(0); status_box.AddText(DIAGNOSTIC_LABEL); status_box.AddText("pre-HGCer view when the source tree permits it")
+        status_box.SetFillStyle(0); status_box.SetBorderSize(0); status_box.AddText(DIAGNOSTIC_LABEL); status_box.AddText(pion_hgcer_display_text("cell_gate_note"))
         status_box.Draw()
         cell_page._pion_hgcer_cell = (kaon_npe, pion_npe, kaon_mm, pion_mm, info, status_box)
         pages.append(("{}.t{}.delta{}".format(prefix, t_index + 1, delta_index + 1), cell_page, "t{} delta{}".format(t_index + 1, delta_index + 1)))
+
+    boundary_prefix = "pion_hgcer.part1p5"
+    boundary = dict(config.get("hgcer_boundary") or {})
+    boundary_threshold = float(boundary.get("threshold", 2.0))
+    provenance_lines = [
+        pion_hgcer_display_text("part1p5"),
+        "{}".format(title_prefix),
+        pion_hgcer_display_text("part1p5_norf_policy"),
+    ]
+    for side in _SIDES:
+        for label, entry in sorted((payload.get("source_provenance") or {}).get(side, {}).items()):
+            provenance_lines.append(
+                "{} {}: role={} tree={} rf={} pid={} factor={}".format(
+                    side,
+                    label,
+                    entry.get("source_role"),
+                    entry.get("tree_name"),
+                    entry.get("rf_state"),
+                    entry.get("pid_role"),
+                    entry.get("proton_factor_scope"),
+                )
+            )
+    pages.append((
+        "{}.provenance".format(boundary_prefix),
+        _page_text_canvas(pion_hgcer_display_text("part1p5_provenance"), provenance_lines),
+        "setting-wide",
+    ))
+
+    boundary_page = ROOT.TCanvas(
+        unique_root_object_name("C_pion_hgcer_boundary", scope="pion_hgcer", role="part1p5"),
+        pion_hgcer_display_text("part1p5_boundary"),
+        1200,
+        700,
+    )
+    boundary_page.Divide(2, 1)
+    weighted_kaon = _detached_clone(
+        histograms["H_hgcer_kaon_weighted"], "H_hgcer_boundary_kaon_weighted"
+    )
+    weighted_pion = _detached_clone(
+        histograms["H_hgcer_pion_weighted"], "H_hgcer_boundary_pion_weighted"
+    )
+    _set_hgcer_zoom((weighted_kaon, weighted_pion), boundary)
+    boundary_page.cd(1)
+    boundary_weighted_legend = _style_overlay(weighted_kaon, weighted_pion)
+    boundary_weighted_line = _draw_hgcer_boundary_line(boundary_threshold, weighted_kaon)
+    boundary_kaon_shape = _normalized_clone(
+        histograms["H_hgcer_kaon_absolute"], "H_hgcer_boundary_kaon_shape"
+    )
+    boundary_pion_shape = _normalized_clone(
+        histograms["H_hgcer_pion_absolute"], "H_hgcer_boundary_pion_shape"
+    )
+    _set_hgcer_zoom((boundary_kaon_shape, boundary_pion_shape), boundary)
+    boundary_page.cd(2)
+    boundary_shape_legend = _style_overlay(
+        boundary_kaon_shape, boundary_pion_shape, shape=True
+    )
+    boundary_shape_line = _draw_hgcer_boundary_line(
+        boundary_threshold, boundary_kaon_shape
+    )
+    boundary_page._pion_hgcer_boundary = (
+        boundary_weighted_legend,
+        boundary_weighted_line,
+        weighted_kaon,
+        weighted_pion,
+        boundary_kaon_shape,
+        boundary_pion_shape,
+        boundary_shape_legend,
+        boundary_shape_line,
+    )
+    pages.append(("{}.boundary".format(boundary_prefix), boundary_page, "setting-wide"))
+
+    population_page = ROOT.TCanvas(
+        unique_root_object_name("C_pion_hgcer_populations", scope="pion_hgcer", role="part1p5"),
+        pion_hgcer_display_text("part1p5_population"),
+        1200,
+        850,
+    )
+    population_page.Divide(2, 2)
+    population_page.cd(1)
+    delta_weighted_legend = _style_overlay(
+        histograms["H_delta_kaon_weighted"],
+        histograms["H_delta_pion_weighted"],
+    )
+    delta_kaon_shape = _normalized_clone(
+        histograms["H_delta_kaon_absolute"], "H_delta_kaon_part1p5_shape"
+    )
+    delta_pion_shape = _normalized_clone(
+        histograms["H_delta_pion_absolute"], "H_delta_pion_part1p5_shape"
+    )
+    population_page.cd(2)
+    delta_shape_legend = _style_overlay(delta_kaon_shape, delta_pion_shape, shape=True)
+    population_page.cd(3)
+    t_weighted_legend = _style_overlay(
+        histograms["H_t_kaon_weighted"], histograms["H_t_pion_weighted"]
+    )
+    t_weighted_lines = _draw_canonical_t_lines(
+        t_edges, histograms["H_t_kaon_weighted"]
+    )
+    t_kaon_shape = _normalized_clone(
+        histograms["H_t_kaon_absolute"], "H_t_kaon_part1p5_shape"
+    )
+    t_pion_shape = _normalized_clone(
+        histograms["H_t_pion_absolute"], "H_t_pion_part1p5_shape"
+    )
+    population_page.cd(4)
+    t_shape_legend = _style_overlay(t_kaon_shape, t_pion_shape, shape=True)
+    t_shape_lines = _draw_canonical_t_lines(t_edges, t_kaon_shape)
+    population_page._pion_hgcer_populations = (
+        delta_weighted_legend,
+        delta_kaon_shape,
+        delta_pion_shape,
+        delta_shape_legend,
+        t_weighted_legend,
+        t_weighted_lines,
+        t_kaon_shape,
+        t_pion_shape,
+        t_shape_legend,
+        t_shape_lines,
+    )
+    pages.append(("{}.populations".format(boundary_prefix), population_page, "setting-wide"))
+
+    boundary_support_page = ROOT.TCanvas(
+        unique_root_object_name("C_pion_hgcer_boundary_support", scope="pion_hgcer", role="part1p5"),
+        pion_hgcer_display_text("part1p5_boundary_support"),
+        1200,
+        700,
+    )
+    boundary_support_page.Divide(2, 1)
+    for pad, side in enumerate(_SIDES, start=1):
+        boundary_support_page.cd(pad)
+        histograms["H_boundary_effective_{}".format(side)].Draw("colz text")
+    pages.append((
+        "{}.boundary_support".format(boundary_prefix),
+        boundary_support_page,
+        "setting-wide",
+    ))
+
+    readiness_page = ROOT.TCanvas(
+        unique_root_object_name("C_pion_hgcer_readiness", scope="pion_hgcer", role="part1p5"),
+        pion_hgcer_display_text("part1p5_readiness"),
+        1000,
+        750,
+    )
+    histograms["H_boundary_readiness"].Draw("colz text")
+    pages.append(("{}.readiness".format(boundary_prefix), readiness_page, "setting-wide"))
+
+    for t_index in range(max(0, len(t_edges) - 1)):
+        t_boundary_page = ROOT.TCanvas(
+            unique_root_object_name("C_pion_hgcer_boundary_t{}".format(t_index + 1), scope="pion_hgcer", role="part1p5"),
+            pion_hgcer_display_text("part1p5_t_boundary", t_index=t_index),
+            1200,
+            700,
+        )
+        t_boundary_page.Divide(2, 1)
+        kaon_weighted = _projection(
+            records, "kaon", t_index=t_index, quantity="npe", weight_mode="weighted",
+            config=config, name="H_hgcer_boundary_kaon_weighted_t{}".format(t_index + 1),
+        )
+        pion_weighted = _projection(
+            records, "pion", t_index=t_index, quantity="npe", weight_mode="weighted",
+            config=config, name="H_hgcer_boundary_pion_weighted_t{}".format(t_index + 1),
+        )
+        _set_hgcer_zoom((kaon_weighted, pion_weighted), boundary)
+        t_boundary_page.cd(1)
+        t_weighted_legend = _style_overlay(kaon_weighted, pion_weighted)
+        t_weighted_line = _draw_hgcer_boundary_line(boundary_threshold, kaon_weighted)
+        kaon_absolute = _projection(
+            records, "kaon", t_index=t_index, quantity="npe", config=config,
+            name="H_hgcer_boundary_kaon_absolute_t{}".format(t_index + 1),
+        )
+        pion_absolute = _projection(
+            records, "pion", t_index=t_index, quantity="npe", config=config,
+            name="H_hgcer_boundary_pion_absolute_t{}".format(t_index + 1),
+        )
+        kaon_shape = _normalized_clone(kaon_absolute, "H_hgcer_boundary_kaon_shape_t{}".format(t_index + 1))
+        pion_shape = _normalized_clone(pion_absolute, "H_hgcer_boundary_pion_shape_t{}".format(t_index + 1))
+        _set_hgcer_zoom((kaon_shape, pion_shape), boundary)
+        t_boundary_page.cd(2)
+        t_shape_legend = _style_overlay(kaon_shape, pion_shape, shape=True)
+        t_shape_line = _draw_hgcer_boundary_line(boundary_threshold, kaon_shape)
+        t_boundary_page._pion_hgcer_boundary = (
+            kaon_weighted,
+            pion_weighted,
+            t_weighted_legend,
+            t_weighted_line,
+            kaon_absolute,
+            pion_absolute,
+            kaon_shape,
+            pion_shape,
+            t_shape_legend,
+            t_shape_line,
+        )
+        pages.append((
+            "{}.t{}".format(boundary_prefix, t_index + 1),
+            t_boundary_page,
+            "t{}".format(t_index + 1),
+        ))
+
+    readiness_counts = {"ready": 0, "marginal": 0, "insufficient": 0}
+    for cell in _iter_or_empty(payload.get("cells")):
+        readiness = str(cell.get("boundary_readiness") or "insufficient")
+        readiness_counts[readiness] = int(readiness_counts.get(readiness, 0)) + 1
+        if not _should_emit_boundary_cell(
+            readiness, config.get("emit_boundary_cell_pages")
+        ):
+            continue
+        t_index = int(cell["t_index"])
+        delta_index = int(cell["delta_index"])
+        cell_boundary_page = ROOT.TCanvas(
+            unique_root_object_name("C_pion_hgcer_boundary_t{}_d{}".format(t_index + 1, delta_index + 1), scope="pion_hgcer", role="part1p5"),
+            pion_hgcer_display_text(
+                "part1p5_cell_boundary", t_index=t_index, delta_index=delta_index
+            ),
+            1100,
+            750,
+        )
+        cell_boundary_page.Divide(2, 2)
+        kaon_full = _normalized_clone(
+            _projection(records, "kaon", t_index=t_index, delta_index=delta_index, quantity="npe", config=config, name="H_hgcer_boundary_kaon_full_t{}_d{}".format(t_index + 1, delta_index + 1)),
+            "H_hgcer_boundary_kaon_full_shape_t{}_d{}".format(t_index + 1, delta_index + 1),
+        )
+        pion_full = _normalized_clone(
+            _projection(records, "pion", t_index=t_index, delta_index=delta_index, quantity="npe", config=config, name="H_hgcer_boundary_pion_full_t{}_d{}".format(t_index + 1, delta_index + 1)),
+            "H_hgcer_boundary_pion_full_shape_t{}_d{}".format(t_index + 1, delta_index + 1),
+        )
+        cell_boundary_page.cd(1)
+        cell_full_legend = _style_overlay(kaon_full, pion_full, shape=True)
+        cell_full_line = _draw_hgcer_boundary_line(boundary_threshold, kaon_full)
+        kaon_zoom = _normalized_clone(kaon_full, "H_hgcer_boundary_kaon_zoom_t{}_d{}".format(t_index + 1, delta_index + 1))
+        pion_zoom = _normalized_clone(pion_full, "H_hgcer_boundary_pion_zoom_t{}_d{}".format(t_index + 1, delta_index + 1))
+        _set_hgcer_zoom((kaon_zoom, pion_zoom), boundary)
+        cell_boundary_page.cd(2)
+        cell_zoom_legend = _style_overlay(kaon_zoom, pion_zoom, shape=True)
+        cell_zoom_line = _draw_hgcer_boundary_line(boundary_threshold, kaon_zoom)
+        kaon_mm = _projection(
+            records, "kaon", t_index=t_index, delta_index=delta_index,
+            quantity="mm", weight_mode="weighted", config=config,
+            name="H_mm_boundary_kaon_t{}_d{}".format(t_index + 1, delta_index + 1),
+        )
+        kaon_mm.SetLineColor(ROOT.kBlue + 1)
+        kaon_mm.SetTitle(pion_hgcer_display_text("kaon_pid_mm"))
+        cell_boundary_page.cd(3)
+        kaon_mm.Draw("hist")
+        pion_mm = _projection(
+            records, "pion", t_index=t_index, delta_index=delta_index,
+            quantity="mm", weight_mode="weighted", config=config,
+            name="H_mm_boundary_pion_t{}_d{}".format(t_index + 1, delta_index + 1),
+        )
+        pion_mm.SetLineColor(ROOT.kRed + 1)
+        pion_mm.SetTitle(pion_hgcer_display_text("pion_pid_mm"))
+        cell_boundary_page.cd(4)
+        pion_mm.Draw("hist")
+        cell_boundary_page._pion_hgcer_boundary = (
+            kaon_full,
+            pion_full,
+            cell_full_legend,
+            cell_full_line,
+            kaon_zoom,
+            pion_zoom,
+            cell_zoom_legend,
+            cell_zoom_line,
+            kaon_mm,
+            pion_mm,
+        )
+        pages.append((
+            "{}.t{}.delta{}".format(boundary_prefix, t_index + 1, delta_index + 1),
+            cell_boundary_page,
+            "t{} delta{}".format(t_index + 1, delta_index + 1),
+        ))
+
+    summary_lines = [
+        pion_hgcer_display_text("part1p5"),
+        "boundary threshold={} band_width={}".format(
+            boundary_threshold, boundary.get("boundary_band_width")
+        ),
+        "readiness: ready={} marginal={} insufficient={}".format(
+            readiness_counts["ready"],
+            readiness_counts["marginal"],
+            readiness_counts["insufficient"],
+        ),
+        pion_hgcer_display_text("part1p5_summary_note"),
+    ]
+    pages.append((
+        "{}.summary".format(boundary_prefix),
+        _page_text_canvas(pion_hgcer_display_text("part1p5_summary"), summary_lines),
+        "setting-wide",
+    ))
 
     emitted = []
     for page_index, (page_id, canvas, scope) in enumerate(pages):

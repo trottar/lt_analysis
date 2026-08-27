@@ -161,9 +161,28 @@ PION_HGCER_DIAGNOSTIC_CONFIG = {
     "emit_cell_pages": "supported_marginal",
     "emit_status_pages": True,
     "production_hgcer_threshold": 2.0,
+    # Part 1.5 keeps the production split as a reference boundary only.  These
+    # values control diagnostic accounting and presentation, never a PID cut.
+    "hgcer_boundary": {
+        "threshold": 2.0,
+        "zoom_min": 0.0,
+        "zoom_max": 4.0,
+        "boundary_band_width": 0.5,
+    },
+    "boundary_readiness_thresholds": {
+        "ready_absolute_weight": 1.0e-2,
+        "marginal_absolute_weight": 1.0e-3,
+        "ready_effective_entries": 10.0,
+        "marginal_effective_entries": 1.0,
+    },
+    "emit_boundary_cell_pages": "ready_marginal",
 }
 PION_HGCER_DIAGNOSTIC_CONFIG_OVERRIDES = {}
-PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS = frozenset({"support_thresholds"})
+PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS = frozenset({
+    "support_thresholds",
+    "hgcer_boundary",
+    "boundary_readiness_thresholds",
+})
 
 ANALYSIS_BINNING_CONFIG = {
     ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
@@ -2466,6 +2485,54 @@ def get_pion_hgcer_diagnostic_config(
     if emit_cell_pages not in {"none", "supported", "supported_marginal", "all"}:
         raise ValueError("Unsupported pion HGCer diagnostic emit_cell_pages '{}'".format(emit_cell_pages))
     config["emit_cell_pages"] = emit_cell_pages
+    boundary = dict(config.get("hgcer_boundary") or {})
+    production_threshold = float(config.get("production_hgcer_threshold", 2.0))
+    boundary_threshold = float(boundary.get("threshold", production_threshold))
+    zoom_min = float(boundary.get("zoom_min", 0.0))
+    zoom_max = float(boundary.get("zoom_max", 4.0))
+    boundary_band_width = float(boundary.get("boundary_band_width", 0.5))
+    if abs(boundary_threshold - production_threshold) > 1.0e-12:
+        raise ValueError("Pion HGCer boundary threshold must match production_hgcer_threshold")
+    if not zoom_min < zoom_max or not zoom_min <= boundary_threshold <= zoom_max:
+        raise ValueError("Pion HGCer boundary zoom must contain its threshold")
+    if boundary_band_width <= 0.0:
+        raise ValueError("Pion HGCer boundary_band_width must be positive")
+    config["hgcer_boundary"] = {
+        "threshold": boundary_threshold,
+        "zoom_min": zoom_min,
+        "zoom_max": zoom_max,
+        "boundary_band_width": boundary_band_width,
+    }
+    readiness_thresholds = dict(config.get("boundary_readiness_thresholds") or {})
+    readiness_keys = (
+        "ready_absolute_weight",
+        "marginal_absolute_weight",
+        "ready_effective_entries",
+        "marginal_effective_entries",
+    )
+    for key in readiness_keys:
+        if float(readiness_thresholds.get(key, 0.0)) < 0.0:
+            raise ValueError("Pion HGCer boundary readiness {} must be non-negative".format(key))
+    if (
+        float(readiness_thresholds.get("ready_absolute_weight", 0.0))
+        < float(readiness_thresholds.get("marginal_absolute_weight", 0.0))
+        or float(readiness_thresholds.get("ready_effective_entries", 0.0))
+        < float(readiness_thresholds.get("marginal_effective_entries", 0.0))
+    ):
+        raise ValueError("Pion HGCer ready thresholds must be at least marginal thresholds")
+    config["boundary_readiness_thresholds"] = {
+        key: float(readiness_thresholds.get(key, 0.0)) for key in readiness_keys
+    }
+    emit_boundary_cell_pages = str(
+        config.get("emit_boundary_cell_pages") or "ready_marginal"
+    ).strip().lower()
+    if emit_boundary_cell_pages not in {"none", "ready", "ready_marginal", "all"}:
+        raise ValueError(
+            "Unsupported pion HGCer diagnostic emit_boundary_cell_pages '{}'".format(
+                emit_boundary_cell_pages
+            )
+        )
+    config["emit_boundary_cell_pages"] = emit_boundary_cell_pages
     config["pion_hgcer_diagnostic_setting_key"] = resolved_setting_key
     config["pion_hgcer_diagnostic_phi_setting"] = resolved_phi_setting
     config["pion_hgcer_diagnostic_override_layers"] = [
