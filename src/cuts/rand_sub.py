@@ -87,6 +87,7 @@ from background_config import (
     get_pion_component_dynamic_alignment_config,
 )
 from pion_component_fits import (
+    _resolve_kaon_lambda_reference_for_plot,
     build_particle_subtraction_component_result,
     print_particle_subtraction_component_application_pages,
     print_particle_subtraction_kaon_lambda_comparison_page,
@@ -154,6 +155,7 @@ from pion_hgcer_diagnostics import (
     write_pion_hgcer_tdelta_json,
 )
 from pion_hgcer_transfer import (
+    audit_pion_hgcer_control_population,
     apply_frozen_pion_hgcer_transfer_map,
     build_pion_hgcer_zerope_transfer_map,
     render_pion_hgcer_zerope_transfer_failure_page,
@@ -6683,7 +6685,81 @@ def rand_sub(
                 # stage.  They are passed ephemerally to Part 2 only for
                 # closure overlays; the renderer never reloads, refits,
                 # normalizes, or serializes them.
-                part2_renderer_inputs = {"by_t": {}, "global": {}}
+                def _part2_display_target(fit_result, application_payload, proposal_payload=None):
+                    application_payload = application_payload if isinstance(application_payload, dict) else {}
+                    proposal_payload = proposal_payload if isinstance(proposal_payload, dict) else {}
+                    return (
+                        application_payload.get("H_MM_nosub_after_pion_subtraction")
+                        or application_payload.get("H_MM_nosub_before_pion_subtraction")
+                        or proposal_payload.get("H_MM_nosub_after_pion_subtraction")
+                        or proposal_payload.get("H_MM_nosub_before_pion_subtraction")
+                        or (fit_result or {}).get("H_kaon_nosub_input")
+                    )
+
+                def _part2_lambda_display(fit_result, application_payload, scope_label, proposal_payload=None):
+                    target = _part2_display_target(fit_result, application_payload, proposal_payload)
+                    diagnostics = (fit_result or {}).get("diagnostics") or {}
+                    protected = diagnostics.get("pi_delta_signal_protected_fit") or (diagnostics.get("kaon") or {}).get("pi_delta_signal_protected_fit") or {}
+                    reference_hists = [
+                        (fit_result or {}).get("H_k_lambda_simc_reference"),
+                        (fit_result or {}).get("H_simc_shape_k_lambda"),
+                        (fit_result or {}).get("H_pi_delta_lambda_gauge") if protected else None,
+                    ]
+                    snapshots = {
+                        id(reference): [
+                            (float(reference.GetBinContent(index)), float(reference.GetBinError(index)))
+                            for index in range(0, int(reference.GetNbinsX()) + 2)
+                        ]
+                        for reference in reference_hists if reference is not None
+                    }
+                    try:
+                        display_hist, scale, source, normalization = _resolve_kaon_lambda_reference_for_plot(
+                            fit_result, target,
+                            (float(inpDict["mm_min"]), float(inpDict["mm_max"])),
+                            scope_label, "H_part2_k_lambda_display",
+                        )
+                        for reference in reference_hists:
+                            if reference is not None and snapshots.get(id(reference)) != [
+                                (float(reference.GetBinContent(index)), float(reference.GetBinError(index)))
+                                for index in range(0, int(reference.GetNbinsX()) + 2)
+                            ]:
+                                raise RuntimeError("canonical K-Lambda template changed during display normalization")
+                        return {"hist": display_hist, "scale": scale, "source": source, "normalization": normalization, "status": "available"}
+                    except Exception as exc:
+                        return {"hist": None, "status": "unavailable", "reason": str(exc)}
+
+                # The control audit is intentionally performed only for the
+                # detached presentation comparison.  It cannot alter the
+                # already-frozen map or its proposed application products.
+                try:
+                    part2_control_audit = audit_pion_hgcer_control_population(
+                        pion_hgcer_zerope_transfer, pion_control_cache
+                    )
+                except Exception as exc:
+                    part2_control_audit = {
+                        "status": "unavailable",
+                        "reason": "control_population_audit_exception: {}".format(exc),
+                        "by_t": {}, "global": None,
+                    }
+                # Retain only scalar audit evidence in the Part-2 sidecar.
+                # The detached ROOT projections remain terminal renderer
+                # inputs, never serialized analysis products.
+                pion_hgcer_zerope_transfer["control_population_audit"] = {
+                    "status": part2_control_audit.get("status"),
+                    "reason": part2_control_audit.get("reason"),
+                    "by_t": {
+                        str(t_index): {
+                            key: value for key, value in (entry or {}).items()
+                            if key != "before"
+                        }
+                        for t_index, entry in (part2_control_audit.get("by_t") or {}).items()
+                    },
+                    "global": {
+                        key: value for key, value in (part2_control_audit.get("global") or {}).items()
+                        if key != "before"
+                    } if isinstance(part2_control_audit.get("global"), dict) else None,
+                }
+                part2_renderer_inputs = {"by_t": {}, "global": {}, "control": part2_control_audit}
                 for parent in t_bin_parent_results:
                     parent_fit = (parent or {}).get("fit_result") or {}
                     try:
@@ -6695,10 +6771,16 @@ def rand_sub(
                             "pi-n": parent_fit.get("H_kaon_fit_pi_n_scaled"),
                             "pi-delta": parent_fit.get("H_kaon_fit_pi_delta_scaled"),
                             "pi-SIDIS": parent_fit.get("H_kaon_fit_pi_sidis_scaled"),
+                            "current total pion model": parent_fit.get("H_kaon_pion_bg_fit_total"),
                         },
                         "signal": {
-                            "K-Lambda": parent_fit.get("H_kaon_fit_k_lambda_scaled"),
-                            "K-Sigma0": parent_fit.get("H_kaon_fit_k_sigma0_scaled"),
+                            "K-Lambda": _part2_lambda_display(
+                                parent_fit,
+                                (parent or {}).get("final_diagnostic_application_result"),
+                                (parent or {}).get("analysis_scope") or "Part2_t{}".format(parent_t_index + 1),
+                                (parent or {}).get("proposed_diagnostic_application_result"),
+                            ),
+                            "K-Sigma0": {"hist": parent_fit.get("H_kaon_fit_k_sigma0_scaled"), "status": "available" if parent_fit.get("H_kaon_fit_k_sigma0_scaled") is not None else "unavailable"},
                         },
                     }
                 if isinstance(component_fit_result, dict):
@@ -6707,10 +6789,14 @@ def rand_sub(
                             "pi-n": component_fit_result.get("H_kaon_fit_pi_n_scaled"),
                             "pi-delta": component_fit_result.get("H_kaon_fit_pi_delta_scaled"),
                             "pi-SIDIS": component_fit_result.get("H_kaon_fit_pi_sidis_scaled"),
+                            "current total pion model": component_fit_result.get("H_kaon_pion_bg_fit_total"),
                         },
                         "signal": {
-                            "K-Lambda": component_fit_result.get("H_kaon_fit_k_lambda_scaled"),
-                            "K-Sigma0": component_fit_result.get("H_kaon_fit_k_sigma0_scaled"),
+                            "K-Lambda": _part2_lambda_display(
+                                component_fit_result, setting_wide_render_payload,
+                                component_fit_result.get("analysis_scope") or "Part2_setting_wide",
+                            ),
+                            "K-Sigma0": {"hist": component_fit_result.get("H_kaon_fit_k_sigma0_scaled"), "status": "available" if component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None else "unavailable"},
                         },
                     }
                 part2_manifest = histDict.setdefault(

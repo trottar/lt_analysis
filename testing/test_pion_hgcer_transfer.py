@@ -105,6 +105,12 @@ def _render_payload(t_count=2, *, include_application=True):
             "status": "available",
             "histograms": {index: {"host": object(), "pion": object(), "clean": object()} for index in range(t_count)},
             "global_histograms": {"host": object(), "pion": object(), "clean": object()},
+            "t_products": [
+                {"t_index": index, "host_integral": 50.0, "pion_integral": 1.0,
+                 "clean_integral": 49.0, "pion_to_host": 0.02,
+                 "unresolved_records": 0}
+                for index in range(t_count)
+            ],
         }
     return payload
 
@@ -236,10 +242,43 @@ class PionHGCerTransferPurePythonTests(unittest.TestCase):
                 self.assertNotEqual(spec["renderer"], "status")
         page = transfer._part2_page("part2_proposed_mm_t2", "proposed_mm", t_index=1)
         with self.assertRaisesRegex(RuntimeError, "host_mm"):
-            transfer._validate_part2_graphical_page(page, [("pion_mm", object()), ("clean_mm", object())])
+            transfer._validate_part2_graphical_page(page, [("pion_mm", object()), ("clean_mm", object()), ("pion_zoom", object()), ("summary_text", object())])
         transfer._validate_part2_graphical_page(
-            page, [("host_mm", object()), ("pion_mm", object()), ("clean_mm", object())]
+            page, [("host_mm", object()), ("pion_mm", object()), ("clean_mm", object()), ("pion_zoom", object()), ("summary_text", object())]
         )
+
+    def test_control_record_contract_and_normalization_rows_are_exact(self):
+        payload = _render_payload(1)
+        payload["coordinate_fingerprint"] = "control-coordinate"
+        contract = payload["pid_contract"]
+        record = {
+            "allcuts": True, "source_label": "prompt", "coefficient": 1.0,
+            "rf_state": "noRF", "coordinate_fingerprint": "control-coordinate",
+            "P_hgcer_npeSum": 3.0, "t_index": 0, "adj_t": 0.5,
+            "ssdelta": -1.0, "delta_index": 0, "adj_MM": 1.1,
+        }
+        cache = {
+            "physical_pion_control_mask": contract["masks"]["physical_pion_control"],
+            "physical_pion_control_mask_fingerprint": contract["fingerprint"],
+            "coordinate_fingerprint": "control-coordinate",
+            "source_accounting": {"prompt": {"coefficient": 1.0}},
+            "by_t": ({
+                "records": (record,),
+                "source_accounting": {"prompt": {"allcuts_records": 1, "signed_weight_sum": 1.0, "coefficient": 1.0}},
+            },),
+        }
+        audit = transfer.inspect_pion_hgcer_control_population(payload, cache)
+        self.assertEqual(audit["status"], "available")
+        self.assertEqual(audit["by_t"][0]["source_summary"]["prompt"]["signed_sum"], 1.0)
+        cache["by_t"][0]["records"][0]["P_hgcer_npeSum"] = 2.0
+        self.assertEqual(transfer.inspect_pion_hgcer_control_population(payload, cache)["status"], "unavailable")
+        cache["by_t"][0]["records"][0]["P_hgcer_npeSum"] = 3.0
+        cache["by_t"][0]["source_accounting"]["prompt"]["signed_weight_sum"] = 2.0
+        self.assertEqual(transfer.inspect_pion_hgcer_control_population(payload, cache)["status"], "unavailable")
+        rows = transfer._normalization_rows(payload, {"control": {"by_t": {0: {"before_integral": 100.0}}}})
+        self.assertEqual(rows[0]["after"], 1.0)
+        self.assertEqual(rows[0]["effective_transfer"], 0.01)
+        self.assertEqual(rows[0]["pion_to_host"], 0.02)
 
     def test_matrix_series_uncertainty_and_undefined_cells_are_exactly_masked(self):
         payload = _render_payload(2)
@@ -264,6 +303,11 @@ class PionHGCerTransferPurePythonTests(unittest.TestCase):
                     for index in range(t_count)
                 },
                 "global": {"simc": {"pi-n": object()}, "signal": {"K-Lambda": object()}},
+                "control": {
+                    "status": "available",
+                    "by_t": {index: {"status": "available", "before": object(), "before_integral": 100.0} for index in range(t_count)},
+                    "global": {"status": "available", "before": object(), "before_integral": 100.0 * t_count, "construction": "strict_sum_of_verified_per_t_control_histograms"},
+                },
             }
             manifest = transfer.expected_pion_hgcer_transfer_page_manifest(
                 payload, renderer_inputs=renderer_inputs
@@ -274,17 +318,46 @@ class PionHGCerTransferPurePythonTests(unittest.TestCase):
                 for page_id in (
                     "part2_transfer_t{}".format(number), "part2_p0_t{}".format(number),
                     "part2_response_fit_t{}_delta1".format(number), "part2_proposed_mm_t{}".format(number),
-                    "part2_simc_closure_t{}".format(number), "part2_signal_closure_t{}".format(number),
+                    "part2_control_to_transferred_t{}".format(number), "part2_simc_closure_t{}".format(number), "part2_signal_closure_t{}".format(number),
                 ):
                     self.assertEqual(page_ids.count(page_id), 1, (t_count, page_id))
                     self.assertEqual(next(page for page in manifest if page["page_id"] == page_id)["t_index"], t_index)
             self.assertIn("part2_proposed_mm_global", page_ids)
             self.assertIn("part2_simc_closure_global", page_ids)
             self.assertIn("part2_signal_closure_global", page_ids)
+            self.assertIn("part2_control_to_transferred_global", page_ids)
+            self.assertIn("part2_transfer_normalization_summary", page_ids)
 
 
 @unittest.skipUnless(ROOT is not None, "PyROOT unavailable")
 class PionHGCerTransferPyROOTTests(unittest.TestCase):
+    def test_control_projection_proves_the_transfer_population(self):
+        payload = _render_payload(1, include_application=False)
+        payload["coordinate_fingerprint"] = "root-control-coordinate"
+        contract = payload["pid_contract"]
+        control = ROOT.TH1D("part2_control_verified", "control", 10, 0.8, 1.4)
+        control.SetDirectory(0); control.Fill(1.1, 1.0)
+        record = {
+            "allcuts": True, "source_label": "prompt", "coefficient": 1.0,
+            "rf_state": "noRF", "coordinate_fingerprint": "root-control-coordinate",
+            "P_hgcer_npeSum": 3.0, "t_index": 0, "adj_t": 0.5,
+            "ssdelta": -1.0, "delta_index": 0, "adj_MM": 1.1,
+        }
+        cache = {
+            "physical_pion_control_mask": contract["masks"]["physical_pion_control"],
+            "physical_pion_control_mask_fingerprint": contract["fingerprint"],
+            "coordinate_fingerprint": "root-control-coordinate",
+            "source_accounting": {"prompt": {"coefficient": 1.0}},
+            "by_t": ({
+                "records": (record,), "H_pion_control_cut": control,
+                "source_accounting": {"prompt": {"allcuts_records": 1, "signed_weight_sum": 1.0, "coefficient": 1.0}},
+            },),
+        }
+        audited = transfer.audit_pion_hgcer_control_population(payload, cache)
+        self.assertEqual(audited["status"], "available")
+        self.assertAlmostEqual(float(audited["by_t"][0]["before"].Integral()), 1.0)
+        self.assertEqual(audited["global"]["construction"], "strict_sum_of_verified_per_t_control_histograms")
+
     def test_frozen_application_uses_detached_norf_host_and_serializes_manifest(self):
         host = ROOT.TH1D("part2_host", "noRF host", 20, 0.7, 1.5)
         host.SetDirectory(0)
@@ -327,11 +400,26 @@ class PionHGCerTransferPyROOTTests(unittest.TestCase):
         payload["application"] = {
             "status": "available", "histograms": {0: {"host": host, "pion": pion, "clean": clean}},
             "global_histograms": {"host": host, "pion": pion, "clean": clean},
+            "t_products": [{"t_index": 0, "host_integral": float(host.Integral()), "pion_integral": float(pion.Integral()), "clean_integral": float(clean.Integral()), "unresolved_records": 0}],
+            "strict_global_sums": {"host": float(host.Integral()), "pion": float(pion.Integral()), "clean": float(clean.Integral()), "closure": 0.0},
         }
+        control = ROOT.TH1D("part2_render_control", "control", 10, 0.8, 1.4)
+        control.SetDirectory(0); control.Fill(1.1, 100.0)
         before = [float(clean.GetBinContent(index)) for index in range(0, clean.GetNbinsX() + 2)]
+        lambda_before = [float(host.GetBinContent(index)) for index in range(0, host.GetNbinsX() + 2)]
+        frozen_snapshot = {
+            "fingerprint": payload["map_fingerprint"],
+            "cells": [(cell["fit"]["P0"], cell["solution"]["transfer"]) for cell in payload["cells"]],
+            "pion_integral": payload["application"]["t_products"][0]["pion_integral"],
+        }
         renderer_inputs = {
-            "by_t": {0: {"simc": {"pi-n": host}, "signal": {"K-Lambda": host, "K-Sigma0": pion}}},
+            "by_t": {0: {"simc": {"pi-n": host}, "signal": {"K-Lambda": {"hist": host, "source": "synthetic canonical", "normalization": "synthetic established", "scale": 1.0}, "K-Sigma0": {"hist": pion}}}},
             "global": {"simc": {"pi-n": host}, "signal": {"K-Lambda": host, "K-Sigma0": pion}},
+            "control": {
+                "status": "available",
+                "by_t": {0: {"status": "available", "before": control, "before_integral": float(control.Integral())}},
+                "global": {"status": "available", "before": control, "before_integral": float(control.Integral()), "construction": "strict_sum_of_verified_per_t_control_histograms"},
+            },
         }
         expected = transfer.expected_pion_hgcer_transfer_page_manifest(payload, renderer_inputs=renderer_inputs)
         with tempfile.TemporaryDirectory() as temporary:
@@ -350,6 +438,15 @@ class PionHGCerTransferPyROOTTests(unittest.TestCase):
             self.assertTrue(set(page["required_roles"]).issubset(roles), page["page_id"])
         self.assertLess(float(clean.GetMinimum()), 0.0)
         self.assertEqual(before, [float(clean.GetBinContent(index)) for index in range(0, clean.GetNbinsX() + 2)])
+        self.assertEqual(lambda_before, [float(host.GetBinContent(index)) for index in range(0, host.GetNbinsX() + 2)])
+        self.assertEqual(frozen_snapshot["fingerprint"], payload["map_fingerprint"])
+        self.assertEqual(frozen_snapshot["cells"], [(cell["fit"]["P0"], cell["solution"]["transfer"]) for cell in payload["cells"]])
+        self.assertEqual(frozen_snapshot["pion_integral"], payload["application"]["t_products"][0]["pion_integral"])
+        control_page = next(record for record in emitted if record["page_id"] == "part2_control_to_transferred_t1")
+        self.assertEqual(control_page["control_before_integral"], 100.0)
+        self.assertAlmostEqual(control_page["control_to_transferred_ratio"], float(pion.Integral()) / 100.0)
+        audit_pages = [record for record in emitted if record["page_id"] in {"part2_mask_audit", "part2_response_family_audit"}]
+        self.assertTrue(all("audit_text" in {item["role"] for item in record["semantic_primitives"]} for record in audit_pages))
 
 
 if __name__ == "__main__":
