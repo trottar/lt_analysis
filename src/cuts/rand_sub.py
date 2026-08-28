@@ -80,7 +80,6 @@ from background_config import (
     resolve_particle_subtraction_weight_warn_max,
     get_proton_contamination_cleaning_config,
     get_pion_hgcer_diagnostic_config,
-    get_pion_hgcer_transfer_config,
     get_particle_subtraction_setting_key,
     get_pion_component_dynamic_alignment_config,
 )
@@ -149,15 +148,6 @@ from pion_hgcer_diagnostics import (
     render_pion_hgcer_tdelta_pages,
     serialize_pion_hgcer_tdelta_diagnostic,
     write_pion_hgcer_tdelta_json,
-)
-from pion_hgcer_transfer import (
-    apply_pion_hgcer_transfer_diagnostic,
-    build_pion_hgcer_transfer_map,
-    hgcer_mask_accepts,
-    render_pion_hgcer_transfer_pages,
-    serialize_pion_hgcer_transfer_map,
-    summarize_pion_hgcer_transfer_closure,
-    write_pion_hgcer_transfer_json,
 )
 
 ################################################################################################################################################
@@ -485,71 +475,6 @@ def _post_proton_cleaning_input_metadata(proton_cleaning_application):
     }
 
 
-_PID_SELECTION_PROVENANCE_OBJECT = "KaonLTPIDSelectionProvenance"
-
-
-def _read_pid_selection_provenance(root_file):
-    """Read source-tree cut provenance written by ``Analysed_Prod``.
-
-    A missing object is not reconstructed from a tree name: Part 2 must fail
-    closed rather than turn a convention into detector-response provenance.
-    """
-    if root_file is None:
-        return None
-    try:
-        stored = root_file.Get(_PID_SELECTION_PROVENANCE_OBJECT)
-        if stored is None:
-            return None
-        raw = stored.GetString().Data() if hasattr(stored, "GetString") else stored.GetName()
-        parsed = json.loads(str(raw))
-        return parsed if isinstance(parsed, dict) else None
-    except Exception:
-        return None
-
-
-def _transfer_source_entries(kaon_bundle, pion_bundle, pion_control_cache=None):
-    """Return persisted tree manifests for exact Part-2 mask resolution."""
-    rows = {"kaon": [], "pion": []}
-    coordinate_fingerprint = (pion_control_cache or {}).get(
-        "coordinate_fingerprint"
-    )
-    kaon_manifests = (kaon_bundle or {}).get("pid_selection_manifests") or {}
-    for source_label, source_spec in ((kaon_bundle or {}).get("sources") or {}).items():
-        origin = "dummy" if str(source_label).startswith("dummy") else "data"
-        rows["kaon"].append({
-            "source_label": str(source_label),
-            "tree_name": (source_spec or {}).get("tree_name"),
-            "manifest": kaon_manifests.get(origin),
-            "rf_state": "noRF",
-            "pid_role": "kaon_pid",
-            "signed_coefficient": (source_spec or {}).get("coefficient"),
-            "coordinate_fingerprint": coordinate_fingerprint,
-            "proton_factor_scope": "proton_cleaned_kaon_host_only",
-        })
-    pion_manifests = (pion_bundle or {}).get("pid_selection_manifests") or {}
-    pion_source_audit = (pion_control_cache or {}).get("source_accounting") or {}
-    pion_specs = (
-        ("prompt", "prompt_tree_name", "data"),
-        ("rand", "rand_tree_name", "data"),
-        ("dummy", "prompt_tree_name", "dummy"),
-        ("dummy_rand", "rand_tree_name", "dummy"),
-    )
-    for source_label, name_key, origin in pion_specs:
-        rows["pion"].append({
-            "source_label": source_label,
-            "tree_name": (pion_bundle or {}).get(name_key),
-            "manifest": pion_manifests.get(origin),
-            "rf_state": "noRF",
-            "pid_role": "pion_pid",
-            "signed_coefficient": (pion_source_audit.get(source_label) or {}).get(
-                "coefficient"
-            ),
-            "coordinate_fingerprint": coordinate_fingerprint,
-            "proton_factor_scope": "never_applied_to_pion_control",
-        })
-    return rows
-
-
 def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_particle, data_filename, dummy_filename, epsset):
     sub_data_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{data_filename}.root"
     sub_dummy_path = f"{outpath}/{phi_setting}_{subtracted_particle}_{dummy_filename}.root"
@@ -574,10 +499,6 @@ def _open_subtracted_particle_tree_bundle(outpath, phi_setting, subtracted_parti
     bundle = {
         "sub_root_data": sub_root_data,
         "sub_root_dummy": sub_root_dummy,
-        "pid_selection_manifests": {
-            "data": _read_pid_selection_provenance(sub_root_data),
-            "dummy": _read_pid_selection_provenance(sub_root_dummy),
-        },
         "prompt_tree_name": sub_prompt_tree_name,
         "rand_tree_name": sub_rand_tree_name,
         "prompt_tree": sub_root_data.Get(sub_prompt_tree_name),
@@ -656,10 +577,6 @@ def _open_kaon_proton_cleaning_tree_bundle(
         "phi_setting": phi_setting,
         "epsset": epsset,
         "particle_type": particle_type,
-        "pid_selection_manifests": {
-            "data": _read_pid_selection_provenance(infile_data),
-            "dummy": _read_pid_selection_provenance(infile_dummy),
-        },
     }
     _print_rand_debug(
         "resolved proton-cleaning tree names",
@@ -797,7 +714,6 @@ def _build_authoritative_pion_control_source_cache(
     norm_factor_data,
     norm_factor_dummy,
     n_windows,
-    physical_control_hgcer_mask,
 ):
     """Build the one signed pion-control population used by t-bin parents.
 
@@ -818,7 +734,7 @@ def _build_authoritative_pion_control_source_cache(
     child_cache_fields = (
         "source_label", "entry_index", "coefficient", "coordinate_fingerprint",
         "raw_t", "raw_MM", "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
-        "ssxptar", "ssyptar", "hsxptar", "hsyptar", "ssdelta", "P_hgcer_npeSum", "allcuts",
+        "ssxptar", "ssyptar", "hsxptar", "hsyptar", "allcuts",
         "nommcuts", "t_index", "phi_index",
     )
     child_cache = {
@@ -830,7 +746,6 @@ def _build_authoritative_pion_control_source_cache(
         "child_event_cache": child_cache,
         "kaon_data_coordinate": dict(coordinate_contract),
         "coordinate_fingerprint": coordinate_fingerprint,
-        "physical_control_hgcer_mask": deepcopy(physical_control_hgcer_mask),
     }
     for t_index, product in enumerate(products):
         final_targets = product.get("final_targets") or {}
@@ -954,10 +869,7 @@ def _build_authoritative_pion_control_source_cache(
                 hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
                 if hole_contains is not None else False
             )
-            pid_pass = hgcer_mask_accepts(
-                physical_control_hgcer_mask,
-                getattr(evt, "P_hgcer_npeSum", None),
-            )
+            pid_pass = evt.P_hgcer_npeSum > 2.0 if particle_type == "kaon" else True
             allcuts = bool(base_allcuts and not hole_rejected and pid_pass)
             nommcuts = bool(base_nommcuts and not hole_rejected and pid_pass)
             if not (allcuts or nommcuts):
@@ -1027,8 +939,6 @@ def _build_authoritative_pion_control_source_cache(
                 "adj_t": adj_t,
                 "coordinate_fingerprint": coordinate_fingerprint,
                 "phi": float(evt.ph_q),
-                "ssdelta": float(evt.ssdelta),
-                "P_hgcer_npeSum": float(evt.P_hgcer_npeSum),
                 "allcuts": bool(allcuts),
                 "nommcuts": bool(nommcuts),
                 "proton_cleaning_factor": None,
@@ -4413,10 +4323,6 @@ def rand_sub(
     proton_cleaning_application = None
     pion_hgcer_tdelta_diagnostic = None
     pion_hgcer_tdelta_json = None
-    pion_hgcer_transfer_map = None
-    pion_hgcer_transfer_json = None
-    pion_hgcer_transfer_application = None
-    pion_hgcer_transfer_closure = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -4762,16 +4668,6 @@ def rand_sub(
                         norm_factor_data=norm_factor_data,
                         norm_factor_dummy=norm_factor_dummy,
                         n_windows=nWindows,
-                        # This is the existing downstream pion-control gate.
-                        # It is now explicit cache provenance rather than an
-                        # implicit consequence of the top-level kaon caller.
-                        physical_control_hgcer_mask={
-                            "field": "P_hgcer_npeSum",
-                            "operator": ">",
-                            "value": 2.0,
-                            "expression": "P_hgcer_npeSum > 2.0",
-                            "source": "rand_sub.authoritative_pion_control_gate",
-                        },
                     )
                     histDict["_authoritative_pion_control_source_cache"] = pion_control_cache
                     histDict["pion_control_source_audit"] = {
@@ -4779,9 +4675,6 @@ def rand_sub(
                         "source_accounting": pion_control_cache.get("source_accounting"),
                         "coordinate_fingerprint": pion_control_cache.get("coordinate_fingerprint"),
                         "kaon_data_coordinate": pion_control_cache.get("kaon_data_coordinate"),
-                        "physical_control_hgcer_mask": pion_control_cache.get(
-                            "physical_control_hgcer_mask"
-                        ),
                     }
                     pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
                         inp_dict=inpDict,
@@ -4863,64 +4756,6 @@ def rand_sub(
                         histDict["pion_hgcer_tdelta_diagnostic_artifacts"] = [
                             pion_hgcer_tdelta_json
                         ]
-
-                    pion_hgcer_transfer_config = get_pion_hgcer_transfer_config(
-                        inp_dict=inpDict,
-                        phi_setting=phi_setting,
-                    )
-                    if bool(pion_hgcer_transfer_config.get("enabled", False)):
-                        try:
-                            pion_hgcer_transfer_map = build_pion_hgcer_transfer_map(
-                                part1_payload=pion_hgcer_tdelta_diagnostic,
-                                pion_control_cache=pion_control_cache,
-                                source_entries=_transfer_source_entries(
-                                    proton_cleaning_tree_bundle,
-                                    sub_tree_bundle,
-                                    pion_control_cache,
-                                ),
-                                config=pion_hgcer_transfer_config,
-                            )
-                        except Exception as exc:
-                            pion_hgcer_transfer_map = {
-                                "status": "unavailable",
-                                "diagnostic_label": "PION HGCer ZERO-PE TRANSFER - PART 2 - NON-AUTHORITATIVE",
-                                "non_authoritative": True,
-                                "production_side_effect_free": True,
-                                "reason": str(exc),
-                                "diagnostic_stage": "transfer_build",
-                                "config": pion_hgcer_transfer_config,
-                            }
-                        pion_hgcer_transfer_json = os.path.join(
-                            OUTPATH,
-                            "{}_{}_pion_hgcer_transfer_map.json".format(
-                                phi_setting, OutFilename
-                            ),
-                        )
-                        histDict["pion_hgcer_transfer_map"] = (
-                            serialize_pion_hgcer_transfer_map(pion_hgcer_transfer_map)
-                        )
-                        histDict["pion_hgcer_transfer_artifacts"] = [
-                            pion_hgcer_transfer_json
-                        ]
-                        if str(pion_hgcer_transfer_map.get("status") or "unavailable") == "available":
-                            # This accounting is deliberately detached.  The
-                            # existing source cache and all production parent
-                            # products remain unchanged.
-                            pion_hgcer_transfer_application = (
-                                apply_pion_hgcer_transfer_diagnostic(
-                                    pion_hgcer_transfer_map,
-                                    pion_control_cache,
-                                    proton_cleaning_application,
-                                )
-                            )
-                            histDict["pion_hgcer_transfer_proposed_application"] = (
-                                pion_hgcer_transfer_application
-                            )
-                        write_pion_hgcer_transfer_json(
-                            pion_hgcer_transfer_json,
-                            pion_hgcer_transfer_map,
-                            application=pion_hgcer_transfer_application,
-                        )
 
                 histDict["proton_contamination_cleaning_result_setting"] = (
                     serialize_kaon_proton_cleaning_result(proton_cleaning_result)
@@ -6716,7 +6551,7 @@ def rand_sub(
                 page_manifest=histDict.setdefault(
                     "pion_hgcer_tdelta_diagnostic_page_manifest", []
                 ),
-                close_pdf=pion_hgcer_transfer_map is None,
+                close_pdf=True,
             )
             histDict["pion_hgcer_tdelta_diagnostic"] = (
                 serialize_pion_hgcer_tdelta_diagnostic(
@@ -6734,69 +6569,6 @@ def rand_sub(
                 emitted=len(emitted_hgcer_pages),
                 status=pion_hgcer_tdelta_diagnostic.get("status"),
             )
-            if pion_hgcer_transfer_map is not None:
-                transfer_closure_inputs = {}
-                if isinstance(component_fit_result, dict):
-                    pion_simc_components = [
-                        component_fit_result.get("H_simc_shape_pi_n"),
-                        component_fit_result.get("H_simc_shape_pi_delta"),
-                        component_fit_result.get("H_simc_shape_pi_sidis"),
-                    ]
-                    pion_simc_components = [
-                        histogram for histogram in pion_simc_components
-                        if histogram is not None
-                    ]
-                    if pion_simc_components:
-                        pion_simc_reference = clone_reset_hist(
-                            pion_simc_components[0], "_pion_hgcer_transfer_simc_closure"
-                        )
-                        for histogram in pion_simc_components:
-                            pion_simc_reference.Add(histogram)
-                        transfer_closure_inputs["pion_SIMC"] = pion_simc_reference
-                    transfer_closure_inputs["K_Lambda"] = (
-                        component_fit_result.get("H_k_lambda_simc_reference")
-                        or component_fit_result.get("H_simc_shape_k_lambda")
-                    )
-                    transfer_closure_inputs["K_Sigma0"] = (
-                        component_fit_result.get("H_simc_shape_k_sigma0")
-                    )
-                pion_hgcer_transfer_closure = (
-                    summarize_pion_hgcer_transfer_closure(
-                        pion_hgcer_transfer_application,
-                        transfer_closure_inputs,
-                    )
-                )
-                emitted_transfer_pages = render_pion_hgcer_transfer_pages(
-                    diagnostic_pdf,
-                    pion_hgcer_transfer_map,
-                    title_prefix="{} {}".format(phi_setting, ParticleType),
-                    page_manifest=histDict.setdefault(
-                        "pion_hgcer_tdelta_diagnostic_page_manifest", []
-                    ),
-                    close_pdf=True,
-                    application=pion_hgcer_transfer_application,
-                    closure=pion_hgcer_transfer_closure,
-                    closure_inputs=transfer_closure_inputs,
-                )
-                histDict["pion_hgcer_transfer_page_manifest"] = list(
-                    emitted_transfer_pages
-                )
-                histDict["pion_hgcer_transfer_closure"] = (
-                    pion_hgcer_transfer_closure
-                )
-                if pion_hgcer_transfer_json is not None:
-                    write_pion_hgcer_transfer_json(
-                        pion_hgcer_transfer_json,
-                        pion_hgcer_transfer_map,
-                        application=pion_hgcer_transfer_application,
-                        page_manifest=emitted_transfer_pages,
-                        closure=pion_hgcer_transfer_closure,
-                    )
-                _print_rand_debug(
-                    "pion HGCer Part-2 transfer pages",
-                    emitted=len(emitted_transfer_pages),
-                    status=pion_hgcer_transfer_map.get("status"),
-                )
         else:
             c_hgcer_hole.Print(diagnostic_pdf + ')')
 

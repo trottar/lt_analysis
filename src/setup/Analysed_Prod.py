@@ -23,7 +23,7 @@ import ROOT
 import scipy
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
-import sys, math, os, subprocess, json, hashlib
+import sys, math, os, subprocess
 from pathlib import Path
 
 ##################################################################################################################################################
@@ -194,78 +194,6 @@ def _apply_named_cuts(column_data, cut_names):
         cut_results[cut_name] = [c.add_cut(column, cut_name) for column in numeric_columns]
 
     return cut_results
-
-
-def _pid_cut_name_for_output_tree(tree_name):
-    """Map a persisted PID-tree name back to the exact replay named cut."""
-    text = str(tree_name)
-    prefixes = {
-        "Cut_Kaon_Events_": "coin_ek_cut_",
-        "Cut_Pion_Events_": "coin_epi_cut_",
-        "Cut_Proton_Events_": "coin_ep_cut_",
-    }
-    for tree_prefix, cut_prefix in prefixes.items():
-        if text.startswith(tree_prefix):
-            return "{}{}".format(cut_prefix, text[len(tree_prefix):])
-    return None
-
-
-def _pid_tree_selection_metadata(tree_name):
-    text = str(tree_name)
-    if text.startswith("Cut_Kaon_Events_"):
-        role = "kaon_pid"
-    elif text.startswith("Cut_Pion_Events_"):
-        role = "pion_pid"
-    elif text.startswith("Cut_Proton_Events_"):
-        role = "proton_pid"
-    else:
-        role = "unknown"
-    if text.endswith("_noRF"):
-        rf_state = "noRF"
-    elif text.endswith("_RF"):
-        rf_state = "RF"
-    else:
-        rf_state = "unknown"
-    return role, rf_state
-
-
-def _write_pid_selection_provenance(root_filename, output_tree_names):
-    """Persist source cut expressions so Part 2 never guesses PID masks."""
-    trees = {}
-    for tree_name in output_tree_names:
-        cut_name = _pid_cut_name_for_output_tree(tree_name)
-        expression = strDict.get(cut_name) if cut_name else None
-        if expression is None:
-            continue
-        expression_text = str(expression)
-        pid_role, rf_state = _pid_tree_selection_metadata(tree_name)
-        trees[str(tree_name)] = {
-            "tree_name": str(tree_name),
-            "cut_name": str(cut_name),
-            "expression": expression_text,
-            "cut_file": str(cut_f),
-            "pid_role": pid_role,
-            "rf_state": rf_state,
-            "fingerprint": hashlib.sha256(
-                "{}|{}|{}".format(tree_name, cut_name, expression_text).encode("utf-8")
-            ).hexdigest(),
-        }
-    manifest = {
-        "schema_version": 1,
-        "particle_type": str(ParticleType),
-        "run_number": str(runNum),
-        "cut_file": str(cut_f),
-        "trees": trees,
-    }
-    output = ROOT.TFile.Open(root_filename, "UPDATE")
-    if not output or output.IsZombie():
-        raise RuntimeError("Unable to update PID-selection provenance in {}".format(root_filename))
-    try:
-        ROOT.TObjString(json.dumps(manifest, sort_keys=True)).Write(
-            "KaonLTPIDSelectionProvenance", ROOT.TObject.kOverwrite
-        )
-    finally:
-        output.Close()
 
 
 #################################################################################################################################################################
@@ -443,8 +371,6 @@ def main():
         # Save the structured array to ROOT file
         print("[{}/{}] Writing {} to {}...".format(output_index, len(output_keys), data_keys[i], out_f_file), flush=True)
         rnp.array2root(structured_array, out_f_file, mode='recreate' if i == 0 else 'update', treename=data_keys[i])
-
-    _write_pid_selection_provenance(out_f_file, output_keys)
 
 if __name__ == '__main__':
     main()
