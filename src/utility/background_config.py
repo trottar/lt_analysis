@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from copy import deepcopy
 
@@ -183,6 +184,41 @@ PION_HGCER_DIAGNOSTIC_CONFIG_MERGE_KEYS = frozenset({
     "hgcer_boundary",
     "boundary_readiness_thresholds",
 })
+
+# Part 2 is an analysis-stage, non-authoritative response diagnostic.  These
+# masks describe already-written PID trees and the existing downstream pion
+# control selection; they must never be used to alter replay-tree production.
+PION_HGCER_PID_MASK_CONFIG = {
+    "kaon_tree": {"field": "P_hgcer_npeSum", "operator": "==", "value": 0.0},
+    "pion_tree": {"field": "P_hgcer_npeSum", "operator": ">", "value": 0.0},
+    "physical_pion_control": {
+        "field": "P_hgcer_npeSum", "operator": ">", "value": 2.0,
+    },
+}
+
+PION_HGCER_TRANSFER_CONFIG = {
+    "enabled": True,
+    "response_family": "auto",
+    "fit_range": (0.0, 20.0),
+    "integer_tolerance": 1.0e-6,
+    "minimum_prompt_pion_records": 20,
+    "toy_count": 2000,
+    "minimum_accepted_toy_fraction": 0.50,
+    "profile_delta_nll": 0.5,
+    "profile_log_mu_half_range": 3.0,
+    "profile_points": 31,
+    "covariance_condition_number_max": 1.0e8,
+    "pair_correlation_max": 0.995,
+    "fallback": {
+        "bracketing_relative_uncertainty": 0.20,
+        "edge_relative_uncertainty": 0.30,
+        "pooled_minimum_prompt_pion_records": 20,
+        "setting_wide_enabled": False,
+    },
+    "render_direct_fit_cells": True,
+}
+PION_HGCER_TRANSFER_CONFIG_OVERRIDES = {}
+PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS = frozenset({"fallback"})
 
 
 ANALYSIS_BINNING_CONFIG = {
@@ -2537,6 +2573,134 @@ def get_pion_hgcer_diagnostic_config(
     config["pion_hgcer_diagnostic_setting_key"] = resolved_setting_key
     config["pion_hgcer_diagnostic_phi_setting"] = resolved_phi_setting
     config["pion_hgcer_diagnostic_override_layers"] = [
+        layer.get("path") for layer in override_layers
+    ] + (["runtime"] if isinstance(runtime_override, dict) else [])
+    return config
+
+
+def normalize_hgcer_mask(mask, *, name="HGCer mask"):
+    """Return the canonical analysis-stage HGCer mask representation.
+
+    This deliberately accepts only the small comparison language used by the
+    analysis contract.  It is not a replay-cut parser.
+    """
+    candidate = dict(mask or {})
+    field = str(candidate.get("field") or "").strip()
+    operator = str(candidate.get("operator") or "").strip()
+    if field != "P_hgcer_npeSum":
+        raise ValueError("{} must select P_hgcer_npeSum".format(name))
+    if operator not in {"==", ">", ">=", "<", "<="}:
+        raise ValueError("{} has unsupported operator '{}'".format(name, operator))
+    try:
+        value = float(candidate.get("value"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("{} requires a finite numeric value".format(name)) from exc
+    if not math.isfinite(value):
+        raise ValueError("{} requires a finite numeric value".format(name))
+    return {"field": field, "operator": operator, "value": value}
+
+
+def hgcer_mask_accepts(value, mask):
+    """Evaluate a normalized HGCer mask without inferring any tree cut."""
+    import math
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return False
+    if not math.isfinite(scalar):
+        return False
+    normalized = normalize_hgcer_mask(mask)
+    threshold = normalized["value"]
+    operator = normalized["operator"]
+    return {
+        "==": scalar == threshold,
+        ">": scalar > threshold,
+        ">=": scalar >= threshold,
+        "<": scalar < threshold,
+        "<=": scalar <= threshold,
+    }[operator]
+
+
+def fingerprint_hgcer_pid_contract(contract=None):
+    """Return normalized masks plus a stable analysis-stage contract hash."""
+    source = PION_HGCER_PID_MASK_CONFIG if contract is None else contract
+    required = ("kaon_tree", "pion_tree", "physical_pion_control")
+    if not isinstance(source, dict) or set(source) != set(required):
+        raise ValueError("HGCer PID contract must contain exactly {}".format(", ".join(required)))
+    normalized = {
+        key: normalize_hgcer_mask(source[key], name="HGCer PID mask '{}'".format(key))
+        for key in required
+    }
+    # These expected selection semantics are part of the Part-2 safety
+    # contract, rather than an interpretation of strings from a ROOT file.
+    expected = {
+        "kaon_tree": ("==", 0.0),
+        "pion_tree": (">", 0.0),
+        "physical_pion_control": (">", 2.0),
+    }
+    for key, (operator, value) in expected.items():
+        if normalized[key]["operator"] != operator or normalized[key]["value"] != value:
+            raise ValueError("Part-2 {} must be P_hgcer_npeSum {} {}".format(key, operator, value))
+    encoded = json.dumps(normalized, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return {
+        "masks": normalized,
+        "fingerprint": hashlib.sha256(encoded.encode("utf-8")).hexdigest(),
+    }
+
+
+def get_pion_hgcer_transfer_config(inp_dict=None, phi_setting=None, setting_key=None):
+    """Resolve the isolated Part-2 response-map configuration."""
+    config = deepcopy(PION_HGCER_TRANSFER_CONFIG)
+    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
+        inp_dict=inp_dict, phi_setting=phi_setting, setting_key=setting_key,
+    )
+    override_layers = _resolve_particle_subtraction_override_layers(
+        PION_HGCER_TRANSFER_CONFIG_OVERRIDES,
+        setting_key=resolved_setting_key,
+        phi_setting=resolved_phi_setting,
+    )
+    for layer in override_layers:
+        config = _deep_merge_particle_subtraction_config(
+            config, layer.get("payload"), merge_keys=PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS,
+        )
+    runtime_override = inp_dict.get("pion_hgcer_transfer_config") if isinstance(inp_dict, dict) else None
+    config = _deep_merge_particle_subtraction_config(
+        config, runtime_override, merge_keys=PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS,
+    )
+    lower, upper = [float(value) for value in (config.get("fit_range") or ())]
+    if not lower < upper or lower < 0.0:
+        raise ValueError("Part-2 HGCer fit_range must be an increasing non-negative pair")
+    config["fit_range"] = (lower, upper)
+    for key in ("minimum_prompt_pion_records", "toy_count", "profile_points"):
+        if int(config.get(key, 0)) <= 0:
+            raise ValueError("Part-2 HGCer {} must be positive".format(key))
+    for key in (
+        "integer_tolerance", "minimum_accepted_toy_fraction", "profile_delta_nll",
+        "profile_log_mu_half_range", "covariance_condition_number_max", "pair_correlation_max",
+    ):
+        if float(config.get(key, 0.0)) <= 0.0:
+            raise ValueError("Part-2 HGCer {} must be positive".format(key))
+    if float(config["minimum_accepted_toy_fraction"]) > 1.0:
+        raise ValueError("Part-2 HGCer minimum_accepted_toy_fraction must not exceed one")
+    fallback = dict(config.get("fallback") or {})
+    if bool(fallback.get("setting_wide_enabled", False)):
+        raise ValueError("Part-2 HGCer setting-wide fallback is deliberately disabled")
+    if int(fallback.get("pooled_minimum_prompt_pion_records", 0)) <= 0:
+        raise ValueError("Part-2 HGCer pooled minimum prompt-pion records must be positive")
+    config["fallback"] = {
+        "bracketing_relative_uncertainty": float(fallback.get("bracketing_relative_uncertainty", 0.20)),
+        "edge_relative_uncertainty": float(fallback.get("edge_relative_uncertainty", 0.30)),
+        "pooled_minimum_prompt_pion_records": int(fallback["pooled_minimum_prompt_pion_records"]),
+        "setting_wide_enabled": False,
+    }
+    family = str(config.get("response_family") or "auto").strip().lower()
+    if family != "auto":
+        raise ValueError("Part-2 HGCer response_family currently supports only 'auto'")
+    config["response_family"] = family
+    config["pid_contract"] = fingerprint_hgcer_pid_contract()
+    config["pion_hgcer_transfer_setting_key"] = resolved_setting_key
+    config["pion_hgcer_transfer_phi_setting"] = resolved_phi_setting
+    config["pion_hgcer_transfer_override_layers"] = [
         layer.get("path") for layer in override_layers
     ] + (["runtime"] if isinstance(runtime_override, dict) else [])
     return config

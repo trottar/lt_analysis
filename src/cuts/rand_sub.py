@@ -80,6 +80,9 @@ from background_config import (
     resolve_particle_subtraction_weight_warn_max,
     get_proton_contamination_cleaning_config,
     get_pion_hgcer_diagnostic_config,
+    get_pion_hgcer_transfer_config,
+    fingerprint_hgcer_pid_contract,
+    hgcer_mask_accepts,
     get_particle_subtraction_setting_key,
     get_pion_component_dynamic_alignment_config,
 )
@@ -146,8 +149,16 @@ from pion_hgcer_diagnostics import (
     build_pion_hgcer_tdelta_diagnostic,
     pion_hgcer_display_text,
     render_pion_hgcer_tdelta_pages,
+    resolve_pion_hgcer_delta_edges,
     serialize_pion_hgcer_tdelta_diagnostic,
     write_pion_hgcer_tdelta_json,
+)
+from pion_hgcer_transfer import (
+    apply_frozen_pion_hgcer_transfer_map,
+    build_pion_hgcer_zerope_transfer_map,
+    render_pion_hgcer_zerope_transfer_pages,
+    serialize_pion_hgcer_zerope_transfer,
+    write_pion_hgcer_zerope_transfer_json,
 )
 
 ################################################################################################################################################
@@ -714,6 +725,7 @@ def _build_authoritative_pion_control_source_cache(
     norm_factor_data,
     norm_factor_dummy,
     n_windows,
+    delta_edges=None,
 ):
     """Build the one signed pion-control population used by t-bin parents.
 
@@ -730,6 +742,15 @@ def _build_authoritative_pion_control_source_cache(
         raise RuntimeError("pion_control_cache_requires_one_proton_product_per_canonical_t")
     if not isinstance(sub_tree_bundle, dict):
         raise RuntimeError("pion_control_cache_requires_subtracted_particle_tree_bundle")
+    pid_contract = fingerprint_hgcer_pid_contract()
+    physical_pion_control_mask = dict(pid_contract["masks"]["physical_pion_control"])
+    resolved_delta_edges = tuple(float(edge) for edge in (delta_edges or ()))
+    if resolved_delta_edges and (
+        len(resolved_delta_edges) < 2
+        or any(resolved_delta_edges[index] >= resolved_delta_edges[index + 1]
+               for index in range(len(resolved_delta_edges) - 1))
+    ):
+        raise RuntimeError("pion_control_cache_requires_increasing_delta_edges")
 
     child_cache_fields = (
         "source_label", "entry_index", "coefficient", "coordinate_fingerprint",
@@ -746,6 +767,12 @@ def _build_authoritative_pion_control_source_cache(
         "child_event_cache": child_cache,
         "kaon_data_coordinate": dict(coordinate_contract),
         "coordinate_fingerprint": coordinate_fingerprint,
+        # This is the one source of truth for the already-authoritative
+        # downstream control selection and for the Part-2 denominator.
+        "physical_pion_control_mask": physical_pion_control_mask,
+        "physical_pion_control_mask_fingerprint": pid_contract["fingerprint"],
+        "pid_contract": pid_contract,
+        "delta_edges": list(resolved_delta_edges),
     }
     for t_index, product in enumerate(products):
         final_targets = product.get("final_targets") or {}
@@ -776,6 +803,8 @@ def _build_authoritative_pion_control_source_cache(
             "source_accounting": {},
             "kaon_data_coordinate": dict(coordinate_contract),
             "coordinate_fingerprint": coordinate_fingerprint,
+            "physical_pion_control_mask": dict(physical_pion_control_mask),
+            "physical_pion_control_mask_fingerprint": pid_contract["fingerprint"],
         })
 
     # Diagnostic-only source overlays are detached from every production fit.
@@ -826,13 +855,13 @@ def _build_authoritative_pion_control_source_cache(
     cache["coordinate_diagnostics"] = source_coordinate_hists
 
     source_specs = (
-        ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data)),
-        ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(n_windows)),
-        ("dummy", sub_tree_bundle.get("dummy_prompt_tree"), -float(norm_factor_dummy)),
-        ("dummy_rand", sub_tree_bundle.get("dummy_rand_tree"), float(norm_factor_dummy) / float(n_windows)),
+        ("prompt", sub_tree_bundle.get("prompt_tree"), float(norm_factor_data), sub_tree_bundle.get("prompt_tree_name")),
+        ("rand", sub_tree_bundle.get("rand_tree"), -float(norm_factor_data) / float(n_windows), sub_tree_bundle.get("rand_tree_name")),
+        ("dummy", sub_tree_bundle.get("dummy_prompt_tree"), -float(norm_factor_dummy), sub_tree_bundle.get("prompt_tree_name")),
+        ("dummy_rand", sub_tree_bundle.get("dummy_rand_tree"), float(norm_factor_dummy) / float(n_windows), sub_tree_bundle.get("rand_tree_name")),
     )
     mm_offset_correction = 0.0 if get_shift_mode() == "shifted" else float(mm_offset_data)
-    for source_label, tree, coefficient in source_specs:
+    for source_label, tree, coefficient, source_tree_name in source_specs:
         source_audit = cache["source_accounting"].setdefault(source_label, {
             "tree_entries_seen": 0,
             "selected_records": 0,
@@ -842,6 +871,10 @@ def _build_authoritative_pion_control_source_cache(
             "signed_weight_sum": 0.0,
             "absolute_weight_support": 0.0,
             "coefficient": float(coefficient),
+            "tree_name": source_tree_name,
+            "rf_state": "noRF" if str(source_tree_name).endswith("_noRF") else "RF_or_unknown",
+            "pid_role": "pion_pid",
+            "proton_factor_scope": "none",
             "coordinate_fingerprint": coordinate_fingerprint,
             "coordinate_closure": {
                 "checked_records": 0,
@@ -869,7 +902,10 @@ def _build_authoritative_pion_control_source_cache(
                 hole_contains(evt.P_hgcer_xAtCer, evt.P_hgcer_yAtCer)
                 if hole_contains is not None else False
             )
-            pid_pass = evt.P_hgcer_npeSum > 2.0 if particle_type == "kaon" else True
+            pid_pass = (
+                hgcer_mask_accepts(getattr(evt, "P_hgcer_npeSum", None), physical_pion_control_mask)
+                if str(particle_type).strip().lower() == "kaon" else True
+            )
             allcuts = bool(base_allcuts and not hole_rejected and pid_pass)
             nommcuts = bool(base_nommcuts and not hole_rejected and pid_pass)
             if not (allcuts or nommcuts):
@@ -892,6 +928,9 @@ def _build_authoritative_pion_control_source_cache(
             )
             raw_t_index = _canonical_t_index(raw_t, t_bins)
             t_index = _canonical_t_index(adj_t, t_bins)
+            delta_index = _canonical_t_index(
+                float(getattr(evt, "ssdelta", float("nan"))), resolved_delta_edges
+            ) if resolved_delta_edges else None
             migration_key = "{}->{}".format(
                 "out" if raw_t_index is None else raw_t_index,
                 "out" if t_index is None else t_index,
@@ -937,8 +976,15 @@ def _build_authoritative_pion_control_source_cache(
                 "raw_t": raw_t,
                 "adj_MM": adj_mm,
                 "adj_t": adj_t,
+                "t_index": int(t_index),
                 "coordinate_fingerprint": coordinate_fingerprint,
+                "source_tree_name": source_tree_name,
+                "rf_state": "noRF" if str(source_tree_name).endswith("_noRF") else "RF_or_unknown",
+                "pid_role": "pion_pid",
                 "phi": float(evt.ph_q),
+                "ssdelta": float(getattr(evt, "ssdelta", float("nan"))),
+                "delta_index": int(delta_index) if delta_index is not None else None,
+                "P_hgcer_npeSum": float(getattr(evt, "P_hgcer_npeSum", float("nan"))),
                 "allcuts": bool(allcuts),
                 "nommcuts": bool(nommcuts),
                 "proton_cleaning_factor": None,
@@ -1050,7 +1096,7 @@ def _build_authoritative_pion_control_source_cache(
             global_cut.Add(entry["H_pion_control_cut"])
         cache["H_pion_control_global"] = global_full
         cache["H_pion_control_global_cut"] = global_cut
-    cache["definition"] = "one_signed_pion_control_source_cache_no_proton_weight"
+    cache["definition"] = "one_signed_pion_control_source_cache_no_proton_weight_physical_hgcer_mask_resolved"
     cache["immutable_record_contract"] = True
     return cache
 
@@ -4323,6 +4369,8 @@ def rand_sub(
     proton_cleaning_application = None
     pion_hgcer_tdelta_diagnostic = None
     pion_hgcer_tdelta_json = None
+    pion_hgcer_zerope_transfer = None
+    pion_hgcer_zerope_transfer_json = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -4651,6 +4699,14 @@ def rand_sub(
                         raise RuntimeError(
                             "authoritative_t_bin_pion_parents_require_direct_proton_products"
                         )
+                    pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
+                        inp_dict=inpDict,
+                        phi_setting=phi_setting,
+                    )
+                    pion_hgcer_delta_edges, _ = resolve_pion_hgcer_delta_edges(
+                        pion_hgcer_diagnostic_config,
+                        proton_cleaning_result,
+                    )
                     pion_control_cache = _build_authoritative_pion_control_source_cache(
                         sub_tree_bundle,
                         proton_t_products=proton_t_products,
@@ -4668,6 +4724,7 @@ def rand_sub(
                         norm_factor_data=norm_factor_data,
                         norm_factor_dummy=norm_factor_dummy,
                         n_windows=nWindows,
+                        delta_edges=pion_hgcer_delta_edges,
                     )
                     histDict["_authoritative_pion_control_source_cache"] = pion_control_cache
                     histDict["pion_control_source_audit"] = {
@@ -4675,11 +4732,9 @@ def rand_sub(
                         "source_accounting": pion_control_cache.get("source_accounting"),
                         "coordinate_fingerprint": pion_control_cache.get("coordinate_fingerprint"),
                         "kaon_data_coordinate": pion_control_cache.get("kaon_data_coordinate"),
+                        "physical_pion_control_mask": pion_control_cache.get("physical_pion_control_mask"),
+                        "physical_pion_control_mask_fingerprint": pion_control_cache.get("physical_pion_control_mask_fingerprint"),
                     }
-                    pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
-                        inp_dict=inpDict,
-                        phi_setting=phi_setting,
-                    )
                     if bool(pion_hgcer_diagnostic_config.get("enabled", False)):
                         try:
                             pion_hgcer_tdelta_diagnostic = (
@@ -4756,6 +4811,59 @@ def rand_sub(
                         histDict["pion_hgcer_tdelta_diagnostic_artifacts"] = [
                             pion_hgcer_tdelta_json
                         ]
+                        # Part 2 consumes only the frozen Part-1 records and
+                        # the already-authoritative cache.  Its every failure
+                        # stays diagnostic-only and cannot alter the component
+                        # fit, production pion weight, or proton products.
+                        try:
+                            pion_hgcer_transfer_config = get_pion_hgcer_transfer_config(
+                                inp_dict=inpDict,
+                                phi_setting=phi_setting,
+                            )
+                            if bool(pion_hgcer_transfer_config.get("enabled", False)):
+                                pion_hgcer_zerope_transfer = build_pion_hgcer_zerope_transfer_map(
+                                    pion_hgcer_tdelta_diagnostic,
+                                    pion_control_cache,
+                                    config=pion_hgcer_transfer_config,
+                                )
+                                pion_hgcer_zerope_transfer["application"] = (
+                                    apply_frozen_pion_hgcer_transfer_map(
+                                        pion_hgcer_zerope_transfer,
+                                        pion_control_cache,
+                                        proton_t_products,
+                                    )
+                                )
+                        except Exception as exc:
+                            pion_hgcer_zerope_transfer = {
+                                "status": "unavailable",
+                                "reason": str(exc),
+                                "exception_type": type(exc).__name__,
+                                "diagnostic_stage": "part2_build",
+                                "non_authoritative": True,
+                                "production_side_effect_free": True,
+                                "production_pion_subtraction_unchanged": True,
+                                "noRF_host_terminology": True,
+                                "rf_restoration_applied": False,
+                            }
+                        if isinstance(pion_hgcer_zerope_transfer, dict):
+                            pion_hgcer_zerope_transfer_json = os.path.join(
+                                OUTPATH,
+                                "{}_{}_pion_hgcer_zerope_transfer.json".format(
+                                    phi_setting, OutFilename
+                                ),
+                            )
+                            write_pion_hgcer_zerope_transfer_json(
+                                pion_hgcer_zerope_transfer_json,
+                                pion_hgcer_zerope_transfer,
+                            )
+                            histDict["pion_hgcer_zerope_transfer"] = (
+                                serialize_pion_hgcer_zerope_transfer(
+                                    pion_hgcer_zerope_transfer
+                                )
+                            )
+                            histDict["pion_hgcer_zerope_transfer_artifacts"] = [
+                                pion_hgcer_zerope_transfer_json
+                            ]
 
                 histDict["proton_contamination_cleaning_result_setting"] = (
                     serialize_kaon_proton_cleaning_result(proton_cleaning_result)
@@ -6551,7 +6659,7 @@ def rand_sub(
                 page_manifest=histDict.setdefault(
                     "pion_hgcer_tdelta_diagnostic_page_manifest", []
                 ),
-                close_pdf=True,
+                close_pdf=not isinstance(pion_hgcer_zerope_transfer, dict),
             )
             histDict["pion_hgcer_tdelta_diagnostic"] = (
                 serialize_pion_hgcer_tdelta_diagnostic(
@@ -6569,6 +6677,31 @@ def rand_sub(
                 emitted=len(emitted_hgcer_pages),
                 status=pion_hgcer_tdelta_diagnostic.get("status"),
             )
+            if isinstance(pion_hgcer_zerope_transfer, dict):
+                emitted_part2_pages = render_pion_hgcer_zerope_transfer_pages(
+                    diagnostic_pdf,
+                    pion_hgcer_zerope_transfer,
+                    title_prefix="{} {}".format(phi_setting, ParticleType),
+                    page_manifest=histDict.setdefault(
+                        "pion_hgcer_zerope_transfer_page_manifest", []
+                    ),
+                    close_pdf=True,
+                )
+                histDict["pion_hgcer_zerope_transfer"] = (
+                    serialize_pion_hgcer_zerope_transfer(
+                        pion_hgcer_zerope_transfer
+                    )
+                )
+                if pion_hgcer_zerope_transfer_json is not None:
+                    write_pion_hgcer_zerope_transfer_json(
+                        pion_hgcer_zerope_transfer_json,
+                        pion_hgcer_zerope_transfer,
+                    )
+                _print_rand_debug(
+                    "pion HGCer zero-PE transfer pages",
+                    emitted=len(emitted_part2_pages),
+                    status=pion_hgcer_zerope_transfer.get("status"),
+                )
         else:
             c_hgcer_hole.Print(diagnostic_pdf + ')')
 
