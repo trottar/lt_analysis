@@ -156,6 +156,7 @@ from pion_hgcer_diagnostics import (
 from pion_hgcer_transfer import (
     apply_frozen_pion_hgcer_transfer_map,
     build_pion_hgcer_zerope_transfer_map,
+    render_pion_hgcer_zerope_transfer_failure_page,
     render_pion_hgcer_zerope_transfer_pages,
     serialize_pion_hgcer_zerope_transfer,
     write_pion_hgcer_zerope_transfer_json,
@@ -6678,15 +6679,67 @@ def rand_sub(
                 status=pion_hgcer_tdelta_diagnostic.get("status"),
             )
             if isinstance(pion_hgcer_zerope_transfer, dict):
-                emitted_part2_pages = render_pion_hgcer_zerope_transfer_pages(
-                    diagnostic_pdf,
-                    pion_hgcer_zerope_transfer,
-                    title_prefix="{} {}".format(phi_setting, ParticleType),
-                    page_manifest=histDict.setdefault(
-                        "pion_hgcer_zerope_transfer_page_manifest", []
-                    ),
-                    close_pdf=True,
+                # These ROOT objects already exist at this terminal display
+                # stage.  They are passed ephemerally to Part 2 only for
+                # closure overlays; the renderer never reloads, refits,
+                # normalizes, or serializes them.
+                part2_renderer_inputs = {"by_t": {}, "global": {}}
+                for parent in t_bin_parent_results:
+                    parent_fit = (parent or {}).get("fit_result") or {}
+                    try:
+                        parent_t_index = int((parent or {}).get("t_bin_index"))
+                    except (TypeError, ValueError):
+                        continue
+                    part2_renderer_inputs["by_t"][parent_t_index] = {
+                        "simc": {
+                            "pi-n": parent_fit.get("H_kaon_fit_pi_n_scaled"),
+                            "pi-delta": parent_fit.get("H_kaon_fit_pi_delta_scaled"),
+                            "pi-SIDIS": parent_fit.get("H_kaon_fit_pi_sidis_scaled"),
+                        },
+                        "signal": {
+                            "K-Lambda": parent_fit.get("H_kaon_fit_k_lambda_scaled"),
+                            "K-Sigma0": parent_fit.get("H_kaon_fit_k_sigma0_scaled"),
+                        },
+                    }
+                if isinstance(component_fit_result, dict):
+                    part2_renderer_inputs["global"] = {
+                        "simc": {
+                            "pi-n": component_fit_result.get("H_kaon_fit_pi_n_scaled"),
+                            "pi-delta": component_fit_result.get("H_kaon_fit_pi_delta_scaled"),
+                            "pi-SIDIS": component_fit_result.get("H_kaon_fit_pi_sidis_scaled"),
+                        },
+                        "signal": {
+                            "K-Lambda": component_fit_result.get("H_kaon_fit_k_lambda_scaled"),
+                            "K-Sigma0": component_fit_result.get("H_kaon_fit_k_sigma0_scaled"),
+                        },
+                    }
+                part2_manifest = histDict.setdefault(
+                    "pion_hgcer_zerope_transfer_page_manifest", []
                 )
+                try:
+                    emitted_part2_pages = render_pion_hgcer_zerope_transfer_pages(
+                        diagnostic_pdf,
+                        pion_hgcer_zerope_transfer,
+                        title_prefix="{} {}".format(phi_setting, ParticleType),
+                        page_manifest=part2_manifest,
+                        close_pdf=True,
+                        renderer_inputs=part2_renderer_inputs,
+                    )
+                    pion_hgcer_zerope_transfer["rendering_status"] = "available"
+                except Exception as exc:
+                    # Part 2 is terminal diagnostic presentation only.  A
+                    # failed page contract must still leave a closed PDF and
+                    # cannot propagate into Part 1/1.5 or production state.
+                    reason = "{}: {}".format(type(exc).__name__, exc)
+                    emitted_part2_pages = render_pion_hgcer_zerope_transfer_failure_page(
+                        diagnostic_pdf, reason,
+                        title_prefix="{} {}".format(phi_setting, ParticleType),
+                        page_manifest=part2_manifest,
+                        close_pdf=True,
+                    )
+                    pion_hgcer_zerope_transfer["rendering_status"] = "unavailable"
+                    pion_hgcer_zerope_transfer["rendering_failure_reason"] = reason
+                pion_hgcer_zerope_transfer["render_manifest"] = emitted_part2_pages
                 histDict["pion_hgcer_zerope_transfer"] = (
                     serialize_pion_hgcer_zerope_transfer(
                         pion_hgcer_zerope_transfer

@@ -66,6 +66,49 @@ def _part1(records, cells=None, no_rf=True):
     }
 
 
+def _render_payload(t_count=2, *, include_application=True):
+    """Frozen display-only payload for manifest and extractor contracts."""
+    cells = []
+    for t_index in range(t_count):
+        for delta_index in range(2):
+            p0 = 0.08 + 0.01 * t_index + 0.001 * delta_index
+            cells.append({
+                "t_index": t_index, "delta_index": delta_index,
+                "support_class": "supported",
+                "fit": {
+                    "fit_status": "fit_valid", "model_family": "zero_truncated_poisson",
+                    "P0": p0, "P0_relative_statistical_uncertainty": 0.12,
+                    "response_display": {
+                        "bin_edges": [0.5, 1.5, 2.5, 3.5], "bin_counts": [6.0, 9.0, 5.0],
+                        "primary_response": {"x": [1.0, 2.0, 3.0], "y": [6.0, 9.0, 5.0]},
+                        "alternate_response": {"x": [1.0, 2.0, 3.0], "y": [5.0, 9.0, 6.0]},
+                    },
+                    "profile": {"grid_log_mu": [0.0, 1.0, 2.0], "grid_nll": [2.0, 1.0, 2.0]},
+                },
+                "solution": {
+                    "solution_source": "direct", "transfer": 0.2 + 0.01 * delta_index,
+                    "transfer_statistical_uncertainty": 0.02,
+                    "transfer_model_uncertainty": 0.01,
+                    "transfer_fallback_uncertainty": 0.0,
+                    "transfer_total_uncertainty": 0.0224,
+                },
+                "part3_cell_eligibility": {"status": "review_eligible", "reason": "direct_valid_model_checked"},
+            })
+    payload = {
+        "status": "available", "frozen": True, "map_fingerprint": "render-test",
+        "Part3_eligibility": "review_eligible", "t_edges": list(np.arange(t_count + 1, dtype=float)),
+        "delta_edges": [-2.0, 0.0, 2.0], "cells": cells,
+        "pid_contract": fingerprint_hgcer_pid_contract(),
+    }
+    if include_application:
+        payload["application"] = {
+            "status": "available",
+            "histograms": {index: {"host": object(), "pion": object(), "clean": object()} for index in range(t_count)},
+            "global_histograms": {"host": object(), "pion": object(), "clean": object()},
+        }
+    return payload
+
+
 class PionHGCerTransferPurePythonTests(unittest.TestCase):
     def test_mask_contract_boundaries_and_fingerprint_are_stable(self):
         contract = fingerprint_hgcer_pid_contract()
@@ -186,16 +229,70 @@ class PionHGCerTransferPurePythonTests(unittest.TestCase):
         unavailable = transfer.apply_frozen_pion_hgcer_transfer_map({}, {}, ())
         self.assertEqual(unavailable["status"], "unavailable")
 
+    def test_semantic_page_specs_reject_generic_graphical_placeholders(self):
+        for spec_key, spec in transfer.PART2_PAGE_SPECS.items():
+            if spec["kind"] == "graphical":
+                self.assertTrue(spec["required_roles"], spec_key)
+                self.assertNotEqual(spec["renderer"], "status")
+        page = transfer._part2_page("part2_proposed_mm_t2", "proposed_mm", t_index=1)
+        with self.assertRaisesRegex(RuntimeError, "host_mm"):
+            transfer._validate_part2_graphical_page(page, [("pion_mm", object()), ("clean_mm", object())])
+        transfer._validate_part2_graphical_page(
+            page, [("host_mm", object()), ("pion_mm", object()), ("clean_mm", object())]
+        )
+
+    def test_matrix_series_uncertainty_and_undefined_cells_are_exactly_masked(self):
+        payload = _render_payload(2)
+        payload["cells"][1]["solution"]["transfer"] = None
+        transfer_map = transfer.extract_pion_hgcer_transfer_tdelta_matrix(payload, "transfer")
+        self.assertEqual(transfer_map["values"], [[0.2, None], [0.2, 0.21000000000000002]])
+        uncertainty_map = transfer.extract_pion_hgcer_transfer_tdelta_matrix(payload, "model_uncertainty")
+        self.assertEqual(uncertainty_map["values"][0], [0.01, 0.01])
+        p0_series = transfer.extract_pion_hgcer_transfer_t_series(payload, 1, "P0")
+        self.assertEqual(p0_series["t_index"], 1)
+        self.assertEqual(p0_series["values"], [0.09, 0.091])
+        eligibility = transfer.extract_pion_hgcer_transfer_categorical_map(payload, "part3_eligibility")
+        self.assertEqual(eligibility["values"][0][0], "review_eligible")
+        self.assertNotIn(0.0, transfer_map["values"][0])
+
+    def test_runtime_t_manifest_has_every_dynamic_page_once(self):
+        for t_count in (1, 2, 3, 5):
+            payload = _render_payload(t_count)
+            renderer_inputs = {
+                "by_t": {
+                    index: {"simc": {"pi-n": object()}, "signal": {"K-Lambda": object()}}
+                    for index in range(t_count)
+                },
+                "global": {"simc": {"pi-n": object()}, "signal": {"K-Lambda": object()}},
+            }
+            manifest = transfer.expected_pion_hgcer_transfer_page_manifest(
+                payload, renderer_inputs=renderer_inputs
+            )
+            page_ids = [page["page_id"] for page in manifest]
+            for t_index in range(t_count):
+                number = t_index + 1
+                for page_id in (
+                    "part2_transfer_t{}".format(number), "part2_p0_t{}".format(number),
+                    "part2_response_fit_t{}_delta1".format(number), "part2_proposed_mm_t{}".format(number),
+                    "part2_simc_closure_t{}".format(number), "part2_signal_closure_t{}".format(number),
+                ):
+                    self.assertEqual(page_ids.count(page_id), 1, (t_count, page_id))
+                    self.assertEqual(next(page for page in manifest if page["page_id"] == page_id)["t_index"], t_index)
+            self.assertIn("part2_proposed_mm_global", page_ids)
+            self.assertIn("part2_simc_closure_global", page_ids)
+            self.assertIn("part2_signal_closure_global", page_ids)
+
 
 @unittest.skipUnless(ROOT is not None, "PyROOT unavailable")
 class PionHGCerTransferPyROOTTests(unittest.TestCase):
     def test_frozen_application_uses_detached_norf_host_and_serializes_manifest(self):
         host = ROOT.TH1D("part2_host", "noRF host", 20, 0.7, 1.5)
         host.SetDirectory(0)
-        host.Fill(1.10, 10.0)
+        host.Fill(1.10, 0.1)
         payload = {
             "status": "available", "frozen": True, "map_fingerprint": "map-test",
             "Part3_eligibility": "review_required_incomplete_uncertainty_or_solution",
+            "t_edges": [0.1, 0.2], "delta_edges": [-1.0, 1.0],
             "cells": [{"t_index": 0, "delta_index": 0, "solution": {"transfer": 0.25, "solution_source": "direct"}}],
         }
         cache = {"by_t": ({"records": ({
@@ -209,13 +306,50 @@ class PionHGCerTransferPyROOTTests(unittest.TestCase):
         self.assertEqual(application["host_label"], "proton-cleaned noRF host")
         self.assertEqual(float(host.Integral()), before)
         self.assertAlmostEqual(application["t_products"][0]["pion_integral"], 0.5)
+        self.assertLess(float(application["histograms"][0]["clean"].GetMinimum()), 0.0)
         payload["application"] = application
         manifest = transfer.expected_pion_hgcer_transfer_page_manifest(payload)
-        self.assertEqual(manifest[-1], "part2_proposed_noRF_host_mm")
+        self.assertIn("part2_proposed_mm_t1", [page["page_id"] for page in manifest])
+        self.assertIn("part2_proposed_mm_global", [page["page_id"] for page in manifest])
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "part2.json"
             transfer.write_pion_hgcer_zerope_transfer_json(path, payload)
             self.assertIn("noRF", path.read_text(encoding="utf-8"))
+
+    def test_real_renderer_requires_and_records_graphical_semantics(self):
+        payload = _render_payload(1, include_application=False)
+        host = ROOT.TH1D("part2_render_host", "host", 10, 0.8, 1.4)
+        pion = ROOT.TH1D("part2_render_pion", "pion", 10, 0.8, 1.4)
+        clean = ROOT.TH1D("part2_render_clean", "clean", 10, 0.8, 1.4)
+        for histogram in (host, pion, clean):
+            histogram.SetDirectory(0)
+        host.Fill(1.1, 0.1); pion.Fill(1.1, 0.5); clean.Add(host); clean.Add(pion, -1.0)
+        payload["application"] = {
+            "status": "available", "histograms": {0: {"host": host, "pion": pion, "clean": clean}},
+            "global_histograms": {"host": host, "pion": pion, "clean": clean},
+        }
+        before = [float(clean.GetBinContent(index)) for index in range(0, clean.GetNbinsX() + 2)]
+        renderer_inputs = {
+            "by_t": {0: {"simc": {"pi-n": host}, "signal": {"K-Lambda": host, "K-Sigma0": pion}}},
+            "global": {"simc": {"pi-n": host}, "signal": {"K-Lambda": host, "K-Sigma0": pion}},
+        }
+        expected = transfer.expected_pion_hgcer_transfer_page_manifest(payload, renderer_inputs=renderer_inputs)
+        with tempfile.TemporaryDirectory() as temporary:
+            pdf = Path(temporary) / "part2.pdf"
+            emitted = transfer.render_pion_hgcer_zerope_transfer_pages(
+                pdf, payload, renderer_inputs=renderer_inputs, close_pdf=True
+            )
+            self.assertTrue(pdf.exists())
+            self.assertGreater(pdf.stat().st_size, 0)
+        self.assertEqual([record["page_id"] for record in emitted], [page["page_id"] for page in expected])
+        for page in expected:
+            if page["page_kind"] != "graphical":
+                continue
+            record = next(item for item in emitted if item["page_id"] == page["page_id"])
+            roles = {item["role"] for item in record["semantic_primitives"]}
+            self.assertTrue(set(page["required_roles"]).issubset(roles), page["page_id"])
+        self.assertLess(float(clean.GetMinimum()), 0.0)
+        self.assertEqual(before, [float(clean.GetBinContent(index)) for index in range(0, clean.GetNbinsX() + 2)])
 
 
 if __name__ == "__main__":

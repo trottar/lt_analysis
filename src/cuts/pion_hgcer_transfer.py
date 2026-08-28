@@ -7,6 +7,7 @@ construct detached proposed MM products for review by a later Part-3 decision.
 
 from __future__ import annotations
 
+from array import array
 from copy import deepcopy
 import hashlib
 import json
@@ -43,8 +44,15 @@ ROOT_SAFE_TRANSFER_LABELS = {
     "relative_p0": "Relative P0 statistical uncertainty",
     "transfer": "Proposed pion-to-kaon transfer R",
     "uncertainty": "Proposed transfer total uncertainty",
+    "statistical_uncertainty": "Proposed transfer statistical uncertainty",
+    "model_uncertainty": "Proposed transfer model uncertainty",
+    "fallback_uncertainty": "Proposed transfer fallback uncertainty",
     "fit_status": "Part 2 fit status",
     "solution_source": "Part 2 solution source",
+    "eligibility": "Part 3 review eligibility by cell",
+    "response_fit": "Prompt-pion HGCer response fit",
+    "simc_closure": "SIMC closure view - diagnostic only",
+    "signal_closure": "K-Lambda and K-Sigma0 closure view - diagnostic only",
     "proposed_mm": "Proposed pion subtraction from proton-cleaned noRF host",
 }
 
@@ -514,6 +522,10 @@ def fit_zero_photoelectron_response(values, *, response_mask, contract, config):
     primary["alternate_model_family"] = alternate.get("model_family")
     primary["alternate_fit_status"] = alternate.get("fit_status")
     primary["alternate_transfer"] = alternate.get("transfer")
+    # The complete alternate result is diagnostic display data only.  Keeping
+    # it beside the frozen primary fit lets the PDF draw the already-computed
+    # alternate response curve without a second fit at render time.
+    primary["alternate_fit"] = alternate
     if primary.get("transfer") is not None and alternate.get("fit_status") == "fit_valid" and alternate.get("transfer") is not None:
         primary["transfer_model_uncertainty"] = abs(float(primary["transfer"]) - float(alternate["transfer"]))
         primary["model_systematic_status"] = "available"
@@ -622,6 +634,121 @@ def _unavailable_transfer(reason, config=None, audit=None):
     }
 
 
+def _response_display_curve(fit, response_mask, fit_range, sample_count):
+    """Return a display-only expected response curve from an existing fit."""
+    if not isinstance(fit, dict) or not fit.get("fit_parameters_log"):
+        return None
+    family = str(fit.get("model_family") or "")
+    parameters = [float(value) for value in fit.get("fit_parameters_log") or ()]
+    lower, upper = [float(value) for value in fit_range]
+    mu = math.exp(parameters[0])
+    if family in {"zero_truncated_poisson", "zero_truncated_negative_binomial"}:
+        x_values = np.arange(max(0, int(math.ceil(lower))), int(math.floor(upper)) + 1, dtype=float)
+        if family == "zero_truncated_poisson":
+            probability = np.exp(_poisson_logpmf(x_values, mu))
+            normalization = _poisson_fit_normalization(mu, response_mask, fit_range)
+        else:
+            shape = math.exp(parameters[1])
+            probability = np.exp(_nbinom_logpmf(x_values, mu, shape))
+            normalization = sum(
+                math.exp(float(_nbinom_logpmf([number], mu, shape)[0]))
+                for number in range(max(0, int(math.ceil(lower))), int(math.floor(upper)) + 1)
+                if hgcer_mask_accepts(number, response_mask)
+            )
+        if normalization <= 0.0:
+            return None
+        return {
+            "x": list(map(float, x_values)),
+            "y": list(map(float, float(sample_count) * probability / normalization)),
+            "kind": "expected_bin_count",
+        }
+    if family not in {
+        "zero_truncated_compound_poisson_gamma_gain",
+        "zero_truncated_compound_poisson_exponential_gain",
+    }:
+        return None
+    shape = 1.0 if "exponential" in family else math.exp(parameters[1])
+    scale = math.exp(parameters[-1])
+    x_values = np.linspace(lower, upper, 240)
+    normalization = _compound_interval_probability(mu, shape, scale, lower, upper)
+    if normalization <= 0.0:
+        return None
+    # The fit domain is positive in the continuous case; the response mask
+    # has already been enforced by the selected prompt-pion records.
+    density = _compound_density(x_values, mu, shape, scale) / normalization
+    return {
+        "x": list(map(float, x_values)),
+        "y": list(map(float, density * float(sample_count) * (upper - lower) / 40.0)),
+        "kind": "expected_bin_count_density",
+    }
+
+
+def _make_response_display(values, fit, config):
+    """Compact JSON-safe binned data and existing-fit curves for rendering."""
+    lower, upper = [float(value) for value in config["fit_range"]]
+    integer_like = bool((fit or {}).get("integer_like"))
+    if integer_like:
+        bin_edges = np.arange(max(-0.5, math.floor(lower) - 0.5), math.ceil(upper) + 1.5, 1.0)
+    else:
+        bin_edges = np.linspace(lower, upper, 41)
+    selected = np.asarray([
+        value for value in (_finite(item) for item in values or ())
+        if value is not None and lower <= value <= upper
+    ], dtype=float)
+    counts, edges = np.histogram(selected, bins=bin_edges)
+    response_mask = (fit or {}).get("response_mask") or config["pid_contract"]["masks"]["pion_tree"]
+    display = {
+        "fit_range": [lower, upper],
+        "bin_edges": list(map(float, edges)),
+        "bin_counts": list(map(float, counts)),
+        "record_count": int(len(selected)),
+        "primary_response": _response_display_curve(fit or {}, response_mask, (lower, upper), len(selected)),
+        "alternate_response": None,
+    }
+    alternate = (fit or {}).get("alternate_fit") or {}
+    if alternate.get("fit_status") in {"fit_valid", "fit_valid_but_P0_weakly_constrained"}:
+        display["alternate_response"] = _response_display_curve(
+            alternate, response_mask, (lower, upper), len(selected)
+        )
+    return _json_ready(display)
+
+
+def _solution_display_fields(solution, fit):
+    """Expose uncertainty components without modifying map construction."""
+    result = dict(solution or {})
+    source = result.get("solution_source")
+    source_fit = result.get("pooled_fit") if source == "same_t_pooled" else fit
+    if source == "direct" or source == "same_t_pooled":
+        result["transfer_statistical_uncertainty"] = (source_fit or {}).get("transfer_statistical_uncertainty")
+        result["transfer_model_uncertainty"] = (source_fit or {}).get("transfer_model_uncertainty")
+        result["transfer_fallback_uncertainty"] = 0.0
+    elif source in {"same_t_delta_bracket", "same_t_delta_edge"}:
+        # Existing fallback totals are intentionally preserved.  Their extra
+        # conservative term is shown separately rather than recomputed.
+        result["transfer_statistical_uncertainty"] = None
+        result["transfer_model_uncertainty"] = None
+        result["transfer_fallback_uncertainty"] = result.get("transfer_total_uncertainty")
+    else:
+        result["transfer_statistical_uncertainty"] = None
+        result["transfer_model_uncertainty"] = None
+        result["transfer_fallback_uncertainty"] = None
+    return result
+
+
+def _cell_part3_eligibility(cell, fit, solution):
+    if cell.get("support_class") != "supported":
+        return {"status": "unsupported", "reason": "full_cell_not_supported"}
+    if fit.get("fit_status") == "fit_valid_but_P0_weakly_constrained":
+        return {"status": "weak_P0", "reason": fit.get("reason")}
+    if solution.get("transfer") is None:
+        return {"status": "unresolved", "reason": solution.get("solution_source")}
+    if solution.get("solution_source") != "direct":
+        return {"status": "review_required_fallback", "reason": solution.get("solution_source")}
+    if fit.get("model_systematic_status") != "available":
+        return {"status": "incomplete_model_uncertainty", "reason": "alternate_model_unavailable"}
+    return {"status": "review_eligible", "reason": "direct_valid_model_checked"}
+
+
 def _solve_fallbacks(cells, fits, response_samples, contract, config):
     solution = {}
     fallback = config["fallback"]
@@ -670,6 +797,9 @@ def _solve_fallbacks(cells, fits, response_samples, contract, config):
                 pooled_values, response_mask=contract["masks"]["pion_tree"], contract=contract, config=pooled_config,
             )
             if pooled_fit.get("fit_status") == "fit_valid":
+                pooled_fit["response_display"] = _make_response_display(
+                    pooled_values, pooled_fit, config
+                )
                 solution[(t_index, delta_index)] = {"solution_source": "same_t_pooled", "transfer": pooled_fit.get("transfer"), "transfer_total_uncertainty": pooled_fit.get("transfer_total_uncertainty"), "pooled_fit": pooled_fit}
     return solution
 
@@ -702,13 +832,19 @@ def build_pion_hgcer_zerope_transfer_map(part1_payload, pion_control_cache, *, c
         fits[key] = fit_zero_photoelectron_response(
             response_samples[key], response_mask=contract["masks"]["pion_tree"], contract=contract, config=direct_config,
         )
+        fits[key]["response_display"] = _make_response_display(
+            response_samples[key], fits[key], config
+        )
     solutions = _solve_fallbacks(cells, fits, response_samples, contract, config)
     serialized_cells = []
     for key in sorted(cells):
         entry = dict(cells[key])
         entry["response_prompt_record_count"] = int(len(response_samples[key]))
         entry["fit"] = fits[key]
-        entry["solution"] = solutions[key]
+        entry["solution"] = _solution_display_fields(solutions[key], fits[key])
+        entry["part3_cell_eligibility"] = _cell_part3_eligibility(
+            entry, fits[key], entry["solution"]
+        )
         serialized_cells.append(entry)
     essentials = [{
         "t_index": cell["t_index"], "delta_index": cell["delta_index"],
@@ -748,6 +884,106 @@ def build_pion_hgcer_zerope_transfer_map(part1_payload, pion_control_cache, *, c
     }
 
 
+_PART2_NUMERIC_MATRIX_PATHS = {
+    "P0": ("fit", "P0"),
+    "relative_P0_uncertainty": ("fit", "P0_relative_statistical_uncertainty"),
+    "transfer": ("solution", "transfer"),
+    "statistical_uncertainty": ("solution", "transfer_statistical_uncertainty"),
+    "model_uncertainty": ("solution", "transfer_model_uncertainty"),
+    "fallback_uncertainty": ("solution", "transfer_fallback_uncertainty"),
+    "total_uncertainty": ("solution", "transfer_total_uncertainty"),
+}
+
+
+_PART2_CATEGORICAL_MATRIX_PATHS = {
+    "response_family": ("fit", "model_family"),
+    "fit_status": ("fit", "fit_status"),
+    "solution_source": ("solution", "solution_source"),
+    "part3_eligibility": ("part3_cell_eligibility", "status"),
+}
+
+
+def _cell_path_value(cell, path):
+    value = cell
+    for key in path:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+    return value
+
+
+def extract_pion_hgcer_transfer_tdelta_matrix(payload, field):
+    """Return a masked t-delta display matrix; undefined values stay None."""
+    if field not in _PART2_NUMERIC_MATRIX_PATHS:
+        raise ValueError("unknown Part-2 numeric matrix '{}'".format(field))
+    t_edges = list((payload or {}).get("t_edges") or ())
+    delta_edges = list((payload or {}).get("delta_edges") or ())
+    matrix = [[None for _ in range(max(0, len(delta_edges) - 1))] for _ in range(max(0, len(t_edges) - 1))]
+    for cell in (payload or {}).get("cells") or ():
+        try:
+            t_index, delta_index = int(cell["t_index"]), int(cell["delta_index"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if not (0 <= t_index < len(matrix) and 0 <= delta_index < len(matrix[t_index])):
+            continue
+        matrix[t_index][delta_index] = _finite(_cell_path_value(cell, _PART2_NUMERIC_MATRIX_PATHS[field]))
+    return {"field": field, "t_edges": t_edges, "delta_edges": delta_edges, "values": matrix}
+
+
+def extract_pion_hgcer_transfer_categorical_map(payload, field):
+    """Return an exact categorical t-delta display matrix with masked cells."""
+    if field not in _PART2_CATEGORICAL_MATRIX_PATHS:
+        raise ValueError("unknown Part-2 categorical matrix '{}'".format(field))
+    t_edges = list((payload or {}).get("t_edges") or ())
+    delta_edges = list((payload or {}).get("delta_edges") or ())
+    matrix = [[None for _ in range(max(0, len(delta_edges) - 1))] for _ in range(max(0, len(t_edges) - 1))]
+    for cell in (payload or {}).get("cells") or ():
+        try:
+            t_index, delta_index = int(cell["t_index"]), int(cell["delta_index"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= t_index < len(matrix) and 0 <= delta_index < len(matrix[t_index]):
+            value = _cell_path_value(cell, _PART2_CATEGORICAL_MATRIX_PATHS[field])
+            matrix[t_index][delta_index] = str(value) if value is not None else None
+    categories = sorted({value for row in matrix for value in row if value is not None})
+    return {"field": field, "t_edges": t_edges, "delta_edges": delta_edges, "values": matrix, "categories": categories}
+
+
+def extract_pion_hgcer_transfer_t_series(payload, t_index, field):
+    """Return a masked per-t delta series from the frozen cell payload."""
+    matrix = extract_pion_hgcer_transfer_tdelta_matrix(payload, field)
+    index = int(t_index)
+    if not 0 <= index < len(matrix["values"]):
+        raise ValueError("Part-2 t index {} is outside the frozen map".format(index))
+    edges = matrix["delta_edges"]
+    return {
+        "field": field, "t_index": index,
+        "delta_centers": [0.5 * (float(edges[i]) + float(edges[i + 1])) for i in range(len(edges) - 1)],
+        "delta_half_widths": [0.5 * (float(edges[i + 1]) - float(edges[i])) for i in range(len(edges) - 1)],
+        "values": list(matrix["values"][index]),
+    }
+
+
+def extract_pion_hgcer_response_fit_pages(payload):
+    """List direct and same-t pooled existing fits once, without fitting."""
+    pages, pooled_t = [], set()
+    for cell in sorted((payload or {}).get("cells") or (), key=lambda item: (item.get("t_index", -1), item.get("delta_index", -1))):
+        fit = cell.get("fit") or {}
+        display = fit.get("response_display") or {}
+        if display.get("primary_response") is not None:
+            pages.append({
+                "fit_source": "direct", "t_index": int(cell["t_index"]),
+                "delta_index": int(cell["delta_index"]), "fit": fit,
+            })
+        pooled = (cell.get("solution") or {}).get("pooled_fit") or {}
+        pooled_display = pooled.get("response_display") or {}
+        t_index = int(cell.get("t_index", -1))
+        if t_index not in pooled_t and pooled_display.get("primary_response") is not None:
+            pages.append({"fit_source": "same_t_pooled", "t_index": t_index, "delta_index": None, "fit": pooled})
+            pooled_t.add(t_index)
+    return pages
+
+
 def serialize_pion_hgcer_zerope_transfer(payload):
     payload = payload or {}
     result = {
@@ -758,7 +994,7 @@ def serialize_pion_hgcer_zerope_transfer(payload):
     if isinstance(application, dict):
         result["application"] = {
             key: value for key, value in application.items()
-            if key not in {"histograms", "application_histograms"}
+            if key not in {"histograms", "application_histograms", "global_histograms"}
         }
     return _json_ready(result)
 
@@ -837,55 +1073,448 @@ def apply_frozen_pion_hgcer_transfer_map(payload, pion_control_cache, proton_t_p
             "most_negative_clean_bin": most_negative_clean_bin,
         })
         detached[t_index] = {"host": host, "pion": pion_hist, "clean": clean_hist}
+    global_histograms = {}
+    if detached:
+        # These are sums of detached per-t products only.  They deliberately
+        # never refill from records and therefore cannot change application
+        # weights or hide negative proposed-clean bins.
+        first = detached[sorted(detached)[0]]
+        for role in ("host", "pion", "clean"):
+            aggregate = clone_root_histogram(
+                first[role], scope="pion_hgcer_part2", role="global_{}_mm".format(role),
+                name="H_MM_part2_{}_noRF_global".format(role), reset=True, sumw2=True,
+            )
+            for product in detached.values():
+                aggregate.Add(product[role])
+            global_histograms[role] = aggregate
+        global_closure = (
+            float(global_histograms["host"].Integral())
+            - float(global_histograms["pion"].Integral())
+            - float(global_histograms["clean"].Integral())
+        )
+    else:
+        global_closure = None
     return {
         "status": "available", "host_label": "proton-cleaned noRF host",
         "rf_restoration_applied": False, "t_products": entries, "histograms": detached,
-        "strict_global_sums": {"host": strict_host, "pion": strict_pion, "clean": strict_clean, "closure": strict_host - strict_pion - strict_clean},
+        "global_histograms": global_histograms,
+        "strict_global_sums": {
+            "host": strict_host, "pion": strict_pion, "clean": strict_clean,
+            "closure": strict_host - strict_pion - strict_clean,
+            "detached_histogram_closure": global_closure,
+        },
     }
 
 
-def expected_pion_hgcer_transfer_page_manifest(payload):
+PART2_PAGE_SPECS = {
+    "unavailable": {"kind": "text", "renderer": "status", "required_roles": ()},
+    "mask_audit": {"kind": "text", "renderer": "audit", "required_roles": ()},
+    "response_family_audit": {"kind": "text", "renderer": "audit", "required_roles": ()},
+    "response_family_map": {"kind": "graphical", "renderer": "categorical_map", "required_roles": ("response_family_map",)},
+    "p0_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("P0_map",)},
+    "relative_p0_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("relative_P0_map",)},
+    "transfer_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("transfer_map",)},
+    "statistical_uncertainty_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("statistical_uncertainty_map",)},
+    "model_uncertainty_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("model_uncertainty_map",)},
+    "fallback_uncertainty_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("fallback_uncertainty_map",)},
+    "total_uncertainty_map": {"kind": "graphical", "renderer": "numeric_map", "required_roles": ("total_uncertainty_map",)},
+    "fit_status_map": {"kind": "graphical", "renderer": "categorical_map", "required_roles": ("fit_status_map",)},
+    "solution_source_map": {"kind": "graphical", "renderer": "categorical_map", "required_roles": ("solution_source_map",)},
+    "part3_eligibility_map": {"kind": "graphical", "renderer": "categorical_map", "required_roles": ("part3_eligibility_map",)},
+    "transfer_series": {"kind": "graphical", "renderer": "series", "required_roles": ("transfer_series",)},
+    "p0_series": {"kind": "graphical", "renderer": "series", "required_roles": ("P0_series",)},
+    "response_fit": {"kind": "graphical", "renderer": "response_fit", "required_roles": ("prompt_pion_data", "primary_response", "profile_likelihood")},
+    "proposed_mm": {"kind": "graphical", "renderer": "proposed_mm", "required_roles": ("host_mm", "pion_mm", "clean_mm")},
+    "simc_closure": {"kind": "graphical", "renderer": "simc_closure", "required_roles": ("proposed_pion_mm", "simc_reference")},
+    "signal_closure": {"kind": "graphical", "renderer": "signal_closure", "required_roles": ("proposed_clean_mm", "signal_reference")},
+    "closure_status": {"kind": "text", "renderer": "status", "required_roles": ()},
+}
+
+
+_PART2_RENDER_SERIAL = 0
+
+
+def _part2_page(page_id, spec_key, *, t_index=None, status="ready", unavailable_reason=None, **detail):
+    spec = PART2_PAGE_SPECS[spec_key]
+    page = {
+        "page_id": str(page_id), "spec_key": str(spec_key), "t_index": t_index,
+        "page_kind": spec["kind"], "renderer": spec["renderer"],
+        "required_roles": list(spec["required_roles"]), "status": status,
+        "unavailable_reason": unavailable_reason,
+    }
+    page.update(detail)
+    return page
+
+
+def _page_has_defined_series(payload, t_index, field):
+    return any(value is not None for value in extract_pion_hgcer_transfer_t_series(payload, t_index, field)["values"])
+
+
+def _application_histograms_for_t(application, t_index):
+    histograms = (application or {}).get("histograms") or {}
+    return histograms.get(t_index) or histograms.get(str(t_index)) or {}
+
+
+def _closure_group(renderer_inputs, t_index, kind):
+    if t_index is None:
+        group = (renderer_inputs or {}).get("global") or {}
+        return (group.get(kind) or {}) if isinstance(group, dict) else {}
+    by_t = (renderer_inputs or {}).get("by_t") or {}
+    group = by_t.get(t_index) or by_t.get(str(t_index)) or {}
+    return (group.get(kind) or {}) if isinstance(group, dict) else {}
+
+
+def _closure_available(renderer_inputs, t_index, kind):
+    return any(value is not None for value in _closure_group(renderer_inputs, t_index, kind).values())
+
+
+def expected_pion_hgcer_transfer_page_manifest(payload, *, renderer_inputs=None):
+    """Build a runtime-sized Part-2 manifest without touching ROOT objects."""
     if not isinstance(payload, dict) or payload.get("status") != "available":
-        return ["part2_unavailable"]
+        return [_part2_page("part2_unavailable", "unavailable", status="unavailable", unavailable_reason=(payload or {}).get("reason", "unknown"))]
     pages = [
-        "part2_mask_audit", "part2_response_family_audit", "part2_p0_map",
-        "part2_relative_p0_map", "part2_transfer_map", "part2_uncertainty_map",
-        "part2_fit_status_map", "part2_solution_source_map",
-        "part2_response_profile_panels", "part2_simc_closure",
-        "part2_klambda_ksigma0_closure",
+        _part2_page("part2_mask_audit", "mask_audit"),
+        _part2_page("part2_response_family_audit", "response_family_audit"),
+        _part2_page("part2_response_family_map", "response_family_map"),
+        _part2_page("part2_p0_map", "p0_map"),
+        _part2_page("part2_relative_p0_map", "relative_p0_map"),
+        _part2_page("part2_transfer_map", "transfer_map"),
+        _part2_page("part2_statistical_uncertainty_map", "statistical_uncertainty_map"),
+        _part2_page("part2_model_uncertainty_map", "model_uncertainty_map"),
+        _part2_page("part2_fallback_uncertainty_map", "fallback_uncertainty_map"),
+        _part2_page("part2_uncertainty_map", "total_uncertainty_map"),
+        _part2_page("part2_fit_status_map", "fit_status_map"),
+        _part2_page("part2_solution_source_map", "solution_source_map"),
+        _part2_page("part2_part3_eligibility_map", "part3_eligibility_map"),
     ]
-    if (payload.get("application") or {}).get("status") == "available":
-        pages.append("part2_proposed_noRF_host_mm")
+    application = payload.get("application") or {}
+    t_count = max(0, len(payload.get("t_edges") or ()) - 1)
+    response_pages = extract_pion_hgcer_response_fit_pages(payload)
+    response_by_t = {}
+    for response_page in response_pages:
+        response_by_t.setdefault(response_page["t_index"], []).append(response_page)
+    for t_index in range(t_count):
+        number = t_index + 1
+        for field, page_id, spec_key in (
+            ("transfer", "part2_transfer_t{}".format(number), "transfer_series"),
+            ("P0", "part2_p0_t{}".format(number), "p0_series"),
+        ):
+            if _page_has_defined_series(payload, t_index, field):
+                pages.append(_part2_page(page_id, spec_key, t_index=t_index, field=field))
+            else:
+                pages.append(_part2_page(page_id + "_unavailable", "closure_status", t_index=t_index, status="unavailable", unavailable_reason="no_resolved_{}_values".format(field)))
+        for response_page in response_by_t.get(t_index, ()):
+            if response_page["fit_source"] == "direct":
+                page_id = "part2_response_fit_t{}_delta{}".format(number, int(response_page["delta_index"]) + 1)
+            else:
+                page_id = "part2_response_fit_t{}_pooled".format(number)
+            required = list(PART2_PAGE_SPECS["response_fit"]["required_roles"])
+            if ((response_page["fit"].get("response_display") or {}).get("alternate_response")) is not None:
+                required.append("alternate_response")
+            pages.append(_part2_page(page_id, "response_fit", t_index=t_index, fit_source=response_page["fit_source"], delta_index=response_page["delta_index"], fit=response_page["fit"], required_roles=required))
+        if _application_histograms_for_t(application, t_index):
+            pages.append(_part2_page("part2_proposed_mm_t{}".format(number), "proposed_mm", t_index=t_index, application_scope="per_t"))
+        else:
+            pages.append(_part2_page("part2_proposed_mm_t{}_unavailable".format(number), "closure_status", t_index=t_index, status="unavailable", unavailable_reason="detached_noRF_host_MM_unavailable"))
+        for closure_kind, label, spec_key in (
+            ("simc", "simc", "simc_closure"), ("signal", "signal", "signal_closure"),
+        ):
+            page_id = "part2_{}_closure_t{}".format(label, number)
+            if _closure_available(renderer_inputs, t_index, closure_kind) and _application_histograms_for_t(application, t_index):
+                pages.append(_part2_page(page_id, spec_key, t_index=t_index, closure_kind=closure_kind))
+            else:
+                pages.append(_part2_page(page_id + "_unavailable", "closure_status", t_index=t_index, status="unavailable", unavailable_reason="{}_closure_inputs_unavailable".format(label)))
+    if (application.get("global_histograms") or {}):
+        pages.append(_part2_page("part2_proposed_mm_global", "proposed_mm", application_scope="global"))
+        for closure_kind, label, spec_key in (
+            ("simc", "simc", "simc_closure"), ("signal", "signal", "signal_closure"),
+        ):
+            page_id = "part2_{}_closure_global".format(label)
+            if _closure_available(renderer_inputs, None, closure_kind):
+                pages.append(_part2_page(page_id, spec_key, closure_kind=closure_kind, application_scope="global"))
+            else:
+                pages.append(_part2_page(page_id + "_unavailable", "closure_status", status="unavailable", unavailable_reason="{}_closure_inputs_unavailable".format(label)))
+    else:
+        pages.append(_part2_page("part2_proposed_mm_global_unavailable", "closure_status", status="unavailable", unavailable_reason="detached_global_noRF_host_MM_unavailable"))
     return pages
 
 
-def render_pion_hgcer_zerope_transfer_pages(pdf_name, payload, *, title_prefix="", page_manifest=None, close_pdf=True):
-    """Append deterministic, ASCII-only Part-2 pages; ROOT is presentation only."""
+def _part2_render_name(stem):
+    global _PART2_RENDER_SERIAL
+    _PART2_RENDER_SERIAL += 1
+    return "part2_{}_{}".format(stem, _PART2_RENDER_SERIAL)
+
+
+def _render_text_page(canvas, page, payload, title_prefix):
+    text = ROOT.TPaveText(0.08, 0.12, 0.92, 0.88, "NDC")
+    text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12)
+    if str(title_prefix).strip():
+        text.AddText(str(title_prefix).strip())
+    unavailable = page["status"] == "unavailable"
+    text.AddText(pion_hgcer_transfer_display_text("unavailable" if unavailable else "part2"))
+    text.AddText(str(page["page_id"]).replace("_", " "))
+    if page["spec_key"] == "mask_audit":
+        audit = (payload or {}).get("audit") or {}
+        text.AddText("noRF audit: {}".format(audit.get("status", "unavailable")))
+        text.AddText("Four-mask contract fingerprint: {}".format(str(((payload or {}).get("pid_contract") or {}).get("fingerprint", "unavailable"))[:16]))
+    elif page["spec_key"] == "response_family_audit":
+        families = sorted({str((cell.get("fit") or {}).get("model_family")) for cell in (payload or {}).get("cells") or () if (cell.get("fit") or {}).get("model_family")})
+        text.AddText("Frozen response families: {}".format(", ".join(families) if families else "unavailable"))
+        text.AddText("Positive-only Gamma/Gaussian leakage models are rejected.")
+    elif unavailable:
+        text.AddText("Reason: {}".format(page.get("unavailable_reason") or "unknown"))
+    else:
+        text.AddText("Frozen map fingerprint: {}".format(str((payload or {}).get("map_fingerprint") or "unavailable")[:16]))
+        text.AddText("Part 3 review status: {}".format((payload or {}).get("Part3_eligibility")))
+    text.Draw()
+    return []
+
+
+def _make_tdelta_hist(page, payload, matrix, title):
+    delta_edges, t_edges = matrix["delta_edges"], matrix["t_edges"]
+    if len(delta_edges) < 2 or len(t_edges) < 2:
+        raise RuntimeError("Part-2 graphical map has no frozen t-delta geometry")
+    hist = ROOT.TH2D(
+        _part2_render_name(page["page_id"]), title,
+        len(delta_edges) - 1, array("d", [float(value) for value in delta_edges]),
+        len(t_edges) - 1, array("d", [float(value) for value in t_edges]),
+    )
+    hist.SetDirectory(0); hist.GetXaxis().SetTitle("delta"); hist.GetYaxis().SetTitle("-t (GeV^2)")
+    return hist
+
+
+def _render_numeric_map(canvas, page, payload, _renderer_inputs):
+    field = page["spec_key"].replace("_map", "")
+    field = {"p0": "P0", "relative_p0": "relative_P0_uncertainty", "statistical_uncertainty": "statistical_uncertainty", "model_uncertainty": "model_uncertainty", "fallback_uncertainty": "fallback_uncertainty", "total_uncertainty": "total_uncertainty"}.get(field, field)
+    matrix = extract_pion_hgcer_transfer_tdelta_matrix(payload, field)
+    role = page["required_roles"][0]
+    hist = _make_tdelta_hist(page, payload, matrix, pion_hgcer_transfer_display_text({"P0": "p0", "relative_P0_uncertainty": "relative_p0", "transfer": "transfer", "statistical_uncertainty": "statistical_uncertainty", "model_uncertainty": "model_uncertainty", "fallback_uncertainty": "fallback_uncertainty", "total_uncertainty": "uncertainty"}[field]))
+    for t_index, row in enumerate(matrix["values"]):
+        for delta_index, value in enumerate(row):
+            if value is not None:
+                hist.SetBinContent(delta_index + 1, t_index + 1, float(value))
+    hist.Draw("COLZ TEXT")
+    note = ROOT.TLatex(); note.SetNDC(True); note.SetTextSize(0.025)
+    note.DrawLatex(0.12, 0.02, "Blank cells are undefined; they are not zero-filled.")
+    return [(role, hist), ("undefined_cell_note", note)]
+
+
+def _render_categorical_map(canvas, page, payload, _renderer_inputs):
+    field = page["spec_key"].replace("_map", "")
+    matrix = extract_pion_hgcer_transfer_categorical_map(payload, field)
+    categories = matrix["categories"]
+    codes = {category: index + 1 for index, category in enumerate(categories)}
+    role = page["required_roles"][0]
+    hist = _make_tdelta_hist(page, payload, matrix, pion_hgcer_transfer_display_text({"response_family": "family_audit", "fit_status": "fit_status", "solution_source": "solution_source", "part3_eligibility": "eligibility"}[field]))
+    for t_index, row in enumerate(matrix["values"]):
+        for delta_index, value in enumerate(row):
+            if value is not None:
+                hist.SetBinContent(delta_index + 1, t_index + 1, float(codes[value]))
+    hist.Draw("COLZ TEXT")
+    legend = ROOT.TPaveText(0.73, 0.70, 0.98, 0.94, "NDC")
+    legend.SetFillStyle(0); legend.SetBorderSize(0); legend.SetTextSize(0.022)
+    legend.AddText("Category codes")
+    for category in categories:
+        legend.AddText("{} = {}".format(codes[category], category))
+    legend.Draw()
+    return [(role, hist), ("category_legend", legend)]
+
+
+def _render_series(canvas, page, payload, _renderer_inputs):
+    field = page["field"]
+    series = extract_pion_hgcer_transfer_t_series(payload, page["t_index"], field)
+    values = [(x, y, error) for x, y, error in zip(series["delta_centers"], series["values"], series["delta_half_widths"]) if y is not None]
+    if not values:
+        raise RuntimeError("Part-2 graphical series selected without finite values")
+    x_values, y_values, x_errors = zip(*values)
+    graph = ROOT.TGraphErrors(len(x_values), array("d", x_values), array("d", y_values), array("d", x_errors), array("d", [0.0] * len(x_values)))
+    graph.SetName(_part2_render_name(page["page_id"])); graph.SetMarkerStyle(20); graph.SetMarkerSize(1.1); graph.SetLineWidth(2)
+    graph.SetTitle("{};delta;{}".format(page["page_id"].replace("_", " "), "P0" if field == "P0" else "R"))
+    graph.Draw("AP")
+    return [(page["required_roles"][0], graph)]
+
+
+def _graph_from_series(name, series, color, style=1):
+    if not isinstance(series, dict) or not series.get("x") or not series.get("y"):
+        return None
+    graph = ROOT.TGraph(len(series["x"]), array("d", [float(value) for value in series["x"]]), array("d", [float(value) for value in series["y"]]))
+    graph.SetName(_part2_render_name(name)); graph.SetLineColor(color); graph.SetLineStyle(style); graph.SetLineWidth(2)
+    return graph
+
+
+def _render_response_fit(canvas, page, payload, _renderer_inputs):
+    fit = page["fit"]
+    display = fit.get("response_display") or {}
+    edges, counts = display.get("bin_edges") or (), display.get("bin_counts") or ()
+    if len(edges) != len(counts) + 1 or not display.get("primary_response"):
+        raise RuntimeError("Part-2 response-fit page has no binned existing-fit display payload")
+    canvas.Divide(2, 1)
+    canvas.cd(1)
+    hist = ROOT.TH1D(_part2_render_name(page["page_id"]), pion_hgcer_transfer_display_text("response_fit"), len(counts), array("d", [float(value) for value in edges]))
+    hist.SetDirectory(0); hist.GetXaxis().SetTitle("P_hgcer_npeSum"); hist.GetYaxis().SetTitle("unweighted prompt-pion records")
+    for index, value in enumerate(counts, start=1):
+        hist.SetBinContent(index, float(value))
+    hist.SetMarkerStyle(20); hist.Draw("E1")
+    primary = _graph_from_series("primary_response", display.get("primary_response"), ROOT.kBlue + 1)
+    if primary is None:
+        raise RuntimeError("Part-2 response-fit primary curve unavailable")
+    primary.Draw("L SAME")
+    primitives = [("prompt_pion_data", hist), ("primary_response", primary)]
+    alternate = _graph_from_series("alternate_response", display.get("alternate_response"), ROOT.kRed + 1, 2)
+    if alternate is not None:
+        alternate.Draw("L SAME")
+        primitives.append(("alternate_response", alternate))
+    threshold = float(((payload.get("pid_contract") or {}).get("masks") or {}).get("physical_pion_control", {}).get("value", 2.0))
+    line = ROOT.TLine(threshold, 0.0, threshold, max(float(hist.GetMaximum()), 1.0))
+    line.SetLineStyle(7); line.SetLineColor(ROOT.kGray + 2); line.Draw("SAME")
+    primitives.append(("physical_control_threshold", line))
+    legend = ROOT.TLegend(0.55, 0.68, 0.89, 0.88); legend.SetBorderSize(0)
+    legend.AddEntry(hist, "prompt pion data", "lep"); legend.AddEntry(primary, "primary response", "l")
+    if alternate is not None:
+        legend.AddEntry(alternate, "alternate response", "l")
+    legend.Draw()
+    canvas.cd(2)
+    profile = fit.get("profile") or {}
+    profile_x = [value for value in profile.get("grid_log_mu") or () if value is not None]
+    profile_y = list(profile.get("grid_nll") or ())
+    profile_pairs = [(x, y) for x, y in zip(profile_x, profile_y) if y is not None]
+    if not profile_pairs:
+        raise RuntimeError("Part-2 response-fit profile payload unavailable")
+    px, py = zip(*profile_pairs)
+    profile_graph = ROOT.TGraph(len(px), array("d", px), array("d", py))
+    profile_graph.SetName(_part2_render_name("profile")); profile_graph.SetLineWidth(2); profile_graph.SetTitle("mu profile;log(mu);NLL")
+    profile_graph.Draw("AL")
+    primitives.append(("profile_likelihood", profile_graph))
+    return primitives
+
+
+def _display_clone(hist, name, color, *, style=1):
+    clone = hist.Clone(_part2_render_name(name))
+    if hasattr(clone, "SetDirectory"):
+        clone.SetDirectory(0)
+    clone.SetLineColor(color); clone.SetLineStyle(style); clone.SetLineWidth(2); clone.SetFillStyle(0)
+    return clone
+
+
+def _render_hist_overlay(canvas, title, sources):
+    clones = [(role, _display_clone(hist, role, color, style=style), label) for role, hist, label, color, style in sources if hist is not None]
+    if not clones:
+        raise RuntimeError("Part-2 graphical overlay has no existing detached histogram")
+    minimum = min(float(clone.GetMinimum()) for _, clone, _ in clones)
+    maximum = max(float(clone.GetMaximum()) for _, clone, _ in clones)
+    first_role, first, _ = clones[0]
+    first.SetTitle(title); first.GetXaxis().SetTitle("MM (GeV)"); first.GetYaxis().SetTitle("weighted counts")
+    first.SetMinimum(minimum * 1.10 if minimum < 0.0 else 0.0); first.SetMaximum(maximum * 1.18 if maximum > 0.0 else 1.0)
+    first.Draw("HIST")
+    for _, clone, _ in clones[1:]:
+        clone.Draw("HIST SAME")
+    legend = ROOT.TLegend(0.58, 0.68, 0.89, 0.89); legend.SetBorderSize(0)
+    for _, clone, label in clones:
+        legend.AddEntry(clone, label, "l")
+    legend.Draw()
+    return [(role, clone) for role, clone, _ in clones] + [("overlay_legend", legend)]
+
+
+def _render_proposed_mm(canvas, page, payload, _renderer_inputs):
+    application = payload.get("application") or {}
+    if page.get("application_scope") == "global":
+        histograms = application.get("global_histograms") or {}
+        title = "Detached global proposed pion subtraction from noRF host"
+    else:
+        histograms = _application_histograms_for_t(application, page["t_index"])
+        title = "Detached proposed pion subtraction from noRF host - t{}".format(int(page["t_index"]) + 1)
+    return _render_hist_overlay(canvas, title, [
+        ("host_mm", histograms.get("host"), "proton-cleaned noRF host", ROOT.kBlack, 1),
+        ("pion_mm", histograms.get("pion"), "proposed pion MM", ROOT.kRed + 1, 1),
+        ("clean_mm", histograms.get("clean"), "proposed clean MM", ROOT.kBlue + 1, 1),
+    ])
+
+
+def _render_closure(canvas, page, payload, renderer_inputs):
+    application = payload.get("application") or {}
+    if page.get("application_scope") == "global":
+        histograms = application.get("global_histograms") or {}
+        closure_index = None
+    else:
+        histograms = _application_histograms_for_t(application, page["t_index"])
+        closure_index = page["t_index"]
+    group = _closure_group(renderer_inputs, closure_index, page["closure_kind"])
+    if page["closure_kind"] == "simc":
+        reference_role, proposed_role = "simc_reference", "proposed_pion_mm"
+        title, proposed = pion_hgcer_transfer_display_text("simc_closure"), histograms.get("pion")
+        references = [(key, hist) for key, hist in group.items() if hist is not None]
+        sources = [(proposed_role, proposed, "proposed pion MM", ROOT.kRed + 1, 1)]
+        sources.extend((reference_role if index == 0 else "simc_component_{}".format(index), hist, str(key), ROOT.kAzure + index + 1, 2) for index, (key, hist) in enumerate(references))
+    else:
+        reference_role, proposed_role = "signal_reference", "proposed_clean_mm"
+        title, proposed = pion_hgcer_transfer_display_text("signal_closure"), histograms.get("clean")
+        references = [(key, hist) for key, hist in group.items() if hist is not None]
+        sources = [(proposed_role, proposed, "proposed clean MM", ROOT.kBlue + 1, 1)]
+        sources.extend((reference_role if index == 0 else "signal_component_{}".format(index), hist, str(key), ROOT.kGreen + index + 2, 2) for index, (key, hist) in enumerate(references))
+    return _render_hist_overlay(canvas, title, sources)
+
+
+def _validate_part2_graphical_page(page, primitives):
+    if page["page_kind"] != "graphical":
+        return
+    roles = {role for role, _ in primitives}
+    missing = set(page["required_roles"]) - roles
+    if missing:
+        raise RuntimeError("Part-2 graphical page '{}' is missing semantic primitives: {}".format(page["page_id"], ", ".join(sorted(missing))))
+
+
+def _render_part2_page(canvas, page, payload, title_prefix, renderer_inputs):
+    if page["page_kind"] == "text":
+        return _render_text_page(canvas, page, payload, title_prefix)
+    if page["renderer"] == "numeric_map":
+        return _render_numeric_map(canvas, page, payload, renderer_inputs)
+    if page["renderer"] == "categorical_map":
+        return _render_categorical_map(canvas, page, payload, renderer_inputs)
+    if page["renderer"] == "series":
+        return _render_series(canvas, page, payload, renderer_inputs)
+    if page["renderer"] == "response_fit":
+        return _render_response_fit(canvas, page, payload, renderer_inputs)
+    if page["renderer"] == "proposed_mm":
+        return _render_proposed_mm(canvas, page, payload, renderer_inputs)
+    if page["renderer"] in {"simc_closure", "signal_closure"}:
+        return _render_closure(canvas, page, payload, renderer_inputs)
+    raise RuntimeError("unknown Part-2 page renderer '{}'".format(page["renderer"]))
+
+
+def render_pion_hgcer_zerope_transfer_pages(pdf_name, payload, *, title_prefix="", page_manifest=None, close_pdf=True, renderer_inputs=None):
+    """Render frozen Part-2 diagnostics and prove each graphical primitive role."""
     if ROOT is None:
         return []
-    manifest = expected_pion_hgcer_transfer_page_manifest(payload)
+    manifest = expected_pion_hgcer_transfer_page_manifest(payload, renderer_inputs=renderer_inputs)
     emitted = []
-    for index, page_id in enumerate(manifest):
-        canvas = ROOT.TCanvas("c_{}_{}".format(page_id, index), page_id, 1000, 700)
-        text = ROOT.TPaveText(0.08, 0.12, 0.92, 0.88, "NDC")
-        text.SetFillStyle(0); text.SetBorderSize(0)
-        text.AddText(str(title_prefix).strip())
-        text.AddText(pion_hgcer_transfer_display_text("unavailable" if page_id == "part2_unavailable" else "part2"))
-        text.AddText("{}".format(page_id.replace("_", " ")))
-        if page_id == "part2_unavailable":
-            text.AddText("Reason: {}".format((payload or {}).get("reason", "unknown")))
-        elif page_id == "part2_proposed_noRF_host_mm":
-            application = payload.get("application") or {}
-            text.AddText("Detached proposed products; authoritative production unchanged.")
-            text.AddText("Host: proton-cleaned noRF kaon host")
-            text.AddText("Strict closure: {}".format((application.get("strict_global_sums") or {}).get("closure")))
-        else:
-            text.AddText("Frozen map fingerprint: {}".format(str((payload or {}).get("map_fingerprint") or "unavailable")[:16]))
-            text.AddText("Part 3 eligibility: {}".format((payload or {}).get("Part3_eligibility")))
-        text.Draw()
+    for index, page in enumerate(manifest):
+        canvas = ROOT.TCanvas(_part2_render_name("canvas"), page["page_id"], 1100, 760)
+        primitives = _render_part2_page(canvas, page, payload or {}, title_prefix, renderer_inputs or {})
+        _validate_part2_graphical_page(page, primitives)
+        record = {
+            "page_id": page["page_id"], "t_index": page.get("t_index"),
+            "page_kind": page["page_kind"],
+            "status": "unavailable" if page["status"] == "unavailable" else "rendered",
+            "semantic_primitives": [{"role": role, "type": primitive.ClassName()} for role, primitive in primitives],
+            "unavailable_reason": page.get("unavailable_reason"),
+        }
         suffix = ")" if close_pdf and index == len(manifest) - 1 else ""
         canvas.Print(str(pdf_name) + suffix)
-        emitted.append(page_id)
+        emitted.append(record)
     if isinstance(page_manifest, list):
-        page_manifest.extend(emitted)
-    return emitted
+        page_manifest.extend(_json_ready(emitted))
+    return _json_ready(emitted)
+
+
+def render_pion_hgcer_zerope_transfer_failure_page(pdf_name, reason, *, title_prefix="", page_manifest=None, close_pdf=True):
+    """Close a diagnostic PDF after a Part-2 presentation-only failure."""
+    if ROOT is None:
+        return []
+    page = _part2_page("part2_rendering_failure", "unavailable", status="unavailable", unavailable_reason=str(reason))
+    canvas = ROOT.TCanvas(_part2_render_name("failure"), page["page_id"], 1100, 760)
+    _render_text_page(canvas, page, {"reason": str(reason)}, title_prefix)
+    canvas.Print(str(pdf_name) + (")" if close_pdf else ""))
+    record = {"page_id": page["page_id"], "t_index": None, "page_kind": "text", "status": "unavailable", "semantic_primitives": [], "unavailable_reason": str(reason)}
+    if isinstance(page_manifest, list):
+        page_manifest.append(record)
+    return [record]
