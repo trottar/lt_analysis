@@ -154,6 +154,10 @@ from pion_hgcer_diagnostics import (
     serialize_pion_hgcer_tdelta_diagnostic,
     write_pion_hgcer_tdelta_json,
 )
+from pion_hgcer_event_contract import (
+    build_pion_hgcer_event_contract,
+    summarize_pion_hgcer_event_contract,
+)
 from pion_hgcer_transfer import (
     audit_pion_hgcer_control_population,
     apply_frozen_pion_hgcer_transfer_map,
@@ -988,6 +992,8 @@ def _build_authoritative_pion_control_source_cache(
                 "ssdelta": float(getattr(evt, "ssdelta", float("nan"))),
                 "delta_index": int(delta_index) if delta_index is not None else None,
                 "P_hgcer_npeSum": float(getattr(evt, "P_hgcer_npeSum", float("nan"))),
+                "P_hgcer_xAtCer": float(getattr(evt, "P_hgcer_xAtCer", float("nan"))),
+                "P_hgcer_yAtCer": float(getattr(evt, "P_hgcer_yAtCer", float("nan"))),
                 "allcuts": bool(allcuts),
                 "nommcuts": bool(nommcuts),
                 "proton_cleaning_factor": None,
@@ -4706,7 +4712,7 @@ def rand_sub(
                         inp_dict=inpDict,
                         phi_setting=phi_setting,
                     )
-                    pion_hgcer_delta_edges, _ = resolve_pion_hgcer_delta_edges(
+                    pion_hgcer_delta_edges, pion_hgcer_delta_edge_source = resolve_pion_hgcer_delta_edges(
                         pion_hgcer_diagnostic_config,
                         proton_cleaning_result,
                     )
@@ -5217,6 +5223,46 @@ def rand_sub(
                     mm_offset_data=MM_offset_DATA,
                     coordinate_contract=coordinate_contract,
                     diagnostic_application_builder=_build_parent_diagnostic_application,
+                )
+                try:
+                    pion_hgcer_event_contract = build_pion_hgcer_event_contract(
+                        pion_control_cache=pion_control_cache,
+                        pion_parents=histDict.get("_pion_t_bin_parent_results") or (),
+                        canonical_t_global=histDict.get(
+                            "_pion_authoritative_canonical_t_global"
+                        ),
+                        proton_source_bundle=proton_cleaning_tree_bundle,
+                        proton_cleaning_result=proton_cleaning_result,
+                        proton_cleaning_application=proton_cleaning_application,
+                        inp_dict=inpDict,
+                        canonical_binning=canonical_binning,
+                        delta_edge_source=pion_hgcer_delta_edge_source,
+                    )
+                except Exception as exc:
+                    # Phase A is a detached read-only proof.  An unexpected
+                    # contract failure is retained as diagnostics and cannot
+                    # disable or modify the already-established subtraction.
+                    pion_hgcer_event_contract = {
+                        "schema_version": "pion_hgcer_event_contract/v1",
+                        "status": "unavailable",
+                        "available": False,
+                        "reason": str(exc),
+                        "diagnostic_stage": "contract_build_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                        "contract_fingerprint": None,
+                        "pion_records": [],
+                        "kaon_host_records": [],
+                        "pion_closure": {"passed": False},
+                        "host_closure": {"passed": False},
+                        "production_objects_mutated": False,
+                        "refinement_applied": False,
+                    }
+                histDict["_pion_hgcer_event_contract"] = pion_hgcer_event_contract
+                histDict["pion_hgcer_event_contract_summary"] = (
+                    summarize_pion_hgcer_event_contract(
+                        pion_hgcer_event_contract
+                    )
                 )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
