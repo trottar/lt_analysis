@@ -220,26 +220,6 @@ PION_HGCER_TRANSFER_CONFIG = {
 PION_HGCER_TRANSFER_CONFIG_OVERRIDES = {}
 PION_HGCER_TRANSFER_CONFIG_MERGE_KEYS = frozenset({"fallback"})
 
-# Part 2B is a detached relative redistribution of the already-established
-# pion event subtraction.  It must never become an implicit production path.
-PION_HGCER_REFINEMENT_CONFIG = {
-    "enabled": True,
-    "authoritative": False,
-    "score_source": "zerope_relative",
-    "normalization_scope": "canonical_t",
-    "unavailable_cell_policy": "identity",
-    "require_baseline_event_template_closure": True,
-    "require_parent_integral_preservation": True,
-    "parent_integral_closure_tolerance": 1.0e-10,
-    "signed_support_ratio_floor": 1.0e-4,
-    "seed_stability_audit": True,
-    "seed_tie_delta_nll": 0.5,
-    "seed_ambiguity_relative_score_spread": 0.10,
-    "render_raw_zerope_diagnostic": True,
-}
-PION_HGCER_REFINEMENT_CONFIG_OVERRIDES = {}
-PION_HGCER_REFINEMENT_CONFIG_MERGE_KEYS = frozenset()
-
 
 ANALYSIS_BINNING_CONFIG = {
     ("0p4", "2p20"): {"num_t_bins": 5, "num_phi_bins": 16, "tmin": 0.001, "tmax": 0.035},
@@ -2721,52 +2701,6 @@ def get_pion_hgcer_transfer_config(inp_dict=None, phi_setting=None, setting_key=
     config["pion_hgcer_transfer_setting_key"] = resolved_setting_key
     config["pion_hgcer_transfer_phi_setting"] = resolved_phi_setting
     config["pion_hgcer_transfer_override_layers"] = [
-        layer.get("path") for layer in override_layers
-    ] + (["runtime"] if isinstance(runtime_override, dict) else [])
-    return config
-
-
-def get_pion_hgcer_refinement_config(inp_dict=None, phi_setting=None, setting_key=None):
-    """Resolve the isolated, permanently non-authoritative Part-2B config."""
-    config = deepcopy(PION_HGCER_REFINEMENT_CONFIG)
-    resolved_setting_key, resolved_phi_setting = _resolve_particle_subtraction_override_context(
-        inp_dict=inp_dict, phi_setting=phi_setting, setting_key=setting_key,
-    )
-    override_layers = _resolve_particle_subtraction_override_layers(
-        PION_HGCER_REFINEMENT_CONFIG_OVERRIDES,
-        setting_key=resolved_setting_key, phi_setting=resolved_phi_setting,
-    )
-    for layer in override_layers:
-        config = _deep_merge_particle_subtraction_config(
-            config, layer.get("payload"), merge_keys=PION_HGCER_REFINEMENT_CONFIG_MERGE_KEYS,
-        )
-    runtime_override = inp_dict.get("pion_hgcer_refinement_config") if isinstance(inp_dict, dict) else None
-    config = _deep_merge_particle_subtraction_config(
-        config, runtime_override, merge_keys=PION_HGCER_REFINEMENT_CONFIG_MERGE_KEYS,
-    )
-    if bool(config.get("authoritative", False)):
-        raise ValueError("Part-2B HGCer refinement is diagnostic-only and cannot be authoritative")
-    if str(config.get("score_source") or "") != "zerope_relative":
-        raise ValueError("Part-2B HGCer refinement requires the frozen zerope_relative score")
-    if str(config.get("normalization_scope") or "") != "canonical_t":
-        raise ValueError("Part-2B HGCer refinement may normalize only within canonical t")
-    if str(config.get("unavailable_cell_policy") or "") != "identity":
-        raise ValueError("Part-2B HGCer refinement must use identity for unavailable cells")
-    for key in (
-        "parent_integral_closure_tolerance", "signed_support_ratio_floor",
-        "seed_tie_delta_nll", "seed_ambiguity_relative_score_spread",
-    ):
-        value = float(config.get(key, 0.0))
-        if not value > 0.0:
-            raise ValueError("Part-2B HGCer refinement {} must be positive".format(key))
-        config[key] = value
-    if config["signed_support_ratio_floor"] > 1.0:
-        raise ValueError("Part-2B HGCer signed_support_ratio_floor must not exceed one")
-    if config["seed_ambiguity_relative_score_spread"] > 1.0:
-        raise ValueError("Part-2B HGCer seed_ambiguity_relative_score_spread must not exceed one")
-    config["pion_hgcer_refinement_setting_key"] = resolved_setting_key
-    config["pion_hgcer_refinement_phi_setting"] = resolved_phi_setting
-    config["pion_hgcer_refinement_override_layers"] = [
         layer.get("path") for layer in override_layers
     ] + (["runtime"] if isinstance(runtime_override, dict) else [])
     return config
