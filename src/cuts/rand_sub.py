@@ -81,6 +81,7 @@ from background_config import (
     get_proton_contamination_cleaning_config,
     get_pion_hgcer_diagnostic_config,
     get_pion_hgcer_transfer_config,
+    get_pion_hgcer_refinement_config,
     fingerprint_hgcer_pid_contract,
     hgcer_mask_accepts,
     get_particle_subtraction_setting_key,
@@ -162,6 +163,13 @@ from pion_hgcer_transfer import (
     render_pion_hgcer_zerope_transfer_pages,
     serialize_pion_hgcer_zerope_transfer,
     write_pion_hgcer_zerope_transfer_json,
+)
+from pion_hgcer_refinement import (
+    build_pion_hgcer_relative_refinement,
+    render_pion_hgcer_refinement_failure_page,
+    render_pion_hgcer_refinement_pages,
+    serialize_pion_hgcer_refinement,
+    write_pion_hgcer_refinement_json,
 )
 
 ################################################################################################################################################
@@ -4374,6 +4382,9 @@ def rand_sub(
     pion_hgcer_tdelta_json = None
     pion_hgcer_zerope_transfer = None
     pion_hgcer_zerope_transfer_json = None
+    pion_hgcer_refinement = None
+    pion_hgcer_refinement_config = None
+    pion_hgcer_refinement_json = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -4847,6 +4858,23 @@ def rand_sub(
                                 "production_pion_subtraction_unchanged": True,
                                 "noRF_host_terminology": True,
                                 "rf_restoration_applied": False,
+                            }
+                        # Resolve Part 2B independently.  Its configuration
+                        # error is intentionally isolated from the frozen
+                        # Part-2 raw-score map and from production products.
+                        try:
+                            pion_hgcer_refinement_config = get_pion_hgcer_refinement_config(
+                                inp_dict=inpDict,
+                                phi_setting=phi_setting,
+                            )
+                        except Exception as exc:
+                            pion_hgcer_refinement_config = {"enabled": True}
+                            pion_hgcer_refinement = {
+                                "status": "unavailable", "reason": str(exc),
+                                "exception_type": type(exc).__name__,
+                                "diagnostic_stage": "part2b_config",
+                                "non_authoritative": True,
+                                "production_pion_subtraction_unchanged": True,
                             }
                         if isinstance(pion_hgcer_zerope_transfer, dict):
                             pion_hgcer_zerope_transfer_json = os.path.join(
@@ -6799,6 +6827,42 @@ def rand_sub(
                             "K-Sigma0": {"hist": component_fit_result.get("H_kaon_fit_k_sigma0_scaled"), "status": "available" if component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None else "unavailable"},
                         },
                     }
+                part2b_enabled = bool(
+                    isinstance(pion_hgcer_refinement_config, dict)
+                    and pion_hgcer_refinement_config.get("enabled", False)
+                )
+                if part2b_enabled and not isinstance(pion_hgcer_refinement, dict):
+                    try:
+                        # This terminal-stage build consumes only frozen Part-2
+                        # scalars plus existing detached t-parent products.
+                        # It never writes to the authoritative application.
+                        pion_hgcer_refinement = build_pion_hgcer_relative_refinement(
+                            pion_hgcer_zerope_transfer,
+                            pion_hgcer_tdelta_diagnostic,
+                            pion_control_cache,
+                            t_bin_parent_results,
+                            tuple(
+                                (proton_cleaning_application or {}).get(
+                                    "canonical_t_products"
+                                ) or ()
+                            ),
+                            config=pion_hgcer_refinement_config,
+                        )
+                    except Exception as exc:
+                        pion_hgcer_refinement = {
+                            "status": "unavailable", "reason": str(exc),
+                            "exception_type": type(exc).__name__,
+                            "diagnostic_stage": "part2b_build",
+                            "non_authoritative": True,
+                            "production_pion_subtraction_unchanged": True,
+                        }
+                if part2b_enabled and isinstance(pion_hgcer_refinement, dict):
+                    pion_hgcer_refinement_json = os.path.join(
+                        OUTPATH,
+                        "{}_{}_pion_hgcer_refinement.json".format(
+                            phi_setting, OutFilename
+                        ),
+                    )
                 part2_manifest = histDict.setdefault(
                     "pion_hgcer_zerope_transfer_page_manifest", []
                 )
@@ -6808,7 +6872,7 @@ def rand_sub(
                         pion_hgcer_zerope_transfer,
                         title_prefix="{} {}".format(phi_setting, ParticleType),
                         page_manifest=part2_manifest,
-                        close_pdf=True,
+                        close_pdf=not part2b_enabled,
                         renderer_inputs=part2_renderer_inputs,
                     )
                     pion_hgcer_zerope_transfer["rendering_status"] = "available"
@@ -6821,7 +6885,7 @@ def rand_sub(
                         diagnostic_pdf, reason,
                         title_prefix="{} {}".format(phi_setting, ParticleType),
                         page_manifest=part2_manifest,
-                        close_pdf=True,
+                        close_pdf=not part2b_enabled,
                     )
                     pion_hgcer_zerope_transfer["rendering_status"] = "unavailable"
                     pion_hgcer_zerope_transfer["rendering_failure_reason"] = reason
@@ -6841,6 +6905,46 @@ def rand_sub(
                     emitted=len(emitted_part2_pages),
                     status=pion_hgcer_zerope_transfer.get("status"),
                 )
+                if part2b_enabled:
+                    part2b_manifest = histDict.setdefault(
+                        "pion_hgcer_refinement_page_manifest", []
+                    )
+                    try:
+                        emitted_part2b_pages = render_pion_hgcer_refinement_pages(
+                            diagnostic_pdf,
+                            pion_hgcer_refinement,
+                            title_prefix="{} {}".format(phi_setting, ParticleType),
+                            page_manifest=part2b_manifest,
+                            close_pdf=True,
+                            renderer_inputs=part2_renderer_inputs,
+                        )
+                        pion_hgcer_refinement["rendering_status"] = "available"
+                    except Exception as exc:
+                        reason = "{}: {}".format(type(exc).__name__, exc)
+                        emitted_part2b_pages = render_pion_hgcer_refinement_failure_page(
+                            diagnostic_pdf, reason,
+                            title_prefix="{} {}".format(phi_setting, ParticleType),
+                            page_manifest=part2b_manifest,
+                            close_pdf=True,
+                        )
+                        pion_hgcer_refinement["rendering_status"] = "unavailable"
+                        pion_hgcer_refinement["rendering_failure_reason"] = reason
+                    pion_hgcer_refinement["render_manifest"] = emitted_part2b_pages
+                    histDict["pion_hgcer_refinement"] = (
+                        serialize_pion_hgcer_refinement(pion_hgcer_refinement)
+                    )
+                    if pion_hgcer_refinement_json is not None:
+                        write_pion_hgcer_refinement_json(
+                            pion_hgcer_refinement_json, pion_hgcer_refinement
+                        )
+                    histDict["pion_hgcer_refinement_artifacts"] = [
+                        pion_hgcer_refinement_json
+                    ] if pion_hgcer_refinement_json is not None else []
+                    _print_rand_debug(
+                        "pion HGCer relative refinement pages",
+                        emitted=len(emitted_part2b_pages),
+                        status=pion_hgcer_refinement.get("status"),
+                    )
         else:
             c_hgcer_hole.Print(diagnostic_pdf + ')')
 
