@@ -155,6 +155,8 @@ from pion_hgcer_diagnostics import (
     write_pion_hgcer_tdelta_json,
 )
 from pion_hgcer_event_contract import (
+    _build_identity_no_proton_cleaning_application,
+    _classify_committed_host_state,
     build_pion_hgcer_event_contract,
     summarize_pion_hgcer_event_contract,
 )
@@ -480,16 +482,17 @@ def _clone_component_targets_for_setting_wide_diagnostic(data_targets):
 
 
 def _post_proton_cleaning_input_metadata(proton_cleaning_application):
-    """Describe whether the final proton product restored RF membership."""
-    diagnostics = (proton_cleaning_application or {}).get("diagnostics") or {}
-    if bool(diagnostics.get("rf_applied", False)):
+    """Describe the committed noRF host consumed by pion subtraction."""
+    if str((proton_cleaning_application or {}).get("host_state") or "") == (
+        "identity_no_proton_cleaning"
+    ):
         return {
-            "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-            "source_target_state": "post_proton_post_rf",
+            "input_selection": "no_rf_identity_no_proton_cleaning",
+            "source_target_state": "post_proton_noRF",
         }
     return {
         "input_selection": "no_rf_proton_cleaning_without_rf_restoration",
-        "source_target_state": "post_proton_pre_rf",
+        "source_target_state": "post_proton_noRF",
     }
 
 
@@ -4562,8 +4565,8 @@ def rand_sub(
             active_component_targets = component_targets
             component_fit_kaon_input = H_MM_nosub_DATA
             component_input_metadata = {
-                "input_selection": "no_rf_proton_cleaning_then_rf_restored",
-                "source_target_state": "post_proton_post_rf",
+                "input_selection": "no_rf_identity_no_proton_cleaning",
+                "source_target_state": "post_proton_noRF",
             }
             pion_control_cache = None
             frozen_t_bins = None
@@ -4701,13 +4704,6 @@ def rand_sub(
                         raise RuntimeError(
                             "authoritative_t_bin_pion_parents_require_frozen_canonical_bins"
                         )
-                    proton_t_products = tuple(
-                        (proton_cleaning_application or {}).get("canonical_t_products") or ()
-                    )
-                    if len(proton_t_products) != len(frozen_t_bins) - 1:
-                        raise RuntimeError(
-                            "authoritative_t_bin_pion_parents_require_direct_proton_products"
-                        )
                     pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
                         inp_dict=inpDict,
                         phi_setting=phi_setting,
@@ -4716,6 +4712,74 @@ def rand_sub(
                         pion_hgcer_diagnostic_config,
                         proton_cleaning_result,
                     )
+                    if not bool((proton_cleaning_application or {}).get("accepted")):
+                        if bool(proton_cleaning_result.get("accepted")):
+                            raise RuntimeError(
+                                "accepted_proton_result_missing_application"
+                            )
+                        proton_cleaning_application = (
+                            _build_identity_no_proton_cleaning_application(
+                                proton_source_bundle=proton_cleaning_tree_bundle,
+                                target_templates=component_targets,
+                                t_edges=frozen_t_bins,
+                                delta_edges=pion_hgcer_delta_edges,
+                                coordinate_fingerprint=(
+                                    (coordinate_contract or {}).get(
+                                        "coordinate_fingerprint"
+                                    )
+                                ),
+                                proton_cleaning_result=proton_cleaning_result,
+                            )
+                        )
+                    committed_host = _classify_committed_host_state(
+                        proton_cleaning_result,
+                        proton_cleaning_application,
+                    )
+                    proton_cleaning_application["host_state"] = committed_host[
+                        "host_state"
+                    ]
+                    proton_cleaning_application["source_target_state"] = (
+                        "post_proton_noRF"
+                    )
+                    proton_cleaning_application["rf_restoration_applied"] = False
+                    application_diagnostics = dict(
+                        proton_cleaning_application.get("diagnostics") or {}
+                    )
+                    application_diagnostics.update(committed_host)
+                    application_diagnostics["rf_applied"] = False
+                    proton_cleaning_application["diagnostics"] = (
+                        application_diagnostics
+                    )
+                    if coordinate_contract is not None:
+                        proton_cleaning_application["kaon_data_coordinate"] = dict(
+                            coordinate_contract
+                        )
+                        proton_cleaning_application["coordinate_fingerprint"] = (
+                            coordinate_contract["coordinate_fingerprint"]
+                        )
+                        for product in (
+                            proton_cleaning_application.get("canonical_t_products")
+                            or ()
+                        ):
+                            product["kaon_data_coordinate"] = dict(
+                                coordinate_contract
+                            )
+                            product["coordinate_fingerprint"] = coordinate_contract[
+                                "coordinate_fingerprint"
+                            ]
+                    proton_cleaning_result["application"] = (
+                        proton_cleaning_application
+                    )
+                    component_input_metadata = _post_proton_cleaning_input_metadata(
+                        proton_cleaning_application
+                    )
+                    proton_t_products = tuple(
+                        proton_cleaning_application.get("canonical_t_products") or ()
+                    )
+                    if len(proton_t_products) != len(frozen_t_bins) - 1:
+                        raise RuntimeError(
+                            "authoritative_t_bin_pion_parents_require_direct_proton_products"
+                        )
                     pion_control_cache = _build_authoritative_pion_control_source_cache(
                         sub_tree_bundle,
                         proton_t_products=proton_t_products,

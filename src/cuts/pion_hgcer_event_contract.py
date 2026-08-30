@@ -242,6 +242,237 @@ def _sum_histograms(histograms, scope, role):
     return total
 
 
+def _identity_mm_target_map(target_templates, scope, role):
+    targets = {}
+    for key in ("h_mm", "h_mm_nosub"):
+        template = (target_templates or {}).get(key)
+        if template is None:
+            raise EventContractUnavailable(
+                "identity_host_target_template_missing:{}".format(key)
+            )
+        targets[key] = _clone_reset(template, scope, "{}_{}".format(role, key))
+    return targets
+
+
+def _sum_identity_target_maps(products, field, scope):
+    return {
+        key: _sum_histograms(
+            [(product.get(field) or {}).get(key) for product in products],
+            scope,
+            "{}_{}".format(field, key),
+        )
+        for key in ("h_mm", "h_mm_nosub")
+    }
+
+
+def _build_identity_no_proton_cleaning_application(
+    *, proton_source_bundle, target_templates, t_edges, delta_edges,
+    coordinate_fingerprint, proton_cleaning_result=None,
+    closure_tolerance=DEFAULT_CLOSURE_TOLERANCE
+):
+    """Build the exact noRF identity host from already-prepared kaon records."""
+    resolved_t_edges = _strict_edges(t_edges, "canonical_t")
+    resolved_delta_edges = _strict_edges(delta_edges, "delta")
+    tolerance = float(closure_tolerance)
+    coordinate = str(coordinate_fingerprint or "")
+    if not coordinate:
+        raise EventContractUnavailable("identity_host_coordinate_fingerprint_missing")
+    prepared_sources = (proton_source_bundle or {}).get("prepared_sources") or {}
+    if not prepared_sources:
+        raise EventContractUnavailable("identity_host_prepared_sources_missing")
+
+    products = []
+    for t_index in range(len(resolved_t_edges) - 1):
+        scope = "identity_no_proton_cleaning_t{}".format(t_index + 1)
+        products.append({
+            "t_index": int(t_index),
+            "t_edges": [
+                float(resolved_t_edges[t_index]),
+                float(resolved_t_edges[t_index + 1]),
+            ],
+            "coordinate_fingerprint": coordinate,
+            "raw_targets": _identity_mm_target_map(
+                target_templates, scope, "raw"
+            ),
+            "proton_targets": _identity_mm_target_map(
+                target_templates, scope, "proton"
+            ),
+            "cleaned_targets_pre_rf": _identity_mm_target_map(
+                target_templates, scope, "cleaned"
+            ),
+            "final_targets": _identity_mm_target_map(
+                target_templates, scope, "final"
+            ),
+            "source_accounting": {},
+        })
+
+    lookup = {}
+    for source_label, source_spec in sorted(prepared_sources.items()):
+        tree_name = str((source_spec or {}).get("tree_name") or "")
+        if not tree_name.endswith("_noRF"):
+            raise EventContractUnavailable(
+                "identity_host_source_not_noRF:{}".format(source_label)
+            )
+        coefficient = _finite_or_none((source_spec or {}).get("coefficient"))
+        if coefficient is None:
+            raise EventContractUnavailable(
+                "identity_host_source_coefficient_nonfinite:{}".format(source_label)
+            )
+        for entry_index, entry in sorted(
+            ((source_spec or {}).get("entries") or {}).items()
+        ):
+            signature = "{}:{}".format(str(source_label), int(entry_index))
+            t_index, _t_low, _t_high, _t_status = _geometry(
+                (entry or {}).get("adj_t"), resolved_t_edges, "canonical_t"
+            )
+            delta_index, _d_low, _d_high, _d_status = _geometry(
+                (entry or {}).get("delta_value"), resolved_delta_edges, "delta"
+            )
+            lookup[signature] = {
+                "event_signature": signature,
+                "t_index": t_index,
+                "delta_index": delta_index,
+                "proton_weight": 0.0,
+                "applied_proton_probability": 0.0,
+                "cleaned_factor": 1.0,
+                "final_cleaned_factor": 1.0,
+                "applied_cleaned_factor": 1.0,
+                "applied_final_cleaned_factor": 1.0,
+                "host_state": "identity_no_proton_cleaning",
+            }
+            allcuts = bool((entry or {}).get("allcuts"))
+            nommcuts = bool((entry or {}).get("nommcuts"))
+            if t_index is None or not (allcuts or nommcuts):
+                continue
+            analysis_mm = _finite_or_none((entry or {}).get("adj_mm"))
+            if analysis_mm is None:
+                raise EventContractUnavailable(
+                    "identity_host_analysis_mm_nonfinite:{}".format(signature)
+                )
+            product = products[t_index]
+            source_metrics = product["source_accounting"].setdefault(
+                str(source_label),
+                {
+                    "coefficient": float(coefficient),
+                    "tree_name": tree_name,
+                    "selected_records": 0,
+                    "allcuts_records": 0,
+                    "nommcuts_records": 0,
+                    "signed_allcuts_sum": 0.0,
+                    "signed_nommcuts_sum": 0.0,
+                    "absolute_weight_support": 0.0,
+                },
+            )
+            source_metrics["selected_records"] += 1
+            source_metrics["allcuts_records"] += int(allcuts)
+            source_metrics["nommcuts_records"] += int(nommcuts)
+            source_metrics["absolute_weight_support"] += abs(float(coefficient))
+            if nommcuts:
+                source_metrics["signed_nommcuts_sum"] += float(coefficient)
+            if allcuts:
+                source_metrics["signed_allcuts_sum"] += float(coefficient)
+            for field in ("raw_targets", "cleaned_targets_pre_rf", "final_targets"):
+                targets = product[field]
+                if nommcuts:
+                    targets["h_mm_nosub"].Fill(analysis_mm, coefficient)
+                if allcuts:
+                    targets["h_mm"].Fill(analysis_mm, coefficient)
+
+    per_t_closure = []
+    for product in products:
+        full_closure = _histogram_closure(
+            product["final_targets"]["h_mm_nosub"],
+            product["raw_targets"]["h_mm_nosub"],
+            tolerance,
+        )
+        cut_closure = _histogram_closure(
+            product["final_targets"]["h_mm"],
+            product["raw_targets"]["h_mm"],
+            tolerance,
+        )
+        product["final_output_fingerprint"] = (
+            fingerprint_histogram_content_error(
+                product["final_targets"]["h_mm_nosub"]
+            )
+        )
+        product["identity_host_closure"] = {
+            "passed": bool(full_closure["passed"] and cut_closure["passed"]),
+            "full": full_closure,
+            "cut": cut_closure,
+        }
+        per_t_closure.append(product["identity_host_closure"])
+
+    global_targets = {
+        field: _sum_identity_target_maps(
+            products, field, "identity_no_proton_cleaning_global"
+        )
+        for field in (
+            "raw_targets", "proton_targets", "cleaned_targets_pre_rf",
+            "final_targets",
+        )
+    }
+    global_full_closure = _histogram_closure(
+        global_targets["final_targets"]["h_mm_nosub"],
+        global_targets["raw_targets"]["h_mm_nosub"],
+        tolerance,
+    )
+    global_cut_closure = _histogram_closure(
+        global_targets["final_targets"]["h_mm"],
+        global_targets["raw_targets"]["h_mm"],
+        tolerance,
+    )
+    result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
+    result_diagnostics = result.get("diagnostics") or {}
+    lambda_gate = result_diagnostics.get("lambda_preservation_gate") or {}
+    diagnostics = {
+        "host_state": "identity_no_proton_cleaning",
+        "identity_reason": (
+            result.get("fallback_reason")
+            or lambda_gate.get("status")
+            or "upstream_proton_cleaning_not_committed"
+        ),
+        "upstream_proton_method": result.get("method"),
+        "upstream_proton_result_accepted": bool(result.get("accepted", False)),
+        "upstream_fallback_reason": result.get("fallback_reason"),
+        "lambda_gate_status": lambda_gate.get("status"),
+        "lambda_gate_production_action": lambda_gate.get("production_action"),
+        "proton_cleaning_committed": False,
+        "rf_applied": False,
+        "source_target_state": "post_proton_noRF",
+        "event_weight_source": "identity_no_proton_cleaning_prepared_noRF_lookup",
+        "coordinate_fingerprint": coordinate,
+        "identity_host_closure": {
+            "passed": bool(
+                all(entry["passed"] for entry in per_t_closure)
+                and global_full_closure["passed"]
+                and global_cut_closure["passed"]
+            ),
+            "tolerance": tolerance,
+            "per_t": per_t_closure,
+            "global_full": global_full_closure,
+            "global_cut": global_cut_closure,
+            "global_constructed_strictly_from_per_t": True,
+        },
+    }
+    if not diagnostics["identity_host_closure"]["passed"]:
+        raise EventContractUnavailable("identity_host_histogram_closure_failed")
+    return {
+        "accepted": True,
+        "host_state": "identity_no_proton_cleaning",
+        "source_target_state": "post_proton_noRF",
+        "rf_restoration_applied": False,
+        "coordinate_fingerprint": coordinate,
+        "canonical_t_products": tuple(products),
+        "raw_targets": global_targets["raw_targets"],
+        "proton_targets": global_targets["proton_targets"],
+        "cleaned_targets_pre_rf": global_targets["cleaned_targets_pre_rf"],
+        "final_targets": global_targets["final_targets"],
+        "_prepared_event_weight_lookup": lookup,
+        "immutable_record_contract": True,
+        "diagnostics": diagnostics,
+    }
+
+
 def _new_metrics():
     return {
         "selected_record_count": 0,
@@ -719,7 +950,9 @@ def _build_pion_side(
     }
 
 
-def _resolve_host_state(proton_cleaning_result, proton_cleaning_application):
+def _classify_committed_host_state(
+    proton_cleaning_result, proton_cleaning_application
+):
     result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
     application = (
         proton_cleaning_application
@@ -727,40 +960,96 @@ def _resolve_host_state(proton_cleaning_result, proton_cleaning_application):
     )
     result_diagnostics = result.get("diagnostics") or {}
     application_diagnostics = application.get("diagnostics") or {}
-    rf_applied = application_diagnostics.get(
-        "rf_applied", result_diagnostics.get("rf_applied")
-    )
-    explicit_identity = (
-        str(application.get("host_state") or "")
-        == "identity_no_proton_cleaning"
-    )
-    if rf_applied is not False and application.get("rf_restoration_applied") is not False:
+    rf_states = [
+        diagnostics.get("rf_applied")
+        for diagnostics in (result_diagnostics, application_diagnostics)
+        if "rf_applied" in diagnostics
+    ]
+    if not rf_states or any(value is not False for value in rf_states):
         raise EventContractUnavailable(
             "proton_host_rf_restoration_not_explicitly_disabled"
         )
-    if bool(result.get("accepted")) and bool(application.get("accepted")):
-        host_state = "proton_cleaned"
-        lookup = result.get("_prepared_event_weight_lookup") or {}
-    elif explicit_identity:
-        host_state = "identity_no_proton_cleaning"
-        lookup = (
-            application.get("_prepared_event_weight_lookup")
-            or result.get("_prepared_event_weight_lookup")
-            or {}
+    if (
+        "rf_restoration_applied" in application
+        and application.get("rf_restoration_applied") is not False
+    ):
+        raise EventContractUnavailable(
+            "proton_host_rf_restoration_not_explicitly_disabled"
+        )
+    lambda_gate = (
+        application_diagnostics.get("lambda_preservation_gate")
+        or result_diagnostics.get("lambda_preservation_gate")
+        or {}
+    )
+    committed = lambda_gate.get("proton_cleaning_committed")
+    production_action = str(lambda_gate.get("production_action") or "").lower()
+    if committed is not None and production_action:
+        if bool(committed) != (production_action == "apply"):
+            raise EventContractUnavailable(
+                "proton_host_committed_state_contradiction"
+            )
+    if committed is not None:
+        host_state = (
+            "proton_cleaned"
+            if bool(committed) else "identity_no_proton_cleaning"
+        )
+    elif production_action in ("apply", "bypass"):
+        host_state = (
+            "proton_cleaned"
+            if production_action == "apply" else "identity_no_proton_cleaning"
         )
     else:
+        explicit_state = str(application.get("host_state") or "")
+        if explicit_state not in (
+            "proton_cleaned", "identity_no_proton_cleaning"
+        ):
+            raise EventContractUnavailable(
+                "proton_host_committed_state_unavailable"
+            )
+        host_state = explicit_state
+    explicit_state = str(application.get("host_state") or "")
+    if explicit_state and explicit_state != host_state:
         raise EventContractUnavailable(
-            "identity_no_proton_cleaning_host_provenance_unavailable"
-        )
-    if not lookup:
-        raise EventContractUnavailable(
-            "identity_no_proton_cleaning_host_provenance_unavailable"
-            if explicit_identity else "proton_event_lookup_unavailable"
+            "proton_host_committed_state_contradiction"
         )
     return {
         "host_state": host_state,
         "source_target_state": "post_proton_noRF",
         "rf_restoration_applied": False,
+        "lambda_gate_status": lambda_gate.get("status"),
+        "lambda_gate_production_action": lambda_gate.get("production_action"),
+        "proton_cleaning_committed": (
+            host_state == "proton_cleaned"
+        ),
+    }
+
+
+def _resolve_host_state(proton_cleaning_result, proton_cleaning_application):
+    result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
+    application = (
+        proton_cleaning_application
+        if isinstance(proton_cleaning_application, dict) else {}
+    )
+    application_diagnostics = application.get("diagnostics") or {}
+    result_diagnostics = result.get("diagnostics") or {}
+    committed_state = _classify_committed_host_state(result, application)
+    host_state = committed_state["host_state"]
+    if host_state == "proton_cleaned":
+        lookup = result.get("_prepared_event_weight_lookup") or {}
+    else:
+        lookup = (
+            application.get("_prepared_event_weight_lookup")
+            or result.get("_prepared_event_weight_lookup")
+            or {}
+        )
+    if not lookup:
+        raise EventContractUnavailable(
+            "identity_no_proton_cleaning_host_provenance_unavailable"
+            if host_state == "identity_no_proton_cleaning"
+            else "proton_event_lookup_unavailable"
+        )
+    return {
+        **committed_state,
         "lookup": lookup,
         "lookup_provenance": (
             application_diagnostics.get("event_weight_source")
@@ -851,6 +1140,26 @@ def _build_host_side(
                 raise EventContractUnavailable(
                     "identity_no_proton_cleaning_factor_mismatch:{}".format(signature)
                 )
+            if host_contract["host_state"] == "identity_no_proton_cleaning":
+                applied_probability = _finite_or_none(
+                    frozen.get(
+                        "applied_proton_probability",
+                        frozen.get("proton_weight"),
+                    )
+                )
+                if applied_probability is None or abs(applied_probability) > tolerance:
+                    raise EventContractUnavailable(
+                        "identity_no_proton_cleaning_probability_mismatch:{}".format(
+                            signature
+                        )
+                    )
+            else:
+                applied_probability = _finite_or_none(
+                    frozen.get(
+                        "applied_proton_probability",
+                        frozen.get("proton_weight"),
+                    )
+                )
             contribution = coefficient * final_factor
             record = {
                 "source_label": str(source_label),
@@ -879,11 +1188,19 @@ def _build_host_side(
                 ),
                 "proton_cleaning_factor": cleaned_factor,
                 "final_cleaned_factor": final_factor,
+                "applied_proton_probability": applied_probability,
                 "signed_host_event_contribution": contribution,
                 "pion_refinement_factor": None,
                 "coordinate_fingerprint": coordinate_fingerprint,
                 "proton_cleaning_method": (proton_cleaning_result or {}).get("method"),
                 "proton_lookup_provenance": host_contract["lookup_provenance"],
+                "lambda_gate_status": host_contract.get("lambda_gate_status"),
+                "lambda_gate_production_action": host_contract.get(
+                    "lambda_gate_production_action"
+                ),
+                "proton_cleaning_committed": host_contract.get(
+                    "proton_cleaning_committed"
+                ),
                 "proton_final_output_fingerprint": (
                     products[t_index].get("final_output_fingerprint")
                     if t_index is not None else None
@@ -1002,6 +1319,13 @@ def _build_host_side(
         "source_target_state": host_contract["source_target_state"],
         "rf_restoration_applied": False,
         "lookup_provenance": host_contract["lookup_provenance"],
+        "lambda_gate_status": host_contract.get("lambda_gate_status"),
+        "lambda_gate_production_action": host_contract.get(
+            "lambda_gate_production_action"
+        ),
+        "proton_cleaning_committed": host_contract.get(
+            "proton_cleaning_committed"
+        ),
         "event_population_fingerprint": _payload_hash(all_records),
         "closure": {
             "passed": bool(
@@ -1122,6 +1446,13 @@ def build_pion_hgcer_event_contract(
             "proton_host_state": host_side["host_state"],
             "proton_source_target_state": host_side["source_target_state"],
             "rf_restoration_applied": host_side["rf_restoration_applied"],
+            "lambda_gate_status": host_side.get("lambda_gate_status"),
+            "lambda_gate_production_action": host_side.get(
+                "lambda_gate_production_action"
+            ),
+            "proton_cleaning_committed": host_side.get(
+                "proton_cleaning_committed"
+            ),
             "proton_cleaning_method": (proton_cleaning_result or {}).get("method"),
             "proton_lookup_provenance": host_side["lookup_provenance"],
         }
@@ -1161,6 +1492,13 @@ def build_pion_hgcer_event_contract(
             "host_state": host_side["host_state"],
             "source_target_state": host_side["source_target_state"],
             "rf_restoration_applied": host_side["rf_restoration_applied"],
+            "lambda_gate_status": host_side.get("lambda_gate_status"),
+            "lambda_gate_production_action": host_side.get(
+                "lambda_gate_production_action"
+            ),
+            "proton_cleaning_committed": host_side.get(
+                "proton_cleaning_committed"
+            ),
             "immutable_record_contract": True,
             "production_objects_mutated": False,
             "refinement_applied": False,
@@ -1202,6 +1540,13 @@ def summarize_pion_hgcer_event_contract(contract):
         "source_target_state": payload.get("source_target_state"),
         "rf_restoration_applied": bool(
             payload.get("rf_restoration_applied", False)
+        ),
+        "lambda_gate_status": payload.get("lambda_gate_status"),
+        "lambda_gate_production_action": payload.get(
+            "lambda_gate_production_action"
+        ),
+        "proton_cleaning_committed": payload.get(
+            "proton_cleaning_committed"
         ),
         "pion_closure_passed": bool(
             (payload.get("pion_closure") or {}).get("passed", False)
