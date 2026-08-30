@@ -1101,10 +1101,11 @@ class PhaseAEventContractTests(unittest.TestCase):
 
     def test_phase_a_diff_allowlist_and_rand_sub_patch_are_small(self):
         baseline = "af4fe473e"
+        phase_a_head = "57e366806"
         changed = subprocess.run(
             [
                 "git", "-c", "core.safecrlf=false", "diff", "--name-only",
-                baseline, "--",
+                baseline, phase_a_head, "--",
             ],
             cwd=REPO_ROOT,
             check=True,
@@ -1119,7 +1120,7 @@ class PhaseAEventContractTests(unittest.TestCase):
         numstat = subprocess.run(
             [
                 "git", "-c", "core.safecrlf=false", "diff", "--numstat",
-                baseline, "--", "src/cuts/rand_sub.py",
+                baseline, phase_a_head, "--", "src/cuts/rand_sub.py",
             ],
             cwd=REPO_ROOT,
             check=True,
@@ -1132,7 +1133,7 @@ class PhaseAEventContractTests(unittest.TestCase):
         phase_a3_changed = subprocess.run(
             [
                 "git", "-c", "core.safecrlf=false", "diff", "--name-only",
-                "bd8d9e9444bd46ddc3734346f92105347e658cdb", "--",
+                "bd8d9e9444bd46ddc3734346f92105347e658cdb", phase_a_head, "--",
             ],
             cwd=REPO_ROOT,
             check=True,

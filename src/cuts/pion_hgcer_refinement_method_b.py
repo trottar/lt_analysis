@@ -815,8 +815,18 @@ def _region_consistency(rows, config):
         row for row in rows
         if row["parent_relative_status"] == "available"
     ]
-    if len(usable) < 2:
-        return "insufficient_regions", "fewer_than_two_parent_relative_regions", usable
+    if not usable:
+        return (
+            "insufficient_regions",
+            "no_supported_parent_relative_regions",
+            usable,
+        )
+    if len(usable) == 1:
+        return (
+            "insufficient_regions",
+            "single_supported_parent_relative_region",
+            usable,
+        )
     primary = config["primary_sigma"]
     marginal = config["marginal_sigma"]
     all_primary = True
@@ -846,10 +856,11 @@ def _region_consistency(rows, config):
 
 def _candidate(rows, consistency_status, shape_status):
     if consistency_status != "region_consistent":
-        return None, None, (
-            "single_region_only" if consistency_status == "insufficient_regions"
-            else consistency_status
-        )
+        if consistency_status == "insufficient_regions":
+            return None, None, (
+                "single_region_only" if len(rows) == 1 else "unavailable"
+            )
+        return None, None, consistency_status
     if shape_status == "poor":
         return None, None, "shape_poor_veto"
     weighted = []
@@ -891,7 +902,25 @@ def _validate_phase_a(phase):
     return host_state
 
 
-def _unavailable(reason, stage, config=None, t_edges=None, delta_edges=None, exception=None):
+def _unavailable(
+    reason,
+    stage,
+    config=None,
+    t_edges=None,
+    delta_edges=None,
+    exception=None,
+    phase_a_contract=None,
+):
+    phase = phase_a_contract if isinstance(phase_a_contract, dict) else {}
+    phase_available = bool(
+        phase.get("available") and phase.get("status") == "available"
+    )
+    available_t_edges = list(
+        t_edges or (phase.get("canonical_t_edges") if phase_available else ()) or ()
+    )
+    available_delta_edges = list(
+        delta_edges or (phase.get("delta_edges") if phase_available else ()) or ()
+    )
     result = {
         "schema_version": METHOD_B_SCHEMA_VERSION,
         "method": METHOD_B_METHOD,
@@ -906,8 +935,8 @@ def _unavailable(reason, stage, config=None, t_edges=None, delta_edges=None, exc
         "interpolation_used": False,
         "phase_a_records_only": True,
         "method_a_numerical_dependency": False,
-        "t_edges": list(t_edges or ()),
-        "delta_edges": list(delta_edges or ()),
+        "t_edges": available_t_edges,
+        "delta_edges": available_delta_edges,
         "mm_regions": list((config or {}).get("mm_regions") or ()),
         "protected_regions": list((config or {}).get("protected_regions") or ()),
         "mm_binning": [],
@@ -917,6 +946,19 @@ def _unavailable(reason, stage, config=None, t_edges=None, delta_edges=None, exc
         "parent_region_references": [],
         "summary": {},
     }
+    if phase_available:
+        result.update({
+            "phase_a_contract_fingerprint": phase.get("contract_fingerprint"),
+            "coordinate_fingerprint": phase.get("coordinate_fingerprint"),
+            "host_state": phase.get("host_state"),
+            "source_target_state": phase.get("source_target_state"),
+            "mm_binning": list(
+                (((phase.get("pion_closure") or {}).get("global_full") or {}).get(
+                    "authoritative"
+                ) or {}).get("edges")
+                or ()
+            ),
+        })
     if exception is not None:
         result["exception_type"] = type(exception).__name__
         result["exception_message"] = str(exception)
@@ -1117,12 +1159,22 @@ def build_pion_hgcer_method_b(phase_a_contract, *, config):
         return result
     except MethodBUnavailable as exc:
         return _unavailable(
-            exc.reason, exc.stage, resolved, t_edges, delta_edges, exception=exc
+            exc.reason,
+            exc.stage,
+            resolved,
+            t_edges,
+            delta_edges,
+            exception=exc,
+            phase_a_contract=phase,
         )
     except Exception as exc:
         return _unavailable(
             "unexpected_method_b_build_failure", "unexpected_exception",
-            resolved, t_edges, delta_edges, exception=exc,
+            resolved,
+            t_edges,
+            delta_edges,
+            exception=exc,
+            phase_a_contract=phase,
         )
 
 

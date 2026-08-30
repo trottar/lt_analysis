@@ -164,6 +164,16 @@ from pion_hgcer_refinement_method_a import (
     build_pion_hgcer_method_a,
     summarize_pion_hgcer_method_a,
 )
+from pion_hgcer_refinement_method_b import (
+    build_pion_hgcer_method_b,
+    resolve_pion_hgcer_method_b_config,
+    summarize_pion_hgcer_method_b,
+)
+from pion_hgcer_refinement_checkpoint import (
+    build_pion_hgcer_refinement_checkpoint,
+    pion_hgcer_refinement_checkpoint_filename,
+    write_pion_hgcer_refinement_checkpoint_json,
+)
 from pion_hgcer_transfer import (
     audit_pion_hgcer_control_population,
     apply_frozen_pion_hgcer_transfer_map,
@@ -4387,6 +4397,8 @@ def rand_sub(
     pion_hgcer_tdelta_json = None
     pion_hgcer_zerope_transfer = None
     pion_hgcer_zerope_transfer_json = None
+    pion_hgcer_method_b = None
+    pion_hgcer_refinement_checkpoint_json = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -5365,6 +5377,89 @@ def rand_sub(
                 histDict["pion_hgcer_method_a_summary"] = (
                     summarize_pion_hgcer_method_a(pion_hgcer_method_a)
                 )
+                try:
+                    pion_hgcer_method_b_config = (
+                        resolve_pion_hgcer_method_b_config(
+                            inp_dict=inpDict,
+                            phi_setting=phi_setting,
+                            mm_offset_data=MM_offset_DATA,
+                        )
+                    )
+                    pion_hgcer_method_b = build_pion_hgcer_method_b(
+                        pion_hgcer_event_contract,
+                        config=pion_hgcer_method_b_config,
+                    )
+                except Exception as exc:
+                    # Phase C is detached and diagnostic-only.  Preserve a
+                    # structured unavailable result while production continues.
+                    pion_hgcer_method_b = build_pion_hgcer_method_b(
+                        pion_hgcer_event_contract,
+                        config={},
+                    )
+                    pion_hgcer_method_b.update({
+                        "reason": "runtime_method_b_configuration_exception",
+                        "diagnostic_stage": "runtime_build_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                    })
+                histDict["_pion_hgcer_method_b"] = pion_hgcer_method_b
+                histDict["pion_hgcer_method_b_summary"] = (
+                    summarize_pion_hgcer_method_b(pion_hgcer_method_b)
+                )
+                try:
+                    pion_hgcer_refinement_checkpoint = (
+                        build_pion_hgcer_refinement_checkpoint(
+                            setting={
+                                "kinematic_token": kinematics,
+                                "Q2": Q2,
+                                "W": W,
+                                "epsilon_setting": EPSSET,
+                                "phi_setting": phi_setting,
+                            },
+                            phase_a=pion_hgcer_event_contract,
+                            phase_a_summary=histDict[
+                                "pion_hgcer_event_contract_summary"
+                            ],
+                            method_a=pion_hgcer_method_a,
+                            method_a_summary=histDict[
+                                "pion_hgcer_method_a_summary"
+                            ],
+                            method_b=pion_hgcer_method_b,
+                            method_b_summary=histDict[
+                                "pion_hgcer_method_b_summary"
+                            ],
+                        )
+                    )
+                    pion_hgcer_refinement_checkpoint_json = os.path.join(
+                        OUTPATH,
+                        pion_hgcer_refinement_checkpoint_filename(
+                            phi_setting, kinematics, EPSSET
+                        ),
+                    )
+                    write_pion_hgcer_refinement_checkpoint_json(
+                        pion_hgcer_refinement_checkpoint_json,
+                        pion_hgcer_refinement_checkpoint,
+                    )
+                    histDict["pion_hgcer_refinement_checkpoint"] = (
+                        pion_hgcer_refinement_checkpoint
+                    )
+                    histDict["pion_hgcer_refinement_checkpoint_artifacts"] = [
+                        pion_hgcer_refinement_checkpoint_json
+                    ]
+                except Exception as exc:
+                    # A checkpoint is a persistent diagnostic artifact only;
+                    # failure to serialize it cannot alter production.
+                    histDict["pion_hgcer_refinement_checkpoint_status"] = {
+                        "status": "unavailable",
+                        "available": False,
+                        "reason": "checkpoint_write_exception",
+                        "diagnostic_stage": "runtime_checkpoint_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                        "non_authoritative": True,
+                        "production_objects_mutated": False,
+                        "refinement_applied": False,
+                    }
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
             histDict["H_simc_shape_pi_sidis_SIMC"] = component_fit_result.get("H_simc_shape_pi_sidis")
