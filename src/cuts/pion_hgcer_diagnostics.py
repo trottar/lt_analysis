@@ -732,6 +732,8 @@ def build_pion_hgcer_tdelta_diagnostic(
             "ssdelta": float(delta_value),
             "delta_index": int(delta_index),
             "P_hgcer_npeSum": float(npe),
+            "P_hgcer_xAtCer": _finite(getattr(evt, "P_hgcer_xAtCer", None)),
+            "P_hgcer_yAtCer": _finite(getattr(evt, "P_hgcer_yAtCer", None)),
             "allcuts": bool(allcuts),
             "nommcuts": bool(nommcuts),
             "Q2": _finite(getattr(evt, "Q2", None)),

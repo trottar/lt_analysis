@@ -160,6 +160,10 @@ from pion_hgcer_event_contract import (
     build_pion_hgcer_event_contract,
     summarize_pion_hgcer_event_contract,
 )
+from pion_hgcer_refinement_method_a import (
+    build_pion_hgcer_method_a,
+    summarize_pion_hgcer_method_a,
+)
 from pion_hgcer_transfer import (
     audit_pion_hgcer_control_population,
     apply_frozen_pion_hgcer_transfer_map,
@@ -5327,6 +5331,39 @@ def rand_sub(
                     summarize_pion_hgcer_event_contract(
                         pion_hgcer_event_contract
                     )
+                )
+                try:
+                    pion_hgcer_method_a = build_pion_hgcer_method_a(
+                        pion_hgcer_tdelta_diagnostic,
+                        pion_hgcer_event_contract,
+                    )
+                except Exception as exc:
+                    # Phase B is detached and diagnostic-only.  Its failure
+                    # cannot modify or disable the frozen Phase-A subtraction.
+                    pion_hgcer_method_a = {
+                        "schema_version": "pion_hgcer_method_a/v1",
+                        "method": "observed_positive_hgcer_response",
+                        "status": "unavailable",
+                        "available": False,
+                        "reason": str(exc),
+                        "diagnostic_stage": "runtime_build_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                        "non_authoritative": True,
+                        "production_objects_mutated": False,
+                        "refinement_applied": False,
+                        "rf_ct_required": False,
+                        "zerope_model_used": False,
+                        "t_edges": [],
+                        "delta_edges": [],
+                        "configuration": {},
+                        "fingerprint": None,
+                        "cells": [],
+                        "summary": {},
+                    }
+                histDict["_pion_hgcer_method_a"] = pion_hgcer_method_a
+                histDict["pion_hgcer_method_a_summary"] = (
+                    summarize_pion_hgcer_method_a(pion_hgcer_method_a)
                 )
             histDict["H_simc_shape_pi_n_SIMC"] = component_fit_result.get("H_simc_shape_pi_n")
             histDict["H_simc_shape_pi_delta_SIMC"] = component_fit_result.get("H_simc_shape_pi_delta")
