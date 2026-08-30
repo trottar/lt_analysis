@@ -20,6 +20,7 @@ import pion_hgcer_refinement_method_a as method_a
 
 
 COORDINATE_FINGERPRINT = "coordinate-fingerprint"
+_DEFAULT_COORDINATE = object()
 
 
 def _phase_a(t_edges=(0.0, 1.0), delta_edges=(0.0, 10.0)):
@@ -71,8 +72,8 @@ def _record(
     delta_index=0,
     allcuts=True,
     nommcuts=True,
-    x=None,
-    y=None,
+    x=_DEFAULT_COORDINATE,
+    y=_DEFAULT_COORDINATE,
 ):
     default_coefficient = {"prompt": 1.0, "rand": -1.0, "dummy": -1.0, "dummy_rand": 1.0}[source]
     coefficient = default_coefficient if weight is None else float(weight)
@@ -89,8 +90,12 @@ def _record(
         "ssdelta": float(delta),
         "delta_index": delta_index,
         "P_hgcer_npeSum": float(npe),
-        "P_hgcer_xAtCer": float(entry_index if x is None else x),
-        "P_hgcer_yAtCer": float(-entry_index if y is None else y),
+        "P_hgcer_xAtCer": (
+            float(entry_index) if x is _DEFAULT_COORDINATE else x
+        ),
+        "P_hgcer_yAtCer": (
+            float(-entry_index) if y is _DEFAULT_COORDINATE else y
+        ),
         "allcuts": bool(allcuts),
         "nommcuts": bool(nommcuts),
         "rf_applied_to_diagnostic": False,
@@ -184,6 +189,14 @@ class PionHGCerMethodATests(unittest.TestCase):
         self.assertLess(
             method_a._ratio_from_fraction(low), method_a._ratio_from_fraction(high)
         )
+        for successes in (0, 1, 25):
+            interval_low, interval_high = method_a._wilson_interval(successes, 25)
+            fraction = float(successes) / 25.0
+            self.assertLessEqual(0.0, interval_low)
+            self.assertLessEqual(interval_low, fraction)
+            self.assertLessEqual(fraction, interval_high)
+            self.assertLessEqual(interval_high, 1.0)
+        self.assertGreater(method_a._wilson_interval(0, 25)[1], 0.0)
 
     def test_support_thresholds_zero_low_and_zero_control(self):
         zero_low = [_record(index, 3.0) for index in range(25)]
@@ -225,6 +238,33 @@ class PionHGCerMethodATests(unittest.TestCase):
         self.assertIsNone(cell["signed_R_low_control"])
         self.assertEqual(cell["prompt_vs_signed_status"], "signed_unavailable")
 
+    def test_signed_ratio_requires_low_neff_and_non_cancelling_positive_yield(self):
+        sparse_low = _supported_records(low=5, control=25)
+        result = method_a.build_pion_hgcer_method_a(
+            _diagnostic(sparse_low), _phase_a()
+        )
+        cell = result["cells"][0]
+        self.assertEqual(cell["support_class"], "supported")
+        self.assertEqual(cell["signed_low_neff"], 5.0)
+        self.assertEqual(cell["signed_low_yield"], 5.0)
+        self.assertIsNone(cell["signed_R_low_control"])
+        self.assertEqual(cell["prompt_vs_signed_status"], "signed_unavailable")
+
+        cancelling_low = _supported_records(low=10, control=25)
+        cancelling_low.extend(
+            _record(100 + index, 1.0, source="rand", weight=-1.0)
+            for index in range(9)
+        )
+        result = method_a.build_pion_hgcer_method_a(
+            _diagnostic(cancelling_low), _phase_a()
+        )
+        cell = result["cells"][0]
+        self.assertGreaterEqual(cell["signed_low_neff"], 10.0)
+        self.assertEqual(cell["signed_low_yield"], 1.0)
+        self.assertEqual(cell["signed_low_abs_support"], 19.0)
+        self.assertIsNone(cell["signed_R_low_control"])
+        self.assertEqual(cell["prompt_vs_signed_status"], "signed_unavailable")
+
     def test_prompt_random_dummy_and_dummy_random_algebra_is_applied_once(self):
         records = _supported_records(low=10, control=20)
         records.extend(
@@ -250,7 +290,7 @@ class PionHGCerMethodATests(unittest.TestCase):
             {"npe": 1.0, "x": 0.0, "y": 0.0} for _ in range(10)
         ] + [{"npe": 3.0, "x": 0.0, "y": 0.0} for _ in range(30)]
         prompt = method_a._prompt_metrics(records, method_a._resolved_config(None))
-        sigma = method_a._prompt_ratio_sigma(prompt)
+        interval_width = prompt["ratio_high"] - prompt["ratio"]
         self.assertEqual(
             method_a._prompt_vs_signed_status(
                 prompt, prompt["ratio"], 0.0, method_a._resolved_config(None)
@@ -260,8 +300,8 @@ class PionHGCerMethodATests(unittest.TestCase):
         self.assertEqual(
             method_a._prompt_vs_signed_status(
                 prompt,
-                prompt["ratio"] + 1.5 * sigma,
-                0.0,
+                prompt["ratio_high"] + interval_width,
+                1.5 * interval_width,
                 method_a._resolved_config(None),
             ),
             "marginal",
@@ -269,8 +309,8 @@ class PionHGCerMethodATests(unittest.TestCase):
         self.assertEqual(
             method_a._prompt_vs_signed_status(
                 prompt,
-                prompt["ratio"] + 3.0 * sigma,
-                0.0,
+                prompt["ratio_high"] + 2.0 * interval_width,
+                0.5 * interval_width,
                 method_a._resolved_config(None),
             ),
             "inconsistent",
@@ -280,6 +320,102 @@ class PionHGCerMethodATests(unittest.TestCase):
                 prompt, None, None, method_a._resolved_config(None)
             ),
             "signed_unavailable",
+        )
+
+    def test_zero_low_prompt_uses_wilson_interval_for_signed_comparison(self):
+        records = [_record(index, 3.0) for index in range(25)]
+        records.extend(
+            _record(100 + index, 1.0, source="dummy_rand", weight=0.1)
+            for index in range(10)
+        )
+        result = method_a.build_pion_hgcer_method_a(
+            _diagnostic(records), _phase_a()
+        )
+        cell = result["cells"][0]
+        self.assertEqual(cell["support_class"], "marginal")
+        self.assertEqual(cell["method_A_status"], "available")
+        self.assertEqual(cell["f_low"], 0.0)
+        self.assertGreater(cell["f_low_high"], 0.0)
+        self.assertAlmostEqual(cell["signed_R_low_control"], 0.04)
+        self.assertLessEqual(
+            cell["signed_R_low_control"], cell["R_low_control_high"]
+        )
+        self.assertEqual(cell["prompt_vs_signed_status"], "consistent")
+
+    def test_missing_xy_preserves_core_response_and_splits_geometry_summaries(self):
+        finite_records = _supported_records(low=10, control=20)
+        missing_records = deepcopy(finite_records)
+        missing_records[0]["P_hgcer_xAtCer"] = None
+        missing_records[1]["P_hgcer_yAtCer"] = float("nan")
+
+        finite = method_a.build_pion_hgcer_method_a(
+            _diagnostic(finite_records), _phase_a()
+        )
+        missing = method_a.build_pion_hgcer_method_a(
+            _diagnostic(missing_records), _phase_a()
+        )
+        self.assertTrue(missing["available"])
+        finite_cell = finite["cells"][0]
+        missing_cell = missing["cells"][0]
+        core_fields = (
+            "prompt_positive_count",
+            "prompt_low_count",
+            "prompt_control_count",
+            "f_low",
+            "R_low_control",
+            "support_class",
+            "method_A_status",
+        )
+        for field in core_fields:
+            self.assertEqual(finite_cell[field], missing_cell[field])
+        self.assertEqual(missing_cell["hgcer_x_valid_count"], 29)
+        self.assertEqual(missing_cell["hgcer_y_valid_count"], 29)
+        self.assertEqual(missing_cell["hgcer_xy_valid_count"], 28)
+        self.assertEqual(missing_cell["hgcer_xy_missing_count"], 2)
+        self.assertEqual(missing_cell["low_hgcer_xy_valid_count"], 8)
+        self.assertEqual(missing_cell["control_hgcer_xy_valid_count"], 20)
+
+        low_x = method_a._distribution(range(1, 10))
+        low_y = method_a._distribution([0] + list(range(-2, -10, -1)))
+        control_x = method_a._distribution(range(10, 30))
+        control_y = method_a._distribution(range(-10, -30, -1))
+        for prefix, expected_x, expected_y in (
+            ("low", low_x, low_y),
+            ("control", control_x, control_y),
+        ):
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_x_mean".format(prefix)], expected_x["mean"]
+            )
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_x_rms".format(prefix)], expected_x["rms"]
+            )
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_x_median".format(prefix)], expected_x["q50"]
+            )
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_y_mean".format(prefix)], expected_y["mean"]
+            )
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_y_rms".format(prefix)], expected_y["rms"]
+            )
+            self.assertAlmostEqual(
+                missing_cell["{}_hgcer_y_median".format(prefix)], expected_y["q50"]
+            )
+
+        identity_fields = (
+            "source_label",
+            "entry_index",
+            "canonical_t_index",
+            "delta_index",
+            "P_hgcer_npeSum",
+            "allcuts",
+            "nommcuts",
+            "coefficient",
+            "diagnostic_weight",
+        )
+        self.assertEqual(
+            [tuple(record[field] for field in identity_fields) for record in finite_records],
+            [tuple(record[field] for field in identity_fields) for record in missing_records],
         )
 
     def test_allcuts_is_secondary_and_detects_biased_response(self):

@@ -39,8 +39,7 @@ DEFAULT_METHOD_A_CONFIG = {
         "denominator_absolute_epsilon": 1.0e-12,
     },
     "comparison": {
-        "consistent_sigma": 1.0,
-        "marginal_sigma": 2.0,
+        "signed_interval_sigma": 1.0,
     },
 }
 
@@ -152,9 +151,12 @@ def _resolved_config(config):
         if not math.isfinite(signed[key]) or signed[key] <= 0.0:
             raise MethodAUnavailable("invalid_signed_support_configuration", "configuration")
     comparison = resolved["comparison"]
-    comparison["consistent_sigma"] = float(comparison.get("consistent_sigma", 0.0))
-    comparison["marginal_sigma"] = float(comparison.get("marginal_sigma", 0.0))
-    if not 0.0 < comparison["consistent_sigma"] <= comparison["marginal_sigma"]:
+    comparison["signed_interval_sigma"] = float(
+        comparison.get("signed_interval_sigma", 0.0)
+    )
+    if not math.isfinite(comparison["signed_interval_sigma"]) or comparison[
+        "signed_interval_sigma"
+    ] <= 0.0:
         raise MethodAUnavailable("invalid_comparison_configuration", "configuration")
     return resolved
 
@@ -202,6 +204,14 @@ def _finite(value, name):
     return scalar
 
 
+def _optional_finite(value):
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return None
+    return scalar if math.isfinite(scalar) else None
+
+
 def _type7_quantile(values, probability):
     ordered = sorted(float(value) for value in values)
     if not ordered:
@@ -244,6 +254,23 @@ def _distribution(values):
     }
 
 
+def _geometry_distribution(records):
+    x_values = [record["x"] for record in records if record["x"] is not None]
+    y_values = [record["y"] for record in records if record["y"] is not None]
+    xy_valid = sum(
+        1 for record in records
+        if record["x"] is not None and record["y"] is not None
+    )
+    return {
+        "x": _distribution(x_values),
+        "y": _distribution(y_values),
+        "x_valid_count": len(x_values),
+        "y_valid_count": len(y_values),
+        "xy_valid_count": xy_valid,
+        "xy_missing_count": len(records) - xy_valid,
+    }
+
+
 def _wilson_interval(successes, total):
     successes = int(successes)
     total = int(total)
@@ -258,7 +285,9 @@ def _wilson_interval(successes, total):
         * math.sqrt(fraction * (1.0 - fraction) / total + z2 / (4.0 * total * total))
         / denominator
     )
-    return max(0.0, center - spread), min(1.0, center + spread)
+    lower = 0.0 if successes == 0 else max(0.0, center - spread)
+    upper = 1.0 if successes == total else min(1.0, center + spread)
+    return lower, upper
 
 
 def _ratio_from_fraction(value):
@@ -296,13 +325,18 @@ def _prompt_metrics(records, config):
     interval_low, interval_high = _wilson_interval(low, positive)
     ratio = float(low) / float(control) if control else None
     npe = _distribution([record["npe"] for record in records])
-    x = _distribution([record["x"] for record in records])
-    y = _distribution([record["y"] for record in records])
+    geometry = _geometry_distribution(records)
+    low_geometry = _geometry_distribution(low_records)
+    control_geometry = _geometry_distribution(control_records)
     if not available:
         fraction = interval_low = interval_high = ratio = None
         npe = _distribution(())
-        x = _distribution(())
-        y = _distribution(())
+        geometry["x"] = _distribution(())
+        geometry["y"] = _distribution(())
+        low_geometry["x"] = _distribution(())
+        low_geometry["y"] = _distribution(())
+        control_geometry["x"] = _distribution(())
+        control_geometry["y"] = _distribution(())
     return {
         "positive": positive,
         "low": low,
@@ -317,8 +351,9 @@ def _prompt_metrics(records, config):
         "ratio_low": _ratio_from_fraction(interval_low) if available else None,
         "ratio_high": _ratio_from_fraction(interval_high) if available else None,
         "npe": npe,
-        "x": x,
-        "y": y,
+        "geometry": geometry,
+        "low_geometry": low_geometry,
+        "control_geometry": control_geometry,
     }
 
 
@@ -351,9 +386,21 @@ def _signed_ratio(signed, config):
         thresholds["denominator_absolute_epsilon"],
         thresholds["minimum_control_significance"] * uncertainty,
     )
+    minimum_neff = thresholds["minimum_effective_entries"]
+
+    def inadequate_neff(value):
+        return value < minimum_neff and not math.isclose(
+            value, minimum_neff, rel_tol=1.0e-12, abs_tol=1.0e-12
+        )
+
     if (
-        positive["neff"] < thresholds["minimum_effective_entries"]
-        or control["neff"] < thresholds["minimum_effective_entries"]
+        inadequate_neff(positive["neff"])
+        or inadequate_neff(low["neff"])
+        or inadequate_neff(control["neff"])
+        or low["sumw"] <= max(
+            thresholds["denominator_absolute_epsilon"],
+            thresholds["minimum_control_significance"] * math.sqrt(low["sumw2"]),
+        )
         or control["sumw"] <= denominator_floor
     ):
         return None, None
@@ -366,32 +413,31 @@ def _signed_ratio(signed, config):
     return ratio, sigma
 
 
-def _prompt_ratio_sigma(metrics):
-    if not metrics["available"] or metrics["ratio"] is None:
-        return None
-    total = metrics["positive"]
-    fraction = metrics["f_low"]
-    if total <= 0 or fraction is None or fraction >= 1.0:
-        return None
-    fraction_variance = fraction * (1.0 - fraction) / float(total)
-    return math.sqrt(max(0.0, fraction_variance)) / ((1.0 - fraction) ** 2)
-
-
 def _prompt_vs_signed_status(prompt, signed_ratio, signed_sigma, config):
-    if signed_ratio is None or signed_sigma is None or prompt["ratio"] is None:
+    prompt_low = prompt.get("ratio_low")
+    prompt_high = prompt.get("ratio_high")
+    prompt_central = prompt.get("ratio")
+    if (
+        signed_ratio is None
+        or signed_sigma is None
+        or prompt_central is None
+        or prompt_low is None
+        or prompt_high is None
+    ):
         return "signed_unavailable"
-    prompt_sigma = _prompt_ratio_sigma(prompt)
-    if prompt_sigma is None:
+    signed_ratio = _optional_finite(signed_ratio)
+    signed_sigma = _optional_finite(signed_sigma)
+    if signed_ratio is None or signed_sigma is None or signed_sigma < 0.0:
         return "signed_unavailable"
-    combined = math.sqrt(prompt_sigma * prompt_sigma + signed_sigma * signed_sigma)
-    difference = abs(prompt["ratio"] - signed_ratio)
-    if combined == 0.0:
-        return "consistent" if difference == 0.0 else "inconsistent"
-    significance = difference / combined
-    comparison = config["comparison"]
-    if significance <= comparison["consistent_sigma"]:
+    half_width = config["comparison"]["signed_interval_sigma"] * signed_sigma
+    signed_low = signed_ratio - half_width
+    signed_high = signed_ratio + half_width
+    if (
+        prompt_low <= signed_ratio <= prompt_high
+        or signed_low <= prompt_central <= signed_high
+    ):
         return "consistent"
-    if significance <= comparison["marginal_sigma"]:
+    if max(prompt_low, signed_low) <= min(prompt_high, signed_high):
         return "marginal"
     return "inconsistent"
 
@@ -539,8 +585,8 @@ def build_pion_hgcer_method_a(response_diagnostic, phase_a_contract, *, config=N
             analysis_t = _finite(record.get("analysis_t"), "analysis_t")
             delta = _finite(record.get("ssdelta"), "delta")
             npe = _finite(record.get("P_hgcer_npeSum"), "response_value")
-            x = _finite(record.get("P_hgcer_xAtCer"), "hgcer_x")
-            y = _finite(record.get("P_hgcer_yAtCer"), "hgcer_y")
+            x = _optional_finite(record.get("P_hgcer_xAtCer"))
+            y = _optional_finite(record.get("P_hgcer_yAtCer"))
             stored_t = _stored_index(record.get("canonical_t_index"), "canonical_t")
             stored_delta = _stored_index(record.get("delta_index"), "delta")
             recomputed_t = _canonical_index(analysis_t, t_edges)
@@ -658,12 +704,30 @@ def build_pion_hgcer_method_a(response_diagnostic, phase_a_contract, *, config=N
                 "npe_q90": prompt["npe"]["q90"],
                 "minimum_npe": prompt["npe"]["minimum"],
                 "maximum_npe": prompt["npe"]["maximum"],
-                "hgcer_x_mean": prompt["x"]["mean"],
-                "hgcer_x_rms": prompt["x"]["rms"],
-                "hgcer_x_median": prompt["x"]["q50"],
-                "hgcer_y_mean": prompt["y"]["mean"],
-                "hgcer_y_rms": prompt["y"]["rms"],
-                "hgcer_y_median": prompt["y"]["q50"],
+                "hgcer_x_mean": prompt["geometry"]["x"]["mean"],
+                "hgcer_x_rms": prompt["geometry"]["x"]["rms"],
+                "hgcer_x_median": prompt["geometry"]["x"]["q50"],
+                "hgcer_y_mean": prompt["geometry"]["y"]["mean"],
+                "hgcer_y_rms": prompt["geometry"]["y"]["rms"],
+                "hgcer_y_median": prompt["geometry"]["y"]["q50"],
+                "hgcer_x_valid_count": prompt["geometry"]["x_valid_count"],
+                "hgcer_y_valid_count": prompt["geometry"]["y_valid_count"],
+                "hgcer_xy_valid_count": prompt["geometry"]["xy_valid_count"],
+                "hgcer_xy_missing_count": prompt["geometry"]["xy_missing_count"],
+                "low_hgcer_xy_valid_count": prompt["low_geometry"]["xy_valid_count"],
+                "control_hgcer_xy_valid_count": prompt["control_geometry"]["xy_valid_count"],
+                "low_hgcer_x_mean": prompt["low_geometry"]["x"]["mean"],
+                "low_hgcer_x_rms": prompt["low_geometry"]["x"]["rms"],
+                "low_hgcer_x_median": prompt["low_geometry"]["x"]["q50"],
+                "low_hgcer_y_mean": prompt["low_geometry"]["y"]["mean"],
+                "low_hgcer_y_rms": prompt["low_geometry"]["y"]["rms"],
+                "low_hgcer_y_median": prompt["low_geometry"]["y"]["q50"],
+                "control_hgcer_x_mean": prompt["control_geometry"]["x"]["mean"],
+                "control_hgcer_x_rms": prompt["control_geometry"]["x"]["rms"],
+                "control_hgcer_x_median": prompt["control_geometry"]["x"]["q50"],
+                "control_hgcer_y_mean": prompt["control_geometry"]["y"]["mean"],
+                "control_hgcer_y_rms": prompt["control_geometry"]["y"]["rms"],
+                "control_hgcer_y_median": prompt["control_geometry"]["y"]["q50"],
                 "signed_positive_yield": signed["positive"]["sumw"],
                 "signed_low_yield": signed["low"]["sumw"],
                 "signed_control_yield": signed["control"]["sumw"],
