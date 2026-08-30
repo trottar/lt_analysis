@@ -280,6 +280,16 @@ def _build_identity_no_proton_cleaning_application(
     prepared_sources = (proton_source_bundle or {}).get("prepared_sources") or {}
     if not prepared_sources:
         raise EventContractUnavailable("identity_host_prepared_sources_missing")
+    upstream_references = {
+        key: (target_templates or {}).get(key)
+        for key in ("h_mm", "h_mm_nosub")
+    }
+    if any(reference is None for reference in upstream_references.values()):
+        raise EventContractUnavailable("identity_host_upstream_noRF_reference_missing")
+    upstream_fingerprints_before = {
+        key: fingerprint_histogram_content_error(reference)
+        for key, reference in upstream_references.items()
+    }
 
     products = []
     for t_index in range(len(resolved_t_edges) - 1):
@@ -411,16 +421,77 @@ def _build_identity_no_proton_cleaning_application(
             "final_targets",
         )
     }
-    global_full_closure = _histogram_closure(
+    transform_global_full = _histogram_closure(
         global_targets["final_targets"]["h_mm_nosub"],
         global_targets["raw_targets"]["h_mm_nosub"],
         tolerance,
     )
-    global_cut_closure = _histogram_closure(
+    transform_global_cut = _histogram_closure(
         global_targets["final_targets"]["h_mm"],
         global_targets["raw_targets"]["h_mm"],
         tolerance,
     )
+    upstream_noRF_closure = {
+        "full": {
+            "raw_vs_upstream": _histogram_closure(
+                global_targets["raw_targets"]["h_mm_nosub"],
+                upstream_references["h_mm_nosub"],
+                tolerance,
+            ),
+            "final_vs_upstream": _histogram_closure(
+                global_targets["final_targets"]["h_mm_nosub"],
+                upstream_references["h_mm_nosub"],
+                tolerance,
+            ),
+        },
+        "cut": {
+            "raw_vs_upstream": _histogram_closure(
+                global_targets["raw_targets"]["h_mm"],
+                upstream_references["h_mm"],
+                tolerance,
+            ),
+            "final_vs_upstream": _histogram_closure(
+                global_targets["final_targets"]["h_mm"],
+                upstream_references["h_mm"],
+                tolerance,
+            ),
+        },
+    }
+    upstream_failures = [
+        "{}/{}".format(selection, comparison)
+        for selection, comparisons in upstream_noRF_closure.items()
+        for comparison, closure in comparisons.items()
+        if not closure["passed"]
+    ]
+    upstream_fingerprints_after = {
+        key: fingerprint_histogram_content_error(reference)
+        for key, reference in upstream_references.items()
+    }
+    upstream_references_unchanged = bool(
+        upstream_fingerprints_before == upstream_fingerprints_after
+    )
+    upstream_noRF_closure.update({
+        "passed": not upstream_failures and upstream_references_unchanged,
+        "reference_source": "caller_supplied_preexisting_target_templates",
+        "reference_mapping": {
+            "h_mm_nosub": "nommcuts",
+            "h_mm": "allcuts",
+        },
+        "upstream_reference_fingerprints_before": upstream_fingerprints_before,
+        "upstream_reference_fingerprints_after": upstream_fingerprints_after,
+        "upstream_references_unchanged": upstream_references_unchanged,
+        "failed_comparisons": upstream_failures,
+    })
+    transform_closure = {
+        "passed": bool(
+            all(entry["passed"] for entry in per_t_closure)
+            and transform_global_full["passed"]
+            and transform_global_cut["passed"]
+        ),
+        "per_t": per_t_closure,
+        "global_full": transform_global_full,
+        "global_cut": transform_global_cut,
+    }
     result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
     result_diagnostics = result.get("diagnostics") or {}
     lambda_gate = result_diagnostics.get("lambda_preservation_gate") or {}
@@ -443,18 +514,26 @@ def _build_identity_no_proton_cleaning_application(
         "coordinate_fingerprint": coordinate,
         "identity_host_closure": {
             "passed": bool(
-                all(entry["passed"] for entry in per_t_closure)
-                and global_full_closure["passed"]
-                and global_cut_closure["passed"]
+                transform_closure["passed"]
+                and upstream_noRF_closure["passed"]
             ),
             "tolerance": tolerance,
-            "per_t": per_t_closure,
-            "global_full": global_full_closure,
-            "global_cut": global_cut_closure,
+            "identity_transform_closure": transform_closure,
+            "upstream_noRF_closure": upstream_noRF_closure,
             "global_constructed_strictly_from_per_t": True,
         },
     }
-    if not diagnostics["identity_host_closure"]["passed"]:
+    if not upstream_references_unchanged:
+        raise EventContractUnavailable(
+            "identity_host_upstream_noRF_reference_mutated"
+        )
+    if not upstream_noRF_closure["passed"]:
+        raise EventContractUnavailable(
+            "identity_host_upstream_noRF_closure_failed:{}".format(
+                ",".join(upstream_failures)
+            )
+        )
+    if not transform_closure["passed"]:
         raise EventContractUnavailable("identity_host_histogram_closure_failed")
     return {
         "accepted": True,

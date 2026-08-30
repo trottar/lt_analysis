@@ -679,10 +679,9 @@ class PhaseAEventContractTests(unittest.TestCase):
 
     def test_rejected_result_builds_runtime_identity_application_and_parents(self):
         fixture = self._fixture(identity_host=True)
-        templates = {
-            "h_mm": _Histogram("identity_runtime_cut"),
-            "h_mm_nosub": _Histogram("identity_runtime_full"),
-        }
+        # These setting-wide histograms were filled independently by the
+        # fixture's ordinary pre-proton host path, before the identity builder.
+        templates = fixture["proton_cleaning_application"]["final_targets"]
         template_fingerprints = {
             key: event_contract.fingerprint_histogram_content_error(histogram)
             for key, histogram in templates.items()
@@ -705,6 +704,20 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertTrue(
             application["diagnostics"]["identity_host_closure"]["passed"]
         )
+        closure = application["diagnostics"]["identity_host_closure"]
+        self.assertTrue(closure["identity_transform_closure"]["passed"])
+        self.assertTrue(closure["upstream_noRF_closure"]["passed"])
+        for selection in ("full", "cut"):
+            self.assertTrue(
+                closure["upstream_noRF_closure"][selection][
+                    "raw_vs_upstream"
+                ]["passed"]
+            )
+            self.assertTrue(
+                closure["upstream_noRF_closure"][selection][
+                    "final_vs_upstream"
+                ]["passed"]
+            )
         self.assertEqual(len(application["_prepared_event_weight_lookup"]), 7)
         for payload in application["_prepared_event_weight_lookup"].values():
             self.assertEqual(payload["proton_weight"], 0.0)
@@ -761,6 +774,62 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertTrue(contract["available"], contract.get("reason"))
         self.assertTrue(contract["host_closure"]["passed"])
         self.assertEqual(contract["host_state"], "identity_no_proton_cleaning")
+
+    def test_identity_upstream_closure_detects_independent_corruption(self):
+        fixture = self._fixture(identity_host=True)
+        templates = fixture["proton_cleaning_application"]["final_targets"]
+
+        def build(source_bundle, references):
+            return event_contract._build_identity_no_proton_cleaning_application(
+                proton_source_bundle=source_bundle,
+                target_templates=references,
+                t_edges=fixture["canonical_binning"]["t_edges"],
+                delta_edges=fixture["pion_control_cache"]["delta_edges"],
+                coordinate_fingerprint="coordinate-phase-a",
+                proton_cleaning_result=fixture["proton_cleaning_result"],
+            )
+
+        missing_prepared_event = copy.deepcopy(fixture["proton_source_bundle"])
+        missing_prepared_event["prepared_sources"]["prompt"]["entries"].pop(0)
+        with self.assertRaises(event_contract.EventContractUnavailable) as caught:
+            build(missing_prepared_event, templates)
+        reason = str(caught.exception)
+        self.assertIn("identity_host_upstream_noRF_closure_failed", reason)
+        for comparison in (
+            "full/raw_vs_upstream", "full/final_vs_upstream",
+            "cut/raw_vs_upstream", "cut/final_vs_upstream",
+        ):
+            self.assertIn(comparison, reason)
+
+        corruption_cases = (
+            ("regular_content", "h_mm_nosub", 1, "content"),
+            ("error_only", "h_mm_nosub", 1, "error"),
+            ("underflow", "h_mm_nosub", 0, "content"),
+            ("overflow", "h_mm", -1, "content"),
+        )
+        for label, target_key, bin_index, corruption_kind in corruption_cases:
+            with self.subTest(label=label):
+                corrupted = {
+                    key: histogram.Clone("{}_{}".format(key, label))
+                    for key, histogram in templates.items()
+                }
+                if corruption_kind == "error":
+                    corrupted[target_key].sumw2[bin_index] += 1.0
+                else:
+                    corrupted[target_key].contents[bin_index] += 1.0
+                before = {
+                    key: event_contract.fingerprint_histogram_content_error(histogram)
+                    for key, histogram in corrupted.items()
+                }
+                with self.assertRaisesRegex(
+                    event_contract.EventContractUnavailable,
+                    "identity_host_upstream_noRF_closure_failed",
+                ):
+                    build(fixture["proton_source_bundle"], corrupted)
+                self.assertEqual(before, {
+                    key: event_contract.fingerprint_histogram_content_error(histogram)
+                    for key, histogram in corrupted.items()
+                })
 
     def test_lambda_gate_committed_state_controls_host_classification(self):
         bypass = self._fixture(identity_host=True)
@@ -905,7 +974,7 @@ class PhaseAEventContractTests(unittest.TestCase):
 
         collect(contract)
         self.assertTrue({
-            "L_A", "L_B", "C", "C_final", "refined_pion_weight"
+            "L_A", "L_B", "L", "C", "C_final", "refined_pion_weight"
         }.isdisjoint(keys))
         self.assertFalse(contract["refinement_applied"])
 
@@ -1060,6 +1129,20 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertEqual(numstat[-1], "src/cuts/rand_sub.py")
         self.assertLess(int(numstat[0]), 200)
         self.assertLess(int(numstat[1]), 30)
+        phase_a3_changed = subprocess.run(
+            [
+                "git", "-c", "core.safecrlf=false", "diff", "--name-only",
+                "bd8d9e9444bd46ddc3734346f92105347e658cdb", "--",
+            ],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+        self.assertEqual(phase_a3_changed, [
+            "src/cuts/pion_hgcer_event_contract.py",
+            "testing/test_pion_hgcer_event_contract.py",
+        ])
 
 
 @unittest.skipUnless(ROOT is not None, "PyROOT is not available")
@@ -1082,6 +1165,63 @@ class PhaseAEventContractRootTests(unittest.TestCase):
         self.assertEqual(
             closure["reconstructed"]["overflow"]["content"], 0.75
         )
+
+    def test_identity_builder_closes_against_independent_root_upstream(self):
+        templates = {}
+        for key in ("h_mm", "h_mm_nosub"):
+            histogram = ROOT.TH1D(
+                "phase_a3_root_upstream_{}".format(key), "", 2, 0.0, 2.0
+            )
+            histogram.SetDirectory(0)
+            histogram.Sumw2()
+            templates[key] = histogram
+        rows = (
+            ("prompt", 0, -0.2, 0.3, 2.0),
+            ("rand", 1, 0.5, 0.7, -0.5),
+            ("dummy", 2, 2.2, 1.4, -1.0),
+            ("dummy_rand", 3, 1.5, 1.8, 0.25),
+        )
+        prepared_sources = {}
+        for label, entry_index, mm_value, t_value, coefficient in rows:
+            prepared_sources[label] = {
+                "coefficient": coefficient,
+                "tree_name": "Cut_Kaon_{}_noRF".format(label),
+                "entries": {
+                    entry_index: {
+                        "adj_mm": mm_value,
+                        "adj_t": t_value,
+                        "delta_value": 0.0,
+                        "allcuts": True,
+                        "nommcuts": True,
+                    }
+                },
+            }
+            templates["h_mm"].Fill(mm_value, coefficient)
+            templates["h_mm_nosub"].Fill(mm_value, coefficient)
+        before = {
+            key: event_contract.fingerprint_histogram_content_error(histogram)
+            for key, histogram in templates.items()
+        }
+        application = event_contract._build_identity_no_proton_cleaning_application(
+            proton_source_bundle={"prepared_sources": prepared_sources},
+            target_templates=templates,
+            t_edges=[0.0, 1.0, 2.0],
+            delta_edges=[-10.0, 0.0, 10.0],
+            coordinate_fingerprint="phase-a3-root-coordinate",
+            proton_cleaning_result={
+                "accepted": False,
+                "diagnostics": {"rf_applied": False},
+            },
+        )
+        upstream_closure = application["diagnostics"]["identity_host_closure"][
+            "upstream_noRF_closure"
+        ]
+        self.assertTrue(upstream_closure["passed"])
+        self.assertTrue(upstream_closure["upstream_references_unchanged"])
+        self.assertEqual(before, {
+            key: event_contract.fingerprint_histogram_content_error(histogram)
+            for key, histogram in templates.items()
+        })
 
 
 if __name__ == "__main__":
