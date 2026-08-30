@@ -75,6 +75,17 @@ def _finite_or_none(value):
     return result if math.isfinite(result) else None
 
 
+def _normalized_bin_index(value):
+    """Normalize frozen bin membership to the public integer-or-None form."""
+    if value is None:
+        return None
+    numeric = _finite_or_none(value)
+    if numeric is None or numeric != math.floor(numeric):
+        raise EventContractUnavailable("invalid_frozen_bin_index")
+    index = int(numeric)
+    return index if index >= 0 else None
+
+
 def _strict_edges(edges, label):
     resolved = []
     for value in edges or ():
@@ -262,7 +273,7 @@ def _finalize_metrics(metrics):
     result = dict(metrics)
     sumw2 = float(result["sumw2"])
     result["effective_entries"] = (
-        float(result["signed_weighted_sum"]) ** 2 / sumw2
+        float(result["absolute_weighted_support"]) ** 2 / sumw2
         if sumw2 > 0.0 else 0.0
     )
     return result
@@ -323,39 +334,8 @@ def _weight_contract(parent, inp_dict, tolerance):
                 final_status or "missing",
             )
         )
-    if action == "component_weight":
-        clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inp_dict)
-        weight_payload = build_simc_shape_pion_control_weights(
-            parent.get("fit_result"),
-            clip_min=clip_min,
-            clip_max=clip_max,
-            denom_floor=resolve_particle_subtraction_weight_denominator_floor(inp_dict),
-        )
-        final_weight_values = final_payload.get("weights")
-        rebuilt_weight_values = weight_payload.get("weights")
-        final_weights = list(
-            () if final_weight_values is None else final_weight_values
-        )
-        rebuilt_weights = list(
-            () if rebuilt_weight_values is None else rebuilt_weight_values
-        )
-        if len(final_weights) != len(rebuilt_weights) or any(
-            abs(float(left) - float(right)) > tolerance
-            for left, right in zip(final_weights, rebuilt_weights)
-        ):
-            raise EventContractUnavailable(
-                "baseline_parent_weight_payload_mismatch:t{}".format(
-                    int(parent.get("t_bin_index", -1)) + 1
-                )
-            )
-    else:
-        weight_payload = {
-            "H_pion_control_model": final_payload.get("H_pion_control_model"),
-            "weights": final_payload.get("weights"),
-            "diagnostics": final_payload.get("diagnostics") or {},
-        }
-    reference = weight_payload.get("H_pion_control_model")
-    weights = weight_payload.get("weights")
+    reference = final_payload.get("H_pion_control_model")
+    weights = final_payload.get("weights")
     if reference is None or weights is None:
         raise EventContractUnavailable(
             "baseline_parent_weight_inputs_missing:t{}".format(
@@ -363,6 +343,55 @@ def _weight_contract(parent, inp_dict, tolerance):
             )
         )
     weight_values = [float(value) for value in weights]
+    rebuild_audit = {
+        "performed": False,
+        "passed": None,
+        "rebuilt_reference_histogram_fingerprint": None,
+        "rebuilt_weight_values_fingerprint": None,
+    }
+    if action == "component_weight":
+        clip_min, clip_max = resolve_particle_subtraction_weight_clip_bounds(inp_dict)
+        rebuilt_payload = build_simc_shape_pion_control_weights(
+            parent.get("fit_result"),
+            clip_min=clip_min,
+            clip_max=clip_max,
+            denom_floor=resolve_particle_subtraction_weight_denominator_floor(inp_dict),
+        )
+        rebuilt_reference = rebuilt_payload.get("H_pion_control_model")
+        rebuilt_weight_values = rebuilt_payload.get("weights")
+        rebuilt_weights = list(
+            () if rebuilt_weight_values is None else rebuilt_weight_values
+        )
+        if rebuilt_reference is None or len(weight_values) != len(rebuilt_weights) or any(
+            abs(float(left) - float(right)) > tolerance
+            for left, right in zip(weight_values, rebuilt_weights)
+        ):
+            raise EventContractUnavailable(
+                "baseline_parent_weight_payload_mismatch:t{}".format(
+                    int(parent.get("t_bin_index", -1)) + 1
+                )
+            )
+        frozen_snapshot = _hist_snapshot(reference)
+        rebuilt_snapshot = _hist_snapshot(rebuilt_reference)
+        if (
+            frozen_snapshot["nbins"] != rebuilt_snapshot["nbins"]
+            or frozen_snapshot["edges"] != rebuilt_snapshot["edges"]
+        ):
+            raise EventContractUnavailable(
+                "baseline_parent_weight_reference_binning_mismatch:t{}".format(
+                    int(parent.get("t_bin_index", -1)) + 1
+                )
+            )
+        rebuild_audit = {
+            "performed": True,
+            "passed": True,
+            "rebuilt_reference_histogram_fingerprint": (
+                fingerprint_histogram_content_error(rebuilt_reference)
+            ),
+            "rebuilt_weight_values_fingerprint": _payload_hash(
+                [float(value) for value in rebuilt_weights]
+            ),
+        }
     if action == "zero" and any(abs(value) > tolerance for value in weight_values):
         raise EventContractUnavailable(
             "baseline_parent_zero_weight_mismatch:t{}".format(
@@ -394,11 +423,13 @@ def _weight_contract(parent, inp_dict, tolerance):
             "application_action": action,
             "fallback_mode": policy.get("fallback_mode"),
             "final_application_status": final_status,
+            "authoritative_weight_source": "frozen_final_diagnostic_application_result",
             "reference_histogram_fingerprint": fingerprint_histogram_content_error(
                 reference
             ),
             "weight_values_fingerprint": _payload_hash(weight_values),
-            "weight_diagnostics": _json_ready(weight_payload.get("diagnostics") or {}),
+            "weight_diagnostics": _json_ready(final_payload.get("diagnostics") or {}),
+            "component_rebuild_audit": rebuild_audit,
         },
         "authoritative_cut": final_payload.get("H_pion_subtraction_template_MM"),
         "authoritative_full": final_payload.get(
@@ -490,8 +521,8 @@ def _build_pion_side(
                         source_record.get("source_label"), source_record.get("entry_index")
                     )
                 )
-            cached_t = source_record.get("t_index")
-            if cached_t is not None and int(cached_t) != t_index:
+            cached_t = _normalized_bin_index(source_record.get("t_index"))
+            if cached_t != resolved_t:
                 raise EventContractUnavailable(
                     "pion_event_cached_t_assignment_mismatch:{}:{}".format(
                         source_record.get("source_label"), source_record.get("entry_index")
@@ -500,9 +531,8 @@ def _build_pion_side(
             delta_index, delta_low, delta_high, delta_status = _geometry(
                 source_record.get("ssdelta"), delta_edges, "delta"
             )
-            cached_delta = source_record.get("delta_index")
-            normalized_cached_delta = (
-                int(cached_delta) if cached_delta is not None else None
+            normalized_cached_delta = _normalized_bin_index(
+                source_record.get("delta_index")
             )
             if normalized_cached_delta != delta_index:
                 raise EventContractUnavailable(
@@ -689,24 +719,74 @@ def _build_pion_side(
     }
 
 
+def _resolve_host_state(proton_cleaning_result, proton_cleaning_application):
+    result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
+    application = (
+        proton_cleaning_application
+        if isinstance(proton_cleaning_application, dict) else {}
+    )
+    result_diagnostics = result.get("diagnostics") or {}
+    application_diagnostics = application.get("diagnostics") or {}
+    rf_applied = application_diagnostics.get(
+        "rf_applied", result_diagnostics.get("rf_applied")
+    )
+    explicit_identity = (
+        str(application.get("host_state") or "")
+        == "identity_no_proton_cleaning"
+    )
+    if rf_applied is not False and application.get("rf_restoration_applied") is not False:
+        raise EventContractUnavailable(
+            "proton_host_rf_restoration_not_explicitly_disabled"
+        )
+    if bool(result.get("accepted")) and bool(application.get("accepted")):
+        host_state = "proton_cleaned"
+        lookup = result.get("_prepared_event_weight_lookup") or {}
+    elif explicit_identity:
+        host_state = "identity_no_proton_cleaning"
+        lookup = (
+            application.get("_prepared_event_weight_lookup")
+            or result.get("_prepared_event_weight_lookup")
+            or {}
+        )
+    else:
+        raise EventContractUnavailable(
+            "identity_no_proton_cleaning_host_provenance_unavailable"
+        )
+    if not lookup:
+        raise EventContractUnavailable(
+            "identity_no_proton_cleaning_host_provenance_unavailable"
+            if explicit_identity else "proton_event_lookup_unavailable"
+        )
+    return {
+        "host_state": host_state,
+        "source_target_state": "post_proton_noRF",
+        "rf_restoration_applied": False,
+        "lookup": lookup,
+        "lookup_provenance": (
+            application_diagnostics.get("event_weight_source")
+            or result_diagnostics.get("event_weight_source")
+        ),
+    }
+
+
 def _build_host_side(
     *, proton_source_bundle, proton_cleaning_result, proton_cleaning_application,
-    coordinate_fingerprint, t_edges, delta_edges, tolerance
+    pion_parents, coordinate_fingerprint, t_edges, delta_edges, tolerance
 ):
-    if not isinstance(proton_cleaning_result, dict) or not bool(
-        proton_cleaning_result.get("accepted")
-    ):
-        raise EventContractUnavailable("proton_cleaning_result_unavailable")
-    lookup = proton_cleaning_result.get("_prepared_event_weight_lookup") or {}
+    host_contract = _resolve_host_state(
+        proton_cleaning_result, proton_cleaning_application
+    )
+    lookup = host_contract["lookup"]
     prepared_sources = (proton_source_bundle or {}).get("prepared_sources") or {}
     products = tuple(
         (proton_cleaning_application or {}).get("canonical_t_products") or ()
     )
-    if len(products) != len(t_edges) - 1:
+    parents = tuple(pion_parents or ())
+    if len(products) != len(t_edges) - 1 or len(parents) != len(products):
         raise EventContractUnavailable("proton_canonical_t_product_count_mismatch")
     proton_coordinate = str(
         (proton_cleaning_application or {}).get("coordinate_fingerprint")
-        or proton_cleaning_result.get("coordinate_fingerprint")
+        or (proton_cleaning_result or {}).get("coordinate_fingerprint")
         or ""
     )
     if proton_coordinate and proton_coordinate != coordinate_fingerprint:
@@ -745,26 +825,31 @@ def _build_host_side(
             delta_index, delta_low, delta_high, delta_status = _geometry(
                 (entry or {}).get("delta_value"), delta_edges, "delta"
             )
-            stored_t = frozen.get("t_index")
-            if t_index is not None and stored_t is not None and int(stored_t) != t_index:
+            if _normalized_bin_index(frozen.get("t_index")) != t_index:
                 raise EventContractUnavailable(
                     "proton_event_t_assignment_mismatch:{}".format(signature)
                 )
-            stored_delta = frozen.get("delta_index")
-            if (
-                delta_index is not None and stored_delta is not None
-                and int(stored_delta) != delta_index
-            ):
+            if _normalized_bin_index(frozen.get("delta_index")) != delta_index:
                 raise EventContractUnavailable(
                     "proton_event_delta_assignment_mismatch:{}".format(signature)
                 )
-            cleaned_factor = float(frozen.get("cleaned_factor", 1.0) or 0.0)
-            final_factor = float(
-                frozen.get("final_cleaned_factor", cleaned_factor) or 0.0
-            )
-            if not bool(frozen.get("rf_accept", True)) and final_factor != 0.0:
+            cleaned_factor = _finite_or_none(frozen.get("cleaned_factor"))
+            final_factor = _finite_or_none(frozen.get("final_cleaned_factor"))
+            if cleaned_factor is None or final_factor is None:
                 raise EventContractUnavailable(
-                    "proton_event_final_factor_rf_mismatch:{}".format(signature)
+                    "proton_event_cleaning_factor_missing:{}".format(signature)
+                )
+            if host_contract["host_state"] == "proton_cleaned":
+                if abs(cleaned_factor - final_factor) > tolerance:
+                    raise EventContractUnavailable(
+                        "proton_event_noRF_factor_alias_mismatch:{}".format(signature)
+                    )
+            elif (
+                abs(cleaned_factor - 1.0) > tolerance
+                or abs(final_factor - 1.0) > tolerance
+            ):
+                raise EventContractUnavailable(
+                    "identity_no_proton_cleaning_factor_mismatch:{}".format(signature)
                 )
             contribution = coefficient * final_factor
             record = {
@@ -775,8 +860,11 @@ def _build_host_side(
                 "signed_source_coefficient": coefficient,
                 "allcuts": bool((entry or {}).get("allcuts")),
                 "nommcuts": bool((entry or {}).get("nommcuts")),
-                "noRF_provenance": "noRF" if tree_name.endswith("_noRF") else "RF_or_unknown",
-                "input_selection": "no_rf_proton_cleaning_then_rf_restored",
+                "noRF_provenance": "noRF",
+                "input_selection": "no_rf_post_proton_host",
+                "source_target_state": host_contract["source_target_state"],
+                "host_state": host_contract["host_state"],
+                "rf_restoration_applied": False,
                 "analysis_MM": _finite_or_none((entry or {}).get("adj_mm")),
                 "analysis_abs_t": _finite_or_none((entry or {}).get("adj_t")),
                 "canonical_t_index": t_index,
@@ -791,14 +879,11 @@ def _build_host_side(
                 ),
                 "proton_cleaning_factor": cleaned_factor,
                 "final_cleaned_factor": final_factor,
-                "proton_rf_accept": bool(frozen.get("rf_accept", True)),
                 "signed_host_event_contribution": contribution,
                 "pion_refinement_factor": None,
                 "coordinate_fingerprint": coordinate_fingerprint,
-                "proton_cleaning_method": proton_cleaning_result.get("method"),
-                "proton_lookup_provenance": (
-                    proton_cleaning_result.get("diagnostics") or {}
-                ).get("event_weight_source"),
+                "proton_cleaning_method": (proton_cleaning_result or {}).get("method"),
+                "proton_lookup_provenance": host_contract["lookup_provenance"],
                 "proton_final_output_fingerprint": (
                     products[t_index].get("final_output_fingerprint")
                     if t_index is not None else None
@@ -811,17 +896,45 @@ def _build_host_side(
                 by_t_records[t_index].append(record)
 
     by_t_results = []
-    for t_index, product in enumerate(products):
+    for t_index, (product, parent) in enumerate(zip(products, parents)):
         targets = product.get("final_targets") or {}
         full_reference = targets.get("h_mm_nosub")
         cut_reference = targets.get("h_mm")
-        if full_reference is None or cut_reference is None:
+        parent_reference = parent.get("H_proton_cleaned_final_rf")
+        if full_reference is None or cut_reference is None or parent_reference is None:
             raise EventContractUnavailable(
                 "proton_final_target_missing:t{}".format(t_index + 1)
+            )
+        if _normalized_bin_index(product.get("t_index")) != t_index:
+            raise EventContractUnavailable(
+                "proton_product_t_index_mismatch:t{}".format(t_index + 1)
+            )
+        product_edges = [float(value) for value in (product.get("t_edges") or ())]
+        if product_edges != [float(t_edges[t_index]), float(t_edges[t_index + 1])]:
+            raise EventContractUnavailable(
+                "proton_product_t_edges_mismatch:t{}".format(t_index + 1)
             )
         if str(product.get("coordinate_fingerprint") or coordinate_fingerprint) != coordinate_fingerprint:
             raise EventContractUnavailable(
                 "proton_product_coordinate_fingerprint_mismatch:t{}".format(t_index + 1)
+            )
+        full_fingerprint = fingerprint_histogram_content_error(full_reference)
+        for owner, expected in (
+            ("product", product.get("final_output_fingerprint")),
+            ("parent", parent.get("proton_output_fingerprint")),
+        ):
+            if expected is not None and str(expected) != str(full_fingerprint):
+                raise EventContractUnavailable(
+                    "proton_{}_output_fingerprint_mismatch:t{}".format(
+                        owner, t_index + 1
+                    )
+                )
+        parent_host_closure = _histogram_closure(
+            full_reference, parent_reference, tolerance
+        )
+        if not parent_host_closure["passed"]:
+            raise EventContractUnavailable(
+                "proton_parent_host_mismatch:t{}".format(t_index + 1)
             )
         full_hist = _clone_reset(full_reference, "phase_a_host_t{}".format(t_index + 1), "full")
         cut_hist = _clone_reset(cut_reference, "phase_a_host_t{}".format(t_index + 1), "cut")
@@ -829,8 +942,6 @@ def _build_host_side(
             mm_value = record["analysis_MM"]
             if mm_value is None:
                 raise EventContractUnavailable("proton_event_analysis_mm_nonfinite")
-            if not record["proton_rf_accept"]:
-                continue
             contribution = float(record["signed_host_event_contribution"])
             if contribution == 0.0:
                 continue
@@ -844,6 +955,7 @@ def _build_host_side(
             "canonical_t_index": int(t_index),
             "canonical_t_edges": [float(t_edges[t_index]), float(t_edges[t_index + 1])],
             "record_count": len(by_t_records[t_index]),
+            "parent_host_closure": parent_host_closure,
             "full_closure": full_closure,
             "cut_closure": cut_closure,
             "passed": bool(full_closure["passed"] and cut_closure["passed"]),
@@ -859,29 +971,37 @@ def _build_host_side(
     global_reconstructed_cut = _sum_histograms(
         reconstructed_cut, "phase_a_host_global", "reconstructed_cut"
     )
-    global_reference_full = (
-        (proton_cleaning_application or {}).get("final_targets") or {}
-    ).get("h_mm_nosub")
-    global_reference_cut = (
-        (proton_cleaning_application or {}).get("final_targets") or {}
-    ).get("h_mm")
-    if global_reference_full is None:
-        global_reference_full = _sum_histograms(
-            reference_full, "phase_a_host_global", "reference_full"
-        )
-    if global_reference_cut is None:
-        global_reference_cut = _sum_histograms(
-            reference_cut, "phase_a_host_global", "reference_cut"
-        )
+    global_reference_full = _sum_histograms(
+        reference_full, "phase_a_host_global", "reference_full"
+    )
+    global_reference_cut = _sum_histograms(
+        reference_cut, "phase_a_host_global", "reference_cut"
+    )
     global_full_closure = _histogram_closure(
         global_reconstructed_full, global_reference_full, tolerance
     )
     global_cut_closure = _histogram_closure(
         global_reconstructed_cut, global_reference_cut, tolerance
     )
+    named_targets = (proton_cleaning_application or {}).get("final_targets") or {}
+    named_global_closure = {
+        "full": (
+            _histogram_closure(global_reference_full, named_targets.get("h_mm_nosub"), tolerance)
+            if named_targets.get("h_mm_nosub") is not None else None
+        ),
+        "cut": (
+            _histogram_closure(global_reference_cut, named_targets.get("h_mm"), tolerance)
+            if named_targets.get("h_mm") is not None else None
+        ),
+        "authoritative_for_canonical_sum": False,
+    }
     return {
         "records": all_records,
         "outside_geometry": outside_geometry,
+        "host_state": host_contract["host_state"],
+        "source_target_state": host_contract["source_target_state"],
+        "rf_restoration_applied": False,
+        "lookup_provenance": host_contract["lookup_provenance"],
         "event_population_fingerprint": _payload_hash(all_records),
         "closure": {
             "passed": bool(
@@ -893,6 +1013,7 @@ def _build_host_side(
             "per_t": by_t_results,
             "global_full": global_full_closure,
             "global_cut": global_cut_closure,
+            "named_application_global": named_global_closure,
             "global_constructed_strictly_from_per_t": True,
         },
     }
@@ -951,6 +1072,7 @@ def build_pion_hgcer_event_contract(
             proton_source_bundle=proton_source_bundle,
             proton_cleaning_result=proton_cleaning_result,
             proton_cleaning_application=proton_cleaning_application,
+            pion_parents=parents,
             coordinate_fingerprint=coordinate_fingerprint,
             t_edges=t_edges,
             delta_edges=delta_edges,
@@ -997,10 +1119,11 @@ def build_pion_hgcer_event_contract(
             "kaon_host_population_fingerprint": host_side[
                 "event_population_fingerprint"
             ],
+            "proton_host_state": host_side["host_state"],
+            "proton_source_target_state": host_side["source_target_state"],
+            "rf_restoration_applied": host_side["rf_restoration_applied"],
             "proton_cleaning_method": (proton_cleaning_result or {}).get("method"),
-            "proton_lookup_provenance": (
-                (proton_cleaning_result or {}).get("diagnostics") or {}
-            ).get("event_weight_source"),
+            "proton_lookup_provenance": host_side["lookup_provenance"],
         }
         fingerprint = _payload_hash(fingerprint_inputs)
         contract = {
@@ -1035,6 +1158,9 @@ def build_pion_hgcer_event_contract(
             "pion_closure": pion_side["closure"],
             "host_closure": host_side["closure"],
             "host_records_outside_geometry": host_side["outside_geometry"],
+            "host_state": host_side["host_state"],
+            "source_target_state": host_side["source_target_state"],
+            "rf_restoration_applied": host_side["rf_restoration_applied"],
             "immutable_record_contract": True,
             "production_objects_mutated": False,
             "refinement_applied": False,
@@ -1071,6 +1197,11 @@ def summarize_pion_hgcer_event_contract(contract):
         "kaon_host_record_count": len(payload.get("kaon_host_records") or ()),
         "host_records_outside_geometry_count": len(
             payload.get("host_records_outside_geometry") or ()
+        ),
+        "host_state": payload.get("host_state"),
+        "source_target_state": payload.get("source_target_state"),
+        "rf_restoration_applied": bool(
+            payload.get("rf_restoration_applied", False)
         ),
         "pion_closure_passed": bool(
             (payload.get("pion_closure") or {}).get("passed", False)

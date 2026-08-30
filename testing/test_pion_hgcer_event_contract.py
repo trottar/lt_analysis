@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -151,7 +152,7 @@ def _fill_template(name, records, reference, weights, selection):
 def _fill_host(name, records, selection):
     histogram = _Histogram(name)
     for record in records:
-        if record[selection] and record["rf_accept"]:
+        if record[selection]:
             contribution = record["coefficient"] * record["final_cleaned_factor"]
             if contribution:
                 histogram.Fill(record["adj_mm"], contribution)
@@ -159,7 +160,7 @@ def _fill_host(name, records, selection):
 
 
 class PhaseAEventContractTests(unittest.TestCase):
-    def _fixture(self):
+    def _fixture(self, *, identity_host=False):
         coordinate = "coordinate-phase-a"
         pair_id = "pair-phase-a"
         pair_hash = "pair-hash-phase-a"
@@ -172,7 +173,7 @@ class PhaseAEventContractTests(unittest.TestCase):
                     "coefficient": 2.0, "source_tree_name": "Cut_Pion_prompt_noRF",
                     "rf_state": "noRF", "raw_MM": 0.25, "adj_MM": 0.25,
                     "raw_t": 1.4, "adj_t": 0.4, "ssdelta": -5.0,
-                    "delta_index": 0, "P_hgcer_npeSum": 0.5,
+                    "t_index": 0, "delta_index": 0, "P_hgcer_npeSum": 2.5,
                     "P_hgcer_xAtCer": 1.25, "P_hgcer_yAtCer": -2.5,
                     "allcuts": True, "nommcuts": True,
                 },
@@ -181,7 +182,7 @@ class PhaseAEventContractTests(unittest.TestCase):
                     "coefficient": -0.5, "source_tree_name": "Cut_Pion_rand_noRF",
                     "rf_state": "noRF", "raw_MM": 1.25, "adj_MM": 1.25,
                     "raw_t": 0.35, "adj_t": 0.35, "ssdelta": 12.0,
-                    "delta_index": None, "P_hgcer_npeSum": 1.0,
+                    "t_index": 0, "delta_index": None, "P_hgcer_npeSum": 3.0,
                     "P_hgcer_xAtCer": 2.0, "P_hgcer_yAtCer": -1.0,
                     "allcuts": False, "nommcuts": True,
                 },
@@ -192,7 +193,7 @@ class PhaseAEventContractTests(unittest.TestCase):
                     "coefficient": -1.0, "source_tree_name": "Cut_Pion_prompt_noRF",
                     "rf_state": "noRF", "raw_MM": 0.75, "adj_MM": 0.75,
                     "raw_t": 1.2, "adj_t": 1.2, "ssdelta": 10.0,
-                    "delta_index": 1, "P_hgcer_npeSum": 0.25,
+                    "t_index": 1, "delta_index": 1, "P_hgcer_npeSum": 5.0,
                     "P_hgcer_xAtCer": -3.0, "P_hgcer_yAtCer": 4.0,
                     "allcuts": True, "nommcuts": True,
                 },
@@ -201,7 +202,7 @@ class PhaseAEventContractTests(unittest.TestCase):
                     "coefficient": 0.25, "source_tree_name": "Cut_Pion_rand_noRF",
                     "rf_state": "noRF", "raw_MM": 1.75, "adj_MM": 1.75,
                     "raw_t": 1.7, "adj_t": 1.7, "ssdelta": 0.0,
-                    "delta_index": 1, "P_hgcer_npeSum": 1.5,
+                    "t_index": 1, "delta_index": 1, "P_hgcer_npeSum": 8.0,
                     "P_hgcer_xAtCer": 0.0, "P_hgcer_yAtCer": 0.5,
                     "allcuts": True, "nommcuts": True,
                 },
@@ -284,7 +285,7 @@ class PhaseAEventContractTests(unittest.TestCase):
                 {
                     "entry_index": 0, "adj_mm": 0.5, "adj_t": 0.3,
                     "delta_value": -5.0, "allcuts": True, "nommcuts": True,
-                    "cleaned_factor": 0.6, "final_cleaned_factor": 0.5,
+                    "cleaned_factor": 0.6, "final_cleaned_factor": 0.6,
                     "rf_accept": True,
                 },
                 {
@@ -318,12 +319,17 @@ class PhaseAEventContractTests(unittest.TestCase):
                 {
                     "entry_index": 6, "adj_mm": 2.2, "adj_t": 1.6,
                     "delta_value": 4.0, "allcuts": True, "nommcuts": True,
-                    "cleaned_factor": 0.4, "final_cleaned_factor": 0.0,
+                    "cleaned_factor": 0.4, "final_cleaned_factor": 0.4,
                     "rf_accept": False,
                 },
             ],
         }
         coefficients = {"prompt": 2.0, "rand": -0.5, "dummy": -1.0}
+        if identity_host:
+            for records in host_records.values():
+                for row in records:
+                    row["cleaned_factor"] = 1.0
+                    row["final_cleaned_factor"] = 1.0
         prepared_sources = {}
         lookup = {}
         per_t_host = [[], []]
@@ -368,24 +374,44 @@ class PhaseAEventContractTests(unittest.TestCase):
                 "t_edges": t_edges[t_index:t_index + 2],
                 "coordinate_fingerprint": coordinate,
                 "final_targets": {"h_mm_nosub": full, "h_mm": cut},
+                "final_output_fingerprint": (
+                    event_contract.fingerprint_histogram_content_error(full)
+                ),
             })
+            parents[t_index]["H_proton_cleaned_final_rf"] = full
+            parents[t_index]["proton_output_fingerprint"] = (
+                event_contract.fingerprint_histogram_content_error(full)
+            )
         proton_application = {
+            "accepted": not identity_host,
             "coordinate_fingerprint": coordinate,
             "canonical_t_products": tuple(proton_products),
             "final_targets": {
                 "h_mm_nosub": _sum_histograms("host_global_full", host_full),
                 "h_mm": _sum_histograms("host_global_cut", host_cut),
             },
-        }
-        proton_result = {
-            "accepted": True,
-            "method": "timing_t_event_weight",
-            "coordinate_fingerprint": coordinate,
-            "_prepared_event_weight_lookup": lookup,
             "diagnostics": {
-                "event_weight_source": "setting_wide_immutable_prepared_lookup"
+                "rf_applied": False,
+                "event_weight_source": "setting_wide_immutable_prepared_lookup",
             },
         }
+        if identity_host:
+            proton_application.update({
+                "host_state": "identity_no_proton_cleaning",
+                "rf_restoration_applied": False,
+                "_prepared_event_weight_lookup": lookup,
+            })
+        proton_result = {
+            "accepted": not identity_host,
+            "method": "timing_t_event_weight",
+            "coordinate_fingerprint": coordinate,
+            "diagnostics": {
+                "event_weight_source": "setting_wide_immutable_prepared_lookup",
+                "rf_applied": False,
+            },
+        }
+        if not identity_host:
+            proton_result["_prepared_event_weight_lookup"] = lookup
         canonical_global = {
             "H_MM_estimated_contamination": _sum_histograms(
                 "pion_global_full", full_templates
@@ -450,6 +476,15 @@ class PhaseAEventContractTests(unittest.TestCase):
             )
             for parent in fixture["pion_parents"]
         ]
+        host_fingerprints_before = [
+            event_contract.fingerprint_histogram_content_error(
+                parent["H_proton_cleaned_final_rf"]
+            )
+            for parent in fixture["pion_parents"]
+        ]
+        lookup_before = copy.deepcopy(
+            fixture["proton_cleaning_result"]["_prepared_event_weight_lookup"]
+        )
         contract = self._build(fixture)
         self.assertTrue(contract["available"], contract.get("reason"))
         self.assertTrue(contract["pion_closure"]["passed"])
@@ -467,6 +502,15 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertEqual(prompt["signed_source_coefficient"], 2.0)
         self.assertIsNone(prompt["proton_cleaning_factor"])
         self.assertEqual(prompt["P_hgcer_xAtCer"], 1.25)
+        self.assertTrue(all(
+            record["P_hgcer_npeSum"] > 2.0
+            for record in contract["pion_records"]
+        ))
+        self.assertTrue(all(
+            provenance["authoritative_weight_source"]
+            == "frozen_final_diagnostic_application_result"
+            for provenance in contract["baseline_weight_provenance"]
+        ))
         negative = next(
             record for record in contract["pion_records"]
             if record["source_label"] == "rand"
@@ -497,6 +541,19 @@ class PhaseAEventContractTests(unittest.TestCase):
                 for parent in fixture["pion_parents"]
             ],
         )
+        self.assertEqual(
+            host_fingerprints_before,
+            [
+                event_contract.fingerprint_histogram_content_error(
+                    parent["H_proton_cleaned_final_rf"]
+                )
+                for parent in fixture["pion_parents"]
+            ],
+        )
+        self.assertEqual(
+            lookup_before,
+            fixture["proton_cleaning_result"]["_prepared_event_weight_lookup"],
+        )
         json.dumps(contract, allow_nan=False)
 
     def test_host_uses_existing_final_factor_and_no_pion_refinement(self):
@@ -506,13 +563,67 @@ class PhaseAEventContractTests(unittest.TestCase):
             if record["source_label"] == "prompt" and record["analysis_MM"] == 0.5
         )
         self.assertEqual(prompt["proton_cleaning_factor"], 0.6)
-        self.assertEqual(prompt["final_cleaned_factor"], 0.5)
-        self.assertEqual(prompt["signed_host_event_contribution"], 1.0)
+        self.assertEqual(prompt["final_cleaned_factor"], 0.6)
+        self.assertEqual(prompt["signed_host_event_contribution"], 1.2)
         self.assertIsNone(prompt["pion_refinement_factor"])
+        self.assertEqual(prompt["source_target_state"], "post_proton_noRF")
+        self.assertEqual(prompt["host_state"], "proton_cleaned")
+        self.assertFalse(prompt["rf_restoration_applied"])
+        self.assertNotIn("proton_rf_accept", prompt)
+        ignored_legacy_rf = next(
+            record for record in contract["kaon_host_records"]
+            if record["source_label"] == "dummy" and record["analysis_MM"] == 2.2
+        )
+        self.assertEqual(ignored_legacy_rf["signed_host_event_contribution"], -0.4)
         self.assertEqual(len(contract["host_records_outside_geometry"]), 1)
         global_snapshot = contract["host_closure"]["global_full"]["reconstructed"]
         self.assertNotEqual(global_snapshot["underflow"]["content"], 0.0)
-        self.assertEqual(global_snapshot["overflow"]["content"], 0.0)
+        self.assertNotEqual(global_snapshot["overflow"]["content"], 0.0)
+
+    def test_frozen_final_weight_payload_is_authoritative_and_rebuild_is_audit(self):
+        fixture = self._fixture()
+        frozen_references = [
+            parent["final_diagnostic_application_result"]["H_pion_control_model"]
+            for parent in fixture["pion_parents"]
+        ]
+        rebuilt_references = []
+        for parent in fixture["pion_parents"]:
+            final_payload = parent["final_diagnostic_application_result"]
+            rebuilt = _Histogram(
+                "rebuilt_audit_t{}".format(parent["t_bin_index"] + 1),
+                final_payload["H_pion_control_model"].axis.edges,
+            )
+            rebuilt_references.append(rebuilt)
+            parent["fit_result"]["_phase_a_weight_payload"] = {
+                "H_pion_control_model": rebuilt,
+                "weights": list(final_payload["weights"]),
+                "diagnostics": {"source": "rebuilt_audit"},
+            }
+        evaluated_references = []
+        real_evaluator = event_contract.simc_shape_pion_weight_from_value
+
+        def evaluator(value, reference, weights):
+            evaluated_references.append(reference)
+            return real_evaluator(value, reference, weights)
+
+        with mock.patch.object(
+            event_contract,
+            "simc_shape_pion_weight_from_value",
+            side_effect=evaluator,
+        ):
+            contract = self._build(fixture)
+        self.assertTrue(contract["available"], contract.get("reason"))
+        self.assertTrue(evaluated_references)
+        self.assertTrue(all(
+            reference in frozen_references for reference in evaluated_references
+        ))
+        self.assertTrue(all(
+            reference not in rebuilt_references for reference in evaluated_references
+        ))
+        self.assertTrue(all(
+            provenance["component_rebuild_audit"]["passed"]
+            for provenance in contract["baseline_weight_provenance"]
+        ))
 
     def test_fingerprint_excludes_phi_binning(self):
         first_fixture = self._fixture()
@@ -529,6 +640,123 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertNotIn("phi_edges", fingerprint_json)
         self.assertNotIn("requested_num_phi_bins", fingerprint_json)
         self.assertNotIn("actual_num_phi_bins", fingerprint_json)
+
+    def test_identity_no_proton_cleaning_host_closes_with_unity_factors(self):
+        contract = self._build(self._fixture(identity_host=True))
+        self.assertTrue(contract["available"], contract.get("reason"))
+        self.assertEqual(contract["host_state"], "identity_no_proton_cleaning")
+        self.assertEqual(contract["source_target_state"], "post_proton_noRF")
+        self.assertFalse(contract["rf_restoration_applied"])
+        self.assertTrue(contract["host_closure"]["passed"])
+        self.assertTrue(all(
+            record["proton_cleaning_factor"] == 1.0
+            and record["final_cleaned_factor"] == 1.0
+            for record in contract["kaon_host_records"]
+        ))
+
+    def test_rejected_cleaning_without_explicit_identity_provenance_is_unavailable(self):
+        fixture = self._fixture(identity_host=True)
+        fixture["proton_cleaning_application"].pop("host_state")
+        fixture["proton_cleaning_application"].pop(
+            "_prepared_event_weight_lookup"
+        )
+        contract = self._build(fixture)
+        self.assertFalse(contract["available"])
+        self.assertEqual(
+            contract["reason"],
+            "identity_no_proton_cleaning_host_provenance_unavailable",
+        )
+
+    def test_noRF_sources_are_required_and_rf_accept_is_not_contract_semantics(self):
+        fixture = self._fixture()
+        contract = self._build(fixture)
+        self.assertTrue(contract["available"], contract.get("reason"))
+        self.assertNotIn("rf_accept", json.dumps(contract))
+
+        invalid = self._fixture()
+        invalid["proton_source_bundle"]["prepared_sources"]["prompt"][
+            "tree_name"
+        ] = "Cut_Kaon_prompt_RF"
+        unavailable = self._build(invalid)
+        self.assertFalse(unavailable["available"])
+        self.assertIn("proton_host_source_not_noRF", unavailable["reason"])
+
+        rf_restored = self._fixture()
+        rf_restored["proton_cleaning_application"]["diagnostics"][
+            "rf_applied"
+        ] = True
+        rf_restored["proton_cleaning_result"]["diagnostics"][
+            "rf_applied"
+        ] = True
+        unavailable = self._build(rf_restored)
+        self.assertFalse(unavailable["available"])
+        self.assertIn("rf_restoration_not_explicitly_disabled", unavailable["reason"])
+
+        mismatched_alias = self._fixture()
+        mismatched_alias["proton_cleaning_result"][
+            "_prepared_event_weight_lookup"
+        ]["prompt:0"]["final_cleaned_factor"] = 0.5
+        unavailable = self._build(mismatched_alias)
+        self.assertFalse(unavailable["available"])
+        self.assertIn("noRF_factor_alias_mismatch", unavailable["reason"])
+
+    def test_absolute_support_effective_entries_preserves_signed_sum(self):
+        metrics = event_contract._new_metrics()
+        for contribution in (2.0, -1.0):
+            event_contract._record_metrics(metrics, {
+                "allcuts": True,
+                "nommcuts": True,
+                "signed_source_coefficient": 1.0,
+                "signed_baseline_event_contribution": contribution,
+            })
+        result = event_contract._finalize_metrics(metrics)
+        self.assertEqual(result["signed_weighted_sum"], 1.0)
+        self.assertEqual(result["absolute_weighted_support"], 3.0)
+        self.assertEqual(result["sumw2"], 5.0)
+        self.assertEqual(result["effective_entries"], 9.0 / 5.0)
+
+    def test_signed_prompt_random_dummy_and_dummy_random_algebra(self):
+        contract = self._build(self._fixture())
+        contributions = {
+            record["source_label"]: record["signed_baseline_event_contribution"]
+            for record in contract["pion_records"]
+        }
+        self.assertEqual(contributions, {
+            "prompt": 4.0,
+            "rand": -1.5,
+            "dummy": -4.0,
+            "dummy_rand": 1.25,
+        })
+
+    def test_exact_host_t_and_delta_geometry_assignment_matrix(self):
+        mutations = (
+            ("prompt:0", "t_index", 1, "proton_event_t_assignment_mismatch"),
+            ("prompt:0", "t_index", None, "proton_event_t_assignment_mismatch"),
+            ("prompt:5", "t_index", 0, "proton_event_t_assignment_mismatch"),
+            ("prompt:0", "delta_index", 1, "proton_event_delta_assignment_mismatch"),
+            ("prompt:0", "delta_index", None, "proton_event_delta_assignment_mismatch"),
+            ("rand:1", "delta_index", 0, "proton_event_delta_assignment_mismatch"),
+        )
+        for signature, key, value, reason in mutations:
+            with self.subTest(signature=signature, key=key, value=value):
+                fixture = self._fixture()
+                fixture["proton_cleaning_result"][
+                    "_prepared_event_weight_lookup"
+                ][signature][key] = value
+                contract = self._build(fixture)
+                self.assertFalse(contract["available"])
+                self.assertIn(reason, contract["reason"])
+        unchanged = self._build(self._fixture())
+        self.assertTrue(unchanged["available"], unchanged.get("reason"))
+
+    def test_exact_pion_cached_t_assignment_rejects_none_for_valid_event(self):
+        fixture = self._fixture()
+        fixture["pion_control_cache"]["by_t"][0]["records"][0][
+            "t_index"
+        ] = None
+        contract = self._build(fixture)
+        self.assertFalse(contract["available"])
+        self.assertIn("pion_event_cached_t_assignment_mismatch", contract["reason"])
 
     def test_existing_zero_payload_is_reused_but_skip_is_unavailable(self):
         zero_fixture = self._fixture()
@@ -613,6 +841,37 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertNotIn("TCanvas", module_source)
         self.assertNotIn(".Print(", module_source)
         self.assertNotIn("write_", module_source)
+
+    def test_phase_a_diff_allowlist_and_rand_sub_patch_are_small(self):
+        baseline = "af4fe473e"
+        changed = subprocess.run(
+            [
+                "git", "-c", "core.safecrlf=false", "diff", "--name-only",
+                baseline, "--",
+            ],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+        self.assertEqual(changed, [
+            "src/cuts/pion_hgcer_event_contract.py",
+            "src/cuts/rand_sub.py",
+            "testing/test_pion_hgcer_event_contract.py",
+        ])
+        numstat = subprocess.run(
+            [
+                "git", "-c", "core.safecrlf=false", "diff", "--numstat",
+                baseline, "--", "src/cuts/rand_sub.py",
+            ],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip().split()
+        self.assertEqual(numstat[-1], "src/cuts/rand_sub.py")
+        self.assertLess(int(numstat[0]), 100)
+        self.assertLess(int(numstat[1]), 10)
 
 
 @unittest.skipUnless(ROOT is not None, "PyROOT is not available")
