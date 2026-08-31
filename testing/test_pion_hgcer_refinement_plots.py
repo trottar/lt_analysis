@@ -36,12 +36,6 @@ def _checkpoint():
             "source_target_state": "post_proton_noRF",
         },
         "method_a": {"summary": {"support_counts": {"supported": 1, "marginal": 1, "unsupported": 2}}},
-        "method_b": {
-            "summary": {
-                "method_B_status_counts": {"available": 1, "marginal": 1, "unavailable": 2},
-                "shape_status_counts": {"good": 1, "poor": 1},
-            }
-        },
     }
 
 
@@ -97,6 +91,82 @@ def _method_b():
                 "regions": [],
             },
         ],
+    }
+
+
+def _left_low_method_b():
+    """Reduced deterministic copy of the persisted Left-low Method-B fields."""
+    delta_edges = [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0, 17.0, 20.0]
+    candidates = {
+        (0, 4): (0.9547608416143295, 0.12140029583276699),
+        (1, 2): (1.0713191848003094, 0.20951468382894808),
+    }
+    remaining_statuses = (
+        ["region_marginal"] * 3
+        + ["single_region_only"] * 7
+        + ["unavailable"] * 18
+    )
+    cells = []
+    remaining_index = 0
+    for t_index in range(3):
+        for delta_index in range(10):
+            low, high = delta_edges[delta_index:delta_index + 2]
+            candidate = candidates.get((t_index, delta_index))
+            if candidate is not None:
+                candidate_status = "available_multi_region"
+                method_status = "available"
+                candidate_value, candidate_uncertainty = candidate
+                shape_status = "good"
+            else:
+                candidate_status = remaining_statuses[remaining_index]
+                remaining_index += 1
+                method_status = "marginal" if candidate_status == "region_marginal" else "unavailable"
+                candidate_value = None
+                candidate_uncertainty = None
+                shape_status = "marginal" if method_status == "marginal" else "unavailable"
+            cells.append({
+                "t_index": t_index,
+                "delta_index": delta_index,
+                "delta_low": low,
+                "delta_high": high,
+                "method_B_status": method_status,
+                "candidate_L_B": candidate_value,
+                "candidate_L_B_uncertainty": candidate_uncertainty,
+                "candidate_L_B_status": candidate_status,
+                "shape_chi2_ndf": None,
+                "shape_max_abs_pull": None,
+                "shape_status": shape_status,
+                "regions": [],
+            })
+    return {
+        "status": "available",
+        "available": True,
+        "t_edges": [0.1, 0.2, 0.3, 0.4],
+        "delta_edges": delta_edges,
+        "cells": cells,
+        "summary": {
+            "candidate_status_counts": {
+                "available_multi_region": 2,
+                "region_marginal": 3,
+                "single_region_only": 7,
+                "unavailable": 18,
+            },
+            "method_B_status_counts": {
+                "available": 2,
+                "marginal": 3,
+                "shape_inconsistent": 0,
+                "unavailable": 25,
+            },
+        },
+    }
+
+
+def _left_low_checkpoint():
+    return {
+        "setting": {"phi_setting": "Left", "kinematic_token": "Q4p4W2p74", "epsilon_filename_token": "low"},
+        "canonical_t_edges": [0.1, 0.2, 0.3, 0.4],
+        "delta_edges": [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0, 17.0, 20.0],
+        "method_b": _left_low_method_b(),
     }
 
 
@@ -235,6 +305,143 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertTrue(shapes[1]["shape_poor_veto"])
         self.assertTrue(payload["frozen_pion_baseline"])
         self.assertTrue(payload["no_refinement"])
+
+    def test_left_low_checkpoint_fixture_retains_both_recorded_candidates(self):
+        payload = plots.method_b_display_payload(None, _left_low_checkpoint())
+        candidates = plots.method_b_candidate_points(payload)
+        self.assertEqual(payload["source"], "checkpoint_method_b")
+        self.assertEqual(len(candidates), 2)
+        self.assertEqual(candidates, [
+            {
+                "t_index": 0, "delta_index": 4, "delta_center": 3.5,
+                "candidate_L_B": 0.9547608416143295,
+                "candidate_L_B_uncertainty": 0.12140029583276699,
+                "candidate_L_B_status": "available_multi_region",
+            },
+            {
+                "t_index": 1, "delta_index": 2, "delta_center": -2.5,
+                "candidate_L_B": 1.0713191848003094,
+                "candidate_L_B_uncertainty": 0.20951468382894808,
+                "candidate_L_B_status": "available_multi_region",
+            },
+        ])
+        self.assertEqual(
+            plots.method_b_candidate_count_parity(payload),
+            {"expected_count": 2, "selected_count": 2, "passed": True},
+        )
+
+    def test_checkpoint_wins_over_stale_runtime_without_field_merging(self):
+        runtime = types.MappingProxyType({
+            "status": "available",
+            "available": True,
+            "summary": {"method_B_status_counts": {"available": 2}},
+            "cells": [types.MappingProxyType({
+                "t_index": 0, "delta_index": 0,
+                "method_B_status": "available",
+                "candidate_L_B_status": "unavailable",
+            })],
+        })
+        payload = plots.method_b_display_payload(runtime, _left_low_checkpoint())
+        self.assertEqual(payload["source"], "checkpoint_method_b")
+        self.assertTrue(payload["source_complete"])
+        self.assertEqual(len(payload["cells"]), 30)
+        self.assertEqual(len(plots.method_b_candidate_points(payload)), 2)
+        self.assertEqual(payload["method_status_counts"], {
+            "available": 2, "marginal": 3, "shape_inconsistent": 0, "unavailable": 25,
+        })
+        self.assertEqual(payload["summary"]["candidate_status_counts"]["available_multi_region"], 2)
+
+    def test_runtime_method_b_is_used_only_when_checkpoint_method_b_is_absent(self):
+        runtime = types.MappingProxyType(_left_low_method_b())
+        payload = plots.method_b_display_payload(runtime, {
+            "canonical_t_edges": [0.1, 0.2, 0.3, 0.4],
+            "delta_edges": [-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0, 17.0, 20.0],
+        })
+        self.assertEqual(payload["source"], "runtime_method_b_fallback")
+        self.assertEqual(len(plots.method_b_candidate_points(payload)), 2)
+        self.assertEqual(payload["method_status_counts"]["unavailable"], 25)
+
+    def test_runtime_checkpoint_presentation_mismatch_keeps_checkpoint_display(self):
+        runtime = _left_low_method_b()
+        runtime["cells"][4]["candidate_L_B"] = 9.99
+        checkpoint = _left_low_checkpoint()
+        payload = plots.method_b_display_payload(runtime, checkpoint)
+        parity = plots.method_b_display_source_parity(runtime, checkpoint)
+        self.assertEqual(payload["source"], "checkpoint_method_b")
+        self.assertEqual(plots.method_b_candidate_points(payload)[0]["candidate_L_B"], 0.9547608416143295)
+        self.assertTrue(parity["checked"])
+        self.assertFalse(parity["passed"])
+        self.assertIn("candidate_tuples", parity["differences"])
+        self.assertEqual(checkpoint["method_b"]["cells"][4]["candidate_L_B"], 0.9547608416143295)
+
+    def test_method_b_coverage_retains_zero_categories_and_all_cells(self):
+        payload = plots.method_b_display_payload(None, _left_low_checkpoint())
+        self.assertEqual(payload["method_status_counts"], {
+            "available": 2, "marginal": 3, "shape_inconsistent": 0, "unavailable": 25,
+        })
+        self.assertEqual(payload["coverage_parity"], {
+            "checked": True, "passed": True, "cell_count": 30, "coverage_total": 30,
+            "summary_checked": True, "summary_passed": True, "differences": (),
+        })
+        qa = plots.setting_qa_summary_payload(
+            {"status": "available"}, {}, {}, method_b_display=payload,
+        )
+        self.assertEqual(qa["method_b_coverage"], payload["method_status_counts"])
+        self.assertIn(
+            "Method B coverage: available=2, marginal=3, shape_inconsistent=0, unavailable=25",
+            plots.setting_qa_summary_lines(qa),
+        )
+        mismatched_checkpoint = _left_low_checkpoint()
+        mismatched_checkpoint["method_b"]["summary"]["method_B_status_counts"]["available"] = 1
+        mismatch = plots.method_b_display_payload(None, mismatched_checkpoint)["coverage_parity"]
+        self.assertFalse(mismatch["passed"])
+        self.assertIn("method_B_status_counts", mismatch["differences"])
+
+    def test_method_b_coverage_keeps_explicit_other_statuses(self):
+        method_b = _left_low_method_b()
+        method_b["cells"][0]["method_B_status"] = "internally_inconsistent"
+        method_b["summary"]["method_B_status_counts"] = {
+            "available": 2, "marginal": 2, "shape_inconsistent": 0,
+            "unavailable": 25, "internally_inconsistent": 1,
+        }
+        payload = plots.method_b_display_payload(method_b, {})
+        self.assertEqual(payload["other_method_status_counts"], {"internally_inconsistent": 1})
+        self.assertEqual(sum(payload["method_status_counts"].values()) + sum(payload["other_method_status_counts"].values()), 30)
+        self.assertTrue(payload["coverage_parity"]["passed"])
+
+    def test_candidate_page_state_uses_local_empty_panels_without_global_empty_message(self):
+        payload = plots.method_b_display_payload(None, _left_low_checkpoint())
+        state = plots.method_b_candidate_page_state(payload)
+        self.assertEqual(state["candidate_count"], 2)
+        self.assertEqual(state["parent_candidate_counts"], {0: 1, 1: 1, 2: 0})
+        self.assertFalse(state["show_setting_empty"])
+
+        local_empty = _left_low_method_b()
+        local_empty["cells"] = [
+            cell for cell in local_empty["cells"]
+            if not (cell["t_index"] == 1 and cell["delta_index"] == 2)
+        ]
+        local_empty["cells"].append({
+            "t_index": 1, "delta_index": 2, "delta_low": -4.0, "delta_high": -1.0,
+            "method_B_status": "unavailable", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "candidate_L_B_status": "unavailable",
+            "shape_status": "unavailable", "regions": [],
+        })
+        local_state = plots.method_b_candidate_page_state(
+            plots.method_b_display_payload(local_empty, {})
+        )
+        self.assertEqual(local_state["parent_candidate_counts"], {0: 1, 1: 0, 2: 0})
+        self.assertFalse(local_state["show_setting_empty"])
+
+    def test_one_display_payload_drives_method_b_pages_and_final_qa(self):
+        payload = plots.method_b_display_payload(None, _left_low_checkpoint())
+        qa = plots.setting_qa_summary_payload(
+            {"status": "available"}, {}, {}, method_b_display=payload,
+        )
+        self.assertEqual(len(plots.method_b_shape_rows(payload)), 30)
+        self.assertEqual(plots.method_b_candidate_page_state(payload)["candidate_count"], 2)
+        self.assertEqual(qa["method_b_coverage"], payload["method_status_counts"])
+        self.assertEqual(plots.unity_line_limits(payload), (-10.0, 20.0))
 
     def test_method_b_regional_panels_are_parent_local_and_unity_uses_full_delta_edges(self):
         payload = plots.method_b_plot_payload(_method_b(), _checkpoint())
@@ -491,6 +698,18 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         ])
         self.assertEqual((summary["available"], summary["total"], summary["unavailable"]), (2, 3, 1))
         self.assertEqual(summary["entries"][2], {"t_index": 2, "status": "unavailable", "reason": "reference missing"})
+        lines = plots.setting_qa_summary_lines({
+            "method_a_coverage": {}, "method_b_coverage": {}, "method_b_other_coverage": {},
+            "phase_host_state": "not recorded", "lambda_gate_status": "not recorded",
+            "proton_action": "not recorded", "proton_cleaning_committed": "not recorded",
+            "phase_a_coordinate_status": "available", "phase_a_pion_closure": True,
+            "phase_a_host_closure": True, "canonical_parent_k_lambda": summary,
+            "k_sigma0_protected_region": "not recorded", "k_sigma0_availability": "not available",
+            "aerogel_warnings": [], "proton_warnings": [],
+            "hgcer_diagnostic_availability": "available", "renderer_failures": [],
+        })
+        self.assertIn("  t1: available", lines)
+        self.assertIn("  t3: unavailable — reference missing", lines)
 
     def test_parent_lambda_render_outcome_uses_actual_comparison_result_not_provenance(self):
         module = _load_parent_lambda_renderer(lambda *_args, **_kwargs: True)
@@ -574,10 +793,14 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         refinement_call = source.index("render_pion_hgcer_refinement_pages(")
         final_qa = source.index('"renderer_failures": setting_renderer_failures')
         warning_page = source.index("render_setting_warning_page(")
+        method_b_display = source.index("method_b_display = method_b_display_payload(")
         self.assertLess(proton_call, proton_failure)
         self.assertLess(proton_failure, final_qa)
         self.assertLess(proton_failure, refinement_call)
         self.assertLess(refinement_call, warning_page)
+        self.assertLess(method_b_display, final_qa)
+        self.assertIn("Method-B display-source parity mismatch", source)
+        self.assertIn("method_b_display=method_b_display", source)
         self.assertIn("canonical_parent_k_lambda_render", source)
         self.assertNotIn("k_lambda_scope_template_availability", source)
         self.assertNotIn("k_lambda_source_availability", source)
@@ -624,7 +847,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
                 imports.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
                 imports.append(node.module or "")
-        self.assertTrue(set(imports).issubset({"__future__", "ROOT", "array", "math", "os", "textwrap"}))
+        self.assertTrue(set(imports).issubset({"__future__", "ROOT", "array", "collections.abc", "math", "os", "textwrap"}))
         forbidden = {"method_comparison", "method_agreement", "C_B", "C_final", "refined_pion_weight", "applied_refinement_weight"}
         self.assertTrue(forbidden.isdisjoint(source))
         for marker in ("build_pion", "apply_pion", "particle_subtraction", "pion_component_fits", "pion_t_bin_parents"):

@@ -178,6 +178,8 @@ from pion_hgcer_refinement_plots import (
     build_pdf_destinations,
     build_pdf_route_manifest,
     close_diagnostic_pdf,
+    method_b_display_payload,
+    method_b_display_source_parity,
     open_diagnostic_pdf,
     render_pion_hgcer_refinement_pages,
     render_proton_main_summary_pages,
@@ -7207,6 +7209,39 @@ def rand_sub(
         hgcer_refinement_manifest = histDict.setdefault(
             "pion_hgcer_refinement_page_manifest", []
         )
+        method_b_display = method_b_display_payload(
+            pion_hgcer_method_b, checkpoint_for_plots
+        )
+        if (
+            method_b_display.get("source") == "checkpoint_method_b"
+            and not method_b_display.get("source_complete")
+        ):
+            setting_renderer_failures.append(
+                "Method-B checkpoint display payload incomplete"
+            )
+        method_b_source_parity = method_b_display_source_parity(
+            pion_hgcer_method_b, checkpoint_for_plots
+        )
+        if (
+            method_b_source_parity.get("checked")
+            and not method_b_source_parity.get("passed")
+        ):
+            setting_renderer_failures.append(
+                "Method-B display-source parity mismatch: {}".format(
+                    ", ".join(method_b_source_parity.get("differences") or ())
+                )
+            )
+        method_b_coverage_parity = method_b_display.get("coverage_parity") or {}
+        if (
+            method_b_display.get("source") == "checkpoint_method_b"
+            and method_b_coverage_parity.get("checked")
+            and not method_b_coverage_parity.get("passed")
+        ):
+            setting_renderer_failures.append(
+                "Method-B checkpoint cell/summary coverage mismatch: {}".format(
+                    ", ".join(method_b_coverage_parity.get("differences") or ())
+                )
+            )
         aerogel_validation_for_qa = proton_display_diagnostics.get(
             "aerogel_vs_t_validation"
         ) or {}
@@ -7235,6 +7270,7 @@ def rand_sub(
                 if isinstance(pion_hgcer_tdelta_diagnostic, dict) else "not available"
             ),
             "renderer_failures": setting_renderer_failures,
+            "method_b_display_payload": method_b_display,
         }
         try:
             render_pion_hgcer_refinement_pages(
@@ -7243,6 +7279,7 @@ def rand_sub(
                 phase_a=pion_hgcer_event_contract,
                 method_a=pion_hgcer_method_a,
                 method_b=pion_hgcer_method_b,
+                method_b_display=method_b_display,
                 phase_a_display_context=phase_a_display_context,
                 page_manifest=hgcer_refinement_manifest,
             )
@@ -7263,6 +7300,7 @@ def rand_sub(
                 phase_a=pion_hgcer_event_contract,
                 method_a=pion_hgcer_method_a,
                 method_b=pion_hgcer_method_b,
+                method_b_display=method_b_display,
                 part2=pion_hgcer_zerope_transfer,
                 phase_a_display_context=phase_a_display_context,
                 runtime_qa_context=setting_qa_context,

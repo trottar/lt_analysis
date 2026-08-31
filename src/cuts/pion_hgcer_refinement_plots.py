@@ -8,6 +8,7 @@ It never evaluates a weight, changes a fit, or changes a production object.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 import math
 import os
 import textwrap
@@ -60,7 +61,7 @@ def build_pdf_route_manifest(main_pdf):
 
 
 def _mapping(value):
-    return value if isinstance(value, dict) else {}
+    return value if isinstance(value, Mapping) else {}
 
 
 def _finite(value):
@@ -112,6 +113,13 @@ _METHOD_B_STATUS_LABELS = {
     "shape_inconsistent": "shape inconsistent",
     "available": "available",
 }
+
+_METHOD_B_CANONICAL_STATUSES = (
+    "available",
+    "marginal",
+    "shape_inconsistent",
+    "unavailable",
+)
 
 _METHOD_B_EXTRA_STATUS_LABELS = {
     "internally_inconsistent": "other stored inconsistency",
@@ -170,14 +178,18 @@ def _stored_category_counts(cells, field, categories, summary_counts=None):
 
 def _display_value(value):
     """Render a recorded scalar or a compact recorded mapping without decisions."""
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         fields = ("status", "passed", "available", "reason", "count", "total")
-        fragments = ["{}={}".format(name, value[name]) for name in fields if name in value]
+        structured_fields = ("status", "passed", "reason", "count", "total")
+        fragments = (
+            ["{}={}".format(name, value[name]) for name in fields if name in value]
+            if any(name in value for name in structured_fields) else []
+        )
         if not fragments:
             fragments = [
                 "{}={}".format(name, item)
                 for name, item in sorted(value.items())
-                if not isinstance(item, (dict, list, tuple))
+                if not isinstance(item, (Mapping, list, tuple))
             ][:6]
         return ", ".join(fragments) if fragments else "recorded mapping"
     if value is None or value == "":
@@ -278,32 +290,186 @@ def method_a_f_low_points(payload):
     return points
 
 
-def method_b_plot_payload(method_b, checkpoint=None):
-    """Return stored Method-B status, candidate, regional, and shape fields."""
+def _method_b_display_edges(source, checkpoint):
+    """Resolve display geometry from one source and the checkpoint root only."""
+    payload = _mapping(source)
+    root = _mapping(checkpoint)
+    t_edges = (
+        _edges(payload, "t_edges")
+        or _edges(payload, "canonical_t_edges")
+        or _edges(root, "canonical_t_edges")
+    )
+    delta_edges = _edges(payload, "delta_edges") or _edges(root, "delta_edges")
+    return t_edges, delta_edges
+
+
+def _checkpoint_method_b_is_complete(checkpoint):
+    """Return whether the persisted Method-B snapshot is sufficient to render."""
+    root = _mapping(checkpoint)
+    payload = _mapping(root.get("method_b"))
+    cells = list(payload.get("cells") or ())
+    summary = payload.get("summary")
+    t_edges, delta_edges = _method_b_display_edges(payload, root)
+    return bool(cells) and isinstance(summary, Mapping) and bool(t_edges) and bool(delta_edges)
+
+
+def _method_b_summary_counts(summary, name):
+    """Copy a recorded count mapping without inventing missing categories."""
+    return dict(_mapping(_mapping(summary).get(name)))
+
+
+def method_b_coverage_parity(payload):
+    """Check Method-B display coverage against its cells and stored aggregate."""
+    display = _mapping(payload)
+    cells = list(display.get("cells") or ())
+    canonical_counts = dict(display.get("method_status_counts") or {})
+    other_counts = dict(display.get("other_method_status_counts") or {})
+    summary_counts = _method_b_summary_counts(display.get("summary"), "method_B_status_counts")
+    summary_canonical, summary_other = _stored_category_counts(
+        (), "method_B_status", _METHOD_B_CANONICAL_STATUSES, summary_counts
+    )
+    coverage_total = sum(canonical_counts.values()) + sum(other_counts.values())
+    summary_checked = bool(cells)
+    summary_passed = (
+        canonical_counts == summary_canonical and other_counts == summary_other
+        if summary_checked else None
+    )
+    differences = []
+    if coverage_total != len(cells):
+        differences.append("coverage_total")
+    if summary_checked and not summary_passed:
+        differences.append("method_B_status_counts")
+    return {
+        "checked": bool(cells),
+        "passed": not differences,
+        "cell_count": len(cells),
+        "coverage_total": coverage_total,
+        "summary_checked": summary_checked,
+        "summary_passed": summary_passed,
+        "differences": tuple(differences),
+    }
+
+
+def _method_b_presentation_value(value):
+    """Return a stable scalar comparison value without inspecting ROOT objects."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    return repr(value)
+
+
+def _method_b_presentation_snapshot(method_b):
+    """Extract only presentation-relevant Method-B fields for parity auditing."""
     payload = _mapping(method_b)
-    checkpoint_method = _mapping(_mapping(checkpoint).get("method_b"))
-    summary = _mapping(payload.get("summary")) or _mapping(checkpoint_method.get("summary"))
-    cells = [dict(_mapping(cell)) for cell in (payload.get("cells") or checkpoint_method.get("cells") or ())]
+    summary = _mapping(payload.get("summary"))
+    cells = [dict(_mapping(cell)) for cell in (payload.get("cells") or ())]
     cells.sort(key=_cell_key)
-    method_status_counts, other_method_status_counts = _stored_category_counts(
-        cells, "method_B_status", tuple(_METHOD_B_STATUS_LABELS), summary.get("method_B_status_counts")
+    return {
+        "status": _method_b_presentation_value(payload.get("status", "unavailable")),
+        "available": bool(payload.get("available", False)),
+        "cell_count": len(cells),
+        "cell_statuses": tuple(
+            (
+                _method_b_presentation_value(cell.get("t_index")),
+                _method_b_presentation_value(cell.get("delta_index")),
+                _cell_status(cell, "method_B_status"),
+            )
+            for cell in cells
+        ),
+        "candidate_tuples": tuple(
+            (
+                _method_b_presentation_value(cell.get("t_index")),
+                _method_b_presentation_value(cell.get("delta_index")),
+                _cell_status(cell, "candidate_L_B_status"),
+                _method_b_presentation_value(cell.get("candidate_L_B")),
+                _method_b_presentation_value(cell.get("candidate_L_B_uncertainty")),
+            )
+            for cell in cells
+        ),
+        "shape_tuples": tuple(
+            (
+                _method_b_presentation_value(cell.get("t_index")),
+                _method_b_presentation_value(cell.get("delta_index")),
+                _cell_status(cell, "shape_status"),
+            )
+            for cell in cells
+        ),
+        "candidate_status_counts": tuple(sorted(
+            _method_b_summary_counts(summary, "candidate_status_counts").items()
+        )),
+        "method_B_status_counts": tuple(sorted(
+            _method_b_summary_counts(summary, "method_B_status_counts").items()
+        )),
+    }
+
+
+def method_b_display_source_parity(method_b, checkpoint):
+    """Compare runtime and persisted Method-B presentation fields without mutation."""
+    runtime = _mapping(method_b)
+    checkpoint_method = _mapping(_mapping(checkpoint).get("method_b"))
+    if not runtime or not checkpoint_method:
+        return {"checked": False, "passed": True, "differences": ()}
+    runtime_snapshot = _method_b_presentation_snapshot(runtime)
+    checkpoint_snapshot = _method_b_presentation_snapshot(checkpoint_method)
+    differences = tuple(
+        field for field in runtime_snapshot
+        if runtime_snapshot[field] != checkpoint_snapshot[field]
     )
     return {
-        "status": payload.get("status", checkpoint_method.get("status", "unavailable")),
-        "available": bool(payload.get("available", checkpoint_method.get("available", False))),
-        "reason": payload.get("reason", checkpoint_method.get("reason")),
-        "t_edges": _edges(payload, "t_edges") or list(_mapping(checkpoint).get("canonical_t_edges") or ()),
-        "delta_edges": _edges(payload, "delta_edges") or list(_mapping(checkpoint).get("delta_edges") or ()),
+        "checked": True,
+        "passed": not differences,
+        "differences": differences,
+    }
+
+
+def method_b_display_payload(method_b=None, checkpoint=None):
+    """Resolve one checkpoint-first Method-B scientific snapshot for all display."""
+    root = _mapping(checkpoint)
+    checkpoint_method = _mapping(root.get("method_b"))
+    if checkpoint_method:
+        source = checkpoint_method
+        source_name = "checkpoint_method_b"
+    else:
+        source = _mapping(method_b)
+        source_name = "runtime_method_b_fallback"
+    summary = _mapping(source.get("summary"))
+    cells = [dict(_mapping(cell)) for cell in (source.get("cells") or ())]
+    cells.sort(key=_cell_key)
+    method_status_counts, other_method_status_counts = _stored_category_counts(
+        cells, "method_B_status", _METHOD_B_CANONICAL_STATUSES,
+        summary.get("method_B_status_counts"),
+    )
+    t_edges, delta_edges = _method_b_display_edges(source, root)
+    payload = {
+        "source": source_name,
+        "source_complete": (
+            _checkpoint_method_b_is_complete(root)
+            if source_name == "checkpoint_method_b" else bool(cells) and bool(summary)
+        ),
+        "status": source.get("status", "unavailable"),
+        "available": bool(source.get("available", False)),
+        "reason": source.get("reason"),
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "summary": dict(summary),
         "method_status_counts": method_status_counts,
         "other_method_status_counts": other_method_status_counts,
-        "shape_status_counts": dict(summary.get("shape_status_counts") or {}),
-        "candidate_status_counts": dict(summary.get("candidate_status_counts") or {}),
+        "shape_status_counts": _method_b_summary_counts(summary, "shape_status_counts"),
+        "candidate_status_counts": _method_b_summary_counts(summary, "candidate_status_counts"),
         "cells": cells,
         "non_authoritative": True,
         "frozen_pion_baseline": True,
         "no_refinement": True,
         "no_interpolation": True,
     }
+    payload["coverage_parity"] = method_b_coverage_parity(payload)
+    return payload
+
+
+def method_b_plot_payload(method_b, checkpoint=None):
+    """Backward-compatible alias for the checkpoint-first Method-B display payload."""
+    return method_b_display_payload(method_b, checkpoint)
 
 
 def method_b_candidate_points(payload):
@@ -328,6 +494,61 @@ def method_b_candidate_points(payload):
             "candidate_L_B_status": _cell_status(entry, "candidate_L_B_status"),
         })
     return points
+
+
+def method_b_candidate_count_parity(payload):
+    """Verify the candidate selector retains exactly its finite stored candidates."""
+    display = _mapping(payload)
+    expected_count = 0
+    for cell in display.get("cells") or ():
+        entry = _mapping(cell)
+        if _cell_status(entry, "candidate_L_B_status") != "available_multi_region":
+            continue
+        required = (
+            entry.get("candidate_L_B"), entry.get("candidate_L_B_uncertainty"),
+            entry.get("delta_low"), entry.get("delta_high"),
+        )
+        if all(_finite(value) is not None for value in required):
+            expected_count += 1
+    selected_count = len(method_b_candidate_points(display))
+    return {
+        "expected_count": expected_count,
+        "selected_count": selected_count,
+        "passed": selected_count == expected_count,
+    }
+
+
+def _method_b_point_t_index(point):
+    try:
+        return int(_mapping(point).get("t_index"))
+    except (TypeError, ValueError):
+        return None
+
+
+def method_b_candidate_page_state(payload):
+    """Return the pure local/global empty-state decision for the candidate page."""
+    display = _mapping(payload)
+    t_indices = []
+    for cell in display.get("cells") or ():
+        try:
+            t_index = int(_mapping(cell).get("t_index"))
+        except (TypeError, ValueError):
+            continue
+        if t_index not in t_indices:
+            t_indices.append(t_index)
+    t_indices.sort()
+    points = method_b_candidate_points(display)
+    parent_counts = {
+        t_index: sum(_method_b_point_t_index(point) == t_index for point in points)
+        for t_index in t_indices
+    }
+    return {
+        "candidate_count": len(points),
+        "candidate_parity": method_b_candidate_count_parity(display),
+        "t_indices": tuple(t_indices),
+        "parent_candidate_counts": parent_counts,
+        "show_setting_empty": not points,
+    }
 
 
 def method_b_regional_rows(payload):
@@ -506,11 +727,11 @@ def _pass_fail_label(value):
     return "not recorded"
 
 
-def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_context=None, runtime_qa_context=None):
+def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_context=None, runtime_qa_context=None, method_b_display=None):
     """Collect existing setting-level coverage and QA state for terminal display."""
     phase = _mapping(phase_a)
     method_a_payload = method_a_plot_payload(method_a)
-    method_b_payload = method_b_plot_payload(method_b)
+    method_b_payload = _mapping(method_b_display) or method_b_display_payload(method_b)
     context = _mapping(display_context)
     runtime = _mapping(runtime_qa_context)
     lambda_summary = canonical_parent_lambda_summary(runtime.get("canonical_parent_k_lambda"))
@@ -540,7 +761,7 @@ def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_
 def _has_recorded_warning(value):
     if value is None or value in ("", "not available", "not recorded"):
         return False
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return any(_has_recorded_warning(item) for item in value.values())
     return bool(value)
 
@@ -628,7 +849,10 @@ def setting_qa_summary_lines(qa, detached_warnings=()):
         ),
     ))
     for parent in lambda_summary.get("entries") or ():
-        lines.append("  t{}: {} — {}".format(int(parent["t_index"]) + 1, parent["status"], parent["reason"]))
+        if parent["status"] in ("available", "ok", "pass", "passed") and parent["reason"] == "not recorded":
+            lines.append("  t{}: {}".format(int(parent["t_index"]) + 1, parent["status"]))
+        else:
+            lines.append("  t{}: {} — {}".format(int(parent["t_index"]) + 1, parent["status"], parent["reason"]))
     lines.extend((
         "K-Sigma0 protected region: {}; setting-wide explicit template: {}".format(
             summary.get("k_sigma0_protected_region"), summary.get("k_sigma0_availability"),
@@ -1006,8 +1230,8 @@ def _render_method_a_pages(pdf_name, checkpoint, method_a, manifest):
         canvas.Close()
 
 
-def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
-    payload = method_b_plot_payload(method_b, checkpoint)
+def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest, display_payload=None):
+    payload = _mapping(display_payload) or method_b_display_payload(method_b, checkpoint)
     setting = _mapping(_mapping(checkpoint).get("setting"))
     ROOT = _import_root()
     if ROOT is None:
@@ -1020,18 +1244,21 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
     canvas = ROOT.TCanvas("C_hgcer_method_b_candidate", _title(setting, "Method B", "candidate L_B"), 1200, 800)
     try:
         draw_objects = []
-        t_indices = sorted({int(cell.get("t_index")) for cell in payload["cells"] if _finite(cell.get("t_index")) is not None})
+        candidate_state = method_b_candidate_page_state(payload)
+        t_indices = candidate_state["t_indices"]
         canvas.Divide(max(1, min(len(t_indices), 4)), 1)
-        plotted = False
         candidates = method_b_candidate_points(payload)
         delta_limits = canonical_delta_frame_limits(payload)
         for pad, t_index in enumerate(t_indices[:4], start=1):
             canvas.cd(pad)
-            parent_points = [point for point in candidates if int(point.get("t_index", -1)) == t_index]
+            parent_points = [
+                point for point in candidates
+                if _method_b_point_t_index(point) == t_index
+            ]
             y_limits = method_b_candidate_frame_limits(parent_points)
             if not parent_points or None in delta_limits or None in y_limits:
                 message = ROOT.TLatex()
-                message.DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells")
+                message.DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells for this t parent")
                 label = _diagnostic_label(ROOT, candidate=True)
                 label.Draw()
                 draw_objects.extend((message, label))
@@ -1052,8 +1279,6 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
             draw_objects.append(graph)
             point = 0
             for point_data in parent_points:
-                if int(point_data.get("t_index", -1)) != t_index:
-                    continue
                 value, sigma = point_data["candidate_L_B"], point_data["candidate_L_B_uncertainty"]
                 center = point_data["delta_center"]
                 graph.SetPoint(point, center, value)
@@ -1067,8 +1292,7 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
                 label = _diagnostic_label(ROOT, candidate=True)
                 label.Draw()
                 draw_objects.append(label)
-                plotted = True
-        if not plotted:
+        if candidate_state["show_setting_empty"]:
             canvas.cd(1)
             message = ROOT.TLatex()
             message.DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells")
@@ -1153,25 +1377,30 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
     return True
 
 
-def render_pion_hgcer_refinement_pages(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, phase_a_display_context=None, page_manifest=None):
+def render_pion_hgcer_refinement_pages(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, method_b_display=None, phase_a_display_context=None, page_manifest=None):
     """Append all new detached Phase-A/Method-A/Method-B pages to an open PDF."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     if _import_root() is None:
         return manifest
     _render_phase_a_page(pdf_name, checkpoint, phase_a, phase_a_display_context, manifest)
     _render_method_a_pages(pdf_name, checkpoint, method_a, manifest)
-    _render_method_b_pages(pdf_name, checkpoint, method_b, manifest)
+    _render_method_b_pages(
+        pdf_name, checkpoint, method_b, manifest,
+        display_payload=method_b_display,
+    )
     return manifest
 
 
-def render_setting_warning_page(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, part2=None, phase_a_display_context=None, runtime_qa_context=None, page_manifest=None, close_pdf=False):
+def render_setting_warning_page(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, method_b_display=None, part2=None, phase_a_display_context=None, runtime_qa_context=None, page_manifest=None, close_pdf=False):
     """Append the terminal setting-level QA summary to an already-open main PDF."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
-    warnings = warning_payload(phase_a, method_a, method_b, part2)
+    resolved_method_b = _mapping(method_b_display) or method_b_display_payload(method_b, checkpoint)
+    warnings = warning_payload(phase_a, method_a, resolved_method_b, part2)
     qa = setting_qa_summary_payload(
         phase_a, method_a, method_b, part2,
         display_context=phase_a_display_context,
         runtime_qa_context=runtime_qa_context,
+        method_b_display=resolved_method_b,
     )
     setting = _mapping(_mapping(checkpoint).get("setting"))
     lines = setting_qa_summary_lines(qa, warnings)
@@ -1401,8 +1630,13 @@ __all__ = (
     "method_a_f_low_frame_limits",
     "method_a_f_low_style",
     "method_a_plot_payload",
+    "method_b_candidate_count_parity",
+    "method_b_candidate_page_state",
     "method_b_candidate_points",
     "method_b_candidate_frame_limits",
+    "method_b_coverage_parity",
+    "method_b_display_payload",
+    "method_b_display_source_parity",
     "method_b_plot_payload",
     "method_b_regional_panels",
     "method_b_regional_frame_limits",
