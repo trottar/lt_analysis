@@ -29,6 +29,12 @@ from root_histogram_ownership import (
 
 
 EVENT_CONTRACT_SCHEMA_VERSION = "pion_hgcer_event_contract/v1"
+EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION = (
+    "pion_hgcer_event_contract_fingerprint/v2"
+)
+FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS = frozenset((
+    "canonical_interval_pair_id",
+))
 DEFAULT_CLOSURE_TOLERANCE = 1.0e-10
 
 
@@ -65,6 +71,21 @@ def _payload_hash(payload):
         allow_nan=False,
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def _fingerprint_event_records(records):
+    """Hash event records after removing non-scientific provenance labels."""
+    projected = []
+    for record in records or ():
+        fingerprint_record = _json_ready(record)
+        if isinstance(fingerprint_record, dict):
+            fingerprint_record = {
+                key: value
+                for key, value in fingerprint_record.items()
+                if key not in FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS
+            }
+        projected.append(fingerprint_record)
+    return _payload_hash(projected)
 
 
 def _finite_or_none(value):
@@ -592,6 +613,7 @@ def _finalize_metrics(metrics):
 def _unavailable(reason, *, stage="validation", exception=None):
     payload = {
         "schema_version": EVENT_CONTRACT_SCHEMA_VERSION,
+        "fingerprint_schema_version": EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
         "status": "unavailable",
         "available": False,
         "reason": str(reason),
@@ -1014,7 +1036,7 @@ def _build_pion_side(
         "by_t": by_t_results,
         "weight_provenance": weight_provenance,
         "source_accounting": global_source_accounting,
-        "event_population_fingerprint": _payload_hash(all_records),
+        "event_population_fingerprint": _fingerprint_event_records(all_records),
         "closure": {
             "passed": passed,
             "tolerance": tolerance,
@@ -1483,6 +1505,7 @@ def build_pion_hgcer_event_contract(
         )
         fingerprint_inputs = {
             "schema_version": EVENT_CONTRACT_SCHEMA_VERSION,
+            "fingerprint_schema_version": EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
             "canonical_t_parent_ids": [
                 parent.get("pion_parent_id") for parent in parents
             ],
@@ -1496,9 +1519,6 @@ def build_pion_hgcer_event_contract(
             "coordinate_fingerprint": coordinate_fingerprint,
             "physical_pion_control_mask_fingerprint": cache.get(
                 "physical_pion_control_mask_fingerprint"
-            ),
-            "canonical_interval_pair_id": canonical.get(
-                "canonical_interval_pair_id"
             ),
             "canonical_interval_pair_hash": canonical.get(
                 "canonical_interval_pair_hash"
@@ -1538,6 +1558,7 @@ def build_pion_hgcer_event_contract(
         fingerprint = _payload_hash(fingerprint_inputs)
         contract = {
             "schema_version": EVENT_CONTRACT_SCHEMA_VERSION,
+            "fingerprint_schema_version": EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
             "status": "available" if (
                 pion_side["closure"]["passed"] and host_side["closure"]["passed"]
             ) else "unavailable",
@@ -1598,6 +1619,10 @@ def summarize_pion_hgcer_event_contract(contract):
     payload = contract if isinstance(contract, dict) else {}
     summary = {
         "schema_version": payload.get("schema_version", EVENT_CONTRACT_SCHEMA_VERSION),
+        "fingerprint_schema_version": payload.get(
+            "fingerprint_schema_version",
+            EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
+        ),
         "status": payload.get("status", "unavailable"),
         "available": bool(payload.get("available", False)),
         "reason": payload.get("reason"),
@@ -1648,6 +1673,9 @@ def summarize_pion_hgcer_event_contract(contract):
 __all__ = (
     "DEFAULT_CLOSURE_TOLERANCE",
     "EVENT_CONTRACT_SCHEMA_VERSION",
+    "EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION",
+    "FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS",
+    "_fingerprint_event_records",
     "build_pion_hgcer_event_contract",
     "summarize_pion_hgcer_event_contract",
 )

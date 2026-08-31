@@ -510,6 +510,14 @@ class PhaseAEventContractTests(unittest.TestCase):
         )
         contract = self._build(fixture)
         self.assertTrue(contract["available"], contract.get("reason"))
+        self.assertEqual(
+            contract["fingerprint_schema_version"],
+            event_contract.EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
+        )
+        self.assertEqual(
+            contract["fingerprint_inputs"]["fingerprint_schema_version"],
+            event_contract.EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
+        )
         self.assertTrue(contract["pion_closure"]["passed"])
         self.assertTrue(contract["host_closure"]["passed"])
         self.assertEqual(len(contract["pion_records"]), 4)
@@ -663,6 +671,88 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertNotIn("phi_edges", fingerprint_json)
         self.assertNotIn("requested_num_phi_bins", fingerprint_json)
         self.assertNotIn("actual_num_phi_bins", fingerprint_json)
+
+    def test_pair_id_is_serialized_and_validated_but_excluded_from_fingerprints(self):
+        first_fixture = self._fixture()
+        second_fixture = self._fixture()
+        renamed_pair_id = "pair-phase-a-renamed"
+        second_fixture["canonical_binning"]["canonical_interval_pair_id"] = (
+            renamed_pair_id
+        )
+        second_fixture["pion_parents"] = tuple(
+            dict(parent, canonical_interval_pair_id=renamed_pair_id)
+            for parent in second_fixture["pion_parents"]
+        )
+
+        first = self._build(first_fixture)
+        second = self._build(second_fixture)
+        self.assertTrue(first["available"], first.get("reason"))
+        self.assertTrue(second["available"], second.get("reason"))
+        self.assertEqual(
+            first["pion_event_population_fingerprint"],
+            second["pion_event_population_fingerprint"],
+        )
+        self.assertEqual(first["contract_fingerprint"], second["contract_fingerprint"])
+        self.assertEqual(
+            [record["pion_parent_id"] for record in first["pion_records"]],
+            [record["pion_parent_id"] for record in second["pion_records"]],
+        )
+        self.assertTrue(all(
+            record["canonical_interval_pair_id"] == renamed_pair_id
+            and record["canonical_interval_pair_hash"] == "pair-hash-phase-a"
+            for record in second["pion_records"]
+        ))
+        fingerprint_json = json.dumps(second["fingerprint_inputs"])
+        self.assertNotIn("canonical_interval_pair_id", fingerprint_json)
+        self.assertIn("canonical_interval_pair_hash", fingerprint_json)
+
+        for key in (
+            "canonical_interval_pair_id", "canonical_interval_pair_hash",
+        ):
+            invalid_fixture = self._fixture()
+            invalid_parents = list(invalid_fixture["pion_parents"])
+            invalid_parents[0] = dict(
+                invalid_parents[0], **{key: "wrong-{}".format(key)}
+            )
+            invalid_fixture["pion_parents"] = tuple(invalid_parents)
+            unavailable = self._build(invalid_fixture)
+            self.assertFalse(unavailable["available"])
+            self.assertIn("pion_parent_{}_mismatch:t1".format(key), unavailable["reason"])
+
+    def test_pair_hash_and_scientific_records_change_fingerprints(self):
+        baseline = self._build(self._fixture())
+
+        hash_fixture = self._fixture()
+        changed_pair_hash = "pair-hash-phase-a-changed"
+        hash_fixture["canonical_binning"]["canonical_interval_pair_hash"] = (
+            changed_pair_hash
+        )
+        hash_fixture["pion_parents"] = tuple(
+            dict(parent, canonical_interval_pair_hash=changed_pair_hash)
+            for parent in hash_fixture["pion_parents"]
+        )
+        hash_changed = self._build(hash_fixture)
+        self.assertNotEqual(
+            baseline["pion_event_population_fingerprint"],
+            hash_changed["pion_event_population_fingerprint"],
+        )
+        self.assertNotEqual(
+            baseline["contract_fingerprint"], hash_changed["contract_fingerprint"])
+
+        science_fixture = self._fixture()
+        by_t = list(science_fixture["pion_control_cache"]["by_t"])
+        records = list(by_t[0]["records"])
+        records[0] = dict(records[0], P_hgcer_npeSum=99.0)
+        by_t[0] = dict(by_t[0], records=tuple(records))
+        science_fixture["pion_control_cache"]["by_t"] = by_t
+        science_changed = self._build(science_fixture)
+        self.assertTrue(science_changed["available"], science_changed.get("reason"))
+        self.assertNotEqual(
+            baseline["pion_event_population_fingerprint"],
+            science_changed["pion_event_population_fingerprint"],
+        )
+        self.assertNotEqual(
+            baseline["contract_fingerprint"], science_changed["contract_fingerprint"])
 
     def test_identity_no_proton_cleaning_host_closes_with_unity_factors(self):
         contract = self._build(self._fixture(identity_host=True))
@@ -1071,6 +1161,10 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertIn("coordinate_fingerprint_mismatch", contract["reason"])
         summary = event_contract.summarize_pion_hgcer_event_contract(contract)
         self.assertFalse(summary["available"])
+        self.assertEqual(
+            summary["fingerprint_schema_version"],
+            event_contract.EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
+        )
         self.assertNotIn("pion_records", summary)
         json.dumps(summary, allow_nan=False)
 

@@ -852,7 +852,7 @@ def setting_qa_summary_lines(qa, detached_warnings=()):
         if parent["status"] in ("available", "ok", "pass", "passed") and parent["reason"] == "not recorded":
             lines.append("  t{}: {}".format(int(parent["t_index"]) + 1, parent["status"]))
         else:
-            lines.append("  t{}: {} — {}".format(int(parent["t_index"]) + 1, parent["status"], parent["reason"]))
+            lines.append("  t{}: {} - {}".format(int(parent["t_index"]) + 1, parent["status"], parent["reason"]))
     lines.extend((
         "K-Sigma0 protected region: {}; setting-wide explicit template: {}".format(
             summary.get("k_sigma0_protected_region"), summary.get("k_sigma0_availability"),
@@ -869,13 +869,13 @@ def setting_qa_summary_lines(qa, detached_warnings=()):
     actionable = [state for state in states if state["category"] in ("WARNING", "FAILURE")]
     if actionable:
         lines.append("Outstanding setting-level QA states:")
-        lines.extend("{}: {} — {}".format(state["category"], state["label"], state["detail"]) for state in actionable)
+        lines.extend("{}: {} - {}".format(state["category"], state["label"], state["detail"]) for state in actionable)
     else:
         lines.append("No outstanding setting-level QA warnings.")
     informational = [state for state in states if state["category"] in ("INFORMATIONAL", "NOT_RECORDED")]
     if informational:
         lines.append("Information:")
-        lines.extend("{}: {} — {}".format(state["category"], state["label"], state["detail"]) for state in informational)
+        lines.extend("{}: {} - {}".format(state["category"], state["label"], state["detail"]) for state in informational)
     return lines
 
 
@@ -1431,8 +1431,9 @@ def proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_displa
         }
         numerical_closure = "not recorded"
         global_closure = "not recorded"
-        identity_host_closure = application_diagnostics.get(
-            "identity_host_closure", "not recorded"
+        identity_host_closure = application.get(
+            "identity_host_closure",
+            application_diagnostics.get("identity_host_closure", "not recorded"),
         )
     else:
         spectra = {

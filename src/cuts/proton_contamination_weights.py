@@ -11801,8 +11801,8 @@ def _timing_t_proposed_model_annotation(lambda_gate):
     """Return a display-only proposal/commitment state annotation."""
     status = str((lambda_gate or {}).get("status") or "").lower()
     if status in ("fail", "insufficient_support"):
-        return "PROPOSED TIMING MODEL — NOT APPLIED TO PRODUCTION"
-    return "PROPOSED MODEL — COMMITTED"
+        return "PROPOSED TIMING MODEL - NOT APPLIED TO PRODUCTION"
+    return "PROPOSED MODEL - COMMITTED"
 
 
 def _draw_timing_t_page_annotation(canvas, annotation):

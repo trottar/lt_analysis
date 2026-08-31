@@ -962,12 +962,19 @@ class ProtonCleaningRuntimeStatusTests(unittest.TestCase):
         self.assertGreater(signed_limits[1], 0.25)
         self.assertEqual(
             proton_cleaning._timing_t_proposed_model_annotation({"status": "pass"}),
-            "PROPOSED MODEL — COMMITTED",
+            "PROPOSED MODEL - COMMITTED",
         )
         self.assertEqual(
             proton_cleaning._timing_t_proposed_model_annotation({"status": "fail"}),
-            "PROPOSED TIMING MODEL — NOT APPLIED TO PRODUCTION",
+            "PROPOSED TIMING MODEL - NOT APPLIED TO PRODUCTION",
         )
+        for annotation in (
+            proton_cleaning._timing_t_proposed_model_annotation({"status": "pass"}),
+            proton_cleaning._timing_t_proposed_model_annotation({"status": "fail"}),
+        ):
+            self.assertNotIn("\N{EM DASH}", annotation)
+            self.assertNotIn("\N{EN DASH}", annotation)
+            annotation.encode("ascii")
         pair = proton_cleaning._cross_stage_pair_state(
             [{"prepass_t": 0.4, "prepared_proton_cleaning_adj_t": 0.4}],
             "prepass_t", "prepared_proton_cleaning_adj_t", 1.0e-10,

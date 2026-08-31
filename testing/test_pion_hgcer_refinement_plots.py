@@ -609,7 +609,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
                 "proton_targets": {"h_mm_nosub": proton_zero},
                 "cleaned_targets_pre_rf": {"h_mm_nosub": cleaned},
                 "final_targets": {"h_mm_nosub": final},
-                "diagnostics": {"identity_host_closure": identity_closure},
+                "identity_host_closure": identity_closure,
             },
             {
                 "host_state": "identity_no_proton_cleaning",
@@ -628,8 +628,36 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIn("host state: identity_no_proton_cleaning", lines)
         self.assertIn("production action: bypass; committed=False", lines)
         self.assertIn("Identity-host closure", lines)
+        self.assertIn("overall: PASS", lines)
         self.assertIn("identity-transform: PASS", lines)
+        self.assertIn("upstream noRF: PASS", lines)
         self.assertIn("No proton subtraction was applied.", lines)
+
+    def test_identity_host_main_qa_prefers_top_level_closure_and_falls_back_to_legacy(self):
+        top_level = {
+            "passed": True,
+            "identity_transform_closure": {"passed": True},
+            "upstream_noRF_closure": {"passed": True},
+        }
+        legacy = {
+            "passed": False,
+            "identity_transform_closure": {"passed": False},
+            "upstream_noRF_closure": {"passed": False},
+        }
+        application = {
+            "host_state": "identity_no_proton_cleaning",
+            "identity_host_closure": top_level,
+            "diagnostics": {"identity_host_closure": legacy},
+        }
+        context = {"host_state": "identity_no_proton_cleaning"}
+        qa = plots.proton_main_qa_payload({}, application, context)
+        self.assertIs(qa["identity_host_closure"], top_level)
+        self.assertIn("overall: PASS", plots.proton_closure_summary_lines(qa))
+
+        application.pop("identity_host_closure")
+        legacy_qa = plots.proton_main_qa_payload({}, application, context)
+        self.assertIs(legacy_qa["identity_host_closure"], legacy)
+        self.assertIn("overall: FAIL", plots.proton_closure_summary_lines(legacy_qa))
 
     def test_proton_numerical_and_canonical_global_closures_remain_distinct(self):
         qa = plots.proton_main_qa_payload(
@@ -733,7 +761,42 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             "hgcer_diagnostic_availability": "available", "renderer_failures": [],
         })
         self.assertIn("  t1: available", lines)
-        self.assertIn("  t3: unavailable — reference missing", lines)
+        self.assertIn("  t3: unavailable - reference missing", lines)
+
+    def test_farm_visible_qa_sources_and_summary_lines_are_ascii(self):
+        sources = (
+            REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py",
+            REPO_ROOT / "src" / "cuts" / "proton_contamination_weights.py",
+        )
+        for source in sources:
+            text = source.read_text(encoding="utf-8")
+            self.assertNotIn("\N{EM DASH}", text)
+            self.assertNotIn("\N{EN DASH}", text)
+
+        lines = plots.setting_qa_summary_lines({
+            "method_a_coverage": {}, "method_b_coverage": {},
+            "method_b_other_coverage": {}, "phase_host_state": "not recorded",
+            "lambda_gate_status": "not recorded", "proton_action": "not recorded",
+            "proton_cleaning_committed": "not recorded",
+            "phase_a_coordinate_status": "available", "phase_a_pion_closure": True,
+            "phase_a_host_closure": True,
+            "canonical_parent_k_lambda": {
+                "entries": [{
+                    "t_index": 0, "status": "unavailable",
+                    "reason": "reference missing",
+                }],
+            },
+            "k_sigma0_protected_region": "active",
+            "k_sigma0_availability": "available",
+            "aerogel_warnings": [], "proton_warnings": [],
+            "hgcer_diagnostic_availability": "available",
+            "renderer_failures": ["proton main summary: RuntimeError: test"],
+        })
+        self.assertIn("  t1: unavailable - reference missing", lines)
+        for line in lines:
+            self.assertNotIn("\N{EM DASH}", line)
+            self.assertNotIn("\N{EN DASH}", line)
+            line.encode("ascii")
 
     def test_parent_lambda_render_outcome_uses_actual_comparison_result_not_provenance(self):
         module = _load_parent_lambda_renderer(lambda *_args, **_kwargs: True)
