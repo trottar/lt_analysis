@@ -5407,15 +5407,26 @@ def rand_sub(
                     summarize_pion_hgcer_method_b(pion_hgcer_method_b)
                 )
                 try:
+                    checkpoint_kinematic_token = (
+                        get_particle_subtraction_setting_key(inpDict)
+                    )
+                    checkpoint_particle_type = str(ParticleType).strip().lower()
+                    checkpoint_epsilon_setting = str(EPSSET).strip().lower()
+                    checkpoint_epsilon_filename_token = "{}e".format(
+                        checkpoint_epsilon_setting
+                    )
+                    checkpoint_setting = {
+                        "kinematic_token": checkpoint_kinematic_token,
+                        "Q2": Q2,
+                        "W": W,
+                        "epsilon_setting": checkpoint_epsilon_setting,
+                        "epsilon_filename_token": checkpoint_epsilon_filename_token,
+                        "phi_setting": phi_setting,
+                        "particle_type": checkpoint_particle_type,
+                    }
                     pion_hgcer_refinement_checkpoint = (
                         build_pion_hgcer_refinement_checkpoint(
-                            setting={
-                                "kinematic_token": kinematics,
-                                "Q2": Q2,
-                                "W": W,
-                                "epsilon_setting": EPSSET,
-                                "phi_setting": phi_setting,
-                            },
+                            setting=checkpoint_setting,
                             phase_a=pion_hgcer_event_contract,
                             phase_a_summary=histDict[
                                 "pion_hgcer_event_contract_summary"
@@ -5433,7 +5444,10 @@ def rand_sub(
                     pion_hgcer_refinement_checkpoint_json = os.path.join(
                         OUTPATH,
                         pion_hgcer_refinement_checkpoint_filename(
-                            phi_setting, kinematics, EPSSET
+                            pion_hgcer_refinement_checkpoint["setting"]["phi_setting"],
+                            pion_hgcer_refinement_checkpoint["setting"]["particle_type"],
+                            pion_hgcer_refinement_checkpoint["setting"]["kinematic_token"],
+                            pion_hgcer_refinement_checkpoint["setting"]["epsilon_filename_token"],
                         ),
                     )
                     write_pion_hgcer_refinement_checkpoint_json(
@@ -5452,7 +5466,11 @@ def rand_sub(
                     histDict["pion_hgcer_refinement_checkpoint_status"] = {
                         "status": "unavailable",
                         "available": False,
-                        "reason": "checkpoint_write_exception",
+                        "reason": (
+                            str(exc)
+                            if str(exc).startswith("checkpoint_")
+                            else "checkpoint_write_exception"
+                        ),
                         "diagnostic_stage": "runtime_checkpoint_exception",
                         "exception_type": type(exc).__name__,
                         "exception_message": str(exc),

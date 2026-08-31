@@ -68,19 +68,87 @@ def _method_payload(value, summary):
     }
 
 
+def _normalize_checkpoint_filename_token(value, name):
+    """Return one strict scalar filename token without container coercion."""
+    if isinstance(value, (bool, list, tuple, dict, set, MappingProxyType)) or isinstance(
+        value, Mapping
+    ):
+        raise ValueError("checkpoint_filename_token_invalid")
+    if not isinstance(value, (str, int, float)):
+        raise ValueError("checkpoint_filename_token_invalid")
+    if isinstance(value, float) and not math.isfinite(value):
+        raise ValueError("checkpoint_filename_token_invalid")
+    raw = str(value)
+    token = raw.strip()
+    if (
+        not token
+        or raw != token
+        or any(character.isspace() for character in token)
+        or any(character in token for character in "\\\\/:")
+        or ".." in token
+    ):
+        raise ValueError("checkpoint_filename_token_invalid")
+    return token
+
+
+def _checkpoint_setting(setting):
+    """Validate the detached setting metadata used by JSON and filename paths."""
+    if not isinstance(setting, Mapping):
+        raise ValueError("checkpoint_setting_invalid")
+    kinematic_token = setting.get("kinematic_token")
+    phi_setting = setting.get("phi_setting")
+    particle_type = setting.get("particle_type")
+    epsilon_setting = setting.get("epsilon_setting")
+    epsilon_filename_token = setting.get("epsilon_filename_token")
+    if not isinstance(kinematic_token, str) or not isinstance(phi_setting, str):
+        raise ValueError("checkpoint_setting_invalid")
+    normalized = {
+        "kinematic_token": _normalize_checkpoint_filename_token(
+            kinematic_token, "kinematic_token"
+        ),
+        "Q2": setting.get("Q2"),
+        "W": setting.get("W"),
+        "epsilon_setting": _normalize_checkpoint_filename_token(
+            epsilon_setting, "epsilon_setting"
+        ).lower(),
+        "epsilon_filename_token": _normalize_checkpoint_filename_token(
+            epsilon_filename_token, "epsilon_filename_token"
+        ).lower(),
+        "phi_setting": _normalize_checkpoint_filename_token(phi_setting, "phi_setting"),
+        "particle_type": _normalize_checkpoint_filename_token(
+            particle_type, "particle_type"
+        ).lower(),
+    }
+    if normalized["particle_type"] != "kaon":
+        raise ValueError("checkpoint_particle_type_invalid")
+    if normalized["epsilon_setting"] not in {"high", "low"}:
+        raise ValueError("checkpoint_epsilon_setting_invalid")
+    if normalized["epsilon_filename_token"] != "{}e".format(
+        normalized["epsilon_setting"]
+    ):
+        raise ValueError("checkpoint_epsilon_filename_token_invalid")
+    return normalized
+
+
 def pion_hgcer_refinement_checkpoint_filename(
-    phi_setting, kinematic_token, epsilon_setting
+    phi_setting, particle_type, kinematic_token, epsilon_filename_token
 ):
     """Return the deterministic setting-level Phase-A/B/C checkpoint basename."""
-    pieces = (phi_setting, kinematic_token, epsilon_setting)
-    normalized = []
-    for value in pieces:
-        token = str(value or "").strip()
-        if not token or any(character in token for character in "\\\\/:"):
-            raise ValueError("checkpoint_filename_token_invalid")
-        normalized.append(token)
-    return "{}_pion_hgcer_refinement_checkpoint_{}_{}.json".format(
-        *normalized
+    phi, particle, kinematic, epsilon = (
+        _normalize_checkpoint_filename_token(value, name)
+        for value, name in (
+            (phi_setting, "phi_setting"),
+            (particle_type, "particle_type"),
+            (kinematic_token, "kinematic_token"),
+            (epsilon_filename_token, "epsilon_filename_token"),
+        )
+    )
+    if particle.lower() != "kaon":
+        raise ValueError("checkpoint_particle_type_invalid")
+    if epsilon.lower() not in {"highe", "lowe"}:
+        raise ValueError("checkpoint_epsilon_filename_token_invalid")
+    return "{}_{}_pion-background_hgcer_refinement_checkpoint_{}_{}.json".format(
+        phi, particle.lower(), kinematic, epsilon.lower()
     )
 
 
@@ -95,7 +163,7 @@ def build_pion_hgcer_refinement_checkpoint(
     method_b_summary=None,
 ):
     """Build a pure JSON-safe A+B+C checkpoint without comparing A to B."""
-    setting = setting if isinstance(setting, Mapping) else {}
+    setting = _checkpoint_setting(setting)
     phase = phase_a if isinstance(phase_a, Mapping) else {}
     method_b_payload = _method_payload(method_b, method_b_summary)
     method_b_payload["parent_region_references"] = (
@@ -110,7 +178,9 @@ def build_pion_hgcer_refinement_checkpoint(
             "Q2": setting.get("Q2"),
             "W": setting.get("W"),
             "epsilon_setting": setting.get("epsilon_setting"),
+            "epsilon_filename_token": setting.get("epsilon_filename_token"),
             "phi_setting": setting.get("phi_setting"),
+            "particle_type": setting.get("particle_type"),
         },
         "phase_a": {
             "summary": _summary(phase_a_summary),

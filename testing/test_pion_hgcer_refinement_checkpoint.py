@@ -43,14 +43,23 @@ def _method(name, status="available"):
     }
 
 
-def _payload(method_a_status="available", method_b_status="available"):
+def _payload(
+    method_a_status="available",
+    method_b_status="available",
+    *,
+    phi_setting="Left",
+    epsilon_setting="low",
+    epsilon_filename_token="lowe",
+):
     return checkpoint.build_pion_hgcer_refinement_checkpoint(
         setting={
             "kinematic_token": "Q4p4W2p74",
             "Q2": 4.4,
             "W": 2.74,
-            "epsilon_setting": "lowe",
-            "phi_setting": "Left",
+            "epsilon_setting": epsilon_setting,
+            "epsilon_filename_token": epsilon_filename_token,
+            "phi_setting": phi_setting,
+            "particle_type": "kaon",
         },
         phase_a=_phase(),
         phase_a_summary={"status": "available", "record_count": 12},
@@ -72,6 +81,9 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         self.assertTrue(payload["non_authoritative"])
         self.assertFalse(payload["production_objects_mutated"])
         self.assertFalse(payload["refinement_applied"])
+        self.assertEqual(payload["setting"]["particle_type"], "kaon")
+        self.assertIsInstance(payload["setting"]["kinematic_token"], str)
+        self.assertEqual(payload["setting"]["kinematic_token"], "Q4p4W2p74")
 
     def test_writer_produces_deterministic_valid_json(self):
         payload = _payload()
@@ -99,16 +111,35 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         method["cells"][0]["C_final"] = 1.0
         with self.assertRaisesRegex(ValueError, "forbidden_field"):
             checkpoint.build_pion_hgcer_refinement_checkpoint(
-                setting={}, phase_a=_phase(), method_a=_method("a"), method_b=method
+                setting={
+                    "kinematic_token": "Q4p4W2p74",
+                    "epsilon_setting": "low",
+                    "epsilon_filename_token": "lowe",
+                    "phi_setting": "Left",
+                    "particle_type": "kaon",
+                },
+                phase_a=_phase(), method_a=_method("a"), method_b=method
             )
 
     def test_filename_rule_and_a_b_neutral_schema(self):
         self.assertEqual(
-            checkpoint.pion_hgcer_refinement_checkpoint_filename("Left", "Q4p4W2p74", "lowe"),
-            "Left_pion_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                "Center", "kaon", "Q4p4W2p74", "highe"
+            ),
+            "Center_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_highe.json",
         )
-        with self.assertRaises(ValueError):
-            checkpoint.pion_hgcer_refinement_checkpoint_filename("Left", "../bad", "lowe")
+        self.assertEqual(
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                "Left", "kaon", "Q4p4W2p74", "lowe"
+            ),
+            "Left_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
+        )
+        self.assertEqual(
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                "Right", "kaon", "Q4p4W2p74", "highe"
+            ),
+            "Right_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_highe.json",
+        )
         payload = _payload()
         forbidden = {"method_comparison", "method_agreement", "phase_d", "classification", "C_B", "C_final"}
         def walk(value):
@@ -120,6 +151,54 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
                 for child in value:
                     walk(child)
         walk(payload)
+
+    def test_original_farm_list_kinematics_bug_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "checkpoint_filename_token_invalid"):
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                "Left", "kaon", ["Q4p4W2p74", "lowe"], "lowe"
+            )
+
+    def test_filename_rejects_other_structured_and_unsafe_tokens(self):
+        for token in (
+            ("Q4p4W2p74", "lowe"),
+            {"kin": "Q4p4W2p74"},
+            "../Q4p4W2p74",
+            "Q4p4W2p74/extra",
+        ):
+            with self.subTest(token=repr(token)):
+                with self.assertRaisesRegex(ValueError, "checkpoint_filename_token_invalid"):
+                    checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                        "Center", "kaon", token, "highe"
+                    )
+        with self.assertRaisesRegex(ValueError, "checkpoint_filename_token_invalid"):
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                "Center\\bad", "kaon", "Q4p4W2p74", "highe"
+            )
+
+    def test_epsilon_metadata_is_separate_from_its_filename_token(self):
+        for semantic, filename in (("low", "lowe"), ("high", "highe")):
+            with self.subTest(semantic=semantic):
+                payload = _payload(
+                    epsilon_setting=semantic,
+                    epsilon_filename_token=filename,
+                )
+                self.assertEqual(payload["setting"]["epsilon_setting"], semantic)
+                self.assertEqual(payload["setting"]["epsilon_filename_token"], filename)
+        with self.assertRaisesRegex(ValueError, "checkpoint_epsilon_setting_invalid"):
+            _payload(epsilon_setting="lowe", epsilon_filename_token="lowe")
+
+    def test_filename_is_built_from_the_same_scalar_metadata(self):
+        payload = _payload()
+        setting = payload["setting"]
+        self.assertEqual(
+            checkpoint.pion_hgcer_refinement_checkpoint_filename(
+                setting["phi_setting"],
+                setting["particle_type"],
+                setting["kinematic_token"],
+                setting["epsilon_filename_token"],
+            ),
+            "Left_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
+        )
 
     def test_runtime_writes_checkpoint_after_independent_method_b_handoff(self):
         source = (REPO_ROOT / "src/cuts/rand_sub.py").read_text(encoding="utf-8")
@@ -134,6 +213,13 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         self.assertLess(checkpoint_position, writer_position)
         self.assertIn('histDict["pion_hgcer_refinement_checkpoint_artifacts"]', source)
         self.assertNotIn("method_comparison", source[method_b_position:writer_position])
+        self.assertIn("checkpoint_kinematic_token =", source)
+        self.assertIn("get_particle_subtraction_setting_key(inpDict)", source)
+        self.assertIn("checkpoint_epsilon_filename_token", source)
+        self.assertNotIn(
+            "pion_hgcer_refinement_checkpoint_filename(\n                            phi_setting, kinematics, EPSSET",
+            source,
+        )
 
 
 if __name__ == "__main__":
