@@ -10651,6 +10651,7 @@ def print_particle_subtraction_component_fit_pages(
     page_manifest=None,
     page_id_prefix=None,
     authoritative=False,
+    refinement_detail_pdf=None,
 ):
     if not isinstance(component_fit_result, dict):
         return
@@ -10919,8 +10920,11 @@ def print_particle_subtraction_component_fit_pages(
             authoritative=authoritative,
         )
 
+    # C.4 keeps staged/protected fit evidence in the main PDF while routing
+    # optional staged-versus-refined residual detail to pion-fit debug.
+    refinement_pdf = refinement_detail_pdf or pdf_name
     _print_joint_refinement_overlay_page(
-        pdf_name,
+        refinement_pdf,
         component_fit_result.get("H_pion_control_input"),
         component_fit_result.get("H_pion_fit_total"),
         component_fit_result.get("H_pion_fit_total_refined"),
@@ -10978,7 +10982,7 @@ def print_particle_subtraction_component_fit_pages(
     )
 
     _print_joint_refinement_overlay_page(
-        pdf_name,
+        refinement_pdf,
         (
             component_fit_result.get("H_kaon_nosub_input")
             if not protected_kaon_mode else None

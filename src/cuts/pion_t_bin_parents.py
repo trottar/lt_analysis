@@ -1292,29 +1292,20 @@ def _print_coordinate_closure_page(
 
 
 def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
+    # Legacy ``protected_fit_or_status`` remains represented by the compact
+    # control/protection page's preserved ``pion_control_fit`` manifest slot.
     page_ids = [entry.get("page_id") for entry in page_manifest if isinstance(entry, dict)]
     duplicate_ids = sorted({page_id for page_id in page_ids if page_ids.count(page_id) > 1})
     required = [
         "pion.canonical_t_global.before_estimated_proposed_final",
         "pion.canonical_t_global.incomplete_status",
     ]
-    if setting_wide_enabled:
-        required.extend(
-            "pion.setting_wide.{}".format(slot)
-            for slot in (
-                "pion_control_fit", "protected_fit_or_status", "weight",
-                "model_closure", "event_template_closure", "before_after",
-                "lambda_comparison",
-            )
-        )
     for parent in parents:
         prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
         required.extend((
             "{}.{}".format(prefix, slot)
             for slot in (
-                "overview", "pion_control_fit", "protected_fit_or_status", "weight",
-                "model_closure", "event_template_closure", "before_after",
-                "application_gate", "proposal_final_transition", "lambda_comparison",
+                "pion_control_fit", "before_after", "lambda_comparison",
             )
         ))
     # Global is a terminal either/or slot, never both.
@@ -1361,23 +1352,12 @@ def _ensure_required_parent_plot_slots(
         else "pion.canonical_t_global.incomplete_status"
     )
     desired = [(desired_global, "canonical_t_global")]
-    if setting_wide_enabled:
-        desired.extend((
-            ("pion.setting_wide.{}".format(slot), "setting_wide")
-            for slot in (
-                "pion_control_fit", "protected_fit_or_status", "weight",
-                "model_closure", "event_template_closure", "before_after",
-                "lambda_comparison",
-            )
-        ))
     for parent in parents:
         prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
         desired.extend((
             ("{}.{}".format(prefix, slot), parent["analysis_scope"])
             for slot in (
-                "overview", "pion_control_fit", "protected_fit_or_status", "weight",
-                "model_closure", "event_template_closure", "before_after",
-                "application_gate", "proposal_final_transition", "lambda_comparison",
+                "pion_control_fit", "before_after", "lambda_comparison",
             )
         ))
     for page_id, scope in desired:
@@ -1393,6 +1373,231 @@ def _ensure_required_parent_plot_slots(
             existing.add(page_id)
 
 
+def _clone_parent_display(histogram, parent, role):
+    """Clone a parent histogram for display without touching its source object."""
+    if histogram is None:
+        return None
+    try:
+        source = (
+            (parent.get("fit_result") or {}).get(histogram)
+            if isinstance(histogram, str)
+            else histogram
+        )
+        if source is None:
+            return None
+        return clone_root_histogram(
+            source,
+            scope="pion_parent_t{}".format(int(parent.get("t_bin_index", -1)) + 1),
+            role=role,
+        )
+    except Exception:
+        return None
+
+
+def _draw_parent_overlay(pad, parent, specs, title):
+    """Draw a compact display-only overlay and return its cloned objects."""
+    try:
+        import ROOT
+    except Exception:
+        return []
+    if pad is not None and hasattr(pad, "cd"):
+        pad.cd()
+    legend = ROOT.TLegend(0.52, 0.64, 0.90, 0.90)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    retained = [legend]
+    drawn = False
+    for key, label, color, style in specs:
+        display = _clone_parent_display((parent.get("fit_result") or {}).get(key), parent, key)
+        if display is None:
+            continue
+        display.SetLineColor(color)
+        display.SetLineStyle(style)
+        display.SetTitle(title)
+        display.Draw("hist" if not drawn else "hist same")
+        legend.AddEntry(display, label, "l")
+        retained.append(display)
+        drawn = True
+    if drawn:
+        legend.Draw()
+    else:
+        ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "display inputs unavailable")
+    return retained
+
+
+def _print_parent_control_protection_page(pdf_name, parent, title_prefix, manifest, page_prefix):
+    """Combine parent control-fit and protected-fit/status evidence on one page."""
+    try:
+        import ROOT
+
+        fit_result = parent.get("fit_result") or {}
+        diagnostics = fit_result.get("diagnostics") or {}
+        protected = diagnostics.get("pi_delta_signal_protected_fit") or (
+            diagnostics.get("kaon") or {}
+        ).get("pi_delta_signal_protected_fit") or {}
+        canvas = ROOT.TCanvas(
+            "pion_parent_control_protection_{}".format(parent.get("pion_parent_id", "unknown")[-12:]),
+            "Pion parent control and protection",
+            1400,
+            900,
+        )
+        canvas.Divide(2, 2)
+        retained = []
+        retained.extend(_draw_parent_overlay(
+            canvas.cd(1), parent,
+            (
+                ("H_pion_control_input", "pion-control data", ROOT.kBlack, 1),
+                ("H_pion_fit_pi_n_scaled", "pi-n", ROOT.kRed + 1, 1),
+                ("H_pion_fit_pi_sidis_scaled", "pi-SIDIS", ROOT.kMagenta + 2, 1),
+                ("H_pion_fit_pi_delta_scaled", "pi-delta", ROOT.kAzure + 2, 1),
+                ("H_pion_fit_total", "total fit", ROOT.kGreen + 2, 2),
+            ),
+            "{} t{} control fit;MM [GeV];yield".format(title_prefix, int(parent["t_bin_index"]) + 1),
+        ))
+        retained.extend(_draw_parent_overlay(
+            canvas.cd(2), parent,
+            (
+                ("H_kaon_nosub_input", "kaon no-sub data", ROOT.kBlack, 1),
+                ("H_kaon_fit_pi_n_scaled", "pi-n", ROOT.kRed + 1, 1),
+                ("H_kaon_fit_pi_sidis_scaled", "pi-SIDIS", ROOT.kMagenta + 2, 1),
+                ("H_kaon_fit_pi_delta_scaled", "pi-delta", ROOT.kAzure + 2, 1),
+                ("H_kaon_pion_bg_fit_total", "pion background", ROOT.kOrange + 7, 2),
+            ),
+            "{} t{} protected kaon fit;MM [GeV];yield".format(title_prefix, int(parent["t_bin_index"]) + 1),
+        ))
+        canvas.cd(3)
+        status = ROOT.TPaveText(0.06, 0.08, 0.94, 0.92, "NDC")
+        status.SetFillStyle(0)
+        status.SetBorderSize(0)
+        status.SetTextAlign(12)
+        status.SetTextSize(0.030)
+        status.AddText("Protected pi-delta / K-Sigma0 status")
+        status.AddText("status: {}".format(protected.get("status") or protected.get("fit_variant") or "unavailable"))
+        status.AddText("Lambda retention: {}".format((protected.get("lambda_retention") or {}).get("status") or "not recorded"))
+        status.AddText("K-Sigma0 template: {}".format(
+            "available" if fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None else "unavailable"
+        ))
+        status.AddText("No protected-signal bin is used as a pion normalization anchor.")
+        for line in textwrap.wrap(str(protected.get("reason") or "none"), width=70):
+            status.AddText("reason: {}".format(line))
+        status.Draw()
+        retained.append(status)
+        canvas.cd(4)
+        gate = parent.get("diagnostic_application_status") or {}
+        application = ROOT.TPaveText(0.06, 0.08, 0.94, 0.92, "NDC")
+        application.SetFillStyle(0)
+        application.SetBorderSize(0)
+        application.SetTextAlign(12)
+        application.SetTextSize(0.030)
+        application.AddText("Authoritative parent state")
+        application.AddText("fit status pion/kaon: {} / {}".format(fit_result.get("fit_status_pion"), fit_result.get("fit_status_kaon")))
+        application.AddText("production gate: {}".format(gate.get("production_evaluation") or "not recorded"))
+        application.AddText("final application: {}".format(gate.get("final_status") or "not recorded"))
+        application.Draw()
+        retained.append(application)
+        canvas.Print(pdf_name)
+        canvas.Close()
+        _record_parent_page_if_absent(manifest, "{}.pion_control_fit".format(page_prefix), scope=parent["analysis_scope"])
+        return True
+    except Exception as exc:
+        return _print_parent_status_page(
+            pdf_name, manifest, "{}.pion_control_fit".format(page_prefix),
+            scope=parent["analysis_scope"],
+            title="{} control/protection status".format(title_prefix), detail=str(exc),
+        )
+
+
+def _print_parent_application_closure_page(pdf_name, parent, title_prefix, manifest, page_prefix):
+    """Combine committed application, MM closure, and parent decision on one page."""
+    try:
+        import ROOT
+
+        payload = parent.get("final_diagnostic_application_result") or {}
+        proposal = parent.get("proposed_diagnostic_application_result") or {}
+        fit_result = parent.get("fit_result") or {}
+        canvas = ROOT.TCanvas(
+            "pion_parent_application_closure_{}".format(parent.get("pion_parent_id", "unknown")[-12:]),
+            "Pion parent application and closure",
+            1400,
+            800,
+        )
+        canvas.Divide(2, 1)
+        canvas.cd(1)
+        legend = ROOT.TLegend(0.52, 0.64, 0.90, 0.90)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        retained = [legend]
+        drawn = False
+        sources = (
+            (payload.get("H_MM_nosub_before_pion_subtraction") or proposal.get("H_MM_nosub_before_pion_subtraction") or fit_result.get("H_kaon_nosub_input"), "before pion subtraction", ROOT.kBlack, 1),
+            (payload.get("H_pion_subtraction_template_MM_nosub") or proposal.get("H_pion_subtraction_template_MM_nosub"), "estimated pion contamination", ROOT.kOrange + 7, 2),
+            (payload.get("H_MM_nosub_after_pion_subtraction") or proposal.get("H_MM_nosub_after_pion_subtraction"), "committed parent result", ROOT.kGreen + 2, 1),
+        )
+        for index, (histogram, label, color, style) in enumerate(sources):
+            display = _clone_parent_display(histogram, parent, "application_{}".format(index))
+            if display is None:
+                continue
+            display.SetLineColor(color)
+            display.SetLineStyle(style)
+            display.SetTitle("{} t{} application/MM closure;MM [GeV];yield".format(title_prefix, int(parent["t_bin_index"]) + 1))
+            display.Draw("hist" if not drawn else "hist same")
+            legend.AddEntry(display, label, "l")
+            retained.append(display)
+            drawn = True
+        if drawn:
+            legend.Draw()
+        else:
+            ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "application display inputs unavailable")
+        canvas.cd(2)
+        diagnostics = payload.get("diagnostics") or {}
+        text = ROOT.TPaveText(0.06, 0.08, 0.94, 0.92, "NDC")
+        text.SetFillStyle(0)
+        text.SetBorderSize(0)
+        text.SetTextAlign(12)
+        text.SetTextSize(0.030)
+        text.AddText("Committed parent application and closure")
+        text.AddText("accepted: {}; final status: {}".format(payload.get("accepted"), payload.get("final_application_status") or "not recorded"))
+        text.AddText("proposal status: {}".format((parent.get("diagnostic_application_status") or {}).get("proposal_status") or "not recorded"))
+        closure = diagnostics.get("model_closure") or {}
+        text.AddText("model closure signature: {}; integral ratio: {}".format(closure.get("signature_match", "not recorded"), closure.get("integral_ratio", "not recorded")))
+        text.AddText("source target: {}".format(parent.get("source_target_state") or "not recorded"))
+        text.Draw()
+        retained.append(text)
+        canvas.Print(pdf_name)
+        canvas.Close()
+        _record_parent_page_if_absent(manifest, "{}.before_after".format(page_prefix), scope=parent["analysis_scope"])
+        return True
+    except Exception as exc:
+        return _print_parent_status_page(
+            pdf_name, manifest, "{}.before_after".format(page_prefix),
+            scope=parent["analysis_scope"],
+            title="{} application/MM closure status".format(title_prefix), detail=str(exc),
+        )
+
+
+def _print_parent_lambda_page(pdf_name, parent, inp_dict, title_prefix, manifest, page_prefix):
+    """Keep the mandatory K-Lambda comparison as its own stable parent page."""
+    try:
+        return print_particle_subtraction_kaon_lambda_comparison_page(
+            pdf_name,
+            parent.get("fit_result") or {},
+            parent.get("final_diagnostic_application_result"),
+            title_prefix=title_prefix,
+            cut_window=(float(inp_dict["mm_min"]), float(inp_dict["mm_max"])),
+            page_manifest=manifest,
+            page_id_prefix=page_prefix,
+            authoritative=True,
+            proposal_payload=parent.get("proposed_diagnostic_application_result"),
+        )
+    except Exception as exc:
+        return _print_parent_status_page(
+            pdf_name, manifest, "{}.lambda_comparison".format(page_prefix),
+            scope=parent["analysis_scope"],
+            title="{} K-Lambda comparison unavailable".format(title_prefix),
+            detail="K-Lambda source/reference/normalization unavailable: {}".format(exc),
+        )
+
+
 def render_setting_t_bin_pion_parent_pages(
     pdf_name,
     parents,
@@ -1405,16 +1610,18 @@ def render_setting_t_bin_pion_parent_pages(
     setting_wide_enabled=True,
     coordinate_audit=None,
     coordinate_diagnostics=None,
+    coordinate_debug_pdf=None,
 ):
-    """Render all authoritative parent sections before ``rand_sub`` returns."""
+    """Render authoritative parent pages and route coordinate detail separately."""
     _print_parent_summary_page(
         pdf_name, parents, setting_wide_summary, canonical_t_global, page_manifest, title_prefix
     )
     _print_authoritative_canonical_t_global_page(
         pdf_name, canonical_t_global, page_manifest, title_prefix
     )
+    coordinate_pdf = coordinate_debug_pdf or pdf_name
     _print_coordinate_closure_page(
-        pdf_name,
+        coordinate_pdf,
         coordinate_audit,
         coordinate_diagnostics,
         page_manifest,
@@ -1425,7 +1632,7 @@ def render_setting_t_bin_pion_parent_pages(
         page_id="pion.coordinate_mm_closure",
     )
     _print_coordinate_closure_page(
-        pdf_name,
+        coordinate_pdf,
         coordinate_audit,
         coordinate_diagnostics,
         page_manifest,
@@ -1436,8 +1643,6 @@ def render_setting_t_bin_pion_parent_pages(
         page_id="pion.coordinate_t_closure",
     )
     for parent in parents:
-        fit_result = parent["fit_result"]
-        scope = parent["analysis_scope"]
         page_prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
         section_title = "{} t{} [{:.3f}, {:.3f}]".format(
             title_prefix,
@@ -1445,74 +1650,15 @@ def render_setting_t_bin_pion_parent_pages(
             float(parent["t_edges"][0]),
             float(parent["t_edges"][1]),
         )
-        print_particle_subtraction_component_fit_pages(
-            pdf_name,
-            fit_result,
-            title_prefix=section_title,
-            cut_window=(float(inp_dict["mm_min"]), float(inp_dict["mm_max"])),
-            page_manifest=page_manifest,
-            page_id_prefix=page_prefix,
-            authoritative=True,
-        )
-        final_payload = parent.get("final_diagnostic_application_result")
-        proposal_payload = parent.get("proposed_diagnostic_application_result")
-        _print_parent_application_gate_page(
+        _print_parent_control_protection_page(
             pdf_name, parent, section_title, page_manifest, page_prefix
         )
-        _print_parent_proposal_final_pages(
+        _print_parent_application_closure_page(
             pdf_name, parent, section_title, page_manifest, page_prefix
         )
-        if isinstance(final_payload, dict):
-            print_particle_subtraction_component_application_pages(
-                pdf_name,
-                final_payload,
-                title_prefix=section_title,
-                cut_window=(float(inp_dict["mm_min"]), float(inp_dict["mm_max"])),
-                component_fit_result=fit_result,
-                include_lambda_page=False,
-                page_manifest=page_manifest,
-                page_id_prefix=page_prefix,
-                authoritative=True,
-            )
-        print_particle_subtraction_kaon_lambda_comparison_page(
-            pdf_name,
-            fit_result,
-            final_payload,
-            title_prefix=section_title,
-            cut_window=(float(inp_dict["mm_min"]), float(inp_dict["mm_max"])),
-            page_manifest=page_manifest,
-            page_id_prefix=page_prefix,
-            authoritative=True,
-            proposal_payload=proposal_payload,
+        _print_parent_lambda_page(
+            pdf_name, parent, inp_dict, section_title, page_manifest, page_prefix
         )
-        _print_parent_overview_page(
-            pdf_name, parent, section_title, page_manifest, page_prefix
-        )
-        # Application pages retain a few legacy manifest names.  Add the
-        # particle-stage aliases only when the corresponding page actually
-        # printed, preserving the manifest's successful-output contract.
-        existing_ids = {
-            entry.get("page_id")
-            for entry in page_manifest
-            if isinstance(entry, dict)
-        }
-        aliases = {
-            "pion_control_fit": ("pion_control_fit",),
-            "protected_fit_or_status": ("protected_fit", "protected_status"),
-            "weight": ("pion_weight",),
-            "model_closure": ("model_closure",),
-            "event_template_closure": ("event_template_closure",),
-            "before_after": ("before_after",),
-            "lambda_comparison": ("lambda_comparison",),
-            "overview": ("overview",),
-        }
-        for stable_name, legacy_names in aliases.items():
-            if any("{}.{}".format(page_prefix, name) in existing_ids for name in legacy_names):
-                _record_parent_page_if_absent(
-                    page_manifest,
-                    "{}.{}".format(page_prefix, stable_name),
-                    scope=scope,
-                )
     _ensure_required_parent_plot_slots(
         pdf_name,
         page_manifest,

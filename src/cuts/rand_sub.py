@@ -174,6 +174,15 @@ from pion_hgcer_refinement_checkpoint import (
     pion_hgcer_refinement_checkpoint_filename,
     write_pion_hgcer_refinement_checkpoint_json,
 )
+from pion_hgcer_refinement_plots import (
+    build_pdf_destinations,
+    build_pdf_route_manifest,
+    close_diagnostic_pdf,
+    open_diagnostic_pdf,
+    render_pion_hgcer_refinement_pages,
+    render_proton_main_summary_pages,
+    render_setting_warning_page,
+)
 from pion_hgcer_transfer import (
     audit_pion_hgcer_control_population,
     apply_frozen_pion_hgcer_transfer_map,
@@ -4398,6 +4407,7 @@ def rand_sub(
     pion_hgcer_zerope_transfer = None
     pion_hgcer_zerope_transfer_json = None
     pion_hgcer_method_b = None
+    pion_hgcer_refinement_checkpoint = None
     pion_hgcer_refinement_checkpoint_json = None
 
     # Pion subtraction by scaling simc to peak size
@@ -6443,6 +6453,10 @@ def rand_sub(
     if not emit_plots:
         _print_rand_timer("rand_sub total {}".format(phi_setting), perf_counter() - total_start)
         return histDict
+
+    # C.4 only reroutes presentation of the existing post_proton_pre_rf
+    # products; their production stage, coordinates, and event factors remain
+    # frozen before this terminal PDF block.
     
     ###
     # CT plots
@@ -6455,7 +6469,32 @@ def rand_sub(
     l_ct.AddEntry(H_ct_DATA,"{}".format(ParticleType.capitalize()))
     l_ct.Draw()
 
-    ct.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+'(')
+    main_pdf = outputpdf.replace(
+        "{}_FullAnalysis_".format(ParticleType),
+        "{}_{}_rand_sub_".format(phi_setting, ParticleType),
+    )
+    ct.Print(main_pdf + '(')
+    pdf_destinations = build_pdf_destinations(main_pdf)
+    pdf_route_manifest = build_pdf_route_manifest(main_pdf)
+    supplement_manifests = {}
+    checkpoint_for_plots = (
+        pion_hgcer_refinement_checkpoint
+        if isinstance(pion_hgcer_refinement_checkpoint, dict)
+        else histDict.get("pion_hgcer_refinement_checkpoint")
+    )
+    if ParticleType == "kaon":
+        for supplement_key, role in (
+            ("proton_debug", "proton-debug"),
+            ("pion_fit_debug", "pion-fit-debug"),
+            ("hgcer_debug", "hgcer-debug"),
+        ):
+            supplement_manifests[supplement_key] = open_diagnostic_pdf(
+                pdf_destinations[supplement_key],
+                checkpoint_for_plots,
+                role=role,
+                main_pdf=main_pdf,
+            )
+    histDict["pdf_cleanup_route_manifest"] = pdf_route_manifest
 
     ###
     # Q2 plots    
@@ -6559,7 +6598,8 @@ def rand_sub(
     #histDict["H_MM_fit2sub_DATA"].Draw("same, E1")
     histDict["H_MM_fit2sub_DATA"].Draw("hist same")
 
-    CMMfit2sub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))    
+    # C.4: individual intermediate subtraction snapshots remain computed but
+    # are intentionally not emitted to the reader-facing main PDF.
 
     ###
     # MM sub plots    
@@ -6574,7 +6614,7 @@ def rand_sub(
         background_fit2[1].SetLineColor(3)
         background_fit2[1].Draw("same")
 
-    CMMfit1sub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    # C.4: intermediate fit-1 snapshot suppressed from PDF output.
 
     ###
     # MM sub plots    
@@ -6589,7 +6629,7 @@ def rand_sub(
         background_fit1[1].SetLineColor(3)
         background_fit1[1].Draw("same")
 
-    CMMpisub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    # C.4: intermediate pion-subtraction snapshot suppressed from PDF output.
 
     ###
     # MM sub plots    
@@ -6604,7 +6644,7 @@ def rand_sub(
         histDict["H_MM_nosub_SUB_DATA"].SetLineColor(2)
         histDict["H_MM_nosub_SUB_DATA"].Draw("same, E1")
 
-    CMMsub.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    # C.4: intermediate no-subtraction snapshot suppressed from PDF output.
 
     if isinstance(proton_cleaning_result, dict):
         if str(proton_cleaning_result.get("method") or "") == "timing_t_event_weight":
@@ -6644,8 +6684,15 @@ def rand_sub(
                     for entry in (display_audit.get("final_display_histograms") or {}).values()
                 ),
             )
+        render_proton_main_summary_pages(
+            main_pdf,
+            checkpoint_for_plots,
+            proton_cleaning_result,
+            proton_cleaning_application,
+            page_manifest=histDict.setdefault("proton_cleaning_main_page_manifest", []),
+        )
         print_kaon_proton_cleaning_pages(
-            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            pdf_destinations["proton_debug"],
             proton_cleaning_result,
             title_prefix="{} {}".format(phi_setting, ParticleType),
         )
@@ -6666,7 +6713,7 @@ def rand_sub(
 
     if setting_wide_pages_enabled and component_payload is not None:
         print_particle_subtraction_component_template_pages(
-            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            pdf_destinations["pion_fit_debug"],
             component_payload,
             title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
@@ -6679,7 +6726,7 @@ def rand_sub(
 
     if setting_wide_pages_enabled:
         print_particle_subtraction_component_fit_pages(
-            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            pdf_destinations["pion_fit_debug"],
             component_fit_result,
             title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
@@ -6689,7 +6736,7 @@ def rand_sub(
         )
     if setting_wide_pages_enabled and isinstance(setting_wide_render_payload, dict):
         print_particle_subtraction_component_application_pages(
-            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            pdf_destinations["pion_fit_debug"],
             setting_wide_render_payload,
             title_prefix=setting_wide_title,
             cut_window=(float(inpDict["mm_min"]), float(inpDict["mm_max"])),
@@ -6701,7 +6748,7 @@ def rand_sub(
         )
     if setting_wide_pages_enabled:
         print_particle_subtraction_kaon_lambda_comparison_page(
-            outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)),
+            pdf_destinations["pion_fit_debug"],
             component_fit_result,
             setting_wide_render_payload,
             title_prefix=setting_wide_title,
@@ -6713,10 +6760,7 @@ def rand_sub(
     t_bin_parent_results = histDict.get("_pion_t_bin_parent_results") or []
     if t_bin_parent_results:
         histDict["pion_component_plot_contract"] = render_setting_t_bin_pion_parent_pages(
-            outputpdf.replace(
-                "{}_FullAnalysis_".format(ParticleType),
-                "{}_{}_rand_sub_".format(phi_setting, ParticleType),
-            ),
+            main_pdf,
             t_bin_parent_results,
             inpDict,
             title_prefix="{} {}".format(phi_setting, ParticleType),
@@ -6730,6 +6774,7 @@ def rand_sub(
                     "coordinate_diagnostics"
                 )
             ),
+            coordinate_debug_pdf=pdf_destinations["pion_fit_debug"],
         )
 
     ###
@@ -6742,7 +6787,7 @@ def rand_sub(
     histDict["H_MM_dummy_DATA"].SetLineColor(1)
     histDict["H_MM_dummy_DATA"].Draw("hist same")
 
-    CMMdummy.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    CMMdummy.Print(pdf_destinations["pion_fit_debug"])
 
     ###
     # MM rand dummy plots    
@@ -6754,7 +6799,7 @@ def rand_sub(
     histDict["H_MM_rand_dummy_DATA"].SetLineColor(1)
     histDict["H_MM_rand_dummy_DATA"].Draw("hist same")
 
-    CMMranddummy.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+    CMMranddummy.Print(pdf_destinations["pion_fit_debug"])
     
     ###
     # t-Phi plots        
@@ -6829,7 +6874,7 @@ def rand_sub(
     c_pid.Draw()
 
     if ParticleType == "kaon":
-        c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+        c_pid.Print(pdf_destinations["hgcer_debug"])
     else:
         c_pid.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType))+')')
 
@@ -6876,7 +6921,7 @@ def rand_sub(
 
         c_hgcervsMM.Draw()
 
-        c_hgcervsMM.Print(outputpdf.replace("{}_FullAnalysis_".format(ParticleType),"{}_{}_rand_sub_".format(phi_setting,ParticleType)))
+        c_hgcervsMM.Print(pdf_destinations["hgcer_debug"])
 
         ##
         # HGCer Hole Plots
@@ -6906,14 +6951,10 @@ def rand_sub(
 
         c_hgcer_hole.Draw()
 
-        diagnostic_pdf = outputpdf.replace(
-            "{}_FullAnalysis_".format(ParticleType),
-            "{}_{}_rand_sub_".format(phi_setting, ParticleType),
-        )
+        diagnostic_pdf = pdf_destinations["hgcer_debug"]
         if isinstance(pion_hgcer_tdelta_diagnostic, dict):
-            # Keep every historical rand_sub page in its original order, then
-            # append the Part-1 section as the terminal PDF content.  The
-            # diagnostic renderer owns the final close only in this branch.
+            # C.4 routes detector diagnostics to their automatic supplement.
+            # The supplement is closed after every terminal renderer returns.
             c_hgcer_hole.Print(diagnostic_pdf)
             emitted_hgcer_pages = render_pion_hgcer_tdelta_pages(
                 diagnostic_pdf,
@@ -6922,7 +6963,7 @@ def rand_sub(
                 page_manifest=histDict.setdefault(
                     "pion_hgcer_tdelta_diagnostic_page_manifest", []
                 ),
-                close_pdf=not isinstance(pion_hgcer_zerope_transfer, dict),
+                close_pdf=False,
             )
             histDict["pion_hgcer_tdelta_diagnostic"] = (
                 serialize_pion_hgcer_tdelta_diagnostic(
@@ -7068,7 +7109,7 @@ def rand_sub(
                         pion_hgcer_zerope_transfer,
                         title_prefix="{} {}".format(phi_setting, ParticleType),
                         page_manifest=part2_manifest,
-                        close_pdf=True,
+                        close_pdf=False,
                         renderer_inputs=part2_renderer_inputs,
                     )
                     pion_hgcer_zerope_transfer["rendering_status"] = "available"
@@ -7081,7 +7122,7 @@ def rand_sub(
                         diagnostic_pdf, reason,
                         title_prefix="{} {}".format(phi_setting, ParticleType),
                         page_manifest=part2_manifest,
-                        close_pdf=True,
+                        close_pdf=False,
                     )
                     pion_hgcer_zerope_transfer["rendering_status"] = "unavailable"
                     pion_hgcer_zerope_transfer["rendering_failure_reason"] = reason
@@ -7102,7 +7143,60 @@ def rand_sub(
                     status=pion_hgcer_zerope_transfer.get("status"),
                 )
         else:
-            c_hgcer_hole.Print(diagnostic_pdf + ')')
+            c_hgcer_hole.Print(diagnostic_pdf)
+
+    if ParticleType == "kaon":
+        hgcer_refinement_manifest = histDict.setdefault(
+            "pion_hgcer_refinement_page_manifest", []
+        )
+        try:
+            render_pion_hgcer_refinement_pages(
+                main_pdf,
+                checkpoint_for_plots,
+                phase_a=pion_hgcer_event_contract,
+                method_a=pion_hgcer_method_a,
+                method_b=pion_hgcer_method_b,
+                page_manifest=hgcer_refinement_manifest,
+            )
+        except Exception as exc:
+            _print_rand_debug(
+                "detached HGCer refinement PDF pages unavailable",
+                renderer="pion_hgcer_refinement_plots",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
+        try:
+            render_setting_warning_page(
+                main_pdf,
+                checkpoint_for_plots,
+                phase_a=pion_hgcer_event_contract,
+                method_a=pion_hgcer_method_a,
+                method_b=pion_hgcer_method_b,
+                part2=pion_hgcer_zerope_transfer,
+                page_manifest=hgcer_refinement_manifest,
+                close_pdf=True,
+            )
+        except Exception as exc:
+            _print_rand_debug(
+                "detached HGCer warning page unavailable",
+                renderer="pion_hgcer_refinement_plots",
+                page_id="qa.setting_warnings",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
+            # Preserve a closed primary PDF even if a detached renderer fails.
+            ct.Print(main_pdf + ')')
+        for supplement_key, role in (
+            ("proton_debug", "proton-debug"),
+            ("pion_fit_debug", "pion-fit-debug"),
+            ("hgcer_debug", "hgcer-debug"),
+        ):
+            close_diagnostic_pdf(
+                pdf_destinations[supplement_key],
+                checkpoint_for_plots,
+                role=role,
+                manifest=supplement_manifests.get(supplement_key, []),
+            )
 
     _print_rand_timer("rand_sub plotting {}".format(phi_setting), perf_counter() - stage_start)
     _print_rand_timer("rand_sub total {}".format(phi_setting), perf_counter() - total_start)
