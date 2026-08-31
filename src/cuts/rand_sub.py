@@ -6477,6 +6477,9 @@ def rand_sub(
     pdf_destinations = build_pdf_destinations(main_pdf)
     pdf_route_manifest = build_pdf_route_manifest(main_pdf)
     supplement_manifests = {}
+    # Detached main-PDF render failures are retained for terminal QA; they
+    # must never interrupt the event-analysis or PDF-close paths.
+    setting_renderer_failures = []
     checkpoint_for_plots = (
         pion_hgcer_refinement_checkpoint
         if isinstance(pion_hgcer_refinement_checkpoint, dict)
@@ -6716,14 +6719,25 @@ def rand_sub(
                     for entry in (display_audit.get("final_display_histograms") or {}).values()
                 ),
             )
-        render_proton_main_summary_pages(
-            main_pdf,
-            checkpoint_for_plots,
-            proton_cleaning_result,
-            proton_cleaning_application,
-            phase_a_display_context=phase_a_display_context,
-            page_manifest=histDict.setdefault("proton_cleaning_main_page_manifest", []),
-        )
+        try:
+            render_proton_main_summary_pages(
+                main_pdf,
+                checkpoint_for_plots,
+                proton_cleaning_result,
+                proton_cleaning_application,
+                phase_a_display_context=phase_a_display_context,
+                page_manifest=histDict.setdefault("proton_cleaning_main_page_manifest", []),
+            )
+        except Exception as exc:
+            setting_renderer_failures.append(
+                "proton main summary: {}: {}".format(type(exc).__name__, exc)
+            )
+            _print_rand_debug(
+                "detached proton main PDF pages unavailable",
+                renderer="pion_hgcer_refinement_plots",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
         print_kaon_proton_cleaning_pages(
             pdf_destinations["proton_debug"],
             proton_cleaning_result,
@@ -6791,8 +6805,9 @@ def rand_sub(
             authoritative=not bool(component_fit_result.get("diagnostic_only")),
         )
     t_bin_parent_results = histDict.get("_pion_t_bin_parent_results") or []
+    pion_parent_plot_contract = {}
     if t_bin_parent_results:
-        histDict["pion_component_plot_contract"] = render_setting_t_bin_pion_parent_pages(
+        pion_parent_plot_contract = render_setting_t_bin_pion_parent_pages(
             main_pdf,
             t_bin_parent_results,
             inpDict,
@@ -6809,43 +6824,15 @@ def rand_sub(
             ),
             coordinate_debug_pdf=pdf_destinations["pion_fit_debug"],
         )
-    # C.4.2 reads the canonical-parent K-Lambda display records that already
-    # exist after parent rendering.  It does not resolve, scale, or refit any
-    # K-Lambda input for the final setting-level QA page.
-    parent_manifest_entries = {
-        entry.get("page_id")
-        for entry in component_page_manifest
-        if isinstance(entry, dict)
-    }
-    canonical_parent_k_lambda_qa = []
-    for parent in t_bin_parent_results:
-        parent_record = parent if isinstance(parent, dict) else {}
-        fit_record = parent_record.get("fit_result") or {}
-        fit_diagnostics = fit_record.get("diagnostics") or {}
-        protected_record = (
-            fit_diagnostics.get("pi_delta_signal_protected_fit")
-            or (fit_diagnostics.get("kaon") or {}).get(
-                "pi_delta_signal_protected_fit"
-            )
-            or {}
+        histDict["pion_component_plot_contract"] = pion_parent_plot_contract
+    # C.4.3 consumes only the scalar result of the actual canonical-parent
+    # K-Lambda renderer.  Page-manifest presence and pre-render fit provenance
+    # cannot distinguish a comparison from its unavailable-status fallback.
+    canonical_parent_k_lambda_qa = list(
+        (pion_parent_plot_contract or {}).get(
+            "canonical_parent_k_lambda_render", []
         )
-        lambda_record = (
-            protected_record.get("k_lambda_scope_template_availability")
-            or protected_record.get("k_lambda_source_availability")
-            or {}
-        )
-        parent_index = parent_record.get("t_bin_index")
-        page_id = "pion.t_bin.{}.lambda_comparison".format(parent_index)
-        canonical_parent_k_lambda_qa.append({
-            "t_index": parent_index,
-            "status": lambda_record.get("status") or "not recorded",
-            "reason": lambda_record.get("reason") or (
-                "comparison page recorded without explicit status"
-                if page_id in parent_manifest_entries else
-                "canonical-parent comparison page not recorded"
-            ),
-            "page_recorded": page_id in parent_manifest_entries,
-        })
+    )
     histDict["canonical_parent_k_lambda_qa"] = canonical_parent_k_lambda_qa
 
     ###
@@ -7247,7 +7234,7 @@ def rand_sub(
                 pion_hgcer_tdelta_diagnostic.get("status", "not available")
                 if isinstance(pion_hgcer_tdelta_diagnostic, dict) else "not available"
             ),
-            "renderer_failures": [],
+            "renderer_failures": setting_renderer_failures,
         }
         try:
             render_pion_hgcer_refinement_pages(
@@ -7260,7 +7247,7 @@ def rand_sub(
                 page_manifest=hgcer_refinement_manifest,
             )
         except Exception as exc:
-            setting_qa_context["renderer_failures"].append(
+            setting_renderer_failures.append(
                 "refinement pages: {}: {}".format(type(exc).__name__, exc)
             )
             _print_rand_debug(

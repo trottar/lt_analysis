@@ -1188,34 +1188,75 @@ def proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_displa
     application_diagnostics = _mapping(application.get("diagnostics"))
     gate = _mapping(diagnostics.get("lambda_preservation_gate"))
     context = _mapping(phase_a_display_context)
+    host_state = context.get(
+        "host_state",
+        application.get("host_state", result.get("source_target_state", "not recorded")),
+    )
+    identity_host = host_state == "identity_no_proton_cleaning"
+    if identity_host:
+        spectra = {
+            "raw": _mapping(application.get("raw_targets")).get("h_mm_nosub"),
+            "estimated": _mapping(application.get("proton_targets")).get("h_mm_nosub"),
+            "cleaned": _mapping(application.get("cleaned_targets_pre_rf")).get("h_mm_nosub"),
+            "committed": _mapping(application.get("final_targets")).get("h_mm_nosub"),
+        }
+        numerical_closure = "not recorded"
+        global_closure = "not recorded"
+        identity_host_closure = application_diagnostics.get(
+            "identity_host_closure", "not recorded"
+        )
+    else:
+        spectra = {
+            "raw": application.get("H_MM_before_proton_cleaning"),
+            "estimated": application.get("H_MM_estimated_proton"),
+            "cleaned": application.get("H_MM_after_proton_cleaning"),
+            "committed": application.get("H_MM_after_proton_cleaning_final_rf"),
+        }
+        numerical_closure = {
+            "proposed_pre_rf_closure_passed": gate.get("proposed_pre_rf_closure_passed"),
+            "proposed_pre_rf_closure_difference": gate.get("proposed_pre_rf_closure_difference"),
+            "final_applied_closure_passed": gate.get("final_applied_closure_passed"),
+            "final_applied_pre_rf_closure_difference": gate.get("final_applied_pre_rf_closure_difference"),
+        }
+        global_closure = application_diagnostics.get(
+            "canonical_t_global_closure", "not recorded"
+        )
+        identity_host_closure = "not recorded"
     return {
         "status": result.get("status") or diagnostics.get("status") or "not recorded",
         "method": result.get("method") or "not recorded",
         "canonical_t_binning": diagnostics.get("canonical_t_binning", "not recorded"),
         "shifted_t_consistency": diagnostics.get("cross_stage_t_consistency_summary", diagnostics.get("cross_stage_t_consistency", "not recorded")),
-        "numerical_closure": {
-            "proposed_pre_rf_closure_passed": gate.get("proposed_pre_rf_closure_passed"),
-            "proposed_pre_rf_closure_difference": gate.get("proposed_pre_rf_closure_difference"),
-            "final_applied_closure_passed": gate.get("final_applied_closure_passed"),
-            "final_applied_pre_rf_closure_difference": gate.get("final_applied_pre_rf_closure_difference"),
-        },
-        "global_closure": application_diagnostics.get("canonical_t_global_closure", "not recorded"),
+        "closure_mode": "identity_no_proton_cleaning" if identity_host else "proton_cleaned",
+        "numerical_closure": numerical_closure,
+        "global_closure": global_closure,
+        "identity_host_closure": identity_host_closure,
         "lambda_gate_status": context.get("lambda_gate_status", gate.get("status", "not recorded")),
         "production_action": context.get("production_action", gate.get("production_action", application.get("production_action", "not recorded"))),
         "proton_cleaning_committed": context.get("proton_cleaning_committed", gate.get("proton_cleaning_committed", application.get("accepted", "not recorded"))),
-        "host_state": context.get("host_state", application.get("host_state", result.get("source_target_state", "not recorded"))),
-        "spectra": {
-            "raw": application.get("H_MM_before_proton_cleaning"),
-            "estimated": application.get("H_MM_estimated_proton"),
-            "cleaned": application.get("H_MM_after_proton_cleaning"),
-            "committed": application.get("H_MM_after_proton_cleaning_final_rf"),
-        },
+        "host_state": host_state,
+        "spectra": spectra,
     }
 
 
 def proton_closure_summary_lines(qa):
     """Format the two already-recorded proton closure types without merging them."""
     payload = _mapping(qa)
+    if payload.get("closure_mode") == "identity_no_proton_cleaning":
+        identity = _mapping(payload.get("identity_host_closure"))
+        transform = _mapping(identity.get("identity_transform_closure"))
+        upstream = _mapping(identity.get("upstream_noRF_closure"))
+        lines = [
+            "Identity-host closure",
+            "overall: {}".format(_pass_fail_label(identity.get("passed"))),
+            "identity-transform: {}".format(_pass_fail_label(transform.get("passed"))),
+            "upstream noRF: {}".format(_pass_fail_label(upstream.get("passed"))),
+        ]
+        for key, label in (("global_full", "global full"), ("global_cut", "global cut")):
+            closure = _mapping(transform.get(key))
+            if closure:
+                lines.append("{}: {}".format(label, _pass_fail_label(closure.get("passed"))))
+        return lines
     numerical = _mapping(payload.get("numerical_closure"))
     global_closure = _mapping(payload.get("global_closure"))
     lines = [
@@ -1245,6 +1286,30 @@ def proton_closure_summary_lines(qa):
     return lines
 
 
+def proton_main_summary_lines(qa):
+    """Build a compact host-state-aware main-PDF proton summary."""
+    payload = _mapping(qa)
+    lines = [
+        "status: {}; method: {}".format(payload.get("status"), payload.get("method")),
+        "host state: {}".format(payload.get("host_state")),
+        "Lambda gate: {}".format(payload.get("lambda_gate_status")),
+        "production action: {}; committed={}".format(
+            payload.get("production_action"), payload.get("proton_cleaning_committed")
+        ),
+        "canonical-t provenance/consistency: {}".format(
+            _display_value(payload.get("canonical_t_binning"))
+        ),
+        "shifted-t consistency: {}".format(
+            _display_value(payload.get("shifted_t_consistency"))
+        ),
+    ]
+    lines.extend(proton_closure_summary_lines(payload))
+    if payload.get("closure_mode") == "identity_no_proton_cleaning":
+        lines.append("No proton subtraction was applied.")
+    lines.append("details are in the proton-debug supplement.")
+    return tuple(lines)
+
+
 def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
     ROOT = _import_root()
     spectra = _mapping(qa.get("spectra"))
@@ -1261,13 +1326,23 @@ def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
     display = [(label, hist, color) for label, hist, color in display if hist is not None]
     if ROOT is None or not display:
         return _print_text_page(pdf_name, "proton.summary.committed_mm", _title(setting, "Proton", "committed shifted MM"), ("Final committed shifted MM overlay: not available", "Details remain in the proton-debug supplement."), manifest)
-    canvas = ROOT.TCanvas("C_proton_main_committed_mm", _title(setting, "Proton", "committed shifted MM"), 1200, 800)
+    identity_host = qa.get("closure_mode") == "identity_no_proton_cleaning"
+    page_name = "identity-host committed MM" if identity_host else "committed shifted MM"
+    canvas = ROOT.TCanvas("C_proton_main_committed_mm", _title(setting, "Proton", page_name), 1200, 800)
     try:
         draw_objects = [histogram for _label, histogram, _color in display]
         legend = ROOT.TLegend(0.64, 0.68, 0.90, 0.89)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
         draw_objects.append(legend)
+        host_annotation = ROOT.TPaveText(0.12, 0.82, 0.58, 0.91, "NDC")
+        host_annotation.SetFillStyle(0)
+        host_annotation.SetBorderSize(0)
+        host_annotation.SetTextAlign(12)
+        host_annotation.SetTextSize(0.022)
+        host_annotation.AddText("host state: {}".format(qa.get("host_state")))
+        host_annotation.AddText("proton-cleaning action: {}".format(qa.get("production_action")))
+        draw_objects.append(host_annotation)
         for index, (label, histogram, color) in enumerate(display):
             histogram.SetLineColor(color)
             histogram.SetLineWidth(2 if label == "committed shifted MM" else 1)
@@ -1275,6 +1350,7 @@ def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
             histogram.Draw("hist" if index == 0 else "hist same")
             legend.AddEntry(histogram, label, "l")
         legend.Draw()
+        host_annotation.Draw()
         missing = [label for key, label, _color in ordered if spectra.get(key) is None]
         if missing:
             annotation = ROOT.TPaveText(0.12, 0.78, 0.58, 0.89, "NDC")
@@ -1297,13 +1373,7 @@ def render_proton_main_summary_pages(pdf_name, checkpoint, cleaning_result, clea
     manifest = page_manifest if isinstance(page_manifest, list) else []
     setting = _mapping(_mapping(checkpoint).get("setting"))
     qa = proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_display_context)
-    closure_lines = (
-        "status: {}; method: {}".format(qa["status"], qa["method"]),
-        "canonical-t provenance/consistency: {}".format(_display_value(qa["canonical_t_binning"])),
-        "shifted-t consistency: {}".format(_display_value(qa["shifted_t_consistency"])),
-    ) + tuple(proton_closure_summary_lines(qa)) + (
-        "details are in the proton-debug supplement.",
-    )
+    closure_lines = proton_main_summary_lines(qa)
     _print_text_page(
         pdf_name,
         "proton.summary.provenance_closure",
@@ -1340,6 +1410,7 @@ __all__ = (
     "method_b_shape_rows",
     "open_diagnostic_pdf",
     "phase_a_summary_payload",
+    "proton_main_summary_lines",
     "proton_main_qa_payload",
     "proton_closure_summary_lines",
     "refinement_annotation_lines",

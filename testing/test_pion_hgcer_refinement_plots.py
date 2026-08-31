@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import ast
+import importlib.util
 from pathlib import Path
 import sys
+import types
 import unittest
 from unittest import mock
 
@@ -96,6 +98,57 @@ def _method_b():
             },
         ],
     }
+
+
+def _load_parent_lambda_renderer(comparison_renderer):
+    """Load the parent presentation wrapper with inert non-rendering imports."""
+    background_config = types.ModuleType("background_config")
+    background_config.get_particle_subtraction_setting_key = lambda *_args, **_kwargs: "test"
+    background_config.resolve_particle_subtraction_mode = lambda *_args, **_kwargs: "simc_shape_components"
+    background_config.resolve_pion_subtraction_scope = lambda *_args, **_kwargs: "t_bin"
+
+    component_fits = types.ModuleType("pion_component_fits")
+    component_fits.print_particle_subtraction_kaon_lambda_comparison_page = comparison_renderer
+    component_fits.record_particle_subtraction_page = lambda *_args, **_kwargs: None
+    for name in (
+        "build_particle_subtraction_component_result",
+        "load_or_resolve_pion_component_alignment",
+        "print_particle_subtraction_component_application_pages",
+        "print_particle_subtraction_component_fit_pages",
+        "resolve_scope_component_shapes",
+        "resolve_scope_single_shape",
+    ):
+        setattr(component_fits, name, lambda *_args, **_kwargs: None)
+
+    component_subtraction = types.ModuleType("pion_component_subtraction")
+    for name in (
+        "build_simc_shape_pion_control_weights",
+        "build_t_bin_pion_parent_identity",
+        "evaluate_particle_subtraction_component_fit_result",
+        "fingerprint_histogram_content_error",
+        "resolve_frozen_parent_application_policy",
+        "validate_authoritative_t_bin_pion_parent",
+        "validate_frozen_t_bin_pion_parent_collection",
+    ):
+        setattr(component_subtraction, name, lambda *_args, **_kwargs: None)
+
+    root_ownership = types.ModuleType("root_histogram_ownership")
+    root_ownership.clone_root_histogram = lambda histogram, **_kwargs: histogram
+    coordinates = types.ModuleType("data_coordinates")
+    coordinates.validate_kaon_data_coordinate_contract = lambda *_args, **_kwargs: {}
+    modules = {
+        "background_config": background_config,
+        "pion_component_fits": component_fits,
+        "pion_component_subtraction": component_subtraction,
+        "root_histogram_ownership": root_ownership,
+        "data_coordinates": coordinates,
+    }
+    module_path = REPO_ROOT / "src" / "cuts" / "pion_t_bin_parents.py"
+    with mock.patch.dict(sys.modules, modules):
+        spec = importlib.util.spec_from_file_location("_c43_parent_lambda_renderer", module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    return module
 
 
 class PionHGCerRefinementPlotTests(unittest.TestCase):
@@ -280,6 +333,73 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual(qa["global_closure"], {"passed": True})
         self.assertTrue(qa["proton_cleaning_committed"])
 
+    def test_proton_cleaned_main_qa_retains_existing_compact_spectra_and_closures(self):
+        raw, estimated, cleaned, committed = object(), object(), object(), object()
+        qa = plots.proton_main_qa_payload(
+            {
+                "diagnostics": {
+                    "lambda_preservation_gate": {
+                        "proposed_pre_rf_closure_passed": True,
+                        "final_applied_closure_passed": True,
+                    },
+                },
+            },
+            {
+                "host_state": "proton_cleaned",
+                "H_MM_before_proton_cleaning": raw,
+                "H_MM_estimated_proton": estimated,
+                "H_MM_after_proton_cleaning": cleaned,
+                "H_MM_after_proton_cleaning_final_rf": committed,
+                "diagnostics": {"canonical_t_global_closure": {"raw": {"passed": True}}},
+            },
+        )
+        self.assertEqual(qa["closure_mode"], "proton_cleaned")
+        self.assertEqual(qa["spectra"], {
+            "raw": raw, "estimated": estimated, "cleaned": cleaned, "committed": committed,
+        })
+        self.assertEqual(qa["numerical_closure"]["proposed_pre_rf_closure_passed"], True)
+        self.assertEqual(qa["global_closure"], {"raw": {"passed": True}})
+        self.assertEqual(qa["identity_host_closure"], "not recorded")
+
+    def test_identity_host_main_qa_uses_existing_target_maps_and_identity_closure(self):
+        raw, proton_zero, cleaned, final = object(), object(), object(), object()
+        identity_closure = {
+            "passed": True,
+            "identity_transform_closure": {
+                "passed": True, "global_full": {"passed": True}, "global_cut": {"passed": True},
+            },
+            "upstream_noRF_closure": {"passed": True},
+        }
+        qa = plots.proton_main_qa_payload(
+            {"diagnostics": {"lambda_preservation_gate": {"status": "bypass"}}},
+            {
+                "host_state": "identity_no_proton_cleaning",
+                "raw_targets": {"h_mm_nosub": raw},
+                "proton_targets": {"h_mm_nosub": proton_zero},
+                "cleaned_targets_pre_rf": {"h_mm_nosub": cleaned},
+                "final_targets": {"h_mm_nosub": final},
+                "diagnostics": {"identity_host_closure": identity_closure},
+            },
+            {
+                "host_state": "identity_no_proton_cleaning",
+                "production_action": "bypass",
+                "proton_cleaning_committed": False,
+            },
+        )
+        self.assertEqual(qa["closure_mode"], "identity_no_proton_cleaning")
+        self.assertEqual(qa["spectra"], {
+            "raw": raw, "estimated": proton_zero, "cleaned": cleaned, "committed": final,
+        })
+        self.assertEqual(qa["numerical_closure"], "not recorded")
+        self.assertEqual(qa["global_closure"], "not recorded")
+        self.assertIs(qa["identity_host_closure"], identity_closure)
+        lines = plots.proton_main_summary_lines(qa)
+        self.assertIn("host state: identity_no_proton_cleaning", lines)
+        self.assertIn("production action: bypass; committed=False", lines)
+        self.assertIn("Identity-host closure", lines)
+        self.assertIn("identity-transform: PASS", lines)
+        self.assertIn("No proton subtraction was applied.", lines)
+
     def test_proton_numerical_and_canonical_global_closures_remain_distinct(self):
         qa = plots.proton_main_qa_payload(
             {
@@ -341,6 +461,28 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             for line in lines
         ))
 
+    def test_warning_classifier_blocks_a_clean_statement_for_proton_renderer_failure(self):
+        summary = plots.setting_qa_summary_payload(
+            {"status": "available", "pion_closure": {"passed": True}, "host_closure": {"passed": True}},
+            _method_a(),
+            _method_b(),
+            {"status": "available"},
+            runtime_qa_context={
+                "aerogel_warnings": [],
+                "proton_warnings": [],
+                "canonical_parent_k_lambda": [{"t_index": 0, "status": "available"}],
+                "hgcer_diagnostic_availability": "available",
+                "renderer_failures": ["proton main summary: RuntimeError: test"],
+            },
+        )
+        lines = plots.setting_qa_summary_lines(summary)
+        self.assertIn("Outstanding setting-level QA states:", lines)
+        self.assertNotIn("No outstanding setting-level QA warnings.", lines)
+        self.assertTrue(any(
+            line.startswith("FAILURE: Required main-PDF renderer") and "proton main summary" in line
+            for line in lines
+        ))
+
     def test_canonical_parent_lambda_summary_keeps_parent_identity_and_reason(self):
         summary = plots.canonical_parent_lambda_summary([
             {"t_index": 0, "status": "available"},
@@ -349,6 +491,48 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         ])
         self.assertEqual((summary["available"], summary["total"], summary["unavailable"]), (2, 3, 1))
         self.assertEqual(summary["entries"][2], {"t_index": 2, "status": "unavailable", "reason": "reference missing"})
+
+    def test_parent_lambda_render_outcome_uses_actual_comparison_result_not_provenance(self):
+        module = _load_parent_lambda_renderer(lambda *_args, **_kwargs: True)
+        parent = {
+            "t_bin_index": 1,
+            "analysis_scope": "canonical_t_1",
+            "fit_result": {
+                "diagnostics": {
+                    "pi_delta_signal_protected_fit": {
+                        "k_lambda_scope_template_availability": {"status": "unavailable"},
+                    },
+                },
+            },
+        }
+        record = module._print_parent_lambda_page(
+            "synthetic.pdf", parent, {"mm_min": 1.0, "mm_max": 1.3}, "test", [], "pion.t_bin.1"
+        )
+        self.assertEqual(record, {
+            "t_index": 1, "status": "available", "reason": None, "page_recorded": True,
+        })
+        with mock.patch("builtins.print"):
+            report = module._parent_plot_contract(
+                [], [parent], setting_wide_enabled=False, canonical_parent_k_lambda_render=[record]
+            )
+        self.assertEqual(report["canonical_parent_k_lambda_render"], [record])
+
+    def test_parent_lambda_unavailable_status_page_is_not_a_successful_comparison(self):
+        def unavailable(*_args, **_kwargs):
+            raise RuntimeError("reference unavailable")
+
+        module = _load_parent_lambda_renderer(unavailable)
+        parent = {"t_bin_index": 2, "analysis_scope": "canonical_t_2"}
+        with mock.patch.object(module, "_print_parent_status_page", return_value=True):
+            record = module._print_parent_lambda_page(
+                "synthetic.pdf", parent, {"mm_min": 1.0, "mm_max": 1.3}, "test", [], "pion.t_bin.2"
+            )
+        self.assertEqual(record, {
+            "t_index": 2,
+            "status": "unavailable",
+            "reason": "reference unavailable",
+            "page_recorded": True,
+        })
 
     def test_canonical_delta_frame_uses_edges_not_candidate_extent(self):
         payload = {"delta_edges": [-10.0, -7.0, -4.0, 5.0, 20.0]}
@@ -382,6 +566,21 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertGreaterEqual(source.count("draw_objects"), 5)
         self.assertIn("shape-poor veto", source)
         self.assertNotIn("shape-pool veto", source)
+
+    def test_rand_sub_contains_proton_renderer_failure_and_actual_parent_outcome_handoff(self):
+        source = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
+        proton_call = source.index("render_proton_main_summary_pages(")
+        proton_failure = source.index("proton main summary: {}: {}")
+        refinement_call = source.index("render_pion_hgcer_refinement_pages(")
+        final_qa = source.index('"renderer_failures": setting_renderer_failures')
+        warning_page = source.index("render_setting_warning_page(")
+        self.assertLess(proton_call, proton_failure)
+        self.assertLess(proton_failure, final_qa)
+        self.assertLess(proton_failure, refinement_call)
+        self.assertLess(refinement_call, warning_page)
+        self.assertIn("canonical_parent_k_lambda_render", source)
+        self.assertNotIn("k_lambda_scope_template_availability", source)
+        self.assertNotIn("k_lambda_source_availability", source)
 
     def test_category_labels_f_low_styles_and_annotation_are_explicit(self):
         self.assertEqual(set(plots._METHOD_A_SUPPORT_LABELS), {"supported", "marginal", "unsupported"})

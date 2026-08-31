@@ -1291,7 +1291,13 @@ def _print_coordinate_closure_page(
         )
 
 
-def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
+def _parent_plot_contract(
+    page_manifest,
+    parents,
+    *,
+    setting_wide_enabled,
+    canonical_parent_k_lambda_render=(),
+):
     # Legacy ``protected_fit_or_status`` remains represented by the compact
     # control/protection page's preserved ``pion_control_fit`` manifest slot.
     page_ids = [entry.get("page_id") for entry in page_manifest if isinstance(entry, dict)]
@@ -1327,6 +1333,21 @@ def _parent_plot_contract(page_manifest, parents, *, setting_wide_enabled):
         "mandatory_lambda_expected": len(parents) + (1 if setting_wide_enabled else 0),
         "duplicate_page_ids": duplicate_ids,
         "missing_mandatory_page_ids": missing,
+        # These scalar records distinguish an actual comparison renderer
+        # success from an explicit unavailable-status page in the same slot.
+        "canonical_parent_k_lambda_render": sorted(
+            (
+                {
+                    "t_index": int(record.get("t_index")),
+                    "status": str(record.get("status") or "unavailable"),
+                    "reason": record.get("reason"),
+                    "page_recorded": bool(record.get("page_recorded")),
+                }
+                for record in canonical_parent_k_lambda_render or ()
+                if isinstance(record, dict) and record.get("t_index") is not None
+            ),
+            key=lambda record: record["t_index"],
+        ),
     }
     print("[PLOT CONTRACT]")
     for scope, count in sorted(by_scope.items()):
@@ -1576,9 +1597,11 @@ def _print_parent_application_closure_page(pdf_name, parent, title_prefix, manif
 
 
 def _print_parent_lambda_page(pdf_name, parent, inp_dict, title_prefix, manifest, page_prefix):
-    """Keep the mandatory K-Lambda comparison as its own stable parent page."""
+    """Render one K-Lambda slot and retain its actual presentation outcome."""
+    t_index = int(parent["t_bin_index"])
+    page_id = "{}.lambda_comparison".format(page_prefix)
     try:
-        return print_particle_subtraction_kaon_lambda_comparison_page(
+        emitted = print_particle_subtraction_kaon_lambda_comparison_page(
             pdf_name,
             parent.get("fit_result") or {},
             parent.get("final_diagnostic_application_result"),
@@ -1590,12 +1613,37 @@ def _print_parent_lambda_page(pdf_name, parent, inp_dict, title_prefix, manifest
             proposal_payload=parent.get("proposed_diagnostic_application_result"),
         )
     except Exception as exc:
-        return _print_parent_status_page(
-            pdf_name, manifest, "{}.lambda_comparison".format(page_prefix),
+        status_page_recorded = _print_parent_status_page(
+            pdf_name, manifest, page_id,
             scope=parent["analysis_scope"],
             title="{} K-Lambda comparison unavailable".format(title_prefix),
             detail="K-Lambda source/reference/normalization unavailable: {}".format(exc),
         )
+        return {
+            "t_index": t_index,
+            "status": "unavailable",
+            "reason": str(exc),
+            "page_recorded": bool(status_page_recorded),
+        }
+    if emitted:
+        return {
+            "t_index": t_index,
+            "status": "available",
+            "reason": None,
+            "page_recorded": True,
+        }
+    status_page_recorded = _print_parent_status_page(
+        pdf_name, manifest, page_id,
+        scope=parent["analysis_scope"],
+        title="{} K-Lambda comparison unavailable".format(title_prefix),
+        detail="K-Lambda comparison renderer returned false.",
+    )
+    return {
+        "t_index": t_index,
+        "status": "unavailable",
+        "reason": "comparison_renderer_returned_false",
+        "page_recorded": bool(status_page_recorded),
+    }
 
 
 def render_setting_t_bin_pion_parent_pages(
@@ -1642,6 +1690,7 @@ def render_setting_t_bin_pion_parent_pages(
         analysis_hist_key="H_t_analysis",
         page_id="pion.coordinate_t_closure",
     )
+    canonical_parent_k_lambda_render = []
     for parent in parents:
         page_prefix = "pion.t_bin.{}".format(int(parent["t_bin_index"]))
         section_title = "{} t{} [{:.3f}, {:.3f}]".format(
@@ -1656,9 +1705,9 @@ def render_setting_t_bin_pion_parent_pages(
         _print_parent_application_closure_page(
             pdf_name, parent, section_title, page_manifest, page_prefix
         )
-        _print_parent_lambda_page(
+        canonical_parent_k_lambda_render.append(_print_parent_lambda_page(
             pdf_name, parent, inp_dict, section_title, page_manifest, page_prefix
-        )
+        ))
     _ensure_required_parent_plot_slots(
         pdf_name,
         page_manifest,
@@ -1667,10 +1716,24 @@ def render_setting_t_bin_pion_parent_pages(
         canonical_t_global=canonical_t_global,
         setting_wide_enabled=bool(setting_wide_enabled),
     )
+    # A failed direct status renderer can still be backfilled into the
+    # mandatory parent slot.  This updates only the page-recorded flag; the
+    # comparison remains unavailable unless its real renderer succeeded.
+    recorded_page_ids = {
+        entry.get("page_id") for entry in page_manifest if isinstance(entry, dict)
+    }
+    for record in canonical_parent_k_lambda_render:
+        if record.get("status") != "unavailable":
+            continue
+        page_id = "pion.t_bin.{}.lambda_comparison".format(record["t_index"])
+        record["page_recorded"] = bool(
+            record.get("page_recorded") or page_id in recorded_page_ids
+        )
     return _parent_plot_contract(
         page_manifest,
         parents,
         setting_wide_enabled=bool(setting_wide_enabled),
+        canonical_parent_k_lambda_render=canonical_parent_k_lambda_render,
     )
 
 
