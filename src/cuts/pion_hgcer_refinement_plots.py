@@ -911,7 +911,7 @@ def _title(setting, section, diagnostic):
     phi = setting.get("phi_setting") or "unknown phi"
     kinematic = setting.get("kinematic_token") or "unknown kinematic"
     epsilon = setting.get("epsilon_filename_token") or setting.get("epsilon_setting") or "unknown epsilon"
-    return "{} | {} | {} — {}: {}".format(phi, kinematic, epsilon, section, diagnostic)
+    return "{} | {} | {} - {}: {}".format(phi, kinematic, epsilon, section, diagnostic)
 
 
 def _import_root():

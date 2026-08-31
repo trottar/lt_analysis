@@ -243,6 +243,30 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIn("hgcer.part2", manifest["routes"]["hgcer_debug"])
         self.assertIn("proton.detail", manifest["routes"]["proton_debug"])
 
+    def test_detached_c4_title_is_ascii_safe(self):
+        title = plots._title(
+            {
+                "phi_setting": "Left",
+                "kinematic_token": "Q4p4W2p74",
+                "epsilon_filename_token": "lowe",
+            },
+            "Method B",
+            "candidate L_B",
+        )
+        for fragment in ("Left", "Q4p4W2p74", "lowe", "Method B", "candidate L_B"):
+            self.assertIn(fragment, title)
+        self.assertNotIn("—", title)
+        self.assertNotIn("–", title)
+        self.assertNotIn("â", title)
+        title.encode("ascii")
+
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        start = source.index("def _title(")
+        end = source.index("\ndef _import_root", start)
+        title_helper = source[start:end]
+        self.assertNotIn("—", title_helper)
+        self.assertNotIn("–", title_helper)
+
     def test_phase_a_summary_uses_stored_contract_and_checkpoint_fields(self):
         phase = {
             "status": "available", "available": True,
