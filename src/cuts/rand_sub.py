@@ -6482,6 +6482,38 @@ def rand_sub(
         if isinstance(pion_hgcer_refinement_checkpoint, dict)
         else histDict.get("pion_hgcer_refinement_checkpoint")
     )
+    # C.4.1 presentation context is copied from already-established runtime
+    # records.  It deliberately performs no gate, closure, or host-state work.
+    proton_display_diagnostics = (
+        proton_cleaning_result.get("diagnostics")
+        if isinstance(proton_cleaning_result, dict)
+        else {}
+    ) or {}
+    proton_display_gate = proton_display_diagnostics.get("lambda_preservation_gate") or {}
+    phase_a_display_context = {
+        "lambda_gate_status": proton_display_gate.get(
+            "status",
+            (pion_hgcer_event_contract or {}).get("lambda_gate_status")
+            if isinstance(pion_hgcer_event_contract, dict) else "not recorded",
+        ),
+        "production_action": proton_display_gate.get(
+            "production_action",
+            (pion_hgcer_event_contract or {}).get("lambda_gate_production_action")
+            if isinstance(pion_hgcer_event_contract, dict) else "not recorded",
+        ),
+        "proton_cleaning_committed": proton_display_gate.get(
+            "proton_cleaning_committed",
+            (proton_cleaning_application or {}).get("accepted", "not recorded")
+            if isinstance(proton_cleaning_application, dict) else "not recorded",
+        ),
+        "host_state": (
+            (proton_cleaning_application or {}).get("host_state")
+            if isinstance(proton_cleaning_application, dict) else None
+        ) or (
+            (pion_hgcer_event_contract or {}).get("host_state")
+            if isinstance(pion_hgcer_event_contract, dict) else "not recorded"
+        ),
+    }
     if ParticleType == "kaon":
         for supplement_key, role in (
             ("proton_debug", "proton-debug"),
@@ -6689,6 +6721,7 @@ def rand_sub(
             checkpoint_for_plots,
             proton_cleaning_result,
             proton_cleaning_application,
+            phase_a_display_context=phase_a_display_context,
             page_manifest=histDict.setdefault("proton_cleaning_main_page_manifest", []),
         )
         print_kaon_proton_cleaning_pages(
@@ -7149,6 +7182,42 @@ def rand_sub(
         hgcer_refinement_manifest = histDict.setdefault(
             "pion_hgcer_refinement_page_manifest", []
         )
+        component_diagnostics_for_qa = (
+            component_fit_result.get("diagnostics")
+            if isinstance(component_fit_result, dict)
+            else {}
+        ) or {}
+        protected_fit_for_qa = (
+            component_diagnostics_for_qa.get("pi_delta_signal_protected_fit")
+            or (component_diagnostics_for_qa.get("kaon") or {}).get(
+                "pi_delta_signal_protected_fit"
+            )
+            or {}
+        )
+        aerogel_validation_for_qa = proton_display_diagnostics.get(
+            "aerogel_vs_t_validation"
+        ) or {}
+        setting_qa_context = {
+            "aerogel_warnings": aerogel_validation_for_qa.get(
+                "warnings_by_t_bin", aerogel_validation_for_qa.get("warnings", "not available")
+            ),
+            "proton_warnings": proton_display_gate.get(
+                "observational_warnings", "not available"
+            ),
+            "k_lambda_comparison": protected_fit_for_qa.get(
+                "fit_variant", protected_fit_for_qa.get("status", "not available")
+            ),
+            "k_sigma0_availability": (
+                "available"
+                if isinstance(component_fit_result, dict)
+                and component_fit_result.get("H_kaon_fit_k_sigma0_scaled") is not None
+                else "not available"
+            ),
+            "hgcer_diagnostic_availability": (
+                pion_hgcer_tdelta_diagnostic.get("status", "not available")
+                if isinstance(pion_hgcer_tdelta_diagnostic, dict) else "not available"
+            ),
+        }
         try:
             render_pion_hgcer_refinement_pages(
                 main_pdf,
@@ -7156,6 +7225,7 @@ def rand_sub(
                 phase_a=pion_hgcer_event_contract,
                 method_a=pion_hgcer_method_a,
                 method_b=pion_hgcer_method_b,
+                phase_a_display_context=phase_a_display_context,
                 page_manifest=hgcer_refinement_manifest,
             )
         except Exception as exc:
@@ -7173,6 +7243,8 @@ def rand_sub(
                 method_a=pion_hgcer_method_a,
                 method_b=pion_hgcer_method_b,
                 part2=pion_hgcer_zerope_transfer,
+                phase_a_display_context=phase_a_display_context,
+                runtime_qa_context=setting_qa_context,
                 page_manifest=hgcer_refinement_manifest,
                 close_pdf=True,
             )

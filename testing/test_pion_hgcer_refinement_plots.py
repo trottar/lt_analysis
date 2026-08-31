@@ -108,8 +108,17 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual(destinations["hgcer_debug"], r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_hgcer-debug.pdf")
         manifest = plots.build_pdf_route_manifest(main)
         self.assertIn("hgcer.phase_a.summary", manifest["routes"]["main"])
+        self.assertEqual(
+            [page_id for page_id in manifest["routes"]["main"] if page_id.startswith("proton.summary")],
+            [
+                "proton.summary.provenance_closure",
+                "proton.summary.committed_mm",
+                "proton.summary.commitment",
+            ],
+        )
         self.assertIn("pion.coordinate.detail", manifest["routes"]["pion_fit_debug"])
         self.assertIn("hgcer.part2", manifest["routes"]["hgcer_debug"])
+        self.assertIn("proton.detail", manifest["routes"]["proton_debug"])
 
     def test_phase_a_summary_uses_stored_contract_and_checkpoint_fields(self):
         phase = {
@@ -127,9 +136,25 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertFalse(payload["production_objects_mutated"])
         self.assertFalse(payload["refinement_applied"])
 
+    def test_phase_a_runtime_display_context_is_explicit_and_read_only(self):
+        payload = plots.phase_a_summary_payload(
+            _checkpoint(),
+            {"status": "available", "available": True},
+            {
+                "lambda_gate_status": "pass",
+                "production_action": "apply",
+                "proton_cleaning_committed": True,
+                "host_state": "post_proton_noRF",
+            },
+        )
+        self.assertEqual(payload["lambda_gate_status"], "pass")
+        self.assertEqual(payload["lambda_gate_production_action"], "apply")
+        self.assertTrue(payload["proton_cleaning_committed"])
+        self.assertEqual(payload["host_state"], "post_proton_noRF")
+
     def test_method_a_keeps_fidelity_fields_nulls_and_support_counts(self):
         payload = plots.method_a_plot_payload(_method_a(), _checkpoint())
-        self.assertEqual(payload["support_counts"], {"supported": 1, "marginal": 1, "unsupported": 2})
+        self.assertEqual(payload["support_counts"], {"supported": 1, "marginal": 1, "unsupported": 1})
         self.assertEqual(payload["cells"][2]["f_low"], None)
         points = plots.method_a_f_low_points(payload)
         self.assertEqual(len(points), 2)
@@ -140,7 +165,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
 
     def test_method_b_keeps_status_candidate_regions_and_shape_without_substitution(self):
         payload = plots.method_b_plot_payload(_method_b(), _checkpoint())
-        self.assertEqual(payload["method_status_counts"], {"available": 1, "marginal": 1, "unavailable": 2})
+        self.assertEqual(payload["method_status_counts"], {"available": 1, "marginal": 0, "shape_inconsistent": 1, "unavailable": 0})
         candidates = plots.method_b_candidate_points(payload)
         self.assertEqual(candidates, [{
             "t_index": 0, "delta_index": 0, "delta_center": -5.0,
@@ -153,8 +178,120 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         shapes = plots.method_b_shape_rows(payload)
         self.assertEqual(shapes[1]["shape_chi2_ndf"], None)
         self.assertEqual(shapes[1]["shape_status"], "poor")
+        self.assertEqual(shapes[1]["candidate_L_B_status"], "shape_poor_veto")
+        self.assertTrue(shapes[1]["shape_poor_veto"])
         self.assertTrue(payload["frozen_pion_baseline"])
         self.assertTrue(payload["no_refinement"])
+
+    def test_method_b_regional_panels_are_parent_local_and_unity_uses_full_delta_edges(self):
+        payload = plots.method_b_plot_payload(_method_b(), _checkpoint())
+        panels = plots.method_b_regional_panels(payload)
+        self.assertEqual([panel["t_index"] for panel in panels], [0])
+        self.assertEqual(set(panels[0]["series"]), {"pi_n", "pi_sidis", "pi_delta_high"})
+        self.assertTrue(all(len(points) == 1 for points in panels[0]["series"].values()))
+        self.assertEqual(plots.unity_line_limits(payload), (-10.0, 10.0))
+
+    def test_method_b_regional_panels_do_not_merge_different_t_parents(self):
+        method_b = {
+            "t_edges": [0.1, 0.2, 0.3],
+            "delta_edges": [-10.0, 10.0],
+            "cells": [
+                {
+                    "t_index": 0, "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
+                    "method_B_status": "available",
+                    "regions": [{"region_name": "pi_n", "parent_relative_ratio": 1.0, "parent_relative_sigma": 0.1, "parent_relative_status": "available"}],
+                },
+                {
+                    "t_index": 1, "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
+                    "method_B_status": "available",
+                    "regions": [{"region_name": "pi_n", "parent_relative_ratio": 1.2, "parent_relative_sigma": 0.1, "parent_relative_status": "available"}],
+                },
+            ],
+        }
+        panels = plots.method_b_regional_panels(plots.method_b_plot_payload(method_b, _checkpoint()))
+        self.assertEqual([panel["t_index"] for panel in panels], [0, 1])
+        self.assertEqual(panels[0]["series"]["pi_n"][0]["Qtilde"], 1.0)
+        self.assertEqual(panels[1]["series"]["pi_n"][0]["Qtilde"], 1.2)
+
+    def test_single_region_candidate_does_not_create_method_b_availability(self):
+        method_b = {
+            "status": "unavailable",
+            "cells": [{
+                "t_index": 0, "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
+                "method_B_status": "unavailable", "candidate_L_B_status": "single_region_only",
+                "candidate_L_B": 1.0, "candidate_L_B_uncertainty": 0.1,
+            }],
+        }
+        payload = plots.method_b_plot_payload(method_b, _checkpoint())
+        self.assertEqual(payload["method_status_counts"], {"available": 0, "marginal": 0, "shape_inconsistent": 0, "unavailable": 1})
+        self.assertEqual(plots.method_b_candidate_points(payload), [])
+
+    def test_shape_poor_veto_uses_the_stored_candidate_status_not_shape_thresholds(self):
+        payload = plots.method_b_plot_payload(
+            {
+                "cells": [{
+                    "t_index": 0, "delta_index": 0,
+                    "method_B_status": "shape_inconsistent",
+                    "candidate_L_B_status": "shape_poor_veto",
+                    "shape_chi2_ndf": 0.2,
+                    "shape_max_abs_pull": 0.1,
+                    "shape_status": "good",
+                }],
+            },
+            _checkpoint(),
+        )
+        row = plots.method_b_shape_rows(payload)[0]
+        self.assertEqual(row["candidate_L_B_status"], "shape_poor_veto")
+        self.assertTrue(row["shape_poor_veto"])
+        self.assertEqual(row["shape_chi2_ndf"], 0.2)
+        self.assertEqual(row["shape_status"], "good")
+
+    def test_setting_qa_summary_reports_coverage_and_unavailable_optional_inputs(self):
+        summary = plots.setting_qa_summary_payload(
+            {"status": "available", "host_state": "post_proton_noRF", "pion_closure": {"passed": True}, "host_closure": {"passed": True}},
+            _method_a(),
+            _method_b(),
+            {"status": "unavailable"},
+            display_context={"lambda_gate_status": "pass", "production_action": "apply", "proton_cleaning_committed": True},
+        )
+        self.assertEqual(summary["method_a_coverage"], {"supported": 1, "marginal": 1, "unsupported": 1})
+        self.assertEqual(summary["method_b_coverage"]["shape_inconsistent"], 1)
+        self.assertEqual(summary["phase_host_state"], "post_proton_noRF")
+        self.assertEqual(summary["lambda_gate_status"], "pass")
+        self.assertEqual(summary["aerogel_warnings"], "not available")
+        self.assertEqual(summary["k_sigma0_availability"], "not available")
+
+    def test_proton_main_qa_keeps_existing_closure_and_commitment_records(self):
+        qa = plots.proton_main_qa_payload(
+            {
+                "status": "available",
+                "method": "timing_t_event_weight",
+                "diagnostics": {
+                    "canonical_t_binning": {"status": "available"},
+                    "cross_stage_t_consistency_summary": {"passed": True},
+                    "lambda_preservation_gate": {"status": "pass", "production_action": "apply"},
+                },
+            },
+            {"accepted": True, "host_state": "post_proton_noRF", "diagnostics": {"canonical_t_global_closure": {"passed": True}}},
+            {"proton_cleaning_committed": True},
+        )
+        self.assertEqual(qa["canonical_t_binning"], {"status": "available"})
+        self.assertEqual(qa["shifted_t_consistency"], {"passed": True})
+        self.assertEqual(qa["global_closure"], {"passed": True})
+        self.assertTrue(qa["proton_cleaning_committed"])
+
+    def test_category_labels_f_low_styles_and_annotation_are_explicit(self):
+        self.assertEqual(set(plots._METHOD_A_SUPPORT_LABELS), {"supported", "marginal", "unsupported"})
+        self.assertEqual(set(plots._METHOD_B_STATUS_LABELS), {"available", "marginal", "shape_inconsistent", "unavailable"})
+        self.assertNotEqual(plots.method_a_f_low_style("supported"), plots.method_a_f_low_style("marginal"))
+        self.assertIsNone(plots.method_a_f_low_style("unsupported"))
+        self.assertEqual(
+            plots.refinement_annotation_lines(candidate=True),
+            (
+                "NON-AUTHORITATIVE DIAGNOSTIC / No refinement applied",
+                "Diagnostic candidate only; no event correction",
+            ),
+        )
 
     def test_warning_page_preserves_only_non_ok_state_and_production_impact(self):
         warnings = plots.warning_payload(
@@ -190,6 +327,10 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertTrue(forbidden.isdisjoint(source))
         for marker in ("build_pion", "apply_pion", "particle_subtraction", "pion_component_fits", "pion_t_bin_parents"):
             self.assertNotIn(marker, source)
+        self.assertIn("NON-AUTHORITATIVE DIAGNOSTIC / No refinement applied", source)
+        self.assertIn("Diagnostic candidate only; no event correction", source)
+        self.assertIn("unity_line_limits(payload)", source)
+        self.assertNotIn("ROOT.TLine(0.0, 1.0", source)
 
 
 if __name__ == "__main__":
