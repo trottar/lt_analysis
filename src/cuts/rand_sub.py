@@ -6809,6 +6809,44 @@ def rand_sub(
             ),
             coordinate_debug_pdf=pdf_destinations["pion_fit_debug"],
         )
+    # C.4.2 reads the canonical-parent K-Lambda display records that already
+    # exist after parent rendering.  It does not resolve, scale, or refit any
+    # K-Lambda input for the final setting-level QA page.
+    parent_manifest_entries = {
+        entry.get("page_id")
+        for entry in component_page_manifest
+        if isinstance(entry, dict)
+    }
+    canonical_parent_k_lambda_qa = []
+    for parent in t_bin_parent_results:
+        parent_record = parent if isinstance(parent, dict) else {}
+        fit_record = parent_record.get("fit_result") or {}
+        fit_diagnostics = fit_record.get("diagnostics") or {}
+        protected_record = (
+            fit_diagnostics.get("pi_delta_signal_protected_fit")
+            or (fit_diagnostics.get("kaon") or {}).get(
+                "pi_delta_signal_protected_fit"
+            )
+            or {}
+        )
+        lambda_record = (
+            protected_record.get("k_lambda_scope_template_availability")
+            or protected_record.get("k_lambda_source_availability")
+            or {}
+        )
+        parent_index = parent_record.get("t_bin_index")
+        page_id = "pion.t_bin.{}.lambda_comparison".format(parent_index)
+        canonical_parent_k_lambda_qa.append({
+            "t_index": parent_index,
+            "status": lambda_record.get("status") or "not recorded",
+            "reason": lambda_record.get("reason") or (
+                "comparison page recorded without explicit status"
+                if page_id in parent_manifest_entries else
+                "canonical-parent comparison page not recorded"
+            ),
+            "page_recorded": page_id in parent_manifest_entries,
+        })
+    histDict["canonical_parent_k_lambda_qa"] = canonical_parent_k_lambda_qa
 
     ###
     # MM dummy plots    
@@ -7182,18 +7220,6 @@ def rand_sub(
         hgcer_refinement_manifest = histDict.setdefault(
             "pion_hgcer_refinement_page_manifest", []
         )
-        component_diagnostics_for_qa = (
-            component_fit_result.get("diagnostics")
-            if isinstance(component_fit_result, dict)
-            else {}
-        ) or {}
-        protected_fit_for_qa = (
-            component_diagnostics_for_qa.get("pi_delta_signal_protected_fit")
-            or (component_diagnostics_for_qa.get("kaon") or {}).get(
-                "pi_delta_signal_protected_fit"
-            )
-            or {}
-        )
         aerogel_validation_for_qa = proton_display_diagnostics.get(
             "aerogel_vs_t_validation"
         ) or {}
@@ -7204,8 +7230,12 @@ def rand_sub(
             "proton_warnings": proton_display_gate.get(
                 "observational_warnings", "not available"
             ),
-            "k_lambda_comparison": protected_fit_for_qa.get(
-                "fit_variant", protected_fit_for_qa.get("status", "not available")
+            "canonical_parent_k_lambda": histDict.get(
+                "canonical_parent_k_lambda_qa", []
+            ),
+            "k_lambda_comparison": "canonical-parent summary",
+            "k_sigma0_protected_region": (
+                "active" if t_bin_parent_results else "not recorded"
             ),
             "k_sigma0_availability": (
                 "available"
@@ -7217,6 +7247,7 @@ def rand_sub(
                 pion_hgcer_tdelta_diagnostic.get("status", "not available")
                 if isinstance(pion_hgcer_tdelta_diagnostic, dict) else "not available"
             ),
+            "renderer_failures": [],
         }
         try:
             render_pion_hgcer_refinement_pages(
@@ -7229,6 +7260,9 @@ def rand_sub(
                 page_manifest=hgcer_refinement_manifest,
             )
         except Exception as exc:
+            setting_qa_context["renderer_failures"].append(
+                "refinement pages: {}: {}".format(type(exc).__name__, exc)
+            )
             _print_rand_debug(
                 "detached HGCer refinement PDF pages unavailable",
                 renderer="pion_hgcer_refinement_plots",

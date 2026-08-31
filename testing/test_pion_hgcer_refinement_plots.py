@@ -280,6 +280,109 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual(qa["global_closure"], {"passed": True})
         self.assertTrue(qa["proton_cleaning_committed"])
 
+    def test_proton_numerical_and_canonical_global_closures_remain_distinct(self):
+        qa = plots.proton_main_qa_payload(
+            {
+                "diagnostics": {
+                    "lambda_preservation_gate": {
+                        "proposed_pre_rf_closure_passed": True,
+                        "proposed_pre_rf_closure_difference": 0.02,
+                        "final_applied_closure_passed": False,
+                        "final_applied_pre_rf_closure_difference": -0.03,
+                    },
+                },
+            },
+            {
+                "diagnostics": {
+                    "canonical_t_global_closure": {
+                        "raw": {"passed": True},
+                        "proton_estimate": {"passed": True},
+                        "proton_cleaned_pre_rf": {"passed": True},
+                        "final_post_rf": {"passed": False},
+                    },
+                },
+            },
+        )
+        self.assertEqual(qa["numerical_closure"]["proposed_pre_rf_closure_difference"], 0.02)
+        self.assertEqual(qa["numerical_closure"]["final_applied_pre_rf_closure_difference"], -0.03)
+        self.assertNotEqual(qa["numerical_closure"], qa["global_closure"])
+        lines = plots.proton_closure_summary_lines(qa)
+        self.assertIn("Numerical proton closure", lines)
+        self.assertIn("Canonical-|t| global closure", lines)
+        self.assertIn("final: FAIL", lines)
+
+    def test_warning_classifier_blocks_a_clean_statement_for_unavailable_hgcer(self):
+        summary = plots.setting_qa_summary_payload(
+            {"status": "available", "host_state": "post_proton_noRF", "pion_closure": {"passed": True}, "host_closure": {"passed": True}},
+            _method_a(),
+            _method_b(),
+            {"status": "available"},
+            display_context={"lambda_gate_status": "pass", "production_action": "apply", "proton_cleaning_committed": True},
+            runtime_qa_context={
+                "aerogel_warnings": [], "proton_warnings": [],
+                "canonical_parent_k_lambda": [{"t_index": 0, "status": "available"}],
+                "k_sigma0_protected_region": "active",
+                "k_sigma0_availability": "not available",
+                "hgcer_diagnostic_availability": "unavailable",
+                "renderer_failures": [],
+            },
+        )
+        states = plots.setting_qa_warning_states(summary)
+        self.assertIn(
+            {"label": "HGCer diagnostics", "category": "FAILURE", "detail": "unavailable"},
+            states,
+        )
+        lines = plots.setting_qa_summary_lines(summary)
+        self.assertIn("Outstanding setting-level QA states:", lines)
+        self.assertNotIn("No outstanding setting-level QA warnings.", lines)
+        self.assertTrue(any(
+            line.startswith("INFORMATIONAL: K-Sigma0 explicit template")
+            and "protected region=active; explicit template=not available" in line
+            for line in lines
+        ))
+
+    def test_canonical_parent_lambda_summary_keeps_parent_identity_and_reason(self):
+        summary = plots.canonical_parent_lambda_summary([
+            {"t_index": 0, "status": "available"},
+            {"t_index": 1, "status": "available"},
+            {"t_index": 2, "status": "unavailable", "reason": "reference missing"},
+        ])
+        self.assertEqual((summary["available"], summary["total"], summary["unavailable"]), (2, 3, 1))
+        self.assertEqual(summary["entries"][2], {"t_index": 2, "status": "unavailable", "reason": "reference missing"})
+
+    def test_canonical_delta_frame_uses_edges_not_candidate_extent(self):
+        payload = {"delta_edges": [-10.0, -7.0, -4.0, 5.0, 20.0]}
+        points = [{"delta_center": -4.0}, {"delta_center": 5.0}]
+        self.assertEqual(plots.canonical_delta_frame_limits(payload), (-10.0, 20.0))
+        self.assertEqual(plots.unity_line_limits(payload), (-10.0, 20.0))
+        self.assertEqual([point["delta_center"] for point in points], [-4.0, 5.0])
+
+    def test_common_y_ranges_include_all_error_bars_and_unity(self):
+        regional = {
+            "series": {
+                "pi_n": [{"Qtilde": 0.8, "Qtilde_uncertainty": 0.1}],
+                "pi_sidis": [{"Qtilde": 1.0, "Qtilde_uncertainty": 0.2}],
+                "pi_delta_high": [{"Qtilde": 1.7, "Qtilde_uncertainty": 0.3}],
+            },
+        }
+        ymin, ymax = plots.method_b_regional_frame_limits(regional)
+        self.assertLessEqual(ymin, 0.7)
+        self.assertGreaterEqual(ymax, 2.0)
+        self.assertLessEqual(ymin, 1.0)
+        self.assertGreaterEqual(ymax, 1.0)
+        a_min, a_max = plots.method_a_f_low_frame_limits([
+            {"f_low": 0.3, "f_low_low": 0.1, "f_low_high": 0.4},
+            {"f_low": 0.7, "f_low_low": 0.5, "f_low_high": 0.95},
+        ])
+        self.assertLessEqual(a_min, 0.1)
+        self.assertGreaterEqual(a_max, 0.95)
+
+    def test_renderer_retains_draw_objects_and_shape_poor_spelling(self):
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count("draw_objects"), 5)
+        self.assertIn("shape-poor veto", source)
+        self.assertNotIn("shape-pool veto", source)
+
     def test_category_labels_f_low_styles_and_annotation_are_explicit(self):
         self.assertEqual(set(plots._METHOD_A_SUPPORT_LABELS), {"supported", "marginal", "unsupported"})
         self.assertEqual(set(plots._METHOD_B_STATUS_LABELS), {"available", "marginal", "shape_inconsistent", "unavailable"})

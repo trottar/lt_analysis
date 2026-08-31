@@ -398,8 +398,63 @@ def method_b_regional_panels(payload):
 
 def unity_line_limits(payload):
     """Return the recorded full delta range for every reference-unity line."""
-    edges = list(_mapping(payload).get("delta_edges") or ())
+    return canonical_delta_frame_limits(payload)
+
+
+def canonical_delta_frame_limits(payload):
+    """Return the full recorded canonical delta domain for a plot frame."""
+    edges = _edges(payload, "delta_edges")
     return (edges[0], edges[-1]) if len(edges) >= 2 else (None, None)
+
+
+def display_y_range(points, value_key, uncertainty_key=None, *, include_values=()):
+    """Return a finite display range from stored values/errors without selection changes."""
+    limits = []
+    for point in points or ():
+        entry = _mapping(point)
+        value = _finite(entry.get(value_key))
+        if value is None:
+            continue
+        uncertainty = _finite(entry.get(uncertainty_key)) if uncertainty_key else None
+        uncertainty = abs(uncertainty) if uncertainty is not None else 0.0
+        limits.extend((value - uncertainty, value + uncertainty))
+    for value in include_values or ():
+        scalar = _finite(value)
+        if scalar is not None:
+            limits.append(scalar)
+    if not limits:
+        return (None, None)
+    lower, upper = min(limits), max(limits)
+    if upper == lower:
+        margin = max(abs(lower) * 0.05, 0.05)
+    else:
+        margin = 0.10 * (upper - lower)
+    return (lower - margin, upper + margin)
+
+
+def method_a_f_low_frame_limits(points):
+    """Use stored Method-A asymmetric intervals to make one parent frame."""
+    limits = []
+    for point in points or ():
+        value = _finite(_mapping(point).get("f_low"))
+        low = _finite(_mapping(point).get("f_low_low"))
+        high = _finite(_mapping(point).get("f_low_high"))
+        if None not in (value, low, high):
+            limits.append({"value": value, "uncertainty": max(abs(value - low), abs(high - value))})
+    return display_y_range(limits, "value", "uncertainty")
+
+
+def method_b_candidate_frame_limits(points):
+    """Use stored candidate intervals and retain the visible unity reference."""
+    return display_y_range(points, "candidate_L_B", "candidate_L_B_uncertainty", include_values=(1.0,))
+
+
+def method_b_regional_frame_limits(panel):
+    """Use every displayed stored regional interval for one parent-local frame."""
+    rows = []
+    for points in _mapping(panel).get("series", {}).values():
+        rows.extend(points or ())
+    return display_y_range(rows, "Qtilde", "Qtilde_uncertainty", include_values=(1.0,))
 
 
 def method_b_shape_rows(payload):
@@ -418,6 +473,39 @@ def method_b_shape_rows(payload):
     ]
 
 
+def canonical_parent_lambda_summary(parent_rows):
+    """Summarize only pre-existing canonical-parent K-Lambda display records."""
+    entries = []
+    for row in parent_rows or ():
+        entry = _mapping(row)
+        try:
+            t_index = int(entry.get("t_index"))
+        except (TypeError, ValueError):
+            continue
+        status = str(entry.get("status") or "not recorded").strip().lower()
+        entries.append({
+            "t_index": t_index,
+            "status": status or "not recorded",
+            "reason": entry.get("reason") or "not recorded",
+        })
+    entries.sort(key=lambda entry: entry["t_index"])
+    available = sum(entry["status"] in ("available", "ok", "pass", "passed") for entry in entries)
+    return {
+        "entries": entries,
+        "available": available,
+        "total": len(entries),
+        "unavailable": len(entries) - available,
+    }
+
+
+def _pass_fail_label(value):
+    if value is True:
+        return "PASS"
+    if value is False:
+        return "FAIL"
+    return "not recorded"
+
+
 def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_context=None, runtime_qa_context=None):
     """Collect existing setting-level coverage and QA state for terminal display."""
     phase = _mapping(phase_a)
@@ -425,6 +513,7 @@ def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_
     method_b_payload = method_b_plot_payload(method_b)
     context = _mapping(display_context)
     runtime = _mapping(runtime_qa_context)
+    lambda_summary = canonical_parent_lambda_summary(runtime.get("canonical_parent_k_lambda"))
     return {
         "method_a_coverage": dict(method_a_payload.get("support_counts") or {}),
         "method_b_coverage": dict(method_b_payload.get("method_status_counts") or {}),
@@ -438,9 +527,12 @@ def setting_qa_summary_payload(phase_a, method_a, method_b, part2=None, display_
         "proton_cleaning_committed": context.get("proton_cleaning_committed", "not recorded"),
         "aerogel_warnings": runtime.get("aerogel_warnings", "not available"),
         "proton_warnings": runtime.get("proton_warnings", "not available"),
+        "canonical_parent_k_lambda": lambda_summary,
         "k_lambda_comparison": runtime.get("k_lambda_comparison", "not available"),
+        "k_sigma0_protected_region": runtime.get("k_sigma0_protected_region", "not recorded"),
         "k_sigma0_availability": runtime.get("k_sigma0_availability", "not available"),
         "hgcer_diagnostic_availability": runtime.get("hgcer_diagnostic_availability", "not available"),
+        "renderer_failures": runtime.get("renderer_failures", "not available"),
         "part2_status": _mapping(part2).get("status") or "not available",
     }
 
@@ -451,6 +543,116 @@ def _has_recorded_warning(value):
     if isinstance(value, dict):
         return any(_has_recorded_warning(item) for item in value.values())
     return bool(value)
+
+
+def _status_category(value, *, required=False, optional=False):
+    token = str(value or "not recorded").strip().lower()
+    if token in ("available", "ok", "pass", "passed", "true"):
+        return "OK"
+    if token in ("not available", "not recorded", "", "none"):
+        return "INFORMATIONAL" if optional else ("WARNING" if required else "NOT_RECORDED")
+    if token in ("warning", "marginal", "insufficient_support", "bypass"):
+        return "WARNING"
+    if token in ("unavailable", "failed", "fail", "failure", "error"):
+        return "FAILURE" if required else "WARNING"
+    return "WARNING" if required else "NOT_RECORDED"
+
+
+def setting_qa_warning_states(qa, detached_warnings=()):
+    """Classify existing presentation states without adding scientific criteria."""
+    summary = _mapping(qa)
+    states = []
+
+    def add(label, category, detail):
+        if category != "OK":
+            states.append({"label": label, "category": category, "detail": detail})
+
+    add("Phase A", _status_category(summary.get("phase_a_coordinate_status"), required=True), summary.get("phase_a_coordinate_status"))
+    for label, value in (
+        ("Phase-A pion closure", summary.get("phase_a_pion_closure")),
+        ("Phase-A host closure", summary.get("phase_a_host_closure")),
+    ):
+        add(label, "OK" if value is True else ("FAILURE" if value is False else "WARNING"), _pass_fail_label(value))
+    if _has_recorded_warning(summary.get("aerogel_warnings")):
+        add("Aerogel diagnostics", "WARNING", _display_value(summary.get("aerogel_warnings")))
+    if _has_recorded_warning(summary.get("proton_warnings")):
+        add("Proton diagnostics", "WARNING", _display_value(summary.get("proton_warnings")))
+    add(
+        "HGCer diagnostics",
+        _status_category(summary.get("hgcer_diagnostic_availability"), required=True),
+        _display_value(summary.get("hgcer_diagnostic_availability")),
+    )
+    for parent in _mapping(summary.get("canonical_parent_k_lambda")).get("entries") or ():
+        category = _status_category(parent.get("status"), required=True)
+        add("Canonical-parent K-Lambda t{}".format(int(parent["t_index"]) + 1), category, parent.get("reason"))
+    if not _mapping(summary.get("canonical_parent_k_lambda")).get("entries"):
+        add("Canonical-parent K-Lambda", "WARNING", "not recorded")
+    if _has_recorded_warning(summary.get("renderer_failures")):
+        add("Required main-PDF renderer", "FAILURE", _display_value(summary.get("renderer_failures")))
+    k_sigma0_detail = "protected region={}; explicit template={}".format(
+        summary.get("k_sigma0_protected_region"), summary.get("k_sigma0_availability")
+    )
+    add("K-Sigma0 explicit template", "INFORMATIONAL", k_sigma0_detail)
+    for entry in detached_warnings or ():
+        item = _mapping(entry)
+        scope = str(item.get("scope") or "detached diagnostic")
+        status = str(item.get("status") or "not recorded").lower()
+        if scope == "Part 2":
+            category = "INFORMATIONAL"
+        elif scope in ("Method A", "Method B") and status == "marginal":
+            category = "INFORMATIONAL"
+        else:
+            category = _status_category(status, required=scope == "Phase A")
+        add(scope, category, item.get("reason") or "not recorded")
+    return states
+
+
+def setting_qa_summary_lines(qa, detached_warnings=()):
+    """Build the terminal QA text from stored display state and its classifier."""
+    summary = _mapping(qa)
+    lambda_summary = _mapping(summary.get("canonical_parent_k_lambda"))
+    lines = ["Setting-level coverage + QA summary"]
+    lines.extend((
+        "Host/proton state: host={}; Lambda gate={}; action={}; committed={}".format(
+            summary.get("phase_host_state"), summary.get("lambda_gate_status"),
+            summary.get("proton_action"), summary.get("proton_cleaning_committed"),
+        ),
+        "Phase A: status={}; pion closure={}; host closure={}".format(
+            summary.get("phase_a_coordinate_status"), _pass_fail_label(summary.get("phase_a_pion_closure")),
+            _pass_fail_label(summary.get("phase_a_host_closure")),
+        ),
+        "Method A coverage: {}".format(_display_value(summary.get("method_a_coverage"))),
+        "Method B coverage: {}".format(_display_value(summary.get("method_b_coverage"))),
+        "Canonical-parent K-Lambda QA: {} / {} available".format(
+            lambda_summary.get("available", 0), lambda_summary.get("total", 0),
+        ),
+    ))
+    for parent in lambda_summary.get("entries") or ():
+        lines.append("  t{}: {} — {}".format(int(parent["t_index"]) + 1, parent["status"], parent["reason"]))
+    lines.extend((
+        "K-Sigma0 protected region: {}; setting-wide explicit template: {}".format(
+            summary.get("k_sigma0_protected_region"), summary.get("k_sigma0_availability"),
+        ),
+        "Aerogel warnings: {}; proton warnings: {}; HGCer diagnostics: {}".format(
+            _display_value(summary.get("aerogel_warnings")), _display_value(summary.get("proton_warnings")),
+            _display_value(summary.get("hgcer_diagnostic_availability")),
+        ),
+        "Renderer failures: {}".format(_display_value(summary.get("renderer_failures"))),
+    ))
+    if summary.get("method_b_other_coverage"):
+        lines.append("Method B other recorded states: {}".format(_display_value(summary.get("method_b_other_coverage"))))
+    states = setting_qa_warning_states(summary, detached_warnings)
+    actionable = [state for state in states if state["category"] in ("WARNING", "FAILURE")]
+    if actionable:
+        lines.append("Outstanding setting-level QA states:")
+        lines.extend("{}: {} — {}".format(state["category"], state["label"], state["detail"]) for state in actionable)
+    else:
+        lines.append("No outstanding setting-level QA warnings.")
+    informational = [state for state in states if state["category"] in ("INFORMATIONAL", "NOT_RECORDED")]
+    if informational:
+        lines.append("Information:")
+        lines.extend("{}: {} — {}".format(state["category"], state["label"], state["detail"]) for state in informational)
+    return lines
 
 
 def warning_payload(phase_a, method_a, method_b, part2=None, extra=None):
@@ -572,6 +774,20 @@ def _clone_display(histogram, name):
         return None
 
 
+def _display_frame(ROOT, name, title, x_limits, y_limits, y_label):
+    """Create a detached ROOT frame with the prescribed visible ranges."""
+    xmin, xmax = x_limits
+    ymin, ymax = y_limits
+    if None in (xmin, xmax, ymin, ymax):
+        return None
+    frame = ROOT.TH1D(str(name), "{};SHMS delta;{}".format(title, y_label), 1, float(xmin), float(xmax))
+    frame.SetDirectory(0)
+    frame.SetStats(0)
+    frame.SetMinimum(float(ymin))
+    frame.SetMaximum(float(ymax))
+    return frame
+
+
 def _diagnostic_label(ROOT, *, candidate=False):
     """Create the mandatory visible detached-diagnostic label for a plot page."""
     label = ROOT.TPaveText(0.10, 0.90, 0.90, 0.985, "NDC")
@@ -623,11 +839,15 @@ def _draw_map_page(ROOT, pdf_name, page_id, title, payload, *, value_key, catego
             histogram.SetBinContent(xbin, ybin, value)
     canvas = ROOT.TCanvas("C_{}".format(page_id.replace(".", "_")), title, 1100, 800)
     try:
+        draw_objects = [histogram]
         histogram.Draw("colz text")
         label = _diagnostic_label(ROOT)
+        draw_objects.append(label)
         label.Draw()
         if category_codes is not None:
-            _category_legend(ROOT, category_labels or {}, category_codes).Draw()
+            legend = _category_legend(ROOT, category_labels or {}, category_codes)
+            draw_objects.append(legend)
+            legend.Draw()
         canvas.Print(pdf_name)
         manifest.append({"page_id": page_id, "scope": "setting", "authoritative": False})
         return True
@@ -647,7 +867,7 @@ def _draw_shape_quality_page(ROOT, pdf_name, title, payload, manifest):
         "chi2": ROOT.TH2D("H_hgcer_method_b_shape_chi2_{}".format(suffix), "stored shape chi2/ndf;SHMS delta;|t| [GeV^2]", len(delta_edges) - 1, array("d", delta_edges), len(t_edges) - 1, array("d", t_edges)),
         "pull": ROOT.TH2D("H_hgcer_method_b_shape_pull_{}".format(suffix), "stored maximum |pull|;SHMS delta;|t| [GeV^2]", len(delta_edges) - 1, array("d", delta_edges), len(t_edges) - 1, array("d", t_edges)),
         "status": ROOT.TH2D("H_hgcer_method_b_shape_status_{}".format(suffix), "shape status (0 unavailable, 1 marginal, 2 good, 3 poor);SHMS delta;|t| [GeV^2]", len(delta_edges) - 1, array("d", delta_edges), len(t_edges) - 1, array("d", t_edges)),
-        "veto": ROOT.TH2D("H_hgcer_method_b_shape_veto_{}".format(suffix), "stored candidate shape-pool veto (0 no, 1 veto);SHMS delta;|t| [GeV^2]", len(delta_edges) - 1, array("d", delta_edges), len(t_edges) - 1, array("d", t_edges)),
+        "veto": ROOT.TH2D("H_hgcer_method_b_shape_veto_{}".format(suffix), "stored candidate shape-poor veto (0 no, 1 veto);SHMS delta;|t| [GeV^2]", len(delta_edges) - 1, array("d", delta_edges), len(t_edges) - 1, array("d", t_edges)),
     }
     for histogram in maps.values():
         histogram.SetDirectory(0)
@@ -667,15 +887,22 @@ def _draw_shape_quality_page(ROOT, pdf_name, title, payload, manifest):
         maps["veto"].SetBinContent(xbin, ybin, 1.0 if row.get("shape_poor_veto") else 0.0)
     canvas = ROOT.TCanvas("C_hgcer_method_b_shape_quality", title, 1900, 650)
     try:
+        draw_objects = list(maps.values())
         canvas.Divide(4, 1)
         for pad, key in enumerate(("chi2", "pull", "status", "veto"), start=1):
             canvas.cd(pad)
             maps[key].Draw("colz text")
-            _diagnostic_label(ROOT).Draw()
+            label = _diagnostic_label(ROOT)
+            draw_objects.append(label)
+            label.Draw()
             if key == "status":
-                _category_legend(ROOT, _SHAPE_STATUS_LABELS, codes).Draw()
+                legend = _category_legend(ROOT, _SHAPE_STATUS_LABELS, codes)
+                draw_objects.append(legend)
+                legend.Draw()
             elif key == "veto":
-                _category_legend(ROOT, {"not_vetoed": "not vetoed", "shape_poor_veto": "shape-pool veto"}, {"not_vetoed": 0.0, "shape_poor_veto": 1.0}).Draw()
+                legend = _category_legend(ROOT, {"not_vetoed": "not vetoed", "shape_poor_veto": "shape-poor veto"}, {"not_vetoed": 0.0, "shape_poor_veto": 1.0})
+                draw_objects.append(legend)
+                legend.Draw()
         canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.method_b.shape_quality", "scope": "setting", "authoritative": False})
         return True
@@ -711,20 +938,43 @@ def _render_method_a_pages(pdf_name, checkpoint, method_a, manifest):
     _draw_map_page(ROOT=ROOT, pdf_name=pdf_name, page_id="hgcer.method_a.support", title=_title(setting, "Method A", "support map"), payload=payload, value_key="support_class", category_codes=category_codes, category_labels=_METHOD_A_SUPPORT_LABELS, manifest=manifest)
     canvas = ROOT.TCanvas("C_hgcer_method_a_f_low", _title(setting, "Method A", "f_low by canonical t"), 1200, 800)
     try:
+        draw_objects = []
         t_indices = sorted({int(cell.get("t_index")) for cell in payload["cells"] if _finite(cell.get("t_index")) is not None})
         canvas.Divide(max(1, min(len(t_indices), 4)), 1)
         plotted = False
+        points = method_a_f_low_points(payload)
+        delta_limits = canonical_delta_frame_limits(payload)
         for pad, t_index in enumerate(t_indices[:4], start=1):
             canvas.cd(pad)
+            parent_points = [point for point in points if int(point.get("t_index", -1)) == t_index]
+            y_limits = method_a_f_low_frame_limits(parent_points)
+            if not parent_points or None in delta_limits or None in y_limits:
+                message = ROOT.TLatex()
+                message.DrawLatexNDC(0.12, 0.55, "No supported or marginal f_low cells")
+                label = _diagnostic_label(ROOT)
+                label.Draw()
+                draw_objects.extend((message, label))
+                continue
+            frame = _display_frame(
+                ROOT,
+                "H_hgcer_method_a_f_low_frame_{}".format(t_index),
+                "{} t{}".format(_title(setting, "Method A", "f_low"), t_index + 1),
+                delta_limits,
+                y_limits,
+                "f_low",
+            )
+            draw_objects.append(frame)
+            frame.Draw("AXIS")
             legend = ROOT.TLegend(0.64, 0.72, 0.90, 0.88)
             legend.SetBorderSize(0)
             legend.SetFillStyle(0)
-            first = True
+            draw_objects.append(legend)
+            has_series = False
             for support_class in ("supported", "marginal"):
                 graph = ROOT.TGraphErrors()
-                graph.SetTitle("{} t{};SHMS delta;f_low".format(_title(setting, "Method A", "f_low"), t_index + 1))
+                draw_objects.append(graph)
                 point = 0
-                for point_data in method_a_f_low_points(payload):
+                for point_data in parent_points:
                     if int(point_data.get("t_index", -1)) != t_index or point_data.get("support_class") != support_class:
                         continue
                     value = point_data["f_low"]
@@ -733,17 +983,22 @@ def _render_method_a_pages(pdf_name, checkpoint, method_a, manifest):
                     point += 1
                 if point:
                     graph.SetMarkerStyle(method_a_f_low_style(support_class))
-                    graph.Draw("AP" if first else "P same")
+                    graph.Draw("P same")
                     legend.AddEntry(graph, support_class, "p")
-                    first = False
+                    has_series = True
                     plotted = True
-            if not first:
+            if has_series:
                 legend.Draw()
-                _diagnostic_label(ROOT).Draw()
+                label = _diagnostic_label(ROOT)
+                label.Draw()
+                draw_objects.append(label)
         if not plotted:
             canvas.cd(1)
-            ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "No supported or marginal f_low cells")
-            _diagnostic_label(ROOT).Draw()
+            message = ROOT.TLatex()
+            message.DrawLatexNDC(0.12, 0.55, "No supported or marginal f_low cells")
+            label = _diagnostic_label(ROOT)
+            label.Draw()
+            draw_objects.extend((message, label))
         canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.method_a.f_low", "scope": "setting", "authoritative": False})
         return True
@@ -764,17 +1019,39 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
 
     canvas = ROOT.TCanvas("C_hgcer_method_b_candidate", _title(setting, "Method B", "candidate L_B"), 1200, 800)
     try:
+        draw_objects = []
         t_indices = sorted({int(cell.get("t_index")) for cell in payload["cells"] if _finite(cell.get("t_index")) is not None})
         canvas.Divide(max(1, min(len(t_indices), 4)), 1)
         plotted = False
+        candidates = method_b_candidate_points(payload)
+        delta_limits = canonical_delta_frame_limits(payload)
         for pad, t_index in enumerate(t_indices[:4], start=1):
             canvas.cd(pad)
-            delta_min, delta_max = unity_line_limits(payload)
-            unity = ROOT.TLine(delta_min, 1.0, delta_max, 1.0) if delta_min is not None else None
+            parent_points = [point for point in candidates if int(point.get("t_index", -1)) == t_index]
+            y_limits = method_b_candidate_frame_limits(parent_points)
+            if not parent_points or None in delta_limits or None in y_limits:
+                message = ROOT.TLatex()
+                message.DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells")
+                label = _diagnostic_label(ROOT, candidate=True)
+                label.Draw()
+                draw_objects.extend((message, label))
+                continue
+            frame = _display_frame(
+                ROOT,
+                "H_hgcer_method_b_candidate_frame_{}".format(t_index),
+                "{} t{}".format(_title(setting, "Method B", "candidate L_B"), t_index + 1),
+                delta_limits,
+                y_limits,
+                "L_B candidate",
+            )
+            draw_objects.append(frame)
+            frame.Draw("AXIS")
+            unity = ROOT.TLine(delta_limits[0], 1.0, delta_limits[1], 1.0)
+            draw_objects.append(unity)
             graph = ROOT.TGraphErrors()
-            graph.SetTitle("{} t{};SHMS delta;L_B candidate".format(_title(setting, "Method B", "candidate"), t_index + 1))
+            draw_objects.append(graph)
             point = 0
-            for point_data in method_b_candidate_points(payload):
+            for point_data in parent_points:
                 if int(point_data.get("t_index", -1)) != t_index:
                     continue
                 value, sigma = point_data["candidate_L_B"], point_data["candidate_L_B_uncertainty"]
@@ -784,16 +1061,20 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
                 point += 1
             if point:
                 graph.SetMarkerStyle(20)
-                graph.Draw("AP")
-                if unity is not None:
-                    unity.SetLineStyle(2)
-                    unity.Draw("same")
-                _diagnostic_label(ROOT, candidate=True).Draw()
+                graph.Draw("P same")
+                unity.SetLineStyle(2)
+                unity.Draw("same")
+                label = _diagnostic_label(ROOT, candidate=True)
+                label.Draw()
+                draw_objects.append(label)
                 plotted = True
         if not plotted:
             canvas.cd(1)
-            ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells")
-            _diagnostic_label(ROOT, candidate=True).Draw()
+            message = ROOT.TLatex()
+            message.DrawLatexNDC(0.12, 0.55, "No available multi-region candidate cells")
+            label = _diagnostic_label(ROOT, candidate=True)
+            label.Draw()
+            draw_objects.extend((message, label))
         canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.method_b.candidate", "scope": "setting", "authoritative": False})
     finally:
@@ -802,18 +1083,40 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
     regional_panels = method_b_regional_panels(payload)
     regional_canvas = ROOT.TCanvas("C_hgcer_method_b_regional", _title(setting, "Method B", "regional closure"), 1500, 800)
     try:
+        draw_objects = []
         regions = ("pi_n", "pi_sidis", "pi_delta_high")
         regional_canvas.Divide(max(1, min(len(regional_panels), 4)), 1)
         plotted = False
         for pad, panel in enumerate(regional_panels[:4], start=1):
             regional_canvas.cd(pad)
+            delta_limits = canonical_delta_frame_limits(payload)
+            y_limits = method_b_regional_frame_limits(panel)
+            panel_points = [point for points in panel["series"].values() for point in points]
+            if not panel_points or None in delta_limits or None in y_limits:
+                message = ROOT.TLatex()
+                message.DrawLatexNDC(0.12, 0.55, "No stored available regional rows for this t parent")
+                label = _diagnostic_label(ROOT)
+                label.Draw()
+                draw_objects.extend((message, label))
+                continue
+            frame = _display_frame(
+                ROOT,
+                "H_hgcer_method_b_regional_frame_{}".format(panel["t_index"]),
+                "{} t{}".format(_title(setting, "Method B", "regional closure"), panel["t_index"] + 1),
+                delta_limits,
+                y_limits,
+                "Qtilde stored ratio",
+            )
+            draw_objects.append(frame)
+            frame.Draw("AXIS")
             legend = ROOT.TLegend(0.57, 0.68, 0.90, 0.89)
             legend.SetBorderSize(0)
             legend.SetFillStyle(0)
-            first = True
+            draw_objects.append(legend)
+            has_series = False
             for region_name, marker_style in zip(regions, (20, 24, 25)):
                 graph = ROOT.TGraphErrors()
-                graph.SetTitle("{} t{};SHMS delta;Qtilde stored ratio".format(_title(setting, "Method B", "regional closure"), panel["t_index"] + 1))
+                draw_objects.append(graph)
                 point = 0
                 for row in panel["series"][region_name]:
                     graph.SetPoint(point, row["delta_center"], row["Qtilde"])
@@ -821,25 +1124,26 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest):
                     point += 1
                 if point:
                     graph.SetMarkerStyle(marker_style)
-                    graph.Draw("AP" if first else "P same")
+                    graph.Draw("P same")
                     legend.AddEntry(graph, region_name, "p")
-                    first = False
+                    has_series = True
                     plotted = True
-            if not first:
-                delta_min, delta_max = unity_line_limits(payload)
-                if delta_min is not None:
-                    line = ROOT.TLine(delta_min, 1.0, delta_max, 1.0)
-                    line.SetLineStyle(2)
-                    line.Draw("same")
+            if has_series:
+                line = ROOT.TLine(delta_limits[0], 1.0, delta_limits[1], 1.0)
+                line.SetLineStyle(2)
+                draw_objects.append(line)
+                line.Draw("same")
                 legend.Draw()
-                _diagnostic_label(ROOT).Draw()
-            else:
-                ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "No stored available regional rows for this t parent")
-                _diagnostic_label(ROOT).Draw()
+                label = _diagnostic_label(ROOT)
+                label.Draw()
+                draw_objects.append(label)
         if not plotted:
             regional_canvas.cd(1)
-            ROOT.TLatex().DrawLatexNDC(0.12, 0.55, "No stored available regional rows")
-            _diagnostic_label(ROOT).Draw()
+            message = ROOT.TLatex()
+            message.DrawLatexNDC(0.12, 0.55, "No stored available regional rows")
+            label = _diagnostic_label(ROOT)
+            label.Draw()
+            draw_objects.extend((message, label))
         regional_canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.method_b.regional_closure", "scope": "setting", "authoritative": False})
     finally:
@@ -861,7 +1165,7 @@ def render_pion_hgcer_refinement_pages(pdf_name, checkpoint, *, phase_a=None, me
 
 
 def render_setting_warning_page(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, part2=None, phase_a_display_context=None, runtime_qa_context=None, page_manifest=None, close_pdf=False):
-    """Append the final non-OK state summary to an already-open main PDF."""
+    """Append the terminal setting-level QA summary to an already-open main PDF."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     warnings = warning_payload(phase_a, method_a, method_b, part2)
     qa = setting_qa_summary_payload(
@@ -870,20 +1174,7 @@ def render_setting_warning_page(pdf_name, checkpoint, *, phase_a=None, method_a=
         runtime_qa_context=runtime_qa_context,
     )
     setting = _mapping(_mapping(checkpoint).get("setting"))
-    lines = ["Setting-level coverage + QA warning summary"]
-    lines.append("Method A coverage: {}".format(_display_value(qa["method_a_coverage"])))
-    lines.append("Method B coverage: {}".format(_display_value(qa["method_b_coverage"])))
-    if qa["method_b_other_coverage"]:
-        lines.append("Method B other recorded states: {}".format(_display_value(qa["method_b_other_coverage"])))
-    lines.append("Phase A coordinate/closure: status={}; pion={}; host={}".format(qa["phase_a_coordinate_status"], qa["phase_a_pion_closure"], qa["phase_a_host_closure"]))
-    lines.append("Phase host: {}; Lambda gate: {}; proton action: {}; committed={}".format(qa["phase_host_state"], qa["lambda_gate_status"], qa["proton_action"], qa["proton_cleaning_committed"]))
-    lines.append("Aerogel warnings: {}; proton warnings: {}".format(_display_value(qa["aerogel_warnings"]), _display_value(qa["proton_warnings"])))
-    lines.append("K-Lambda comparison/fallback: {}".format(_display_value(qa["k_lambda_comparison"])))
-    lines.append("K-Sigma0 availability: {}; HGCer diagnostic availability: {}; Part 2: {}".format(_display_value(qa["k_sigma0_availability"]), _display_value(qa["hgcer_diagnostic_availability"]), qa["part2_status"]))
-    if not warnings and not _has_recorded_warning(qa["aerogel_warnings"]) and not _has_recorded_warning(qa["proton_warnings"]):
-        lines.append("No outstanding setting-level QA warnings.")
-    for entry in warnings:
-        lines.append("{} | status={} | reason={} | production impact={}".format(entry.get("scope"), entry.get("status"), entry.get("reason"), entry.get("production_impact")))
+    lines = setting_qa_summary_lines(qa, warnings)
     target_pdf = "{}".format(pdf_name) + ")" if close_pdf else pdf_name
     _print_text_page(target_pdf, "qa.setting_warnings", _title(setting, "Warnings", "detached diagnostic status"), lines, manifest)
     return manifest
@@ -902,7 +1193,12 @@ def proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_displa
         "method": result.get("method") or "not recorded",
         "canonical_t_binning": diagnostics.get("canonical_t_binning", "not recorded"),
         "shifted_t_consistency": diagnostics.get("cross_stage_t_consistency_summary", diagnostics.get("cross_stage_t_consistency", "not recorded")),
-        "numerical_closure": application_diagnostics.get("canonical_t_global_closure", diagnostics.get("timing_t_mm_diagnostics", "not recorded")),
+        "numerical_closure": {
+            "proposed_pre_rf_closure_passed": gate.get("proposed_pre_rf_closure_passed"),
+            "proposed_pre_rf_closure_difference": gate.get("proposed_pre_rf_closure_difference"),
+            "final_applied_closure_passed": gate.get("final_applied_closure_passed"),
+            "final_applied_pre_rf_closure_difference": gate.get("final_applied_pre_rf_closure_difference"),
+        },
         "global_closure": application_diagnostics.get("canonical_t_global_closure", "not recorded"),
         "lambda_gate_status": context.get("lambda_gate_status", gate.get("status", "not recorded")),
         "production_action": context.get("production_action", gate.get("production_action", application.get("production_action", "not recorded"))),
@@ -915,6 +1211,38 @@ def proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_displa
             "committed": application.get("H_MM_after_proton_cleaning_final_rf"),
         },
     }
+
+
+def proton_closure_summary_lines(qa):
+    """Format the two already-recorded proton closure types without merging them."""
+    payload = _mapping(qa)
+    numerical = _mapping(payload.get("numerical_closure"))
+    global_closure = _mapping(payload.get("global_closure"))
+    lines = [
+        "Numerical proton closure",
+        "proposed: {} | raw - proton - cleaned = {}".format(
+            _pass_fail_label(numerical.get("proposed_pre_rf_closure_passed")),
+            _display_value(numerical.get("proposed_pre_rf_closure_difference")),
+        ),
+        "committed/applied: {} | raw - proton - cleaned = {}".format(
+            _pass_fail_label(numerical.get("final_applied_closure_passed")),
+            _display_value(numerical.get("final_applied_pre_rf_closure_difference")),
+        ),
+        "Canonical-|t| global closure",
+    ]
+    labels = {
+        "raw": "raw",
+        "proton_estimate": "proton estimate",
+        "proton_cleaned_pre_rf": "cleaned pre-RF",
+        "final_post_rf": "final",
+    }
+    if global_closure:
+        for key, label in labels.items():
+            closure = _mapping(global_closure.get(key))
+            lines.append("{}: {}".format(label, _pass_fail_label(closure.get("passed"))))
+    else:
+        lines.append("not recorded")
+    return lines
 
 
 def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
@@ -935,9 +1263,11 @@ def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
         return _print_text_page(pdf_name, "proton.summary.committed_mm", _title(setting, "Proton", "committed shifted MM"), ("Final committed shifted MM overlay: not available", "Details remain in the proton-debug supplement."), manifest)
     canvas = ROOT.TCanvas("C_proton_main_committed_mm", _title(setting, "Proton", "committed shifted MM"), 1200, 800)
     try:
+        draw_objects = [histogram for _label, histogram, _color in display]
         legend = ROOT.TLegend(0.64, 0.68, 0.90, 0.89)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
+        draw_objects.append(legend)
         for index, (label, histogram, color) in enumerate(display):
             histogram.SetLineColor(color)
             histogram.SetLineWidth(2 if label == "committed shifted MM" else 1)
@@ -945,6 +1275,16 @@ def _render_proton_committed_mm_page(pdf_name, setting, qa, manifest):
             histogram.Draw("hist" if index == 0 else "hist same")
             legend.AddEntry(histogram, label, "l")
         legend.Draw()
+        missing = [label for key, label, _color in ordered if spectra.get(key) is None]
+        if missing:
+            annotation = ROOT.TPaveText(0.12, 0.78, 0.58, 0.89, "NDC")
+            annotation.SetFillStyle(0)
+            annotation.SetBorderSize(0)
+            annotation.SetTextAlign(12)
+            annotation.SetTextSize(0.022)
+            annotation.AddText("missing display states: {}".format(", ".join(missing)))
+            draw_objects.append(annotation)
+            annotation.Draw()
         canvas.Print(pdf_name)
         manifest.append({"page_id": "proton.summary.committed_mm", "scope": "setting", "authoritative": False})
         return True
@@ -957,14 +1297,20 @@ def render_proton_main_summary_pages(pdf_name, checkpoint, cleaning_result, clea
     manifest = page_manifest if isinstance(page_manifest, list) else []
     setting = _mapping(_mapping(checkpoint).get("setting"))
     qa = proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_display_context)
-    _print_text_page(pdf_name, "proton.summary.provenance_closure", _title(setting, "Proton", "provenance and closure"), (
+    closure_lines = (
         "status: {}; method: {}".format(qa["status"], qa["method"]),
         "canonical-t provenance/consistency: {}".format(_display_value(qa["canonical_t_binning"])),
         "shifted-t consistency: {}".format(_display_value(qa["shifted_t_consistency"])),
-        "numerical closure: {}".format(_display_value(qa["numerical_closure"])),
-        "global closure: {}".format(_display_value(qa["global_closure"])),
+    ) + tuple(proton_closure_summary_lines(qa)) + (
         "details are in the proton-debug supplement.",
-    ), manifest)
+    )
+    _print_text_page(
+        pdf_name,
+        "proton.summary.provenance_closure",
+        _title(setting, "Proton", "provenance and closure"),
+        closure_lines,
+        manifest,
+    )
     _render_proton_committed_mm_page(pdf_name, setting, qa, manifest)
     _print_text_page(pdf_name, "proton.summary.commitment", _title(setting, "Proton", "commitment summary"), (
         "Lambda gate: {}".format(qa["lambda_gate_status"]),
@@ -978,23 +1324,31 @@ def render_proton_main_summary_pages(pdf_name, checkpoint, cleaning_result, clea
 __all__ = (
     "build_pdf_destinations",
     "build_pdf_route_manifest",
+    "canonical_delta_frame_limits",
+    "canonical_parent_lambda_summary",
     "close_diagnostic_pdf",
     "method_a_f_low_points",
+    "method_a_f_low_frame_limits",
     "method_a_f_low_style",
     "method_a_plot_payload",
     "method_b_candidate_points",
+    "method_b_candidate_frame_limits",
     "method_b_plot_payload",
     "method_b_regional_panels",
+    "method_b_regional_frame_limits",
     "method_b_regional_rows",
     "method_b_shape_rows",
     "open_diagnostic_pdf",
     "phase_a_summary_payload",
     "proton_main_qa_payload",
+    "proton_closure_summary_lines",
     "refinement_annotation_lines",
     "render_pion_hgcer_refinement_pages",
     "render_proton_main_summary_pages",
     "render_setting_warning_page",
     "setting_qa_summary_payload",
+    "setting_qa_summary_lines",
+    "setting_qa_warning_states",
     "unity_line_limits",
     "warning_payload",
 )
