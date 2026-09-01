@@ -294,6 +294,11 @@ class SignalProtectedPiDeltaRenderingTests(unittest.TestCase):
             [overlay[0] for overlay in first_protected[2]],
             [self.objects["protected_gauge"]],
         )
+        gauge_legend = first_protected[2][0][1]
+        self.assertIn("immutable K-Lambda x selected anchor", gauge_legend)
+        self.assertNotIn("× selected anchor", gauge_legend)
+        self.assertNotIn("Ã", gauge_legend)
+        gauge_legend.encode("ascii")
         second_protected = overlay_pages[titles.index(protected_titles[1])]
         self.assertEqual(
             [overlay[0] for overlay in second_protected[2]],

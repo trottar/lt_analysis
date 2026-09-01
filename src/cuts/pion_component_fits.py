@@ -9631,7 +9631,7 @@ def _print_protected_pi_delta_pages(
         component_fit_result.get("H_pi_delta_protected_fit_input"),
         "R_{pre#Delta}",
         "{}K-Lambda pre-pi-delta gauge".format(title_prefix),
-        [(gauge_hist, "immutable K-Lambda × selected anchor", ROOT.kBlue + 1, 1)],
+        [(gauge_hist, "immutable K-Lambda x selected anchor", ROOT.kBlue + 1, 1)],
         [
             "scope: {}".format(scope),
             "K-Lambda template available={}".format(
