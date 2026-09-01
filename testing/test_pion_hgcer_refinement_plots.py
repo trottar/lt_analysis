@@ -633,8 +633,8 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIn("upstream noRF: PASS", lines)
         self.assertIn("No proton subtraction was applied.", lines)
 
-    def test_identity_host_main_qa_prefers_top_level_closure_and_falls_back_to_legacy(self):
-        top_level = {
+    def test_identity_host_main_qa_prefers_diagnostics_closure_and_falls_back_to_legacy(self):
+        diagnostics_closure = {
             "passed": True,
             "identity_transform_closure": {"passed": True},
             "upstream_noRF_closure": {"passed": True},
@@ -646,18 +646,37 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         }
         application = {
             "host_state": "identity_no_proton_cleaning",
-            "identity_host_closure": top_level,
-            "diagnostics": {"identity_host_closure": legacy},
+            "identity_host_closure": legacy,
+            "diagnostics": {"identity_host_closure": diagnostics_closure},
         }
         context = {"host_state": "identity_no_proton_cleaning"}
         qa = plots.proton_main_qa_payload({}, application, context)
-        self.assertIs(qa["identity_host_closure"], top_level)
+        self.assertIs(qa["identity_host_closure"], diagnostics_closure)
         self.assertIn("overall: PASS", plots.proton_closure_summary_lines(qa))
 
-        application.pop("identity_host_closure")
+        application["diagnostics"].pop("identity_host_closure")
         legacy_qa = plots.proton_main_qa_payload({}, application, context)
         self.assertIs(legacy_qa["identity_host_closure"], legacy)
         self.assertIn("overall: FAIL", plots.proton_closure_summary_lines(legacy_qa))
+
+    def test_identity_host_main_qa_does_not_infer_a_missing_closure(self):
+        qa = plots.proton_main_qa_payload(
+            {},
+            {
+                "host_state": "identity_no_proton_cleaning",
+                "diagnostics": {},
+            },
+            {
+                "host_state": "identity_no_proton_cleaning",
+                "production_action": "bypass",
+                "proton_cleaning_committed": False,
+            },
+        )
+        self.assertEqual(qa["identity_host_closure"], "not recorded")
+        lines = plots.proton_closure_summary_lines(qa)
+        self.assertIn("overall: not recorded", lines)
+        self.assertIn("identity-transform: not recorded", lines)
+        self.assertIn("upstream noRF: not recorded", lines)
 
     def test_proton_numerical_and_canonical_global_closures_remain_distinct(self):
         qa = plots.proton_main_qa_payload(

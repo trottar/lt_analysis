@@ -286,6 +286,203 @@ def _sum_identity_target_maps(products, field, scope):
     }
 
 
+def _identity_closure_target_map(application, field, owner):
+    targets = application.get(field)
+    if not isinstance(targets, dict):
+        raise EventContractUnavailable(
+            "identity_host_{}_targets_missing".format(owner)
+        )
+    required = {}
+    for key in ("h_mm", "h_mm_nosub"):
+        histogram = targets.get(key)
+        if histogram is None:
+            raise EventContractUnavailable(
+                "identity_host_{}_target_missing:{}".format(owner, key)
+            )
+        required[key] = histogram
+    return required
+
+
+def build_identity_host_closure_from_application(
+    application,
+    upstream_target_templates,
+    *,
+    tolerance=DEFAULT_CLOSURE_TOLERANCE
+):
+    """Audit an already-constructed identity host without rebuilding it."""
+    if not isinstance(application, dict):
+        raise EventContractUnavailable("identity_host_application_missing")
+    tolerance = float(tolerance)
+    global_targets = {
+        field: _identity_closure_target_map(application, field, field)
+        for field in (
+            "raw_targets",
+            "proton_targets",
+            "cleaned_targets_pre_rf",
+            "final_targets",
+        )
+    }
+    upstream_references = _identity_closure_target_map(
+        {"upstream_targets": upstream_target_templates},
+        "upstream_targets",
+        "upstream_noRF_reference",
+    )
+    upstream_fingerprints_before = {
+        key: fingerprint_histogram_content_error(reference)
+        for key, reference in upstream_references.items()
+    }
+    products = application.get("canonical_t_products")
+    if products is None:
+        products = ()
+    elif not isinstance(products, (list, tuple)):
+        raise EventContractUnavailable("identity_host_canonical_t_products_malformed")
+
+    per_t = []
+    for position, product in enumerate(products):
+        if not isinstance(product, dict):
+            raise EventContractUnavailable(
+                "identity_host_canonical_t_product_malformed:t{}".format(
+                    position + 1
+                )
+            )
+        product_targets = {
+            field: _identity_closure_target_map(
+                product, field, "canonical_t_{}_{}".format(position + 1, field)
+            )
+            for field in (
+                "raw_targets",
+                "proton_targets",
+                "cleaned_targets_pre_rf",
+                "final_targets",
+            )
+        }
+        full = _histogram_closure(
+            product_targets["final_targets"]["h_mm_nosub"],
+            product_targets["raw_targets"]["h_mm_nosub"],
+            tolerance,
+        )
+        cut = _histogram_closure(
+            product_targets["final_targets"]["h_mm"],
+            product_targets["raw_targets"]["h_mm"],
+            tolerance,
+        )
+        pre_rf_full = _histogram_closure(
+            product_targets["cleaned_targets_pre_rf"]["h_mm_nosub"],
+            product_targets["raw_targets"]["h_mm_nosub"],
+            tolerance,
+        )
+        pre_rf_cut = _histogram_closure(
+            product_targets["cleaned_targets_pre_rf"]["h_mm"],
+            product_targets["raw_targets"]["h_mm"],
+            tolerance,
+        )
+        per_t.append({
+            "t_index": product.get("t_index", position),
+            "t_edges": _json_ready(product.get("t_edges") or ()),
+            "passed": bool(
+                full["passed"]
+                and cut["passed"]
+                and pre_rf_full["passed"]
+                and pre_rf_cut["passed"]
+            ),
+            "full": full,
+            "cut": cut,
+            "pre_rf_full": pre_rf_full,
+            "pre_rf_cut": pre_rf_cut,
+        })
+
+    transform_closure = {
+        "per_t": per_t,
+        "global_full": _histogram_closure(
+            global_targets["final_targets"]["h_mm_nosub"],
+            global_targets["raw_targets"]["h_mm_nosub"],
+            tolerance,
+        ),
+        "global_cut": _histogram_closure(
+            global_targets["final_targets"]["h_mm"],
+            global_targets["raw_targets"]["h_mm"],
+            tolerance,
+        ),
+        "pre_rf_full": _histogram_closure(
+            global_targets["cleaned_targets_pre_rf"]["h_mm_nosub"],
+            global_targets["raw_targets"]["h_mm_nosub"],
+            tolerance,
+        ),
+        "pre_rf_cut": _histogram_closure(
+            global_targets["cleaned_targets_pre_rf"]["h_mm"],
+            global_targets["raw_targets"]["h_mm"],
+            tolerance,
+        ),
+    }
+    transform_closure["passed"] = bool(
+        all(entry["passed"] for entry in per_t)
+        and transform_closure["global_full"]["passed"]
+        and transform_closure["global_cut"]["passed"]
+        and transform_closure["pre_rf_full"]["passed"]
+        and transform_closure["pre_rf_cut"]["passed"]
+    )
+    upstream_noRF_closure = {
+        "full": {
+            "raw_vs_upstream": _histogram_closure(
+                global_targets["raw_targets"]["h_mm_nosub"],
+                upstream_references["h_mm_nosub"],
+                tolerance,
+            ),
+            "final_vs_upstream": _histogram_closure(
+                global_targets["final_targets"]["h_mm_nosub"],
+                upstream_references["h_mm_nosub"],
+                tolerance,
+            ),
+        },
+        "cut": {
+            "raw_vs_upstream": _histogram_closure(
+                global_targets["raw_targets"]["h_mm"],
+                upstream_references["h_mm"],
+                tolerance,
+            ),
+            "final_vs_upstream": _histogram_closure(
+                global_targets["final_targets"]["h_mm"],
+                upstream_references["h_mm"],
+                tolerance,
+            ),
+        },
+    }
+    upstream_failures = [
+        "{}/{}".format(selection, comparison)
+        for selection, comparisons in upstream_noRF_closure.items()
+        for comparison, closure in comparisons.items()
+        if not closure["passed"]
+    ]
+    upstream_fingerprints_after = {
+        key: fingerprint_histogram_content_error(reference)
+        for key, reference in upstream_references.items()
+    }
+    upstream_references_unchanged = bool(
+        upstream_fingerprints_before == upstream_fingerprints_after
+    )
+    upstream_noRF_closure.update({
+        "passed": not upstream_failures and upstream_references_unchanged,
+        "reference_source": "caller_supplied_preexisting_target_templates",
+        "reference_mapping": {
+            "h_mm_nosub": "nommcuts",
+            "h_mm": "allcuts",
+        },
+        "upstream_reference_fingerprints_before": upstream_fingerprints_before,
+        "upstream_reference_fingerprints_after": upstream_fingerprints_after,
+        "upstream_references_unchanged": upstream_references_unchanged,
+        "failed_comparisons": upstream_failures,
+    })
+    return {
+        "passed": bool(
+            transform_closure["passed"] and upstream_noRF_closure["passed"]
+        ),
+        "tolerance": tolerance,
+        "identity_transform_closure": transform_closure,
+        "upstream_noRF_closure": upstream_noRF_closure,
+        "global_constructed_strictly_from_per_t": bool(products),
+    }
+
+
 def _build_identity_no_proton_cleaning_application(
     *, proton_source_bundle, target_templates, t_edges, delta_edges,
     coordinate_fingerprint, proton_cleaning_result=None,
@@ -301,17 +498,6 @@ def _build_identity_no_proton_cleaning_application(
     prepared_sources = (proton_source_bundle or {}).get("prepared_sources") or {}
     if not prepared_sources:
         raise EventContractUnavailable("identity_host_prepared_sources_missing")
-    upstream_references = {
-        key: (target_templates or {}).get(key)
-        for key in ("h_mm", "h_mm_nosub")
-    }
-    if any(reference is None for reference in upstream_references.values()):
-        raise EventContractUnavailable("identity_host_upstream_noRF_reference_missing")
-    upstream_fingerprints_before = {
-        key: fingerprint_histogram_content_error(reference)
-        for key, reference in upstream_references.items()
-    }
-
     products = []
     for t_index in range(len(resolved_t_edges) - 1):
         scope = "identity_no_proton_cleaning_t{}".format(t_index + 1)
@@ -409,29 +595,12 @@ def _build_identity_no_proton_cleaning_application(
                 if allcuts:
                     targets["h_mm"].Fill(analysis_mm, coefficient)
 
-    per_t_closure = []
     for product in products:
-        full_closure = _histogram_closure(
-            product["final_targets"]["h_mm_nosub"],
-            product["raw_targets"]["h_mm_nosub"],
-            tolerance,
-        )
-        cut_closure = _histogram_closure(
-            product["final_targets"]["h_mm"],
-            product["raw_targets"]["h_mm"],
-            tolerance,
-        )
         product["final_output_fingerprint"] = (
             fingerprint_histogram_content_error(
                 product["final_targets"]["h_mm_nosub"]
             )
         )
-        product["identity_host_closure"] = {
-            "passed": bool(full_closure["passed"] and cut_closure["passed"]),
-            "full": full_closure,
-            "cut": cut_closure,
-        }
-        per_t_closure.append(product["identity_host_closure"])
 
     global_targets = {
         field: _sum_identity_target_maps(
@@ -441,77 +610,6 @@ def _build_identity_no_proton_cleaning_application(
             "raw_targets", "proton_targets", "cleaned_targets_pre_rf",
             "final_targets",
         )
-    }
-    transform_global_full = _histogram_closure(
-        global_targets["final_targets"]["h_mm_nosub"],
-        global_targets["raw_targets"]["h_mm_nosub"],
-        tolerance,
-    )
-    transform_global_cut = _histogram_closure(
-        global_targets["final_targets"]["h_mm"],
-        global_targets["raw_targets"]["h_mm"],
-        tolerance,
-    )
-    upstream_noRF_closure = {
-        "full": {
-            "raw_vs_upstream": _histogram_closure(
-                global_targets["raw_targets"]["h_mm_nosub"],
-                upstream_references["h_mm_nosub"],
-                tolerance,
-            ),
-            "final_vs_upstream": _histogram_closure(
-                global_targets["final_targets"]["h_mm_nosub"],
-                upstream_references["h_mm_nosub"],
-                tolerance,
-            ),
-        },
-        "cut": {
-            "raw_vs_upstream": _histogram_closure(
-                global_targets["raw_targets"]["h_mm"],
-                upstream_references["h_mm"],
-                tolerance,
-            ),
-            "final_vs_upstream": _histogram_closure(
-                global_targets["final_targets"]["h_mm"],
-                upstream_references["h_mm"],
-                tolerance,
-            ),
-        },
-    }
-    upstream_failures = [
-        "{}/{}".format(selection, comparison)
-        for selection, comparisons in upstream_noRF_closure.items()
-        for comparison, closure in comparisons.items()
-        if not closure["passed"]
-    ]
-    upstream_fingerprints_after = {
-        key: fingerprint_histogram_content_error(reference)
-        for key, reference in upstream_references.items()
-    }
-    upstream_references_unchanged = bool(
-        upstream_fingerprints_before == upstream_fingerprints_after
-    )
-    upstream_noRF_closure.update({
-        "passed": not upstream_failures and upstream_references_unchanged,
-        "reference_source": "caller_supplied_preexisting_target_templates",
-        "reference_mapping": {
-            "h_mm_nosub": "nommcuts",
-            "h_mm": "allcuts",
-        },
-        "upstream_reference_fingerprints_before": upstream_fingerprints_before,
-        "upstream_reference_fingerprints_after": upstream_fingerprints_after,
-        "upstream_references_unchanged": upstream_references_unchanged,
-        "failed_comparisons": upstream_failures,
-    })
-    transform_closure = {
-        "passed": bool(
-            all(entry["passed"] for entry in per_t_closure)
-            and transform_global_full["passed"]
-            and transform_global_cut["passed"]
-        ),
-        "per_t": per_t_closure,
-        "global_full": transform_global_full,
-        "global_cut": transform_global_cut,
     }
     result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
     result_diagnostics = result.get("diagnostics") or {}
@@ -533,30 +631,8 @@ def _build_identity_no_proton_cleaning_application(
         "source_target_state": "post_proton_noRF",
         "event_weight_source": "identity_no_proton_cleaning_prepared_noRF_lookup",
         "coordinate_fingerprint": coordinate,
-        "identity_host_closure": {
-            "passed": bool(
-                transform_closure["passed"]
-                and upstream_noRF_closure["passed"]
-            ),
-            "tolerance": tolerance,
-            "identity_transform_closure": transform_closure,
-            "upstream_noRF_closure": upstream_noRF_closure,
-            "global_constructed_strictly_from_per_t": True,
-        },
     }
-    if not upstream_references_unchanged:
-        raise EventContractUnavailable(
-            "identity_host_upstream_noRF_reference_mutated"
-        )
-    if not upstream_noRF_closure["passed"]:
-        raise EventContractUnavailable(
-            "identity_host_upstream_noRF_closure_failed:{}".format(
-                ",".join(upstream_failures)
-            )
-        )
-    if not transform_closure["passed"]:
-        raise EventContractUnavailable("identity_host_histogram_closure_failed")
-    return {
+    application = {
         "accepted": True,
         "host_state": "identity_no_proton_cleaning",
         "source_target_state": "post_proton_noRF",
@@ -571,6 +647,31 @@ def _build_identity_no_proton_cleaning_application(
         "immutable_record_contract": True,
         "diagnostics": diagnostics,
     }
+    closure = build_identity_host_closure_from_application(
+        application,
+        target_templates,
+        tolerance=tolerance,
+    )
+    for product, per_t_closure in zip(
+        application["canonical_t_products"],
+        closure["identity_transform_closure"]["per_t"],
+    ):
+        product["identity_host_closure"] = per_t_closure
+    application["diagnostics"]["identity_host_closure"] = closure
+    upstream_noRF_closure = closure["upstream_noRF_closure"]
+    if not upstream_noRF_closure["upstream_references_unchanged"]:
+        raise EventContractUnavailable(
+            "identity_host_upstream_noRF_reference_mutated"
+        )
+    if not upstream_noRF_closure["passed"]:
+        raise EventContractUnavailable(
+            "identity_host_upstream_noRF_closure_failed:{}".format(
+                ",".join(upstream_noRF_closure["failed_comparisons"])
+            )
+        )
+    if not closure["identity_transform_closure"]["passed"]:
+        raise EventContractUnavailable("identity_host_histogram_closure_failed")
+    return application
 
 
 def _new_metrics():
@@ -1125,6 +1226,48 @@ def _classify_committed_host_state(
     }
 
 
+def finalize_committed_host_application(
+    proton_cleaning_result,
+    proton_cleaning_application,
+    upstream_target_templates,
+    *,
+    tolerance=DEFAULT_CLOSURE_TOLERANCE
+):
+    """Record committed-host state and its required identity closure."""
+    if not isinstance(proton_cleaning_application, dict):
+        raise RuntimeError("identity_committed_host_closure_unavailable:application")
+    committed_host = _classify_committed_host_state(
+        proton_cleaning_result,
+        proton_cleaning_application,
+    )
+    proton_cleaning_application["host_state"] = committed_host["host_state"]
+    proton_cleaning_application["source_target_state"] = (
+        committed_host["source_target_state"]
+    )
+    proton_cleaning_application["rf_restoration_applied"] = (
+        committed_host["rf_restoration_applied"]
+    )
+    application_diagnostics = dict(
+        proton_cleaning_application.get("diagnostics") or {}
+    )
+    application_diagnostics.update(committed_host)
+    application_diagnostics["rf_applied"] = False
+    proton_cleaning_application["diagnostics"] = application_diagnostics
+    if committed_host["host_state"] == "identity_no_proton_cleaning":
+        try:
+            closure = build_identity_host_closure_from_application(
+                proton_cleaning_application,
+                upstream_target_templates,
+                tolerance=tolerance,
+            )
+        except EventContractUnavailable as exc:
+            raise RuntimeError(
+                "identity_committed_host_closure_unavailable:{}".format(exc)
+            ) from exc
+        application_diagnostics["identity_host_closure"] = closure
+    return committed_host
+
+
 def _resolve_host_state(proton_cleaning_result, proton_cleaning_application):
     result = proton_cleaning_result if isinstance(proton_cleaning_result, dict) else {}
     application = (
@@ -1676,6 +1819,8 @@ __all__ = (
     "EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION",
     "FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS",
     "_fingerprint_event_records",
+    "build_identity_host_closure_from_application",
     "build_pion_hgcer_event_contract",
+    "finalize_committed_host_application",
     "summarize_pion_hgcer_event_contract",
 )

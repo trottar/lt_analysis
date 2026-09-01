@@ -19,6 +19,7 @@ for relative_path in ("src/cuts", "src/utility"):
         sys.path.insert(0, path)
 
 import pion_hgcer_event_contract as event_contract
+import pion_hgcer_refinement_plots as refinement_plots
 
 try:
     import ROOT
@@ -488,6 +489,33 @@ class PhaseAEventContractTests(unittest.TestCase):
         ):
             return event_contract.build_pion_hgcer_event_contract(**fixture)
 
+    def _accepted_application_fixture(self, *, production_action):
+        fixture = self._fixture(identity_host=True)
+        application = copy.deepcopy(fixture["proton_cleaning_application"])
+        result = copy.deepcopy(fixture["proton_cleaning_result"])
+        upstream = copy.deepcopy(application["final_targets"])
+        application["accepted"] = True
+        application.pop("host_state", None)
+        application["rf_restoration_applied"] = False
+        application["raw_targets"] = copy.deepcopy(upstream)
+        application["proton_targets"] = copy.deepcopy(upstream)
+        application["cleaned_targets_pre_rf"] = copy.deepcopy(upstream)
+        for product in application["canonical_t_products"]:
+            final_targets = product["final_targets"]
+            product["raw_targets"] = copy.deepcopy(final_targets)
+            product["proton_targets"] = copy.deepcopy(final_targets)
+            product["cleaned_targets_pre_rf"] = copy.deepcopy(final_targets)
+        committed = production_action == "apply"
+        gate = {
+            "status": "pass" if committed else "fail",
+            "production_action": production_action,
+            "proton_cleaning_committed": committed,
+        }
+        application["diagnostics"]["lambda_preservation_gate"] = dict(gate)
+        result["accepted"] = True
+        result["diagnostics"]["lambda_preservation_gate"] = dict(gate)
+        return result, application, upstream
+
     def test_exact_event_identity_weight_source_accounting_and_closure(self):
         fixture = self._fixture()
         parent_ids_before = [id(parent) for parent in fixture["pion_parents"]]
@@ -754,6 +782,127 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertNotEqual(
             baseline["contract_fingerprint"], science_changed["contract_fingerprint"])
 
+    def test_identity_closure_from_existing_application_passes_exact_identity(self):
+        _result, application, upstream = self._accepted_application_fixture(
+            production_action="bypass"
+        )
+        before = {
+            key: event_contract.fingerprint_histogram_content_error(histogram)
+            for key, histogram in upstream.items()
+        }
+        closure = event_contract.build_identity_host_closure_from_application(
+            application, upstream
+        )
+        self.assertTrue(closure["passed"])
+        self.assertTrue(closure["identity_transform_closure"]["passed"])
+        self.assertTrue(closure["upstream_noRF_closure"]["passed"])
+        self.assertTrue(closure["global_constructed_strictly_from_per_t"])
+        self.assertTrue(all(
+            entry["passed"]
+            for entry in closure["identity_transform_closure"]["per_t"]
+        ))
+        self.assertTrue(
+            closure["upstream_noRF_closure"]["upstream_references_unchanged"]
+        )
+        self.assertEqual(before, {
+            key: event_contract.fingerprint_histogram_content_error(histogram)
+            for key, histogram in upstream.items()
+        })
+
+    def test_identity_closure_from_existing_application_detects_nonidentity(self):
+        _result, application, upstream = self._accepted_application_fixture(
+            production_action="bypass"
+        )
+        application["final_targets"]["h_mm_nosub"].contents[1] += 1.0
+        closure = event_contract.build_identity_host_closure_from_application(
+            application, upstream
+        )
+        self.assertFalse(closure["passed"])
+        self.assertFalse(closure["identity_transform_closure"]["passed"])
+        self.assertFalse(
+            closure["identity_transform_closure"]["global_full"]["passed"]
+        )
+
+    def test_accepted_timing_model_lambda_bypass_builds_identity_closure(self):
+        result, application, upstream = self._accepted_application_fixture(
+            production_action="bypass"
+        )
+        gate = result["diagnostics"]["lambda_preservation_gate"]
+        self.assertTrue(result["accepted"])
+        self.assertTrue(application["accepted"])
+        self.assertEqual(gate["status"], "fail")
+        self.assertEqual(gate["production_action"], "bypass")
+        self.assertFalse(gate["proton_cleaning_committed"])
+        self.assertNotIn("identity_host_closure", application)
+        self.assertNotIn("identity_host_closure", application["diagnostics"])
+        with mock.patch.object(
+            event_contract,
+            "_build_identity_no_proton_cleaning_application",
+            side_effect=AssertionError("accepted-bypass must not use identity builder"),
+        ):
+            committed_host = event_contract.finalize_committed_host_application(
+                result, application, upstream
+            )
+        closure = application["diagnostics"]["identity_host_closure"]
+        self.assertTrue(application["accepted"])
+        self.assertEqual(committed_host["host_state"], "identity_no_proton_cleaning")
+        self.assertTrue(closure["passed"])
+        self.assertTrue(closure["identity_transform_closure"]["passed"])
+        self.assertTrue(closure["upstream_noRF_closure"]["passed"])
+
+        qa = refinement_plots.proton_main_qa_payload(
+            result, application, committed_host
+        )
+        lines = refinement_plots.proton_main_summary_lines(qa)
+        for expected in (
+            "overall: PASS",
+            "identity-transform: PASS",
+            "upstream noRF: PASS",
+            "No proton subtraction was applied.",
+        ):
+            self.assertIn(expected, lines)
+        for forbidden in (
+            "overall: not recorded",
+            "identity-transform: not recorded",
+            "upstream noRF: not recorded",
+        ):
+            self.assertNotIn(forbidden, lines)
+
+    def test_accepted_timing_model_lambda_pass_stays_proton_cleaned(self):
+        result, application, upstream = self._accepted_application_fixture(
+            production_action="apply"
+        )
+        committed_host = event_contract.finalize_committed_host_application(
+            result, application, upstream
+        )
+        self.assertTrue(application["accepted"])
+        self.assertEqual(committed_host["host_state"], "proton_cleaned")
+        self.assertNotIn("identity_host_closure", application["diagnostics"])
+        qa = refinement_plots.proton_main_qa_payload(
+            result, application, committed_host
+        )
+        self.assertEqual(qa["closure_mode"], "proton_cleaned")
+
+    def test_committed_host_finalization_is_keyed_from_final_host_state(self):
+        event_source = (
+            REPO_ROOT / "src" / "cuts" / "pion_hgcer_event_contract.py"
+        ).read_text(encoding="utf-8")
+        start = event_source.index("def finalize_committed_host_application(")
+        end = event_source.index("\ndef _resolve_host_state(", start)
+        finalization = event_source[start:end]
+        self.assertIn(
+            'if committed_host["host_state"] == "identity_no_proton_cleaning":',
+            finalization,
+        )
+        self.assertNotIn("if not proton_cleaning_result", finalization)
+        self.assertNotIn("if not proton_cleaning_application", finalization)
+
+        rand_source = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("finalize_committed_host_application(", rand_source)
+        self.assertIn("component_targets,", rand_source)
+
     def test_identity_no_proton_cleaning_host_closes_with_unity_factors(self):
         contract = self._build(self._fixture(identity_host=True))
         self.assertTrue(contract["available"], contract.get("reason"))
@@ -776,14 +925,20 @@ class PhaseAEventContractTests(unittest.TestCase):
             key: event_contract.fingerprint_histogram_content_error(histogram)
             for key, histogram in templates.items()
         }
-        application = event_contract._build_identity_no_proton_cleaning_application(
-            proton_source_bundle=fixture["proton_source_bundle"],
-            target_templates=templates,
-            t_edges=fixture["canonical_binning"]["t_edges"],
-            delta_edges=fixture["pion_control_cache"]["delta_edges"],
-            coordinate_fingerprint="coordinate-phase-a",
-            proton_cleaning_result=fixture["proton_cleaning_result"],
-        )
+        with mock.patch.object(
+            event_contract,
+            "build_identity_host_closure_from_application",
+            wraps=event_contract.build_identity_host_closure_from_application,
+        ) as closure_builder:
+            application = event_contract._build_identity_no_proton_cleaning_application(
+                proton_source_bundle=fixture["proton_source_bundle"],
+                target_templates=templates,
+                t_edges=fixture["canonical_binning"]["t_edges"],
+                delta_edges=fixture["pion_control_cache"]["delta_edges"],
+                coordinate_fingerprint="coordinate-phase-a",
+                proton_cleaning_result=fixture["proton_cleaning_result"],
+            )
+        closure_builder.assert_called_once()
         self.assertTrue(application["accepted"])
         self.assertEqual(
             application["host_state"], "identity_no_proton_cleaning"

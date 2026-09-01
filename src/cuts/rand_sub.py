@@ -156,8 +156,8 @@ from pion_hgcer_diagnostics import (
 )
 from pion_hgcer_event_contract import (
     _build_identity_no_proton_cleaning_application,
-    _classify_committed_host_state,
     build_pion_hgcer_event_contract,
+    finalize_committed_host_application,
     summarize_pion_hgcer_event_contract,
 )
 from pion_hgcer_refinement_method_a import (
@@ -4759,24 +4759,10 @@ def rand_sub(
                                 proton_cleaning_result=proton_cleaning_result,
                             )
                         )
-                    committed_host = _classify_committed_host_state(
+                    committed_host = finalize_committed_host_application(
                         proton_cleaning_result,
                         proton_cleaning_application,
-                    )
-                    proton_cleaning_application["host_state"] = committed_host[
-                        "host_state"
-                    ]
-                    proton_cleaning_application["source_target_state"] = (
-                        "post_proton_noRF"
-                    )
-                    proton_cleaning_application["rf_restoration_applied"] = False
-                    application_diagnostics = dict(
-                        proton_cleaning_application.get("diagnostics") or {}
-                    )
-                    application_diagnostics.update(committed_host)
-                    application_diagnostics["rf_applied"] = False
-                    proton_cleaning_application["diagnostics"] = (
-                        application_diagnostics
+                        component_targets,
                     )
                     if coordinate_contract is not None:
                         proton_cleaning_application["kaon_data_coordinate"] = dict(

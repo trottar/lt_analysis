@@ -1431,9 +1431,10 @@ def proton_main_qa_payload(cleaning_result, cleaning_application, phase_a_displa
         }
         numerical_closure = "not recorded"
         global_closure = "not recorded"
-        identity_host_closure = application.get(
-            "identity_host_closure",
-            application_diagnostics.get("identity_host_closure", "not recorded"),
+        identity_host_closure = (
+            application_diagnostics.get("identity_host_closure")
+            or application.get("identity_host_closure")
+            or "not recorded"
         )
     else:
         spectra = {
