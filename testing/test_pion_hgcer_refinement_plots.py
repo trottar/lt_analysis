@@ -406,6 +406,29 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             ),
         )
 
+    def test_phase_d_central_frames_include_equality_and_full_delta_lattice(self):
+        above_unity = plots._phase_d_central_display_bounds((1.8, 1.9, 2.0), 1.0)
+        above_zero = plots._phase_d_central_display_bounds((0.6, 0.65, 0.7), 0.0)
+        below_zero = plots._phase_d_central_display_bounds((-0.8, -0.7, -0.6), 0.0)
+        zero_span = plots._phase_d_central_display_bounds((1.0, 1.0), 1.0)
+        lattice = {
+            "cells": [
+                {"delta_low": -20.0, "delta_high": -10.0},
+                {"delta_low": -10.0, "delta_high": 0.0},
+                {"delta_low": 0.0, "delta_high": 10.0},
+            ]
+        }
+
+        self.assertLessEqual(above_unity[0], 1.0)
+        self.assertGreaterEqual(above_unity[1], 2.0)
+        self.assertLessEqual(above_zero[0], 0.0)
+        self.assertGreaterEqual(above_zero[1], 0.7)
+        self.assertLessEqual(below_zero[0], -0.8)
+        self.assertGreaterEqual(below_zero[1], 0.0)
+        self.assertLess(zero_span[0], 1.0)
+        self.assertGreater(zero_span[1], 1.0)
+        self.assertEqual(plots._phase_d_group_delta_bounds(lattice), (-20.0, 10.0))
+
     def test_phase_d_renderers_annotate_and_keep_drawing_objects_alive(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
         overlay_start = source.index("def _phase_d_ab_overlay_page")
@@ -416,6 +439,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
 
         self.assertIn("_phase_d_overlay_display_bounds(group)", overlay_source)
         self.assertIn("frame.Draw(\"AXIS\")", overlay_source)
+        self.assertIn("frame.SetDirectory(0)", overlay_source)
         self.assertNotIn('graph_a.Draw("AP")', overlay_source)
         self.assertNotIn('graph_b.Draw("P SAME" if a_rows else "AP")', overlay_source)
         for renderer_source in (overlay_source, central_source):
@@ -424,6 +448,13 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             self.assertLess(renderer_source.index("keepalive.append"), renderer_source.index("canvas.Print(pdf_name)"))
         self.assertIn("keepalive.append(graph)", central_source)
         self.assertIn("keepalive.append(line)", central_source)
+        self.assertIn("keepalive.append(frame)", central_source)
+        self.assertIn("_phase_d_group_delta_bounds(group)", central_source)
+        self.assertIn("_phase_d_central_display_bounds(", central_source)
+        self.assertIn("frame.SetDirectory(0)", central_source)
+        self.assertIn("frame.Draw(\"AXIS\")", central_source)
+        self.assertNotIn('graph.Draw("AP")', central_source)
+        self.assertIn('graph.Draw("P SAME")', central_source)
         self.assertIn("_phase_d_annotation_lines()", central_source)
         self.assertIn("annotation.DrawLatexNDC", central_source)
 

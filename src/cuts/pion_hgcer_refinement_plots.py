@@ -264,6 +264,41 @@ def _phase_d_overlay_display_bounds(group):
     return lower - padding, upper + padding
 
 
+def _phase_d_central_display_bounds(values, reference):
+    """Return padded display bounds for stored central values and equality."""
+    finite_reference = _finite(reference)
+    if finite_reference is None:
+        raise ValueError("central display reference must be finite")
+    display_values = [
+        scalar
+        for value in values
+        for scalar in (_finite(value),)
+        if scalar is not None
+    ]
+    display_values.append(finite_reference)
+    lower = min(display_values)
+    upper = max(display_values)
+    span = upper - lower
+    padding = 0.05 * span if span > 0.0 else max(0.05 * abs(lower), 0.05)
+    return lower - padding, upper + padding
+
+
+def _phase_d_group_delta_bounds(group):
+    """Return the full stored delta lattice span for a Phase-D t-bin group."""
+    lower_edges = []
+    upper_edges = []
+    for source_row in _mapping(group).get("cells") or ():
+        row = _mapping(source_row)
+        delta_low = _finite(row.get("delta_low"))
+        delta_high = _finite(row.get("delta_high"))
+        if delta_low is not None and delta_high is not None:
+            lower_edges.append(delta_low)
+            upper_edges.append(delta_high)
+    if not lower_edges or not upper_edges:
+        raise ValueError("Phase-D group has no finite delta geometry")
+    return min(lower_edges), max(upper_edges)
+
+
 def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
     canvas = ROOT.TCanvas(
         "C_phase_d_ab_overlay_{}".format(group["t_index"]),
@@ -305,6 +340,7 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
             y_high,
         )
         frame.SetStats(0)
+        frame.SetDirectory(0)
         frame.Draw("AXIS")
         keepalive.append(frame)
         if a_rows:
@@ -380,22 +416,40 @@ def _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest):
         ]
         if rows:
             canvas.Divide(1, 2)
+            x_low, x_high = _phase_d_group_delta_bounds(group)
             for pad, key, title, reference in (
                 (1, "ratio_B_over_A", "B/A", 1.0),
                 (2, "log_ratio_B_over_A", "ln(B/A)", 0.0),
             ):
                 canvas.cd(pad)
+                y_low, y_high = _phase_d_central_display_bounds(
+                    (row["comparison"][key] for row in rows),
+                    reference,
+                )
+                frame = ROOT.TH2F(
+                    "H_phase_d_ab_central_frame_{}_{}".format(group["t_index"], pad),
+                    "{};delta;{}".format(_title(setting, "HGCer Phase D", title), title),
+                    1,
+                    x_low,
+                    x_high,
+                    1,
+                    y_low,
+                    y_high,
+                )
+                frame.SetStats(0)
+                frame.SetDirectory(0)
+                frame.Draw("AXIS")
+                keepalive.append(frame)
                 graph = ROOT.TGraph(len(rows))
                 for index, row in enumerate(rows):
                     graph.SetPoint(index, row["delta_center"], row["comparison"][key])
                 graph.SetMarkerStyle(20)
-                graph.SetTitle("{};delta;{}".format(_title(setting, "HGCer Phase D", title), title))
-                graph.Draw("AP")
+                graph.Draw("P SAME")
                 keepalive.append(graph)
                 line = ROOT.TLine(
-                    min(row["delta_low"] for row in group["cells"]),
+                    x_low,
                     reference,
-                    max(row["delta_high"] for row in group["cells"]),
+                    x_high,
                     reference,
                 )
                 line.SetLineStyle(2)
