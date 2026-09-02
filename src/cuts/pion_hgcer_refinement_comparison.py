@@ -14,6 +14,7 @@ import math
 
 
 COMPARISON_INPUT_SCHEMA_VERSION = "pion_hgcer_ab_comparison_input/v1"
+METHOD_A_COMPARISON_SCHEMA_VERSION = "pion_hgcer_method_a_comparison/v1"
 
 _CHECKPOINT_SCHEMA_VERSION = "pion_hgcer_refinement_checkpoint/v1"
 _PHASE_A_SCHEMA_VERSION = "pion_hgcer_event_contract/v1"
@@ -22,10 +23,55 @@ _METHOD_A_SCHEMA_VERSION = "pion_hgcer_method_a/v1"
 _METHOD_B_SCHEMA_VERSION = "pion_hgcer_method_b/v1"
 _HOST_STATES = {"proton_cleaned", "identity_no_proton_cleaning"}
 _SOURCE_TARGET_STATE = "post_proton_noRF"
+_METHOD_A_COMPARISON_METHOD = "method_a_same_t_comparison_representation"
+_METHOD_A_WILSON_Z_95 = 1.959963984540054
+_METHOD_A_PARENT_MINIMUM_DELTA_CELLS = 2
+_METHOD_A_SUPPORT_THRESHOLD_KEYS = (
+    "supported_positive_count",
+    "supported_low_count",
+    "supported_control_count",
+    "marginal_positive_count",
+    "minimum_control_count_for_ratio",
+    "minimum_low_count_for_ratio",
+)
+_METHOD_A_D2_CELL_FIELDS = (
+    "t_index",
+    "t_low",
+    "t_high",
+    "delta_index",
+    "delta_low",
+    "delta_high",
+    "prompt_positive_count",
+    "prompt_low_count",
+    "prompt_control_count",
+    "partition_closure_passed",
+    "f_low",
+    "f_low_low",
+    "f_low_high",
+    "R_low_control",
+    "R_low_control_low",
+    "R_low_control_high",
+    "signed_R_low_control",
+    "signed_R_low_control_sigma",
+    "prompt_vs_signed_status",
+    "nommcuts_vs_allcuts_status",
+    "support_class",
+    "method_A_status",
+    "method_A_reason",
+)
 
 
 class _ComparisonInputUnavailable(Exception):
     """Expected validation failure carrying the public reason and stage."""
+
+    def __init__(self, reason, stage):
+        super().__init__(reason)
+        self.reason = str(reason)
+        self.stage = str(stage)
+
+
+class _MethodAComparisonUnavailable(Exception):
+    """Expected D.2 validation failure carrying the public reason and stage."""
 
     def __init__(self, reason, stage):
         super().__init__(reason)
@@ -572,7 +618,607 @@ def _validate_method_b_cells(method, available, t_edges, delta_edges, host_state
     )
 
 
+def _method_a_comparison_unavailable(reason, stage, exception=None):
+    """Return the detached, Method-A-only D.2 failure shape."""
+    result = {
+        "schema_version": METHOD_A_COMPARISON_SCHEMA_VERSION,
+        "method": _METHOD_A_COMPARISON_METHOD,
+        "status": "unavailable",
+        "available": False,
+        "reason": str(reason),
+        "diagnostic_stage": str(stage),
+        "non_authoritative": True,
+        "method_b_numerical_dependency": False,
+        "comparison_performed": False,
+        "classification_performed": False,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+    }
+    if exception is not None:
+        result["exception_type"] = type(exception).__name__
+        result["exception_message"] = str(exception)
+    return result
+
+
+def _method_a_comparison_fail(reason, stage):
+    raise _MethodAComparisonUnavailable(reason, stage)
+
+
+def _d2_mapping(value, reason, stage):
+    if not isinstance(value, Mapping):
+        _method_a_comparison_fail(reason, stage)
+    return value
+
+
+def _d2_require_keys(mapping, keys, reason, stage):
+    if any(key not in mapping for key in keys):
+        _method_a_comparison_fail(reason, stage)
+
+
+def _d2_strict_edges(value, invalid_reason, stage):
+    if not isinstance(value, list) or len(value) < 2:
+        _method_a_comparison_fail(invalid_reason, stage)
+    previous = None
+    for edge in value:
+        if not _is_finite_number(edge):
+            _method_a_comparison_fail(invalid_reason, stage)
+        if previous is not None and edge <= previous:
+            _method_a_comparison_fail(invalid_reason, stage)
+        previous = edge
+    return value
+
+
+def _method_a_wilson_interval(successes, total):
+    """Return the exact Wilson-95 construction frozen by Method A."""
+    if total <= 0 or successes < 0 or successes > total:
+        return None, None
+    fraction = float(successes) / float(total)
+    z2 = _METHOD_A_WILSON_Z_95 * _METHOD_A_WILSON_Z_95
+    denominator = 1.0 + z2 / total
+    center = (fraction + z2 / (2.0 * total)) / denominator
+    spread = (
+        _METHOD_A_WILSON_Z_95
+        * math.sqrt(
+            fraction * (1.0 - fraction) / total + z2 / (4.0 * total * total)
+        )
+        / denominator
+    )
+    lower = 0.0 if successes == 0 else max(0.0, center - spread)
+    upper = 1.0 if successes == total else min(1.0, center + spread)
+    return lower, upper
+
+
+def _method_a_ratio_from_fraction(value):
+    if value is None or value >= 1.0:
+        return None
+    return float(value) / (1.0 - float(value))
+
+
+def _method_a_support_class(positive, low, control, thresholds):
+    if (
+        positive >= thresholds["supported_positive_count"]
+        and low >= thresholds["supported_low_count"]
+        and control >= thresholds["supported_control_count"]
+    ):
+        return "supported"
+    if (
+        positive >= thresholds["marginal_positive_count"]
+        and control >= thresholds["minimum_control_count_for_ratio"]
+        and low >= thresholds["minimum_low_count_for_ratio"]
+    ):
+        return "marginal"
+    return "unsupported"
+
+
+def _validate_method_a_comparison_input(contract):
+    """Validate and JSON-detach only the D.2 Method-A input projection."""
+    stage = "comparison_input_validation"
+    _d2_mapping(contract, "comparison_input_contract_invalid", stage)
+    _d2_require_keys(
+        contract,
+        (
+            "schema_version",
+            "status",
+            "available",
+            "source_checkpoint_payload_fingerprint",
+            "phase_a",
+            "method_a",
+            "canonical_t_edges",
+            "delta_edges",
+            "non_authoritative",
+            "comparison_performed",
+            "classification_performed",
+            "production_objects_mutated",
+            "refinement_applied",
+        ),
+        "comparison_input_contract_invalid",
+        stage,
+    )
+    if contract["schema_version"] != COMPARISON_INPUT_SCHEMA_VERSION:
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+    status = contract["status"]
+    available = contract["available"]
+    if not isinstance(status, str) or not isinstance(available, bool):
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+    if status == "unavailable" and available is False:
+        _method_a_comparison_fail("comparison_input_unavailable", stage)
+    if status != "available" or available is not True:
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+    if (
+        contract["non_authoritative"] is not True
+        or contract["comparison_performed"] is not False
+        or contract["classification_performed"] is not False
+        or contract["production_objects_mutated"] is not False
+        or contract["refinement_applied"] is not False
+    ):
+        _method_a_comparison_fail(
+            "comparison_input_authority_contract_invalid", "comparison_input_authority"
+        )
+    if not _nonempty_string(contract["source_checkpoint_payload_fingerprint"]):
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+
+    # This projection deliberately omits the D.1 Method-B subtree.  The
+    # serialized projection also provides all returned D.2 objects with their
+    # own JSON-safe, non-aliased storage.
+    projection = {
+        "source_checkpoint_payload_fingerprint": contract[
+            "source_checkpoint_payload_fingerprint"
+        ],
+        "phase_a": contract["phase_a"],
+        "method_a": contract["method_a"],
+        "canonical_t_edges": contract["canonical_t_edges"],
+        "delta_edges": contract["delta_edges"],
+    }
+    try:
+        return json.loads(_canonical_json(projection))
+    except (TypeError, ValueError, OverflowError):
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+
+
+def _validate_method_a_comparison_phase_a(phase):
+    stage = "phase_a_provenance"
+    phase = _d2_mapping(phase, "comparison_input_contract_invalid", stage)
+    contract_fingerprint = phase.get("contract_fingerprint")
+    if not _nonempty_string(contract_fingerprint):
+        _method_a_comparison_fail("phase_a_fingerprint_missing", stage)
+    coordinate_fingerprint = phase.get("coordinate_fingerprint")
+    if not _nonempty_string(coordinate_fingerprint):
+        _method_a_comparison_fail("coordinate_fingerprint_missing", stage)
+    summary = phase.get("summary")
+    if not isinstance(summary, Mapping):
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+    if (
+        summary.get("status") != "available"
+        or summary.get("available") is not True
+        or summary.get("contract_fingerprint") != contract_fingerprint
+        or summary.get("coordinate_fingerprint") != coordinate_fingerprint
+        or summary.get("schema_version") != _PHASE_A_SCHEMA_VERSION
+        or summary.get("fingerprint_schema_version")
+        != _PHASE_A_FINGERPRINT_SCHEMA_VERSION
+        or summary.get("pion_closure_passed") is not True
+        or summary.get("host_closure_passed") is not True
+        or summary.get("production_objects_mutated") is not False
+        or summary.get("refinement_applied") is not False
+        or summary.get("rf_restoration_applied") is not False
+    ):
+        _method_a_comparison_fail("comparison_input_contract_invalid", stage)
+    return contract_fingerprint, coordinate_fingerprint
+
+
+def _validate_method_a_comparison_thresholds(summary):
+    stage = "method_a_summary"
+    thresholds = summary.get("support_thresholds")
+    if not isinstance(thresholds, Mapping) or set(thresholds) != set(
+        _METHOD_A_SUPPORT_THRESHOLD_KEYS
+    ):
+        _method_a_comparison_fail("method_a_support_thresholds_invalid", stage)
+    for key in _METHOD_A_SUPPORT_THRESHOLD_KEYS:
+        value = thresholds[key]
+        if not _is_integer(value) or value < 0:
+            _method_a_comparison_fail("method_a_support_thresholds_invalid", stage)
+    return dict(thresholds)
+
+
+def _validate_method_a_comparison_summary(
+    method_a, phase_fingerprint, coordinate_fingerprint, t_edges, delta_edges
+):
+    stage = "method_a_provenance"
+    method_a = _d2_mapping(method_a, "method_a_summary_invalid", stage)
+    if method_a.get("status") == "unavailable" and method_a.get("available") is False:
+        _method_a_comparison_fail("method_a_unavailable", stage)
+    if method_a.get("status") != "available" or method_a.get("available") is not True:
+        _method_a_comparison_fail("method_a_summary_invalid", stage)
+    fingerprint = method_a.get("fingerprint")
+    if not _nonempty_string(fingerprint):
+        _method_a_comparison_fail("method_a_fingerprint_missing", stage)
+    summary = method_a.get("summary")
+    if not isinstance(summary, Mapping):
+        _method_a_comparison_fail("method_a_summary_invalid", "method_a_summary")
+    if (
+        summary.get("schema_version") != _METHOD_A_SCHEMA_VERSION
+        or summary.get("status") != "available"
+        or summary.get("available") is not True
+        or summary.get("fingerprint") != fingerprint
+        or summary.get("phase_a_contract_fingerprint") != phase_fingerprint
+        or summary.get("coordinate_fingerprint") != coordinate_fingerprint
+        or summary.get("production_objects_mutated") is not False
+        or summary.get("refinement_applied") is not False
+        or summary.get("rf_ct_required") is not False
+    ):
+        _method_a_comparison_fail("method_a_summary_invalid", "method_a_summary")
+    if summary.get("uncertainty_method") != "wilson_95_percent":
+        _method_a_comparison_fail(
+            "method_a_uncertainty_contract_invalid", "method_a_summary"
+        )
+    if not _serialized_equal(summary.get("t_edges"), t_edges) or not _serialized_equal(
+        summary.get("delta_edges"), delta_edges
+    ):
+        _method_a_comparison_fail("canonical_geometry_mismatch", "canonical_geometry")
+    return fingerprint, _validate_method_a_comparison_thresholds(summary)
+
+
+def _validate_method_a_comparison_geometry(cell, t_edges, delta_edges):
+    t_index = cell["t_index"]
+    delta_index = cell["delta_index"]
+    if (
+        not _is_integer(t_index)
+        or not _is_integer(delta_index)
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        _method_a_comparison_fail("canonical_geometry_mismatch", "canonical_geometry")
+
+
+def _validate_method_a_comparison_counts(cell):
+    for key in (
+        "prompt_positive_count",
+        "prompt_low_count",
+        "prompt_control_count",
+    ):
+        if not _is_integer(cell[key]) or cell[key] < 0:
+            _method_a_comparison_fail(
+                "method_a_cell_count_contract_invalid", "method_a_cells"
+            )
+    if (
+        cell["partition_closure_passed"] is not True
+        or cell["prompt_positive_count"]
+        != cell["prompt_low_count"] + cell["prompt_control_count"]
+    ):
+        _method_a_comparison_fail(
+            "method_a_cell_count_contract_invalid", "method_a_cells"
+        )
+
+
+def _validate_method_a_comparison_available_ratio(cell):
+    positive = cell["prompt_positive_count"]
+    low = cell["prompt_low_count"]
+    control = cell["prompt_control_count"]
+    if positive <= 0 or control <= 0:
+        _method_a_comparison_fail("method_a_cell_ratio_contract_invalid", "method_a_cells")
+    expected_f_low = float(low) / float(positive)
+    expected_f_low_low, expected_f_low_high = _method_a_wilson_interval(low, positive)
+    expected_ratio = float(low) / float(control)
+    expected_ratio_low = _method_a_ratio_from_fraction(expected_f_low_low)
+    expected_ratio_high = _method_a_ratio_from_fraction(expected_f_low_high)
+    values = (
+        cell["f_low"],
+        cell["f_low_low"],
+        cell["f_low_high"],
+        cell["R_low_control"],
+        cell["R_low_control_low"],
+        cell["R_low_control_high"],
+    )
+    if (
+        any(not _is_finite_number(value) for value in values)
+        or not 0.0 <= cell["f_low_low"] <= cell["f_low"] <= cell["f_low_high"] <= 1.0
+        or not 0.0
+        <= cell["R_low_control_low"]
+        <= cell["R_low_control"]
+        <= cell["R_low_control_high"]
+        or not _serialized_equal(cell["f_low"], expected_f_low)
+        or not _serialized_equal(cell["f_low_low"], expected_f_low_low)
+        or not _serialized_equal(cell["f_low_high"], expected_f_low_high)
+        or not _serialized_equal(cell["R_low_control"], expected_ratio)
+        or not _serialized_equal(cell["R_low_control_low"], expected_ratio_low)
+        or not _serialized_equal(cell["R_low_control_high"], expected_ratio_high)
+    ):
+        _method_a_comparison_fail("method_a_cell_ratio_contract_invalid", "method_a_cells")
+
+
+def _validate_method_a_comparison_cells(method_a, thresholds, t_edges, delta_edges):
+    stage = "method_a_cells"
+    cells = method_a.get("cells")
+    if not isinstance(cells, list):
+        _method_a_comparison_fail("method_a_cells_invalid", stage)
+    expected_count = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    if len(cells) != expected_count:
+        _method_a_comparison_fail("method_a_cell_count_contract_invalid", stage)
+    selected_cells = []
+    seen = set()
+    for cell in cells:
+        if not isinstance(cell, Mapping) or any(
+            key not in cell for key in _METHOD_A_D2_CELL_FIELDS
+        ):
+            _method_a_comparison_fail("method_a_cells_invalid", stage)
+        _validate_method_a_comparison_geometry(cell, t_edges, delta_edges)
+        coordinate = (cell["t_index"], cell["delta_index"])
+        if coordinate in seen:
+            _method_a_comparison_fail("method_a_cell_count_contract_invalid", stage)
+        seen.add(coordinate)
+        _validate_method_a_comparison_counts(cell)
+        support_class = _method_a_support_class(
+            cell["prompt_positive_count"],
+            cell["prompt_low_count"],
+            cell["prompt_control_count"],
+            thresholds,
+        )
+        if cell["support_class"] != support_class or cell["method_A_status"] not in {
+            "available",
+            "unavailable",
+        }:
+            _method_a_comparison_fail(
+                "method_a_cell_status_contract_invalid", stage
+            )
+        expected_status = "unavailable" if support_class == "unsupported" else "available"
+        if cell["method_A_status"] != expected_status:
+            _method_a_comparison_fail(
+                "method_a_cell_status_contract_invalid", stage
+            )
+        if cell["method_A_status"] == "available":
+            _validate_method_a_comparison_available_ratio(cell)
+        selected_cells.append({key: cell[key] for key in _METHOD_A_D2_CELL_FIELDS})
+    return sorted(selected_cells, key=lambda cell: (cell["t_index"], cell["delta_index"]))
+
+
+def _method_a_parent_reference(t_index, t_edges, cells, thresholds):
+    """Build one same-t aggregate prompt-count parent reference."""
+    contributors = [
+        cell
+        for cell in cells
+        if cell["method_A_status"] == "available"
+        and cell["support_class"] in {"supported", "marginal"}
+    ]
+    positive = sum(cell["prompt_positive_count"] for cell in contributors)
+    low = sum(cell["prompt_low_count"] for cell in contributors)
+    control = sum(cell["prompt_control_count"] for cell in contributors)
+    closure = positive == low + control
+    support_class = _method_a_support_class(positive, low, control, thresholds)
+    f_low = float(low) / float(positive) if positive > 0 else None
+    f_low_low, f_low_high = _method_a_wilson_interval(low, positive)
+    ratio = float(low) / float(control) if control > 0 else None
+    ratio_low = _method_a_ratio_from_fraction(f_low_low)
+    ratio_high = _method_a_ratio_from_fraction(f_low_high)
+    parent = {
+        "t_index": t_index,
+        "t_low": t_edges[t_index],
+        "t_high": t_edges[t_index + 1],
+        "contributing_delta_indices": [
+            cell["delta_index"] for cell in contributors
+        ],
+        "contributing_delta_cell_count": len(contributors),
+        "supported_contributing_cell_count": sum(
+            cell["support_class"] == "supported" for cell in contributors
+        ),
+        "marginal_contributing_cell_count": sum(
+            cell["support_class"] == "marginal" for cell in contributors
+        ),
+        "prompt_positive_count": positive,
+        "prompt_low_count": low,
+        "prompt_control_count": control,
+        "partition_closure_passed": closure,
+        "f_low": f_low,
+        "f_low_low": f_low_low,
+        "f_low_high": f_low_high,
+        "R_low_control": ratio,
+        "R_low_control_low": ratio_low,
+        "R_low_control_high": ratio_high,
+        "support_class": support_class,
+        "parent_reference_status": "unavailable",
+        "parent_reference_reason": None,
+        "uncertainty_method": "wilson_95_percent_aggregated_prompt_counts",
+        "minimum_contributing_delta_cells": _METHOD_A_PARENT_MINIMUM_DELTA_CELLS,
+    }
+    if len(contributors) < _METHOD_A_PARENT_MINIMUM_DELTA_CELLS:
+        parent["parent_reference_reason"] = "insufficient_contributing_delta_cells"
+    elif support_class == "unsupported":
+        parent["parent_reference_reason"] = "parent_support_insufficient"
+    elif not closure or low <= 0 or control <= 0 or ratio is None or ratio <= 0.0:
+        parent["parent_reference_reason"] = "parent_reference_nonpositive"
+    elif (
+        not _is_finite_number(ratio_low)
+        or not _is_finite_number(ratio_high)
+        or ratio_low <= 0.0
+        or ratio_low > ratio
+        or ratio > ratio_high
+    ):
+        parent["parent_reference_reason"] = "parent_interval_invalid"
+    elif support_class == "supported":
+        parent["parent_reference_status"] = "available"
+    else:
+        parent["parent_reference_status"] = "marginal"
+    return parent
+
+
+def _method_a_comparison_cells(cells, parents):
+    parent_by_t_index = {parent["t_index"]: parent for parent in parents}
+    result = []
+    for source_cell in cells:
+        parent = parent_by_t_index[source_cell["t_index"]]
+        cell = dict(source_cell)
+        cell.update(
+            {
+                "parent_reference_R_low_control": parent["R_low_control"],
+                "parent_reference_R_low_control_low": parent["R_low_control_low"],
+                "parent_reference_R_low_control_high": parent["R_low_control_high"],
+                "parent_reference_status": parent["parent_reference_status"],
+                "method_a_comparison_candidate": None,
+                "method_a_comparison_candidate_low": None,
+                "method_a_comparison_candidate_high": None,
+                "method_a_comparison_candidate_status": "unavailable",
+                "method_a_comparison_candidate_reason": None,
+                "candidate_interval_method": None,
+                "candidate_covariance_treatment": None,
+            }
+        )
+        if source_cell["method_A_status"] != "available":
+            cell["method_a_comparison_candidate_reason"] = "cell_support_insufficient"
+        elif parent["parent_reference_status"] == "unavailable":
+            cell["method_a_comparison_candidate_reason"] = (
+                parent["parent_reference_reason"] or "parent_reference_unavailable"
+            )
+        elif (
+            parent["R_low_control"] is None
+            or parent["R_low_control"] <= 0.0
+        ):
+            cell["method_a_comparison_candidate_reason"] = "parent_reference_nonpositive"
+        elif (
+            parent["R_low_control_low"] is None
+            or parent["R_low_control_low"] <= 0.0
+            or parent["R_low_control_high"] is None
+        ):
+            cell["method_a_comparison_candidate_reason"] = "parent_interval_invalid"
+        else:
+            cell["method_a_comparison_candidate"] = (
+                source_cell["R_low_control"] / parent["R_low_control"]
+            )
+            cell["method_a_comparison_candidate_low"] = (
+                source_cell["R_low_control_low"] / parent["R_low_control_high"]
+            )
+            cell["method_a_comparison_candidate_high"] = (
+                source_cell["R_low_control_high"] / parent["R_low_control_low"]
+            )
+            cell["method_a_comparison_candidate_status"] = (
+                "available"
+                if (
+                    source_cell["support_class"] == "supported"
+                    and parent["parent_reference_status"] == "available"
+                )
+                else "marginal"
+            )
+            cell["candidate_interval_method"] = "ratio_envelope_from_wilson_bounds"
+            cell["candidate_covariance_treatment"] = (
+                "shared_parent_covariance_not_modeled"
+            )
+        result.append(cell)
+    return result
+
+
+def build_pion_hgcer_method_a_comparison(comparison_input_contract):
+    """Build a detached same-t Method-A comparison representation.
+
+    This consumes an already successful D.1 snapshot and uses no Method-B
+    value.  It creates a descriptive parent-relative view of the frozen
+    Method-A low/control observable without changing any upstream object.
+    """
+    if not isinstance(comparison_input_contract, Mapping):
+        return _method_a_comparison_unavailable(
+            "comparison_input_contract_invalid", "comparison_input_validation"
+        )
+    try:
+        snapshot = _validate_method_a_comparison_input(comparison_input_contract)
+        phase_fingerprint, coordinate_fingerprint = _validate_method_a_comparison_phase_a(
+            snapshot["phase_a"]
+        )
+        t_edges = _d2_strict_edges(
+            snapshot["canonical_t_edges"],
+            "canonical_geometry_invalid",
+            "canonical_geometry",
+        )
+        delta_edges = _d2_strict_edges(
+            snapshot["delta_edges"], "canonical_geometry_invalid", "canonical_geometry"
+        )
+        method_a_fingerprint, thresholds = _validate_method_a_comparison_summary(
+            snapshot["method_a"],
+            phase_fingerprint,
+            coordinate_fingerprint,
+            t_edges,
+            delta_edges,
+        )
+        cells = _validate_method_a_comparison_cells(
+            snapshot["method_a"], thresholds, t_edges, delta_edges
+        )
+        parents = [
+            _method_a_parent_reference(
+                t_index,
+                t_edges,
+                [cell for cell in cells if cell["t_index"] == t_index],
+                thresholds,
+            )
+            for t_index in range(len(t_edges) - 1)
+        ]
+        comparison_cells = _method_a_comparison_cells(cells, parents)
+        source_method_a_payload_fingerprint = hashlib.sha256(
+            _canonical_json(snapshot["method_a"]).encode("ascii")
+        ).hexdigest()
+        parent_definition = "same_t_aggregate_prompt_low_control_counts"
+        uncertainty_definition = "wilson_95_percent_aggregated_prompt_counts"
+        candidate_definition = "same_t_parent_ratio_with_ratio_envelope_bounds"
+        fingerprint_inputs = {
+            "schema_version": METHOD_A_COMPARISON_SCHEMA_VERSION,
+            "method": _METHOD_A_COMPARISON_METHOD,
+            "phase_a_contract_fingerprint": phase_fingerprint,
+            "coordinate_fingerprint": coordinate_fingerprint,
+            "method_a_fingerprint": method_a_fingerprint,
+            "source_method_a_payload_fingerprint": source_method_a_payload_fingerprint,
+            "canonical_t_edges": t_edges,
+            "delta_edges": delta_edges,
+            "minimum_parent_delta_cells": _METHOD_A_PARENT_MINIMUM_DELTA_CELLS,
+            "support_thresholds": thresholds,
+            "parent_definition": parent_definition,
+            "uncertainty_definition": uncertainty_definition,
+            "candidate_definition": candidate_definition,
+        }
+        fingerprint = hashlib.sha256(
+            _canonical_json(fingerprint_inputs).encode("ascii")
+        ).hexdigest()
+        return {
+            "schema_version": METHOD_A_COMPARISON_SCHEMA_VERSION,
+            "method": _METHOD_A_COMPARISON_METHOD,
+            "status": "available",
+            "available": True,
+            "reason": None,
+            "diagnostic_stage": "complete",
+            "source_checkpoint_payload_fingerprint": snapshot[
+                "source_checkpoint_payload_fingerprint"
+            ],
+            "source_method_a_payload_fingerprint": source_method_a_payload_fingerprint,
+            "phase_a_contract_fingerprint": phase_fingerprint,
+            "coordinate_fingerprint": coordinate_fingerprint,
+            "method_a_fingerprint": method_a_fingerprint,
+            "canonical_t_edges": t_edges,
+            "delta_edges": delta_edges,
+            "support_thresholds": thresholds,
+            "parent_definition": parent_definition,
+            "uncertainty_definition": uncertainty_definition,
+            "candidate_definition": candidate_definition,
+            "parent_references": parents,
+            "cells": comparison_cells,
+            "fingerprint_inputs": fingerprint_inputs,
+            "fingerprint": fingerprint,
+            "non_authoritative": True,
+            "method_b_numerical_dependency": False,
+            "comparison_performed": False,
+            "classification_performed": False,
+            "production_objects_mutated": False,
+            "refinement_applied": False,
+        }
+    except _MethodAComparisonUnavailable as exc:
+        return _method_a_comparison_unavailable(exc.reason, exc.stage)
+    except Exception as exc:
+        return _method_a_comparison_unavailable(
+            "unexpected_method_a_comparison_build_failure",
+            "unexpected_exception",
+            exception=exc,
+        )
+
+
 __all__ = (
     "COMPARISON_INPUT_SCHEMA_VERSION",
+    "METHOD_A_COMPARISON_SCHEMA_VERSION",
     "build_pion_hgcer_comparison_input_contract",
+    "build_pion_hgcer_method_a_comparison",
 )

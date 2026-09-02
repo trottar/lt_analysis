@@ -23,6 +23,15 @@ import pion_hgcer_refinement_comparison as comparison
 
 T_EDGES = [0.0, 1.0, 2.0]
 DELTA_EDGES = [0.0, 10.0, 20.0]
+METHOD_A_SUPPORT_THRESHOLDS = {
+    "supported_positive_count": 25,
+    "supported_low_count": 5,
+    "supported_control_count": 5,
+    "marginal_positive_count": 10,
+    "minimum_control_count_for_ratio": 1,
+    "minimum_low_count_for_ratio": 0,
+}
+WILSON_Z_95 = 1.959963984540054
 
 
 def _cells(method, host_state):
@@ -76,6 +85,102 @@ def _phase_a_summary(host_state):
     }
 
 
+def _wilson_interval(successes, total):
+    fraction = float(successes) / float(total)
+    z2 = WILSON_Z_95 * WILSON_Z_95
+    denominator = 1.0 + z2 / total
+    center = (fraction + z2 / (2.0 * total)) / denominator
+    spread = (
+        WILSON_Z_95
+        * (
+            fraction * (1.0 - fraction) / total
+            + z2 / (4.0 * total * total)
+        )
+        ** 0.5
+        / denominator
+    )
+    return (
+        0.0 if successes == 0 else max(0.0, center - spread),
+        1.0 if successes == total else min(1.0, center + spread),
+    )
+
+
+def _method_a_support_class(positive, low, control):
+    if (
+        positive >= METHOD_A_SUPPORT_THRESHOLDS["supported_positive_count"]
+        and low >= METHOD_A_SUPPORT_THRESHOLDS["supported_low_count"]
+        and control >= METHOD_A_SUPPORT_THRESHOLDS["supported_control_count"]
+    ):
+        return "supported"
+    if (
+        positive >= METHOD_A_SUPPORT_THRESHOLDS["marginal_positive_count"]
+        and control >= METHOD_A_SUPPORT_THRESHOLDS["minimum_control_count_for_ratio"]
+        and low >= METHOD_A_SUPPORT_THRESHOLDS["minimum_low_count_for_ratio"]
+    ):
+        return "marginal"
+    return "unsupported"
+
+
+def _method_a_cell(t_index, delta_index, positive, low, control, host_state):
+    support_class = _method_a_support_class(positive, low, control)
+    available = support_class != "unsupported"
+    f_low = float(low) / float(positive) if positive else None
+    f_low_low, f_low_high = _wilson_interval(low, positive) if positive else (None, None)
+    ratio = float(low) / float(control) if control else None
+    ratio_low = (
+        f_low_low / (1.0 - f_low_low)
+        if f_low_low is not None and f_low_low < 1.0
+        else None
+    )
+    ratio_high = (
+        f_low_high / (1.0 - f_low_high)
+        if f_low_high is not None and f_low_high < 1.0
+        else None
+    )
+    return {
+        "t_index": t_index,
+        "delta_index": delta_index,
+        "t_low": T_EDGES[t_index],
+        "t_high": T_EDGES[t_index + 1],
+        "delta_low": DELTA_EDGES[delta_index],
+        "delta_high": DELTA_EDGES[delta_index + 1],
+        "host_state": host_state,
+        "method": "method_a",
+        "synthetic_observation": 10 * t_index + delta_index,
+        "prompt_positive_count": positive,
+        "prompt_low_count": low,
+        "prompt_control_count": control,
+        "partition_closure_passed": positive == low + control,
+        "f_low": f_low,
+        "f_low_low": f_low_low if available else None,
+        "f_low_high": f_low_high if available else None,
+        "R_low_control": ratio,
+        "R_low_control_low": ratio_low if available else None,
+        "R_low_control_high": ratio_high if available else None,
+        "signed_R_low_control": ratio + 0.125 if ratio is not None else None,
+        "signed_R_low_control_sigma": 0.25 if ratio is not None else None,
+        "prompt_vs_signed_status": "consistent",
+        "nommcuts_vs_allcuts_status": "consistent",
+        "support_class": support_class,
+        "method_A_status": "available" if available else "unavailable",
+        "method_A_reason": None if available else "support_insufficient",
+    }
+
+
+def _method_a_cells(host_state, counts=None):
+    counts = counts or (
+        (30, 10, 20),
+        (20, 0, 20),
+        (30, 15, 15),
+        (20, 5, 15),
+    )
+    return [
+        _method_a_cell(t_index, delta_index, *counts[2 * t_index + delta_index], host_state)
+        for t_index in range(len(T_EDGES) - 1)
+        for delta_index in range(len(DELTA_EDGES) - 1)
+    ]
+
+
 def _method_a(status, host_state):
     available = status == "available"
     return {
@@ -84,7 +189,7 @@ def _method_a(status, host_state):
         "reason": None if available else "synthetic_method_a_unavailable",
         "fingerprint": "method-a-fingerprint" if available else None,
         "host_state": host_state,
-        "cells": _cells("method_a", host_state) if available else [],
+        "cells": _method_a_cells(host_state) if available else [],
     }
 
 
@@ -92,12 +197,15 @@ def _method_a_summary(status, host_state):
     available = status == "available"
     return {
         "schema_version": "pion_hgcer_method_a/v1",
+        "method": "observed_positive_hgcer_response",
         "status": status,
         "available": available,
         "reason": None if available else "synthetic_method_a_unavailable",
         "fingerprint": "method-a-fingerprint" if available else None,
         "phase_a_contract_fingerprint": "phase-a-contract-fingerprint",
         "coordinate_fingerprint": "phase-a-coordinate-fingerprint",
+        "uncertainty_method": "wilson_95_percent",
+        "support_thresholds": dict(METHOD_A_SUPPORT_THRESHOLDS),
         "t_edges": list(T_EDGES) if available else [],
         "delta_edges": list(DELTA_EDGES) if available else [],
         "production_objects_mutated": False,
@@ -544,6 +652,480 @@ class PionHGCerRefinementComparisonTests(unittest.TestCase):
         ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
+
+
+class PionHGCerMethodAComparisonTests(unittest.TestCase):
+    def _comparison_input(self, **checkpoint_kwargs):
+        result = comparison.build_pion_hgcer_comparison_input_contract(
+            _checkpoint(**checkpoint_kwargs)
+        )
+        self.assertTrue(result["available"])
+        return result
+
+    def _assert_unavailable(self, payload, reason, stage=None):
+        result = comparison.build_pion_hgcer_method_a_comparison(payload)
+        self.assertEqual(
+            result["schema_version"], comparison.METHOD_A_COMPARISON_SCHEMA_VERSION
+        )
+        self.assertEqual(result["method"], "method_a_same_t_comparison_representation")
+        self.assertEqual(result["status"], "unavailable")
+        self.assertFalse(result["available"])
+        self.assertEqual(result["reason"], reason)
+        self.assertTrue(result["non_authoritative"])
+        self.assertFalse(result["method_b_numerical_dependency"])
+        self.assertFalse(result["comparison_performed"])
+        self.assertFalse(result["classification_performed"])
+        self.assertFalse(result["production_objects_mutated"])
+        self.assertFalse(result["refinement_applied"])
+        if stage is not None:
+            self.assertEqual(result["diagnostic_stage"], stage)
+        return result
+
+    @staticmethod
+    def _cell(result, t_index, delta_index):
+        return next(
+            cell
+            for cell in result["cells"]
+            if cell["t_index"] == t_index and cell["delta_index"] == delta_index
+        )
+
+    @staticmethod
+    def _replace_cell(contract, t_index, delta_index, positive, low, control):
+        cells = contract["method_a"]["cells"]
+        index = next(
+            index
+            for index, cell in enumerate(cells)
+            if cell["t_index"] == t_index and cell["delta_index"] == delta_index
+        )
+        cells[index] = _method_a_cell(
+            t_index, delta_index, positive, low, control, "proton_cleaned"
+        )
+
+    @staticmethod
+    def _calculation_view(result):
+        return {
+            "parents": [
+                {
+                    key: parent[key]
+                    for key in (
+                        "t_index",
+                        "contributing_delta_indices",
+                        "contributing_delta_cell_count",
+                        "prompt_positive_count",
+                        "prompt_low_count",
+                        "prompt_control_count",
+                        "f_low",
+                        "f_low_low",
+                        "f_low_high",
+                        "R_low_control",
+                        "R_low_control_low",
+                        "R_low_control_high",
+                        "support_class",
+                        "parent_reference_status",
+                        "parent_reference_reason",
+                    )
+                }
+                for parent in result["parent_references"]
+            ],
+            "cells": [
+                {
+                    key: cell[key]
+                    for key in (
+                        "t_index",
+                        "delta_index",
+                        "parent_reference_R_low_control",
+                        "parent_reference_R_low_control_low",
+                        "parent_reference_R_low_control_high",
+                        "parent_reference_status",
+                        "method_a_comparison_candidate",
+                        "method_a_comparison_candidate_low",
+                        "method_a_comparison_candidate_high",
+                        "method_a_comparison_candidate_status",
+                        "method_a_comparison_candidate_reason",
+                    )
+                }
+                for cell in result["cells"]
+            ],
+        }
+
+    def test_successful_same_t_representation_has_required_detached_shape(self):
+        for host_state in ("proton_cleaned", "identity_no_proton_cleaning"):
+            with self.subTest(host_state=host_state):
+                input_contract = self._comparison_input(host_state=host_state)
+                result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+                self.assertEqual(
+                    set(result),
+                    {
+                        "schema_version",
+                        "method",
+                        "status",
+                        "available",
+                        "reason",
+                        "diagnostic_stage",
+                        "source_checkpoint_payload_fingerprint",
+                        "source_method_a_payload_fingerprint",
+                        "phase_a_contract_fingerprint",
+                        "coordinate_fingerprint",
+                        "method_a_fingerprint",
+                        "canonical_t_edges",
+                        "delta_edges",
+                        "support_thresholds",
+                        "parent_definition",
+                        "uncertainty_definition",
+                        "candidate_definition",
+                        "parent_references",
+                        "cells",
+                        "fingerprint_inputs",
+                        "fingerprint",
+                        "non_authoritative",
+                        "method_b_numerical_dependency",
+                        "comparison_performed",
+                        "classification_performed",
+                        "production_objects_mutated",
+                        "refinement_applied",
+                    },
+                )
+                self.assertTrue(result["available"])
+                self.assertEqual(result["reason"], None)
+                self.assertEqual(result["diagnostic_stage"], "complete")
+                self.assertEqual(result["support_thresholds"], METHOD_A_SUPPORT_THRESHOLDS)
+                self.assertEqual(result["parent_definition"], "same_t_aggregate_prompt_low_control_counts")
+                self.assertEqual(
+                    result["uncertainty_definition"],
+                    "wilson_95_percent_aggregated_prompt_counts",
+                )
+                self.assertEqual(
+                    result["candidate_definition"],
+                    "same_t_parent_ratio_with_ratio_envelope_bounds",
+                )
+                self.assertFalse(result["method_b_numerical_dependency"])
+                self.assertEqual(len(result["parent_references"]), 2)
+                self.assertEqual(len(result["cells"]), 4)
+                self.assertEqual(len(result["source_method_a_payload_fingerprint"]), 64)
+                self.assertEqual(len(result["fingerprint"]), 64)
+
+    def test_input_and_nested_result_values_are_isolated(self):
+        input_contract = self._comparison_input()
+        before = copy.deepcopy(input_contract)
+        result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        self.assertEqual(input_contract, before)
+        result["parent_references"][0]["contributing_delta_indices"].append(99)
+        result["cells"][0]["signed_R_low_control"] = -1.0
+        result["support_thresholds"]["supported_positive_count"] = -1
+        self.assertEqual(input_contract, before)
+
+    def test_method_b_content_is_not_read_or_fingerprinted(self):
+        input_contract = self._comparison_input()
+        baseline = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        changed = copy.deepcopy(input_contract)
+        changed["method_b"] = {"arbitrary": object(), "cells": ["anything"]}
+        result = comparison.build_pion_hgcer_method_a_comparison(changed)
+        for key in (
+            "source_method_a_payload_fingerprint",
+            "parent_references",
+            "cells",
+            "fingerprint",
+        ):
+            self.assertEqual(result[key], baseline[key])
+
+    def test_same_t_parent_uses_aggregate_counts_not_ratio_averaging(self):
+        input_contract = self._comparison_input()
+        self._replace_cell(input_contract, 0, 0, 30, 5, 25)
+        self._replace_cell(input_contract, 0, 1, 20, 10, 10)
+        result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        parent = result["parent_references"][0]
+        self.assertEqual(parent["prompt_low_count"], 15)
+        self.assertEqual(parent["prompt_control_count"], 35)
+        self.assertEqual(parent["R_low_control"], 15.0 / 35.0)
+        self.assertNotEqual(parent["R_low_control"], (0.2 + 1.0) / 2.0)
+        self.assertEqual(parent["contributing_delta_indices"], [0, 1])
+
+    def test_parent_wilson_bounds_and_asymmetric_candidates_match_definition(self):
+        result = comparison.build_pion_hgcer_method_a_comparison(self._comparison_input())
+        parent = result["parent_references"][0]
+        expected_low, expected_high = _wilson_interval(10, 50)
+        self.assertAlmostEqual(parent["f_low"], 10.0 / 50.0, places=15)
+        self.assertAlmostEqual(parent["f_low_low"], expected_low, places=15)
+        self.assertAlmostEqual(parent["f_low_high"], expected_high, places=15)
+        self.assertAlmostEqual(
+            parent["R_low_control_low"], expected_low / (1.0 - expected_low), places=15
+        )
+        self.assertAlmostEqual(
+            parent["R_low_control_high"], expected_high / (1.0 - expected_high), places=15
+        )
+        cell = self._cell(result, 0, 0)
+        self.assertAlmostEqual(
+            cell["method_a_comparison_candidate"],
+            cell["R_low_control"] / parent["R_low_control"],
+            places=15,
+        )
+        self.assertAlmostEqual(
+            cell["method_a_comparison_candidate_low"],
+            cell["R_low_control_low"] / parent["R_low_control_high"],
+            places=15,
+        )
+        self.assertAlmostEqual(
+            cell["method_a_comparison_candidate_high"],
+            cell["R_low_control_high"] / parent["R_low_control_low"],
+            places=15,
+        )
+        self.assertLessEqual(
+            cell["method_a_comparison_candidate_low"],
+            cell["method_a_comparison_candidate"],
+        )
+        self.assertLessEqual(
+            cell["method_a_comparison_candidate"],
+            cell["method_a_comparison_candidate_high"],
+        )
+        self.assertEqual(
+            cell["candidate_interval_method"], "ratio_envelope_from_wilson_bounds"
+        )
+        self.assertEqual(
+            cell["candidate_covariance_treatment"], "shared_parent_covariance_not_modeled"
+        )
+
+    def test_supported_marginal_zero_low_and_unsupported_cells_follow_native_status(self):
+        input_contract = self._comparison_input()
+        result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        self.assertEqual(result["parent_references"][0]["parent_reference_status"], "available")
+        supported = self._cell(result, 0, 0)
+        zero_low = self._cell(result, 0, 1)
+        self.assertEqual(supported["method_a_comparison_candidate_status"], "available")
+        self.assertEqual(zero_low["method_a_comparison_candidate"], 0.0)
+        self.assertEqual(zero_low["method_a_comparison_candidate_low"], 0.0)
+        self.assertGreater(zero_low["method_a_comparison_candidate_high"], 0.0)
+        self.assertEqual(zero_low["method_a_comparison_candidate_status"], "marginal")
+
+        unsupported_input = self._comparison_input()
+        self._replace_cell(unsupported_input, 1, 1, 9, 1, 8)
+        unsupported_result = comparison.build_pion_hgcer_method_a_comparison(
+            unsupported_input
+        )
+        unsupported = self._cell(unsupported_result, 1, 1)
+        self.assertEqual(unsupported["support_class"], "unsupported")
+        self.assertIsNone(unsupported["method_a_comparison_candidate"])
+        self.assertIsNone(unsupported["method_a_comparison_candidate_low"])
+        self.assertIsNone(unsupported["method_a_comparison_candidate_high"])
+        self.assertEqual(unsupported["method_a_comparison_candidate_status"], "unavailable")
+        self.assertEqual(
+            unsupported["method_a_comparison_candidate_reason"], "cell_support_insufficient"
+        )
+
+    def test_unusable_parents_preserve_diagnostics_without_candidates(self):
+        input_contract = self._comparison_input()
+        self._replace_cell(input_contract, 0, 1, 9, 1, 8)
+        result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        parent = result["parent_references"][0]
+        self.assertEqual(parent["contributing_delta_cell_count"], 1)
+        self.assertEqual(parent["prompt_positive_count"], 30)
+        self.assertEqual(parent["parent_reference_status"], "unavailable")
+        self.assertEqual(
+            parent["parent_reference_reason"], "insufficient_contributing_delta_cells"
+        )
+        cell = self._cell(result, 0, 0)
+        self.assertIsNone(cell["method_a_comparison_candidate"])
+        self.assertEqual(
+            cell["method_a_comparison_candidate_reason"],
+            "insufficient_contributing_delta_cells",
+        )
+
+        all_unusable_input = self._comparison_input()
+        for t_index in range(2):
+            for delta_index in range(2):
+                self._replace_cell(all_unusable_input, t_index, delta_index, 9, 1, 8)
+        all_unusable = comparison.build_pion_hgcer_method_a_comparison(
+            all_unusable_input
+        )
+        self.assertTrue(all_unusable["available"])
+        self.assertTrue(
+            all(
+                parent["support_class"] == "unsupported"
+                and parent["parent_reference_status"] == "unavailable"
+                for parent in all_unusable["parent_references"]
+            )
+        )
+        self.assertTrue(
+            all(
+                cell["method_a_comparison_candidate"] is None
+                and cell["method_a_comparison_candidate_status"] == "unavailable"
+                for cell in all_unusable["cells"]
+            )
+        )
+
+    def test_marginal_parent_remains_usable_and_marginal(self):
+        input_contract = self._comparison_input()
+        self._replace_cell(input_contract, 0, 0, 10, 1, 9)
+        self._replace_cell(input_contract, 0, 1, 10, 1, 9)
+        result = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        parent = result["parent_references"][0]
+        self.assertEqual(parent["support_class"], "marginal")
+        self.assertEqual(parent["parent_reference_status"], "marginal")
+        self.assertEqual(
+            self._cell(result, 0, 0)["method_a_comparison_candidate_status"], "marginal"
+        )
+
+    def test_changing_one_t_bin_does_not_change_another(self):
+        input_contract = self._comparison_input()
+        baseline = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        changed = copy.deepcopy(input_contract)
+        self._replace_cell(changed, 1, 0, 40, 20, 20)
+        result = comparison.build_pion_hgcer_method_a_comparison(changed)
+        self.assertEqual(result["parent_references"][0], baseline["parent_references"][0])
+        self.assertEqual(
+            [cell for cell in result["cells"] if cell["t_index"] == 0],
+            [cell for cell in baseline["cells"] if cell["t_index"] == 0],
+        )
+        self.assertNotEqual(result["parent_references"][1], baseline["parent_references"][1])
+
+    def test_cross_checks_and_signed_fields_do_not_change_calculations(self):
+        input_contract = self._comparison_input()
+        baseline = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        for key, value in (
+            ("prompt_vs_signed_status", "inconsistent"),
+            ("nommcuts_vs_allcuts_status", "inconsistent"),
+            ("signed_R_low_control", 987.0),
+            ("signed_R_low_control_sigma", 654.0),
+        ):
+            with self.subTest(key=key):
+                changed = copy.deepcopy(input_contract)
+                changed["method_a"]["cells"][0][key] = value
+                result = comparison.build_pion_hgcer_method_a_comparison(changed)
+                self.assertEqual(
+                    self._calculation_view(result), self._calculation_view(baseline)
+                )
+                self.assertNotEqual(
+                    result["source_method_a_payload_fingerprint"],
+                    baseline["source_method_a_payload_fingerprint"],
+                )
+                self.assertNotEqual(result["fingerprint"], baseline["fingerprint"])
+                self.assertEqual(result["cells"][0][key], value)
+
+    def test_method_a_fingerprints_are_deterministic_and_method_a_specific(self):
+        input_contract = self._comparison_input()
+        first = comparison.build_pion_hgcer_method_a_comparison(input_contract)
+        second = comparison.build_pion_hgcer_method_a_comparison(copy.deepcopy(input_contract))
+        for key in (
+            "source_method_a_payload_fingerprint",
+            "fingerprint",
+            "parent_references",
+            "cells",
+        ):
+            self.assertEqual(first[key], second[key])
+        changed = copy.deepcopy(input_contract)
+        self._replace_cell(changed, 0, 0, 32, 8, 24)
+        changed_result = comparison.build_pion_hgcer_method_a_comparison(changed)
+        self.assertNotEqual(
+            changed_result["source_method_a_payload_fingerprint"],
+            first["source_method_a_payload_fingerprint"],
+        )
+        self.assertNotEqual(changed_result["fingerprint"], first["fingerprint"])
+
+    def test_structured_top_level_and_provenance_failures(self):
+        self._assert_unavailable([], "comparison_input_contract_invalid")
+        unavailable_input = comparison.build_pion_hgcer_comparison_input_contract(
+            _checkpoint(method_a_status="unavailable")
+        )
+        self._assert_unavailable(unavailable_input, "method_a_unavailable", "method_a_provenance")
+        malformed_d1 = copy.deepcopy(self._comparison_input())
+        malformed_d1["status"] = "unavailable"
+        malformed_d1["available"] = False
+        self._assert_unavailable(malformed_d1, "comparison_input_unavailable")
+        cases = (
+            (
+                "authority",
+                lambda value: value.update(non_authoritative=False),
+                "comparison_input_authority_contract_invalid",
+            ),
+            (
+                "phase_fingerprint",
+                lambda value: value["phase_a"].update(contract_fingerprint=None),
+                "phase_a_fingerprint_missing",
+            ),
+            (
+                "coordinate_fingerprint",
+                lambda value: value["phase_a"].update(coordinate_fingerprint=None),
+                "coordinate_fingerprint_missing",
+            ),
+            (
+                "method_fingerprint",
+                lambda value: value["method_a"].update(fingerprint=None),
+                "method_a_fingerprint_missing",
+            ),
+            (
+                "summary",
+                lambda value: value["method_a"]["summary"].update(schema_version="other/v1"),
+                "method_a_summary_invalid",
+            ),
+            (
+                "uncertainty",
+                lambda value: value["method_a"]["summary"].update(uncertainty_method="other"),
+                "method_a_uncertainty_contract_invalid",
+            ),
+            (
+                "thresholds",
+                lambda value: value["method_a"]["summary"]["support_thresholds"].pop("supported_low_count"),
+                "method_a_support_thresholds_invalid",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                payload = self._comparison_input()
+                mutate(payload)
+                self._assert_unavailable(payload, reason)
+
+    def test_structured_cell_and_geometry_failures_are_not_repaired(self):
+        cases = (
+            (
+                "missing_required_field",
+                lambda value: value["method_a"]["cells"][0].pop("signed_R_low_control"),
+                "method_a_cells_invalid",
+            ),
+            (
+                "missing_cell",
+                lambda value: value["method_a"]["cells"].pop(),
+                "method_a_cell_count_contract_invalid",
+            ),
+            (
+                "duplicate_cell",
+                lambda value: value["method_a"]["cells"].append(copy.deepcopy(value["method_a"]["cells"][0])),
+                "method_a_cell_count_contract_invalid",
+            ),
+            (
+                "invalid_count",
+                lambda value: value["method_a"]["cells"][0].update(prompt_low_count=-1),
+                "method_a_cell_count_contract_invalid",
+            ),
+            (
+                "invalid_status",
+                lambda value: value["method_a"]["cells"][0].update(method_A_status="unavailable"),
+                "method_a_cell_status_contract_invalid",
+            ),
+            (
+                "invalid_ratio",
+                lambda value: value["method_a"]["cells"][0].update(R_low_control=99.0),
+                "method_a_cell_ratio_contract_invalid",
+            ),
+            (
+                "cell_geometry",
+                lambda value: value["method_a"]["cells"][0].update(t_high=0.5),
+                "canonical_geometry_mismatch",
+            ),
+            (
+                "summary_geometry",
+                lambda value: value["method_a"]["summary"]["t_edges"].__setitem__(1, 1.5),
+                "canonical_geometry_mismatch",
+            ),
+            (
+                "invalid_edges",
+                lambda value: value.update(canonical_t_edges=[0.0, 0.0]),
+                "canonical_geometry_invalid",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                payload = self._comparison_input()
+                mutate(payload)
+                self._assert_unavailable(payload, reason)
 
 
 if __name__ == "__main__":
