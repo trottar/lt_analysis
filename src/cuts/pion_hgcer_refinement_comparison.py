@@ -1,8 +1,9 @@
-"""Read-only Phase-D comparison-input contract for frozen HGCer diagnostics.
+"""Read-only Phase-D comparison contracts for frozen HGCer diagnostics.
 
-This module deliberately validates only the detached Phase-C checkpoint.  It
-does not choose a Method-A observable, transform Method-B, compare numerical
-results, or own any analysis object.
+This module validates the detached Phase-C A/B comparison input and builds the
+non-authoritative same-t Method-A comparison representation. It does not
+perform a Method-A/Method-B numerical comparison, construct a correction, or
+own or mutate analysis objects.
 """
 
 from __future__ import annotations

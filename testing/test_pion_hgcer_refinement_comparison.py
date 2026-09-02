@@ -1,4 +1,4 @@
-"""Pure-Python regression coverage for the frozen Phase-D.1 input contract."""
+"""Pure-Python regression coverage for Phase-D.1/D.1.1 and Phase-D.2 comparison contracts."""
 
 from __future__ import annotations
 
