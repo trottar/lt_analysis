@@ -1,9 +1,8 @@
 """Read-only Phase-D comparison contracts for frozen HGCer diagnostics.
 
-This module validates the detached Phase-C A/B comparison input and builds
-non-authoritative Method-A and Method-B comparison representations. It does
-not perform a Method-A/Method-B numerical comparison, construct a correction,
-or own or mutate analysis objects.
+This module owns the D.1 frozen input contract, D.2 Method-A representation,
+D.3 Method-B representation, and the D.4 non-authoritative A/B comparison.
+It never constructs a correction or mutates a production analysis object.
 """
 
 from __future__ import annotations
@@ -17,6 +16,7 @@ import math
 COMPARISON_INPUT_SCHEMA_VERSION = "pion_hgcer_ab_comparison_input/v1"
 METHOD_A_COMPARISON_SCHEMA_VERSION = "pion_hgcer_method_a_comparison/v1"
 METHOD_B_COMPARISON_SCHEMA_VERSION = "pion_hgcer_method_b_comparison/v1"
+AB_COMPARISON_SCHEMA_VERSION = "pion_hgcer_ab_comparison/v1"
 
 _CHECKPOINT_SCHEMA_VERSION = "pion_hgcer_refinement_checkpoint/v1"
 _PHASE_A_SCHEMA_VERSION = "pion_hgcer_event_contract/v1"
@@ -27,6 +27,7 @@ _HOST_STATES = {"proton_cleaned", "identity_no_proton_cleaning"}
 _SOURCE_TARGET_STATE = "post_proton_noRF"
 _METHOD_A_COMPARISON_METHOD = "method_a_same_t_comparison_representation"
 _METHOD_B_COMPARISON_METHOD = "method_b_comparison_representation"
+_AB_COMPARISON_METHOD = "non_authoritative_ab_comparison"
 _METHOD_A_WILSON_Z_95 = 1.959963984540054
 _METHOD_A_PARENT_MINIMUM_DELTA_CELLS = 2
 _METHOD_A_SUPPORT_THRESHOLD_KEYS = (
@@ -182,6 +183,15 @@ class _MethodAComparisonUnavailable(Exception):
 
 class _MethodBComparisonUnavailable(Exception):
     """Expected D.3 validation failure carrying the public reason and stage."""
+
+    def __init__(self, reason, stage):
+        super().__init__(reason)
+        self.reason = str(reason)
+        self.stage = str(stage)
+
+
+class _ABComparisonUnavailable(Exception):
+    """Expected D.4 validation failure carrying the public reason and stage."""
 
     def __init__(self, reason, stage):
         super().__init__(reason)
@@ -1986,11 +1996,543 @@ def build_pion_hgcer_method_b_comparison(comparison_input_contract):
         )
 
 
+def _ab_comparison_unavailable(reason, stage, exception=None):
+    """Return the non-authoritative D.4 failure shape."""
+    result = {
+        "schema_version": AB_COMPARISON_SCHEMA_VERSION,
+        "method": _AB_COMPARISON_METHOD,
+        "status": "unavailable",
+        "available": False,
+        "reason": str(reason),
+        "diagnostic_stage": str(stage),
+        "non_authoritative": True,
+        "comparison_performed": False,
+        "classification_performed": False,
+        "classification_scope": "none",
+        "decision_performed": False,
+        "statistical_compatibility_claimed": False,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+    }
+    if exception is not None:
+        result["exception_type"] = type(exception).__name__
+        result["exception_message"] = str(exception)
+    return result
+
+
+def _ab_fail(reason, stage):
+    raise _ABComparisonUnavailable(reason, stage)
+
+
+def _ab_snapshot(value, reason, stage):
+    if not isinstance(value, Mapping):
+        _ab_fail(reason, stage)
+    try:
+        return json.loads(_canonical_json(value))
+    except (TypeError, ValueError, OverflowError):
+        _ab_fail(reason, stage)
+
+
+def _ab_nonempty_fingerprint(value):
+    return _nonempty_string(value)
+
+
+def _ab_strict_edges(value):
+    if not isinstance(value, list) or len(value) < 2:
+        _ab_fail("comparison_geometry_mismatch", "canonical_geometry")
+    previous = None
+    for edge in value:
+        if not _is_finite_number(edge) or (
+            previous is not None and edge <= previous
+        ):
+            _ab_fail("comparison_geometry_mismatch", "canonical_geometry")
+        previous = edge
+    return value
+
+
+def _ab_top_level(value, schema, dependency_field, unavailable_reason, invalid_reason):
+    """Validate the shared D.2/D.3 outer contract before available-only data."""
+    stage = "comparison_input_validation"
+    if not isinstance(value, Mapping):
+        _ab_fail(invalid_reason, stage)
+    required = (
+        "schema_version",
+        "status",
+        "available",
+        "non_authoritative",
+        dependency_field,
+        "comparison_performed",
+        "classification_performed",
+        "production_objects_mutated",
+        "refinement_applied",
+    )
+    if any(key not in value for key in required) or value["schema_version"] != schema:
+        _ab_fail(invalid_reason, stage)
+    if (
+        value["non_authoritative"] is not True
+        or value[dependency_field] is not False
+        or value["comparison_performed"] is not False
+        or value["classification_performed"] is not False
+        or value["production_objects_mutated"] is not False
+        or value["refinement_applied"] is not False
+    ):
+        _ab_fail("comparison_authority_contract_invalid", "comparison_authority")
+    if value["status"] == "unavailable" and value["available"] is False:
+        _ab_fail(unavailable_reason, stage)
+    if value["status"] != "available" or value["available"] is not True:
+        _ab_fail(invalid_reason, stage)
+
+
+def _ab_validate_representation(snapshot, kind):
+    """Validate a successful D.2 or D.3 representation without rebuilding it."""
+    invalid_reason = "method_{}_comparison_contract_invalid".format(kind)
+    stage = "method_{}_comparison_validation".format(kind)
+    fingerprint_name = "method_{}_fingerprint".format(kind)
+    source_payload_name = "source_method_{}_payload_fingerprint".format(kind)
+    required = (
+        "source_checkpoint_payload_fingerprint",
+        "phase_a_contract_fingerprint",
+        "coordinate_fingerprint",
+        fingerprint_name,
+        source_payload_name,
+        "canonical_t_edges",
+        "delta_edges",
+        "cells",
+        "fingerprint_inputs",
+        "fingerprint",
+    )
+    if any(key not in snapshot for key in required):
+        _ab_fail(invalid_reason, stage)
+    if any(
+        not _ab_nonempty_fingerprint(snapshot[key])
+        for key in (
+            "source_checkpoint_payload_fingerprint",
+            "phase_a_contract_fingerprint",
+            "coordinate_fingerprint",
+            fingerprint_name,
+            source_payload_name,
+            "fingerprint",
+        )
+    ) or not isinstance(snapshot["fingerprint_inputs"], Mapping):
+        _ab_fail(invalid_reason, stage)
+    try:
+        expected_fingerprint = hashlib.sha256(
+            _canonical_json(snapshot["fingerprint_inputs"]).encode("ascii")
+        ).hexdigest()
+    except (TypeError, ValueError, OverflowError):
+        _ab_fail(invalid_reason, stage)
+    if snapshot["fingerprint"] != expected_fingerprint:
+        _ab_fail(invalid_reason, stage)
+    t_edges = _ab_strict_edges(snapshot["canonical_t_edges"])
+    delta_edges = _ab_strict_edges(snapshot["delta_edges"])
+    if not isinstance(snapshot["cells"], list):
+        _ab_fail(invalid_reason, stage)
+    if kind == "b":
+        if (
+            snapshot.get("host_state") not in _HOST_STATES
+            or snapshot.get("source_target_state") != _SOURCE_TARGET_STATE
+        ):
+            _ab_fail(invalid_reason, stage)
+    return t_edges, delta_edges
+
+
+def _ab_cell_lookup(snapshot, kind, t_edges, delta_edges):
+    """Require the exact frozen D.2/D.3 cell lattice and interface fields."""
+    invalid_reason = "method_{}_comparison_cell_invalid".format(kind)
+    expected_count = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    cells = snapshot["cells"]
+    if len(cells) != expected_count:
+        _ab_fail("comparison_cell_grid_invalid", "comparison_cells")
+    shared = (
+        "t_index",
+        "t_low",
+        "t_high",
+        "delta_index",
+        "delta_low",
+        "delta_high",
+    )
+    if kind == "a":
+        fields = shared + (
+            "support_class",
+            "method_A_status",
+            "method_A_reason",
+            "method_a_comparison_candidate",
+            "method_a_comparison_candidate_low",
+            "method_a_comparison_candidate_high",
+            "method_a_comparison_candidate_status",
+            "method_a_comparison_candidate_reason",
+            "candidate_interval_method",
+            "candidate_covariance_treatment",
+            "prompt_vs_signed_status",
+            "nommcuts_vs_allcuts_status",
+        )
+    else:
+        fields = shared + (
+            "method_b_comparison_candidate",
+            "method_b_comparison_candidate_uncertainty",
+            "method_b_comparison_candidate_status",
+            "method_b_comparison_candidate_reason",
+            "candidate_L_B_status",
+            "method_B_status",
+            "method_B_reason",
+            "region_consistency_status",
+            "region_consistency_reason",
+            "shape_status",
+            "shape_reason",
+        )
+    lookup = {}
+    for cell in cells:
+        if not isinstance(cell, Mapping) or any(key not in cell for key in fields):
+            _ab_fail(invalid_reason, "comparison_cells")
+        t_index = cell["t_index"]
+        delta_index = cell["delta_index"]
+        if (
+            not _is_integer(t_index)
+            or not _is_integer(delta_index)
+            or not 0 <= t_index < len(t_edges) - 1
+            or not 0 <= delta_index < len(delta_edges) - 1
+        ):
+            _ab_fail("comparison_cell_grid_invalid", "comparison_cells")
+        if (
+            not _serialized_equal(cell["t_low"], t_edges[t_index])
+            or not _serialized_equal(cell["t_high"], t_edges[t_index + 1])
+            or not _serialized_equal(cell["delta_low"], delta_edges[delta_index])
+            or not _serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+        ):
+            _ab_fail("comparison_cell_geometry_mismatch", "comparison_cells")
+        coordinate = (t_index, delta_index)
+        if coordinate in lookup:
+            _ab_fail("comparison_cell_grid_invalid", "comparison_cells")
+        lookup[coordinate] = cell
+    return lookup
+
+
+def _ab_method_a_cell(cell):
+    status = cell["method_a_comparison_candidate_status"]
+    if status not in {"available", "marginal", "unavailable"}:
+        _ab_fail("method_a_comparison_cell_invalid", "comparison_cells")
+    candidate = cell["method_a_comparison_candidate"]
+    low = cell["method_a_comparison_candidate_low"]
+    high = cell["method_a_comparison_candidate_high"]
+    present = status in {"available", "marginal"}
+    if present:
+        if (
+            not _is_finite_number(candidate)
+            or candidate < 0.0
+            or not _is_finite_number(low)
+            or not _is_finite_number(high)
+            or low < 0.0
+            or low > candidate
+            or candidate > high
+            or cell["candidate_interval_method"]
+            != "ratio_envelope_from_wilson_bounds"
+            or cell["candidate_covariance_treatment"]
+            != "shared_parent_covariance_not_modeled"
+        ):
+            _ab_fail("method_a_comparison_cell_invalid", "comparison_cells")
+    elif candidate is not None or low is not None or high is not None:
+        _ab_fail("method_a_comparison_cell_invalid", "comparison_cells")
+    return {
+        "present": present,
+        "support_class": cell["support_class"],
+        "method_A_status": cell["method_A_status"],
+        "method_A_reason": cell["method_A_reason"],
+        "comparison_candidate": candidate,
+        "comparison_candidate_low": low,
+        "comparison_candidate_high": high,
+        "comparison_candidate_status": status,
+        "comparison_candidate_reason": cell["method_a_comparison_candidate_reason"],
+        "candidate_interval_method": cell["candidate_interval_method"],
+        "candidate_covariance_treatment": cell["candidate_covariance_treatment"],
+        "prompt_vs_signed_status": cell["prompt_vs_signed_status"],
+        "nommcuts_vs_allcuts_status": cell["nommcuts_vs_allcuts_status"],
+    }
+
+
+def _ab_method_b_cell(cell):
+    status = cell["method_b_comparison_candidate_status"]
+    if status not in _METHOD_B_CANDIDATE_STATUSES or status != cell["candidate_L_B_status"]:
+        _ab_fail("method_b_comparison_cell_invalid", "comparison_cells")
+    candidate = cell["method_b_comparison_candidate"]
+    uncertainty = cell["method_b_comparison_candidate_uncertainty"]
+    present = status == "available_multi_region"
+    if present:
+        if (
+            not _is_finite_number(candidate)
+            or candidate <= 0.0
+            or not _is_finite_number(uncertainty)
+            or uncertainty <= 0.0
+            or cell["method_B_status"] != "available"
+        ):
+            _ab_fail("method_b_comparison_cell_invalid", "comparison_cells")
+    elif candidate is not None or uncertainty is not None:
+        _ab_fail("method_b_comparison_cell_invalid", "comparison_cells")
+    if (
+        cell["method_B_status"] not in _METHOD_B_CELL_STATUSES
+        or cell["region_consistency_status"] not in _METHOD_B_CONSISTENCY_STATUSES
+        or cell["shape_status"] not in _METHOD_B_SHAPE_STATUSES
+    ):
+        _ab_fail("method_b_comparison_cell_invalid", "comparison_cells")
+    return {
+        "present": present,
+        "comparison_candidate": candidate,
+        "comparison_candidate_uncertainty": uncertainty,
+        "comparison_candidate_status": status,
+        "comparison_candidate_reason": cell["method_b_comparison_candidate_reason"],
+        "candidate_L_B_status": cell["candidate_L_B_status"],
+        "method_B_status": cell["method_B_status"],
+        "method_B_reason": cell["method_B_reason"],
+        "region_consistency_status": cell["region_consistency_status"],
+        "region_consistency_reason": cell["region_consistency_reason"],
+        "shape_status": cell["shape_status"],
+        "shape_reason": cell["shape_reason"],
+    }
+
+
+def _ab_comparison_cell(a_cell, b_cell):
+    method_a = _ab_method_a_cell(a_cell)
+    method_b = _ab_method_b_cell(b_cell)
+    a_present = method_a["present"]
+    b_present = method_b["present"]
+    if a_present and b_present and method_a["comparison_candidate"] > 0.0:
+        availability = "both_comparable"
+        availability_reason = None
+        ratio = method_b["comparison_candidate"] / method_a["comparison_candidate"]
+        log_ratio = math.log(method_b["comparison_candidate"]) - math.log(
+            method_a["comparison_candidate"]
+        )
+    elif a_present and b_present:
+        availability = "both_present_not_comparable"
+        availability_reason = "method_a_comparison_candidate_nonpositive"
+        ratio = None
+        log_ratio = None
+    elif a_present:
+        availability = "a_only"
+        availability_reason = None
+        ratio = None
+        log_ratio = None
+    elif b_present:
+        availability = "b_only"
+        availability_reason = None
+        ratio = None
+        log_ratio = None
+    else:
+        availability = "neither_available"
+        availability_reason = None
+        ratio = None
+        log_ratio = None
+    if a_present and b_present:
+        a_low = method_a["comparison_candidate_low"]
+        a_high = method_a["comparison_candidate_high"]
+        b_low = method_b["comparison_candidate"] - method_b["comparison_candidate_uncertainty"]
+        b_high = method_b["comparison_candidate"] + method_b["comparison_candidate_uncertainty"]
+        interval_relation = "overlap" if max(a_low, b_low) <= min(a_high, b_high) else "disjoint"
+    else:
+        a_low = method_a["comparison_candidate_low"] if a_present else None
+        a_high = method_a["comparison_candidate_high"] if a_present else None
+        b_low = (
+            method_b["comparison_candidate"] - method_b["comparison_candidate_uncertainty"]
+            if b_present
+            else None
+        )
+        b_high = (
+            method_b["comparison_candidate"] + method_b["comparison_candidate_uncertainty"]
+            if b_present
+            else None
+        )
+        interval_relation = "not_evaluable"
+    return {
+        "t_index": a_cell["t_index"],
+        "t_low": a_cell["t_low"],
+        "t_high": a_cell["t_high"],
+        "delta_index": a_cell["delta_index"],
+        "delta_low": a_cell["delta_low"],
+        "delta_high": a_cell["delta_high"],
+        "method_a": method_a,
+        "method_b": method_b,
+        "comparison": {
+            "availability": availability,
+            "availability_reason": availability_reason,
+            "ratio_B_over_A": ratio,
+            "log_ratio_B_over_A": log_ratio,
+            "method_a_interval_low": a_low,
+            "method_a_interval_high": a_high,
+            "method_a_interval_semantics": "ratio_envelope_from_wilson_bounds_shared_parent_covariance_not_modeled" if a_present else None,
+            "method_b_interval_low": b_low,
+            "method_b_interval_high": b_high,
+            "method_b_interval_semantics": "native_candidate_plus_minus_one_sigma" if b_present else None,
+            "diagnostic_interval_relation": interval_relation,
+            "diagnostic_interval_relation_semantics": "mathematical_overlap_only_not_statistical_compatibility",
+            "statistical_compatibility_claimed": False,
+        },
+    }
+
+
+def _ab_summary(cells):
+    availability = {
+        name: 0
+        for name in (
+            "both_comparable",
+            "both_present_not_comparable",
+            "a_only",
+            "b_only",
+            "neither_available",
+        )
+    }
+    intervals = {"overlap": 0, "disjoint": 0, "not_evaluable": 0}
+    a_statuses = {"available": 0, "marginal": 0, "unavailable": 0}
+    b_candidates = {name: 0 for name in sorted(_METHOD_B_CANDIDATE_STATUSES)}
+    b_statuses = {name: 0 for name in sorted(_METHOD_B_CELL_STATUSES)}
+    for cell in cells:
+        availability[cell["comparison"]["availability"]] += 1
+        intervals[cell["comparison"]["diagnostic_interval_relation"]] += 1
+        a_statuses[cell["method_a"]["comparison_candidate_status"]] += 1
+        b_candidates[cell["method_b"]["comparison_candidate_status"]] += 1
+        b_statuses[cell["method_b"]["method_B_status"]] += 1
+    return {
+        "cell_count": len(cells),
+        "comparison_availability_counts": availability,
+        "diagnostic_interval_relation_counts": intervals,
+        "method_a_candidate_status_counts": a_statuses,
+        "method_b_candidate_status_counts": b_candidates,
+        "method_b_method_status_counts": b_statuses,
+    }
+
+
+def build_pion_hgcer_ab_comparison(method_a_comparison, method_b_comparison):
+    """Compare only detached D.2/D.3 central diagnostics without a decision."""
+    try:
+        _ab_top_level(
+            method_a_comparison,
+            METHOD_A_COMPARISON_SCHEMA_VERSION,
+            "method_b_numerical_dependency",
+            "method_a_comparison_unavailable",
+            "method_a_comparison_contract_invalid",
+        )
+        _ab_top_level(
+            method_b_comparison,
+            METHOD_B_COMPARISON_SCHEMA_VERSION,
+            "method_a_numerical_dependency",
+            "method_b_comparison_unavailable",
+            "method_b_comparison_contract_invalid",
+        )
+        method_a = _ab_snapshot(
+            method_a_comparison,
+            "method_a_comparison_contract_invalid",
+            "comparison_input_validation",
+        )
+        method_b = _ab_snapshot(
+            method_b_comparison,
+            "method_b_comparison_contract_invalid",
+            "comparison_input_validation",
+        )
+        a_t_edges, a_delta_edges = _ab_validate_representation(method_a, "a")
+        b_t_edges, b_delta_edges = _ab_validate_representation(method_b, "b")
+        for key in (
+            "source_checkpoint_payload_fingerprint",
+            "phase_a_contract_fingerprint",
+            "coordinate_fingerprint",
+        ):
+            if method_a[key] != method_b[key]:
+                _ab_fail("comparison_provenance_mismatch", "comparison_provenance")
+        if not _serialized_equal(a_t_edges, b_t_edges) or not _serialized_equal(
+            a_delta_edges, b_delta_edges
+        ):
+            _ab_fail("comparison_geometry_mismatch", "canonical_geometry")
+        a_cells = _ab_cell_lookup(method_a, "a", a_t_edges, a_delta_edges)
+        b_cells = _ab_cell_lookup(method_b, "b", b_t_edges, b_delta_edges)
+        if set(a_cells) != set(b_cells):
+            _ab_fail("comparison_cell_grid_invalid", "comparison_cells")
+        cells = []
+        for coordinate in sorted(a_cells):
+            a_cell = a_cells[coordinate]
+            b_cell = b_cells[coordinate]
+            if any(
+                not _serialized_equal(a_cell[key], b_cell[key])
+                for key in ("t_low", "t_high", "delta_low", "delta_high")
+            ):
+                _ab_fail("comparison_cell_geometry_mismatch", "comparison_cells")
+            cells.append(_ab_comparison_cell(a_cell, b_cell))
+        source_method_a_comparison_payload_fingerprint = hashlib.sha256(
+            _canonical_json(method_a).encode("ascii")
+        ).hexdigest()
+        source_method_b_comparison_payload_fingerprint = hashlib.sha256(
+            _canonical_json(method_b).encode("ascii")
+        ).hexdigest()
+        fingerprint_inputs = {
+            "schema_version": AB_COMPARISON_SCHEMA_VERSION,
+            "method": _AB_COMPARISON_METHOD,
+            "method_a_comparison_fingerprint": method_a["fingerprint"],
+            "method_b_comparison_fingerprint": method_b["fingerprint"],
+            "source_method_a_comparison_payload_fingerprint": source_method_a_comparison_payload_fingerprint,
+            "source_method_b_comparison_payload_fingerprint": source_method_b_comparison_payload_fingerprint,
+            "phase_a_contract_fingerprint": method_a["phase_a_contract_fingerprint"],
+            "coordinate_fingerprint": method_a["coordinate_fingerprint"],
+            "canonical_t_edges": a_t_edges,
+            "delta_edges": a_delta_edges,
+            "host_state": method_b["host_state"],
+            "source_target_state": method_b["source_target_state"],
+            "comparison_availability_definition": "neutral_native_candidate_availability",
+            "ratio_definition": "method_b_over_method_a_positive_central_values",
+            "log_ratio_definition": "natural_log_method_b_over_method_a_positive_central_values",
+            "method_a_interval_definition": "exact_d2_ratio_envelope_from_wilson_bounds",
+            "method_b_interval_definition": "exact_d3_candidate_plus_minus_native_one_sigma",
+            "interval_relation_definition": "inclusive_mathematical_interval_overlap",
+            "statistical_interpretation_definition": "mathematical_overlap_only_not_statistical_compatibility",
+        }
+        fingerprint = hashlib.sha256(
+            _canonical_json(fingerprint_inputs).encode("ascii")
+        ).hexdigest()
+        return {
+            "schema_version": AB_COMPARISON_SCHEMA_VERSION,
+            "method": _AB_COMPARISON_METHOD,
+            "status": "available",
+            "available": True,
+            "reason": None,
+            "diagnostic_stage": "complete",
+            "source_checkpoint_payload_fingerprint": method_a[
+                "source_checkpoint_payload_fingerprint"
+            ],
+            "phase_a_contract_fingerprint": method_a["phase_a_contract_fingerprint"],
+            "coordinate_fingerprint": method_a["coordinate_fingerprint"],
+            "method_a_comparison_fingerprint": method_a["fingerprint"],
+            "method_b_comparison_fingerprint": method_b["fingerprint"],
+            "source_method_a_comparison_payload_fingerprint": source_method_a_comparison_payload_fingerprint,
+            "source_method_b_comparison_payload_fingerprint": source_method_b_comparison_payload_fingerprint,
+            "canonical_t_edges": a_t_edges,
+            "delta_edges": a_delta_edges,
+            "host_state": method_b["host_state"],
+            "source_target_state": method_b["source_target_state"],
+            "cells": cells,
+            "summary": _ab_summary(cells),
+            "fingerprint_inputs": fingerprint_inputs,
+            "fingerprint": fingerprint,
+            "non_authoritative": True,
+            "comparison_performed": True,
+            "classification_performed": True,
+            "classification_scope": "availability_only_non_prescriptive",
+            "decision_performed": False,
+            "statistical_compatibility_claimed": False,
+            "production_objects_mutated": False,
+            "refinement_applied": False,
+        }
+    except _ABComparisonUnavailable as exc:
+        return _ab_comparison_unavailable(exc.reason, exc.stage)
+    except Exception as exc:
+        return _ab_comparison_unavailable(
+            "unexpected_ab_comparison_build_failure",
+            "unexpected_exception",
+            exception=exc,
+        )
+
+
 __all__ = (
     "COMPARISON_INPUT_SCHEMA_VERSION",
     "METHOD_A_COMPARISON_SCHEMA_VERSION",
     "METHOD_B_COMPARISON_SCHEMA_VERSION",
+    "AB_COMPARISON_SCHEMA_VERSION",
     "build_pion_hgcer_comparison_input_contract",
     "build_pion_hgcer_method_a_comparison",
     "build_pion_hgcer_method_b_comparison",
+    "build_pion_hgcer_ab_comparison",
 )

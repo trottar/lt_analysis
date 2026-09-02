@@ -174,6 +174,17 @@ from pion_hgcer_refinement_checkpoint import (
     pion_hgcer_refinement_checkpoint_filename,
     write_pion_hgcer_refinement_checkpoint_json,
 )
+from pion_hgcer_refinement_comparison import (
+    build_pion_hgcer_ab_comparison,
+    build_pion_hgcer_comparison_input_contract,
+    build_pion_hgcer_method_a_comparison,
+    build_pion_hgcer_method_b_comparison,
+)
+from pion_hgcer_phase_d_checkpoint import (
+    build_pion_hgcer_phase_d_checkpoint,
+    pion_hgcer_phase_d_checkpoint_filename,
+    write_pion_hgcer_phase_d_checkpoint_json,
+)
 from pion_hgcer_refinement_plots import (
     build_pdf_destinations,
     build_pdf_route_manifest,
@@ -182,6 +193,7 @@ from pion_hgcer_refinement_plots import (
     method_b_display_source_parity,
     open_diagnostic_pdf,
     render_pion_hgcer_refinement_pages,
+    render_pion_hgcer_ab_comparison_pages,
     render_proton_main_summary_pages,
     render_setting_warning_page,
 )
@@ -4411,6 +4423,12 @@ def rand_sub(
     pion_hgcer_method_b = None
     pion_hgcer_refinement_checkpoint = None
     pion_hgcer_refinement_checkpoint_json = None
+    pion_hgcer_comparison_input = None
+    pion_hgcer_method_a_comparison = None
+    pion_hgcer_method_b_comparison = None
+    pion_hgcer_ab_comparison = None
+    pion_hgcer_phase_d_checkpoint = None
+    pion_hgcer_phase_d_checkpoint_json = None
 
     # Pion subtraction by scaling simc to peak size
     if ParticleType == "kaon":
@@ -5458,6 +5476,70 @@ def rand_sub(
                     histDict["pion_hgcer_refinement_checkpoint_artifacts"] = [
                         pion_hgcer_refinement_checkpoint_json
                     ]
+                    # Phase D.4 is a terminal detached diagnostic chain.  It
+                    # consumes the in-memory Phase-C checkpoint only after the
+                    # frozen Phase-C artifact has been written.
+                    try:
+                        pion_hgcer_comparison_input = (
+                            build_pion_hgcer_comparison_input_contract(
+                                pion_hgcer_refinement_checkpoint
+                            )
+                        )
+                        pion_hgcer_method_a_comparison = (
+                            build_pion_hgcer_method_a_comparison(
+                                pion_hgcer_comparison_input
+                            )
+                        )
+                        pion_hgcer_method_b_comparison = (
+                            build_pion_hgcer_method_b_comparison(
+                                pion_hgcer_comparison_input
+                            )
+                        )
+                        pion_hgcer_ab_comparison = build_pion_hgcer_ab_comparison(
+                            pion_hgcer_method_a_comparison,
+                            pion_hgcer_method_b_comparison,
+                        )
+                        pion_hgcer_phase_d_checkpoint = (
+                            build_pion_hgcer_phase_d_checkpoint(
+                                setting=pion_hgcer_refinement_checkpoint["setting"],
+                                method_a_comparison=pion_hgcer_method_a_comparison,
+                                method_b_comparison=pion_hgcer_method_b_comparison,
+                                ab_comparison=pion_hgcer_ab_comparison,
+                            )
+                        )
+                        pion_hgcer_phase_d_checkpoint_json = os.path.join(
+                            OUTPATH,
+                            pion_hgcer_phase_d_checkpoint_filename(
+                                pion_hgcer_phase_d_checkpoint["setting"]["phi_setting"],
+                                pion_hgcer_phase_d_checkpoint["setting"]["particle_type"],
+                                pion_hgcer_phase_d_checkpoint["setting"]["kinematic_token"],
+                                pion_hgcer_phase_d_checkpoint["setting"]["epsilon_filename_token"],
+                            ),
+                        )
+                        write_pion_hgcer_phase_d_checkpoint_json(
+                            pion_hgcer_phase_d_checkpoint_json,
+                            pion_hgcer_phase_d_checkpoint,
+                        )
+                        histDict["pion_hgcer_comparison_input"] = pion_hgcer_comparison_input
+                        histDict["pion_hgcer_method_a_comparison"] = pion_hgcer_method_a_comparison
+                        histDict["pion_hgcer_method_b_comparison"] = pion_hgcer_method_b_comparison
+                        histDict["pion_hgcer_ab_comparison"] = pion_hgcer_ab_comparison
+                        histDict["pion_hgcer_phase_d_checkpoint"] = pion_hgcer_phase_d_checkpoint
+                        histDict["pion_hgcer_phase_d_checkpoint_artifacts"] = [
+                            pion_hgcer_phase_d_checkpoint_json
+                        ]
+                    except Exception as exc:
+                        histDict["pion_hgcer_phase_d_checkpoint_status"] = {
+                            "status": "unavailable",
+                            "available": False,
+                            "reason": "phase_d_checkpoint_write_exception",
+                            "diagnostic_stage": "runtime_phase_d_exception",
+                            "exception_type": type(exc).__name__,
+                            "exception_message": str(exc),
+                            "non_authoritative": True,
+                            "production_objects_mutated": False,
+                            "refinement_applied": False,
+                        }
                 except Exception as exc:
                     # A checkpoint is a persistent diagnostic artifact only;
                     # failure to serialize it cannot alter production.
@@ -6473,6 +6555,11 @@ def rand_sub(
         if isinstance(pion_hgcer_refinement_checkpoint, dict)
         else histDict.get("pion_hgcer_refinement_checkpoint")
     )
+    phase_d_checkpoint_for_plots = (
+        pion_hgcer_phase_d_checkpoint
+        if isinstance(pion_hgcer_phase_d_checkpoint, dict)
+        else histDict.get("pion_hgcer_phase_d_checkpoint")
+    )
     # C.4.1 presentation context is copied from already-established runtime
     # records.  It deliberately performs no gate, closure, or host-state work.
     proton_display_diagnostics = (
@@ -6515,6 +6602,13 @@ def rand_sub(
                 pdf_destinations[supplement_key],
                 checkpoint_for_plots,
                 role=role,
+                main_pdf=main_pdf,
+            )
+        if isinstance(phase_d_checkpoint_for_plots, dict):
+            supplement_manifests["phase_d_ab"] = open_diagnostic_pdf(
+                pdf_destinations["phase_d_ab"],
+                phase_d_checkpoint_for_plots,
+                role="hgcer-ab-comparison",
                 main_pdf=main_pdf,
             )
     histDict["pdf_cleanup_route_manifest"] = pdf_route_manifest
@@ -7303,6 +7397,23 @@ def rand_sub(
             )
             # Preserve a closed primary PDF even if a detached renderer fails.
             ct.Print(main_pdf + ')')
+        if isinstance(phase_d_checkpoint_for_plots, dict):
+            try:
+                render_pion_hgcer_ab_comparison_pages(
+                    pdf_destinations["phase_d_ab"],
+                    phase_d_checkpoint_for_plots,
+                    page_manifest=supplement_manifests.get("phase_d_ab", []),
+                )
+            except Exception as exc:
+                setting_renderer_failures.append(
+                    "Phase-D A/B pages: {}: {}".format(type(exc).__name__, exc)
+                )
+                _print_rand_debug(
+                    "detached Phase-D A/B PDF pages unavailable",
+                    renderer="pion_hgcer_refinement_plots",
+                    exception_type=type(exc).__name__,
+                    exception=str(exc),
+                )
         for supplement_key, role in (
             ("proton_debug", "proton-debug"),
             ("pion_fit_debug", "pion-fit-debug"),
@@ -7313,6 +7424,13 @@ def rand_sub(
                 checkpoint_for_plots,
                 role=role,
                 manifest=supplement_manifests.get(supplement_key, []),
+            )
+        if "phase_d_ab" in supplement_manifests:
+            close_diagnostic_pdf(
+                pdf_destinations["phase_d_ab"],
+                phase_d_checkpoint_for_plots,
+                role="hgcer-ab-comparison",
+                manifest=supplement_manifests["phase_d_ab"],
             )
 
     _print_rand_timer("rand_sub plotting {}".format(phi_setting), perf_counter() - stage_start)

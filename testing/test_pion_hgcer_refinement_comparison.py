@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 import unittest
@@ -1425,7 +1426,7 @@ class PionHGCerMethodBComparisonTests(unittest.TestCase):
         )
         d3_source = source[
             source.index("def _method_b_comparison_unavailable") : source.index(
-                "\n__all__"
+                "\ndef _ab_comparison_unavailable"
             )
         ]
         for forbidden in (
@@ -1866,6 +1867,295 @@ class PionHGCerMethodBComparisonTests(unittest.TestCase):
             [parent for parent in result["parent_region_references"] if parent["t_index"] == 0],
             [parent for parent in baseline["parent_region_references"] if parent["t_index"] == 0],
         )
+
+
+class PionHGCerABComparisonTests(unittest.TestCase):
+    def _inputs(self):
+        d1 = comparison.build_pion_hgcer_comparison_input_contract(_checkpoint())
+        self.assertTrue(d1["available"])
+        d2 = comparison.build_pion_hgcer_method_a_comparison(d1)
+        d3 = comparison.build_pion_hgcer_method_b_comparison(d1)
+        self.assertTrue(d2["available"])
+        self.assertTrue(d3["available"])
+        return d2, d3
+
+    def _result(self, d2=None, d3=None):
+        if d2 is None or d3 is None:
+            d2, d3 = self._inputs()
+        return comparison.build_pion_hgcer_ab_comparison(d2, d3)
+
+    @staticmethod
+    def _cell(result, t_index=0, delta_index=0):
+        return next(
+            cell
+            for cell in result["cells"]
+            if cell["t_index"] == t_index and cell["delta_index"] == delta_index
+        )
+
+    @staticmethod
+    def _make_a_unavailable(cell):
+        cell.update(
+            method_a_comparison_candidate=None,
+            method_a_comparison_candidate_low=None,
+            method_a_comparison_candidate_high=None,
+            method_a_comparison_candidate_status="unavailable",
+            method_a_comparison_candidate_reason="synthetic_unavailable",
+        )
+
+    @staticmethod
+    def _make_b_unavailable(cell):
+        cell.update(
+            method_b_comparison_candidate=None,
+            method_b_comparison_candidate_uncertainty=None,
+            method_b_comparison_candidate_status="unavailable",
+            method_b_comparison_candidate_reason="synthetic_unavailable",
+            candidate_L_B_status="unavailable",
+            method_B_status="unavailable",
+            method_B_reason="synthetic_unavailable",
+            region_consistency_status="insufficient_regions",
+            region_consistency_reason="synthetic_unavailable",
+            shape_status="unavailable",
+            shape_reason="synthetic_unavailable",
+        )
+
+    def _assert_unavailable(self, result, reason):
+        self.assertEqual(result["schema_version"], comparison.AB_COMPARISON_SCHEMA_VERSION)
+        self.assertEqual(result["status"], "unavailable")
+        self.assertFalse(result["available"])
+        self.assertEqual(result["reason"], reason)
+        self.assertTrue(result["non_authoritative"])
+        self.assertFalse(result["comparison_performed"])
+        self.assertFalse(result["classification_performed"])
+        self.assertEqual(result["classification_scope"], "none")
+        self.assertFalse(result["decision_performed"])
+        self.assertFalse(result["statistical_compatibility_claimed"])
+
+    def test_successful_ab_comparison_is_detached_and_non_prescriptive(self):
+        d2, d3 = self._inputs()
+        before_d2, before_d3 = copy.deepcopy(d2), copy.deepcopy(d3)
+        result = self._result(d2, d3)
+        self.assertTrue(result["available"])
+        self.assertEqual(result["method"], "non_authoritative_ab_comparison")
+        self.assertTrue(result["comparison_performed"])
+        self.assertTrue(result["classification_performed"])
+        self.assertEqual(result["classification_scope"], "availability_only_non_prescriptive")
+        self.assertFalse(result["decision_performed"])
+        self.assertFalse(result["statistical_compatibility_claimed"])
+        self.assertEqual(d2, before_d2)
+        self.assertEqual(d3, before_d3)
+        cell = self._cell(result)
+        self.assertEqual(cell["comparison"]["availability"], "both_comparable")
+        self.assertEqual(
+            cell["comparison"]["ratio_B_over_A"],
+            cell["method_b"]["comparison_candidate"]
+            / cell["method_a"]["comparison_candidate"],
+        )
+        self.assertEqual(
+            cell["comparison"]["log_ratio_B_over_A"],
+            math.log(cell["method_b"]["comparison_candidate"])
+            - math.log(cell["method_a"]["comparison_candidate"]),
+        )
+        result["cells"][0]["method_a"]["support_class"] = "mutated"
+        self.assertEqual(d2, before_d2)
+        self.assertEqual(d3, before_d3)
+
+    def test_all_neutral_local_availability_states_are_preserved(self):
+        cases = (
+            ("both_comparable", lambda a, b: None),
+            (
+                "both_present_not_comparable",
+                lambda a, b: a.update(
+                    method_a_comparison_candidate=0.0,
+                    method_a_comparison_candidate_low=0.0,
+                    method_a_comparison_candidate_high=0.25,
+                    method_a_comparison_candidate_status="marginal",
+                ),
+            ),
+            ("a_only", lambda a, b: self._make_b_unavailable(b)),
+            ("b_only", lambda a, b: self._make_a_unavailable(a)),
+            (
+                "neither_available",
+                lambda a, b: (self._make_a_unavailable(a), self._make_b_unavailable(b)),
+            ),
+        )
+        for expected, mutate in cases:
+            with self.subTest(expected=expected):
+                d2, d3 = self._inputs()
+                mutate(d2["cells"][0], d3["cells"][0])
+                result = self._result(d2, d3)
+                cell = self._cell(result)
+                self.assertEqual(cell["comparison"]["availability"], expected)
+                if expected == "both_comparable":
+                    self.assertIsNotNone(cell["comparison"]["ratio_B_over_A"])
+                else:
+                    self.assertIsNone(cell["comparison"]["ratio_B_over_A"])
+                    self.assertIsNone(cell["comparison"]["log_ratio_B_over_A"])
+                if expected == "both_present_not_comparable":
+                    self.assertTrue(cell["method_a"]["present"])
+                    self.assertTrue(cell["method_b"]["present"])
+                    self.assertEqual(
+                        cell["comparison"]["availability_reason"],
+                        "method_a_comparison_candidate_nonpositive",
+                    )
+                    self.assertIsNotNone(cell["comparison"]["method_a_interval_low"])
+
+    def test_diagnostic_intervals_are_inclusive_and_b_lower_bound_is_not_clipped(self):
+        d2, d3 = self._inputs()
+        a_cell, b_cell = d2["cells"][0], d3["cells"][0]
+        a_cell.update(
+            method_a_comparison_candidate=0.20,
+            method_a_comparison_candidate_low=0.10,
+            method_a_comparison_candidate_high=0.20,
+        )
+        b_cell.update(
+            method_b_comparison_candidate=0.10,
+            method_b_comparison_candidate_uncertainty=0.20,
+        )
+        result = self._result(d2, d3)
+        cell = self._cell(result)
+        self.assertEqual(cell["comparison"]["method_b_interval_low"], -0.10)
+        self.assertAlmostEqual(cell["comparison"]["method_b_interval_high"], 0.30)
+        self.assertEqual(cell["comparison"]["diagnostic_interval_relation"], "overlap")
+        d2["cells"][0]["method_a_comparison_candidate_low"] = 0.31
+        d2["cells"][0]["method_a_comparison_candidate"] = 0.31
+        d2["cells"][0]["method_a_comparison_candidate_high"] = 0.40
+        self.assertEqual(
+            self._cell(self._result(d2, d3))["comparison"]["diagnostic_interval_relation"],
+            "disjoint",
+        )
+
+    def test_structural_failures_are_narrow_and_a_unavailability_precedes_b(self):
+        cases = (
+            (
+                "a_schema",
+                lambda a, b: a.update(schema_version="other"),
+                "method_a_comparison_contract_invalid",
+            ),
+            (
+                "b_schema",
+                lambda a, b: b.update(schema_version="other"),
+                "method_b_comparison_contract_invalid",
+            ),
+            (
+                "a_unavailable",
+                lambda a, b: a.update(status="unavailable", available=False),
+                "method_a_comparison_unavailable",
+            ),
+            (
+                "b_unavailable",
+                lambda a, b: b.update(status="unavailable", available=False),
+                "method_b_comparison_unavailable",
+            ),
+            (
+                "authority",
+                lambda a, b: a.update(non_authoritative=False),
+                "comparison_authority_contract_invalid",
+            ),
+            (
+                "provenance",
+                lambda a, b: b.update(coordinate_fingerprint="other"),
+                "comparison_provenance_mismatch",
+            ),
+            (
+                "source_provenance",
+                lambda a, b: b.update(source_checkpoint_payload_fingerprint="other"),
+                "comparison_provenance_mismatch",
+            ),
+            (
+                "phase_a_provenance",
+                lambda a, b: b.update(phase_a_contract_fingerprint="other"),
+                "comparison_provenance_mismatch",
+            ),
+            (
+                "fingerprint",
+                lambda a, b: a.update(fingerprint="other"),
+                "method_a_comparison_contract_invalid",
+            ),
+            (
+                "geometry",
+                lambda a, b: b.update(delta_edges=[0.0, 20.0, 10.0]),
+                "comparison_geometry_mismatch",
+            ),
+            (
+                "grid",
+                lambda a, b: b["cells"].pop(),
+                "comparison_cell_grid_invalid",
+            ),
+            (
+                "duplicate_grid",
+                lambda a, b: b["cells"].append(copy.deepcopy(b["cells"][0])),
+                "comparison_cell_grid_invalid",
+            ),
+            (
+                "out_of_range_grid",
+                lambda a, b: b["cells"][0].update(t_index=99),
+                "comparison_cell_grid_invalid",
+            ),
+            (
+                "cell_geometry",
+                lambda a, b: b["cells"][0].update(delta_high=99.0),
+                "comparison_cell_geometry_mismatch",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                d2, d3 = self._inputs()
+                mutate(d2, d3)
+                self._assert_unavailable(self._result(d2, d3), reason)
+        d2, d3 = self._inputs()
+        d2.update(status="unavailable", available=False)
+        d3.update(status="unavailable", available=False)
+        self._assert_unavailable(self._result(d2, d3), "method_a_comparison_unavailable")
+
+    def test_d4_fingerprints_cover_exact_representations_but_not_cross_t_science(self):
+        d2, d3 = self._inputs()
+        baseline = self._result(d2, d3)
+        repeated = self._result(copy.deepcopy(d2), copy.deepcopy(d3))
+        for key in (
+            "source_method_a_comparison_payload_fingerprint",
+            "source_method_b_comparison_payload_fingerprint",
+            "fingerprint",
+            "cells",
+            "summary",
+        ):
+            self.assertEqual(repeated[key], baseline[key])
+        changed = copy.deepcopy(d2)
+        changed["cells"][2]["prompt_vs_signed_status"] = "diagnostic_changed"
+        result = self._result(changed, d3)
+        self.assertNotEqual(
+            result["source_method_a_comparison_payload_fingerprint"],
+            baseline["source_method_a_comparison_payload_fingerprint"],
+        )
+        self.assertNotEqual(result["fingerprint"], baseline["fingerprint"])
+        self.assertEqual(
+            [cell for cell in result["cells"] if cell["t_index"] == 0],
+            [cell for cell in baseline["cells"] if cell["t_index"] == 0],
+        )
+        changed_b = copy.deepcopy(d3)
+        changed_b["cells"][2]["shape_reason"] = "diagnostic_changed"
+        result_b = self._result(d2, changed_b)
+        self.assertNotEqual(
+            result_b["source_method_b_comparison_payload_fingerprint"],
+            baseline["source_method_b_comparison_payload_fingerprint"],
+        )
+        self.assertNotEqual(result_b["fingerprint"], baseline["fingerprint"])
+        self.assertEqual(
+            [cell for cell in result_b["cells"] if cell["t_index"] == 0],
+            [cell for cell in baseline["cells"] if cell["t_index"] == 0],
+        )
+        forbidden = (
+            "z_score",
+            "p_value",
+            "chi2_AB",
+            "sigma_tension",
+            "use_A",
+            "use_B",
+            "combine_AB",
+            "C_final",
+        )
+        serialized = json.dumps(result, sort_keys=True)
+        for name in forbidden:
+            self.assertNotIn('"{}"'.format(name), serialized)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Read-only PDF presentation for detached HGCer Phase A / Method A / Method B.
+"""Read-only PDF presentation for detached HGCer Phase A-D diagnostics.
 
 This module intentionally has no imports from the analysis, fitting, weighting, or
 event-selection layers.  It consumes already-produced payloads and, when ROOT is
@@ -23,6 +23,7 @@ def build_pdf_destinations(main_pdf):
         "proton_debug": "{}_proton-debug{}".format(root, extension),
         "pion_fit_debug": "{}_pion-fit-debug{}".format(root, extension),
         "hgcer_debug": "{}_hgcer-debug{}".format(root, extension),
+        "phase_d_ab": "{}_hgcer-ab-comparison{}".format(root, extension),
     }
 
 
@@ -53,6 +54,12 @@ def build_pdf_route_manifest(main_pdf):
             "pion.dummy_random.detail",
         ),
         "hgcer_debug": ("hgcer.pid", "hgcer.part1", "hgcer.part1_5", "hgcer.part2"),
+        "phase_d_ab": (
+            "hgcer.phase_d.ab.overlay",
+            "hgcer.phase_d.ab.central_comparison",
+            "hgcer.phase_d.ab.status",
+            "hgcer.phase_d.ab.provenance",
+        ),
     }
     return {
         "destinations": destinations,
@@ -139,6 +146,287 @@ def refinement_annotation_lines(candidate=False):
     if candidate:
         lines.append("Diagnostic candidate only; no event correction")
     return tuple(lines)
+
+
+def phase_d_ab_plot_payload(phase_d_checkpoint):
+    """Select stored D.4 scalar records without rebuilding their comparison."""
+    checkpoint = _mapping(phase_d_checkpoint)
+    comparison = _mapping(checkpoint.get("ab_comparison"))
+    setting = _mapping(checkpoint.get("setting"))
+    cells_by_t = {}
+    for source_cell in comparison.get("cells") or ():
+        cell = _mapping(source_cell)
+        method_a = _mapping(cell.get("method_a"))
+        method_b = _mapping(cell.get("method_b"))
+        relation = _mapping(cell.get("comparison"))
+        try:
+            t_index = int(cell["t_index"])
+            delta_index = int(cell["delta_index"])
+            delta_low = float(cell["delta_low"])
+            delta_high = float(cell["delta_high"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        row = {
+            "t_index": t_index,
+            "delta_index": delta_index,
+            "delta_low": delta_low,
+            "delta_high": delta_high,
+            "delta_center": 0.5 * (delta_low + delta_high),
+            "method_a": {
+                "present": method_a.get("present") is True,
+                "candidate": _finite(method_a.get("comparison_candidate")),
+                "low": _finite(method_a.get("comparison_candidate_low")),
+                "high": _finite(method_a.get("comparison_candidate_high")),
+                "status": method_a.get("comparison_candidate_status"),
+                "support_class": method_a.get("support_class"),
+            },
+            "method_b": {
+                "present": method_b.get("present") is True,
+                "candidate": _finite(method_b.get("comparison_candidate")),
+                "uncertainty": _finite(method_b.get("comparison_candidate_uncertainty")),
+                "status": method_b.get("comparison_candidate_status"),
+                "method_status": method_b.get("method_B_status"),
+                "region_consistency_status": method_b.get("region_consistency_status"),
+                "shape_status": method_b.get("shape_status"),
+            },
+            "comparison": {
+                "availability": relation.get("availability"),
+                "ratio_B_over_A": _finite(relation.get("ratio_B_over_A")),
+                "log_ratio_B_over_A": _finite(relation.get("log_ratio_B_over_A")),
+                "interval_relation": relation.get("diagnostic_interval_relation"),
+            },
+        }
+        cells_by_t.setdefault(t_index, []).append(row)
+    per_t = []
+    for t_index in sorted(cells_by_t):
+        rows = sorted(cells_by_t[t_index], key=lambda row: row["delta_index"])
+        per_t.append({"t_index": t_index, "cells": rows})
+    return {
+        "setting": setting,
+        "status": comparison.get("status"),
+        "available": comparison.get("available") is True,
+        "reason": comparison.get("reason"),
+        "provenance": {
+            "source_checkpoint_payload_fingerprint": checkpoint.get(
+                "source_checkpoint_payload_fingerprint"
+            ),
+            "phase_a_contract_fingerprint": comparison.get("phase_a_contract_fingerprint"),
+            "coordinate_fingerprint": comparison.get("coordinate_fingerprint"),
+            "method_a_comparison_fingerprint": comparison.get(
+                "method_a_comparison_fingerprint"
+            ),
+            "method_b_comparison_fingerprint": comparison.get(
+                "method_b_comparison_fingerprint"
+            ),
+            "fingerprint": comparison.get("fingerprint"),
+        },
+        "summary": _mapping(comparison.get("summary")),
+        "per_t": per_t,
+    }
+
+
+def _phase_d_annotation_lines():
+    return (
+        "NON-AUTHORITATIVE DIAGNOSTIC",
+        "NO REFINEMENT APPLIED",
+        "A/B comparison only; no correction decision",
+    )
+
+
+def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
+    canvas = ROOT.TCanvas(
+        "C_phase_d_ab_overlay_{}".format(group["t_index"]),
+        _title(setting, "HGCer Phase D", "A/B versus delta"),
+        1200,
+        800,
+    )
+    try:
+        a_rows = [
+            row
+            for row in group["cells"]
+            if row["method_a"]["present"]
+            and row["method_a"]["candidate"] is not None
+            and row["method_a"]["low"] is not None
+            and row["method_a"]["high"] is not None
+        ]
+        b_rows = [
+            row
+            for row in group["cells"]
+            if row["method_b"]["present"]
+            and row["method_b"]["candidate"] is not None
+            and row["method_b"]["uncertainty"] is not None
+        ]
+        graphs = []
+        if a_rows:
+            graph_a = ROOT.TGraphAsymmErrors(len(a_rows))
+            for index, row in enumerate(a_rows):
+                candidate = row["method_a"]["candidate"]
+                graph_a.SetPoint(index, row["delta_center"], candidate)
+                graph_a.SetPointError(
+                    index,
+                    0.0,
+                    0.0,
+                    candidate - row["method_a"]["low"],
+                    row["method_a"]["high"] - candidate,
+                )
+            graph_a.SetMarkerStyle(20)
+            graph_a.SetMarkerColor(4)
+            graph_a.SetLineColor(4)
+            graph_a.SetTitle("{};delta;stored comparison candidate".format(_title(setting, "HGCer Phase D", "A/B versus delta")))
+            graph_a.Draw("AP")
+            graphs.append((graph_a, "Method A"))
+        if b_rows:
+            graph_b = ROOT.TGraphErrors(len(b_rows))
+            for index, row in enumerate(b_rows):
+                graph_b.SetPoint(index, row["delta_center"], row["method_b"]["candidate"])
+                graph_b.SetPointError(index, 0.0, row["method_b"]["uncertainty"])
+            graph_b.SetMarkerStyle(24)
+            graph_b.SetMarkerColor(1)
+            graph_b.SetLineColor(1)
+            graph_b.Draw("P SAME" if a_rows else "AP")
+            graphs.append((graph_b, "Method B"))
+        if graphs:
+            legend = ROOT.TLegend(0.68, 0.72, 0.89, 0.88)
+            legend.SetFillStyle(0)
+            legend.SetBorderSize(0)
+            for graph, label in graphs:
+                legend.AddEntry(graph, label, "lep")
+            legend.Draw()
+            line = ROOT.TLine(
+                min(row["delta_low"] for row in group["cells"]),
+                1.0,
+                max(row["delta_high"] for row in group["cells"]),
+                1.0,
+            )
+            line.SetLineStyle(2)
+            line.Draw()
+        else:
+            message = ROOT.TLatex()
+            message.DrawLatexNDC(0.12, 0.55, "No stored A/B candidates for this t bin")
+        annotation = ROOT.TLatex()
+        for index, line in enumerate(_phase_d_annotation_lines()):
+            annotation.DrawLatexNDC(0.12, 0.90 - 0.035 * index, line)
+        canvas.Print(pdf_name)
+        manifest.append({"page_id": "hgcer.phase_d.ab.overlay", "scope": "t_bin", "authoritative": False})
+    finally:
+        canvas.Close()
+
+
+def _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest):
+    canvas = ROOT.TCanvas(
+        "C_phase_d_ab_central_{}".format(group["t_index"]),
+        _title(setting, "HGCer Phase D", "B/A central comparison"),
+        1200,
+        800,
+    )
+    try:
+        rows = [
+            row
+            for row in group["cells"]
+            if row["comparison"]["availability"] == "both_comparable"
+            and row["comparison"]["ratio_B_over_A"] is not None
+            and row["comparison"]["log_ratio_B_over_A"] is not None
+        ]
+        if rows:
+            canvas.Divide(1, 2)
+            for pad, key, title, reference in (
+                (1, "ratio_B_over_A", "B/A", 1.0),
+                (2, "log_ratio_B_over_A", "ln(B/A)", 0.0),
+            ):
+                canvas.cd(pad)
+                graph = ROOT.TGraph(len(rows))
+                for index, row in enumerate(rows):
+                    graph.SetPoint(index, row["delta_center"], row["comparison"][key])
+                graph.SetMarkerStyle(20)
+                graph.SetTitle("{};delta;{}".format(_title(setting, "HGCer Phase D", title), title))
+                graph.Draw("AP")
+                line = ROOT.TLine(
+                    min(row["delta_low"] for row in group["cells"]),
+                    reference,
+                    max(row["delta_high"] for row in group["cells"]),
+                    reference,
+                )
+                line.SetLineStyle(2)
+                line.Draw()
+        else:
+            message = ROOT.TLatex()
+            message.DrawLatexNDC(0.12, 0.55, "No both_comparable central values for this t bin")
+        canvas.Print(pdf_name)
+        manifest.append({"page_id": "hgcer.phase_d.ab.central_comparison", "scope": "t_bin", "authoritative": False})
+    finally:
+        canvas.Close()
+
+
+def _phase_d_status_lines(group):
+    lines = list(_phase_d_annotation_lines())
+    lines.append("t_index={}".format(group["t_index"]))
+    for row in group["cells"]:
+        lines.append(
+            "delta {}: A={} ({}) | B={} / {} / {} / {} | D4={} | interval={}".format(
+                row["delta_index"],
+                row["method_a"]["status"],
+                row["method_a"]["support_class"],
+                row["method_b"]["status"],
+                row["method_b"]["method_status"],
+                row["method_b"]["region_consistency_status"],
+                row["method_b"]["shape_status"],
+                row["comparison"]["availability"],
+                row["comparison"]["interval_relation"],
+            )
+        )
+    return tuple(lines)
+
+
+def render_pion_hgcer_ab_comparison_pages(pdf_name, phase_d_checkpoint, *, page_manifest=None):
+    """Append stored Phase-D A/B diagnostic pages to an already-open PDF."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    payload = phase_d_ab_plot_payload(phase_d_checkpoint)
+    setting = payload["setting"]
+    if _import_root() is None:
+        return manifest
+    ROOT = _import_root()
+    if not payload["available"]:
+        _print_text_page(
+            pdf_name,
+            "hgcer.phase_d.ab.status",
+            _title(setting, "HGCer Phase D", "A/B comparison status"),
+            _phase_d_annotation_lines()
+            + ("status: unavailable", "reason: {}".format(payload["reason"])),
+            manifest,
+        )
+        return manifest
+    for group in payload["per_t"]:
+        _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest)
+        _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest)
+        _print_text_page(
+            pdf_name,
+            "hgcer.phase_d.ab.status",
+            _title(setting, "HGCer Phase D", "A/B stored status"),
+            _phase_d_status_lines(group),
+            manifest,
+        )
+    provenance = payload["provenance"]
+    summary = payload["summary"]
+    _print_text_page(
+        pdf_name,
+        "hgcer.phase_d.ab.provenance",
+        _title(setting, "HGCer Phase D", "A/B provenance and summary"),
+        _phase_d_annotation_lines()
+        + tuple(
+            "{}: {}".format(name, _short_fingerprint(value))
+            for name, value in provenance.items()
+        )
+        + (
+            "availability counts: {}".format(
+                _display_value(summary.get("comparison_availability_counts"))
+            ),
+            "interval counts: {}".format(
+                _display_value(summary.get("diagnostic_interval_relation_counts"))
+            ),
+        ),
+        manifest,
+    )
+    return manifest
 
 
 def method_a_f_low_style(support_class):
@@ -1645,12 +1933,14 @@ __all__ = (
     "method_b_regional_rows",
     "method_b_shape_rows",
     "open_diagnostic_pdf",
+    "phase_d_ab_plot_payload",
     "phase_a_summary_payload",
     "proton_main_summary_lines",
     "proton_main_qa_payload",
     "proton_closure_summary_lines",
     "refinement_annotation_lines",
     "render_pion_hgcer_refinement_pages",
+    "render_pion_hgcer_ab_comparison_pages",
     "render_proton_main_summary_pages",
     "render_setting_warning_page",
     "setting_qa_summary_payload",

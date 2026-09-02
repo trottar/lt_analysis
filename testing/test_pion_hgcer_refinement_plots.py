@@ -170,6 +170,94 @@ def _left_low_checkpoint():
     }
 
 
+def _phase_d_checkpoint():
+    return {
+        "setting": {
+            "phi_setting": "Left",
+            "kinematic_token": "Q4p4W2p74",
+            "epsilon_filename_token": "lowe",
+        },
+        "source_checkpoint_payload_fingerprint": "phase-c-fingerprint-0123456789",
+        "ab_comparison": {
+            "status": "available",
+            "available": True,
+            "phase_a_contract_fingerprint": "phase-a-fingerprint-0123456789",
+            "coordinate_fingerprint": "coordinate-fingerprint-012345",
+            "method_a_comparison_fingerprint": "d2-fingerprint-0123456789",
+            "method_b_comparison_fingerprint": "d3-fingerprint-0123456789",
+            "fingerprint": "d4-fingerprint-0123456789",
+            "summary": {
+                "comparison_availability_counts": {"both_comparable": 1},
+                "diagnostic_interval_relation_counts": {"overlap": 1},
+            },
+            "cells": [
+                {
+                    "t_index": 0,
+                    "t_low": 0.1,
+                    "t_high": 0.2,
+                    "delta_index": 0,
+                    "delta_low": -10.0,
+                    "delta_high": 0.0,
+                    "method_a": {
+                        "present": True,
+                        "comparison_candidate": 0.8,
+                        "comparison_candidate_low": 0.5,
+                        "comparison_candidate_high": 1.1,
+                        "comparison_candidate_status": "available",
+                        "support_class": "supported",
+                    },
+                    "method_b": {
+                        "present": True,
+                        "comparison_candidate": 1.0,
+                        "comparison_candidate_uncertainty": 0.2,
+                        "comparison_candidate_status": "available_multi_region",
+                        "method_B_status": "available",
+                        "region_consistency_status": "region_consistent",
+                        "shape_status": "good",
+                    },
+                    "comparison": {
+                        "availability": "both_comparable",
+                        "ratio_B_over_A": 1.25,
+                        "log_ratio_B_over_A": 0.22314355131420976,
+                        "diagnostic_interval_relation": "overlap",
+                    },
+                },
+                {
+                    "t_index": 0,
+                    "t_low": 0.1,
+                    "t_high": 0.2,
+                    "delta_index": 1,
+                    "delta_low": 0.0,
+                    "delta_high": 10.0,
+                    "method_a": {
+                        "present": True,
+                        "comparison_candidate": 0.0,
+                        "comparison_candidate_low": 0.0,
+                        "comparison_candidate_high": 0.2,
+                        "comparison_candidate_status": "marginal",
+                        "support_class": "marginal",
+                    },
+                    "method_b": {
+                        "present": False,
+                        "comparison_candidate": None,
+                        "comparison_candidate_uncertainty": None,
+                        "comparison_candidate_status": "shape_poor_veto",
+                        "method_B_status": "shape_inconsistent",
+                        "region_consistency_status": "region_consistent",
+                        "shape_status": "poor",
+                    },
+                    "comparison": {
+                        "availability": "a_only",
+                        "ratio_B_over_A": None,
+                        "log_ratio_B_over_A": None,
+                        "diagnostic_interval_relation": "not_evaluable",
+                    },
+                },
+            ],
+        },
+    }
+
+
 def _load_parent_lambda_renderer(comparison_renderer):
     """Load the parent presentation wrapper with inert non-rendering imports."""
     background_config = types.ModuleType("background_config")
@@ -229,6 +317,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual(destinations["proton_debug"], r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_proton-debug.pdf")
         self.assertEqual(destinations["pion_fit_debug"], r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_pion-fit-debug.pdf")
         self.assertEqual(destinations["hgcer_debug"], r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_hgcer-debug.pdf")
+        self.assertEqual(destinations["phase_d_ab"], r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_hgcer-ab-comparison.pdf")
         manifest = plots.build_pdf_route_manifest(main)
         self.assertIn("hgcer.phase_a.summary", manifest["routes"]["main"])
         self.assertEqual(
@@ -242,6 +331,44 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIn("pion.coordinate.detail", manifest["routes"]["pion_fit_debug"])
         self.assertIn("hgcer.part2", manifest["routes"]["hgcer_debug"])
         self.assertIn("proton.detail", manifest["routes"]["proton_debug"])
+        self.assertEqual(
+            manifest["routes"]["phase_d_ab"],
+            [
+                "hgcer.phase_d.ab.overlay",
+                "hgcer.phase_d.ab.central_comparison",
+                "hgcer.phase_d.ab.status",
+                "hgcer.phase_d.ab.provenance",
+            ],
+        )
+        self.assertFalse(
+            any(page.startswith("hgcer.phase_d") for page in manifest["routes"]["main"])
+        )
+
+    def test_phase_d_plot_payload_uses_stored_values_and_preserves_missing_states(self):
+        payload = plots.phase_d_ab_plot_payload(_phase_d_checkpoint())
+        self.assertTrue(payload["available"])
+        self.assertEqual(len(payload["per_t"]), 1)
+        rows = payload["per_t"][0]["cells"]
+        self.assertEqual(rows[0]["method_a"]["candidate"], 0.8)
+        self.assertEqual(rows[0]["method_a"]["low"], 0.5)
+        self.assertEqual(rows[0]["method_a"]["high"], 1.1)
+        self.assertEqual(rows[0]["method_b"]["candidate"], 1.0)
+        self.assertEqual(rows[0]["method_b"]["uncertainty"], 0.2)
+        self.assertEqual(rows[0]["comparison"]["ratio_B_over_A"], 1.25)
+        self.assertIsNone(rows[1]["comparison"]["ratio_B_over_A"])
+        self.assertIsNone(rows[1]["comparison"]["log_ratio_B_over_A"])
+        self.assertEqual(rows[1]["method_a"]["candidate"], 0.0)
+        self.assertEqual(rows[1]["method_b"]["status"], "shape_poor_veto")
+        self.assertEqual(rows[1]["method_b"]["method_status"], "shape_inconsistent")
+        self.assertEqual(rows[1]["method_b"]["shape_status"], "poor")
+        for line in plots._phase_d_annotation_lines():
+            self.assertIn(line, plots._phase_d_status_lines(payload["per_t"][0]))
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        start = source.index("def phase_d_ab_plot_payload")
+        end = source.index("def render_pion_hgcer_refinement_pages", start)
+        d4_source = source[start:end]
+        for forbidden in ("build_pion_hgcer_ab_comparison", "use_A", "use_B", "combine_AB", "C_final"):
+            self.assertNotIn(forbidden, d4_source)
 
     def test_detached_c4_title_is_ascii_safe(self):
         title = plots._title(
