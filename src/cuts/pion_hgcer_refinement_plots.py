@@ -28,7 +28,7 @@ def build_pdf_destinations(main_pdf):
 
 
 def build_pdf_route_manifest(main_pdf):
-    """Declare C.4 page ownership without using a mutable render-time policy."""
+    """Declare detached C.4 and Phase-D page ownership without mutable policy."""
     destinations = build_pdf_destinations(main_pdf)
     routes = {
         "main": (
@@ -233,6 +233,37 @@ def _phase_d_annotation_lines():
     )
 
 
+def _phase_d_overlay_display_bounds(group):
+    """Return padded, display-only A/B bounds from native stored intervals and unity."""
+    values = [1.0]
+    for source_row in _mapping(group).get("cells") or ():
+        row = _mapping(source_row)
+        method_a = _mapping(row.get("method_a"))
+        method_b = _mapping(row.get("method_b"))
+
+        a_candidate = _finite(method_a.get("candidate"))
+        a_low = _finite(method_a.get("low"))
+        a_high = _finite(method_a.get("high"))
+        if method_a.get("present") is True and None not in (a_candidate, a_low, a_high):
+            values.extend((a_low, a_candidate, a_high))
+
+        b_candidate = _finite(method_b.get("candidate"))
+        b_uncertainty = _finite(method_b.get("uncertainty"))
+        if (
+            method_b.get("present") is True
+            and b_candidate is not None
+            and b_uncertainty is not None
+            and b_uncertainty >= 0.0
+        ):
+            values.extend((b_candidate - b_uncertainty, b_candidate + b_uncertainty))
+
+    lower = min(values)
+    upper = max(values)
+    span = upper - lower
+    padding = 0.05 * span if span > 0.0 else max(0.05 * abs(lower), 0.05)
+    return lower - padding, upper + padding
+
+
 def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
     canvas = ROOT.TCanvas(
         "C_phase_d_ab_overlay_{}".format(group["t_index"]),
@@ -240,6 +271,7 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
         1200,
         800,
     )
+    keepalive = []
     try:
         a_rows = [
             row
@@ -257,6 +289,24 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
             and row["method_b"]["uncertainty"] is not None
         ]
         graphs = []
+        x_low = min(row["delta_low"] for row in group["cells"])
+        x_high = max(row["delta_high"] for row in group["cells"])
+        y_low, y_high = _phase_d_overlay_display_bounds(group)
+        frame = ROOT.TH2F(
+            "H_phase_d_ab_overlay_frame_{}".format(group["t_index"]),
+            "{};delta;stored comparison candidate".format(
+                _title(setting, "HGCer Phase D", "A/B versus delta")
+            ),
+            1,
+            x_low,
+            x_high,
+            1,
+            y_low,
+            y_high,
+        )
+        frame.SetStats(0)
+        frame.Draw("AXIS")
+        keepalive.append(frame)
         if a_rows:
             graph_a = ROOT.TGraphAsymmErrors(len(a_rows))
             for index, row in enumerate(a_rows):
@@ -272,9 +322,9 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
             graph_a.SetMarkerStyle(20)
             graph_a.SetMarkerColor(4)
             graph_a.SetLineColor(4)
-            graph_a.SetTitle("{};delta;stored comparison candidate".format(_title(setting, "HGCer Phase D", "A/B versus delta")))
-            graph_a.Draw("AP")
+            graph_a.Draw("P SAME")
             graphs.append((graph_a, "Method A"))
+            keepalive.append(graph_a)
         if b_rows:
             graph_b = ROOT.TGraphErrors(len(b_rows))
             for index, row in enumerate(b_rows):
@@ -283,8 +333,9 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
             graph_b.SetMarkerStyle(24)
             graph_b.SetMarkerColor(1)
             graph_b.SetLineColor(1)
-            graph_b.Draw("P SAME" if a_rows else "AP")
+            graph_b.Draw("P SAME")
             graphs.append((graph_b, "Method B"))
+            keepalive.append(graph_b)
         if graphs:
             legend = ROOT.TLegend(0.68, 0.72, 0.89, 0.88)
             legend.SetFillStyle(0)
@@ -292,20 +343,19 @@ def _phase_d_ab_overlay_page(ROOT, pdf_name, setting, group, manifest):
             for graph, label in graphs:
                 legend.AddEntry(graph, label, "lep")
             legend.Draw()
-            line = ROOT.TLine(
-                min(row["delta_low"] for row in group["cells"]),
-                1.0,
-                max(row["delta_high"] for row in group["cells"]),
-                1.0,
-            )
-            line.SetLineStyle(2)
-            line.Draw()
+            keepalive.append(legend)
         else:
             message = ROOT.TLatex()
             message.DrawLatexNDC(0.12, 0.55, "No stored A/B candidates for this t bin")
+            keepalive.append(message)
+        unity = ROOT.TLine(x_low, 1.0, x_high, 1.0)
+        unity.SetLineStyle(2)
+        unity.Draw()
+        keepalive.append(unity)
         annotation = ROOT.TLatex()
         for index, line in enumerate(_phase_d_annotation_lines()):
             annotation.DrawLatexNDC(0.12, 0.90 - 0.035 * index, line)
+        keepalive.append(annotation)
         canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.phase_d.ab.overlay", "scope": "t_bin", "authoritative": False})
     finally:
@@ -319,6 +369,7 @@ def _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest):
         1200,
         800,
     )
+    keepalive = []
     try:
         rows = [
             row
@@ -340,6 +391,7 @@ def _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest):
                 graph.SetMarkerStyle(20)
                 graph.SetTitle("{};delta;{}".format(_title(setting, "HGCer Phase D", title), title))
                 graph.Draw("AP")
+                keepalive.append(graph)
                 line = ROOT.TLine(
                     min(row["delta_low"] for row in group["cells"]),
                     reference,
@@ -348,9 +400,16 @@ def _phase_d_ab_central_page(ROOT, pdf_name, setting, group, manifest):
                 )
                 line.SetLineStyle(2)
                 line.Draw()
+                keepalive.append(line)
+            canvas.cd(1)
         else:
             message = ROOT.TLatex()
             message.DrawLatexNDC(0.12, 0.55, "No both_comparable central values for this t bin")
+            keepalive.append(message)
+        annotation = ROOT.TLatex()
+        for index, text in enumerate(_phase_d_annotation_lines()):
+            annotation.DrawLatexNDC(0.12, 0.90 - 0.035 * index, text)
+        keepalive.append(annotation)
         canvas.Print(pdf_name)
         manifest.append({"page_id": "hgcer.phase_d.ab.central_comparison", "scope": "t_bin", "authoritative": False})
     finally:

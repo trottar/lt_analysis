@@ -1,4 +1,4 @@
-"""Pure-Python contracts for C.4 detached HGCer PDF presentation."""
+"""Pure-Python contracts for detached C.4 and Phase-D HGCer PDF presentation."""
 
 from __future__ import annotations
 
@@ -369,6 +369,63 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         d4_source = source[start:end]
         for forbidden in ("build_pion_hgcer_ab_comparison", "use_A", "use_B", "combine_AB", "C_final"):
             self.assertNotIn(forbidden, d4_source)
+
+    def test_phase_d_overlay_frame_covers_native_a_b_intervals_and_unity(self):
+        a_only_group = {
+            "cells": [
+                {
+                    "method_a": {"present": True, "candidate": 4.0, "low": 3.8, "high": 4.2},
+                    "method_b": {"present": True, "candidate": 8.0, "uncertainty": 2.0},
+                }
+            ]
+        }
+        b_wide_group = {
+            "cells": [
+                {
+                    "method_a": {"present": True, "candidate": 3.0, "low": 2.9, "high": 3.1},
+                    "method_b": {"present": True, "candidate": 0.2, "uncertainty": 1.5},
+                }
+            ]
+        }
+        first_bounds = plots._phase_d_overlay_display_bounds(a_only_group)
+        second_snapshot = (
+            b_wide_group["cells"][0]["method_a"].copy(),
+            b_wide_group["cells"][0]["method_b"].copy(),
+        )
+        second_bounds = plots._phase_d_overlay_display_bounds(b_wide_group)
+
+        self.assertLessEqual(first_bounds[0], 1.0)
+        self.assertGreaterEqual(first_bounds[1], 10.0)
+        self.assertLessEqual(second_bounds[0], -1.3)
+        self.assertGreaterEqual(second_bounds[1], 3.1)
+        self.assertEqual(
+            second_snapshot,
+            (
+                b_wide_group["cells"][0]["method_a"],
+                b_wide_group["cells"][0]["method_b"],
+            ),
+        )
+
+    def test_phase_d_renderers_annotate_and_keep_drawing_objects_alive(self):
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        overlay_start = source.index("def _phase_d_ab_overlay_page")
+        central_start = source.index("def _phase_d_ab_central_page")
+        status_start = source.index("def _phase_d_status_lines")
+        overlay_source = source[overlay_start:central_start]
+        central_source = source[central_start:status_start]
+
+        self.assertIn("_phase_d_overlay_display_bounds(group)", overlay_source)
+        self.assertIn("frame.Draw(\"AXIS\")", overlay_source)
+        self.assertNotIn('graph_a.Draw("AP")', overlay_source)
+        self.assertNotIn('graph_b.Draw("P SAME" if a_rows else "AP")', overlay_source)
+        for renderer_source in (overlay_source, central_source):
+            self.assertIn("keepalive = []", renderer_source)
+            self.assertIn("canvas.Print(pdf_name)", renderer_source)
+            self.assertLess(renderer_source.index("keepalive.append"), renderer_source.index("canvas.Print(pdf_name)"))
+        self.assertIn("keepalive.append(graph)", central_source)
+        self.assertIn("keepalive.append(line)", central_source)
+        self.assertIn("_phase_d_annotation_lines()", central_source)
+        self.assertIn("annotation.DrawLatexNDC", central_source)
 
     def test_detached_c4_title_is_ascii_safe(self):
         title = plots._title(

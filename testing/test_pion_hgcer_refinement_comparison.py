@@ -1,4 +1,4 @@
-"""Pure-Python regression coverage for Phase-D.1/D.1.1, D.2, and D.3 contracts."""
+"""Pure-Python regression coverage for Phase D.1/D.1.1 through D.4 contracts."""
 
 from __future__ import annotations
 
