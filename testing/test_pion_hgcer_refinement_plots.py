@@ -367,7 +367,15 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         start = source.index("def phase_d_ab_plot_payload")
         end = source.index("def render_pion_hgcer_refinement_pages", start)
         d4_source = source[start:end]
-        for forbidden in ("build_pion_hgcer_ab_comparison", "use_A", "use_B", "combine_AB", "C_final"):
+        for forbidden in (
+            "build_pion_hgcer_ab_comparison",
+            "use_A",
+            "use_B",
+            "combine_AB",
+            "C_A",
+            "C_B",
+            "C_final",
+        ):
             self.assertNotIn(forbidden, d4_source)
 
     def test_phase_d_overlay_frame_covers_native_a_b_intervals_and_unity(self):
