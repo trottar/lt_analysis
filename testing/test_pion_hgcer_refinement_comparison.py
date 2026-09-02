@@ -1282,23 +1282,49 @@ class PionHGCerMethodBComparisonTests(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_candidate_unavailable(cell, candidate_status, method_status, reason):
+    def _set_parent_relative_available_count(cell, available_count):
+        for index, row in enumerate(cell["regions"]):
+            if index < available_count:
+                row["support_status"] = "usable"
+                row["parent_relative_status"] = "available"
+                row["parent_relative_reason"] = None
+                if row["parent_relative_ratio"] is None:
+                    row["parent_relative_ratio"] = 1.0
+                if row["parent_relative_sigma"] is None:
+                    row["parent_relative_sigma"] = 0.20
+            else:
+                row["parent_relative_status"] = "unavailable"
+                row["parent_relative_ratio"] = None
+                row["parent_relative_sigma"] = None
+                row["parent_relative_reason"] = "local_parent_relative_unavailable"
+
+    @classmethod
+    def _make_candidate_unavailable(cls, cell, candidate_status, method_status, reason):
         cell["candidate_L_B"] = None
         cell["candidate_L_B_uncertainty"] = None
         cell["candidate_L_B_status"] = candidate_status
         cell["method_B_status"] = method_status
         cell["method_B_reason"] = reason
         if candidate_status == "region_marginal":
+            cls._set_parent_relative_available_count(cell, 2)
             cell["region_consistency_status"] = "region_marginal"
             cell["region_consistency_reason"] = reason
         elif candidate_status == "region_inconsistent":
+            cls._set_parent_relative_available_count(cell, 2)
             cell["region_consistency_status"] = "region_inconsistent"
             cell["region_consistency_reason"] = reason
         elif candidate_status == "shape_poor_veto":
+            cls._set_parent_relative_available_count(cell, 2)
             cell["region_consistency_status"] = "region_consistent"
+            cell["region_consistency_reason"] = None
             cell["shape_status"] = "poor"
             cell["shape_reason"] = reason
+        elif candidate_status == "single_region_only":
+            cls._set_parent_relative_available_count(cell, 1)
+            cell["region_consistency_status"] = "insufficient_regions"
+            cell["region_consistency_reason"] = reason
         else:
+            cls._set_parent_relative_available_count(cell, 0)
             cell["region_consistency_status"] = "insufficient_regions"
             cell["region_consistency_reason"] = reason
 
@@ -1451,8 +1477,183 @@ class PionHGCerMethodBComparisonTests(unittest.TestCase):
         )
 
     def test_method_b_unavailable_is_structured_without_changing_d1(self):
+        for method_b_host_state in (None, "proton_cleaned"):
+            with self.subTest(method_b_host_state=method_b_host_state):
+                input_contract = self._comparison_input(method_b_status="unavailable")
+                input_contract["host_state_summary"][
+                    "method_b_host_state"
+                ] = method_b_host_state
+                self._assert_unavailable(
+                    input_contract, "method_b_unavailable", "method_b_provenance"
+                )
+
+    def test_unavailable_method_b_rejects_a_contradictory_non_null_host(self):
         input_contract = self._comparison_input(method_b_status="unavailable")
-        self._assert_unavailable(input_contract, "method_b_unavailable", "method_b_provenance")
+        input_contract["host_state_summary"][
+            "method_b_host_state"
+        ] = "identity_no_proton_cleaning"
+        self._assert_unavailable(
+            input_contract, "host_state_invalid", "host_provenance"
+        )
+
+    def test_unavailable_method_b_does_not_require_available_only_metadata(self):
+        input_contract = self._comparison_input(method_b_status="unavailable")
+        for key in ("fingerprint", "cells", "parent_region_references"):
+            input_contract["method_b"].pop(key)
+        self._assert_unavailable(
+            input_contract, "method_b_unavailable", "method_b_provenance"
+        )
+
+    def test_parent_relative_available_requires_usable_support(self):
+        input_contract = self._comparison_input()
+        input_contract["method_b"]["cells"][0]["regions"][0][
+            "support_status"
+        ] = "unavailable"
+        self._assert_unavailable(
+            input_contract,
+            "method_b_parent_relative_contract_invalid",
+            "method_b_regions",
+        )
+
+    def test_parent_relative_unavailable_rows_may_retain_parent_references(self):
+        input_contract = self._comparison_input()
+        cell = input_contract["method_b"]["cells"][0]
+        self._make_candidate_unavailable(
+            cell, "unavailable", "unavailable", "no_usable_regions"
+        )
+        cell["regions"][0]["support_status"] = "unavailable"
+        result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        self.assertTrue(result["available"])
+        projected = self._cell(result, 0, 0)
+        self.assertEqual(
+            projected["regions"][0]["parent_reference_ratio"],
+            input_contract["method_b"]["parent_region_references"][0][
+                "parent_reference_ratio"
+            ],
+        )
+        self.assertIsNone(projected["regions"][0]["parent_relative_ratio"])
+
+    def test_usable_support_does_not_require_parent_relative_availability(self):
+        input_contract = self._comparison_input()
+        cell = input_contract["method_b"]["cells"][0]
+        self._make_candidate_unavailable(
+            cell, "single_region_only", "unavailable", "only_one_region"
+        )
+        self.assertEqual(cell["regions"][1]["support_status"], "usable")
+        self.assertEqual(cell["regions"][1]["parent_relative_status"], "unavailable")
+        result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        self.assertTrue(result["available"])
+        self.assertEqual(
+            self._cell(result, 0, 0)["method_b_comparison_candidate_status"],
+            "single_region_only",
+        )
+
+    def test_native_method_b_state_machine_rejects_incoherent_pairings(self):
+        cases = (
+            (
+                "available_requires_two_parent_relative_rows",
+                lambda cell: self._set_parent_relative_available_count(cell, 1),
+            ),
+            (
+                "shape_veto_requires_poor_shape",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell, "shape_poor_veto", "shape_inconsistent", "poor_shape"
+                    ),
+                    cell.update(shape_status="good"),
+                ),
+            ),
+            (
+                "marginal_requires_two_parent_relative_rows",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell, "region_marginal", "marginal", "marginal_agreement"
+                    ),
+                    self._set_parent_relative_available_count(cell, 1),
+                ),
+            ),
+            (
+                "inconsistent_requires_two_parent_relative_rows",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell,
+                        "region_inconsistent",
+                        "internally_inconsistent",
+                        "disjoint_regions",
+                    ),
+                    self._set_parent_relative_available_count(cell, 1),
+                ),
+            ),
+            (
+                "single_requires_exactly_one_parent_relative_row",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell, "single_region_only", "unavailable", "only_one_region"
+                    ),
+                    self._set_parent_relative_available_count(cell, 0),
+                ),
+            ),
+            (
+                "unavailable_requires_no_parent_relative_rows",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell, "unavailable", "unavailable", "no_usable_regions"
+                    ),
+                    self._set_parent_relative_available_count(cell, 1),
+                ),
+            ),
+        )
+        for name, mutate in cases:
+            with self.subTest(name=name):
+                input_contract = self._comparison_input()
+                mutate(input_contract["method_b"]["cells"][0])
+                self._assert_unavailable(
+                    input_contract,
+                    "method_b_status_contract_invalid",
+                    "method_b_cells",
+                )
+
+    def test_native_method_b_reason_contracts_are_not_repaired(self):
+        cases = (
+            (
+                "available_method_reason",
+                lambda cell: cell.update(method_B_reason="unexpected_reason"),
+            ),
+            (
+                "consistent_region_reason",
+                lambda cell: cell.update(region_consistency_reason="unexpected_reason"),
+            ),
+            (
+                "marginal_method_reason",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell, "region_marginal", "marginal", "marginal_agreement"
+                    ),
+                    cell.update(method_B_reason=None),
+                ),
+            ),
+            (
+                "inconsistent_region_reason",
+                lambda cell: (
+                    self._make_candidate_unavailable(
+                        cell,
+                        "region_inconsistent",
+                        "internally_inconsistent",
+                        "disjoint_regions",
+                    ),
+                    cell.update(region_consistency_reason=None),
+                ),
+            ),
+        )
+        for name, mutate in cases:
+            with self.subTest(name=name):
+                input_contract = self._comparison_input()
+                mutate(input_contract["method_b"]["cells"][0])
+                self._assert_unavailable(
+                    input_contract,
+                    "method_b_status_contract_invalid",
+                    "method_b_cells",
+                )
 
     def test_parent_reference_row_linkage_is_exact_for_ratio_and_sigma(self):
         for key, value in (

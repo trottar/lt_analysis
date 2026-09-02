@@ -1472,7 +1472,6 @@ def _validate_method_b_comparison_phase_host(phase, host_summary):
         host_state not in _HOST_STATES
         or summary.get("host_state") != host_state
         or host_summary.get("phase_a_host_state") != host_state
-        or host_summary.get("method_b_host_state") != host_state
     ):
         _method_b_comparison_fail("host_state_invalid", "host_provenance")
     source_target_state = phase.get("source_target_state")
@@ -1487,13 +1486,31 @@ def _validate_method_b_comparison_phase_host(phase, host_summary):
     return phase_fingerprint, coordinate_fingerprint, host_state, source_target_state, summary
 
 
+def _validate_method_b_comparison_top_level(method_b, host_summary, host_state):
+    """Validate Method-B's native availability before its available-only metadata."""
+    stage = "method_b_provenance"
+    method_b = _d3_mapping(method_b, "method_b_summary_invalid", stage)
+    status = method_b.get("status")
+    available = method_b.get("available")
+    if "method_b_host_state" not in host_summary:
+        _method_b_comparison_fail("host_state_invalid", "host_provenance")
+    method_b_host_state = host_summary.get("method_b_host_state")
+    if status == "unavailable" and available is False:
+        if method_b_host_state is not None and method_b_host_state != host_state:
+            _method_b_comparison_fail("host_state_invalid", "host_provenance")
+        _method_b_comparison_fail("method_b_unavailable", stage)
+    if status != "available" or available is not True:
+        _method_b_comparison_fail("method_b_summary_invalid", stage)
+    if method_b_host_state != host_state:
+        _method_b_comparison_fail("host_state_invalid", "host_provenance")
+    return method_b
+
+
 def _validate_method_b_comparison_summary(
     method_b, phase_fingerprint, coordinate_fingerprint, host_state, t_edges, delta_edges
 ):
     stage = "method_b_provenance"
     method_b = _d3_mapping(method_b, "method_b_summary_invalid", stage)
-    if method_b.get("status") == "unavailable" and method_b.get("available") is False:
-        _method_b_comparison_fail("method_b_unavailable", stage)
     if method_b.get("status") != "available" or method_b.get("available") is not True:
         _method_b_comparison_fail("method_b_summary_invalid", stage)
     fingerprint = method_b.get("fingerprint")
@@ -1548,7 +1565,8 @@ def _validate_method_b_region(row):
     ):
         _method_b_comparison_fail("method_b_region_contract_invalid", stage)
     if row["parent_relative_status"] == "available" and (
-        not _is_finite_number(row["parent_relative_ratio"])
+        row["support_status"] != "usable"
+        or not _is_finite_number(row["parent_relative_ratio"])
         or row["parent_relative_ratio"] <= 0.0
         or not _is_finite_number(row["parent_relative_sigma"])
         or row["parent_relative_sigma"] <= 0.0
@@ -1561,6 +1579,81 @@ def _validate_method_b_region(row):
             "method_b_parent_relative_contract_invalid", stage
         )
     return {key: row[key] for key in _METHOD_B_D3_REGION_FIELDS}
+
+
+def _validate_method_b_native_cell_state(cell, parent_relative_available_count):
+    """Validate the producer-owned categorical Method-B state machine."""
+    stage = "method_b_cells"
+    candidate_status = cell["candidate_L_B_status"]
+    method_status = cell["method_B_status"]
+    consistency_status = cell["region_consistency_status"]
+    candidate = cell["candidate_L_B"]
+    candidate_uncertainty = cell["candidate_L_B_uncertainty"]
+    method_reason = cell["method_B_reason"]
+    consistency_reason = cell["region_consistency_reason"]
+
+    if candidate_status == "available_multi_region":
+        if (
+            not _is_finite_number(candidate)
+            or candidate <= 0.0
+            or not _is_finite_number(candidate_uncertainty)
+            or candidate_uncertainty <= 0.0
+        ):
+            _method_b_comparison_fail("method_b_candidate_contract_invalid", stage)
+    elif candidate is not None or candidate_uncertainty is not None:
+        _method_b_comparison_fail("method_b_candidate_contract_invalid", stage)
+
+    if (
+        (consistency_status == "region_consistent" and consistency_reason is not None)
+        or (
+            consistency_status != "region_consistent"
+            and not _nonempty_string(consistency_reason)
+        )
+        or (method_status == "available" and method_reason is not None)
+        or (method_status != "available" and not _nonempty_string(method_reason))
+    ):
+        _method_b_comparison_fail("method_b_status_contract_invalid", stage)
+
+    if candidate_status == "available_multi_region":
+        valid = (
+            consistency_status == "region_consistent"
+            and parent_relative_available_count >= 2
+            and method_status == "available"
+            and cell["shape_status"] in {"good", "marginal", "unavailable"}
+        )
+    elif candidate_status == "shape_poor_veto":
+        valid = (
+            consistency_status == "region_consistent"
+            and parent_relative_available_count >= 2
+            and cell["shape_status"] == "poor"
+            and method_status == "shape_inconsistent"
+        )
+    elif candidate_status == "region_marginal":
+        valid = (
+            consistency_status == "region_marginal"
+            and parent_relative_available_count >= 2
+            and method_status == "marginal"
+        )
+    elif candidate_status == "region_inconsistent":
+        valid = (
+            consistency_status == "region_inconsistent"
+            and parent_relative_available_count >= 2
+            and method_status == "internally_inconsistent"
+        )
+    elif candidate_status == "single_region_only":
+        valid = (
+            consistency_status == "insufficient_regions"
+            and parent_relative_available_count == 1
+            and method_status == "unavailable"
+        )
+    else:
+        valid = (
+            consistency_status == "insufficient_regions"
+            and parent_relative_available_count == 0
+            and method_status == "unavailable"
+        )
+    if not valid:
+        _method_b_comparison_fail("method_b_status_contract_invalid", stage)
 
 
 def _validate_method_b_comparison_cells(method_b, t_edges, delta_edges, host_state):
@@ -1625,40 +1718,6 @@ def _validate_method_b_comparison_cells(method_b, t_edges, delta_edges, host_sta
             for key in ("shape_chi2", "shape_chi2_ndf", "shape_max_abs_pull")
         ):
             _method_b_comparison_fail("method_b_shape_contract_invalid", stage)
-        candidate_status = cell["candidate_L_B_status"]
-        if candidate_status == "available_multi_region":
-            if (
-                not _is_finite_number(cell["candidate_L_B"])
-                or cell["candidate_L_B"] <= 0.0
-                or not _is_finite_number(cell["candidate_L_B_uncertainty"])
-                or cell["candidate_L_B_uncertainty"] <= 0.0
-                or cell["method_B_status"] != "available"
-                or cell["method_B_reason"] is not None
-                or cell["region_consistency_status"] != "region_consistent"
-                or cell["shape_status"] == "poor"
-            ):
-                _method_b_comparison_fail(
-                    "method_b_candidate_contract_invalid", stage
-                )
-        elif cell["candidate_L_B"] is not None or cell["candidate_L_B_uncertainty"] is not None:
-            _method_b_comparison_fail("method_b_candidate_contract_invalid", stage)
-        if (
-            cell["region_consistency_status"] == "region_inconsistent"
-            and cell["method_B_status"] != "internally_inconsistent"
-        ) or (
-            cell["region_consistency_status"] == "region_marginal"
-            and cell["method_B_status"] != "marginal"
-        ) or (
-            candidate_status == "shape_poor_veto"
-            and (
-                cell["method_B_status"] != "shape_inconsistent"
-                or cell["shape_status"] != "poor"
-            )
-        ) or (
-            candidate_status in {"single_region_only", "unavailable"}
-            and cell["method_B_status"] != "unavailable"
-        ):
-            _method_b_comparison_fail("method_b_status_contract_invalid", stage)
         regions = cell["regions"]
         if not isinstance(regions, list) or not regions:
             _method_b_comparison_fail("method_b_region_contract_invalid", stage)
@@ -1670,6 +1729,13 @@ def _validate_method_b_comparison_cells(method_b, t_edges, delta_edges, host_sta
             region_names = names
         elif names != region_names:
             _method_b_comparison_fail("method_b_region_contract_invalid", stage)
+        _validate_method_b_native_cell_state(
+            cell,
+            sum(
+                row["parent_relative_status"] == "available"
+                for row in selected_regions
+            ),
+        )
         selected = {key: cell[key] for key in _METHOD_B_D3_CELL_FIELDS}
         selected["regions"] = selected_regions
         selected_cells.append(selected)
@@ -1829,6 +1895,9 @@ def build_pion_hgcer_method_b_comparison(comparison_input_contract):
         ) = _validate_method_b_comparison_phase_host(
             snapshot["phase_a"], snapshot["host_state_summary"]
         )
+        method_b = _validate_method_b_comparison_top_level(
+            snapshot["method_b"], snapshot["host_state_summary"], host_state
+        )
         t_edges = _d3_strict_edges(snapshot["canonical_t_edges"])
         delta_edges = _d3_strict_edges(snapshot["delta_edges"])
         if not _serialized_equal(phase_summary.get("canonical_t_edges"), t_edges) or not _serialized_equal(
@@ -1838,7 +1907,7 @@ def build_pion_hgcer_method_b_comparison(comparison_input_contract):
                 "canonical_geometry_mismatch", "canonical_geometry"
             )
         method_b, method_b_fingerprint = _validate_method_b_comparison_summary(
-            snapshot["method_b"],
+            method_b,
             phase_fingerprint,
             coordinate_fingerprint,
             host_state,
