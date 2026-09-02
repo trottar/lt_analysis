@@ -147,12 +147,14 @@ def _checkpoint(
     host_state="proton_cleaned",
     method_a_status="available",
     method_b_status="available",
+    Q2="4p4",
+    W="2p74",
 ):
     return checkpoint.build_pion_hgcer_refinement_checkpoint(
         setting={
             "kinematic_token": "Q4p4W2p74",
-            "Q2": 4.4,
-            "W": 2.74,
+            "Q2": Q2,
+            "W": W,
             "epsilon_setting": "low",
             "epsilon_filename_token": "lowe",
             "phi_setting": "Left",
@@ -219,6 +221,10 @@ class PionHGCerRefinementComparisonTests(unittest.TestCase):
             "pion_hgcer_refinement_checkpoint/v1",
         )
         self.assertEqual(result["setting"], payload["setting"])
+        self.assertEqual(result["setting"]["Q2"], "4p4")
+        self.assertEqual(result["setting"]["W"], "2p74")
+        self.assertIsInstance(result["setting"]["Q2"], str)
+        self.assertIsInstance(result["setting"]["W"], str)
         self.assertEqual(result["canonical_t_edges"], T_EDGES)
         self.assertEqual(result["delta_edges"], DELTA_EDGES)
         self.assertEqual(result["phase_a"], payload["phase_a"])
@@ -242,6 +248,28 @@ class PionHGCerRefinementComparisonTests(unittest.TestCase):
             "identity_no_proton_cleaning",
         )
 
+    def test_finite_numeric_setting_metadata_remains_valid_and_exact(self):
+        payload = _checkpoint(Q2=4.4, W=2.74)
+        result = comparison.build_pion_hgcer_comparison_input_contract(payload)
+        self.assertTrue(result["available"])
+        self.assertEqual(result["setting"]["Q2"], 4.4)
+        self.assertEqual(result["setting"]["W"], 2.74)
+        self.assertIsInstance(result["setting"]["Q2"], float)
+        self.assertIsInstance(result["setting"]["W"], float)
+        token_result = comparison.build_pion_hgcer_comparison_input_contract(
+            _checkpoint(Q2="4p4", W="2p74")
+        )
+        self.assertNotEqual(
+            result["source_checkpoint_payload_fingerprint"],
+            token_result["source_checkpoint_payload_fingerprint"],
+        )
+        integer_result = comparison.build_pion_hgcer_comparison_input_contract(
+            _checkpoint(Q2=4, W=2)
+        )
+        self.assertTrue(integer_result["available"])
+        self.assertIsInstance(integer_result["setting"]["Q2"], int)
+        self.assertIsInstance(integer_result["setting"]["W"], int)
+
     def test_native_method_unavailability_is_not_a_contract_failure(self):
         for method_a_status, method_b_status in (
             ("unavailable", "available"),
@@ -258,6 +286,32 @@ class PionHGCerRefinementComparisonTests(unittest.TestCase):
                 self.assertTrue(result["available"])
                 self.assertEqual(result["method_a"]["status"], method_a_status)
                 self.assertEqual(result["method_b"]["status"], method_b_status)
+                self.assertFalse(result["comparison_performed"])
+                self.assertFalse(result["classification_performed"])
+
+    def test_unavailable_methods_may_retain_valid_diagnostic_cells(self):
+        for method_name in ("method_a", "method_b"):
+            with self.subTest(method=method_name):
+                payload = _checkpoint(
+                    method_a_status="unavailable" if method_name == "method_a" else "available",
+                    method_b_status="unavailable" if method_name == "method_b" else "available",
+                )
+                payload[method_name]["cells"] = [
+                    {
+                        "t_index": 0,
+                        "delta_index": 0,
+                        "t_low": T_EDGES[0],
+                        "t_high": T_EDGES[1],
+                        "delta_low": DELTA_EDGES[0],
+                        "delta_high": DELTA_EDGES[1],
+                        "host_state": "proton_cleaned",
+                        "diagnostic_only": True,
+                    }
+                ]
+                result = comparison.build_pion_hgcer_comparison_input_contract(payload)
+                self.assertTrue(result["available"])
+                self.assertEqual(result[method_name]["status"], "unavailable")
+                self.assertEqual(result[method_name]["cells"], payload[method_name]["cells"])
                 self.assertFalse(result["comparison_performed"])
                 self.assertFalse(result["classification_performed"])
 
@@ -318,18 +372,44 @@ class PionHGCerRefinementComparisonTests(unittest.TestCase):
         )
 
     def test_setting_contract_rejects_invalid_semantic_or_scalar_metadata(self):
-        cases = (
+        for key, value in (
             ("particle_type", "pion"),
             ("epsilon_filename_token", "highe"),
             ("epsilon_setting", ["low"]),
-            ("Q2", [4.4]),
-            ("W", "2.74"),
-        )
-        for key, value in cases:
-            with self.subTest(key=key):
+        ):
+            with self.subTest(key=key, value=repr(value)):
                 payload = _checkpoint()
                 payload["setting"][key] = value
                 self._assert_unavailable(payload, "setting_contract_invalid", "setting_validation")
+        invalid_scalars = (
+            None,
+            True,
+            False,
+            ["4p4"],
+            {"value": "4p4"},
+            (),
+            set(),
+            "",
+            "  ",
+            " 4p4",
+            "4p4 ",
+            "../4p4",
+            "4p4/extra",
+            "4p4\\extra",
+            "4p4:extra",
+            "4p4\x00",
+            float("nan"),
+            float("inf"),
+            -float("inf"),
+        )
+        for key in ("Q2", "W"):
+            for value in invalid_scalars:
+                with self.subTest(key=key, value=repr(value)):
+                    payload = _checkpoint()
+                    payload["setting"][key] = value
+                    self._assert_unavailable(
+                        payload, "setting_contract_invalid", "setting_validation"
+                    )
 
     def test_phase_a_provenance_failures_are_narrow(self):
         cases = (

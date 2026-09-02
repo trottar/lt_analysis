@@ -76,6 +76,23 @@ def _is_finite_number(value):
     )
 
 
+def _is_safe_scalar_metadata(value):
+    """Accept only exact finite numeric or safe string setting scalars."""
+    if _is_finite_number(value):
+        return True
+    if not isinstance(value, str) or not value or value != value.strip():
+        return False
+    if ".." in value or any(
+        character.isspace()
+        or ord(character) < 32
+        or ord(character) == 127
+        or character in "/\\:"
+        for character in value
+    ):
+        return False
+    return True
+
+
 def _is_integer(value):
     return not isinstance(value, bool) and isinstance(value, int)
 
@@ -150,7 +167,9 @@ def _validate_setting(setting):
     )
     if not _nonempty_string(setting["kinematic_token"]):
         _fail("setting_contract_invalid", stage)
-    if not _is_finite_number(setting["Q2"]) or not _is_finite_number(setting["W"]):
+    if not _is_safe_scalar_metadata(setting["Q2"]) or not _is_safe_scalar_metadata(
+        setting["W"]
+    ):
         _fail("setting_contract_invalid", stage)
     if not _nonempty_string(setting["phi_setting"]):
         _fail("setting_contract_invalid", stage)
@@ -457,6 +476,16 @@ def _available(snapshot, source_fingerprint):
     }
 
 
+def _prevalidate_source_scalar_metadata(checkpoint_payload):
+    """Report malformed Q2/W metadata before JSON rejects non-finite values."""
+    setting = checkpoint_payload.get("setting")
+    if not isinstance(setting, Mapping):
+        return
+    for key in ("Q2", "W"):
+        if key in setting and not _is_safe_scalar_metadata(setting[key]):
+            _fail("setting_contract_invalid", "setting_validation")
+
+
 def build_pion_hgcer_comparison_input_contract(checkpoint_payload):
     """Validate and detach the frozen Phase-C A/B comparison input.
 
@@ -466,6 +495,16 @@ def build_pion_hgcer_comparison_input_contract(checkpoint_payload):
     """
     if not isinstance(checkpoint_payload, Mapping):
         return _unavailable("checkpoint_contract_invalid", "checkpoint_validation")
+    try:
+        _prevalidate_source_scalar_metadata(checkpoint_payload)
+    except _ComparisonInputUnavailable as exc:
+        return _unavailable(exc.reason, exc.stage)
+    except Exception as exc:
+        return _unavailable(
+            "unexpected_comparison_input_build_failure",
+            "unexpected_exception",
+            exception=exc,
+        )
     try:
         encoded = _canonical_json(checkpoint_payload)
         snapshot = json.loads(encoded)
