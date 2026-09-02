@@ -1,4 +1,4 @@
-"""Pure-Python regression coverage for Phase-D.1/D.1.1 and Phase-D.2 comparison contracts."""
+"""Pure-Python regression coverage for Phase-D.1/D.1.1, D.2, and D.3 contracts."""
 
 from __future__ import annotations
 
@@ -215,6 +215,117 @@ def _method_a_summary(status, host_state):
     }
 
 
+METHOD_B_REGIONS = ("pi_n", "pi_delta")
+
+
+def _method_b_parent_reference(t_index, region_name):
+    base = {
+        (0, "pi_n"): 1.10,
+        (0, "pi_delta"): 0.90,
+        (1, "pi_n"): 1.05,
+        (1, "pi_delta"): 0.95,
+    }[(t_index, region_name)]
+    return {
+        "t_index": t_index,
+        "t_low": T_EDGES[t_index],
+        "t_high": T_EDGES[t_index + 1],
+        "region_name": region_name,
+        "usable_delta_cell_count": 2,
+        "contributing_delta_indices": [0, 1],
+        "combined_host_abs_support": 40.0,
+        "combined_host_sumw2": 16.0,
+        "combined_host_neff": 20.0,
+        "combined_baseline_abs_support": 40.0,
+        "combined_baseline_sumw2": 16.0,
+        "combined_baseline_neff": 20.0,
+        "parent_reference_ratio": base,
+        "parent_reference_uncertainty": 0.10,
+        "parent_reference_status": "available",
+        "parent_reference_reason": None,
+        "weighting": "inverse_variance",
+    }
+
+
+def _method_b_region(t_index, delta_index, region_name):
+    parent = _method_b_parent_reference(t_index, region_name)
+    raw_ratio = parent["parent_reference_ratio"] * (1.0 + 0.05 * delta_index)
+    return {
+        "region_name": region_name,
+        "available": True,
+        "reason": None,
+        "region_role": "pion_background",
+        "window_source": "synthetic_frozen",
+        "mm_low": -0.10 if region_name == "pi_n" else 0.10,
+        "mm_high": 0.10 if region_name == "pi_n" else 0.30,
+        "protected_signal_overlap": False,
+        "support_status": "usable",
+        "support_reason": None,
+        "host_record_count": 20,
+        "host_yield": 10.0,
+        "host_sumw2": 4.0,
+        "host_neff": 20.0,
+        "baseline_record_count": 20,
+        "baseline_pion_yield": 10.0,
+        "baseline_pion_sumw2": 4.0,
+        "baseline_pion_neff": 20.0,
+        "baseline_pion_significance": 5.0,
+        "residual": 0.0,
+        "residual_sigma": 2.0,
+        "fractional_residual": 0.0,
+        "raw_ratio": raw_ratio,
+        "raw_ratio_sigma": 0.20,
+        "parent_reference_ratio": parent["parent_reference_ratio"],
+        "parent_reference_sigma": parent["parent_reference_uncertainty"],
+        "parent_relative_ratio": raw_ratio / parent["parent_reference_ratio"],
+        "parent_relative_sigma": 0.20,
+        "parent_relative_status": "available",
+        "parent_relative_reason": None,
+    }
+
+
+def _method_b_cell(t_index, delta_index, host_state):
+    return {
+        "t_index": t_index,
+        "t_low": T_EDGES[t_index],
+        "t_high": T_EDGES[t_index + 1],
+        "delta_index": delta_index,
+        "delta_low": DELTA_EDGES[delta_index],
+        "delta_high": DELTA_EDGES[delta_index + 1],
+        "host_state": host_state,
+        "host_record_count": 40,
+        "baseline_record_count": 40,
+        "regions": [
+            _method_b_region(t_index, delta_index, region_name)
+            for region_name in METHOD_B_REGIONS
+        ],
+        "region_consistency_status": "region_consistent",
+        "region_consistency_reason": None,
+        "shape_chi2": 1.0,
+        "shape_ndf": 2,
+        "shape_chi2_ndf": 0.5,
+        "shape_max_abs_pull": 0.5,
+        "shape_usable_bin_count": 2,
+        "shape_status": "good",
+        "shape_reason": None,
+        "candidate_L_B": 1.0 + 0.05 * delta_index,
+        "candidate_L_B_uncertainty": 0.15,
+        "candidate_L_B_status": "available_multi_region",
+        "method_B_status": "available",
+        "method_B_reason": None,
+        "bins": [{"not": "carried_by_d3"}],
+        "underflow": {"not": "carried_by_d3"},
+        "overflow": {"not": "carried_by_d3"},
+    }
+
+
+def _method_b_cells(host_state):
+    return [
+        _method_b_cell(t_index, delta_index, host_state)
+        for t_index in range(len(T_EDGES) - 1)
+        for delta_index in range(len(DELTA_EDGES) - 1)
+    ]
+
+
 def _method_b(status, host_state):
     available = status == "available"
     return {
@@ -223,9 +334,15 @@ def _method_b(status, host_state):
         "reason": None if available else "synthetic_method_b_unavailable",
         "fingerprint": "method-b-fingerprint" if available else None,
         "host_state": host_state,
-        "cells": _cells("method_b", host_state) if available else [],
+        "cells": _method_b_cells(host_state) if available else [],
         "parent_region_references": (
-            [{"t_index": 0, "region_name": "pi_n"}] if available else []
+            [
+                _method_b_parent_reference(t_index, region_name)
+                for t_index in range(len(T_EDGES) - 1)
+                for region_name in METHOD_B_REGIONS
+            ]
+            if available
+            else []
         ),
     }
 
@@ -234,6 +351,7 @@ def _method_b_summary(status, host_state):
     available = status == "available"
     return {
         "schema_version": "pion_hgcer_method_b/v1",
+        "method": "same_t_pion_background_closure",
         "status": status,
         "available": available,
         "reason": None if available else "synthetic_method_b_unavailable",
@@ -1126,6 +1244,427 @@ class PionHGCerMethodAComparisonTests(unittest.TestCase):
                 payload = self._comparison_input()
                 mutate(payload)
                 self._assert_unavailable(payload, reason)
+
+
+class PionHGCerMethodBComparisonTests(unittest.TestCase):
+    def _comparison_input(self, **checkpoint_kwargs):
+        result = comparison.build_pion_hgcer_comparison_input_contract(
+            _checkpoint(**checkpoint_kwargs)
+        )
+        self.assertTrue(result["available"])
+        return result
+
+    def _assert_unavailable(self, payload, reason, stage=None):
+        result = comparison.build_pion_hgcer_method_b_comparison(payload)
+        self.assertEqual(
+            result["schema_version"], comparison.METHOD_B_COMPARISON_SCHEMA_VERSION
+        )
+        self.assertEqual(result["method"], "method_b_comparison_representation")
+        self.assertEqual(result["status"], "unavailable")
+        self.assertFalse(result["available"])
+        self.assertEqual(result["reason"], reason)
+        self.assertTrue(result["non_authoritative"])
+        self.assertFalse(result["method_a_numerical_dependency"])
+        self.assertFalse(result["comparison_performed"])
+        self.assertFalse(result["classification_performed"])
+        self.assertFalse(result["production_objects_mutated"])
+        self.assertFalse(result["refinement_applied"])
+        if stage is not None:
+            self.assertEqual(result["diagnostic_stage"], stage)
+        return result
+
+    @staticmethod
+    def _cell(result, t_index, delta_index):
+        return next(
+            cell
+            for cell in result["cells"]
+            if cell["t_index"] == t_index and cell["delta_index"] == delta_index
+        )
+
+    @staticmethod
+    def _make_candidate_unavailable(cell, candidate_status, method_status, reason):
+        cell["candidate_L_B"] = None
+        cell["candidate_L_B_uncertainty"] = None
+        cell["candidate_L_B_status"] = candidate_status
+        cell["method_B_status"] = method_status
+        cell["method_B_reason"] = reason
+        if candidate_status == "region_marginal":
+            cell["region_consistency_status"] = "region_marginal"
+            cell["region_consistency_reason"] = reason
+        elif candidate_status == "region_inconsistent":
+            cell["region_consistency_status"] = "region_inconsistent"
+            cell["region_consistency_reason"] = reason
+        elif candidate_status == "shape_poor_veto":
+            cell["region_consistency_status"] = "region_consistent"
+            cell["shape_status"] = "poor"
+            cell["shape_reason"] = reason
+        else:
+            cell["region_consistency_status"] = "insufficient_regions"
+            cell["region_consistency_reason"] = reason
+
+    def test_successful_method_b_projection_has_compact_detached_shape(self):
+        for host_state in ("proton_cleaned", "identity_no_proton_cleaning"):
+            with self.subTest(host_state=host_state):
+                input_contract = self._comparison_input(host_state=host_state)
+                result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+                self.assertEqual(
+                    set(result),
+                    {
+                        "schema_version",
+                        "method",
+                        "status",
+                        "available",
+                        "reason",
+                        "diagnostic_stage",
+                        "source_checkpoint_payload_fingerprint",
+                        "source_method_b_payload_fingerprint",
+                        "phase_a_contract_fingerprint",
+                        "coordinate_fingerprint",
+                        "method_b_fingerprint",
+                        "canonical_t_edges",
+                        "delta_edges",
+                        "host_state",
+                        "source_target_state",
+                        "parent_region_references",
+                        "cells",
+                        "fingerprint_inputs",
+                        "fingerprint",
+                        "non_authoritative",
+                        "method_a_numerical_dependency",
+                        "comparison_performed",
+                        "classification_performed",
+                        "production_objects_mutated",
+                        "refinement_applied",
+                    },
+                )
+                self.assertTrue(result["available"])
+                self.assertEqual(len(result["cells"]), 4)
+                self.assertEqual(len(result["parent_region_references"]), 4)
+                self.assertFalse(result["method_a_numerical_dependency"])
+                expected_source_fingerprint = hashlib.sha256(
+                    json.dumps(
+                        input_contract["method_b"],
+                        sort_keys=True,
+                        separators=(",", ":"),
+                        ensure_ascii=True,
+                        allow_nan=False,
+                    ).encode("ascii")
+                ).hexdigest()
+                self.assertEqual(
+                    result["source_method_b_payload_fingerprint"],
+                    expected_source_fingerprint,
+                )
+                self.assertEqual(len(result["source_method_b_payload_fingerprint"]), 64)
+                self.assertEqual(len(result["fingerprint"]), 64)
+                cell = self._cell(result, 0, 0)
+                self.assertNotIn("bins", cell)
+                self.assertNotIn("underflow", cell)
+                self.assertNotIn("overflow", cell)
+                self.assertEqual(
+                    cell["method_b_comparison_candidate"], cell["candidate_L_B"]
+                )
+                self.assertEqual(
+                    cell["method_b_comparison_candidate_uncertainty"],
+                    cell["candidate_L_B_uncertainty"],
+                )
+                self.assertEqual(
+                    cell["method_b_comparison_candidate_status"],
+                    "available_multi_region",
+                )
+
+    def test_input_and_nested_return_values_are_isolated(self):
+        input_contract = self._comparison_input()
+        before = copy.deepcopy(input_contract)
+        result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        self.assertEqual(input_contract, before)
+        result["cells"][0]["regions"][0]["raw_ratio"] = -999.0
+        result["parent_region_references"][0]["contributing_delta_indices"].append(99)
+        self.assertEqual(input_contract, before)
+
+    def test_method_a_is_completely_opaque_to_d3(self):
+        input_contract = self._comparison_input()
+        baseline = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        changed = copy.deepcopy(input_contract)
+        changed["method_a"] = {"opaque": object(), "cells": [object()]}
+        result = comparison.build_pion_hgcer_method_b_comparison(changed)
+        for key in (
+            "source_method_b_payload_fingerprint",
+            "parent_region_references",
+            "cells",
+            "fingerprint",
+        ):
+            self.assertEqual(result[key], baseline[key])
+        source = (REPO_ROOT / "src/cuts/pion_hgcer_refinement_comparison.py").read_text(
+            encoding="utf-8"
+        )
+        d3_source = source[
+            source.index("def _method_b_comparison_unavailable") : source.index(
+                "\n__all__"
+            )
+        ]
+        for forbidden in (
+            "METHOD_A_COMPARISON_SCHEMA_VERSION",
+            "build_pion_hgcer_method_a_comparison",
+            "method_a_comparison_candidate",
+        ):
+            self.assertNotIn(forbidden, d3_source)
+
+    def test_candidate_and_native_statuses_are_preserved_without_promotion(self):
+        cases = (
+            ("single_region_only", "unavailable", "only_one_region"),
+            ("unavailable", "unavailable", "no_usable_regions"),
+            ("region_marginal", "marginal", "marginal_agreement"),
+            ("region_inconsistent", "internally_inconsistent", "disjoint_regions"),
+            ("shape_poor_veto", "shape_inconsistent", "poor_shape"),
+        )
+        for candidate_status, method_status, reason in cases:
+            with self.subTest(candidate_status=candidate_status):
+                input_contract = self._comparison_input()
+                cell = input_contract["method_b"]["cells"][0]
+                self._make_candidate_unavailable(
+                    cell, candidate_status, method_status, reason
+                )
+                result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+                projected = self._cell(result, 0, 0)
+                self.assertIsNone(projected["method_b_comparison_candidate"])
+                self.assertIsNone(
+                    projected["method_b_comparison_candidate_uncertainty"]
+                )
+                self.assertEqual(
+                    projected["method_b_comparison_candidate_status"], candidate_status
+                )
+                self.assertEqual(
+                    projected["method_b_comparison_candidate_reason"], reason
+                )
+                self.assertEqual(projected["method_B_status"], method_status)
+
+    def test_valid_top_level_method_b_may_have_all_local_candidates_unavailable(self):
+        input_contract = self._comparison_input()
+        for cell in input_contract["method_b"]["cells"]:
+            self._make_candidate_unavailable(
+                cell, "single_region_only", "unavailable", "only_one_region"
+            )
+        result = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        self.assertTrue(result["available"])
+        self.assertTrue(
+            all(cell["method_b_comparison_candidate"] is None for cell in result["cells"])
+        )
+
+    def test_method_b_unavailable_is_structured_without_changing_d1(self):
+        input_contract = self._comparison_input(method_b_status="unavailable")
+        self._assert_unavailable(input_contract, "method_b_unavailable", "method_b_provenance")
+
+    def test_parent_reference_row_linkage_is_exact_for_ratio_and_sigma(self):
+        for key, value in (
+            ("parent_reference_ratio", 999.0),
+            ("parent_reference_sigma", 999.0),
+        ):
+            with self.subTest(key=key):
+                input_contract = self._comparison_input()
+                input_contract["method_b"]["cells"][0]["regions"][0][key] = value
+                self._assert_unavailable(
+                    input_contract,
+                    "method_b_parent_reference_linkage_mismatch",
+                    "method_b_parent_references",
+                )
+
+    def test_parent_reference_geometry_and_status_contracts_are_not_repaired(self):
+        cases = (
+            (
+                "missing",
+                lambda value: value["method_b"]["parent_region_references"].pop(),
+                "method_b_parent_references_invalid",
+            ),
+            (
+                "duplicate",
+                lambda value: value["method_b"]["parent_region_references"].append(
+                    copy.deepcopy(value["method_b"]["parent_region_references"][0])
+                ),
+                "method_b_parent_references_invalid",
+            ),
+            (
+                "out_of_range_t",
+                lambda value: value["method_b"]["parent_region_references"][0].update(t_index=2),
+                "method_b_parent_reference_geometry_invalid",
+            ),
+            (
+                "wrong_t_high",
+                lambda value: value["method_b"]["parent_region_references"][0].update(t_high=0.5),
+                "method_b_parent_reference_geometry_invalid",
+            ),
+            (
+                "unknown_region",
+                lambda value: value["method_b"]["parent_region_references"][0].update(region_name="unknown"),
+                "method_b_parent_reference_geometry_invalid",
+            ),
+            (
+                "duplicate_delta",
+                lambda value: value["method_b"]["parent_region_references"][0].update(contributing_delta_indices=[0, 0]),
+                "method_b_parent_reference_geometry_invalid",
+            ),
+            (
+                "count_mismatch",
+                lambda value: value["method_b"]["parent_region_references"][0].update(usable_delta_cell_count=1),
+                "method_b_parent_reference_geometry_invalid",
+            ),
+            (
+                "available_null_ratio",
+                lambda value: value["method_b"]["parent_region_references"][0].update(parent_reference_ratio=None),
+                "method_b_parent_reference_status_invalid",
+            ),
+            (
+                "unavailable_missing_reason",
+                lambda value: value["method_b"]["parent_region_references"][0].update(parent_reference_status="unavailable", parent_reference_reason=None),
+                "method_b_parent_reference_status_invalid",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                input_contract = self._comparison_input()
+                mutate(input_contract)
+                self._assert_unavailable(input_contract, reason)
+
+    def test_region_shape_candidate_and_geometry_failures_are_structured(self):
+        cases = (
+            (
+                "missing_region_field",
+                lambda value: value["method_b"]["cells"][0]["regions"][0].pop("raw_ratio"),
+                "method_b_region_contract_invalid",
+            ),
+            (
+                "duplicate_region",
+                lambda value: value["method_b"]["cells"][0]["regions"].append(
+                    copy.deepcopy(value["method_b"]["cells"][0]["regions"][0])
+                ),
+                "method_b_region_contract_invalid",
+            ),
+            (
+                "region_set_mismatch",
+                lambda value: value["method_b"]["cells"][0]["regions"][1].update(region_name="other"),
+                "method_b_region_contract_invalid",
+            ),
+            (
+                "invalid_support",
+                lambda value: value["method_b"]["cells"][0]["regions"][0].update(support_status="other"),
+                "method_b_region_status_invalid",
+            ),
+            (
+                "available_parent_relative_null",
+                lambda value: value["method_b"]["cells"][0]["regions"][0].update(parent_relative_ratio=None),
+                "method_b_parent_relative_contract_invalid",
+            ),
+            (
+                "invalid_shape",
+                lambda value: value["method_b"]["cells"][0].update(shape_status="other"),
+                "method_b_status_contract_invalid",
+            ),
+            (
+                "negative_ndf",
+                lambda value: value["method_b"]["cells"][0].update(shape_ndf=-1),
+                "method_b_shape_contract_invalid",
+            ),
+            (
+                "candidate_value",
+                lambda value: value["method_b"]["cells"][0].update(candidate_L_B=None),
+                "method_b_candidate_contract_invalid",
+            ),
+            (
+                "cell_host",
+                lambda value: value["method_b"]["cells"][0].update(host_state="identity_no_proton_cleaning"),
+                "method_b_cell_host_state_mismatch",
+            ),
+            (
+                "cell_geometry",
+                lambda value: value["method_b"]["cells"][0].update(delta_high=15.0),
+                "method_b_cell_geometry_invalid",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                input_contract = self._comparison_input()
+                mutate(input_contract)
+                self._assert_unavailable(input_contract, reason)
+
+    def test_provenance_geometry_and_authority_failures_are_structured(self):
+        self._assert_unavailable([], "comparison_input_contract_invalid")
+        unavailable_d1 = copy.deepcopy(self._comparison_input())
+        unavailable_d1.update(status="unavailable", available=False)
+        self._assert_unavailable(unavailable_d1, "comparison_input_unavailable")
+        cases = (
+            (
+                "authority",
+                lambda value: value.update(non_authoritative=False),
+                "comparison_input_authority_contract_invalid",
+            ),
+            (
+                "phase_fingerprint",
+                lambda value: value["phase_a"].update(contract_fingerprint=None),
+                "phase_a_fingerprint_missing",
+            ),
+            (
+                "coordinate",
+                lambda value: value["phase_a"].update(coordinate_fingerprint=None),
+                "coordinate_fingerprint_missing",
+            ),
+            (
+                "host",
+                lambda value: value["host_state_summary"].update(method_b_host_state="other"),
+                "host_state_invalid",
+            ),
+            (
+                "source_target",
+                lambda value: value["phase_a"].update(source_target_state="other"),
+                "source_target_state_mismatch",
+            ),
+            (
+                "method_fingerprint",
+                lambda value: value["method_b"].update(fingerprint=None),
+                "method_b_fingerprint_missing",
+            ),
+            (
+                "summary",
+                lambda value: value["method_b"]["summary"].update(interpolation_used=True),
+                "method_b_summary_invalid",
+            ),
+            (
+                "edges",
+                lambda value: value.update(canonical_t_edges=[0.0, 0.0]),
+                "canonical_geometry_invalid",
+            ),
+        )
+        for name, mutate, reason in cases:
+            with self.subTest(name=name):
+                input_contract = self._comparison_input()
+                mutate(input_contract)
+                self._assert_unavailable(input_contract, reason)
+
+    def test_method_b_fingerprints_are_deterministic_and_same_t_projection_is_local(self):
+        input_contract = self._comparison_input()
+        baseline = comparison.build_pion_hgcer_method_b_comparison(input_contract)
+        repeated = comparison.build_pion_hgcer_method_b_comparison(copy.deepcopy(input_contract))
+        for key in (
+            "source_method_b_payload_fingerprint",
+            "fingerprint",
+            "parent_region_references",
+            "cells",
+        ):
+            self.assertEqual(repeated[key], baseline[key])
+        changed = copy.deepcopy(input_contract)
+        changed["method_b"]["cells"][2]["shape_chi2"] = 2.0
+        result = comparison.build_pion_hgcer_method_b_comparison(changed)
+        self.assertNotEqual(
+            result["source_method_b_payload_fingerprint"],
+            baseline["source_method_b_payload_fingerprint"],
+        )
+        self.assertNotEqual(result["fingerprint"], baseline["fingerprint"])
+        self.assertEqual(
+            [cell for cell in result["cells"] if cell["t_index"] == 0],
+            [cell for cell in baseline["cells"] if cell["t_index"] == 0],
+        )
+        self.assertEqual(
+            [parent for parent in result["parent_region_references"] if parent["t_index"] == 0],
+            [parent for parent in baseline["parent_region_references"] if parent["t_index"] == 0],
+        )
 
 
 if __name__ == "__main__":
