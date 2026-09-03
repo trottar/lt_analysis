@@ -407,6 +407,77 @@ def _d8_fixture():
     return parents, cache
 
 
+def _d8_single_scale_final_fallback_fixture():
+    """Provide one frozen final single-scale parent without any resolver."""
+    scale = 2.5
+    final = {
+        "H_MM_nosub_before_pion_subtraction": _ProjectionHistogram(
+            "single-scale-final-before", (12.0, 8.0)
+        ),
+        "H_pion_subtraction_template_MM_nosub": _ProjectionHistogram(
+            "single-scale-final-template", (5.0, -2.5), (5.0, 2.5)
+        ),
+        "H_MM_nosub_after_pion_subtraction": _ProjectionHistogram(
+            "single-scale-final-after", (7.0, 10.5)
+        ),
+        "H_pion_control_model": _ProjectionHistogram(
+            "single-scale-final-model", (1.0, 1.0)
+        ),
+        "weights": [0.0, scale, scale, 0.0],
+    }
+    proposed = {
+        "H_MM_nosub_before_pion_subtraction": _ProjectionHistogram(
+            "proposal-before-sentinel", (99.0, 98.0)
+        ),
+        "H_pion_subtraction_template_MM_nosub": _ProjectionHistogram(
+            "proposal-template-sentinel", (97.0, 96.0)
+        ),
+        "H_MM_nosub_after_pion_subtraction": _ProjectionHistogram(
+            "proposal-after-sentinel", (95.0, 94.0)
+        ),
+        "H_pion_control_model": _ProjectionHistogram(
+            "proposal-model-sentinel", (1.0, 1.0)
+        ),
+        "weights": [0.0, 9.0, 9.0, 0.0],
+    }
+    parents = (
+        {
+            "t_bin_index": 0,
+            "t_edges": [0.0, 1.0],
+            "proposed_diagnostic_application_result": proposed,
+            "final_diagnostic_application_result": final,
+            "final_diagnostic_application_status": {
+                "final_status": "applied_fallback",
+                "fallback_mode": "single_scale",
+            },
+        },
+    )
+    cache = {
+        "delta_edges": [-10.0, 0.0, 10.0],
+        "by_t": (
+            {
+                "t_index": 0,
+                "t_edges": [0.0, 1.0],
+                "records": (
+                    {
+                        "nommcuts": True,
+                        "delta_index": 0,
+                        "adj_MM": 0.2,
+                        "coefficient": 2.0,
+                    },
+                    {
+                        "nommcuts": True,
+                        "delta_index": 1,
+                        "adj_MM": 1.2,
+                        "coefficient": -1.0,
+                    },
+                ),
+            },
+        ),
+    }
+    return parents, cache
+
+
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
     def test_pdf_path_is_deterministic_and_detached(self):
         main = r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf"
@@ -654,6 +725,59 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(rows[1][0]["baseline_contribution"], -2.0)
         self.assertEqual(rows[0][1]["baseline_contribution"], 3.0)
         self.assertEqual(payload["per_t"][0]["delta_projection"]["exclusions"]["non_nommcuts_records"], 1)
+
+    def test_d8_single_scale_final_fallback_uses_frozen_final_application(self):
+        parents, cache = _d8_single_scale_final_fallback_fixture()
+        final = parents[0]["final_diagnostic_application_result"]
+        proposed = parents[0]["proposed_diagnostic_application_result"]
+        payload = plots.build_full_background_subtraction_d8_payload(parents, cache)
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(
+            parents[0]["final_diagnostic_application_status"],
+            {"final_status": "applied_fallback", "fallback_mode": "single_scale"},
+        )
+        group = payload["per_t"][0]
+        self.assertIs(
+            group["before_pion_mm"]["histogram"],
+            final["H_MM_nosub_before_pion_subtraction"],
+        )
+        self.assertIs(
+            group["baseline_pion_mm"]["histogram"],
+            final["H_pion_subtraction_template_MM_nosub"],
+        )
+        self.assertIs(
+            group["after_pion_mm"]["histogram"],
+            final["H_MM_nosub_after_pion_subtraction"],
+        )
+        for payload_key, final_key in (
+            ("before_pion_mm", "H_MM_nosub_before_pion_subtraction"),
+            ("baseline_pion_mm", "H_pion_subtraction_template_MM_nosub"),
+            ("after_pion_mm", "H_MM_nosub_after_pion_subtraction"),
+        ):
+            self.assertIsNot(group[payload_key]["histogram"], proposed[final_key])
+
+        projection = group["delta_projection"]
+        self.assertTrue(projection["available"])
+        self.assertEqual(projection["closure"]["status"], "closed")
+        self.assertTrue(projection["closure"]["coverage_complete"])
+        positive = projection["rows_by_delta"][0][0]["baseline_contribution"]
+        negative = projection["rows_by_delta"][1][0]["baseline_contribution"]
+        self.assertEqual(
+            positive,
+            2.0 * plots.simc_shape_pion_weight_from_value(
+                0.2, final["H_pion_control_model"], final["weights"]
+            ),
+        )
+        self.assertEqual(
+            negative,
+            -1.0 * plots.simc_shape_pion_weight_from_value(
+                1.2, final["H_pion_control_model"], final["weights"]
+            ),
+        )
+        self.assertEqual((positive, negative), (5.0, -2.5))
+        self.assertGreater(positive, 0.0)
+        self.assertLess(negative, 0.0)
 
     def test_d8_unavailable_final_never_substitutes_the_proposal(self):
         parents, cache = _d8_fixture()
@@ -921,6 +1045,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "resolve_pion_hgcer_delta_edges",
             "build_pion_hgcer_method_a",
             "build_pion_hgcer_method_b",
+            "single_scale",
         ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
@@ -1047,8 +1172,12 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 (2.0, 3.0, 0.0) if t_index == 0 else (0.0, 0.0, 0.0),
                 (2.0, 3.0, 0.0) if t_index == 0 else (0.0, 0.0, 0.0),
             )
-            before = d8_histogram("H_d8_before_t{}".format(t_index), (4.0, 5.0, 1.0))
-            after = d8_histogram("H_d8_after_t{}".format(t_index), (4.0, 2.0, 1.0))
+            before = d8_histogram(
+                "H_d8_before_t{}".format(t_index), (4.0, 5.0, 1.0), (0.5, 0.75, 0.25)
+            )
+            after = d8_histogram(
+                "H_d8_after_t{}".format(t_index), (4.0, 2.0, 1.0), (0.4, 0.6, 0.2)
+            )
             model = d8_histogram("H_d8_model_t{}".format(t_index), (0.0, 0.0, 0.0))
             d8_parents.append({
                 "t_bin_index": t_index,
@@ -1087,6 +1216,26 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             [group["delta_projection"]["closure"]["status"] for group in d8_payload["per_t"]],
             ["closed", "closed"],
         )
+        d8_source_snapshots = []
+        for parent in d8_parents:
+            application = parent["final_diagnostic_application_result"]
+            for key in (
+                "H_MM_nosub_before_pion_subtraction",
+                "H_pion_subtraction_template_MM_nosub",
+                "H_MM_nosub_after_pion_subtraction",
+            ):
+                histogram = application[key]
+                axis = histogram.GetXaxis()
+                d8_source_snapshots.append((
+                    histogram,
+                    histogram.GetNbinsX(),
+                    tuple(
+                        (histogram.GetBinContent(index), histogram.GetBinError(index))
+                        for index in range(1, histogram.GetNbinsX() + 1)
+                    ),
+                    axis.GetXmin(),
+                    axis.GetXmax(),
+                ))
         with tempfile.TemporaryDirectory() as temporary:
             pdf = str(Path(temporary) / "procedure.pdf")
             self.assertTrue(plots.open_full_background_subtraction_pdf(pdf))
@@ -1132,9 +1281,17 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(timing_cells[0][0].GetNbinsX(), 4)
         self.assertEqual(weight.GetNbinsX(), 2)
         self.assertEqual(weight.GetNbinsY(), 2)
-        d8_template = d8_parents[0]["final_diagnostic_application_result"]["H_pion_subtraction_template_MM_nosub"]
-        self.assertEqual(d8_template.GetNbinsX(), 3)
-        self.assertEqual(d8_template.GetBinContent(2), 3.0)
+        for histogram, bin_count, bins, x_minimum, x_maximum in d8_source_snapshots:
+            self.assertEqual(histogram.GetNbinsX(), bin_count)
+            self.assertEqual(
+                tuple(
+                    (histogram.GetBinContent(index), histogram.GetBinError(index))
+                    for index in range(1, histogram.GetNbinsX() + 1)
+                ),
+                bins,
+            )
+            self.assertEqual(histogram.GetXaxis().GetXmin(), x_minimum)
+            self.assertEqual(histogram.GetXaxis().GetXmax(), x_maximum)
 
 
 if __name__ == "__main__":
