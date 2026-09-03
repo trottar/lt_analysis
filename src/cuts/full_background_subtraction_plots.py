@@ -1,4 +1,4 @@
-"""Detached D.6/D.7/D.8/D.9 procedure pages for the procedure PDF.
+"""Detached D.6 through D.10 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -21,12 +21,17 @@ D6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d6/v1"
 D7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d7/v1"
 D8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d8/v1"
 D9_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d9/v1"
+D10_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d10/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
 _CTIME_AERO_METHOD = "ctime_aero_event_weight"
 _D9_SIDES = ("kaon", "pion")
 _D9_METHOD_A_COMPARISON_SCHEMA = "pion_hgcer_method_a_comparison/v1"
+_D10_PHASE_A_SCHEMA = "pion_hgcer_event_contract/v1"
+_D10_METHOD_B_SCHEMA = "pion_hgcer_method_b/v1"
+_D10_METHOD_B_COMPARISON_SCHEMA = "pion_hgcer_method_b_comparison/v1"
+_D10_SOURCE_TARGET_STATE = "post_proton_noRF"
 
 
 def _import_root():
@@ -100,6 +105,29 @@ def _d9_unavailable(reason):
         "delta_edges": [],
         "coordinate_fingerprint": None,
         "method_a_thresholds": {"available": False},
+        "per_t": [],
+    }
+
+
+def _d10_unavailable(reason):
+    """Return the detached D.10 unavailable payload without source aliases."""
+    return {
+        "schema_version": D10_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "method_b_fingerprint": None,
+        "host_state": None,
+        "host_label": None,
+        "source_target_state": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "mm_edges": [],
+        "mm_regions": [],
+        "protected_regions": [],
+        "d3_available": False,
+        "d3_reason": None,
         "per_t": [],
     }
 
@@ -2246,6 +2274,886 @@ def _append_d7_exclusion_failure(presentation, failures):
         failures.append("D.7 frozen display rows excluded: {}".format(", ".join(parts)))
 
 
+def _d10_integer(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return None
+    integer = int(scalar)
+    if not math.isfinite(scalar) or scalar != integer:
+        return None
+    return integer
+
+
+def _d10_finite(value):
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return None
+    return scalar if math.isfinite(scalar) else None
+
+
+def _d10_nonempty_string(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _d10_sequence(value):
+    return isinstance(value, Sequence) and not isinstance(value, (str, bytes))
+
+
+def _d10_region_rows(value, *, protected):
+    """Copy only frozen Method-B region display metadata."""
+    if not _d10_sequence(value) or not value:
+        return None, "method_b_region_contract_invalid"
+    result = []
+    names = set()
+    expected_role = "protected_signal" if protected else "pion_sensitive"
+    for source in value:
+        row = _mapping(source)
+        required = (
+            "region_name", "mm_low", "mm_high", "region_role", "window_source",
+            "mm_offset_applied",
+        )
+        if not row or any(key not in row for key in required):
+            return None, "method_b_region_contract_invalid"
+        name = row["region_name"]
+        low = _d10_finite(row["mm_low"])
+        high = _d10_finite(row["mm_high"])
+        offset = _d10_finite(row["mm_offset_applied"])
+        if (
+            not _d10_nonempty_string(name)
+            or name in names
+            or low is None
+            or high is None
+            or low >= high
+            or offset is None
+            or row["region_role"] != expected_role
+            or not _d10_nonempty_string(row["window_source"])
+        ):
+            return None, "method_b_region_contract_invalid"
+        copied = {
+            "region_name": str(name),
+            "mm_low": low,
+            "mm_high": high,
+            "region_role": expected_role,
+            "window_source": str(row["window_source"]),
+            "mm_offset_applied": offset,
+        }
+        if protected:
+            copied.update({
+                "available": True,
+                "protected_signal_overlap": False,
+                "reason": None,
+            })
+        else:
+            if (
+                not isinstance(row.get("available"), bool)
+                or not isinstance(row.get("protected_signal_overlap"), bool)
+            ):
+                return None, "method_b_region_contract_invalid"
+            copied.update({
+                "available": row["available"],
+                "protected_signal_overlap": row["protected_signal_overlap"],
+                "reason": row.get("reason"),
+            })
+        names.add(name)
+        result.append(copied)
+    if protected and not {"KLambda", "KSigma0"}.issubset(names):
+        return None, "method_b_protected_region_contract_invalid"
+    return tuple(result), None
+
+
+def _d10_phase_a_contract(phase_a):
+    phase = _mapping(phase_a)
+    required = (
+        "schema_version", "status", "available", "contract_fingerprint",
+        "coordinate_fingerprint", "canonical_t_edges", "delta_edges", "host_state",
+        "source_target_state", "pion_records", "kaon_host_records", "pion_closure",
+        "host_closure", "production_objects_mutated", "refinement_applied",
+        "rf_restoration_applied",
+    )
+    if not phase or any(key not in phase for key in required):
+        return None, "phase_a_contract_invalid"
+    t_edges = _strict_edges(phase["canonical_t_edges"])
+    delta_edges = _strict_edges(phase["delta_edges"])
+    pion_closure = _mapping(phase["pion_closure"])
+    host_closure = _mapping(phase["host_closure"])
+    if (
+        phase["schema_version"] != _D10_PHASE_A_SCHEMA
+        or phase["status"] != "available"
+        or phase["available"] is not True
+        or not _d10_nonempty_string(phase["contract_fingerprint"])
+        or not _d10_nonempty_string(phase["coordinate_fingerprint"])
+        or t_edges is None
+        or delta_edges is None
+        or phase["host_state"] not in {"proton_cleaned", "identity_no_proton_cleaning"}
+        or phase["source_target_state"] != _D10_SOURCE_TARGET_STATE
+        or pion_closure.get("passed") is not True
+        or host_closure.get("passed") is not True
+        or phase["production_objects_mutated"] is not False
+        or phase["refinement_applied"] is not False
+        or phase["rf_restoration_applied"] is not False
+        or not _d10_sequence(phase["pion_records"])
+        or not _d10_sequence(phase["kaon_host_records"])
+    ):
+        return None, "phase_a_contract_invalid"
+    return {
+        "contract_fingerprint": str(phase["contract_fingerprint"]),
+        "coordinate_fingerprint": str(phase["coordinate_fingerprint"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "host_state": phase["host_state"],
+        "source_target_state": phase["source_target_state"],
+        "pion_records": phase["pion_records"],
+        "kaon_host_records": phase["kaon_host_records"],
+    }, None
+
+
+def _d10_method_b_contract(method_b, phase):
+    method = _mapping(method_b)
+    required = (
+        "schema_version", "status", "available", "non_authoritative",
+        "production_objects_mutated", "refinement_applied", "rf_ct_required",
+        "interpolation_used", "phase_a_records_only", "method_a_numerical_dependency",
+        "phase_a_contract_fingerprint", "coordinate_fingerprint", "host_state",
+        "source_target_state", "t_edges", "delta_edges", "mm_binning", "mm_regions",
+        "protected_regions", "fingerprint", "cells",
+    )
+    if not method or any(key not in method for key in required):
+        return None, "method_b_contract_invalid"
+    t_edges = _strict_edges(method["t_edges"])
+    delta_edges = _strict_edges(method["delta_edges"])
+    mm_edges = _strict_edges(method["mm_binning"])
+    if (
+        method["schema_version"] != _D10_METHOD_B_SCHEMA
+        or method["status"] != "available"
+        or method["available"] is not True
+        or method["non_authoritative"] is not True
+        or method["production_objects_mutated"] is not False
+        or method["refinement_applied"] is not False
+        or method["rf_ct_required"] is not False
+        or method["interpolation_used"] is not False
+        or method["phase_a_records_only"] is not True
+        or method["method_a_numerical_dependency"] is not False
+        or not _d10_nonempty_string(method["fingerprint"])
+        or method["phase_a_contract_fingerprint"] != phase["contract_fingerprint"]
+        or method["coordinate_fingerprint"] != phase["coordinate_fingerprint"]
+        or list(t_edges or ()) != phase["t_edges"]
+        or list(delta_edges or ()) != phase["delta_edges"]
+        or method["host_state"] != phase["host_state"]
+        or method["source_target_state"] != phase["source_target_state"]
+        or method["source_target_state"] != _D10_SOURCE_TARGET_STATE
+        or mm_edges is None
+        or not _d10_sequence(method["cells"])
+    ):
+        return None, "method_b_contract_invalid"
+    regions, reason = _d10_region_rows(method["mm_regions"], protected=False)
+    if reason is not None:
+        return None, reason
+    protected, reason = _d10_region_rows(method["protected_regions"], protected=True)
+    if reason is not None:
+        return None, reason
+    return {
+        "fingerprint": str(method["fingerprint"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "mm_edges": list(mm_edges),
+        "mm_regions": regions,
+        "protected_regions": protected,
+        "cells": method["cells"],
+    }, None
+
+
+def _d10_event_rows(records, *, contribution_key, t_count, delta_count, host_state=None):
+    copied = [[] for _unused in range(t_count)]
+    failures = [None for _unused in range(t_count)]
+
+    def fail(t_index, reason):
+        if t_index is None:
+            for index in range(t_count):
+                failures[index] = failures[index] or reason
+        else:
+            failures[t_index] = failures[t_index] or reason
+
+    for source in records:
+        row = _mapping(source)
+        if row.get("nommcuts") is not True:
+            continue
+        t_index = _d10_integer(row.get("canonical_t_index"))
+        delta_index = _d10_integer(row.get("delta_index"))
+        if t_index is None or not 0 <= t_index < t_count:
+            fail(None, "phase_a_record_t_membership_invalid")
+            continue
+        if delta_index is None or not 0 <= delta_index < delta_count:
+            fail(t_index, "phase_a_record_delta_membership_invalid")
+            continue
+        missing_mass = _d10_finite(row.get("analysis_MM"))
+        contribution = _d10_finite(row.get(contribution_key))
+        if missing_mass is None or contribution is None:
+            fail(t_index, "phase_a_record_scalar_invalid")
+            continue
+        if host_state is not None and row.get("host_state") != host_state:
+            fail(t_index, "phase_a_host_record_state_invalid")
+            continue
+        copied[t_index].append({
+            "t_index": t_index,
+            "delta_index": delta_index,
+            "missing_mass": missing_mass,
+            "signed_contribution": contribution,
+        })
+    return tuple(tuple(rows) for rows in copied), tuple(failures)
+
+
+def _d10_copy_cell_bins(value, mm_edges):
+    if not _d10_sequence(value) or len(value) != len(mm_edges) + 1:
+        return None, "method_b_cell_bins_invalid"
+    copied = []
+    regular_count = len(mm_edges) - 1
+    for expected_index, source in enumerate(value):
+        row = _mapping(source)
+        required = (
+            "index", "mm_low", "mm_high", "underflow", "overflow",
+            "in_allowed_pion_sensitive_domain", "usable_for_shape",
+            "host_record_count", "host_yield", "host_sumw2",
+            "baseline_record_count", "baseline_yield", "baseline_sumw2",
+            "residual", "pull",
+        )
+        if not row or any(key not in row for key in required):
+            return None, "method_b_cell_bins_invalid"
+        index = _d10_integer(row["index"])
+        if index != expected_index:
+            return None, "method_b_cell_bins_invalid"
+        regular = 1 <= index <= regular_count
+        if (
+            row["underflow"] is not (index == 0)
+            or row["overflow"] is not (index == regular_count + 1)
+            or not isinstance(row["in_allowed_pion_sensitive_domain"], bool)
+            or not isinstance(row["usable_for_shape"], bool)
+        ):
+            return None, "method_b_cell_bins_invalid"
+        if regular:
+            if row["mm_low"] != mm_edges[index - 1] or row["mm_high"] != mm_edges[index]:
+                return None, "method_b_cell_mm_geometry_invalid"
+        elif row["mm_low"] is not None or row["mm_high"] is not None:
+            return None, "method_b_cell_mm_geometry_invalid"
+        host_count = _d10_integer(row["host_record_count"])
+        baseline_count = _d10_integer(row["baseline_record_count"])
+        host_yield = _d10_finite(row["host_yield"])
+        host_sumw2 = _d10_finite(row["host_sumw2"])
+        baseline_yield = _d10_finite(row["baseline_yield"])
+        baseline_sumw2 = _d10_finite(row["baseline_sumw2"])
+        if (
+            host_count is None or host_count < 0 or baseline_count is None or baseline_count < 0
+            or host_yield is None or host_sumw2 is None or host_sumw2 < 0.0
+            or baseline_yield is None or baseline_sumw2 is None or baseline_sumw2 < 0.0
+        ):
+            return None, "method_b_cell_bins_invalid"
+        residual = row["residual"]
+        pull = row["pull"]
+        if (residual is not None and _d10_finite(residual) is None) or (
+            pull is not None and _d10_finite(pull) is None
+        ):
+            return None, "method_b_cell_bins_invalid"
+        copied.append({
+            "index": index,
+            "mm_low": row["mm_low"] if not regular else float(row["mm_low"]),
+            "mm_high": row["mm_high"] if not regular else float(row["mm_high"]),
+            "underflow": row["underflow"],
+            "overflow": row["overflow"],
+            "in_allowed_pion_sensitive_domain": row["in_allowed_pion_sensitive_domain"],
+            "usable_for_shape": row["usable_for_shape"],
+            "host_record_count": host_count,
+            "host_yield": host_yield,
+            "host_sumw2": host_sumw2,
+            "baseline_record_count": baseline_count,
+            "baseline_yield": baseline_yield,
+            "baseline_sumw2": baseline_sumw2,
+            "residual": None if residual is None else float(residual),
+            "pull": None if pull is None else float(pull),
+        })
+    return tuple(copied), None
+
+
+def _d10_local_closure_cells(cells, method, phase):
+    t_edges = method["t_edges"]
+    delta_edges = method["delta_edges"]
+    t_count = len(t_edges) - 1
+    delta_count = len(delta_edges) - 1
+    if len(cells) != t_count * delta_count:
+        return None, None, "method_b_cell_grid_invalid"
+    grouped = [[] for _unused in range(t_count)]
+    failures = [None for _unused in range(t_count)]
+    seen = set()
+    for source in cells:
+        cell = _mapping(source)
+        t_index = _d10_integer(cell.get("t_index"))
+        delta_index = _d10_integer(cell.get("delta_index"))
+        if (
+            t_index is None or delta_index is None
+            or not 0 <= t_index < t_count or not 0 <= delta_index < delta_count
+            or (t_index, delta_index) in seen
+            or cell.get("t_low") != t_edges[t_index]
+            or cell.get("t_high") != t_edges[t_index + 1]
+            or cell.get("delta_low") != delta_edges[delta_index]
+            or cell.get("delta_high") != delta_edges[delta_index + 1]
+            or cell.get("host_state") != phase["host_state"]
+        ):
+            return None, None, "method_b_cell_grid_invalid"
+        seen.add((t_index, delta_index))
+        if cell.get("mm_edges") != method["mm_edges"]:
+            failures[t_index] = failures[t_index] or "method_b_cell_mm_geometry_invalid"
+            continue
+        bins, reason = _d10_copy_cell_bins(cell.get("bins"), method["mm_edges"])
+        if reason is not None:
+            failures[t_index] = failures[t_index] or reason
+            continue
+        shape_status = cell.get("shape_status")
+        if shape_status not in {"good", "marginal", "poor", "unavailable"}:
+            failures[t_index] = failures[t_index] or "method_b_cell_shape_invalid"
+            continue
+        grouped[t_index].append({
+            "t_index": t_index,
+            "delta_index": delta_index,
+            "delta_low": float(delta_edges[delta_index]),
+            "delta_high": float(delta_edges[delta_index + 1]),
+            "mm_edges": list(method["mm_edges"]),
+            "bins": bins,
+            "shape_status": shape_status,
+            "shape_reason": cell.get("shape_reason"),
+        })
+    if len(seen) != t_count * delta_count:
+        return None, None, "method_b_cell_grid_invalid"
+    for t_index, rows in enumerate(grouped):
+        if len(rows) != delta_count:
+            failures[t_index] = failures[t_index] or "method_b_cell_grid_invalid"
+        rows.sort(key=lambda row: row["delta_index"])
+    return tuple(tuple(rows) for rows in grouped), tuple(failures), None
+
+
+def _d10_d3_relative_cells(comparison, phase, method):
+    d3 = _mapping(comparison)
+    if not d3 or d3.get("status") != "available" or d3.get("available") is not True:
+        return None, "method_b_comparison_unavailable"
+    required = (
+        "schema_version", "non_authoritative", "method_a_numerical_dependency",
+        "comparison_performed", "classification_performed", "production_objects_mutated",
+        "refinement_applied", "phase_a_contract_fingerprint", "coordinate_fingerprint",
+        "method_b_fingerprint", "canonical_t_edges", "delta_edges", "host_state",
+        "source_target_state", "cells",
+    )
+    if any(key not in d3 for key in required):
+        return None, "method_b_comparison_contract_invalid"
+    if (
+        d3["schema_version"] != _D10_METHOD_B_COMPARISON_SCHEMA
+        or d3["non_authoritative"] is not True
+        or d3["method_a_numerical_dependency"] is not False
+        or d3["comparison_performed"] is not False
+        or d3["classification_performed"] is not False
+        or d3["production_objects_mutated"] is not False
+        or d3["refinement_applied"] is not False
+        or d3["phase_a_contract_fingerprint"] != phase["contract_fingerprint"]
+        or d3["coordinate_fingerprint"] != phase["coordinate_fingerprint"]
+        or d3["method_b_fingerprint"] != method["fingerprint"]
+        or d3["canonical_t_edges"] != method["t_edges"]
+        or d3["delta_edges"] != method["delta_edges"]
+        or d3["host_state"] != phase["host_state"]
+        or d3["source_target_state"] != phase["source_target_state"]
+        or not _d10_sequence(d3["cells"])
+    ):
+        return None, "method_b_comparison_provenance_invalid"
+    t_count = len(method["t_edges"]) - 1
+    delta_count = len(method["delta_edges"]) - 1
+    if len(d3["cells"]) != t_count * delta_count:
+        return None, "method_b_comparison_cell_grid_invalid"
+    grouped = [[] for _unused in range(t_count)]
+    seen = set()
+    statuses = {
+        "available_multi_region", "single_region_only", "unavailable", "region_marginal",
+        "region_inconsistent", "shape_poor_veto",
+    }
+    for source in d3["cells"]:
+        cell = _mapping(source)
+        required_cell = (
+            "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+            "method_b_comparison_candidate", "method_b_comparison_candidate_uncertainty",
+            "method_b_comparison_candidate_status", "method_b_comparison_candidate_reason",
+            "method_B_status", "method_B_reason", "region_consistency_status",
+            "region_consistency_reason", "shape_status", "shape_reason",
+        )
+        if not cell or any(key not in cell for key in required_cell):
+            return None, "method_b_comparison_cell_contract_invalid"
+        t_index = _d10_integer(cell["t_index"])
+        delta_index = _d10_integer(cell["delta_index"])
+        if (
+            t_index is None or delta_index is None
+            or not 0 <= t_index < t_count or not 0 <= delta_index < delta_count
+            or (t_index, delta_index) in seen
+            or cell["t_low"] != method["t_edges"][t_index]
+            or cell["t_high"] != method["t_edges"][t_index + 1]
+            or cell["delta_low"] != method["delta_edges"][delta_index]
+            or cell["delta_high"] != method["delta_edges"][delta_index + 1]
+            or cell["method_b_comparison_candidate_status"] not in statuses
+            or cell["method_B_status"] not in {
+                "available", "marginal", "internally_inconsistent", "shape_inconsistent", "unavailable",
+            }
+            or cell["region_consistency_status"] not in {
+                "region_consistent", "region_marginal", "region_inconsistent", "insufficient_regions",
+            }
+            or cell["shape_status"] not in {"good", "marginal", "poor", "unavailable"}
+        ):
+            return None, "method_b_comparison_cell_contract_invalid"
+        status = cell["method_b_comparison_candidate_status"]
+        candidate = cell["method_b_comparison_candidate"]
+        uncertainty = cell["method_b_comparison_candidate_uncertainty"]
+        if status == "available_multi_region":
+            candidate = _d10_finite(candidate)
+            uncertainty = _d10_finite(uncertainty)
+            if candidate is None or candidate <= 0.0 or uncertainty is None or uncertainty <= 0.0:
+                return None, "method_b_comparison_candidate_invalid"
+        elif candidate is not None or uncertainty is not None:
+            return None, "method_b_comparison_candidate_invalid"
+        seen.add((t_index, delta_index))
+        grouped[t_index].append({
+            "t_index": t_index,
+            "t_low": float(cell["t_low"]),
+            "t_high": float(cell["t_high"]),
+            "delta_index": delta_index,
+            "delta_low": float(cell["delta_low"]),
+            "delta_high": float(cell["delta_high"]),
+            "method_b_comparison_candidate": candidate,
+            "method_b_comparison_candidate_uncertainty": uncertainty,
+            "method_b_comparison_candidate_status": status,
+            "method_b_comparison_candidate_reason": cell[
+                "method_b_comparison_candidate_reason"
+            ],
+            "method_B_status": cell["method_B_status"],
+            "method_B_reason": cell["method_B_reason"],
+            "region_consistency_status": cell["region_consistency_status"],
+            "region_consistency_reason": cell["region_consistency_reason"],
+            "shape_status": cell["shape_status"],
+            "shape_reason": cell["shape_reason"],
+        })
+    if len(seen) != t_count * delta_count:
+        return None, "method_b_comparison_cell_grid_invalid"
+    return tuple(tuple(sorted(rows, key=lambda row: row["delta_index"])) for rows in grouped), None
+
+
+def build_full_background_subtraction_d10_payload(
+    pion_hgcer_event_contract,
+    pion_hgcer_method_b,
+    pion_hgcer_method_b_comparison,
+):
+    """Select frozen Method-B explanation inputs without Method-B recalculation."""
+    phase, reason = _d10_phase_a_contract(pion_hgcer_event_contract)
+    if reason is not None:
+        return _d10_unavailable(reason)
+    method, reason = _d10_method_b_contract(pion_hgcer_method_b, phase)
+    if reason is not None:
+        return _d10_unavailable(reason)
+    local_cells, local_failures, reason = _d10_local_closure_cells(
+        method["cells"], method, phase
+    )
+    if reason is not None:
+        return _d10_unavailable(reason)
+    t_count = len(phase["t_edges"]) - 1
+    delta_count = len(phase["delta_edges"]) - 1
+    host_rows, host_failures = _d10_event_rows(
+        phase["kaon_host_records"],
+        contribution_key="signed_host_event_contribution",
+        t_count=t_count,
+        delta_count=delta_count,
+        host_state=phase["host_state"],
+    )
+    pion_rows, pion_failures = _d10_event_rows(
+        phase["pion_records"],
+        contribution_key="signed_baseline_event_contribution",
+        t_count=t_count,
+        delta_count=delta_count,
+    )
+    relative_cells, d3_reason = _d10_d3_relative_cells(
+        pion_hgcer_method_b_comparison, phase, method
+    )
+    host_label = (
+        "Proton-cleaned kaon data"
+        if phase["host_state"] == "proton_cleaned" else "Kaon-selected data"
+    )
+    per_t = []
+    for t_index in range(t_count):
+        inputs_reason = host_failures[t_index] or pion_failures[t_index]
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(phase["t_edges"][t_index]),
+            "t_high": float(phase["t_edges"][t_index + 1]),
+            "mm_inputs": {
+                "available": inputs_reason is None,
+                "reason": inputs_reason,
+                "host_rows": host_rows[t_index],
+                "baseline_rows": pion_rows[t_index],
+            },
+            "local_closure": {
+                "available": local_failures[t_index] is None,
+                "reason": local_failures[t_index],
+                "cells_by_delta": local_cells[t_index],
+            },
+            "method_b_relative": {
+                "available": d3_reason is None,
+                "reason": d3_reason,
+                "cells": relative_cells[t_index] if relative_cells is not None else tuple(),
+            },
+        })
+    return {
+        "schema_version": D10_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "phase_a_contract_fingerprint": phase["contract_fingerprint"],
+        "coordinate_fingerprint": phase["coordinate_fingerprint"],
+        "method_b_fingerprint": method["fingerprint"],
+        "host_state": phase["host_state"],
+        "host_label": host_label,
+        "source_target_state": phase["source_target_state"],
+        "t_edges": list(phase["t_edges"]),
+        "delta_edges": list(phase["delta_edges"]),
+        "mm_edges": list(method["mm_edges"]),
+        "mm_regions": [dict(row) for row in method["mm_regions"]],
+        "protected_regions": [dict(row) for row in method["protected_regions"]],
+        "d3_available": d3_reason is None,
+        "d3_reason": d3_reason,
+        "per_t": per_t,
+    }
+
+
+def _d10_new_histogram(ROOT, name, edges):
+    if not hasattr(ROOT, "TH1D"):
+        return None
+    try:
+        histogram = ROOT.TH1D(str(name), str(name), len(edges) - 1, array("d", edges))
+        histogram.SetDirectory(0)
+        if hasattr(histogram, "Sumw2"):
+            histogram.Sumw2()
+        return histogram
+    except Exception:
+        return None
+
+
+def _d10_event_histogram(ROOT, name, edges, rows):
+    histogram = _d10_new_histogram(ROOT, name, edges)
+    if histogram is None:
+        return None
+    try:
+        for row in rows:
+            row = _mapping(row)
+            histogram.Fill(float(row["missing_mass"]), float(row["signed_contribution"]))
+    except Exception:
+        return None
+    return histogram
+
+
+def _d10_local_histograms(ROOT, name, cell):
+    cell = _mapping(cell)
+    edges = cell.get("mm_edges") or ()
+    host = _d10_new_histogram(ROOT, "{}_host".format(name), edges)
+    baseline = _d10_new_histogram(ROOT, "{}_baseline".format(name), edges)
+    if host is None or baseline is None:
+        return None, None
+    try:
+        for row in cell.get("bins") or ():
+            row = _mapping(row)
+            index = int(row["index"])
+            if not 1 <= index <= len(edges) - 1:
+                continue
+            host.SetBinContent(index, float(row["host_yield"]))
+            host.SetBinError(index, math.sqrt(float(row["host_sumw2"])))
+            baseline.SetBinContent(index, float(row["baseline_yield"]))
+            baseline.SetBinError(index, math.sqrt(float(row["baseline_sumw2"])))
+    except Exception:
+        return None, None
+    return host, baseline
+
+
+def _d10_draw_region_boundaries(ROOT, presentation, y_range, draw_objects):
+    """Draw only frozen Method-B MM boundaries, never recomputed windows."""
+    if not hasattr(ROOT, "TLine"):
+        return {}
+    lines = {}
+    for region in tuple(presentation.get("mm_regions") or ()):
+        region = _mapping(region)
+        if not region:
+            continue
+        color = getattr(ROOT, "kBlue", 4) if region.get("available") else getattr(ROOT, "kGray", 920)
+        style = 2 if region.get("available") else 3
+        for boundary in (region.get("mm_low"), region.get("mm_high")):
+            try:
+                line = ROOT.TLine(float(boundary), float(y_range[0]), float(boundary), float(y_range[1]))
+                line.SetLineColor(color)
+                line.SetLineStyle(style)
+                line.SetLineWidth(1)
+                line.Draw()
+                draw_objects.append(line)
+                lines.setdefault("pion", line)
+            except Exception:
+                continue
+    for region in tuple(presentation.get("protected_regions") or ()):
+        region = _mapping(region)
+        if not region:
+            continue
+        name = str(region.get("region_name"))
+        for boundary in (region.get("mm_low"), region.get("mm_high")):
+            try:
+                line = ROOT.TLine(
+                    float(boundary), float(y_range[0]), float(boundary), float(y_range[1])
+                )
+                line.SetLineColor(getattr(ROOT, "kRed", 2))
+                line.SetLineStyle(3)
+                line.SetLineWidth(1)
+                line.Draw()
+                draw_objects.append(line)
+                lines.setdefault(name, line)
+            except Exception:
+                continue
+    return lines
+
+
+def _d10_add_region_legend_entries(legend, lines):
+    if "pion" in lines:
+        legend.AddEntry(lines["pion"], "Pion-sensitive region", "l")
+    if "KLambda" in lines:
+        legend.AddEntry(lines["KLambda"], "K-Lambda protected region", "l")
+    if "KSigma0" in lines:
+        legend.AddEntry(lines["KSigma0"], "K-Sigma0 protected region", "l")
+
+
+def _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
+    inputs = _mapping(group.get("mm_inputs"))
+    edges = presentation.get("mm_edges") or ()
+    host = _d10_event_histogram(
+        ROOT,
+        "H_full_background_d10_inputs_host_t{}".format(group["t_index"] + 1),
+        edges,
+        inputs.get("host_rows") or (),
+    )
+    baseline = _d10_event_histogram(
+        ROOT,
+        "H_full_background_d10_inputs_baseline_t{}".format(group["t_index"] + 1),
+        edges,
+        inputs.get("baseline_rows") or (),
+    )
+    if host is None or baseline is None:
+        return False
+    title = "Method B - Missing-mass closure inputs - {}".format(_t_context(group))
+    _set_histogram_title(host, "{};Missing mass [GeV];Signed normalized yield".format(title))
+    y_range = _combined_histogram_y_range((host, baseline))
+    _apply_display_y_range(host, y_range)
+    _style_histogram(host, getattr(ROOT, "kBlack", 1))
+    _style_histogram(baseline, getattr(ROOT, "kBlue", 4))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d10_inputs_t{}".format(group["t_index"] + 1), title, 1200, 800
+    )
+    draw_objects = [host, baseline]
+    try:
+        host.Draw("hist e")
+        baseline.Draw("hist e same")
+        lines = _d10_draw_region_boundaries(ROOT, presentation, y_range, draw_objects)
+        legend = ROOT.TLegend(0.55, 0.56, 0.89, 0.82)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        legend.AddEntry(host, presentation.get("host_label", "Kaon-selected data"), "l")
+        legend.AddEntry(baseline, "Baseline pion background", "l")
+        _d10_add_region_legend_entries(legend, lines)
+        legend.Draw()
+        draw_objects.append(legend)
+        draw_objects.append(_draw_small_note(ROOT, "Diagnostic only - no refinement applied"))
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Method B - Missing-mass closure inputs", group)
+        )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
+    closure = _mapping(group.get("local_closure"))
+    cells = tuple(closure.get("cells_by_delta") or ())
+    if not cells:
+        return False
+    columns = min(3, len(cells))
+    rows = int(math.ceil(float(len(cells)) / float(columns)))
+    title = "Method B - Local missing-mass closure - {}".format(_t_context(group))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d10_local_t{}".format(group["t_index"] + 1), title, 1400, 900
+    )
+    canvas.Divide(columns, rows)
+    draw_objects = []
+    pairs = []
+    try:
+        for cell in cells:
+            host, baseline = _d10_local_histograms(
+                ROOT,
+                "H_full_background_d10_local_t{}_d{}".format(
+                    group["t_index"] + 1, int(cell["delta_index"]) + 1
+                ),
+                cell,
+            )
+            if host is None or baseline is None:
+                return False
+            pairs.append((cell, host, baseline))
+        y_range = _combined_histogram_y_range(
+            [histogram for _cell, host, baseline in pairs for histogram in (host, baseline)]
+        )
+        for panel_index, (cell, host, baseline) in enumerate(pairs, 1):
+            canvas.cd(panel_index)
+            panel_title = "delta = [{:.3f}, {:.3f}] %".format(
+                float(cell["delta_low"]), float(cell["delta_high"])
+            )
+            _set_histogram_title(
+                host, "{};Missing mass [GeV];Signed normalized yield".format(panel_title)
+            )
+            _apply_display_y_range(host, y_range)
+            _style_histogram(host, getattr(ROOT, "kBlack", 1))
+            _style_histogram(baseline, getattr(ROOT, "kBlue", 4))
+            host.Draw("hist e")
+            baseline.Draw("hist e same")
+            lines = _d10_draw_region_boundaries(ROOT, presentation, y_range, draw_objects)
+            if panel_index == 1:
+                legend = ROOT.TLegend(0.48, 0.54, 0.89, 0.84)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                legend.AddEntry(host, presentation.get("host_label", "Kaon-selected data"), "l")
+                legend.AddEntry(baseline, "Baseline pion background", "l")
+                _d10_add_region_legend_entries(legend, lines)
+                legend.Draw()
+                draw_objects.append(legend)
+            draw_objects.extend((host, baseline))
+        canvas.cd(1)
+        draw_objects.append(_draw_small_note(ROOT, "Diagnostic only - no refinement applied"))
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Method B - Local missing-mass closure", group)
+        )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _d10_relative_y_range(cells):
+    values = [1.0]
+    for cell in cells:
+        cell = _mapping(cell)
+        if cell.get("method_b_comparison_candidate_status") != "available_multi_region":
+            continue
+        candidate = _d10_finite(cell.get("method_b_comparison_candidate"))
+        uncertainty = _d10_finite(cell.get("method_b_comparison_candidate_uncertainty"))
+        if candidate is not None and uncertainty is not None:
+            values.extend((candidate - uncertainty, candidate, candidate + uncertainty))
+    low, high = min(values), max(values)
+    if high <= low:
+        return low - 0.05, high + 0.05
+    padding = 0.05 * (high - low)
+    return low - padding, high + padding
+
+
+def _render_d10_method_b_relative_page(ROOT, pdf_name, group, delta_edges):
+    presentation = _mapping(group.get("method_b_relative"))
+    cells = tuple(presentation.get("cells") or ())
+    if not hasattr(ROOT, "TH1D"):
+        return False
+    title = "Method B - Missing-mass closure diagnostic - {}".format(_t_context(group))
+    try:
+        frame = ROOT.TH1D(
+            "H_full_background_d10_relative_t{}".format(group["t_index"] + 1),
+            "{};delta [%];Relative pion-background diagnostic".format(title),
+            len(delta_edges) - 1,
+            array("d", delta_edges),
+        )
+        frame.SetDirectory(0)
+        if hasattr(frame, "SetStats"):
+            frame.SetStats(0)
+        y_range = _d10_relative_y_range(cells)
+        frame.SetMinimum(y_range[0])
+        frame.SetMaximum(y_range[1])
+    except Exception:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_d10_relative_t{}".format(group["t_index"] + 1), title, 1200, 800
+    )
+    draw_objects = [frame]
+    try:
+        frame.Draw("axis")
+        selected = [
+            _mapping(cell) for cell in cells
+            if _mapping(cell).get("method_b_comparison_candidate_status") == "available_multi_region"
+        ]
+        if selected and hasattr(ROOT, "TGraphErrors"):
+            graph = ROOT.TGraphErrors(len(selected))
+            for point_index, cell in enumerate(selected):
+                x_value = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+                graph.SetPoint(point_index, x_value, float(cell["method_b_comparison_candidate"]))
+                graph.SetPointError(
+                    point_index, 0.0, float(cell["method_b_comparison_candidate_uncertainty"])
+                )
+            graph.SetMarkerColor(getattr(ROOT, "kBlack", 1))
+            graph.SetLineColor(getattr(ROOT, "kBlack", 1))
+            graph.SetMarkerStyle(20)
+            graph.SetMarkerSize(1.1)
+            graph.Draw("P same")
+            draw_objects.append(graph)
+            legend = ROOT.TLegend(0.64, 0.74, 0.89, 0.86)
+            legend.SetBorderSize(0)
+            legend.SetFillStyle(0)
+            legend.AddEntry(graph, "Available local closure", "p")
+            legend.Draw()
+            draw_objects.append(legend)
+        if hasattr(ROOT, "TLine"):
+            unity = ROOT.TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
+            unity.SetLineStyle(2)
+            unity.SetLineWidth(2)
+            unity.Draw()
+            draw_objects.append(unity)
+        draw_objects.append(
+            _draw_small_note(ROOT, "Diagnostic only - no correction or method selection")
+        )
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Method B - Missing-mass closure diagnostic", group)
+        )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d10_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Render the detached D.10 Method-B explanation for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    inputs = _mapping(group.get("mm_inputs"))
+    if inputs.get("available"):
+        if _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
+            manifest.append({"page_id": "full_background.d10.method_b_mm_inputs", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.10 Method-B MM-input page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.10 Method-B MM-input unavailable for t{}: {}".format(t_number, inputs.get("reason")))
+    closure = _mapping(group.get("local_closure"))
+    if closure.get("available"):
+        if _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
+            manifest.append({"page_id": "full_background.d10.method_b_local_closure", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.10 Method-B local-closure page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.10 Method-B local-closure input unavailable for t{}: {}".format(t_number, closure.get("reason")))
+    relative = _mapping(group.get("method_b_relative"))
+    if relative.get("available"):
+        if _render_d10_method_b_relative_page(
+            ROOT, pdf_name, group, presentation.get("delta_edges") or ()
+        ):
+            manifest.append({"page_id": "full_background.d10.method_b_relative", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.10 Method-B relative page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.10 Method-B relative input unavailable for t{}: {}".format(t_number, relative.get("reason")))
+
+
 def render_full_background_subtraction_d6_pages(pdf_name, payload, *, page_manifest=None):
     """Append D.6 pages in raw-MM, PID, weight order for every canonical t bin."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
@@ -2327,23 +3235,48 @@ def render_full_background_subtraction_d9_pages(pdf_name, payload, *, page_manif
     return result
 
 
+def render_full_background_subtraction_d10_pages(pdf_name, payload, *, page_manifest=None):
+    """Append D.10 Method-B explanation pages for every canonical t bin."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    result = {"manifest": manifest, "failures": []}
+    presentation = _mapping(payload)
+    if not bool(presentation.get("available")):
+        result["failures"].append(
+            "D.10 procedure input unavailable: {}".format(presentation.get("reason"))
+        )
+        return result
+    ROOT = _import_root()
+    if ROOT is None:
+        result["failures"].append("D.10 procedure rendering unavailable: PyROOT not available")
+        return result
+    for group in tuple(presentation.get("per_t") or ()):
+        _render_d10_t_pages(
+            ROOT, pdf_name, presentation, _mapping(group), manifest, result["failures"]
+        )
+    return result
+
+
 def render_full_background_subtraction_procedure_pages(
-    pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, *, page_manifest=None
+    pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
+    *, page_manifest=None
 ):
-    """Append available D.6 through D.9 groups in complete canonical-t order."""
+    """Append available D.6 through D.10 groups in complete canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
     d7 = _mapping(d7_payload)
     d8 = _mapping(d8_payload)
     d9 = _mapping(d9_payload)
+    d10 = _mapping(d10_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
     d8_available = bool(d8.get("available"))
     d9_requested = d9_payload is not None
     d9_available = bool(d9.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available:
+    d10_requested = d10_payload is not None
+    d10_available = bool(d10.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -2359,6 +3292,10 @@ def render_full_background_subtraction_procedure_pages(
         if d9_requested:
             result["failures"].append(
                 "D.9 procedure input unavailable: {}".format(d9.get("reason"))
+            )
+        if d10_requested:
+            result["failures"].append(
+                "D.10 procedure input unavailable: {}".format(d10.get("reason"))
             )
         return result
     if not d6_available:
@@ -2377,12 +3314,14 @@ def render_full_background_subtraction_procedure_pages(
         result["failures"].append(
             "D.9 procedure input unavailable: {}".format(d9.get("reason"))
         )
+    if d10_requested and not d10_available:
+        result["failures"].append(
+            "D.10 procedure input unavailable: {}".format(d10.get("reason"))
+        )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
         d7_available = False
-    geometry_owner = (
-        d6 if d6_available else d7 if d7_available else d8 if d8_available else d9
-    )
+    geometry_owner = d6 if d6_available else d7 if d7_available else d8 if d8_available else d9 if d9_available else d10
     if (
         d8_available
         and geometry_owner is not None
@@ -2397,6 +3336,13 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("D.9 canonical t geometry mismatch")
         d9_available = False
+    if (
+        d10_available
+        and geometry_owner is not d10
+        and list(geometry_owner.get("t_edges") or ()) != list(d10.get("t_edges") or ())
+    ):
+        result["failures"].append("D.10 canonical t geometry mismatch")
+        d10_available = False
     for comparison_name, comparison_payload, comparison_available in (
         ("D.6", d6, d6_available),
         ("D.7", d7, d7_available),
@@ -2424,6 +3370,21 @@ def render_full_background_subtraction_procedure_pages(
             result["failures"].append(
                 "D.9 frozen delta geometry differs from {}".format(comparison_name)
             )
+    for comparison_name, comparison_payload, comparison_available in (
+        ("D.6", d6, d6_available),
+        ("D.7", d7, d7_available),
+        ("D.8", d8, d8_available),
+        ("D.9", d9, d9_available),
+    ):
+        if (
+            d10_available
+            and comparison_available
+            and list(comparison_payload.get("delta_edges") or ())
+            and list(comparison_payload.get("delta_edges") or ()) != list(d10.get("delta_edges") or ())
+        ):
+            result["failures"].append(
+                "D.10 frozen delta geometry differs from {}".format(comparison_name)
+            )
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -2443,6 +3404,11 @@ def render_full_background_subtraction_procedure_pages(
     d9_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(d9.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    d10_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(d10.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -2468,6 +3434,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_d9_t_pages(ROOT, pdf_name, d9, d9_group, manifest, result["failures"])
 
+    def render_d10_group(t_index):
+        if not d10_available:
+            return
+        d10_group = d10_by_index.get(t_index)
+        if d10_group is None:
+            result["failures"].append(
+                "D.10 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_d10_t_pages(ROOT, pdf_name, d10, d10_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -2482,20 +3459,27 @@ def render_full_background_subtraction_procedure_pages(
                     _render_d7_t_pages(ROOT, pdf_name, d7, d7_group, manifest, result["failures"])
             render_d8_group(group.get("t_index"))
             render_d9_group(group.get("t_index"))
+            render_d10_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
             _render_d7_t_pages(ROOT, pdf_name, d7, group, manifest, result["failures"])
             render_d8_group(group.get("t_index"))
             render_d9_group(group.get("t_index"))
+            render_d10_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
             group = _mapping(group)
             _render_d8_t_pages(ROOT, pdf_name, d8, group, manifest, result["failures"])
             render_d9_group(group.get("t_index"))
+            render_d10_group(group.get("t_index"))
     elif d9_available:
         for group in tuple(d9.get("per_t") or ()):
             _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
+            render_d10_group(_mapping(group).get("t_index"))
+    elif d10_available:
+        for group in tuple(d10.get("per_t") or ()):
+            _render_d10_t_pages(ROOT, pdf_name, d10, _mapping(group), manifest, result["failures"])
     return result
 
 
@@ -2504,11 +3488,13 @@ __all__ = (
     "D7_PRESENTATION_SCHEMA_VERSION",
     "D8_PRESENTATION_SCHEMA_VERSION",
     "D9_PRESENTATION_SCHEMA_VERSION",
+    "D10_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
     "build_full_background_subtraction_d8_payload",
     "build_full_background_subtraction_d9_payload",
+    "build_full_background_subtraction_d10_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",
@@ -2516,5 +3502,6 @@ __all__ = (
     "render_full_background_subtraction_d7_pages",
     "render_full_background_subtraction_d8_pages",
     "render_full_background_subtraction_d9_pages",
+    "render_full_background_subtraction_d10_pages",
     "render_full_background_subtraction_procedure_pages",
 )

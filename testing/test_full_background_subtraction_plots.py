@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 import sys
 import unittest
+from copy import deepcopy
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -649,6 +650,200 @@ def _d9_fixture():
     return diagnostic, method_a, comparison
 
 
+def _d10_fixture():
+    """Return frozen Phase-A, Method-B, and D.3 inputs with source sentinels."""
+    t_edges = [0.0, 1.0, 2.0]
+    delta_edges = [-10.0, 0.0, 10.0]
+    mm_edges = [0.80, 0.91, 1.03, 1.17, 1.35]
+    phase_fingerprint = "d10-phase-a-fingerprint"
+    coordinate_fingerprint = "d10-coordinate-fingerprint"
+    method_b_fingerprint = "d10-method-b-fingerprint"
+    host_rows = []
+    pion_rows = []
+    for t_index in range(2):
+        for delta_index in range(2):
+            host_rows.append({
+                "canonical_t_index": t_index,
+                "delta_index": delta_index,
+                "analysis_MM": 0.85 + 0.10 * float(t_index + delta_index),
+                # These raw coordinates and factors must never be used to reassign/rebuild.
+                "analysis_abs_t": 99.0,
+                "SHMS_delta": 99.0,
+                "proton_cleaning_factor": 99.0,
+                "nommcuts": True,
+                "host_state": "proton_cleaned",
+                "signed_host_event_contribution": 3.0 if delta_index == 0 else -1.5,
+            })
+            pion_rows.append({
+                "canonical_t_index": t_index,
+                "delta_index": delta_index,
+                "analysis_MM": 0.87 + 0.10 * float(t_index + delta_index),
+                "analysis_abs_t": -99.0,
+                "SHMS_delta": -99.0,
+                "signed_source_coefficient": 99.0,
+                "baseline_pion_weight_w0": 99.0,
+                "nommcuts": True,
+                "signed_baseline_event_contribution": -2.5 if delta_index == 0 else 1.25,
+            })
+
+    def bins_for(t_index, delta_index):
+        rows = []
+        for index in range(len(mm_edges) + 1):
+            regular = 1 <= index < len(mm_edges)
+            rows.append({
+                "index": index,
+                "mm_low": mm_edges[index - 1] if regular else None,
+                "mm_high": mm_edges[index] if regular else None,
+                "underflow": index == 0,
+                "overflow": index == len(mm_edges),
+                "in_allowed_pion_sensitive_domain": regular,
+                "usable_for_shape": regular,
+                "host_record_count": 1 if regular else 0,
+                "host_yield": 7.0 + t_index + delta_index if regular else 0.0,
+                "host_sumw2": 9.0 if regular else 0.0,
+                "baseline_record_count": 1 if regular else 0,
+                "baseline_yield": -2.0 - t_index if regular else 0.0,
+                "baseline_sumw2": 4.0 if regular else 0.0,
+                "residual": 9.0 + delta_index if regular else 0.0,
+                "pull": 2.0 if regular else None,
+            })
+        return rows
+
+    method_b_cells = []
+    d3_cells = []
+    statuses = (
+        "available_multi_region", "single_region_only", "region_marginal", "unavailable",
+    )
+    for t_index in range(2):
+        for delta_index in range(2):
+            status = statuses[t_index * 2 + delta_index]
+            method_b_cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "host_state": "proton_cleaned",
+                "mm_edges": mm_edges,
+                "bins": bins_for(t_index, delta_index),
+                "shape_status": "good",
+                "shape_reason": None,
+                # Page 15 must not use these raw values.
+                "candidate_L_B": 9.0,
+                "candidate_L_B_uncertainty": 8.0,
+            })
+            candidate = 1.25 if status == "available_multi_region" else None
+            uncertainty = 0.15 if status == "available_multi_region" else None
+            d3_cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "method_b_comparison_candidate": candidate,
+                "method_b_comparison_candidate_uncertainty": uncertainty,
+                "method_b_comparison_candidate_status": status,
+                "method_b_comparison_candidate_reason": None if candidate is not None else status,
+                "method_B_status": "available" if candidate is not None else "unavailable",
+                "method_B_reason": None if candidate is not None else status,
+                "region_consistency_status": "region_consistent",
+                "region_consistency_reason": None,
+                "shape_status": "good",
+                "shape_reason": None,
+            })
+
+    phase_a = {
+        "schema_version": "pion_hgcer_event_contract/v1",
+        "status": "available",
+        "available": True,
+        "contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "canonical_t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "host_state": "proton_cleaned",
+        "source_target_state": "post_proton_noRF",
+        "pion_records": pion_rows,
+        "kaon_host_records": host_rows,
+        "pion_closure": {"passed": True},
+        "host_closure": {"passed": True},
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "rf_restoration_applied": False,
+    }
+    method_b = {
+        "schema_version": "pion_hgcer_method_b/v1",
+        "status": "available",
+        "available": True,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "rf_ct_required": False,
+        "interpolation_used": False,
+        "phase_a_records_only": True,
+        "method_a_numerical_dependency": False,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "host_state": "proton_cleaned",
+        "source_target_state": "post_proton_noRF",
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "mm_binning": mm_edges,
+        "mm_regions": [{
+            "region_name": "pi_delta",
+            "mm_low": 0.93,
+            "mm_high": 1.11,
+            "region_role": "pion_sensitive",
+            "window_source": "sentinel.pion.window",
+            "mm_offset_applied": 0.0125,
+            "available": True,
+            "protected_signal_overlap": False,
+            "reason": None,
+        }],
+        "protected_regions": [
+            {
+                "region_name": "KLambda",
+                "mm_low": 1.115,
+                "mm_high": 1.130,
+                "region_role": "protected_signal",
+                "window_source": "sentinel.lambda.window",
+                "mm_offset_applied": 0.0,
+            },
+            {
+                "region_name": "KSigma0",
+                "mm_low": 1.185,
+                "mm_high": 1.215,
+                "region_role": "protected_signal",
+                "window_source": "sentinel.sigma.window",
+                "mm_offset_applied": 0.020,
+            },
+        ],
+        "fingerprint": method_b_fingerprint,
+        "cells": method_b_cells,
+    }
+    comparison = {
+        "schema_version": "pion_hgcer_method_b_comparison/v1",
+        "status": "available",
+        "available": True,
+        "non_authoritative": True,
+        "method_a_numerical_dependency": False,
+        "comparison_performed": False,
+        "classification_performed": False,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "method_b_fingerprint": method_b_fingerprint,
+        "canonical_t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "host_state": "proton_cleaned",
+        "source_target_state": "post_proton_noRF",
+        "cells": d3_cells,
+    }
+    return phase_a, method_b, comparison
+
+
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
     def test_pdf_path_is_deterministic_and_detached(self):
         main = r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf"
@@ -1114,6 +1309,148 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertFalse(payload["available"])
         self.assertEqual(payload["reason"], "part1_geometry_invalid")
 
+    def test_d10_uses_frozen_phase_a_method_b_and_d3_sources_without_aliases(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        phase_before = deepcopy(phase_a)
+        method_before = deepcopy(method_b)
+        comparison_before = deepcopy(comparison)
+        payload = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.D10_PRESENTATION_SCHEMA_VERSION)
+        self.assertEqual(payload["mm_edges"], [0.80, 0.91, 1.03, 1.17, 1.35])
+        self.assertEqual(payload["host_label"], "Proton-cleaned kaon data")
+        self.assertEqual(payload["mm_regions"][0]["mm_low"], 0.93)
+        self.assertEqual(payload["mm_regions"][0]["mm_offset_applied"], 0.0125)
+        self.assertEqual(
+            payload["per_t"][0]["mm_inputs"]["host_rows"][0]["signed_contribution"], 3.0
+        )
+        self.assertEqual(
+            payload["per_t"][0]["mm_inputs"]["baseline_rows"][0]["signed_contribution"], -2.5
+        )
+        first_bin = payload["per_t"][0]["local_closure"]["cells_by_delta"][0]["bins"][1]
+        self.assertEqual(first_bin["host_yield"], 7.0)
+        self.assertEqual(first_bin["host_sumw2"], 9.0)
+        self.assertEqual(first_bin["baseline_yield"], -2.0)
+        self.assertEqual(first_bin["baseline_sumw2"], 4.0)
+        first_relative = payload["per_t"][0]["method_b_relative"]["cells"][0]
+        self.assertEqual(first_relative["method_b_comparison_candidate"], 1.25)
+        self.assertEqual(first_relative["method_b_comparison_candidate_uncertainty"], 0.15)
+        self.assertNotEqual(first_relative["method_b_comparison_candidate"], 9.0)
+        self.assertIsNone(
+            payload["per_t"][0]["method_b_relative"]["cells"][1][
+                "method_b_comparison_candidate"
+            ]
+        )
+
+        payload["mm_regions"][0]["mm_low"] = -123.0
+        payload["per_t"][0]["mm_inputs"]["host_rows"][0]["signed_contribution"] = 44.0
+        payload["per_t"][0]["local_closure"]["cells_by_delta"][0]["bins"][1]["host_yield"] = 55.0
+        self.assertEqual(phase_a, phase_before)
+        self.assertEqual(method_b, method_before)
+        self.assertEqual(comparison, comparison_before)
+
+    def test_d10_d3_failures_are_local_to_the_relative_page(self):
+        mutations = (
+            ("method_b_fingerprint", "wrong-method-b"),
+            ("coordinate_fingerprint", "wrong-coordinate"),
+            ("canonical_t_edges", [0.0, 1.0, 3.0]),
+            ("delta_edges", [-10.0, 5.0, 10.0]),
+            ("host_state", "identity_no_proton_cleaning"),
+        )
+        for key, value in mutations:
+            with self.subTest(key=key):
+                phase_a, method_b, comparison = _d10_fixture()
+                comparison[key] = value
+                payload = plots.build_full_background_subtraction_d10_payload(
+                    phase_a, method_b, comparison
+                )
+                self.assertTrue(payload["available"])
+                self.assertTrue(payload["per_t"][0]["mm_inputs"]["available"])
+                self.assertTrue(payload["per_t"][0]["local_closure"]["available"])
+                self.assertFalse(payload["per_t"][0]["method_b_relative"]["available"])
+        phase_a, method_b, comparison = _d10_fixture()
+        comparison["cells"].pop()
+        payload = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertFalse(payload["per_t"][0]["method_b_relative"]["available"])
+        self.assertEqual(
+            payload["per_t"][0]["method_b_relative"]["reason"],
+            "method_b_comparison_cell_grid_invalid",
+        )
+
+    def test_d10_phase_method_b_failures_are_global_and_page_failures_are_local(self):
+        for field, value in (
+            ("phase_a_contract_fingerprint", "wrong-phase"),
+            ("coordinate_fingerprint", "wrong-coordinate"),
+            ("t_edges", [0.0, 1.0, 3.0]),
+            ("delta_edges", [-10.0, 5.0, 10.0]),
+            ("host_state", "identity_no_proton_cleaning"),
+            ("source_target_state", "post_proton_RF"),
+        ):
+            with self.subTest(field=field):
+                phase_a, method_b, comparison = _d10_fixture()
+                method_b[field] = value
+                payload = plots.build_full_background_subtraction_d10_payload(
+                    phase_a, method_b, comparison
+                )
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], "method_b_contract_invalid")
+
+        phase_a, method_b, comparison = _d10_fixture()
+        phase_a["kaon_host_records"][0]["delta_index"] = 99
+        payload = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertFalse(payload["per_t"][0]["mm_inputs"]["available"])
+        self.assertTrue(payload["per_t"][0]["local_closure"]["available"])
+        self.assertTrue(payload["per_t"][0]["method_b_relative"]["available"])
+
+        phase_a, method_b, comparison = _d10_fixture()
+        method_b["cells"][0]["bins"][1]["host_sumw2"] = -1.0
+        payload = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertTrue(payload["per_t"][0]["mm_inputs"]["available"])
+        self.assertFalse(payload["per_t"][0]["local_closure"]["available"])
+        self.assertTrue(payload["per_t"][0]["method_b_relative"]["available"])
+
+    def test_d10_accepts_each_native_d3_candidate_status_without_fabricating_points(self):
+        statuses = (
+            "available_multi_region", "single_region_only", "unavailable", "region_marginal",
+            "region_inconsistent", "shape_poor_veto",
+        )
+        for status in statuses:
+            with self.subTest(status=status):
+                phase_a, method_b, comparison = _d10_fixture()
+                cell = comparison["cells"][0]
+                cell["method_b_comparison_candidate_status"] = status
+                cell["method_b_comparison_candidate_reason"] = (
+                    None if status == "available_multi_region" else status
+                )
+                cell["method_b_comparison_candidate"] = (
+                    1.75 if status == "available_multi_region" else None
+                )
+                cell["method_b_comparison_candidate_uncertainty"] = (
+                    0.20 if status == "available_multi_region" else None
+                )
+                payload = plots.build_full_background_subtraction_d10_payload(
+                    phase_a, method_b, comparison
+                )
+                self.assertTrue(payload["available"])
+                copied = payload["per_t"][0]["method_b_relative"]["cells"][0]
+                self.assertEqual(copied["method_b_comparison_candidate_status"], status)
+                if status == "available_multi_region":
+                    self.assertEqual(copied["method_b_comparison_candidate"], 1.75)
+                else:
+                    self.assertIsNone(copied["method_b_comparison_candidate"])
+
     def test_d9_threshold_text_is_generated_from_frozen_payload_values(self):
         self.assertEqual(
             plots._d9_method_a_threshold_text({
@@ -1538,8 +1875,47 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(d9_forbidden=forbidden):
                 self.assertNotIn(forbidden, d9_source)
 
+        d10_source = source[
+            source.index("def _d10_integer"):
+            source.index("def render_full_background_subtraction_d6_pages")
+        ]
+        for required in (
+            "signed_host_event_contribution",
+            "signed_baseline_event_contribution",
+            "method_b_comparison_candidate",
+            "Missing-mass closure inputs",
+            "Local missing-mass closure",
+            "Relative pion-background diagnostic",
+            "Diagnostic only - no refinement applied",
+            "Diagnostic only - no correction or method selection",
+        ):
+            self.assertIn(required, d10_source)
+        for forbidden in (
+            "find_canonical_bin(",
+            "build_pion_hgcer_event_contract(",
+            "build_pion_hgcer_method_b(",
+            "build_pion_hgcer_method_b_comparison(",
+            "resolve_pion_hgcer_method_b_config(",
+            "method_b_display_payload(",
+            "phase_d_ab_plot_payload(",
+            "candidate_L_B",
+            "raw_ratio",
+            "parent_reference_ratio",
+            "build_pion_hgcer_method_a(",
+            "build_pion_hgcer_ab_comparison(",
+            "C_A",
+            "C_B",
+            "C_final",
+            "use_A",
+            "use_B",
+            "combine_AB",
+            "preferred_method",
+        ):
+            with self.subTest(d10_forbidden=forbidden):
+                self.assertNotIn(forbidden, d10_source)
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6/D.7/D.8/D.9 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.10 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -1547,6 +1923,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_d7_payload",
             "build_full_background_subtraction_d8_payload",
             "build_full_background_subtraction_d9_payload",
+            "build_full_background_subtraction_d10_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -1570,6 +1947,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_d9_payload(", start),
+            runtime.index("build_full_background_subtraction_d10_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_d10_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
@@ -1584,6 +1965,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d7_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d8_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_root_rendering_preserves_source_and_page_order(self):
@@ -1719,6 +2101,12 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             d9_diagnostic, d9_method_a, d9_comparison
         )
         self.assertTrue(d9_payload["available"])
+        d10_phase_a, d10_method_b, d10_comparison = _d10_fixture()
+        d10_sources_before = deepcopy((d10_phase_a, d10_method_b, d10_comparison))
+        d10_payload = plots.build_full_background_subtraction_d10_payload(
+            d10_phase_a, d10_method_b, d10_comparison
+        )
+        self.assertTrue(d10_payload["available"])
         d8_source_snapshots = []
         for parent in d8_parents:
             application = parent["final_diagnostic_application_result"]
@@ -1744,7 +2132,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             self.assertTrue(plots.open_full_background_subtraction_pdf(pdf))
             try:
                 rendered = plots.render_full_background_subtraction_procedure_pages(
-                    pdf, d6_payload, d7_payload, d8_payload, d9_payload
+                    pdf, d6_payload, d7_payload, d8_payload, d9_payload, d10_payload
                 )
             finally:
                 plots.close_full_background_subtraction_pdf(pdf)
@@ -1763,6 +2151,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d9.hgcer_response",
                     "full_background.d9.hgcer_delta_response",
                     "full_background.d9.method_a_relative",
+                    "full_background.d10.method_b_mm_inputs",
+                    "full_background.d10.method_b_local_closure",
+                    "full_background.d10.method_b_relative",
                     "full_background.d6.raw_mm",
                     "full_background.d6.proton_pid",
                     "full_background.d6.proton_weight",
@@ -1775,11 +2166,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d9.hgcer_response",
                     "full_background.d9.hgcer_delta_response",
                     "full_background.d9.method_a_relative",
+                    "full_background.d10.method_b_mm_inputs",
+                    "full_background.d10.method_b_local_closure",
+                    "full_background.d10.method_b_relative",
                 ],
             )
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
-                ["t1"] * 12 + ["t2"] * 12,
+                ["t1"] * 15 + ["t2"] * 15,
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
             self.assertTrue(Path(pdf).exists())
@@ -1819,6 +2213,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             )
             self.assertEqual(histogram.GetXaxis().GetXmin(), x_minimum)
             self.assertEqual(histogram.GetXaxis().GetXmax(), x_maximum)
+        self.assertEqual((d10_phase_a, d10_method_b, d10_comparison), d10_sources_before)
 
 
 if __name__ == "__main__":
