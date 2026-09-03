@@ -205,6 +205,18 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(clone.directory, 0)
         self.assertEqual(source.title, "original")
 
+    def test_ctime_aerogel_colz_pages_define_their_z_axis_quantities(self):
+        source = (REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py").read_text(encoding="utf-8")
+        pid_start = source.index("def _render_ctime_aero_pid_page")
+        weight_start = source.index("def _render_ctime_aero_weight_page")
+        pid_source = source[pid_start:source.index("def _render_timing_t_weight_page", pid_start)]
+        weight_source = source[weight_start:source.index("def open_full_background_subtraction_pdf", weight_start)]
+
+        self.assertIn('histogram.Draw("colz")', pid_source)
+        self.assertIn("Aerogel NPE;Coincidence time [ns];Signed weighted yield", pid_source)
+        self.assertIn('histogram.Draw("colz")', weight_source)
+        self.assertIn("delta [%];Aerogel NPE;Proton contamination weight", weight_source)
+
     def test_static_presentation_and_runtime_contracts(self):
         source = (REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py").read_text(encoding="utf-8")
         for forbidden in (

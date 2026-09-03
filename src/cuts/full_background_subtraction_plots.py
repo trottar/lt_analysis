@@ -359,7 +359,8 @@ def _render_ctime_aero_pid_page(ROOT, pdf_name, group):
         return False
     title = "Proton-identification timing vs aerogel - {}".format(_t_context(group))
     _set_histogram_title(
-        histogram, "{};Aerogel NPE;Coincidence time [ns]".format(title)
+        histogram,
+        "{};Aerogel NPE;Coincidence time [ns];Signed weighted yield".format(title),
     )
     if hasattr(histogram, "SetStats"):
         histogram.SetStats(0)
@@ -419,7 +420,8 @@ def _render_ctime_aero_weight_page(ROOT, pdf_name, group):
         return False
     title = "Proton contamination weight - {}".format(_t_context(group))
     _set_histogram_title(
-        histogram, "{};delta [%];Aerogel NPE".format(title)
+        histogram,
+        "{};delta [%];Aerogel NPE;Proton contamination weight".format(title),
     )
     if hasattr(histogram, "SetStats"):
         histogram.SetStats(0)
