@@ -1935,6 +1935,35 @@ def _d9_draw_delta_threshold(ROOT, y_value, x_low, x_high, draw_objects):
         return
 
 
+def _d9_method_a_threshold_text(thresholds):
+    """Return the display text for a valid frozen Method-A threshold mapping."""
+    thresholds = _mapping(thresholds)
+    if thresholds.get("available") is not True:
+        return None
+    try:
+        positive = float(thresholds["positive_response_threshold"])
+        low_upper = float(thresholds["low_response_upper_threshold"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not math.isfinite(positive) or not math.isfinite(low_upper):
+        return None
+    return "Method A low response: {:g} < HGCer NPE <= {:g}".format(
+        positive, low_upper
+    )
+
+
+def _d9_draw_notice(ROOT, text, y_low, y_high):
+    """Draw one retained D.9 notice at an explicitly separate NDC position."""
+    notice = ROOT.TPaveText(0.14, float(y_low), 0.86, float(y_high), "NDC")
+    notice.SetFillStyle(0)
+    notice.SetBorderSize(0)
+    notice.SetTextAlign(22)
+    notice.SetTextSize(0.030)
+    notice.AddText(str(text))
+    notice.Draw()
+    return notice
+
+
 def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
     presentation = _mapping(group.get("hgcer_response"))
     kaon = _d9_fresh_weighted_histogram(
@@ -1971,7 +2000,11 @@ def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
         legend.AddEntry(pion, "Pion-control sample", "l")
         legend.Draw()
         draw_objects.extend((kaon, pion, legend))
-        if thresholds.get("available"):
+        draw_objects.append(
+            _d9_draw_notice(ROOT, "Diagnostic only - no refinement applied", 0.84, 0.92)
+        )
+        threshold_text = _d9_method_a_threshold_text(thresholds)
+        if threshold_text is not None:
             _d9_draw_threshold(
                 ROOT,
                 thresholds["low_response_upper_threshold"],
@@ -1981,13 +2014,7 @@ def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
                 draw_objects,
             )
             draw_objects.append(
-                _draw_small_note(
-                    ROOT, "Diagnostic only - Method A low response: 0 < HGCer NPE <= 2"
-                )
-            )
-        else:
-            draw_objects.append(
-                _draw_small_note(ROOT, "Diagnostic only - Method A threshold unavailable")
+                _d9_draw_notice(ROOT, threshold_text, 0.75, 0.83)
             )
         canvas.Print(pdf_name)
     finally:
@@ -2023,6 +2050,7 @@ def _render_d9_hgcer_delta_page(ROOT, pdf_name, group, thresholds, delta_edges):
     )
     canvas.Divide(2, 1)
     draw_objects = []
+    threshold_text = _d9_method_a_threshold_text(thresholds)
     try:
         for pad_index, (histogram, label) in enumerate(
             ((kaon, "Proton-cleaned kaon data"), (pion, "Pion-control sample")), 1
@@ -2034,7 +2062,7 @@ def _render_d9_hgcer_delta_page(ROOT, pdf_name, group, thresholds, delta_edges):
             if hasattr(histogram, "SetStats"):
                 histogram.SetStats(0)
             histogram.Draw("colz")
-            if thresholds.get("available"):
+            if threshold_text is not None:
                 _d9_draw_delta_threshold(
                     ROOT,
                     thresholds["low_response_upper_threshold"],
@@ -2044,12 +2072,11 @@ def _render_d9_hgcer_delta_page(ROOT, pdf_name, group, thresholds, delta_edges):
                 )
             draw_objects.append(histogram)
         canvas.cd(1)
-        notice = (
-            "Diagnostic only - Method A low response: 0 < HGCer NPE <= 2"
-            if thresholds.get("available")
-            else "Diagnostic only - Method A threshold unavailable"
+        draw_objects.append(
+            _d9_draw_notice(ROOT, "Diagnostic only - no refinement applied", 0.84, 0.92)
         )
-        draw_objects.append(_draw_small_note(ROOT, notice))
+        if threshold_text is not None:
+            draw_objects.append(_d9_draw_notice(ROOT, threshold_text, 0.75, 0.83))
         draw_objects.append(_draw_page_header(ROOT, canvas, "HGCer response across delta", group))
         canvas.Print(pdf_name)
     finally:
@@ -2086,11 +2113,11 @@ def _render_d9_method_a_relative_page(ROOT, pdf_name, group, delta_edges):
     cells = tuple(presentation.get("cells") or ())
     if not hasattr(ROOT, "TH1D"):
         return False
-    title = "Method A relative HGCer diagnostic - {}".format(_t_context(group))
+    title = "Method A - HGCer response diagnostic - {}".format(_t_context(group))
     try:
         frame = ROOT.TH1D(
             "H_full_background_d9_method_a_relative_t{}".format(group["t_index"] + 1),
-            "{};delta [%];Method A cell / same-|t| parent".format(title),
+            "{};delta [%];Relative pion-background diagnostic".format(title),
             len(delta_edges) - 1,
             array("d", delta_edges),
         )
@@ -2152,9 +2179,11 @@ def _render_d9_method_a_relative_page(ROOT, pdf_name, group, delta_edges):
             legend.Draw()
             draw_objects.append(legend)
         draw_objects.append(
-            _draw_small_note(ROOT, "Stored Method A values only - no refinement applied")
+            _draw_small_note(ROOT, "Diagnostic only - no correction or method selection")
         )
-        draw_objects.append(_draw_page_header(ROOT, canvas, "Method A relative diagnostic", group))
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Method A - HGCer response diagnostic", group)
+        )
         canvas.Print(pdf_name)
     finally:
         canvas.Close()

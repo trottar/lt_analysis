@@ -79,6 +79,53 @@ class _BinnedHistogram(_Histogram):
         return None
 
 
+class _BinnedHistogram2D(_Histogram):
+    created = []
+
+    def __init__(self, label, x_bins=2, y_bins=2):
+        super().__init__(label)
+        self.x_bins = int(x_bins)
+        self.y_bins = int(y_bins)
+        self.contents = [[0.0] * self.y_bins for _unused in range(self.x_bins)]
+        self.display_minimum = None
+        self.display_maximum = None
+
+    def Clone(self, name):
+        clone = type(self)("{}:{}".format(self.label, name), self.x_bins, self.y_bins)
+        clone.contents = [list(row) for row in self.contents]
+        type(self).created.append(clone)
+        return clone
+
+    def GetNbinsX(self):
+        return self.x_bins
+
+    def GetNbinsY(self):
+        return self.y_bins
+
+    def GetBinContent(self, x_index, y_index):
+        return self.contents[int(x_index) - 1][int(y_index) - 1]
+
+    def Reset(self, _option):
+        self.contents = [[0.0] * self.y_bins for _unused in range(self.x_bins)]
+
+    def Fill(self, x_value, y_value, weight):
+        x_index = min(max(int(float(x_value)), 0), self.x_bins - 1)
+        y_index = min(max(int(float(y_value)), 0), self.y_bins - 1)
+        self.contents[x_index][y_index] += float(weight)
+
+    def SetMinimum(self, value):
+        self.display_minimum = float(value)
+
+    def SetMaximum(self, value):
+        self.display_maximum = float(value)
+
+    def SetStats(self, _value):
+        return None
+
+    def Draw(self, _option):
+        return None
+
+
 class _ProjectionAxis:
     def __init__(self, bin_count):
         self._bin_count = int(bin_count)
@@ -1047,7 +1094,18 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertFalse(payload["available"])
         self.assertEqual(payload["reason"], "part1_geometry_invalid")
 
-    def test_d9_response_page_uses_detached_signed_weighted_clones(self):
+    def test_d9_threshold_text_is_generated_from_frozen_payload_values(self):
+        self.assertEqual(
+            plots._d9_method_a_threshold_text({
+                "available": True,
+                "positive_response_threshold": 0.25,
+                "low_response_upper_threshold": 1.75,
+            }),
+            "Method A low response: 0.25 < HGCer NPE <= 1.75",
+        )
+        self.assertIsNone(plots._d9_method_a_threshold_text({"available": False}))
+
+    def test_d9_response_page_uses_detached_signed_weighted_clones_and_notices(self):
         _BinnedHistogram.created = []
         root = _FakeROOT()
         kaon_source = _BinnedHistogram("d9-kaon", (11.0,))
@@ -1068,7 +1126,11 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 root,
                 "unused.pdf",
                 group,
-                {"available": True, "low_response_upper_threshold": 2.0},
+                {
+                    "available": True,
+                    "positive_response_threshold": 0.0,
+                    "low_response_upper_threshold": 2.0,
+                },
             )
         )
         displays = [
@@ -1082,13 +1144,64 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual((displays[1].display_minimum, displays[1].display_maximum), (None, None))
         self.assertEqual(kaon_source.contents, [11.0])
         self.assertEqual(pion_source.contents, [13.0])
+        visible_text = tuple(line for text in root.drawn_text for line in text)
+        self.assertIn("Diagnostic only - no refinement applied", visible_text)
+        self.assertIn("Method A low response: 0 < HGCer NPE <= 2", visible_text)
+
+        unavailable_root = _FakeROOT()
         self.assertTrue(
-            any(
-                "Method A low response: 0 < HGCer NPE <= 2" in line
-                for text in root.drawn_text
-                for line in text
+            plots._render_d9_hgcer_response_page(
+                unavailable_root, "unused.pdf", group, {"available": False}
             )
         )
+        unavailable_text = tuple(
+            line for text in unavailable_root.drawn_text for line in text
+        )
+        self.assertIn("Diagnostic only - no refinement applied", unavailable_text)
+        self.assertNotIn("Method A low response: 0 < HGCer NPE <= 2", unavailable_text)
+        self.assertFalse(any("threshold unavailable" in line for line in unavailable_text))
+
+    def test_d9_delta_page_keeps_authority_and_threshold_notices_separate(self):
+        _BinnedHistogram2D.created = []
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "hgcer_delta_response": {
+                "kaon_template": _BinnedHistogram2D("d9-kaon-delta"),
+                "pion_template": _BinnedHistogram2D("d9-pion-delta"),
+                "kaon_rows": ({"delta": -5.0, "npe": 0.5, "diagnostic_weight": -4.0},),
+                "pion_rows": ({"delta": 5.0, "npe": 1.5, "diagnostic_weight": 6.0},),
+            },
+        }
+        root = _FakeROOT()
+        thresholds = {
+            "available": True,
+            "positive_response_threshold": 0.0,
+            "low_response_upper_threshold": 2.0,
+        }
+        self.assertTrue(
+            plots._render_d9_hgcer_delta_page(
+                root, "unused.pdf", group, thresholds, (-10.0, 0.0, 10.0)
+            )
+        )
+        visible_text = tuple(line for text in root.drawn_text for line in text)
+        self.assertIn("Diagnostic only - no refinement applied", visible_text)
+        self.assertIn("Method A low response: 0 < HGCer NPE <= 2", visible_text)
+
+        unavailable_root = _FakeROOT()
+        self.assertTrue(
+            plots._render_d9_hgcer_delta_page(
+                unavailable_root, "unused.pdf", group, {"available": False},
+                (-10.0, 0.0, 10.0),
+            )
+        )
+        unavailable_text = tuple(
+            line for text in unavailable_root.drawn_text for line in text
+        )
+        self.assertIn("Diagnostic only - no refinement applied", unavailable_text)
+        self.assertFalse(any("Method A low response" in line for line in unavailable_text))
+        self.assertFalse(any("threshold unavailable" in line for line in unavailable_text))
 
     def test_d8_delta_renderer_uses_common_range_and_visible_t_header(self):
         _ProjectionHistogram.created = []
@@ -1346,11 +1459,30 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "Signed weighted yield",
         ):
             self.assertIn(required, d9_source)
+        d9_relative_renderer = d9_source[
+            d9_source.index("def _render_d9_method_a_relative_page"):
+            d9_source.index("def _render_d9_t_pages")
+        ]
+        self.assertIn("Method A - HGCer response diagnostic", d9_relative_renderer)
+        self.assertIn("Relative pion-background diagnostic", d9_relative_renderer)
+        self.assertIn(
+            "Diagnostic only - no correction or method selection", d9_relative_renderer
+        )
+        self.assertNotIn("Method A cell / same-|t| parent", d9_relative_renderer)
+        self.assertNotIn(
+            "Stored Method A values only - no refinement applied", d9_relative_renderer
+        )
+        self.assertNotIn("Method A relative diagnostic", d9_relative_renderer)
         for forbidden in (
             "Method B",
             "ln(B/A)",
+            "build_pion_hgcer_tdelta_diagnostic(",
+            "resolve_pion_hgcer_delta_edges(",
             "build_pion_hgcer_method_a(",
+            "build_pion_hgcer_method_a_comparison(",
             "build_pion_hgcer_method_b(",
+            "build_pion_hgcer_method_b_comparison(",
+            "build_pion_hgcer_ab_comparison(",
             "Rebin(",
             "Scale(",
             "Add(",
@@ -1364,6 +1496,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "use_A",
             "use_B",
             "combine_AB",
+            "preferred_method",
         ):
             with self.subTest(d9_forbidden=forbidden):
                 self.assertNotIn(forbidden, d9_source)
