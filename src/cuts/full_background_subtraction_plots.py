@@ -1,4 +1,4 @@
-"""Detached D.6/D.7/D.8 procedure pages for the full background-subtraction PDF.
+"""Detached D.6/D.7/D.8/D.9 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -8,6 +8,7 @@ open/close helpers without inheriting the technical diagnostic-PDF lifecycle.
 
 from __future__ import annotations
 
+from array import array
 import math
 import os
 from collections.abc import Mapping, Sequence
@@ -19,10 +20,13 @@ from pion_component_subtraction import simc_shape_pion_weight_from_value
 D6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d6/v1"
 D7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d7/v1"
 D8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d8/v1"
+D9_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d9/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
 _CTIME_AERO_METHOD = "ctime_aero_event_weight"
+_D9_SIDES = ("kaon", "pion")
+_D9_METHOD_A_COMPARISON_SCHEMA = "pion_hgcer_method_a_comparison/v1"
 
 
 def _import_root():
@@ -83,6 +87,19 @@ def _d8_unavailable(reason):
         "reason": str(reason),
         "t_edges": [],
         "delta_edges": [],
+        "per_t": [],
+    }
+
+
+def _d9_unavailable(reason):
+    return {
+        "schema_version": D9_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "t_edges": [],
+        "delta_edges": [],
+        "coordinate_fingerprint": None,
+        "method_a_thresholds": {"available": False},
         "per_t": [],
     }
 
@@ -778,6 +795,310 @@ def build_full_background_subtraction_d8_payload(pion_parents, pion_control_cach
         "t_edges": list(t_edges),
         "delta_edges": list(delta_edges),
         "delta_geometry_available": bool(delta_geometry_available),
+        "per_t": per_t,
+    }
+
+
+def _d9_integer(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _d9_part1_rows(records, side, t_count, delta_count):
+    if not isinstance(records, Sequence) or isinstance(records, (str, bytes)):
+        return None, "part1_{}_records_missing".format(side)
+    per_t = [[] for _ in range(t_count)]
+    for source_record in records:
+        record = _mapping(source_record)
+        if not record or record.get("side") != side:
+            return None, "part1_{}_record_contract_invalid".format(side)
+        t_index = record.get("canonical_t_index")
+        delta_index = record.get("delta_index")
+        if (
+            not _d9_integer(t_index)
+            or not _d9_integer(delta_index)
+            or not 0 <= t_index < t_count
+            or not 0 <= delta_index < delta_count
+        ):
+            return None, "part1_{}_record_membership_invalid".format(side)
+        try:
+            delta = float(record.get("ssdelta"))
+            npe = float(record.get("P_hgcer_npeSum"))
+            diagnostic_weight = float(record.get("diagnostic_weight"))
+        except (TypeError, ValueError):
+            return None, "part1_{}_record_scalar_invalid".format(side)
+        if not all(math.isfinite(value) for value in (delta, npe, diagnostic_weight)):
+            return None, "part1_{}_record_scalar_invalid".format(side)
+        per_t[t_index].append({
+            "t_index": int(t_index),
+            "delta_index": int(delta_index),
+            "side": str(side),
+            "delta": delta,
+            "npe": npe,
+            "diagnostic_weight": diagnostic_weight,
+        })
+    return tuple(tuple(rows) for rows in per_t), None
+
+
+def _d9_thresholds(method_a):
+    method = _mapping(method_a)
+    if method.get("status") != "available" or method.get("available") is not True:
+        return {"available": False}, "method_a_unavailable"
+    configuration = _mapping(method.get("configuration"))
+    try:
+        positive = float(configuration.get("positive_response_threshold"))
+        low_upper = float(configuration.get("low_response_upper_threshold"))
+    except (TypeError, ValueError):
+        return {"available": False}, "method_a_thresholds_invalid"
+    if not (math.isfinite(positive) and math.isfinite(low_upper)) or positive != 0.0 or low_upper != 2.0:
+        return {"available": False}, "method_a_thresholds_invalid"
+    return {
+        "available": True,
+        "positive_response_threshold": positive,
+        "low_response_upper_threshold": low_upper,
+    }, None
+
+
+def _d9_method_a_relative_cells(method_a, comparison, t_edges, delta_edges, coordinate_fingerprint):
+    """Validate and copy D.2 cells without rebuilding a same-t reference."""
+    method = _mapping(method_a)
+    projection = _mapping(comparison)
+    if (
+        method.get("status") != "available"
+        or method.get("available") is not True
+        or method.get("non_authoritative") is not True
+        or method.get("production_objects_mutated") is not False
+        or method.get("refinement_applied") is not False
+    ):
+        return None, "method_a_unavailable"
+    if (
+        not isinstance(method.get("fingerprint"), str)
+        or not method.get("fingerprint")
+        or method.get("coordinate_fingerprint") != coordinate_fingerprint
+        or _strict_edges(method.get("t_edges")) != t_edges
+        or _strict_edges(method.get("delta_edges")) != delta_edges
+    ):
+        return None, "method_a_provenance_mismatch"
+    if (
+        projection.get("schema_version") != _D9_METHOD_A_COMPARISON_SCHEMA
+        or projection.get("status") != "available"
+        or projection.get("available") is not True
+        or projection.get("non_authoritative") is not True
+        or projection.get("method_b_numerical_dependency") is not False
+        or projection.get("comparison_performed") is not False
+        or projection.get("classification_performed") is not False
+        or projection.get("production_objects_mutated") is not False
+        or projection.get("refinement_applied") is not False
+        or projection.get("method_a_fingerprint") != method.get("fingerprint")
+        or projection.get("coordinate_fingerprint") != coordinate_fingerprint
+        or _strict_edges(projection.get("canonical_t_edges")) != t_edges
+        or _strict_edges(projection.get("delta_edges")) != delta_edges
+    ):
+        return None, "method_a_comparison_provenance_mismatch"
+    source_cells = projection.get("cells")
+    expected_count = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    if not isinstance(source_cells, list) or len(source_cells) != expected_count:
+        return None, "method_a_comparison_cell_grid_invalid"
+    copied = [[] for _ in range(len(t_edges) - 1)]
+    seen = set()
+    for source_cell in source_cells:
+        cell = _mapping(source_cell)
+        required = (
+            "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+            "method_a_comparison_candidate", "method_a_comparison_candidate_low",
+            "method_a_comparison_candidate_high", "method_a_comparison_candidate_status",
+            "support_class", "method_A_status", "method_A_reason",
+            "method_a_comparison_candidate_reason",
+        )
+        if not cell or any(key not in cell for key in required):
+            return None, "method_a_comparison_cell_contract_invalid"
+        t_index = cell["t_index"]
+        delta_index = cell["delta_index"]
+        if (
+            not _d9_integer(t_index)
+            or not _d9_integer(delta_index)
+            or not 0 <= t_index < len(t_edges) - 1
+            or not 0 <= delta_index < len(delta_edges) - 1
+            or cell["t_low"] != t_edges[t_index]
+            or cell["t_high"] != t_edges[t_index + 1]
+            or cell["delta_low"] != delta_edges[delta_index]
+            or cell["delta_high"] != delta_edges[delta_index + 1]
+            or (t_index, delta_index) in seen
+        ):
+            return None, "method_a_comparison_cell_geometry_invalid"
+        seen.add((t_index, delta_index))
+        status = cell["method_a_comparison_candidate_status"]
+        if status not in {"available", "marginal", "unavailable"}:
+            return None, "method_a_comparison_cell_status_invalid"
+        if (
+            cell["support_class"] not in {"supported", "marginal", "unsupported"}
+            or cell["method_A_status"] not in {"available", "unavailable"}
+        ):
+            return None, "method_a_comparison_cell_status_invalid"
+        candidate = cell["method_a_comparison_candidate"]
+        low = cell["method_a_comparison_candidate_low"]
+        high = cell["method_a_comparison_candidate_high"]
+        if status in {"available", "marginal"}:
+            try:
+                candidate, low, high = float(candidate), float(low), float(high)
+            except (TypeError, ValueError):
+                return None, "method_a_comparison_candidate_invalid"
+            if (
+                not all(math.isfinite(value) for value in (candidate, low, high))
+                or candidate < 0.0
+                or low < 0.0
+                or low > candidate
+                or candidate > high
+                or cell["method_A_status"] != "available"
+                or cell["support_class"] not in {"supported", "marginal"}
+            ):
+                return None, "method_a_comparison_candidate_invalid"
+        else:
+            if candidate is not None or low is not None or high is not None:
+                return None, "method_a_comparison_candidate_invalid"
+        copied[t_index].append({
+            "t_index": int(t_index),
+            "t_low": float(cell["t_low"]),
+            "t_high": float(cell["t_high"]),
+            "delta_index": int(delta_index),
+            "delta_low": float(cell["delta_low"]),
+            "delta_high": float(cell["delta_high"]),
+            "method_a_comparison_candidate": candidate,
+            "method_a_comparison_candidate_low": low,
+            "method_a_comparison_candidate_high": high,
+            "method_a_comparison_candidate_status": str(status),
+            "support_class": cell["support_class"],
+            "method_A_status": cell["method_A_status"],
+            "method_A_reason": cell["method_A_reason"],
+            "method_a_comparison_candidate_reason": cell[
+                "method_a_comparison_candidate_reason"
+            ],
+        })
+    if len(seen) != expected_count:
+        return None, "method_a_comparison_cell_grid_invalid"
+    return tuple(
+        tuple(sorted(rows, key=lambda cell: cell["delta_index"])) for rows in copied
+    ), None
+
+
+def build_full_background_subtraction_d9_payload(
+    pion_hgcer_tdelta_diagnostic,
+    pion_hgcer_method_a,
+    pion_hgcer_method_a_comparison,
+):
+    """Select frozen Part-1/D.2 presentation inputs without recalculation."""
+    response = _mapping(pion_hgcer_tdelta_diagnostic)
+    if (
+        response.get("status") not in {"available", "unavailable"}
+        or response.get("non_authoritative") is not True
+        or response.get("production_side_effect_free") is not True
+        or response.get("production_hgcer_pid_unchanged") is not True
+        or response.get("rf_restoration_applied") is not False
+    ):
+        return _d9_unavailable("part1_diagnostic_unavailable")
+    t_edges = _strict_edges(response.get("t_edges"))
+    delta_edges = _strict_edges(response.get("delta_edges"))
+    coordinate_fingerprint = response.get("coordinate_fingerprint")
+    if t_edges is None or delta_edges is None:
+        return _d9_unavailable("part1_geometry_invalid")
+    if not isinstance(coordinate_fingerprint, str) or not coordinate_fingerprint:
+        return _d9_unavailable("part1_coordinate_fingerprint_missing")
+    part1_available = response.get("status") == "available"
+    records = _mapping(response.get("records")) if part1_available else {}
+    histograms = _mapping(response.get("histograms")) if part1_available else {}
+    row_groups = {}
+    row_failures = {}
+    for side in _D9_SIDES:
+        if part1_available:
+            row_groups[side], row_failures[side] = _d9_part1_rows(
+                records.get(side), side, len(t_edges) - 1, len(delta_edges) - 1
+            )
+        else:
+            row_groups[side] = tuple(
+                tuple() for _unused in range(len(t_edges) - 1)
+            )
+            row_failures[side] = "part1_diagnostic_unavailable"
+    template_keys = {
+        "response": {
+            "kaon": "H_hgcer_kaon_weighted",
+            "pion": "H_hgcer_pion_weighted",
+        },
+        "delta": {
+            "kaon": "H_hgcer_vs_delta_kaon_weighted",
+            "pion": "H_hgcer_vs_delta_pion_weighted",
+        },
+    }
+    thresholds, threshold_reason = _d9_thresholds(pion_hgcer_method_a)
+    relative_groups, relative_reason = _d9_method_a_relative_cells(
+        pion_hgcer_method_a,
+        pion_hgcer_method_a_comparison,
+        t_edges,
+        delta_edges,
+        coordinate_fingerprint,
+    )
+    per_t = []
+    for t_index in range(len(t_edges) - 1):
+        response_templates = {
+            side: histograms.get(template_keys["response"][side]) for side in _D9_SIDES
+        }
+        delta_templates = {
+            side: histograms.get(template_keys["delta"][side]) for side in _D9_SIDES
+        }
+        response_reason = next(
+            (row_failures[side] for side in _D9_SIDES if row_failures[side] is not None),
+            None,
+        )
+        if response_reason is None and any(
+            response_templates[side] is None for side in _D9_SIDES
+        ):
+            response_reason = "part1_weighted_response_template_missing"
+        delta_reason = next(
+            (row_failures[side] for side in _D9_SIDES if row_failures[side] is not None),
+            None,
+        )
+        if delta_reason is None and any(
+            delta_templates[side] is None for side in _D9_SIDES
+        ):
+            delta_reason = "part1_weighted_delta_template_missing"
+        per_t.append({
+            "t_index": int(t_index),
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "hgcer_response": {
+                "available": response_reason is None,
+                "reason": response_reason,
+                "kaon_template": response_templates["kaon"],
+                "pion_template": response_templates["pion"],
+                "kaon_rows": tuple(row_groups.get("kaon") or ())[t_index]
+                if row_groups.get("kaon") is not None else tuple(),
+                "pion_rows": tuple(row_groups.get("pion") or ())[t_index]
+                if row_groups.get("pion") is not None else tuple(),
+            },
+            "hgcer_delta_response": {
+                "available": delta_reason is None,
+                "reason": delta_reason,
+                "kaon_template": delta_templates["kaon"],
+                "pion_template": delta_templates["pion"],
+                "kaon_rows": tuple(row_groups.get("kaon") or ())[t_index]
+                if row_groups.get("kaon") is not None else tuple(),
+                "pion_rows": tuple(row_groups.get("pion") or ())[t_index]
+                if row_groups.get("pion") is not None else tuple(),
+            },
+            "method_a_relative": {
+                "available": relative_reason is None,
+                "reason": relative_reason,
+                "cells": relative_groups[t_index]
+                if relative_groups is not None else tuple(),
+            },
+        })
+    return {
+        "schema_version": D9_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "coordinate_fingerprint": str(coordinate_fingerprint),
+        "method_a_thresholds": dict(thresholds),
+        "method_a_threshold_reason": threshold_reason,
         "per_t": per_t,
     }
 
@@ -1516,6 +1837,364 @@ def _render_d8_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
         )
 
 
+def _d9_fresh_weighted_histogram(source, name, rows, *, versus_delta):
+    """Fill a detached Part-1 weighted display clone from frozen scalar rows."""
+    histogram = _clone_display_histogram(source, name)
+    if histogram is None or not hasattr(histogram, "Reset") or not hasattr(histogram, "Fill"):
+        return None
+    try:
+        histogram.Reset("ICES")
+        for row in rows:
+            row = _mapping(row)
+            if versus_delta:
+                histogram.Fill(row["delta"], row["npe"], row["diagnostic_weight"])
+            else:
+                histogram.Fill(row["npe"], row["diagnostic_weight"])
+    except Exception:
+        return None
+    return histogram
+
+
+def _histogram_visible_extrema_2d(histogram):
+    """Return finite ordinary-cell extrema without changing a 2D histogram."""
+    if histogram is None:
+        return None
+    try:
+        x_count = int(histogram.GetNbinsX())
+        y_count = int(histogram.GetNbinsY())
+    except Exception:
+        return None
+    minimum = maximum = None
+    for x_index in range(1, x_count + 1):
+        for y_index in range(1, y_count + 1):
+            try:
+                value = float(histogram.GetBinContent(x_index, y_index))
+            except Exception:
+                continue
+            if not math.isfinite(value):
+                continue
+            minimum = value if minimum is None else min(minimum, value)
+            maximum = value if maximum is None else max(maximum, value)
+    if minimum is None:
+        return None
+    return minimum, maximum
+
+
+def _signed_z_range(histograms):
+    """Return one signed display range that always contains zero."""
+    minimum = maximum = 0.0
+    found_content = False
+    for histogram in histograms:
+        extrema = _histogram_visible_extrema_2d(histogram)
+        if extrema is None:
+            continue
+        found_content = True
+        minimum = min(minimum, extrema[0])
+        maximum = max(maximum, extrema[1])
+    span = maximum - minimum
+    if not found_content or span <= 0.0:
+        return -0.05, 0.05
+    padding = 0.05 * span
+    return minimum - padding, maximum + padding
+
+
+def _apply_display_z_range(histogram, z_range):
+    if histogram is None or not isinstance(z_range, tuple) or len(z_range) != 2:
+        return
+    try:
+        histogram.SetMinimum(float(z_range[0]))
+        histogram.SetMaximum(float(z_range[1]))
+    except Exception:
+        return
+
+
+def _d9_draw_threshold(ROOT, x_value, y_range, x_low, x_high, draw_objects):
+    """Draw the frozen Method-A low-response boundary only on display clones."""
+    if not hasattr(ROOT, "TLine"):
+        return
+    try:
+        line = ROOT.TLine(float(x_value), float(y_range[0]), float(x_value), float(y_range[1]))
+        line.SetLineStyle(2)
+        line.SetLineWidth(2)
+        line.Draw()
+        draw_objects.append(line)
+    except Exception:
+        return
+
+
+def _d9_draw_delta_threshold(ROOT, y_value, x_low, x_high, draw_objects):
+    if not hasattr(ROOT, "TLine"):
+        return
+    try:
+        line = ROOT.TLine(float(x_low), float(y_value), float(x_high), float(y_value))
+        line.SetLineStyle(2)
+        line.SetLineWidth(2)
+        line.Draw()
+        draw_objects.append(line)
+    except Exception:
+        return
+
+
+def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
+    presentation = _mapping(group.get("hgcer_response"))
+    kaon = _d9_fresh_weighted_histogram(
+        presentation.get("kaon_template"),
+        "H_full_background_d9_hgcer_kaon_t{}".format(group["t_index"] + 1),
+        presentation.get("kaon_rows") or (),
+        versus_delta=False,
+    )
+    pion = _d9_fresh_weighted_histogram(
+        presentation.get("pion_template"),
+        "H_full_background_d9_hgcer_pion_t{}".format(group["t_index"] + 1),
+        presentation.get("pion_rows") or (),
+        versus_delta=False,
+    )
+    if kaon is None or pion is None:
+        return False
+    title = "HGCer response - {}".format(_t_context(group))
+    _set_histogram_title(kaon, "{};HGCer NPE;Signed weighted yield".format(title))
+    y_range = _combined_histogram_y_range((kaon, pion))
+    _apply_display_y_range(kaon, y_range)
+    _style_histogram(kaon, getattr(ROOT, "kBlack", 1))
+    _style_histogram(pion, getattr(ROOT, "kBlue", 4))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d9_hgcer_t{}".format(group["t_index"] + 1), title, 1200, 800
+    )
+    draw_objects = []
+    try:
+        kaon.Draw("hist e")
+        pion.Draw("hist e same")
+        legend = ROOT.TLegend(0.58, 0.67, 0.89, 0.87)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        legend.AddEntry(kaon, "Proton-cleaned kaon data", "l")
+        legend.AddEntry(pion, "Pion-control sample", "l")
+        legend.Draw()
+        draw_objects.extend((kaon, pion, legend))
+        if thresholds.get("available"):
+            _d9_draw_threshold(
+                ROOT,
+                thresholds["low_response_upper_threshold"],
+                y_range,
+                0.0,
+                thresholds["low_response_upper_threshold"],
+                draw_objects,
+            )
+            draw_objects.append(
+                _draw_small_note(
+                    ROOT, "Diagnostic only - Method A low response: 0 < HGCer NPE <= 2"
+                )
+            )
+        else:
+            draw_objects.append(
+                _draw_small_note(ROOT, "Diagnostic only - Method A threshold unavailable")
+            )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d9_hgcer_delta_page(ROOT, pdf_name, group, thresholds, delta_edges):
+    presentation = _mapping(group.get("hgcer_delta_response"))
+    kaon = _d9_fresh_weighted_histogram(
+        presentation.get("kaon_template"),
+        "H_full_background_d9_hgcer_delta_kaon_t{}".format(group["t_index"] + 1),
+        presentation.get("kaon_rows") or (),
+        versus_delta=True,
+    )
+    pion = _d9_fresh_weighted_histogram(
+        presentation.get("pion_template"),
+        "H_full_background_d9_hgcer_delta_pion_t{}".format(group["t_index"] + 1),
+        presentation.get("pion_rows") or (),
+        versus_delta=True,
+    )
+    if kaon is None or pion is None:
+        return False
+    z_range = _signed_z_range((kaon, pion))
+    _apply_display_z_range(kaon, z_range)
+    _apply_display_z_range(pion, z_range)
+    title = "HGCer response across delta - {}".format(_t_context(group))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d9_hgcer_delta_t{}".format(group["t_index"] + 1),
+        title,
+        1300,
+        800,
+    )
+    canvas.Divide(2, 1)
+    draw_objects = []
+    try:
+        for pad_index, (histogram, label) in enumerate(
+            ((kaon, "Proton-cleaned kaon data"), (pion, "Pion-control sample")), 1
+        ):
+            canvas.cd(pad_index)
+            _set_histogram_title(
+                histogram, "{};delta [%];HGCer NPE;Signed weighted yield".format(label)
+            )
+            if hasattr(histogram, "SetStats"):
+                histogram.SetStats(0)
+            histogram.Draw("colz")
+            if thresholds.get("available"):
+                _d9_draw_delta_threshold(
+                    ROOT,
+                    thresholds["low_response_upper_threshold"],
+                    delta_edges[0],
+                    delta_edges[-1],
+                    draw_objects,
+                )
+            draw_objects.append(histogram)
+        canvas.cd(1)
+        notice = (
+            "Diagnostic only - Method A low response: 0 < HGCer NPE <= 2"
+            if thresholds.get("available")
+            else "Diagnostic only - Method A threshold unavailable"
+        )
+        draw_objects.append(_draw_small_note(ROOT, notice))
+        draw_objects.append(_draw_page_header(ROOT, canvas, "HGCer response across delta", group))
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _d9_relative_y_range(cells):
+    values = [1.0]
+    for cell in cells:
+        cell = _mapping(cell)
+        if cell.get("method_a_comparison_candidate_status") not in {"available", "marginal"}:
+            continue
+        for key in (
+            "method_a_comparison_candidate_low",
+            "method_a_comparison_candidate",
+            "method_a_comparison_candidate_high",
+        ):
+            try:
+                value = float(cell.get(key))
+            except (TypeError, ValueError):
+                continue
+            if math.isfinite(value):
+                values.append(value)
+    low, high = min(values), max(values)
+    if high <= low:
+        return low - 0.05, high + 0.05
+    padding = 0.05 * (high - low)
+    return low - padding, high + padding
+
+
+def _render_d9_method_a_relative_page(ROOT, pdf_name, group, delta_edges):
+    presentation = _mapping(group.get("method_a_relative"))
+    cells = tuple(presentation.get("cells") or ())
+    if not hasattr(ROOT, "TH1D"):
+        return False
+    title = "Method A relative HGCer diagnostic - {}".format(_t_context(group))
+    try:
+        frame = ROOT.TH1D(
+            "H_full_background_d9_method_a_relative_t{}".format(group["t_index"] + 1),
+            "{};delta [%];Method A cell / same-|t| parent".format(title),
+            len(delta_edges) - 1,
+            array("d", delta_edges),
+        )
+        frame.SetDirectory(0)
+        if hasattr(frame, "SetStats"):
+            frame.SetStats(0)
+        y_range = _d9_relative_y_range(cells)
+        frame.SetMinimum(y_range[0])
+        frame.SetMaximum(y_range[1])
+    except Exception:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_d9_method_a_relative_t{}".format(group["t_index"] + 1),
+        title,
+        1200,
+        800,
+    )
+    draw_objects = [frame]
+    try:
+        frame.Draw("axis")
+        graphs = {}
+        for status, color, label in (
+            ("available", getattr(ROOT, "kBlack", 1), "Supported"),
+            ("marginal", getattr(ROOT, "kBlue", 4), "Marginal"),
+        ):
+            selected = [
+                _mapping(cell) for cell in cells
+                if _mapping(cell).get("method_a_comparison_candidate_status") == status
+            ]
+            if not selected or not hasattr(ROOT, "TGraphAsymmErrors"):
+                continue
+            graph = ROOT.TGraphAsymmErrors(len(selected))
+            for point_index, cell in enumerate(selected):
+                x_value = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+                value = float(cell["method_a_comparison_candidate"])
+                low = float(cell["method_a_comparison_candidate_low"])
+                high = float(cell["method_a_comparison_candidate_high"])
+                graph.SetPoint(point_index, x_value, value)
+                graph.SetPointError(point_index, 0.0, 0.0, value - low, high - value)
+            graph.SetMarkerColor(color)
+            graph.SetLineColor(color)
+            graph.SetMarkerStyle(20 if status == "available" else 24)
+            graph.SetMarkerSize(1.1)
+            graph.Draw("P same")
+            graphs[status] = (graph, label)
+            draw_objects.append(graph)
+        if hasattr(ROOT, "TLine"):
+            unity = ROOT.TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
+            unity.SetLineStyle(2)
+            unity.SetLineWidth(2)
+            unity.Draw()
+            draw_objects.append(unity)
+        if graphs:
+            legend = ROOT.TLegend(0.64, 0.72, 0.89, 0.87)
+            legend.SetBorderSize(0)
+            legend.SetFillStyle(0)
+            for graph, label in graphs.values():
+                legend.AddEntry(graph, label, "p")
+            legend.Draw()
+            draw_objects.append(legend)
+        draw_objects.append(
+            _draw_small_note(ROOT, "Stored Method A values only - no refinement applied")
+        )
+        draw_objects.append(_draw_page_header(ROOT, canvas, "Method A relative diagnostic", group))
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d9_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Render D.9 HGCer/Method-A pages for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    thresholds = _mapping(presentation.get("method_a_thresholds"))
+    response = _mapping(group.get("hgcer_response"))
+    if response.get("available"):
+        if _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
+            manifest.append({"page_id": "full_background.d9.hgcer_response", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.9 HGCer response page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.9 HGCer response input unavailable for t{}: {}".format(t_number, response.get("reason")))
+    delta_response = _mapping(group.get("hgcer_delta_response"))
+    if delta_response.get("available"):
+        if _render_d9_hgcer_delta_page(
+            ROOT, pdf_name, group, thresholds, presentation.get("delta_edges") or ()
+        ):
+            manifest.append({"page_id": "full_background.d9.hgcer_delta_response", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.9 HGCer delta-response page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.9 HGCer delta-response input unavailable for t{}: {}".format(t_number, delta_response.get("reason")))
+    relative = _mapping(group.get("method_a_relative"))
+    if relative.get("available"):
+        if _render_d9_method_a_relative_page(
+            ROOT, pdf_name, group, presentation.get("delta_edges") or ()
+        ):
+            manifest.append({"page_id": "full_background.d9.method_a_relative", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.9 Method-A relative page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.9 Method-A relative input unavailable for t{}: {}".format(t_number, relative.get("reason")))
+
+
 def _append_d7_exclusion_failure(presentation, failures):
     exclusions = _mapping(presentation.get("projection_exclusions"))
     relevant = (
@@ -1598,20 +2277,44 @@ def render_full_background_subtraction_d8_pages(pdf_name, payload, *, page_manif
     return result
 
 
+def render_full_background_subtraction_d9_pages(pdf_name, payload, *, page_manifest=None):
+    """Append D.9 HGCer/Method-A pages for every canonical t bin."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    result = {"manifest": manifest, "failures": []}
+    presentation = _mapping(payload)
+    if not bool(presentation.get("available")):
+        result["failures"].append(
+            "D.9 procedure input unavailable: {}".format(presentation.get("reason"))
+        )
+        return result
+    ROOT = _import_root()
+    if ROOT is None:
+        result["failures"].append("D.9 procedure rendering unavailable: PyROOT not available")
+        return result
+    for group in tuple(presentation.get("per_t") or ()):
+        _render_d9_t_pages(
+            ROOT, pdf_name, presentation, _mapping(group), manifest, result["failures"]
+        )
+    return result
+
+
 def render_full_background_subtraction_procedure_pages(
-    pdf_name, d6_payload, d7_payload, d8_payload=None, *, page_manifest=None
+    pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, *, page_manifest=None
 ):
-    """Append available D.6/D.7/D.8 groups in complete canonical-t order."""
+    """Append available D.6 through D.9 groups in complete canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
     d7 = _mapping(d7_payload)
     d8 = _mapping(d8_payload)
+    d9 = _mapping(d9_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
     d8_available = bool(d8.get("available"))
-    if not d6_available and not d7_available and not d8_available:
+    d9_requested = d9_payload is not None
+    d9_available = bool(d9.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -1623,6 +2326,10 @@ def render_full_background_subtraction_procedure_pages(
         if d8_requested:
             result["failures"].append(
                 "D.8 procedure input unavailable: {}".format(d8.get("reason"))
+            )
+        if d9_requested:
+            result["failures"].append(
+                "D.9 procedure input unavailable: {}".format(d9.get("reason"))
             )
         return result
     if not d6_available:
@@ -1637,10 +2344,16 @@ def render_full_background_subtraction_procedure_pages(
         result["failures"].append(
             "D.8 procedure input unavailable: {}".format(d8.get("reason"))
         )
+    if d9_requested and not d9_available:
+        result["failures"].append(
+            "D.9 procedure input unavailable: {}".format(d9.get("reason"))
+        )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
         d7_available = False
-    geometry_owner = d6 if d6_available else d7 if d7_available else None
+    geometry_owner = (
+        d6 if d6_available else d7 if d7_available else d8 if d8_available else d9
+    )
     if (
         d8_available
         and geometry_owner is not None
@@ -1648,6 +2361,13 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("D.8 canonical t geometry mismatch")
         d8_available = False
+    if (
+        d9_available
+        and geometry_owner is not d9
+        and list(geometry_owner.get("t_edges") or ()) != list(d9.get("t_edges") or ())
+    ):
+        result["failures"].append("D.9 canonical t geometry mismatch")
+        d9_available = False
     for comparison_name, comparison_payload, comparison_available in (
         ("D.6", d6, d6_available),
         ("D.7", d7, d7_available),
@@ -1660,6 +2380,20 @@ def render_full_background_subtraction_procedure_pages(
         ):
             result["failures"].append(
                 "D.8 cache delta geometry differs from {}".format(comparison_name)
+            )
+    for comparison_name, comparison_payload, comparison_available in (
+        ("D.6", d6, d6_available),
+        ("D.7", d7, d7_available),
+        ("D.8", d8, d8_available),
+    ):
+        if (
+            d9_available
+            and comparison_available
+            and list(comparison_payload.get("delta_edges") or ())
+            and list(comparison_payload.get("delta_edges") or ()) != list(d9.get("delta_edges") or ())
+        ):
+            result["failures"].append(
+                "D.9 frozen delta geometry differs from {}".format(comparison_name)
             )
     ROOT = _import_root()
     if ROOT is None:
@@ -1677,6 +2411,11 @@ def render_full_background_subtraction_procedure_pages(
         for group in tuple(d8.get("per_t") or ())
         if isinstance(group, Mapping)
     }
+    d9_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(d9.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
 
     def render_d8_group(t_index):
         if not d8_available:
@@ -1688,6 +2427,17 @@ def render_full_background_subtraction_procedure_pages(
             )
             return
         _render_d8_t_pages(ROOT, pdf_name, d8, d8_group, manifest, result["failures"])
+
+    def render_d9_group(t_index):
+        if not d9_available:
+            return
+        d9_group = d9_by_index.get(t_index)
+        if d9_group is None:
+            result["failures"].append(
+                "D.9 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_d9_t_pages(ROOT, pdf_name, d9, d9_group, manifest, result["failures"])
 
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
@@ -1702,14 +2452,21 @@ def render_full_background_subtraction_procedure_pages(
                 else:
                     _render_d7_t_pages(ROOT, pdf_name, d7, d7_group, manifest, result["failures"])
             render_d8_group(group.get("t_index"))
+            render_d9_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
             _render_d7_t_pages(ROOT, pdf_name, d7, group, manifest, result["failures"])
             render_d8_group(group.get("t_index"))
+            render_d9_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
-            _render_d8_t_pages(ROOT, pdf_name, d8, _mapping(group), manifest, result["failures"])
+            group = _mapping(group)
+            _render_d8_t_pages(ROOT, pdf_name, d8, group, manifest, result["failures"])
+            render_d9_group(group.get("t_index"))
+    elif d9_available:
+        for group in tuple(d9.get("per_t") or ()):
+            _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
     return result
 
 
@@ -1717,15 +2474,18 @@ __all__ = (
     "D6_PRESENTATION_SCHEMA_VERSION",
     "D7_PRESENTATION_SCHEMA_VERSION",
     "D8_PRESENTATION_SCHEMA_VERSION",
+    "D9_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
     "build_full_background_subtraction_d8_payload",
+    "build_full_background_subtraction_d9_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",
     "render_full_background_subtraction_d6_pages",
     "render_full_background_subtraction_d7_pages",
     "render_full_background_subtraction_d8_pages",
+    "render_full_background_subtraction_d9_pages",
     "render_full_background_subtraction_procedure_pages",
 )

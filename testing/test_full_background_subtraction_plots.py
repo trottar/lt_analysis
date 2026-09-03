@@ -1,4 +1,4 @@
-"""Focused D.6/D.7/D.8 procedure-PDF contract tests."""
+"""Focused D.6 through D.9 procedure-PDF contract tests."""
 
 from __future__ import annotations
 
@@ -478,6 +478,110 @@ def _d8_single_scale_final_fallback_fixture():
     return parents, cache
 
 
+def _d9_fixture():
+    """Return realistic detached Part-1, Method-A, and D.2 display inputs."""
+    t_edges = [0.0, 1.0, 2.0]
+    delta_edges = [-10.0, 0.0, 10.0]
+    coordinate_fingerprint = "d9-coordinate-fingerprint"
+    method_a_fingerprint = "d9-method-a-fingerprint"
+    records = {}
+    for side, sign in (("kaon", 1.0), ("pion", -1.0)):
+        side_records = []
+        for t_index in range(2):
+            for delta_index in range(2):
+                side_records.append({
+                    "side": side,
+                    "canonical_t_index": t_index,
+                    "delta_index": delta_index,
+                    # These sentinels must not replace the frozen indices above.
+                    "ssdelta": 7.5 if delta_index == 0 else -7.5,
+                    "P_hgcer_npeSum": 0.5 + float(t_index + delta_index),
+                    "diagnostic_weight": sign * (3.25 + t_index + delta_index),
+                    "adj_t": 99.0,
+                    "reconstructed_weight": 12345.0,
+                })
+        records[side] = tuple(side_records)
+    histograms = {
+        "H_hgcer_kaon_weighted": _Histogram("d9-kaon-weighted"),
+        "H_hgcer_pion_weighted": _Histogram("d9-pion-weighted"),
+        "H_hgcer_vs_delta_kaon_weighted": _Histogram("d9-kaon-delta-weighted"),
+        "H_hgcer_vs_delta_pion_weighted": _Histogram("d9-pion-delta-weighted"),
+        "H_hgcer_kaon_absolute": _Histogram("forbidden-absolute"),
+        "H_hgcer_pion_absolute": _Histogram("forbidden-absolute"),
+    }
+    diagnostic = {
+        "status": "available",
+        "non_authoritative": True,
+        "production_side_effect_free": True,
+        "production_hgcer_pid_unchanged": True,
+        "rf_restoration_applied": False,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "records": records,
+        "histograms": histograms,
+    }
+    method_a = {
+        "status": "available",
+        "available": True,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "fingerprint": method_a_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "configuration": {
+            "positive_response_threshold": 0.0,
+            "low_response_upper_threshold": 2.0,
+        },
+    }
+    cells = []
+    candidate_specs = {
+        (0, 0): ("available", 0.0, 0.0, 0.25),
+        (0, 1): ("marginal", 0.8, 0.5, 1.3),
+        (1, 0): ("unavailable", None, None, None),
+        (1, 1): ("available", 1.2, 0.9, 1.7),
+    }
+    for t_index in range(2):
+        for delta_index in range(2):
+            status, candidate, low, high = candidate_specs[(t_index, delta_index)]
+            cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "method_a_comparison_candidate": candidate,
+                "method_a_comparison_candidate_low": low,
+                "method_a_comparison_candidate_high": high,
+                "method_a_comparison_candidate_status": status,
+                "method_a_comparison_candidate_reason": None if candidate is not None else "parent_unavailable",
+                "support_class": "supported" if status == "available" else "marginal",
+                "method_A_status": "available" if candidate is not None else "unavailable",
+                "method_A_reason": None if candidate is not None else "support_insufficient",
+                "forbidden_recalculation_sentinel": 919.0,
+            })
+    comparison = {
+        "schema_version": "pion_hgcer_method_a_comparison/v1",
+        "status": "available",
+        "available": True,
+        "non_authoritative": True,
+        "method_b_numerical_dependency": False,
+        "comparison_performed": False,
+        "classification_performed": False,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "method_a_fingerprint": method_a_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "canonical_t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "cells": cells,
+    }
+    return diagnostic, method_a, comparison
+
+
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
     def test_pdf_path_is_deterministic_and_detached(self):
         main = r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf"
@@ -827,6 +931,165 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertFalse(payload["available"])
         self.assertEqual(payload["reason"], "pion_parent_cache_t_geometry_mismatch")
 
+    def test_d9_uses_only_frozen_part1_rows_weighted_templates_and_d2_values(self):
+        diagnostic, method_a, comparison = _d9_fixture()
+        payload = plots.build_full_background_subtraction_d9_payload(
+            diagnostic, method_a, comparison
+        )
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.D9_PRESENTATION_SCHEMA_VERSION)
+        self.assertEqual(payload["t_edges"], [0.0, 1.0, 2.0])
+        self.assertEqual(payload["delta_edges"], [-10.0, 0.0, 10.0])
+        self.assertEqual(payload["method_a_thresholds"], {
+            "available": True,
+            "positive_response_threshold": 0.0,
+            "low_response_upper_threshold": 2.0,
+        })
+        first = payload["per_t"][0]
+        self.assertIs(
+            first["hgcer_response"]["kaon_template"],
+            diagnostic["histograms"]["H_hgcer_kaon_weighted"],
+        )
+        self.assertIs(
+            first["hgcer_delta_response"]["pion_template"],
+            diagnostic["histograms"]["H_hgcer_vs_delta_pion_weighted"],
+        )
+        self.assertIsNot(
+            first["hgcer_response"]["kaon_template"],
+            diagnostic["histograms"]["H_hgcer_kaon_absolute"],
+        )
+        first_row = first["hgcer_response"]["kaon_rows"][0]
+        self.assertEqual(first_row["t_index"], 0)
+        self.assertEqual(first_row["delta_index"], 0)
+        self.assertEqual(first_row["delta"], 7.5)
+        self.assertEqual(first_row["diagnostic_weight"], 3.25)
+        self.assertNotIn("reconstructed_weight", first_row)
+        cells = first["method_a_relative"]["cells"]
+        self.assertEqual(cells[0]["method_a_comparison_candidate"], 0.0)
+        self.assertEqual(cells[0]["method_a_comparison_candidate_high"], 0.25)
+        self.assertEqual(cells[1]["method_a_comparison_candidate_status"], "marginal")
+        self.assertNotIn("forbidden_recalculation_sentinel", cells[0])
+
+        payload["t_edges"][0] = -99.0
+        first_row["diagnostic_weight"] = 99.0
+        cells[0]["method_a_comparison_candidate"] = 99.0
+        self.assertEqual(diagnostic["t_edges"][0], 0.0)
+        self.assertEqual(diagnostic["records"]["kaon"][0]["diagnostic_weight"], 3.25)
+        self.assertEqual(comparison["cells"][0]["method_a_comparison_candidate"], 0.0)
+
+    def test_d9_threshold_failure_is_local_to_annotation_and_d2_failures_are_local(self):
+        diagnostic, method_a, comparison = _d9_fixture()
+        method_a["configuration"] = dict(
+            method_a["configuration"], low_response_upper_threshold=2.1
+        )
+        threshold_payload = plots.build_full_background_subtraction_d9_payload(
+            diagnostic, method_a, comparison
+        )
+        self.assertTrue(threshold_payload["available"])
+        self.assertFalse(threshold_payload["method_a_thresholds"]["available"])
+        self.assertEqual(
+            threshold_payload["method_a_threshold_reason"], "method_a_thresholds_invalid"
+        )
+        self.assertTrue(threshold_payload["per_t"][0]["hgcer_response"]["available"])
+        self.assertTrue(threshold_payload["per_t"][0]["method_a_relative"]["available"])
+
+        diagnostic, method_a, comparison = _d9_fixture()
+        comparison["method_a_fingerprint"] = "wrong"
+        payload = plots.build_full_background_subtraction_d9_payload(
+            diagnostic, method_a, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertTrue(payload["per_t"][0]["hgcer_response"]["available"])
+        self.assertFalse(payload["per_t"][0]["method_a_relative"]["available"])
+        self.assertEqual(
+            payload["per_t"][0]["method_a_relative"]["reason"],
+            "method_a_comparison_provenance_mismatch",
+        )
+
+    def test_d9_rejects_part1_coordinate_geometry_and_d2_grid_mismatches(self):
+        for mutation, expected in (
+            (lambda diagnostic, _method, _comparison: diagnostic.update(coordinate_fingerprint=""), "part1_coordinate_fingerprint_missing"),
+            (lambda diagnostic, _method, _comparison: diagnostic.update(delta_edges=[-10.0, -10.0]), "part1_geometry_invalid"),
+            (lambda _diagnostic, _method, comparison: comparison["cells"].pop(), None),
+        ):
+            diagnostic, method_a, comparison = _d9_fixture()
+            mutation(diagnostic, method_a, comparison)
+            payload = plots.build_full_background_subtraction_d9_payload(
+                diagnostic, method_a, comparison
+            )
+            if expected is not None:
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], expected)
+            else:
+                self.assertTrue(payload["available"])
+                self.assertEqual(
+                    payload["per_t"][0]["method_a_relative"]["reason"],
+                    "method_a_comparison_cell_grid_invalid",
+                )
+
+    def test_d9_part1_unavailability_requires_retained_geometry_for_page12(self):
+        diagnostic, method_a, comparison = _d9_fixture()
+        diagnostic["status"] = "unavailable"
+        payload = plots.build_full_background_subtraction_d9_payload(
+            diagnostic, method_a, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertFalse(payload["per_t"][0]["hgcer_response"]["available"])
+        self.assertFalse(payload["per_t"][0]["hgcer_delta_response"]["available"])
+        self.assertTrue(payload["per_t"][0]["method_a_relative"]["available"])
+
+        diagnostic, method_a, comparison = _d9_fixture()
+        diagnostic.update(status="unavailable", delta_edges=[])
+        payload = plots.build_full_background_subtraction_d9_payload(
+            diagnostic, method_a, comparison
+        )
+        self.assertFalse(payload["available"])
+        self.assertEqual(payload["reason"], "part1_geometry_invalid")
+
+    def test_d9_response_page_uses_detached_signed_weighted_clones(self):
+        _BinnedHistogram.created = []
+        root = _FakeROOT()
+        kaon_source = _BinnedHistogram("d9-kaon", (11.0,))
+        pion_source = _BinnedHistogram("d9-pion", (13.0,))
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "hgcer_response": {
+                "kaon_template": kaon_source,
+                "pion_template": pion_source,
+                "kaon_rows": ({"npe": 0.5, "diagnostic_weight": -4.0},),
+                "pion_rows": ({"npe": 0.5, "diagnostic_weight": 6.0},),
+            },
+        }
+        self.assertTrue(
+            plots._render_d9_hgcer_response_page(
+                root,
+                "unused.pdf",
+                group,
+                {"available": True, "low_response_upper_threshold": 2.0},
+            )
+        )
+        displays = [
+            histogram for histogram in _BinnedHistogram.created
+            if "H_full_background_d9_hgcer_" in histogram.label
+        ]
+        self.assertEqual(len(displays), 2)
+        self.assertEqual(
+            (displays[0].display_minimum, displays[0].display_maximum), (-4.5, 6.5)
+        )
+        self.assertEqual((displays[1].display_minimum, displays[1].display_maximum), (None, None))
+        self.assertEqual(kaon_source.contents, [11.0])
+        self.assertEqual(pion_source.contents, [13.0])
+        self.assertTrue(
+            any(
+                "Method A low response: 0 < HGCer NPE <= 2" in line
+                for text in root.drawn_text
+                for line in text
+            )
+        )
+
     def test_d8_delta_renderer_uses_common_range_and_visible_t_header(self):
         _ProjectionHistogram.created = []
         root = _FakeROOT()
@@ -1017,6 +1280,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
 
     def test_static_presentation_and_runtime_contracts(self):
         source = (REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py").read_text(encoding="utf-8")
+        pre_d9_source = source[:source.index("def _d9_integer")]
         for forbidden in (
             "import proton_contamination_weights",
             "build_kaon_proton_cleaning_result",
@@ -1034,10 +1298,6 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "SetBinError(",
             "final_cleaned_factor",
             'get("sources")',
-            "HGCer response",
-            "Method A",
-            "Method B",
-            "ln(B/A)",
             "build_setting_t_bin_pion_parents",
             "build_particle_subtraction_component_result",
             "resolve_frozen_parent_application_policy",
@@ -1048,7 +1308,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "single_scale",
         ):
             with self.subTest(forbidden=forbidden):
-                self.assertNotIn(forbidden, source)
+                self.assertNotIn(forbidden, pre_d9_source)
         fresh_delta_histogram = source[
             source.index("def _new_d7_delta_histogram"):
             source.index("def _render_d7_delta_page")
@@ -1064,22 +1324,59 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertIn("find_canonical_bin", legacy_membership)
         d8_builder = source[
             source.index("def _build_d8_delta_projection"):
-            source.index("def full_background_subtraction_pdf_path")
+            source.index("def _d9_integer")
         ]
         self.assertIn("final_diagnostic_application_result", d8_builder)
         self.assertNotIn("proposed_diagnostic_application_result", d8_builder)
         self.assertIn("simc_shape_pion_weight_from_value", d8_builder)
         self.assertIn("invalid_frozen_delta_index", d8_builder)
         self.assertIn("H_pion_subtraction_template_MM_nosub", d8_builder)
+        d9_source = source[
+            source.index("def _d9_integer"):
+            source.index("def _append_d7_exclusion_failure")
+        ]
+        for required in (
+            "H_hgcer_kaon_weighted",
+            "H_hgcer_pion_weighted",
+            "H_hgcer_vs_delta_kaon_weighted",
+            "H_hgcer_vs_delta_pion_weighted",
+            "diagnostic_weight",
+            "method_a_comparison_candidate",
+            "TGraphAsymmErrors",
+            "Signed weighted yield",
+        ):
+            self.assertIn(required, d9_source)
+        for forbidden in (
+            "Method B",
+            "ln(B/A)",
+            "build_pion_hgcer_method_a(",
+            "build_pion_hgcer_method_b(",
+            "Rebin(",
+            "Scale(",
+            "Add(",
+            "Multiply(",
+            "SetBinContent(",
+            "SetBinError(",
+            "Normalized pion-control yield",
+            "C_A",
+            "C_B",
+            "C_final",
+            "use_A",
+            "use_B",
+            "combine_AB",
+        ):
+            with self.subTest(d9_forbidden=forbidden):
+                self.assertNotIn(forbidden, d9_source)
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6/D.7/D.8 are terminal presentation only.")
+        start = runtime.index("# Phases D.6/D.7/D.8/D.9 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
             "build_full_background_subtraction_d6_payload",
             "build_full_background_subtraction_d7_payload",
             "build_full_background_subtraction_d8_payload",
+            "build_full_background_subtraction_d9_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -1099,6 +1396,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_d8_payload(", start),
+            runtime.index("build_full_background_subtraction_d9_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_d9_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
@@ -1112,6 +1413,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d6_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d7_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d8_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_root_rendering_preserves_source_and_page_order(self):
@@ -1216,6 +1518,37 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             [group["delta_projection"]["closure"]["status"] for group in d8_payload["per_t"]],
             ["closed", "closed"],
         )
+        d9_diagnostic, d9_method_a, d9_comparison = _d9_fixture()
+        d9_source_snapshots = []
+        for side in ("kaon", "pion"):
+            response_histogram = ROOT.TH1D(
+                "H_d9_{}_response".format(side), "source", 4, 0.0, 4.0
+            )
+            response_histogram.SetDirectory(0)
+            response_histogram.SetBinContent(1, 7.0 if side == "kaon" else -5.0)
+            delta_histogram = ROOT.TH2D(
+                "H_d9_{}_delta".format(side), "source", 2, -10.0, 10.0, 4, 0.0, 4.0
+            )
+            delta_histogram.SetDirectory(0)
+            delta_histogram.SetBinContent(1, 1, 3.0 if side == "kaon" else -2.0)
+            d9_diagnostic["histograms"]["H_hgcer_{}_weighted".format(side)] = response_histogram
+            d9_diagnostic["histograms"]["H_hgcer_vs_delta_{}_weighted".format(side)] = delta_histogram
+            d9_source_snapshots.append((
+                response_histogram,
+                tuple(response_histogram.GetBinContent(index) for index in range(1, 5)),
+            ))
+            d9_source_snapshots.append((
+                delta_histogram,
+                tuple(
+                    delta_histogram.GetBinContent(x_index, y_index)
+                    for x_index in range(1, 3)
+                    for y_index in range(1, 5)
+                ),
+            ))
+        d9_payload = plots.build_full_background_subtraction_d9_payload(
+            d9_diagnostic, d9_method_a, d9_comparison
+        )
+        self.assertTrue(d9_payload["available"])
         d8_source_snapshots = []
         for parent in d8_parents:
             application = parent["final_diagnostic_application_result"]
@@ -1241,7 +1574,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             self.assertTrue(plots.open_full_background_subtraction_pdf(pdf))
             try:
                 rendered = plots.render_full_background_subtraction_procedure_pages(
-                    pdf, d6_payload, d7_payload, d8_payload
+                    pdf, d6_payload, d7_payload, d8_payload, d9_payload
                 )
             finally:
                 plots.close_full_background_subtraction_pdf(pdf)
@@ -1257,6 +1590,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d8.pion_background_mm",
                     "full_background.d8.pion_subtracted_mm",
                     "full_background.d8.pion_delta_mm",
+                    "full_background.d9.hgcer_response",
+                    "full_background.d9.hgcer_delta_response",
+                    "full_background.d9.method_a_relative",
                     "full_background.d6.raw_mm",
                     "full_background.d6.proton_pid",
                     "full_background.d6.proton_weight",
@@ -1266,11 +1602,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d8.pion_background_mm",
                     "full_background.d8.pion_subtracted_mm",
                     "full_background.d8.pion_delta_mm",
+                    "full_background.d9.hgcer_response",
+                    "full_background.d9.hgcer_delta_response",
+                    "full_background.d9.method_a_relative",
                 ],
             )
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
-                ["t1"] * 9 + ["t2"] * 9,
+                ["t1"] * 12 + ["t2"] * 12,
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
             self.assertTrue(Path(pdf).exists())
@@ -1281,6 +1620,24 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(timing_cells[0][0].GetNbinsX(), 4)
         self.assertEqual(weight.GetNbinsX(), 2)
         self.assertEqual(weight.GetNbinsY(), 2)
+        for histogram, contents in d9_source_snapshots:
+            if histogram.InheritsFrom("TH2"):
+                self.assertEqual(histogram.GetNbinsX(), 2)
+                self.assertEqual(histogram.GetNbinsY(), 4)
+                self.assertEqual(
+                    tuple(
+                        histogram.GetBinContent(x_index, y_index)
+                        for x_index in range(1, 3)
+                        for y_index in range(1, 5)
+                    ),
+                    contents,
+                )
+            else:
+                self.assertEqual(histogram.GetNbinsX(), 4)
+                self.assertEqual(
+                    tuple(histogram.GetBinContent(index) for index in range(1, 5)),
+                    contents,
+                )
         for histogram, bin_count, bins, x_minimum, x_maximum in d8_source_snapshots:
             self.assertEqual(histogram.GetNbinsX(), bin_count)
             self.assertEqual(
