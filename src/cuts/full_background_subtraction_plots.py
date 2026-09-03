@@ -1993,7 +1993,7 @@ def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
     try:
         kaon.Draw("hist e")
         pion.Draw("hist e same")
-        legend = ROOT.TLegend(0.58, 0.67, 0.89, 0.87)
+        legend = ROOT.TLegend(0.62, 0.58, 0.89, 0.72)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
         legend.AddEntry(kaon, "Proton-cleaned kaon data", "l")

@@ -219,6 +219,9 @@ class _FakeCanvas:
 
 
 class _FakeLegend:
+    def __init__(self, *coordinates):
+        self.coordinates = tuple(float(value) for value in coordinates[:4])
+
     def SetBorderSize(self, _size):
         return None
 
@@ -233,8 +236,9 @@ class _FakeLegend:
 
 
 class _FakePaveText:
-    def __init__(self, root):
+    def __init__(self, root, *coordinates):
         self._root = root
+        self.coordinates = tuple(float(value) for value in coordinates[:4])
         self._text = []
 
     def SetFillStyle(self, _style):
@@ -263,15 +267,31 @@ class _FakeROOT:
 
     def __init__(self):
         self.drawn_text = []
+        self.legends = []
+        self.pave_texts = []
 
     def TCanvas(self, *_args):
         return _FakeCanvas(*_args)
 
     def TLegend(self, *_args):
-        return _FakeLegend()
+        legend = _FakeLegend(*_args)
+        self.legends.append(legend)
+        return legend
 
     def TPaveText(self, *_args):
-        return _FakePaveText(self)
+        pave_text = _FakePaveText(self, *_args)
+        self.pave_texts.append(pave_text)
+        return pave_text
+
+
+def _rectangles_overlap(left, right):
+    """Return whether two NDC rectangles have a positive-area overlap."""
+    left_x1, left_y1, left_x2, left_y2 = (float(value) for value in left)
+    right_x1, right_y1, right_x2, right_y2 = (float(value) for value in right)
+    return (
+        max(left_x1, right_x1) < min(left_x2, right_x2)
+        and max(left_y1, right_y1) < min(left_y2, right_y2)
+    )
 
 
 class _ForbiddenTree:
@@ -1147,6 +1167,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         visible_text = tuple(line for text in root.drawn_text for line in text)
         self.assertIn("Diagnostic only - no refinement applied", visible_text)
         self.assertIn("Method A low response: 0 < HGCer NPE <= 2", visible_text)
+        self.assertEqual(len(root.legends), 1)
+        self.assertEqual(len(root.pave_texts), 2)
+        legend_rectangle = root.legends[0].coordinates
+        authority_rectangle = root.pave_texts[0].coordinates
+        threshold_rectangle = root.pave_texts[1].coordinates
+        self.assertEqual(legend_rectangle, (0.62, 0.58, 0.89, 0.72))
+        self.assertFalse(_rectangles_overlap(legend_rectangle, authority_rectangle))
+        self.assertFalse(_rectangles_overlap(legend_rectangle, threshold_rectangle))
+        self.assertFalse(_rectangles_overlap(authority_rectangle, threshold_rectangle))
 
         unavailable_root = _FakeROOT()
         self.assertTrue(
@@ -1160,6 +1189,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertIn("Diagnostic only - no refinement applied", unavailable_text)
         self.assertNotIn("Method A low response: 0 < HGCer NPE <= 2", unavailable_text)
         self.assertFalse(any("threshold unavailable" in line for line in unavailable_text))
+        self.assertEqual(len(unavailable_root.legends), 1)
+        self.assertEqual(len(unavailable_root.pave_texts), 1)
+        self.assertFalse(
+            _rectangles_overlap(
+                unavailable_root.legends[0].coordinates,
+                unavailable_root.pave_texts[0].coordinates,
+            )
+        )
 
     def test_d9_delta_page_keeps_authority_and_threshold_notices_separate(self):
         _BinnedHistogram2D.created = []
