@@ -1,4 +1,4 @@
-"""Detached D.6 procedure pages for the full background-subtraction PDF.
+"""Detached D.6/D.7 procedure pages for the full background-subtraction PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -499,6 +499,72 @@ def _draw_small_note(ROOT, text):
     return note
 
 
+def _draw_page_header(ROOT, canvas, heading, group):
+    """Draw a retained, page-visible canonical-t header on a multipanel canvas."""
+    canvas.cd()
+    header = ROOT.TPaveText(0.16, 0.925, 0.84, 0.995, "NDC")
+    header.SetFillStyle(0)
+    header.SetBorderSize(0)
+    header.SetTextAlign(22)
+    header.SetTextSize(0.028)
+    header.AddText(str(heading))
+    header.AddText(_t_context(group))
+    header.Draw()
+    return header
+
+
+def _histogram_visible_extrema(histogram):
+    """Return finite ordinary-bin extrema without changing a histogram."""
+    if histogram is None:
+        return None
+    try:
+        bin_count = int(histogram.GetNbinsX())
+    except Exception:
+        return None
+    minimum = maximum = None
+    for bin_index in range(1, bin_count + 1):
+        try:
+            value = float(histogram.GetBinContent(bin_index))
+        except Exception:
+            continue
+        if not math.isfinite(value):
+            continue
+        minimum = value if minimum is None else min(minimum, value)
+        maximum = value if maximum is None else max(maximum, value)
+    if minimum is None:
+        return None
+    return minimum, maximum
+
+
+def _combined_histogram_y_range(histograms):
+    """Return a padded signed-y range spanning visible bins and zero."""
+    minimum = maximum = 0.0
+    found_content = False
+    for histogram in tuple(histograms or ()):
+        extrema = _histogram_visible_extrema(histogram)
+        if extrema is None:
+            continue
+        found_content = True
+        minimum = min(minimum, extrema[0])
+        maximum = max(maximum, extrema[1])
+    span = maximum - minimum
+    if not found_content or span <= 0.0:
+        return -0.05, 0.05
+    padding = 0.05 * span
+    return minimum - padding, maximum + padding
+
+
+def _apply_display_y_range(histogram, y_range):
+    """Apply display-only limits to an axis-owning detached histogram clone."""
+    if histogram is None or not isinstance(y_range, tuple) or len(y_range) != 2:
+        return
+    try:
+        histogram.SetMinimum(float(y_range[0]))
+        histogram.SetMaximum(float(y_range[1]))
+    except Exception:
+        return
+
+
 def _render_raw_mm_page(ROOT, pdf_name, group):
     source = _mapping(group.get("raw_mm")).get("histogram")
     histogram = _clone_display_histogram(
@@ -566,6 +632,9 @@ def _render_timing_t_pid_page(ROOT, pdf_name, group, delta_edges):
             draw_objects.append(histogram)
         canvas.cd(1)
         draw_objects.append(_draw_small_note(ROOT, "Proton-identification timing"))
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Proton-identification timing", group)
+        )
         canvas.Print(pdf_name)
     finally:
         canvas.Close()
@@ -748,6 +817,10 @@ def _render_d7_mm_overlay_page(
     _set_histogram_title(
         raw_histogram, "{};Missing mass [GeV];Signed normalized yield".format(title)
     )
+    _apply_display_y_range(
+        raw_histogram,
+        _combined_histogram_y_range((raw_histogram, other_histogram)),
+    )
     _style_histogram(raw_histogram, getattr(ROOT, "kBlack", 1))
     _style_histogram(other_histogram, getattr(ROOT, other_color, 2))
     canvas = ROOT.TCanvas(
@@ -802,8 +875,8 @@ def _render_d7_delta_page(ROOT, pdf_name, group, delta_edges):
     draw_objects = []
     source = _mapping(group.get("raw_mm")).get("histogram")
     try:
+        panel_histograms = []
         for delta_index, display_rows in enumerate(rows_by_delta):
-            canvas.cd(delta_index + 1)
             raw_histogram = _new_d7_delta_histogram(
                 source,
                 "H_full_background_d7_delta_raw_t{}_d{}".format(
@@ -829,6 +902,16 @@ def _render_d7_delta_page(ROOT, pdf_name, group, delta_edges):
                 raw_histogram.Fill(row["missing_mass"], row["raw_weight"])
                 proton_histogram.Fill(row["missing_mass"], row["proton_contribution"])
                 cleaned_histogram.Fill(row["missing_mass"], row["cleaned_contribution"])
+            panel_histograms.append((raw_histogram, proton_histogram, cleaned_histogram))
+
+        common_y_range = _combined_histogram_y_range(
+            histogram
+            for panel in panel_histograms
+            for histogram in panel
+        )
+        for delta_index, histograms in enumerate(panel_histograms):
+            canvas.cd(delta_index + 1)
+            raw_histogram, proton_histogram, cleaned_histogram = histograms
             panel_title = "delta = [{:.3f}, {:.3f}] %".format(
                 delta_edges[delta_index], delta_edges[delta_index + 1]
             )
@@ -836,6 +919,7 @@ def _render_d7_delta_page(ROOT, pdf_name, group, delta_edges):
                 raw_histogram,
                 "{};Missing mass [GeV];Signed normalized yield".format(panel_title),
             )
+            _apply_display_y_range(raw_histogram, common_y_range)
             _style_histogram(raw_histogram, getattr(ROOT, "kBlack", 1))
             _style_histogram(proton_histogram, getattr(ROOT, "kRed", 2))
             _style_histogram(cleaned_histogram, getattr(ROOT, "kBlue", 4))
@@ -852,6 +936,9 @@ def _render_d7_delta_page(ROOT, pdf_name, group, delta_edges):
                 legend.Draw()
                 draw_objects.append(legend)
             draw_objects.extend((raw_histogram, proton_histogram, cleaned_histogram))
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Proton subtraction across delta", group)
+        )
         canvas.Print(pdf_name)
     finally:
         canvas.Close()

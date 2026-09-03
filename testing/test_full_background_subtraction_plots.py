@@ -1,4 +1,4 @@
-"""Focused D.6 procedure-PDF contract tests."""
+"""Focused D.6/D.7 procedure-PDF contract tests."""
 
 from __future__ import annotations
 
@@ -31,6 +31,125 @@ class _Histogram:
 
     def SetTitle(self, title):
         self.title = title
+
+
+class _BinnedHistogram(_Histogram):
+    created = []
+
+    def __init__(self, label, contents=()):
+        super().__init__(label)
+        self.contents = list(contents)
+        self.display_minimum = None
+        self.display_maximum = None
+
+    def Clone(self, name):
+        clone = type(self)("{}:{}".format(self.label, name), self.contents)
+        type(self).created.append(clone)
+        return clone
+
+    def GetNbinsX(self):
+        return len(self.contents)
+
+    def GetBinContent(self, bin_index):
+        return self.contents[int(bin_index) - 1]
+
+    def Reset(self, _option):
+        self.contents = [0.0] * len(self.contents)
+
+    def Fill(self, value, weight):
+        index = min(max(int(float(value)), 0), len(self.contents) - 1)
+        self.contents[index] += float(weight)
+
+    def SetMinimum(self, value):
+        self.display_minimum = float(value)
+
+    def SetMaximum(self, value):
+        self.display_maximum = float(value)
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetLineWidth(self, _width):
+        return None
+
+    def SetStats(self, _value):
+        return None
+
+    def Draw(self, _option):
+        return None
+
+
+class _FakeCanvas:
+    def __init__(self, *_args):
+        return None
+
+    def Divide(self, _columns, _rows):
+        return None
+
+    def cd(self, *_args):
+        return self
+
+    def Print(self, _name):
+        return None
+
+    def Close(self):
+        return None
+
+
+class _FakeLegend:
+    def SetBorderSize(self, _size):
+        return None
+
+    def SetFillStyle(self, _style):
+        return None
+
+    def AddEntry(self, *_args):
+        return None
+
+    def Draw(self):
+        return None
+
+
+class _FakePaveText:
+    def __init__(self, root):
+        self._root = root
+        self._text = []
+
+    def SetFillStyle(self, _style):
+        return None
+
+    def SetBorderSize(self, _size):
+        return None
+
+    def SetTextAlign(self, _alignment):
+        return None
+
+    def SetTextSize(self, _size):
+        return None
+
+    def AddText(self, text):
+        self._text.append(str(text))
+
+    def Draw(self):
+        self._root.drawn_text.append(tuple(self._text))
+
+
+class _FakeROOT:
+    kBlack = 1
+    kBlue = 4
+    kRed = 2
+
+    def __init__(self):
+        self.drawn_text = []
+
+    def TCanvas(self, *_args):
+        return _FakeCanvas(*_args)
+
+    def TLegend(self, *_args):
+        return _FakeLegend()
+
+    def TPaveText(self, *_args):
+        return _FakePaveText(self)
 
 
 class _ForbiddenTree:
@@ -360,6 +479,138 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         payload["per_t"][0]["delta_projection"]["exclusions"]["changed"] = True
         self.assertNotIn("changed", prepared["prepared_sources"]["prompt"]["entries"][0])
+
+    def test_signed_display_y_range_covers_every_histogram_and_zero(self):
+        raw = _BinnedHistogram("raw", (1.0, 2.0))
+        proton = _BinnedHistogram("proton", (-8.0, -6.0))
+        cleaned = _BinnedHistogram("cleaned", (10.0, 12.0))
+
+        display_range = plots._combined_histogram_y_range((raw, proton, cleaned))
+        self.assertLessEqual(display_range[0], -8.0)
+        self.assertGreaterEqual(display_range[1], 12.0)
+        self.assertLessEqual(display_range[0], 0.0)
+        self.assertGreaterEqual(display_range[1], 0.0)
+        self.assertEqual(
+            display_range,
+            plots._combined_histogram_y_range((raw, proton, cleaned)),
+        )
+        self.assertEqual(plots._combined_histogram_y_range(()), (-0.05, 0.05))
+        self.assertEqual(
+            plots._combined_histogram_y_range((_BinnedHistogram("zero", (0.0, 0.0)),)),
+            (-0.05, 0.05),
+        )
+
+    def test_d7_overlays_apply_shared_signed_range_to_the_axis_clone(self):
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "raw_mm": {"histogram": _BinnedHistogram("raw", (1.0, 2.0))},
+            "proton_mm": {"histogram": _BinnedHistogram("proton", (-8.0, -6.0))},
+            "cleaned_mm": {"histogram": _BinnedHistogram("cleaned", (10.0, 12.0))},
+        }
+        root = _FakeROOT()
+        for other_key, other_label, color, page_id, minimum, maximum in (
+            ("proton_mm", "Proton contamination", "kRed", "full_background.d7.proton_mm", -8.0, 2.0),
+            ("cleaned_mm", "Proton-cleaned kaon data", "kBlue", "full_background.d7.proton_cleaned_mm", 1.0, 12.0),
+        ):
+            _BinnedHistogram.created = []
+            self.assertTrue(
+                plots._render_d7_mm_overlay_page(
+                    root,
+                    "unused.pdf",
+                    group,
+                    other_key,
+                    "overlay",
+                    other_label,
+                    color,
+                    page_id,
+                )
+            )
+            raw_display = next(
+                histogram
+                for histogram in _BinnedHistogram.created
+                if "_raw_" in histogram.label
+            )
+            self.assertLessEqual(raw_display.display_minimum, minimum)
+            self.assertGreaterEqual(raw_display.display_maximum, maximum)
+            self.assertLessEqual(raw_display.display_minimum, 0.0)
+            self.assertGreaterEqual(raw_display.display_maximum, 0.0)
+
+    def test_d7_delta_page_uses_one_common_signed_range_and_visible_t_header(self):
+        _BinnedHistogram.created = []
+        root = _FakeROOT()
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "raw_mm": {"histogram": _BinnedHistogram("template", (0.0, 0.0))},
+            "delta_projection": {
+                "rows_by_delta": (
+                    (
+                        {
+                            "missing_mass": 0.2,
+                            "raw_weight": 1.0,
+                            "proton_contribution": -7.0,
+                            "cleaned_contribution": 5.0,
+                        },
+                    ),
+                    (
+                        {
+                            "missing_mass": 1.2,
+                            "raw_weight": 2.0,
+                            "proton_contribution": -3.0,
+                            "cleaned_contribution": 11.0,
+                        },
+                    ),
+                )
+            },
+        }
+
+        self.assertTrue(
+            plots._render_d7_delta_page(root, "unused.pdf", group, (-10.0, 0.0, 10.0))
+        )
+        raw_displays = [
+            histogram
+            for histogram in _BinnedHistogram.created
+            if "_delta_raw_" in histogram.label
+        ]
+        self.assertEqual(len(raw_displays), 2)
+        self.assertEqual(
+            {(histogram.display_minimum, histogram.display_maximum) for histogram in raw_displays},
+            {(-7.9, 11.9)},
+        )
+        self.assertTrue(
+            any(
+                text == ("Proton subtraction across delta", "|t| = [0.0000, 1.0000] GeV^2")
+                for text in root.drawn_text
+            )
+        )
+
+    def test_d6_timing_page_draws_visible_t_header(self):
+        root = _FakeROOT()
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "pid": {
+                "timing_axis_label": "RF timing [ns]",
+                "cell_histograms": (
+                    _BinnedHistogram("timing-d0", (1.0, 2.0)),
+                    _BinnedHistogram("timing-d1", (2.0, 3.0)),
+                ),
+            },
+        }
+
+        self.assertTrue(
+            plots._render_timing_t_pid_page(root, "unused.pdf", group, (-10.0, 0.0, 10.0))
+        )
+        self.assertTrue(
+            any(
+                text == ("Proton-identification timing", "|t| = [0.0000, 1.0000] GeV^2")
+                for text in root.drawn_text
+            )
+        )
 
     def test_clone_is_detached_without_source_mutation(self):
         source = _Histogram("source")
