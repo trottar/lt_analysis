@@ -1,4 +1,4 @@
-"""Focused D.6/D.7 procedure-PDF contract tests."""
+"""Focused D.6/D.7/D.8 procedure-PDF contract tests."""
 
 from __future__ import annotations
 
@@ -77,6 +77,81 @@ class _BinnedHistogram(_Histogram):
 
     def Draw(self, _option):
         return None
+
+
+class _ProjectionAxis:
+    def __init__(self, bin_count):
+        self._bin_count = int(bin_count)
+
+    def FindBin(self, value):
+        value = float(value)
+        if value < 0.0:
+            return 0
+        if value >= self._bin_count:
+            return self._bin_count + 1
+        return int(value) + 1
+
+
+class _ProjectionHistogram(_BinnedHistogram):
+    def __init__(self, label, contents=(), errors=None):
+        super().__init__(label, contents)
+        self._underflow = 0.0
+        self._overflow = 0.0
+        self._variances = [float(value) ** 2 for value in (errors or [0.0] * len(self.contents))]
+        self._underflow_variance = 0.0
+        self._overflow_variance = 0.0
+        self._axis = _ProjectionAxis(len(self.contents))
+
+    def Clone(self, name):
+        clone = type(self)(
+            "{}:{}".format(self.label, name),
+            self.contents,
+            [variance ** 0.5 for variance in self._variances],
+        )
+        clone._underflow = self._underflow
+        clone._overflow = self._overflow
+        clone._underflow_variance = self._underflow_variance
+        clone._overflow_variance = self._overflow_variance
+        type(self).created.append(clone)
+        return clone
+
+    def GetXaxis(self):
+        return self._axis
+
+    def GetBinContent(self, bin_index):
+        bin_index = int(bin_index)
+        if bin_index == 0:
+            return self._underflow
+        if bin_index == len(self.contents) + 1:
+            return self._overflow
+        return super().GetBinContent(bin_index)
+
+    def GetBinError(self, bin_index):
+        bin_index = int(bin_index)
+        if bin_index == 0:
+            return self._underflow_variance ** 0.5
+        if bin_index == len(self.contents) + 1:
+            return self._overflow_variance ** 0.5
+        return self._variances[bin_index - 1] ** 0.5
+
+    def Reset(self, _option):
+        super().Reset(_option)
+        self._underflow = self._overflow = 0.0
+        self._variances = [0.0] * len(self.contents)
+        self._underflow_variance = self._overflow_variance = 0.0
+
+    def Fill(self, value, weight):
+        bin_index = self._axis.FindBin(value)
+        weight = float(weight)
+        if bin_index == 0:
+            self._underflow += weight
+            self._underflow_variance += weight * weight
+        elif bin_index == len(self.contents) + 1:
+            self._overflow += weight
+            self._overflow_variance += weight * weight
+        else:
+            self.contents[bin_index - 1] += weight
+            self._variances[bin_index - 1] += weight * weight
 
 
 class _FakeCanvas:
@@ -265,6 +340,71 @@ def _d7_timing_result():
         },
     }
     return result
+
+
+def _d8_final_application(label, *, weights=(0.0, 2.0, 3.0, 0.0), zero=False):
+    before = _ProjectionHistogram("{}-before".format(label), (8.0, 9.0))
+    template = _ProjectionHistogram(
+        "{}-template".format(label),
+        (0.0, 3.0) if not zero else (0.0, 0.0),
+        (8.0 ** 0.5, 3.0) if not zero else (0.0, 0.0),
+    )
+    after = _ProjectionHistogram("{}-after".format(label), (8.0, 6.0) if not zero else (8.0, 9.0))
+    return {
+        "H_MM_nosub_before_pion_subtraction": before,
+        "H_pion_subtraction_template_MM_nosub": template,
+        "H_MM_nosub_after_pion_subtraction": after,
+        "H_pion_control_model": _ProjectionHistogram("{}-model".format(label), (1.0, 1.0)),
+        "weights": list(weights),
+        "H_MM_before_pion_subtraction": _ProjectionHistogram("{}-forbidden-cut-before".format(label), (99.0, 99.0)),
+        "H_pion_subtraction_template_MM": _ProjectionHistogram("{}-forbidden-cut-template".format(label), (99.0, 99.0)),
+        "H_MM_after_pion_subtraction": _ProjectionHistogram("{}-forbidden-cut-after".format(label), (99.0, 99.0)),
+    }
+
+
+def _d8_fixture():
+    final_t0 = _d8_final_application("final-t0")
+    final_t1 = _d8_final_application("final-t1", weights=(0.0, 0.0, 0.0, 0.0), zero=True)
+    proposed_t0 = _d8_final_application("proposed-t0", weights=(0.0, 9.0, 9.0, 0.0))
+    parents = (
+        {
+            "t_bin_index": 0,
+            "t_edges": [0.0, 1.0],
+            "proposed_diagnostic_application_result": proposed_t0,
+            "final_diagnostic_application_result": final_t0,
+            "final_diagnostic_application_status": {"final_status": "applied_component"},
+        },
+        {
+            "t_bin_index": 1,
+            "t_edges": [1.0, 2.0],
+            "proposed_diagnostic_application_result": _d8_final_application("proposed-t1"),
+            "final_diagnostic_application_result": final_t1,
+            "final_diagnostic_application_status": {"final_status": "zero"},
+        },
+    )
+    cache = {
+        "delta_edges": [-10.0, 0.0, 10.0],
+        "by_t": (
+            {
+                "t_index": 0,
+                "t_edges": [0.0, 1.0],
+                "records": (
+                    {"nommcuts": True, "delta_index": 0, "adj_MM": 0.2, "coefficient": 1.0, "ssdelta": 5.0},
+                    {"nommcuts": True, "delta_index": 1, "adj_MM": 0.2, "coefficient": -1.0, "ssdelta": -5.0},
+                    {"nommcuts": True, "delta_index": 0, "adj_MM": 1.2, "coefficient": 1.0, "ssdelta": -5.0},
+                    {"nommcuts": False, "delta_index": 0, "adj_MM": 0.2, "coefficient": 100.0},
+                ),
+            },
+            {
+                "t_index": 1,
+                "t_edges": [1.0, 2.0],
+                "records": (
+                    {"nommcuts": True, "delta_index": 0, "adj_MM": 0.2, "coefficient": 1.0},
+                ),
+            },
+        ),
+    }
+    return parents, cache
 
 
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
@@ -480,6 +620,125 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         payload["per_t"][0]["delta_projection"]["exclusions"]["changed"] = True
         self.assertNotIn("changed", prepared["prepared_sources"]["prompt"]["entries"][0])
 
+    def test_d8_uses_only_final_parent_application_and_preserves_zero_fallback(self):
+        parents, cache = _d8_fixture()
+        payload = plots.build_full_background_subtraction_d8_payload(parents, cache)
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["t_edges"], [0.0, 1.0, 2.0])
+        self.assertEqual(payload["delta_edges"], [-10.0, 0.0, 10.0])
+        first = payload["per_t"][0]
+        final = parents[0]["final_diagnostic_application_result"]
+        proposed = parents[0]["proposed_diagnostic_application_result"]
+        self.assertIs(first["before_pion_mm"]["histogram"], final["H_MM_nosub_before_pion_subtraction"])
+        self.assertIs(first["baseline_pion_mm"]["histogram"], final["H_pion_subtraction_template_MM_nosub"])
+        self.assertIs(first["after_pion_mm"]["histogram"], final["H_MM_nosub_after_pion_subtraction"])
+        self.assertIsNot(first["baseline_pion_mm"]["histogram"], proposed["H_pion_subtraction_template_MM_nosub"])
+        self.assertEqual(first["delta_projection"]["closure"]["status"], "closed")
+        self.assertTrue(payload["per_t"][1]["delta_projection"]["available"])
+        self.assertEqual(payload["per_t"][1]["delta_projection"]["closure"]["status"], "closed")
+        payload["t_edges"][0] = -99.0
+        first["delta_projection"]["rows_by_delta"][0][0]["baseline_contribution"] = 99.0
+        self.assertEqual(parents[0]["t_edges"][0], 0.0)
+        self.assertEqual(cache["by_t"][0]["records"][0]["coefficient"], 1.0)
+        self.assertEqual(final["H_pion_subtraction_template_MM_nosub"].contents, [0.0, 3.0])
+
+    def test_d8_uses_frozen_delta_index_and_signed_final_weights(self):
+        parents, cache = _d8_fixture()
+        payload = plots.build_full_background_subtraction_d8_payload(parents, cache)
+        rows = payload["per_t"][0]["delta_projection"]["rows_by_delta"]
+
+        self.assertEqual(len(rows[0]), 2)
+        self.assertEqual(len(rows[1]), 1)
+        self.assertEqual(rows[0][0]["baseline_contribution"], 2.0)
+        self.assertEqual(rows[1][0]["baseline_contribution"], -2.0)
+        self.assertEqual(rows[0][1]["baseline_contribution"], 3.0)
+        self.assertEqual(payload["per_t"][0]["delta_projection"]["exclusions"]["non_nommcuts_records"], 1)
+
+    def test_d8_unavailable_final_never_substitutes_the_proposal(self):
+        parents, cache = _d8_fixture()
+        parents = list(parents)
+        parents[0] = dict(
+            parents[0],
+            final_diagnostic_application_result=None,
+            final_diagnostic_application_status={"final_reason": "skip_bin"},
+        )
+        payload = plots.build_full_background_subtraction_d8_payload(tuple(parents), cache)
+
+        self.assertTrue(payload["available"])
+        first = payload["per_t"][0]
+        self.assertFalse(first["before_pion_mm"]["available"])
+        self.assertEqual(first["before_pion_mm"]["reason"], "skip_bin")
+        self.assertFalse(first["delta_projection"]["available"])
+        self.assertEqual(first["delta_projection"]["reason"], "skip_bin")
+
+    def test_d8_invalid_delta_coverage_and_numerical_mismatch_are_local(self):
+        parents, cache = _d8_fixture()
+        by_t = list(cache["by_t"])
+        records = list(by_t[0]["records"])
+        records[1] = dict(records[1], delta_index=9)
+        by_t[0] = dict(by_t[0], records=tuple(records))
+        incomplete = plots.build_full_background_subtraction_d8_payload(
+            parents, dict(cache, by_t=tuple(by_t))
+        )
+        first = incomplete["per_t"][0]["delta_projection"]
+        self.assertTrue(first["available"])
+        self.assertEqual(first["closure"]["status"], "incomplete_frozen_delta_coverage")
+        self.assertEqual(first["exclusions"]["invalid_frozen_delta_index"], 1)
+
+        parents, cache = _d8_fixture()
+        parents[0]["final_diagnostic_application_result"]["H_pion_subtraction_template_MM_nosub"].contents[1] = 99.0
+        mismatch = plots.build_full_background_subtraction_d8_payload(parents, cache)
+        first = mismatch["per_t"][0]
+        self.assertTrue(first["before_pion_mm"]["available"])
+        self.assertTrue(first["baseline_pion_mm"]["available"])
+        self.assertFalse(first["delta_projection"]["available"])
+        self.assertEqual(first["delta_projection"]["reason"], "baseline_template_closure_mismatch")
+
+    def test_d8_parent_cache_geometry_mismatch_is_unavailable(self):
+        parents, cache = _d8_fixture()
+        bad_cache = dict(cache, by_t=(dict(cache["by_t"][0], t_edges=[0.0, 1.1]), cache["by_t"][1]))
+        payload = plots.build_full_background_subtraction_d8_payload(parents, bad_cache)
+
+        self.assertFalse(payload["available"])
+        self.assertEqual(payload["reason"], "pion_parent_cache_t_geometry_mismatch")
+
+    def test_d8_delta_renderer_uses_common_range_and_visible_t_header(self):
+        _ProjectionHistogram.created = []
+        root = _FakeROOT()
+        group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "baseline_pion_mm": {"histogram": _ProjectionHistogram("template", (0.0, 0.0))},
+            "delta_projection": {
+                "rows_by_delta": (
+                    ({"missing_mass": 0.2, "baseline_contribution": -5.0},),
+                    ({"missing_mass": 1.2, "baseline_contribution": 9.0},),
+                )
+            },
+        }
+
+        self.assertTrue(
+            plots._render_d8_delta_page(root, "unused.pdf", group, (-10.0, 0.0, 10.0))
+        )
+        displays = [
+            histogram
+            for histogram in _ProjectionHistogram.created
+            if "_d8_delta_baseline_" in histogram.label
+        ]
+        self.assertEqual(len(displays), 2)
+        self.assertEqual(
+            {(histogram.display_minimum, histogram.display_maximum) for histogram in displays},
+            {(-5.7, 9.7)},
+        )
+        self.assertTrue(
+            any(
+                text == ("Baseline pion background across delta", "|t| = [0.0000, 1.0000] GeV^2")
+                for text in root.drawn_text
+            )
+        )
+
     def test_signed_display_y_range_covers_every_histogram_and_zero(self):
         raw = _BinnedHistogram("raw", (1.0, 2.0))
         proton = _BinnedHistogram("proton", (-8.0, -6.0))
@@ -651,11 +910,17 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "SetBinError(",
             "final_cleaned_factor",
             'get("sources")',
-            "Baseline pion background",
             "HGCer response",
             "Method A",
             "Method B",
             "ln(B/A)",
+            "build_setting_t_bin_pion_parents",
+            "build_particle_subtraction_component_result",
+            "resolve_frozen_parent_application_policy",
+            "evaluate_particle_subtraction_component_fit_result",
+            "resolve_pion_hgcer_delta_edges",
+            "build_pion_hgcer_method_a",
+            "build_pion_hgcer_method_b",
         ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)
@@ -672,14 +937,24 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             source.index("def _build_d7_delta_projection")
         ]
         self.assertIn("find_canonical_bin", legacy_membership)
+        d8_builder = source[
+            source.index("def _build_d8_delta_projection"):
+            source.index("def full_background_subtraction_pdf_path")
+        ]
+        self.assertIn("final_diagnostic_application_result", d8_builder)
+        self.assertNotIn("proposed_diagnostic_application_result", d8_builder)
+        self.assertIn("simc_shape_pion_weight_from_value", d8_builder)
+        self.assertIn("invalid_frozen_delta_index", d8_builder)
+        self.assertIn("H_pion_subtraction_template_MM_nosub", d8_builder)
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6/D.7 are terminal presentation only.")
+        start = runtime.index("# Phases D.6/D.7/D.8 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
             "build_full_background_subtraction_d6_payload",
             "build_full_background_subtraction_d7_payload",
+            "build_full_background_subtraction_d8_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -695,6 +970,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_d7_payload(", start),
+            runtime.index("build_full_background_subtraction_d8_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_d8_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
@@ -707,6 +986,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertNotIn("full_background_subtraction_d6_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d7_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_d8_payload\"]", block)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_root_rendering_preserves_source_and_page_order(self):
@@ -749,12 +1029,70 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         d7_payload = plots.build_full_background_subtraction_d7_payload(
             result, application, _d7_prepared_bundle()
         )
+        def d8_histogram(name, contents, errors=()):
+            histogram = ROOT.TH1D(name, "source", 3, 0.0, 3.0)
+            histogram.SetDirectory(0)
+            histogram.Sumw2()
+            for bin_index, content in enumerate(contents, start=1):
+                histogram.SetBinContent(bin_index, float(content))
+                if errors:
+                    histogram.SetBinError(bin_index, float(errors[bin_index - 1]))
+            return histogram
+
+        d8_parents = []
+        d8_cache_rows = []
+        for t_index in range(2):
+            template = d8_histogram(
+                "H_d8_template_t{}".format(t_index),
+                (2.0, 3.0, 0.0) if t_index == 0 else (0.0, 0.0, 0.0),
+                (2.0, 3.0, 0.0) if t_index == 0 else (0.0, 0.0, 0.0),
+            )
+            before = d8_histogram("H_d8_before_t{}".format(t_index), (4.0, 5.0, 1.0))
+            after = d8_histogram("H_d8_after_t{}".format(t_index), (4.0, 2.0, 1.0))
+            model = d8_histogram("H_d8_model_t{}".format(t_index), (0.0, 0.0, 0.0))
+            d8_parents.append({
+                "t_bin_index": t_index,
+                "t_edges": [float(t_index), float(t_index + 1)],
+                "final_diagnostic_application_result": {
+                    "H_MM_nosub_before_pion_subtraction": before,
+                    "H_pion_subtraction_template_MM_nosub": template,
+                    "H_MM_nosub_after_pion_subtraction": after,
+                    "H_pion_control_model": model,
+                    "weights": [0.0, 2.0, 3.0, 0.0],
+                },
+            })
+            d8_cache_rows.append({
+                "t_index": t_index,
+                "t_edges": [float(t_index), float(t_index + 1)],
+                "records": [
+                    {
+                        "nommcuts": True,
+                        "delta_index": 0,
+                        "adj_MM": 0.2,
+                        "coefficient": 1.0 if t_index == 0 else 0.0,
+                    },
+                    {
+                        "nommcuts": True,
+                        "delta_index": 1,
+                        "adj_MM": 1.2,
+                        "coefficient": 1.0 if t_index == 0 else 0.0,
+                    },
+                ],
+            })
+        d8_payload = plots.build_full_background_subtraction_d8_payload(
+            tuple(d8_parents), {"delta_edges": [-10.0, 0.0, 10.0], "by_t": tuple(d8_cache_rows)}
+        )
+        self.assertTrue(d8_payload["available"])
+        self.assertEqual(
+            [group["delta_projection"]["closure"]["status"] for group in d8_payload["per_t"]],
+            ["closed", "closed"],
+        )
         with tempfile.TemporaryDirectory() as temporary:
             pdf = str(Path(temporary) / "procedure.pdf")
             self.assertTrue(plots.open_full_background_subtraction_pdf(pdf))
             try:
                 rendered = plots.render_full_background_subtraction_procedure_pages(
-                    pdf, d6_payload, d7_payload
+                    pdf, d6_payload, d7_payload, d8_payload
                 )
             finally:
                 plots.close_full_background_subtraction_pdf(pdf)
@@ -767,17 +1105,23 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d7.proton_mm",
                     "full_background.d7.proton_cleaned_mm",
                     "full_background.d7.proton_delta_mm",
+                    "full_background.d8.pion_background_mm",
+                    "full_background.d8.pion_subtracted_mm",
+                    "full_background.d8.pion_delta_mm",
                     "full_background.d6.raw_mm",
                     "full_background.d6.proton_pid",
                     "full_background.d6.proton_weight",
                     "full_background.d7.proton_mm",
                     "full_background.d7.proton_cleaned_mm",
                     "full_background.d7.proton_delta_mm",
+                    "full_background.d8.pion_background_mm",
+                    "full_background.d8.pion_subtracted_mm",
+                    "full_background.d8.pion_delta_mm",
                 ],
             )
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
-                ["t1"] * 6 + ["t2"] * 6,
+                ["t1"] * 9 + ["t2"] * 9,
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
             self.assertTrue(Path(pdf).exists())
@@ -788,6 +1132,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(timing_cells[0][0].GetNbinsX(), 4)
         self.assertEqual(weight.GetNbinsX(), 2)
         self.assertEqual(weight.GetNbinsY(), 2)
+        d8_template = d8_parents[0]["final_diagnostic_application_result"]["H_pion_subtraction_template_MM_nosub"]
+        self.assertEqual(d8_template.GetNbinsX(), 3)
+        self.assertEqual(d8_template.GetBinContent(2), 3.0)
 
 
 if __name__ == "__main__":

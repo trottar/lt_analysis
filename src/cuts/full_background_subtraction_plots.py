@@ -1,4 +1,4 @@
-"""Detached D.6/D.7 procedure pages for the full background-subtraction PDF.
+"""Detached D.6/D.7/D.8 procedure pages for the full background-subtraction PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -13,10 +13,12 @@ import os
 from collections.abc import Mapping, Sequence
 
 from canonical_binning import find_canonical_bin
+from pion_component_subtraction import simc_shape_pion_weight_from_value
 
 
 D6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d6/v1"
 D7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d7/v1"
+D8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d8/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -68,6 +70,17 @@ def _d7_unavailable(reason):
         "available": False,
         "reason": str(reason),
         "method": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "per_t": [],
+    }
+
+
+def _d8_unavailable(reason):
+    return {
+        "schema_version": D8_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
         "t_edges": [],
         "delta_edges": [],
         "per_t": [],
@@ -440,6 +453,331 @@ def build_full_background_subtraction_d7_payload(
         "t_edges": list(t_edges),
         "delta_edges": list(delta_edges),
         "projection_exclusions": dict(projection.get("exclusions") or {}),
+        "per_t": per_t,
+    }
+
+
+def _d8_histogram_source(application, key, reason):
+    histogram = _mapping(application).get(key)
+    return {
+        "available": histogram is not None,
+        "reason": None if histogram is not None else str(reason),
+        "histogram": histogram,
+    }
+
+
+def _d8_final_application_reason(parent):
+    status = _mapping(_mapping(parent).get("final_diagnostic_application_status"))
+    return str(
+        status.get("final_reason")
+        or status.get("reason")
+        or status.get("detail")
+        or "final_parent_application_unavailable"
+    )
+
+
+def _d8_parent_cache_geometry(pion_parents, pion_control_cache):
+    if not isinstance(pion_parents, Sequence) or isinstance(pion_parents, (str, bytes)):
+        return None, None, "pion_parent_collection_missing"
+    cache = _mapping(pion_control_cache)
+    by_t = cache.get("by_t")
+    if not isinstance(by_t, Sequence) or isinstance(by_t, (str, bytes)):
+        return None, None, "pion_control_cache_missing"
+    if not pion_parents or len(pion_parents) != len(by_t):
+        return None, None, "pion_parent_cache_count_mismatch"
+
+    normalized = []
+    t_edges = []
+    for expected_index, (parent, cache_entry) in enumerate(zip(pion_parents, by_t)):
+        parent = _mapping(parent)
+        cache_entry = _mapping(cache_entry)
+        parent_index = parent.get("t_bin_index")
+        cache_index = cache_entry.get("t_index")
+        if (
+            isinstance(parent_index, bool)
+            or isinstance(cache_index, bool)
+            or not isinstance(parent_index, int)
+            or not isinstance(cache_index, int)
+            or parent_index != expected_index
+            or cache_index != expected_index
+        ):
+            return None, None, "pion_parent_cache_t_index_mismatch"
+        parent_edges = _strict_edges(parent.get("t_edges"))
+        cache_edges = _strict_edges(cache_entry.get("t_edges"))
+        if (
+            parent_edges is None
+            or cache_edges is None
+            or len(parent_edges) != 2
+            or len(cache_edges) != 2
+            or parent_edges != cache_edges
+        ):
+            return None, None, "pion_parent_cache_t_geometry_mismatch"
+        if t_edges and parent_edges[0] != t_edges[-1]:
+            return None, None, "pion_parent_cache_t_geometry_mismatch"
+        if not t_edges:
+            t_edges.append(parent_edges[0])
+        t_edges.append(parent_edges[1])
+        normalized.append((expected_index, parent_edges, parent, cache_entry))
+    return t_edges, normalized, None
+
+
+def _d8_empty_delta_projection(reason, delta_count=0):
+    return {
+        "available": False,
+        "reason": str(reason),
+        "rows_by_delta": tuple(tuple() for _ in range(max(0, int(delta_count)))),
+        "exclusions": {},
+        "closure": {
+            "status": "unavailable",
+            "content_passed": False,
+            "error_passed": None,
+            "coverage_complete": False,
+        },
+    }
+
+
+def _d8_histogram_bin_count(histogram):
+    try:
+        count = int(histogram.GetNbinsX())
+    except Exception:
+        return None
+    return count if count >= 1 else None
+
+
+def _d8_compare_projection_bins(template, contents, variances):
+    bin_count = _d8_histogram_bin_count(template)
+    if bin_count is None or len(contents) != bin_count + 2:
+        return {
+            "available": False,
+            "content_passed": False,
+            "error_passed": None,
+            "content_max_abs_difference": None,
+            "error_max_abs_difference": None,
+        }
+    content_max_abs_difference = 0.0
+    content_passed = True
+    error_available = hasattr(template, "GetBinError")
+    error_max_abs_difference = 0.0 if error_available else None
+    error_passed = True if error_available else None
+    for bin_index in range(bin_count + 2):
+        try:
+            reference = float(template.GetBinContent(bin_index))
+        except Exception:
+            return {
+                "available": False,
+                "content_passed": False,
+                "error_passed": None,
+                "content_max_abs_difference": None,
+                "error_max_abs_difference": None,
+            }
+        comparison = float(contents[bin_index])
+        difference = abs(reference - comparison)
+        content_max_abs_difference = max(content_max_abs_difference, difference)
+        if difference > 1.0e-12 * max(1.0, abs(reference), abs(comparison)):
+            content_passed = False
+        if error_available:
+            try:
+                reference_variance = float(template.GetBinError(bin_index)) ** 2
+            except Exception:
+                error_available = False
+                error_max_abs_difference = None
+                error_passed = None
+                continue
+            comparison_variance = float(variances[bin_index])
+            variance_difference = abs(reference_variance - comparison_variance)
+            error_max_abs_difference = max(error_max_abs_difference, variance_difference)
+            if variance_difference > 1.0e-12 * max(
+                1.0, abs(reference_variance), abs(comparison_variance)
+            ):
+                error_passed = False
+    return {
+        "available": True,
+        "content_passed": bool(content_passed),
+        "error_passed": error_passed,
+        "content_max_abs_difference": float(content_max_abs_difference),
+        "error_max_abs_difference": error_max_abs_difference,
+    }
+
+
+def _build_d8_delta_projection(final_application, cache_entry, delta_edges):
+    application = _mapping(final_application)
+    cache_t = _mapping(cache_entry)
+    template = application.get("H_pion_subtraction_template_MM_nosub")
+    reference = application.get("H_pion_control_model")
+    weights = application.get("weights")
+    records = cache_t.get("records")
+    if template is None or reference is None or weights is None:
+        return _d8_empty_delta_projection(
+            "final_pion_template_or_weight_reference_missing", len(delta_edges) - 1
+        )
+    if not isinstance(records, Sequence) or isinstance(records, (str, bytes)):
+        return _d8_empty_delta_projection("pion_control_records_missing", len(delta_edges) - 1)
+    bin_count = _d8_histogram_bin_count(template)
+    if bin_count is None or not hasattr(template, "GetXaxis"):
+        return _d8_empty_delta_projection("baseline_template_geometry_invalid", len(delta_edges) - 1)
+    try:
+        template_axis = template.GetXaxis()
+    except Exception:
+        return _d8_empty_delta_projection("baseline_template_geometry_invalid", len(delta_edges) - 1)
+
+    rows_by_delta = [list() for _ in range(len(delta_edges) - 1)]
+    contents = [0.0] * (bin_count + 2)
+    variances = [0.0] * (bin_count + 2)
+    exclusions = {
+        "records_seen": 0,
+        "non_nommcuts_records": 0,
+        "invalid_frozen_delta_index": 0,
+        "missing_record_fields": 0,
+        "invalid_template_bin": 0,
+        "assigned_records": 0,
+        "nonzero_contributions": 0,
+    }
+    for record in records:
+        exclusions["records_seen"] += 1
+        record = _mapping(record)
+        if not bool(record.get("nommcuts")):
+            exclusions["non_nommcuts_records"] += 1
+            continue
+        delta_index = record.get("delta_index")
+        if isinstance(delta_index, bool) or not isinstance(delta_index, int):
+            exclusions["invalid_frozen_delta_index"] += 1
+            continue
+        if not 0 <= delta_index < len(rows_by_delta):
+            exclusions["invalid_frozen_delta_index"] += 1
+            continue
+        try:
+            missing_mass = float(record.get("adj_MM"))
+            coefficient = float(record.get("coefficient"))
+        except (TypeError, ValueError):
+            missing_mass = coefficient = float("nan")
+        if not (math.isfinite(missing_mass) and math.isfinite(coefficient)):
+            exclusions["missing_record_fields"] += 1
+            continue
+        contribution = coefficient * simc_shape_pion_weight_from_value(
+            missing_mass, reference, weights
+        )
+        if not math.isfinite(contribution):
+            exclusions["missing_record_fields"] += 1
+            continue
+        try:
+            template_bin = int(template_axis.FindBin(missing_mass))
+        except Exception:
+            template_bin = -1
+        if not 0 <= template_bin <= bin_count + 1:
+            exclusions["invalid_template_bin"] += 1
+            continue
+        rows_by_delta[delta_index].append({
+            "missing_mass": float(missing_mass),
+            "baseline_contribution": float(contribution),
+        })
+        contents[template_bin] += contribution
+        variances[template_bin] += contribution * contribution
+        exclusions["assigned_records"] += 1
+        exclusions["nonzero_contributions"] += int(contribution != 0.0)
+
+    comparison = _d8_compare_projection_bins(template, contents, variances)
+    coverage_complete = exclusions["invalid_frozen_delta_index"] == 0
+    numerical_match = bool(
+        comparison.get("available")
+        and comparison.get("content_passed")
+        and comparison.get("error_passed") is not False
+    )
+    if not comparison.get("available"):
+        available = False
+        reason = "baseline_template_closure_unavailable"
+        status = "unavailable"
+    elif not coverage_complete:
+        available = True
+        reason = None
+        status = "incomplete_frozen_delta_coverage"
+    elif numerical_match:
+        available = True
+        reason = None
+        status = "closed"
+    else:
+        available = False
+        reason = "baseline_template_closure_mismatch"
+        status = "mismatch"
+    return {
+        "available": available,
+        "reason": reason,
+        "rows_by_delta": tuple(tuple(rows) for rows in rows_by_delta),
+        "exclusions": exclusions,
+        "closure": {
+            "status": status,
+            "coverage_complete": coverage_complete,
+            **comparison,
+        },
+    }
+
+
+def build_full_background_subtraction_d8_payload(pion_parents, pion_control_cache):
+    """Select final authoritative-pion display products without changing them."""
+    t_edges, normalized, reason = _d8_parent_cache_geometry(
+        pion_parents, pion_control_cache
+    )
+    if reason is not None:
+        return _d8_unavailable(reason)
+    cache = _mapping(pion_control_cache)
+    delta_edges = _strict_edges(cache.get("delta_edges"))
+    delta_geometry_available = delta_edges is not None
+    if not delta_geometry_available:
+        delta_edges = []
+
+    per_t = []
+    for t_index, parent_edges, parent, cache_entry in normalized:
+        final_application = parent.get("final_diagnostic_application_result")
+        final_reason = _d8_final_application_reason(parent)
+        application_available = isinstance(final_application, Mapping)
+        before = _d8_histogram_source(
+            final_application,
+            "H_MM_nosub_before_pion_subtraction",
+            final_reason if not application_available else "before_pion_mm_source_missing",
+        )
+        baseline = _d8_histogram_source(
+            final_application,
+            "H_pion_subtraction_template_MM_nosub",
+            final_reason if not application_available else "baseline_pion_mm_source_missing",
+        )
+        after = _d8_histogram_source(
+            final_application,
+            "H_MM_nosub_after_pion_subtraction",
+            final_reason if not application_available else "after_pion_mm_source_missing",
+        )
+        if not application_available:
+            projection = _d8_empty_delta_projection(final_reason)
+        elif not delta_geometry_available:
+            projection = _d8_empty_delta_projection("pion_control_delta_edges_invalid")
+        else:
+            projection = _build_d8_delta_projection(
+                final_application, cache_entry, delta_edges
+            )
+        per_t.append({
+            "t_index": int(t_index),
+            "t_low": float(parent_edges[0]),
+            "t_high": float(parent_edges[1]),
+            "before_pion_mm": before,
+            "baseline_pion_mm": baseline,
+            "after_pion_mm": after,
+            "delta_projection": {
+                "available": bool(projection.get("available") and baseline.get("available")),
+                "reason": (
+                    projection.get("reason")
+                    if not projection.get("available")
+                    else baseline.get("reason")
+                ),
+                "rows_by_delta": tuple(projection.get("rows_by_delta") or ()),
+                "exclusions": dict(projection.get("exclusions") or {}),
+                "closure": dict(projection.get("closure") or {}),
+            },
+        })
+    return {
+        "schema_version": D8_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "delta_geometry_available": bool(delta_geometry_available),
         "per_t": per_t,
     }
 
@@ -993,6 +1331,191 @@ def _render_d7_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
         failures.append("D.7 proton-subtraction delta input unavailable for t{}".format(t_number))
 
 
+def _render_d8_mm_overlay_page(
+    ROOT, pdf_name, group, other_key, page_title, other_label, other_color, page_id
+):
+    before = _mapping(group.get("before_pion_mm"))
+    other = _mapping(group.get(other_key))
+    before_histogram = _clone_display_histogram(
+        before.get("histogram"),
+        "H_full_background_d8_before_{}_t{}".format(
+            page_id.rsplit(".", 1)[-1], group["t_index"] + 1
+        ),
+    )
+    other_histogram = _clone_display_histogram(
+        other.get("histogram"),
+        "H_full_background_d8_other_{}_t{}".format(
+            page_id.rsplit(".", 1)[-1], group["t_index"] + 1
+        ),
+    )
+    if before_histogram is None or other_histogram is None:
+        return False
+    title = "{} - {}".format(page_title, _t_context(group))
+    _set_histogram_title(
+        before_histogram, "{};Missing mass [GeV];Signed normalized yield".format(title)
+    )
+    _apply_display_y_range(
+        before_histogram,
+        _combined_histogram_y_range((before_histogram, other_histogram)),
+    )
+    _style_histogram(before_histogram, getattr(ROOT, "kBlack", 1))
+    _style_histogram(other_histogram, getattr(ROOT, other_color, 2))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d8_{}_t{}".format(
+            page_id.rsplit(".", 1)[-1], group["t_index"] + 1
+        ),
+        title,
+        1200,
+        800,
+    )
+    try:
+        before_histogram.Draw("hist e")
+        other_histogram.Draw("hist e same")
+        legend = ROOT.TLegend(0.60, 0.72, 0.89, 0.87)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        legend.AddEntry(before_histogram, "Proton-cleaned kaon data", "l")
+        legend.AddEntry(other_histogram, other_label, "l")
+        legend.Draw()
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d8_delta_page(ROOT, pdf_name, group, delta_edges):
+    projection = _mapping(group.get("delta_projection"))
+    rows_by_delta = tuple(projection.get("rows_by_delta") or ())
+    if len(rows_by_delta) != len(delta_edges) - 1:
+        return False
+    panel_count = len(rows_by_delta)
+    columns = min(3, max(1, panel_count))
+    rows = int(math.ceil(float(panel_count) / float(columns)))
+    title = "Baseline pion background across delta - {}".format(_t_context(group))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d8_delta_t{}".format(group["t_index"] + 1),
+        title,
+        1300,
+        850,
+    )
+    canvas.Divide(columns, rows)
+    draw_objects = []
+    source = _mapping(group.get("baseline_pion_mm")).get("histogram")
+    try:
+        panel_histograms = []
+        for delta_index, display_rows in enumerate(rows_by_delta):
+            histogram = _new_d7_delta_histogram(
+                source,
+                "H_full_background_d8_delta_baseline_t{}_d{}".format(
+                    group["t_index"] + 1, delta_index + 1
+                ),
+            )
+            if histogram is None:
+                return False
+            for row in display_rows:
+                row = _mapping(row)
+                histogram.Fill(row["missing_mass"], row["baseline_contribution"])
+            panel_histograms.append(histogram)
+
+        common_y_range = _combined_histogram_y_range(panel_histograms)
+        for delta_index, histogram in enumerate(panel_histograms):
+            canvas.cd(delta_index + 1)
+            panel_title = "delta = [{:.3f}, {:.3f}] %".format(
+                delta_edges[delta_index], delta_edges[delta_index + 1]
+            )
+            _set_histogram_title(
+                histogram,
+                "{};Missing mass [GeV];Signed normalized yield".format(panel_title),
+            )
+            _apply_display_y_range(histogram, common_y_range)
+            _style_histogram(histogram, getattr(ROOT, "kOrange", 800) + 7)
+            histogram.Draw("hist e")
+            if delta_index == 0:
+                legend = ROOT.TLegend(0.57, 0.76, 0.89, 0.87)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                legend.AddEntry(histogram, "Baseline pion background", "l")
+                legend.Draw()
+                draw_objects.append(legend)
+            draw_objects.append(histogram)
+        draw_objects.append(
+            _draw_page_header(ROOT, canvas, "Baseline pion background across delta", group)
+        )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _append_d8_projection_failure(group, failures):
+    projection = _mapping(group.get("delta_projection"))
+    exclusions = _mapping(projection.get("exclusions"))
+    t_number = int(group.get("t_index", -1)) + 1
+    invalid_delta = int(exclusions.get("invalid_frozen_delta_index", 0) or 0)
+    if invalid_delta:
+        failures.append(
+            "D.8 frozen delta rows excluded for t{}: invalid_frozen_delta_index={}".format(
+                t_number, invalid_delta
+            )
+        )
+    closure = _mapping(projection.get("closure"))
+    if closure.get("status") == "incomplete_frozen_delta_coverage":
+        failures.append("D.8 delta projection has incomplete frozen coverage for t{}".format(t_number))
+
+
+def _render_d8_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Render the D.8 baseline-pion group for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    before = _mapping(group.get("before_pion_mm"))
+    baseline = _mapping(group.get("baseline_pion_mm"))
+    after = _mapping(group.get("after_pion_mm"))
+    if before.get("available") and baseline.get("available"):
+        if _render_d8_mm_overlay_page(
+            ROOT,
+            pdf_name,
+            group,
+            "baseline_pion_mm",
+            "Baseline pion background in missing mass",
+            "Baseline pion background",
+            "kOrange",
+            "full_background.d8.pion_background_mm",
+        ):
+            manifest.append({"page_id": "full_background.d8.pion_background_mm", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.8 baseline pion-background MM page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.8 baseline pion-background MM input unavailable for t{}".format(t_number))
+    if before.get("available") and after.get("available"):
+        if _render_d8_mm_overlay_page(
+            ROOT,
+            pdf_name,
+            group,
+            "after_pion_mm",
+            "Before and after baseline pion subtraction",
+            "Baseline pion-subtracted kaon data",
+            "kGreen",
+            "full_background.d8.pion_subtracted_mm",
+        ):
+            manifest.append({"page_id": "full_background.d8.pion_subtracted_mm", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.8 pion-subtracted MM page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.8 pion-subtracted MM input unavailable for t{}".format(t_number))
+    projection = _mapping(group.get("delta_projection"))
+    _append_d8_projection_failure(group, failures)
+    if projection.get("available"):
+        if _render_d8_delta_page(ROOT, pdf_name, group, presentation.get("delta_edges") or ()):
+            manifest.append({"page_id": "full_background.d8.pion_delta_mm", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.8 baseline pion delta page unavailable for t{}".format(t_number))
+    else:
+        failures.append(
+            "D.8 baseline pion delta input unavailable for t{}: {}".format(
+                t_number, projection.get("reason")
+            )
+        )
+
+
 def _append_d7_exclusion_failure(presentation, failures):
     exclusions = _mapping(presentation.get("projection_exclusions"))
     relevant = (
@@ -1054,21 +1577,53 @@ def render_full_background_subtraction_d7_pages(pdf_name, payload, *, page_manif
     return result
 
 
+def render_full_background_subtraction_d8_pages(pdf_name, payload, *, page_manifest=None):
+    """Append D.8 baseline-pion pages for every canonical t bin."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    result = {"manifest": manifest, "failures": []}
+    presentation = _mapping(payload)
+    if not bool(presentation.get("available")):
+        result["failures"].append(
+            "D.8 procedure input unavailable: {}".format(presentation.get("reason"))
+        )
+        return result
+    ROOT = _import_root()
+    if ROOT is None:
+        result["failures"].append("D.8 procedure rendering unavailable: PyROOT not available")
+        return result
+    for group in tuple(presentation.get("per_t") or ()):
+        _render_d8_t_pages(
+            ROOT, pdf_name, presentation, _mapping(group), manifest, result["failures"]
+        )
+    return result
+
+
 def render_full_background_subtraction_procedure_pages(
-    pdf_name, d6_payload, d7_payload, *, page_manifest=None
+    pdf_name, d6_payload, d7_payload, d8_payload=None, *, page_manifest=None
 ):
-    """Append D.6 and D.7 page groups in complete canonical-t order."""
+    """Append available D.6/D.7/D.8 groups in complete canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
     d7 = _mapping(d7_payload)
+    d8 = _mapping(d8_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
-    if not d6_available and not d7_available:
-        result["failures"].extend((
-            "D.6 procedure input unavailable: {}".format(d6.get("reason")),
-            "D.7 procedure input unavailable: {}".format(d7.get("reason")),
-        ))
+    d8_requested = d8_payload is not None
+    d8_available = bool(d8.get("available"))
+    if not d6_available and not d7_available and not d8_available:
+        if d6_payload is not None:
+            result["failures"].append(
+                "D.6 procedure input unavailable: {}".format(d6.get("reason"))
+            )
+        if d7_payload is not None:
+            result["failures"].append(
+                "D.7 procedure input unavailable: {}".format(d7.get("reason"))
+            )
+        if d8_requested:
+            result["failures"].append(
+                "D.8 procedure input unavailable: {}".format(d8.get("reason"))
+            )
         return result
     if not d6_available:
         result["failures"].append(
@@ -1078,9 +1633,34 @@ def render_full_background_subtraction_procedure_pages(
         result["failures"].append(
             "D.7 procedure input unavailable: {}".format(d7.get("reason"))
         )
+    if d8_requested and not d8_available:
+        result["failures"].append(
+            "D.8 procedure input unavailable: {}".format(d8.get("reason"))
+        )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
         d7_available = False
+    geometry_owner = d6 if d6_available else d7 if d7_available else None
+    if (
+        d8_available
+        and geometry_owner is not None
+        and list(geometry_owner.get("t_edges") or ()) != list(d8.get("t_edges") or ())
+    ):
+        result["failures"].append("D.8 canonical t geometry mismatch")
+        d8_available = False
+    for comparison_name, comparison_payload, comparison_available in (
+        ("D.6", d6, d6_available),
+        ("D.7", d7, d7_available),
+    ):
+        if (
+            d8_available
+            and comparison_available
+            and list(comparison_payload.get("delta_edges") or ())
+            and list(comparison_payload.get("delta_edges") or ()) != list(d8.get("delta_edges") or ())
+        ):
+            result["failures"].append(
+                "D.8 cache delta geometry differs from {}".format(comparison_name)
+            )
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -1092,6 +1672,23 @@ def render_full_background_subtraction_procedure_pages(
         for group in tuple(d7.get("per_t") or ())
         if isinstance(group, Mapping)
     }
+    d8_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(d8.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+
+    def render_d8_group(t_index):
+        if not d8_available:
+            return
+        d8_group = d8_by_index.get(t_index)
+        if d8_group is None:
+            result["failures"].append(
+                "D.8 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_d8_t_pages(ROOT, pdf_name, d8, d8_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -1104,22 +1701,31 @@ def render_full_background_subtraction_procedure_pages(
                     )
                 else:
                     _render_d7_t_pages(ROOT, pdf_name, d7, d7_group, manifest, result["failures"])
+            render_d8_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
-            _render_d7_t_pages(ROOT, pdf_name, d7, _mapping(group), manifest, result["failures"])
+            group = _mapping(group)
+            _render_d7_t_pages(ROOT, pdf_name, d7, group, manifest, result["failures"])
+            render_d8_group(group.get("t_index"))
+    elif d8_available:
+        for group in tuple(d8.get("per_t") or ()):
+            _render_d8_t_pages(ROOT, pdf_name, d8, _mapping(group), manifest, result["failures"])
     return result
 
 
 __all__ = (
     "D6_PRESENTATION_SCHEMA_VERSION",
     "D7_PRESENTATION_SCHEMA_VERSION",
+    "D8_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
+    "build_full_background_subtraction_d8_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",
     "render_full_background_subtraction_d6_pages",
     "render_full_background_subtraction_d7_pages",
+    "render_full_background_subtraction_d8_pages",
     "render_full_background_subtraction_procedure_pages",
 )
