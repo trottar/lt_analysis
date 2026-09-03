@@ -185,6 +185,13 @@ from pion_hgcer_phase_d_checkpoint import (
     pion_hgcer_phase_d_checkpoint_filename,
     write_pion_hgcer_phase_d_checkpoint_json,
 )
+from full_background_subtraction_plots import (
+    build_full_background_subtraction_d6_payload,
+    close_full_background_subtraction_pdf,
+    full_background_subtraction_pdf_path,
+    open_full_background_subtraction_pdf,
+    render_full_background_subtraction_d6_pages,
+)
 from pion_hgcer_refinement_plots import (
     build_pdf_destinations,
     build_pdf_route_manifest,
@@ -7414,6 +7421,76 @@ def rand_sub(
                     exception_type=type(exc).__name__,
                     exception=str(exc),
                 )
+        # Phase D.6 is terminal presentation only.  It receives the already
+        # constructed proton-cleaning products and retains no ROOT-bearing
+        # object in histDict or any downstream physics input.
+        full_background_subtraction_d6_manifest = []
+        full_background_subtraction_d6_failures = []
+        full_background_subtraction_d6_pdf = full_background_subtraction_pdf_path(
+            main_pdf
+        )
+        full_background_subtraction_d6_open = False
+        try:
+            full_background_subtraction_d6_payload = (
+                build_full_background_subtraction_d6_payload(
+                    proton_cleaning_result,
+                    proton_cleaning_application,
+                )
+            )
+            if not full_background_subtraction_d6_payload.get("available"):
+                full_background_subtraction_d6_failures.append(
+                    "D.6 procedure input unavailable: {}".format(
+                        full_background_subtraction_d6_payload.get("reason")
+                    )
+                )
+            else:
+                full_background_subtraction_d6_open = (
+                    open_full_background_subtraction_pdf(
+                        full_background_subtraction_d6_pdf
+                    )
+                )
+                if not full_background_subtraction_d6_open:
+                    full_background_subtraction_d6_failures.append(
+                        "D.6 procedure rendering unavailable: PyROOT not available"
+                    )
+                else:
+                    rendered_d6 = render_full_background_subtraction_d6_pages(
+                        full_background_subtraction_d6_pdf,
+                        full_background_subtraction_d6_payload,
+                        page_manifest=full_background_subtraction_d6_manifest,
+                    )
+                    full_background_subtraction_d6_failures.extend(
+                        rendered_d6.get("failures") or ()
+                    )
+        except Exception as exc:
+            full_background_subtraction_d6_failures.append(
+                "D.6 procedure pages: {}: {}".format(type(exc).__name__, exc)
+            )
+            _print_rand_debug(
+                "detached full background-subtraction D.6 pages unavailable",
+                renderer="full_background_subtraction_plots",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
+        finally:
+            if full_background_subtraction_d6_open:
+                try:
+                    close_full_background_subtraction_pdf(
+                        full_background_subtraction_d6_pdf
+                    )
+                except Exception as exc:
+                    full_background_subtraction_d6_failures.append(
+                        "D.6 procedure PDF close: {}: {}".format(
+                            type(exc).__name__, exc
+                        )
+                    )
+        histDict["full_background_subtraction_d6_page_manifest"] = [
+            dict(page) for page in full_background_subtraction_d6_manifest
+        ]
+        histDict["full_background_subtraction_d6_renderer_failures"] = list(
+            full_background_subtraction_d6_failures
+        )
+        setting_renderer_failures.extend(full_background_subtraction_d6_failures)
         for supplement_key, role in (
             ("proton_debug", "proton-debug"),
             ("pion_fit_debug", "pion-fit-debug"),
