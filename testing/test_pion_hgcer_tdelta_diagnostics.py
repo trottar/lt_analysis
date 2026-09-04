@@ -263,6 +263,35 @@ class PionHGCerTDeltaPurePythonTests(unittest.TestCase):
         self.assertEqual(serialized["reason"], "synthetic missing tree")
         self.assertNotIn("histograms", serialized)
 
+    def test_serializer_excludes_phase_e_acceptance_record_sidecar(self):
+        serialized = diagnostics.serialize_pion_hgcer_tdelta_diagnostic(
+            {
+                "status": "unavailable",
+                "coordinate_fingerprint": "sidecar-freeze-coordinate",
+                "t_edges": (0.0, 0.4, 1.0),
+                "delta_edges": (-10.0, 0.0, 20.0),
+                "records": {"kaon": (), "pion": ()},
+                "phase_e_acceptance_records": {
+                    "kaon": (
+                        {
+                            "canonical_t_index": 0,
+                            "delta_index": 0,
+                            "ssxptar": 0.01,
+                            "ssyptar": -0.01,
+                        },
+                    ),
+                    "pion": (),
+                },
+            }
+        )
+        self.assertNotIn("phase_e_acceptance_records", serialized)
+        self.assertEqual(
+            serialized["coordinate_fingerprint"], "sidecar-freeze-coordinate"
+        )
+        self.assertEqual(serialized["t_edges"], [0.0, 0.4, 1.0])
+        self.assertEqual(serialized["delta_edges"], [-10.0, 0.0, 20.0])
+        json.dumps(serialized, allow_nan=False)
+
     def test_unavailable_payload_preserves_concise_staged_error_metadata(self):
         original = IndexError("Replacement index 2 out of range for positional args tuple")
         failure = diagnostics._PionHGCerDiagnosticBuildFailure(

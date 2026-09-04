@@ -547,6 +547,65 @@ class PionHGCerMethodATests(unittest.TestCase):
         self.assertFalse(rejected["available"])
         self.assertEqual(rejected["reason"], "phi_dependent_configuration_forbidden")
 
+    def test_presentation_only_shms_metadata_is_invariant_and_response_changes_are_not(self):
+        baseline_records = _supported_records()
+        baseline_diagnostic = _diagnostic(baseline_records)
+        baseline_phase = _phase_a()
+        baseline_diagnostic_before = deepcopy(baseline_diagnostic)
+        baseline_phase_before = deepcopy(baseline_phase)
+        baseline = method_a.build_pion_hgcer_method_a(
+            baseline_diagnostic, baseline_phase
+        )
+
+        augmented_records = deepcopy(baseline_records)
+        denominator = max(1, len(augmented_records) - 1)
+        for index, record in enumerate(augmented_records):
+            fraction = float(index) / denominator
+            record["ssxptar"] = -0.055 + 0.110 * fraction
+            record["ssyptar"] = 0.035 - 0.070 * fraction
+        augmented_diagnostic = _diagnostic(augmented_records)
+        augmented_phase = _phase_a()
+        augmented_diagnostic_before = deepcopy(augmented_diagnostic)
+        augmented_phase_before = deepcopy(augmented_phase)
+        augmented = method_a.build_pion_hgcer_method_a(
+            augmented_diagnostic, augmented_phase
+        )
+
+        self.assertEqual(baseline_diagnostic, baseline_diagnostic_before)
+        self.assertEqual(baseline_phase, baseline_phase_before)
+        self.assertEqual(augmented_diagnostic, augmented_diagnostic_before)
+        self.assertEqual(augmented_phase, augmented_phase_before)
+        for field in (
+            "fingerprint",
+            "event_population_fingerprint",
+            "cells",
+            "summary",
+            "response_population_definition",
+            "physical_control_definition",
+            "low_response_definition",
+        ):
+            self.assertEqual(baseline[field], augmented[field])
+        self.assertEqual(
+            baseline["response_population_definition"],
+            "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0",
+        )
+        self.assertEqual(
+            baseline["physical_control_definition"], "P_hgcer_npeSum_gt_2"
+        )
+        self.assertEqual(
+            baseline["low_response_definition"], "0_lt_P_hgcer_npeSum_le_2"
+        )
+
+        response_changed_records = deepcopy(baseline_records)
+        response_changed_records[0]["P_hgcer_npeSum"] += 0.125
+        response_changed = method_a.build_pion_hgcer_method_a(
+            _diagnostic(response_changed_records), _phase_a()
+        )
+        self.assertNotEqual(
+            baseline["event_population_fingerprint"],
+            response_changed["event_population_fingerprint"],
+        )
+
     def test_json_safety_summary_and_forbidden_output_contract(self):
         result = method_a.build_pion_hgcer_method_a(
             _diagnostic(_supported_records()), _phase_a()
