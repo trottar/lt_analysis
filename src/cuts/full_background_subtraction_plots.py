@@ -1,4 +1,4 @@
-"""Detached D.6 through D.10 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -9,6 +9,8 @@ open/close helpers without inheriting the technical diagnostic-PDF lifecycle.
 from __future__ import annotations
 
 from array import array
+import hashlib
+import json
 import math
 import os
 from collections.abc import Mapping, Sequence
@@ -22,6 +24,7 @@ D7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d7/v1"
 D8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d8/v1"
 D9_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d9/v1"
 D10_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d10/v1"
+D11_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d11/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -32,6 +35,18 @@ _D10_PHASE_A_SCHEMA = "pion_hgcer_event_contract/v1"
 _D10_METHOD_B_SCHEMA = "pion_hgcer_method_b/v1"
 _D10_METHOD_B_COMPARISON_SCHEMA = "pion_hgcer_method_b_comparison/v1"
 _D10_SOURCE_TARGET_STATE = "post_proton_noRF"
+_D11_PHASE_D_CHECKPOINT_SCHEMA = "pion_hgcer_phase_d_checkpoint/v1"
+_D11_METHOD_A_COMPARISON_SCHEMA = "pion_hgcer_method_a_comparison/v1"
+_D11_METHOD_B_COMPARISON_SCHEMA = "pion_hgcer_method_b_comparison/v1"
+_D11_AB_COMPARISON_SCHEMA = "pion_hgcer_ab_comparison/v1"
+_D11_SOURCE_TARGET_STATE = "post_proton_noRF"
+_D11_AVAILABILITY_LABELS = {
+    "both_comparable": "Both methods available",
+    "both_present_not_comparable": "Both present; ratio undefined",
+    "a_only": "Method A only",
+    "b_only": "Method B only",
+    "neither_available": "Neither method available",
+}
 
 
 def _import_root():
@@ -128,6 +143,26 @@ def _d10_unavailable(reason):
         "protected_regions": [],
         "d3_available": False,
         "d3_reason": None,
+        "per_t": [],
+    }
+
+
+def _d11_unavailable(reason):
+    """Return a detached unavailable D.11 payload without source aliases."""
+    return {
+        "schema_version": D11_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "source_checkpoint_payload_fingerprint": None,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "method_a_comparison_fingerprint": None,
+        "method_b_comparison_fingerprint": None,
+        "ab_comparison_fingerprint": None,
+        "host_state": None,
+        "source_target_state": None,
+        "t_edges": [],
+        "delta_edges": [],
         "per_t": [],
     }
 
@@ -3277,11 +3312,741 @@ def render_full_background_subtraction_d10_pages(pdf_name, payload, *, page_mani
     return result
 
 
+def _d11_nonempty_string(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _d11_integer(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if value == number else None
+
+
+def _d11_finite(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _d11_canonical_fingerprint(value):
+    """Return the frozen comparison hash, or ``None`` for non-JSON data."""
+    try:
+        serialized = json.dumps(
+            value,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        )
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return hashlib.sha256(serialized.encode("ascii")).hexdigest()
+
+
+def _d11_serialized_equal(left, right):
+    """Require the exact JSON geometry retained by the frozen checkpoint."""
+    try:
+        return json.dumps(
+            left, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False,
+        ) == json.dumps(
+            right, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False,
+        )
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
+def _d11_checkpoint_contract(value):
+    checkpoint = _mapping(value)
+    if not checkpoint:
+        return None, "phase_d_checkpoint_contract_invalid"
+    if checkpoint.get("status") != "available" or checkpoint.get("available") is not True:
+        return None, "phase_d_checkpoint_unavailable"
+    required = (
+        "schema_version", "source_checkpoint_payload_fingerprint", "non_authoritative",
+        "comparison_performed", "classification_performed", "classification_scope",
+        "decision_performed", "statistical_compatibility_claimed",
+        "production_objects_mutated", "refinement_applied", "method_a_comparison",
+        "method_b_comparison", "ab_comparison",
+    )
+    if any(key not in checkpoint for key in required):
+        return None, "phase_d_checkpoint_contract_invalid"
+    if (
+        checkpoint["schema_version"] != _D11_PHASE_D_CHECKPOINT_SCHEMA
+        or not _d11_nonempty_string(checkpoint["source_checkpoint_payload_fingerprint"])
+        or checkpoint["non_authoritative"] is not True
+        or checkpoint["comparison_performed"] is not True
+        or checkpoint["classification_performed"] is not True
+        or checkpoint["classification_scope"] != "availability_only_non_prescriptive"
+        or checkpoint["decision_performed"] is not False
+        or checkpoint["statistical_compatibility_claimed"] is not False
+        or checkpoint["production_objects_mutated"] is not False
+        or checkpoint["refinement_applied"] is not False
+    ):
+        return None, "phase_d_checkpoint_authority_invalid"
+    return checkpoint, None
+
+
+def _d11_representation_contract(
+    value, schema, dependency_key, source_payload_key, reason
+):
+    representation = _mapping(value)
+    required = (
+        "schema_version", "status", "available", "source_checkpoint_payload_fingerprint",
+        "phase_a_contract_fingerprint", "coordinate_fingerprint", source_payload_key,
+        "canonical_t_edges", "delta_edges", "fingerprint_inputs", "fingerprint",
+        "non_authoritative", dependency_key,
+        "comparison_performed", "classification_performed", "production_objects_mutated",
+        "refinement_applied",
+    )
+    if not representation or any(key not in representation for key in required):
+        return None, reason
+    t_edges = _strict_edges(representation["canonical_t_edges"])
+    delta_edges = _strict_edges(representation["delta_edges"])
+    if (
+        representation["schema_version"] != schema
+        or representation["status"] != "available"
+        or representation["available"] is not True
+        or not all(
+            _d11_nonempty_string(representation[key])
+            for key in (
+                "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+                "coordinate_fingerprint", source_payload_key, "fingerprint",
+            )
+        )
+        or t_edges is None
+        or delta_edges is None
+        or not isinstance(representation["fingerprint_inputs"], Mapping)
+        or representation["fingerprint"] != _d11_canonical_fingerprint(
+            representation["fingerprint_inputs"]
+        )
+        or representation["non_authoritative"] is not True
+        or representation[dependency_key] is not False
+        or representation["comparison_performed"] is not False
+        or representation["classification_performed"] is not False
+        or representation["production_objects_mutated"] is not False
+        or representation["refinement_applied"] is not False
+    ):
+        return None, reason
+    return representation, None
+
+
+def _d11_ab_contract(value):
+    comparison = _mapping(value)
+    required = (
+        "schema_version", "method", "status", "available",
+        "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+        "coordinate_fingerprint", "method_a_comparison_fingerprint",
+        "method_b_comparison_fingerprint", "source_method_a_comparison_payload_fingerprint",
+        "source_method_b_comparison_payload_fingerprint", "canonical_t_edges", "delta_edges",
+        "host_state", "source_target_state", "cells", "fingerprint_inputs", "fingerprint",
+        "non_authoritative",
+        "comparison_performed", "classification_performed", "classification_scope",
+        "decision_performed", "statistical_compatibility_claimed",
+        "production_objects_mutated", "refinement_applied",
+    )
+    if not comparison or any(key not in comparison for key in required):
+        return None, "ab_comparison_contract_invalid"
+    t_edges = _strict_edges(comparison["canonical_t_edges"])
+    delta_edges = _strict_edges(comparison["delta_edges"])
+    if (
+        comparison["schema_version"] != _D11_AB_COMPARISON_SCHEMA
+        or comparison["method"] != "non_authoritative_ab_comparison"
+        or comparison["status"] != "available"
+        or comparison["available"] is not True
+        or not all(
+            _d11_nonempty_string(comparison[key])
+            for key in (
+                "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+                "coordinate_fingerprint", "method_a_comparison_fingerprint",
+                "method_b_comparison_fingerprint",
+                "source_method_a_comparison_payload_fingerprint",
+                "source_method_b_comparison_payload_fingerprint", "fingerprint",
+            )
+        )
+        or t_edges is None
+        or delta_edges is None
+        or comparison["host_state"] not in {"proton_cleaned", "identity_no_proton_cleaning"}
+        or comparison["source_target_state"] != _D11_SOURCE_TARGET_STATE
+        or not isinstance(comparison["cells"], Sequence)
+        or isinstance(comparison["cells"], (str, bytes))
+        or not isinstance(comparison["fingerprint_inputs"], Mapping)
+        or comparison["fingerprint"] != _d11_canonical_fingerprint(
+            comparison["fingerprint_inputs"]
+        )
+        or comparison["non_authoritative"] is not True
+        or comparison["comparison_performed"] is not True
+        or comparison["classification_performed"] is not True
+        or comparison["classification_scope"] != "availability_only_non_prescriptive"
+        or comparison["decision_performed"] is not False
+        or comparison["statistical_compatibility_claimed"] is not False
+        or comparison["production_objects_mutated"] is not False
+        or comparison["refinement_applied"] is not False
+    ):
+        return None, "ab_comparison_contract_invalid"
+    return comparison, None
+
+
+def _d11_source_linkage(checkpoint, method_a, method_b, comparison):
+    if (
+        method_a["fingerprint"] != comparison["method_a_comparison_fingerprint"]
+        or method_b["fingerprint"] != comparison["method_b_comparison_fingerprint"]
+    ):
+        return "ab_comparison_representation_fingerprint_mismatch"
+    if (
+        _d11_canonical_fingerprint(method_a)
+        != comparison["source_method_a_comparison_payload_fingerprint"]
+        or _d11_canonical_fingerprint(method_b)
+        != comparison["source_method_b_comparison_payload_fingerprint"]
+    ):
+        return "ab_comparison_representation_payload_fingerprint_mismatch"
+    source_fingerprint = checkpoint["source_checkpoint_payload_fingerprint"]
+    if any(
+        source.get("source_checkpoint_payload_fingerprint") != source_fingerprint
+        for source in (method_a, method_b, comparison)
+    ):
+        return "ab_comparison_source_checkpoint_fingerprint_mismatch"
+    if any(
+        source.get("phase_a_contract_fingerprint") != comparison["phase_a_contract_fingerprint"]
+        or source.get("coordinate_fingerprint") != comparison["coordinate_fingerprint"]
+        for source in (method_a, method_b)
+    ):
+        return "ab_comparison_provenance_mismatch"
+    if any(not _d11_serialized_equal(source[key], comparison[key]) for source in (
+        method_a, method_b
+    ) for key in ("canonical_t_edges", "delta_edges")):
+        return "ab_comparison_geometry_mismatch"
+    if (
+        method_b.get("host_state") != comparison["host_state"]
+        or method_b.get("source_target_state") != comparison["source_target_state"]
+    ):
+        return "ab_comparison_host_state_mismatch"
+    return None
+
+
+def _d11_scalar_cell(source, t_edges, delta_edges):
+    cell = _mapping(source)
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "method_a", "method_b", "comparison",
+    )
+    if not cell or any(key not in cell for key in required):
+        return None, "ab_comparison_cell_contract_invalid"
+    t_index = _d11_integer(cell["t_index"])
+    delta_index = _d11_integer(cell["delta_index"])
+    if (
+        t_index is None or delta_index is None
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _d11_serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        return None, "ab_comparison_cell_geometry_invalid"
+    method_a = _mapping(cell["method_a"])
+    method_b = _mapping(cell["method_b"])
+    relation = _mapping(cell["comparison"])
+    if any(
+        key not in method_a
+        for key in (
+            "present", "comparison_candidate", "comparison_candidate_low",
+            "comparison_candidate_high", "comparison_candidate_status",
+        )
+    ) or any(
+        key not in method_b
+        for key in (
+            "present", "comparison_candidate", "comparison_candidate_uncertainty",
+            "comparison_candidate_status",
+        )
+    ) or any(
+        key not in relation
+        for key in ("availability", "availability_reason", "ratio_B_over_A", "log_ratio_B_over_A")
+    ):
+        return None, "ab_comparison_cell_contract_invalid"
+    a_present = method_a["present"]
+    b_present = method_b["present"]
+    if not isinstance(a_present, bool) or not isinstance(b_present, bool):
+        return None, "ab_comparison_cell_contract_invalid"
+    a_candidate = _d11_finite(method_a["comparison_candidate"])
+    a_low = _d11_finite(method_a["comparison_candidate_low"])
+    a_high = _d11_finite(method_a["comparison_candidate_high"])
+    if a_present:
+        if (
+            method_a["comparison_candidate_status"] not in {"available", "marginal"}
+            or None in (a_candidate, a_low, a_high)
+            or a_candidate < 0.0 or a_low < 0.0 or a_low > a_candidate or a_candidate > a_high
+        ):
+            return None, "ab_comparison_method_a_cell_invalid"
+    elif (
+        method_a["comparison_candidate_status"] != "unavailable"
+        or any(value is not None for value in (method_a["comparison_candidate"], method_a["comparison_candidate_low"], method_a["comparison_candidate_high"]))
+    ):
+        return None, "ab_comparison_method_a_cell_invalid"
+    b_candidate = _d11_finite(method_b["comparison_candidate"])
+    b_uncertainty = _d11_finite(method_b["comparison_candidate_uncertainty"])
+    if b_present:
+        if (
+            method_b["comparison_candidate_status"] != "available_multi_region"
+            or b_candidate is None or b_candidate <= 0.0
+            or b_uncertainty is None or b_uncertainty <= 0.0
+        ):
+            return None, "ab_comparison_method_b_cell_invalid"
+    elif (
+        method_b["comparison_candidate_status"] not in {
+            "single_region_only", "unavailable", "region_marginal", "region_inconsistent",
+            "shape_poor_veto",
+        }
+        or any(value is not None for value in (method_b["comparison_candidate"], method_b["comparison_candidate_uncertainty"]))
+    ):
+        return None, "ab_comparison_method_b_cell_invalid"
+    availability = relation["availability"]
+    ratio = relation["ratio_B_over_A"]
+    log_ratio = relation["log_ratio_B_over_A"]
+    if availability not in _D11_AVAILABILITY_LABELS:
+        return None, "ab_comparison_availability_invalid"
+    if availability == "both_comparable":
+        if not a_present or not b_present or a_candidate <= 0.0 or (
+            _d11_finite(ratio) is None or _d11_finite(log_ratio) is None
+        ):
+            return None, "ab_comparison_availability_invalid"
+    elif availability == "both_present_not_comparable":
+        if not a_present or not b_present or a_candidate != 0.0 or ratio is not None or log_ratio is not None:
+            return None, "ab_comparison_availability_invalid"
+    elif availability == "a_only":
+        if not a_present or b_present or ratio is not None or log_ratio is not None:
+            return None, "ab_comparison_availability_invalid"
+    elif availability == "b_only":
+        if a_present or not b_present or ratio is not None or log_ratio is not None:
+            return None, "ab_comparison_availability_invalid"
+    elif a_present or b_present or ratio is not None or log_ratio is not None:
+        return None, "ab_comparison_availability_invalid"
+    return {
+        "t_index": t_index,
+        "t_low": float(t_edges[t_index]),
+        "t_high": float(t_edges[t_index + 1]),
+        "delta_index": delta_index,
+        "delta_low": float(delta_edges[delta_index]),
+        "delta_high": float(delta_edges[delta_index + 1]),
+        "method_a": {
+            "present": a_present,
+            "candidate": a_candidate if a_present else None,
+            "low": a_low if a_present else None,
+            "high": a_high if a_present else None,
+            "status": method_a["comparison_candidate_status"],
+        },
+        "method_b": {
+            "present": b_present,
+            "candidate": b_candidate if b_present else None,
+            "uncertainty": b_uncertainty if b_present else None,
+            "status": method_b["comparison_candidate_status"],
+        },
+        "comparison": {
+            "availability": availability,
+            "ratio_B_over_A": _d11_finite(ratio) if ratio is not None else None,
+            "log_ratio_B_over_A": _d11_finite(log_ratio) if log_ratio is not None else None,
+        },
+    }, None
+
+
+def _d11_page_cell(cell):
+    """Return an independent scalar copy for one D.11 page group."""
+    return {
+        "t_index": cell["t_index"], "t_low": cell["t_low"], "t_high": cell["t_high"],
+        "delta_index": cell["delta_index"], "delta_low": cell["delta_low"],
+        "delta_high": cell["delta_high"],
+        "method_a": dict(cell["method_a"]),
+        "method_b": dict(cell["method_b"]),
+        "comparison": dict(cell["comparison"]),
+    }
+
+
+def build_full_background_subtraction_d11_payload(phase_d_checkpoint):
+    """Select only frozen Phase-D/D.4 display scalars without recomputation."""
+    checkpoint, reason = _d11_checkpoint_contract(phase_d_checkpoint)
+    if reason is not None:
+        return _d11_unavailable(reason)
+    method_a, reason = _d11_representation_contract(
+        checkpoint["method_a_comparison"], _D11_METHOD_A_COMPARISON_SCHEMA,
+        "method_b_numerical_dependency", "source_method_a_payload_fingerprint",
+        "method_a_comparison_contract_invalid",
+    )
+    if reason is not None:
+        return _d11_unavailable(reason)
+    method_b, reason = _d11_representation_contract(
+        checkpoint["method_b_comparison"], _D11_METHOD_B_COMPARISON_SCHEMA,
+        "method_a_numerical_dependency", "source_method_b_payload_fingerprint",
+        "method_b_comparison_contract_invalid",
+    )
+    if reason is not None:
+        return _d11_unavailable(reason)
+    comparison, reason = _d11_ab_contract(checkpoint["ab_comparison"])
+    if reason is not None:
+        return _d11_unavailable(reason)
+    reason = _d11_source_linkage(checkpoint, method_a, method_b, comparison)
+    if reason is not None:
+        return _d11_unavailable(reason)
+    t_edges = list(comparison["canonical_t_edges"])
+    delta_edges = list(comparison["delta_edges"])
+    expected = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    if len(comparison["cells"]) != expected:
+        return _d11_unavailable("ab_comparison_cell_grid_invalid")
+    grouped = [[] for _unused in range(len(t_edges) - 1)]
+    seen = set()
+    for source in comparison["cells"]:
+        cell, reason = _d11_scalar_cell(source, t_edges, delta_edges)
+        if reason is not None:
+            return _d11_unavailable(reason)
+        coordinate = (cell["t_index"], cell["delta_index"])
+        if coordinate in seen:
+            return _d11_unavailable("ab_comparison_cell_grid_invalid")
+        seen.add(coordinate)
+        grouped[cell["t_index"]].append(cell)
+    if len(seen) != expected:
+        return _d11_unavailable("ab_comparison_cell_grid_invalid")
+    per_t = []
+    for t_index, cells in enumerate(grouped):
+        cells.sort(key=lambda row: row["delta_index"])
+        if len(cells) != len(delta_edges) - 1:
+            return _d11_unavailable("ab_comparison_cell_grid_invalid")
+        overlay_cells = [_d11_page_cell(cell) for cell in cells if (
+            cell["method_a"]["present"] or cell["method_b"]["present"]
+        )]
+        ratio_cells = [_d11_page_cell(cell) for cell in cells if (
+            cell["comparison"]["availability"] == "both_comparable"
+        )]
+        availability_cells = []
+        for cell in cells:
+            copied = _d11_page_cell(cell)
+            copied["availability_label"] = _D11_AVAILABILITY_LABELS[
+                copied["comparison"]["availability"]
+            ]
+            availability_cells.append(copied)
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "ab_overlay": {
+                "available": bool(overlay_cells),
+                "reason": None if overlay_cells else "no_stored_method_candidates",
+                "cells": overlay_cells,
+            },
+            "ratio_log": {
+                "available": bool(ratio_cells),
+                "reason": None if ratio_cells else "no_stored_both_comparable_cells",
+                "cells": ratio_cells,
+            },
+            "availability": {"available": True, "reason": None, "cells": availability_cells},
+        })
+    return {
+        "schema_version": D11_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "source_checkpoint_payload_fingerprint": checkpoint["source_checkpoint_payload_fingerprint"],
+        "phase_a_contract_fingerprint": comparison["phase_a_contract_fingerprint"],
+        "coordinate_fingerprint": comparison["coordinate_fingerprint"],
+        "method_a_comparison_fingerprint": comparison["method_a_comparison_fingerprint"],
+        "method_b_comparison_fingerprint": comparison["method_b_comparison_fingerprint"],
+        "ab_comparison_fingerprint": comparison["fingerprint"],
+        "host_state": comparison["host_state"],
+        "source_target_state": comparison["source_target_state"],
+        "t_edges": [float(edge) for edge in t_edges],
+        "delta_edges": [float(edge) for edge in delta_edges],
+        "per_t": per_t,
+    }
+
+
+def _d11_display_bounds(values, reference):
+    finite = [float(reference)]
+    finite.extend(float(value) for value in values if _d11_finite(value) is not None)
+    low, high = min(finite), max(finite)
+    if high <= low:
+        return low - 0.05, high + 0.05
+    padding = 0.05 * (high - low)
+    return low - padding, high + padding
+
+
+def _d11_new_frame(ROOT, name, title, delta_edges, y_range):
+    if not hasattr(ROOT, "TH1D"):
+        return None
+    try:
+        frame = ROOT.TH1D(str(name), str(title), len(delta_edges) - 1, array("d", delta_edges))
+        frame.SetDirectory(0)
+        if hasattr(frame, "SetStats"):
+            frame.SetStats(0)
+        frame.SetMinimum(float(y_range[0]))
+        frame.SetMaximum(float(y_range[1]))
+        return frame
+    except Exception:
+        return None
+
+
+def _d11_draw_notice(ROOT):
+    note = ROOT.TPaveText(0.14, 0.82, 0.86, 0.92, "NDC")
+    note.SetFillStyle(0)
+    note.SetBorderSize(0)
+    note.SetTextAlign(22)
+    note.SetTextSize(0.028)
+    note.AddText("NON-AUTHORITATIVE DIAGNOSTIC")
+    note.AddText("No refinement, correction, or method selection")
+    note.Draw()
+    return note
+
+
+def _render_d11_ab_overlay_page(ROOT, pdf_name, presentation, group):
+    overlay = _mapping(group.get("ab_overlay"))
+    cells = tuple(overlay.get("cells") or ())
+    if not cells or not hasattr(ROOT, "TGraphAsymmErrors") or not hasattr(ROOT, "TGraphErrors"):
+        return False
+    values = [1.0]
+    for cell in cells:
+        cell = _mapping(cell)
+        method_a = _mapping(cell.get("method_a"))
+        method_b = _mapping(cell.get("method_b"))
+        if method_a.get("present") is True:
+            values.extend((method_a["low"], method_a["candidate"], method_a["high"]))
+        if method_b.get("present") is True:
+            values.extend((
+                method_b["candidate"] - method_b["uncertainty"], method_b["candidate"],
+                method_b["candidate"] + method_b["uncertainty"],
+            ))
+    y_range = _d11_display_bounds(values, 1.0)
+    title = "Method A / Method B diagnostic comparison - {}".format(_t_context(group))
+    frame = _d11_new_frame(
+        ROOT, "H_full_background_d11_overlay_t{}".format(group["t_index"] + 1),
+        "{};delta [%];Relative pion-background diagnostic".format(title),
+        presentation["delta_edges"], y_range,
+    )
+    if frame is None:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_d11_overlay_t{}".format(group["t_index"] + 1), title, 1200, 800
+    )
+    draw_objects = [frame]
+    try:
+        frame.Draw("axis")
+        a_cells = [cell for cell in cells if _mapping(cell).get("method_a", {}).get("present") is True]
+        b_cells = [cell for cell in cells if _mapping(cell).get("method_b", {}).get("present") is True]
+        legend = ROOT.TLegend(0.53, 0.61, 0.89, 0.79)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        if a_cells:
+            graph_a = ROOT.TGraphAsymmErrors(len(a_cells))
+            for index, cell in enumerate(a_cells):
+                method_a = cell["method_a"]
+                x_value = 0.5 * (cell["delta_low"] + cell["delta_high"])
+                graph_a.SetPoint(index, x_value, method_a["candidate"])
+                graph_a.SetPointError(
+                    index, 0.0, 0.0, method_a["candidate"] - method_a["low"],
+                    method_a["high"] - method_a["candidate"],
+                )
+            graph_a.SetMarkerColor(getattr(ROOT, "kBlue", 4))
+            graph_a.SetLineColor(getattr(ROOT, "kBlue", 4))
+            graph_a.SetMarkerStyle(20)
+            graph_a.Draw("P same")
+            legend.AddEntry(graph_a, "Method A - HGCer response diagnostic", "lep")
+            draw_objects.append(graph_a)
+        if b_cells:
+            graph_b = ROOT.TGraphErrors(len(b_cells))
+            for index, cell in enumerate(b_cells):
+                method_b = cell["method_b"]
+                x_value = 0.5 * (cell["delta_low"] + cell["delta_high"])
+                graph_b.SetPoint(index, x_value, method_b["candidate"])
+                graph_b.SetPointError(index, 0.0, method_b["uncertainty"])
+            graph_b.SetMarkerColor(getattr(ROOT, "kRed", 2))
+            graph_b.SetLineColor(getattr(ROOT, "kRed", 2))
+            graph_b.SetMarkerStyle(24)
+            graph_b.Draw("P same")
+            legend.AddEntry(graph_b, "Method B - Missing-mass closure diagnostic", "lep")
+            draw_objects.append(graph_b)
+        legend.Draw()
+        draw_objects.append(legend)
+        unity = ROOT.TLine(
+            float(presentation["delta_edges"][0]), 1.0,
+            float(presentation["delta_edges"][-1]), 1.0,
+        )
+        unity.SetLineStyle(2)
+        unity.SetLineWidth(2)
+        unity.Draw()
+        draw_objects.append(unity)
+        draw_objects.append(_d11_draw_notice(ROOT))
+        draw_objects.append(_draw_page_header(ROOT, canvas, "Method A / Method B diagnostic comparison", group))
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d11_ratio_log_page(ROOT, pdf_name, presentation, group):
+    ratio_log = _mapping(group.get("ratio_log"))
+    cells = tuple(ratio_log.get("cells") or ())
+    if not cells or not hasattr(ROOT, "TGraph"):
+        return False
+    title = "Method A / Method B relative comparison - {}".format(_t_context(group))
+    canvas = ROOT.TCanvas(
+        "C_full_background_d11_ratio_log_t{}".format(group["t_index"] + 1), title, 1400, 800
+    )
+    draw_objects = []
+    try:
+        canvas.Divide(2, 1)
+        for panel, key, label, reference in (
+            (1, "ratio_B_over_A", "B/A", 1.0),
+            (2, "log_ratio_B_over_A", "ln(B/A)", 0.0),
+        ):
+            canvas.cd(panel)
+            frame = _d11_new_frame(
+                ROOT,
+                "H_full_background_d11_{}_t{}".format(key, group["t_index"] + 1),
+                "{};delta [%];{}".format(title, label), presentation["delta_edges"],
+                _d11_display_bounds((cell["comparison"][key] for cell in cells), reference),
+            )
+            if frame is None:
+                return False
+            frame.Draw("axis")
+            graph = ROOT.TGraph(len(cells))
+            for index, cell in enumerate(cells):
+                graph.SetPoint(
+                    index, 0.5 * (cell["delta_low"] + cell["delta_high"]),
+                    cell["comparison"][key],
+                )
+            graph.SetMarkerColor(getattr(ROOT, "kBlack", 1))
+            graph.SetMarkerStyle(20)
+            graph.Draw("P same")
+            line = ROOT.TLine(
+                float(presentation["delta_edges"][0]), float(reference),
+                float(presentation["delta_edges"][-1]), float(reference),
+            )
+            line.SetLineStyle(2)
+            line.SetLineWidth(2)
+            line.Draw()
+            draw_objects.extend((frame, graph, line))
+        canvas.cd(1)
+        draw_objects.append(_d11_draw_notice(ROOT))
+        draw_objects.append(_draw_page_header(ROOT, canvas, "Method A / Method B relative comparison", group))
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _d11_availability_style(ROOT, availability):
+    colors = {
+        "both_comparable": getattr(ROOT, "kGreen", 3),
+        "both_present_not_comparable": getattr(ROOT, "kOrange", 800),
+        "a_only": getattr(ROOT, "kBlue", 4),
+        "b_only": getattr(ROOT, "kRed", 2),
+        "neither_available": getattr(ROOT, "kGray", 920),
+    }
+    return colors[availability]
+
+
+def _render_d11_availability_page(ROOT, pdf_name, presentation, group):
+    availability = _mapping(group.get("availability"))
+    cells = tuple(availability.get("cells") or ())
+    if not cells or not hasattr(ROOT, "TBox"):
+        return False
+    title = "Method availability across delta - {}".format(_t_context(group))
+    frame = _d11_new_frame(
+        ROOT, "H_full_background_d11_availability_t{}".format(group["t_index"] + 1),
+        "{};delta [%];".format(title), presentation["delta_edges"], (0.0, 1.0),
+    )
+    if frame is None:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_d11_availability_t{}".format(group["t_index"] + 1), title, 1200, 800
+    )
+    draw_objects = [frame]
+    try:
+        frame.Draw("axis")
+        for cell in cells:
+            state = cell["comparison"]["availability"]
+            box = ROOT.TBox(cell["delta_low"], 0.0, cell["delta_high"], 1.0)
+            box.SetFillColor(_d11_availability_style(ROOT, state))
+            box.SetLineColor(getattr(ROOT, "kBlack", 1))
+            box.Draw()
+            draw_objects.append(box)
+        legend = ROOT.TLegend(0.55, 0.52, 0.89, 0.84)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        for state, label in _D11_AVAILABILITY_LABELS.items():
+            exemplar = ROOT.TBox(0.0, 0.0, 0.0, 0.0)
+            exemplar.SetFillColor(_d11_availability_style(ROOT, state))
+            exemplar.SetLineColor(getattr(ROOT, "kBlack", 1))
+            legend.AddEntry(exemplar, label, "f")
+            draw_objects.append(exemplar)
+        legend.Draw()
+        draw_objects.append(legend)
+        draw_objects.append(_d11_draw_notice(ROOT))
+        draw_objects.append(_draw_page_header(ROOT, canvas, "Method availability across delta", group))
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_d11_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Render the frozen D.11 explanation for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    overlay = _mapping(group.get("ab_overlay"))
+    if overlay.get("available"):
+        if _render_d11_ab_overlay_page(ROOT, pdf_name, presentation, group):
+            manifest.append({"page_id": "full_background.d11.ab_overlay", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.11 A/B-overlay page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.11 A/B-overlay unavailable for t{}: {}".format(t_number, overlay.get("reason")))
+    ratio_log = _mapping(group.get("ratio_log"))
+    if ratio_log.get("available"):
+        if _render_d11_ratio_log_page(ROOT, pdf_name, presentation, group):
+            manifest.append({"page_id": "full_background.d11.ab_ratio_log", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.11 B/A-and-log page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.11 B/A-and-log unavailable for t{}: {}".format(t_number, ratio_log.get("reason")))
+    availability = _mapping(group.get("availability"))
+    if availability.get("available"):
+        if _render_d11_availability_page(ROOT, pdf_name, presentation, group):
+            manifest.append({"page_id": "full_background.d11.method_availability", "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("D.11 availability page unavailable for t{}".format(t_number))
+    else:
+        failures.append("D.11 availability unavailable for t{}: {}".format(t_number, availability.get("reason")))
+
+
+def render_full_background_subtraction_d11_pages(pdf_name, payload, *, page_manifest=None):
+    """Append D.11 stored A/B explanation pages for every canonical t bin."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    result = {"manifest": manifest, "failures": []}
+    presentation = _mapping(payload)
+    if not bool(presentation.get("available")):
+        result["failures"].append(
+            "D.11 procedure input unavailable: {}".format(presentation.get("reason"))
+        )
+        return result
+    ROOT = _import_root()
+    if ROOT is None:
+        result["failures"].append("D.11 procedure rendering unavailable: PyROOT not available")
+        return result
+    for group in tuple(presentation.get("per_t") or ()):
+        _render_d11_t_pages(
+            ROOT, pdf_name, presentation, _mapping(group), manifest, result["failures"]
+        )
+    return result
+
+
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
+    d11_payload=None,
     *, page_manifest=None
 ):
-    """Append available D.6 through D.10 groups in complete canonical-t order."""
+    """Append available D.6 through D.11 groups in complete canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -3289,6 +4054,7 @@ def render_full_background_subtraction_procedure_pages(
     d8 = _mapping(d8_payload)
     d9 = _mapping(d9_payload)
     d10 = _mapping(d10_payload)
+    d11 = _mapping(d11_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -3297,7 +4063,9 @@ def render_full_background_subtraction_procedure_pages(
     d9_available = bool(d9.get("available"))
     d10_requested = d10_payload is not None
     d10_available = bool(d10.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available:
+    d11_requested = d11_payload is not None
+    d11_available = bool(d11.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -3317,6 +4085,10 @@ def render_full_background_subtraction_procedure_pages(
         if d10_requested:
             result["failures"].append(
                 "D.10 procedure input unavailable: {}".format(d10.get("reason"))
+            )
+        if d11_requested:
+            result["failures"].append(
+                "D.11 procedure input unavailable: {}".format(d11.get("reason"))
             )
         return result
     if not d6_available:
@@ -3339,10 +4111,14 @@ def render_full_background_subtraction_procedure_pages(
         result["failures"].append(
             "D.10 procedure input unavailable: {}".format(d10.get("reason"))
         )
+    if d11_requested and not d11_available:
+        result["failures"].append(
+            "D.11 procedure input unavailable: {}".format(d11.get("reason"))
+        )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
         d7_available = False
-    geometry_owner = d6 if d6_available else d7 if d7_available else d8 if d8_available else d9 if d9_available else d10
+    geometry_owner = d6 if d6_available else d7 if d7_available else d8 if d8_available else d9 if d9_available else d10 if d10_available else d11
     if (
         d8_available
         and geometry_owner is not None
@@ -3364,6 +4140,13 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("D.10 canonical t geometry mismatch")
         d10_available = False
+    if (
+        d11_available
+        and geometry_owner is not d11
+        and list(geometry_owner.get("t_edges") or ()) != list(d11.get("t_edges") or ())
+    ):
+        result["failures"].append("D.11 canonical t geometry mismatch")
+        d11_available = False
     for comparison_name, comparison_payload, comparison_available in (
         ("D.6", d6, d6_available),
         ("D.7", d7, d7_available),
@@ -3406,6 +4189,23 @@ def render_full_background_subtraction_procedure_pages(
             result["failures"].append(
                 "D.10 frozen delta geometry differs from {}".format(comparison_name)
             )
+    for comparison_name, comparison_payload, comparison_available in (
+        ("D.6", d6, d6_available),
+        ("D.7", d7, d7_available),
+        ("D.8", d8, d8_available),
+        ("D.9", d9, d9_available),
+        ("D.10", d10, d10_available),
+    ):
+        if (
+            d11_available
+            and comparison_available
+            and list(comparison_payload.get("delta_edges") or ())
+            and list(comparison_payload.get("delta_edges") or ()) != list(d11.get("delta_edges") or ())
+        ):
+            result["failures"].append(
+                "D.11 frozen delta geometry differs from {}".format(comparison_name)
+            )
+            d11_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -3430,6 +4230,11 @@ def render_full_background_subtraction_procedure_pages(
     d10_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(d10.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    d11_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(d11.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -3466,6 +4271,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_d10_t_pages(ROOT, pdf_name, d10, d10_group, manifest, result["failures"])
 
+    def render_d11_group(t_index):
+        if not d11_available:
+            return
+        d11_group = d11_by_index.get(t_index)
+        if d11_group is None:
+            result["failures"].append(
+                "D.11 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_d11_t_pages(ROOT, pdf_name, d11, d11_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -3481,6 +4297,7 @@ def render_full_background_subtraction_procedure_pages(
             render_d8_group(group.get("t_index"))
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
+            render_d11_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
@@ -3488,19 +4305,26 @@ def render_full_background_subtraction_procedure_pages(
             render_d8_group(group.get("t_index"))
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
+            render_d11_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
             group = _mapping(group)
             _render_d8_t_pages(ROOT, pdf_name, d8, group, manifest, result["failures"])
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
+            render_d11_group(group.get("t_index"))
     elif d9_available:
         for group in tuple(d9.get("per_t") or ()):
             _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
             render_d10_group(_mapping(group).get("t_index"))
+            render_d11_group(_mapping(group).get("t_index"))
     elif d10_available:
         for group in tuple(d10.get("per_t") or ()):
             _render_d10_t_pages(ROOT, pdf_name, d10, _mapping(group), manifest, result["failures"])
+            render_d11_group(_mapping(group).get("t_index"))
+    elif d11_available:
+        for group in tuple(d11.get("per_t") or ()):
+            _render_d11_t_pages(ROOT, pdf_name, d11, _mapping(group), manifest, result["failures"])
     return result
 
 
@@ -3510,12 +4334,14 @@ __all__ = (
     "D8_PRESENTATION_SCHEMA_VERSION",
     "D9_PRESENTATION_SCHEMA_VERSION",
     "D10_PRESENTATION_SCHEMA_VERSION",
+    "D11_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
     "build_full_background_subtraction_d8_payload",
     "build_full_background_subtraction_d9_payload",
     "build_full_background_subtraction_d10_payload",
+    "build_full_background_subtraction_d11_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",
@@ -3524,5 +4350,6 @@ __all__ = (
     "render_full_background_subtraction_d8_pages",
     "render_full_background_subtraction_d9_pages",
     "render_full_background_subtraction_d10_pages",
+    "render_full_background_subtraction_d11_pages",
     "render_full_background_subtraction_procedure_pages",
 )

@@ -1,7 +1,9 @@
-"""Focused D.6 through D.9 procedure-PDF contract tests."""
+"""Focused D.6 through D.11 procedure-PDF contract tests."""
 
 from __future__ import annotations
 
+import hashlib
+import json
 import tempfile
 from pathlib import Path
 import sys
@@ -417,6 +419,69 @@ class _D10GraphErrors:
         self.root.drawn_graphs.append(self)
 
 
+class _D11GraphAsymmErrors:
+    def __init__(self, root, point_count):
+        self.root = root
+        self.points = [(None, None)] * int(point_count)
+        self.errors = [(None, None, None, None)] * int(point_count)
+
+    def SetPoint(self, index, x_value, y_value):
+        self.points[int(index)] = (float(x_value), float(y_value))
+
+    def SetPointError(self, index, ex_low, ex_high, ey_low, ey_high):
+        self.errors[int(index)] = (
+            float(ex_low), float(ex_high), float(ey_low), float(ey_high)
+        )
+
+    def SetMarkerColor(self, _color):
+        return None
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetMarkerStyle(self, _style):
+        return None
+
+    def Draw(self, _option):
+        self.root.drawn_asymm_graphs.append(self)
+
+
+class _D11Graph:
+    def __init__(self, root, point_count):
+        self.root = root
+        self.points = [(None, None)] * int(point_count)
+
+    def SetPoint(self, index, x_value, y_value):
+        self.points[int(index)] = (float(x_value), float(y_value))
+
+    def SetMarkerColor(self, _color):
+        return None
+
+    def SetMarkerStyle(self, _style):
+        return None
+
+    def Draw(self, _option):
+        self.root.drawn_plain_graphs.append(self)
+
+
+class _D11Box:
+    def __init__(self, root, x_low, y_low, x_high, y_high):
+        self.root = root
+        self.x_low = float(x_low)
+        self.y_low = float(y_low)
+        self.x_high = float(x_high)
+        self.y_high = float(y_high)
+
+    def SetFillColor(self, _color):
+        return None
+
+    def SetLineColor(self, _color):
+        return None
+
+    def Draw(self):
+        self.root.drawn_boxes.append(self)
+
+
 class _D10RenderROOT(_FakeROOT):
     """Test-only capture ROOT for the detached D.10 page renderers."""
 
@@ -428,6 +493,9 @@ class _D10RenderROOT(_FakeROOT):
         self.drawn_histograms = []
         self.drawn_lines = []
         self.drawn_graphs = []
+        self.drawn_asymm_graphs = []
+        self.drawn_plain_graphs = []
+        self.drawn_boxes = []
 
     def TH1D(self, *args):
         histogram = _D10DisplayHistogram(*args)
@@ -440,6 +508,15 @@ class _D10RenderROOT(_FakeROOT):
 
     def TGraphErrors(self, point_count):
         return _D10GraphErrors(self, point_count)
+
+    def TGraphAsymmErrors(self, point_count):
+        return _D11GraphAsymmErrors(self, point_count)
+
+    def TGraph(self, point_count):
+        return _D11Graph(self, point_count)
+
+    def TBox(self, *args):
+        return _D11Box(self, *args)
 
 
 def _d10_visible_text(root):
@@ -1012,6 +1089,154 @@ def _d10_fixture():
         "cells": d3_cells,
     }
     return phase_a, method_b, comparison
+
+
+def _d11_fixture(t_edges=(0.0, 1.0, 2.0), delta_edges=(-12.0, -5.0, 1.0, 6.0, 14.0, 23.0)):
+    """Return a detached Phase-D checkpoint with stored D.4 sentinels."""
+    def canonical_fingerprint(value):
+        return hashlib.sha256(json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False,
+        ).encode("ascii")).hexdigest()
+
+    t_edges = list(t_edges)
+    delta_edges = list(delta_edges)
+    source_fingerprint = "d11-phase-c-source-fingerprint"
+    phase_fingerprint = "d11-phase-a-fingerprint"
+    coordinate_fingerprint = "d11-coordinate-fingerprint"
+    method_a_fingerprint_inputs = {"representation": "d11-test-method-a"}
+    method_b_fingerprint_inputs = {"representation": "d11-test-method-b"}
+    method_a_fingerprint = canonical_fingerprint(method_a_fingerprint_inputs)
+    method_b_fingerprint = canonical_fingerprint(method_b_fingerprint_inputs)
+    definitions = (
+        {
+            "availability": "both_comparable", "availability_reason": None,
+            "a": (True, 2.0, 1.0, 3.0, "available"),
+            "b": (True, 4.0, 0.5, "available_multi_region"),
+            # Deliberately not derivable from the A/B sentinels.
+            "ratio": 7.25, "log": -3.5,
+        },
+        {
+            "availability": "both_present_not_comparable",
+            "availability_reason": "method_a_comparison_candidate_nonpositive",
+            "a": (True, 0.0, 0.0, 0.25, "marginal"),
+            "b": (True, 1.1, 0.2, "available_multi_region"),
+            "ratio": None, "log": None,
+        },
+        {
+            "availability": "a_only", "availability_reason": None,
+            "a": (True, 0.8, 0.4, 1.2, "available"),
+            "b": (False, None, None, "unavailable"), "ratio": None, "log": None,
+        },
+        {
+            "availability": "b_only", "availability_reason": None,
+            "a": (False, None, None, None, "unavailable"),
+            "b": (True, 0.9, 0.1, "available_multi_region"), "ratio": None, "log": None,
+        },
+        {
+            "availability": "neither_available", "availability_reason": None,
+            "a": (False, None, None, None, "unavailable"),
+            "b": (False, None, None, "unavailable"), "ratio": None, "log": None,
+        },
+    )
+    cells = []
+    for t_index in range(len(t_edges) - 1):
+        for delta_index in range(len(delta_edges) - 1):
+            definition = definitions[delta_index % len(definitions)]
+            a_present, a_candidate, a_low, a_high, a_status = definition["a"]
+            b_present, b_candidate, b_uncertainty, b_status = definition["b"]
+            cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "method_a": {
+                    "present": a_present,
+                    "comparison_candidate": a_candidate,
+                    "comparison_candidate_low": a_low,
+                    "comparison_candidate_high": a_high,
+                    "comparison_candidate_status": a_status,
+                },
+                "method_b": {
+                    "present": b_present,
+                    "comparison_candidate": b_candidate,
+                    "comparison_candidate_uncertainty": b_uncertainty,
+                    "comparison_candidate_status": b_status,
+                },
+                "comparison": {
+                    "availability": definition["availability"],
+                    "availability_reason": definition["availability_reason"],
+                    "ratio_B_over_A": definition["ratio"],
+                    "log_ratio_B_over_A": definition["log"],
+                    "diagnostic_interval_relation": "disjoint",
+                },
+            })
+    method_a = {
+        "schema_version": "pion_hgcer_method_a_comparison/v1",
+        "status": "available", "available": True,
+        "source_checkpoint_payload_fingerprint": source_fingerprint,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "canonical_t_edges": t_edges, "delta_edges": delta_edges,
+        "source_method_a_payload_fingerprint": "d11-source-method-a-payload",
+        "fingerprint_inputs": method_a_fingerprint_inputs,
+        "fingerprint": method_a_fingerprint,
+        "non_authoritative": True, "method_b_numerical_dependency": False,
+        "comparison_performed": False, "classification_performed": False,
+        "production_objects_mutated": False, "refinement_applied": False,
+    }
+    method_b = {
+        "schema_version": "pion_hgcer_method_b_comparison/v1",
+        "status": "available", "available": True,
+        "source_checkpoint_payload_fingerprint": source_fingerprint,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "canonical_t_edges": t_edges, "delta_edges": delta_edges,
+        "source_method_b_payload_fingerprint": "d11-source-method-b-payload",
+        "fingerprint_inputs": method_b_fingerprint_inputs,
+        "fingerprint": method_b_fingerprint,
+        "host_state": "proton_cleaned", "source_target_state": "post_proton_noRF",
+        "non_authoritative": True, "method_a_numerical_dependency": False,
+        "comparison_performed": False, "classification_performed": False,
+        "production_objects_mutated": False, "refinement_applied": False,
+    }
+    comparison_fingerprint_inputs = {"representation": "d11-test-ab"}
+    ab_fingerprint = canonical_fingerprint(comparison_fingerprint_inputs)
+    comparison = {
+        "schema_version": "pion_hgcer_ab_comparison/v1",
+        "method": "non_authoritative_ab_comparison",
+        "status": "available", "available": True,
+        "source_checkpoint_payload_fingerprint": source_fingerprint,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "method_a_comparison_fingerprint": method_a_fingerprint,
+        "method_b_comparison_fingerprint": method_b_fingerprint,
+        "source_method_a_comparison_payload_fingerprint": canonical_fingerprint(method_a),
+        "source_method_b_comparison_payload_fingerprint": canonical_fingerprint(method_b),
+        "canonical_t_edges": t_edges, "delta_edges": delta_edges,
+        "host_state": "proton_cleaned", "source_target_state": "post_proton_noRF",
+        "cells": cells, "fingerprint_inputs": comparison_fingerprint_inputs,
+        "fingerprint": ab_fingerprint,
+        "non_authoritative": True, "comparison_performed": True,
+        "classification_performed": True,
+        "classification_scope": "availability_only_non_prescriptive",
+        "decision_performed": False, "statistical_compatibility_claimed": False,
+        "production_objects_mutated": False, "refinement_applied": False,
+    }
+    return {
+        "schema_version": "pion_hgcer_phase_d_checkpoint/v1",
+        "source_checkpoint_payload_fingerprint": source_fingerprint,
+        "method_a_comparison": method_a,
+        "method_b_comparison": method_b,
+        "ab_comparison": comparison,
+        "status": "available", "available": True,
+        "non_authoritative": True, "comparison_performed": True,
+        "classification_performed": True,
+        "classification_scope": "availability_only_non_prescriptive",
+        "decision_performed": False, "statistical_compatibility_claimed": False,
+        "production_objects_mutated": False, "refinement_applied": False,
+    }
 
 
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
@@ -1788,6 +2013,151 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertLessEqual(isolated_frame.display_minimum, -0.15)
         self.assertGreaterEqual(isolated_frame.display_maximum, 1.0)
 
+    def test_d11_uses_only_detached_stored_d4_scalars_and_availability(self):
+        checkpoint = _d11_fixture()
+        before = deepcopy(checkpoint)
+        payload = plots.build_full_background_subtraction_d11_payload(checkpoint)
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.D11_PRESENTATION_SCHEMA_VERSION)
+        self.assertEqual(payload["t_edges"], [0.0, 1.0, 2.0])
+        self.assertEqual(payload["delta_edges"], [-12.0, -5.0, 1.0, 6.0, 14.0, 23.0])
+        first = payload["per_t"][0]
+        self.assertEqual(first["ratio_log"]["cells"][0]["comparison"], {
+            "availability": "both_comparable", "ratio_B_over_A": 7.25,
+            "log_ratio_B_over_A": -3.5,
+        })
+        zero = first["ab_overlay"]["cells"][1]
+        self.assertEqual(zero["method_a"]["candidate"], 0.0)
+        self.assertEqual(zero["method_a"]["low"], 0.0)
+        self.assertEqual(zero["method_a"]["high"], 0.25)
+        self.assertEqual(zero["method_b"]["candidate"], 1.1)
+        self.assertNotIn(zero, first["ratio_log"]["cells"])
+        self.assertEqual(
+            [cell["availability_label"] for cell in first["availability"]["cells"]],
+            [
+                "Both methods available", "Both present; ratio undefined", "Method A only",
+                "Method B only", "Neither method available",
+            ],
+        )
+        self.assertNotIn("diagnostic_interval_relation", first["availability"]["cells"][0]["comparison"])
+
+        checkpoint["ab_comparison"]["cells"][0]["comparison"]["diagnostic_interval_relation"] = "overlap"
+        self.assertEqual(
+            plots.build_full_background_subtraction_d11_payload(checkpoint), payload
+        )
+        payload["per_t"][0]["ab_overlay"]["cells"][0]["method_a"]["candidate"] = 99.0
+        self.assertEqual(before["ab_comparison"]["cells"][0]["method_a"]["comparison_candidate"], 2.0)
+        self.assertEqual(checkpoint["method_a_comparison"], before["method_a_comparison"])
+
+    def test_d11_rejects_checkpoint_provenance_geometry_and_grid_mismatches(self):
+        mutations = (
+            lambda checkpoint: checkpoint.update(source_checkpoint_payload_fingerprint="wrong"),
+            lambda checkpoint: checkpoint["method_a_comparison"].update(fingerprint="wrong"),
+            lambda checkpoint: checkpoint["method_a_comparison"]["fingerprint_inputs"].update(
+                tampered=True
+            ),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(fingerprint="wrong"),
+            lambda checkpoint: checkpoint["ab_comparison"]["fingerprint_inputs"].update(
+                tampered=True
+            ),
+            lambda checkpoint: checkpoint["method_a_comparison"].update(
+                preserved_d2_value="tampered"
+            ),
+            lambda checkpoint: checkpoint["ab_comparison"].update(
+                source_method_b_comparison_payload_fingerprint="wrong"
+            ),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(phase_a_contract_fingerprint="wrong"),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(coordinate_fingerprint="wrong"),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(canonical_t_edges=[0.0, 1.0, 3.0]),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(delta_edges=[-12.0, 1.0, 23.0]),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(host_state="identity_no_proton_cleaning"),
+            lambda checkpoint: checkpoint["method_b_comparison"].update(source_target_state="post_proton_RF"),
+            lambda checkpoint: checkpoint["ab_comparison"]["cells"].pop(),
+            lambda checkpoint: checkpoint["ab_comparison"]["cells"].append(
+                deepcopy(checkpoint["ab_comparison"]["cells"][0])
+            ),
+            lambda checkpoint: checkpoint["ab_comparison"]["cells"][0].update(t_low=-1.0),
+            lambda checkpoint: checkpoint["ab_comparison"]["cells"][0].update(delta_index=99),
+        )
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                checkpoint = _d11_fixture()
+                mutation(checkpoint)
+                payload = plots.build_full_background_subtraction_d11_payload(checkpoint)
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["per_t"], [])
+
+    def test_d11_page_local_availability_and_rendered_stored_values(self):
+        checkpoint = _d11_fixture()
+        for cell in checkpoint["ab_comparison"]["cells"]:
+            if cell["t_index"] != 1:
+                continue
+            cell["method_a"].update(
+                present=False,
+                comparison_candidate=None,
+                comparison_candidate_low=None,
+                comparison_candidate_high=None,
+                comparison_candidate_status="unavailable",
+            )
+            cell["method_b"].update(
+                present=False,
+                comparison_candidate=None,
+                comparison_candidate_uncertainty=None,
+                comparison_candidate_status="unavailable",
+            )
+            cell["comparison"].update(
+                availability="neither_available", availability_reason=None,
+                ratio_B_over_A=None, log_ratio_B_over_A=None,
+            )
+        payload = plots.build_full_background_subtraction_d11_payload(checkpoint)
+        self.assertTrue(payload["available"])
+        self.assertFalse(payload["per_t"][1]["ab_overlay"]["available"])
+        self.assertFalse(payload["per_t"][1]["ratio_log"]["available"])
+        self.assertTrue(payload["per_t"][1]["availability"]["available"])
+
+        root = _D10RenderROOT()
+        first = payload["per_t"][0]
+        self.assertTrue(plots._render_d11_ab_overlay_page(root, "ignored.pdf", payload, first))
+        self.assertEqual(len(root.drawn_asymm_graphs), 1)
+        self.assertIn((-2.0, 0.0), root.drawn_asymm_graphs[0].points)
+        zero_index = root.drawn_asymm_graphs[0].points.index((-2.0, 0.0))
+        self.assertEqual(root.drawn_asymm_graphs[0].errors[zero_index], (0.0, 0.0, 0.0, 0.25))
+        self.assertEqual(len(root.drawn_graphs), 1)
+        self.assertIn((-8.5, 4.0), root.drawn_graphs[0].points)
+        overlay_frame = _d10_histogram(root, "H_full_background_d11_overlay_t1")
+        self.assertLessEqual(overlay_frame.display_minimum, 0.0)
+        self.assertGreaterEqual(overlay_frame.display_maximum, 4.5)
+        self.assertIn((-12.0, 1.0, 23.0, 1.0), [
+            (line.x1, line.y1, line.x2, line.y2) for line in root.drawn_lines
+        ])
+        visible = _d10_visible_text(root)
+        self.assertIn("Method A - HGCer response diagnostic", visible)
+        self.assertIn("Method B - Missing-mass closure diagnostic", visible)
+        self.assertIn("NON-AUTHORITATIVE DIAGNOSTIC", visible)
+        self.assertIn("No refinement, correction, or method selection", visible)
+
+        ratio_root = _D10RenderROOT()
+        self.assertTrue(plots._render_d11_ratio_log_page(ratio_root, "ignored.pdf", payload, first))
+        self.assertEqual(ratio_root.drawn_plain_graphs[0].points, [(-8.5, 7.25)])
+        self.assertEqual(ratio_root.drawn_plain_graphs[1].points, [(-8.5, -3.5)])
+        self.assertEqual(
+            [(line.x1, line.y1, line.x2, line.y2) for line in ratio_root.drawn_lines],
+            [(-12.0, 1.0, 23.0, 1.0), (-12.0, 0.0, 23.0, 0.0)],
+        )
+
+        availability_root = _D10RenderROOT()
+        self.assertTrue(plots._render_d11_availability_page(availability_root, "ignored.pdf", payload, first))
+        self.assertEqual(
+            [(box.x_low, box.x_high) for box in availability_root.drawn_boxes],
+            [(-12.0, -5.0), (-5.0, 1.0), (1.0, 6.0), (6.0, 14.0), (14.0, 23.0)],
+        )
+        labels = [label for legend in availability_root.legends for label, _option in legend.entries]
+        self.assertEqual(labels, [
+            "Both methods available", "Both present; ratio undefined", "Method A only",
+            "Method B only", "Neither method available",
+        ])
+
     def test_d10_d3_failures_are_local_to_the_relative_page(self):
         mutations = (
             ("method_b_fingerprint", "wrong-method-b"),
@@ -2358,8 +2728,68 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("analysis_abs_t", d10_event_rows_source)
         self.assertNotIn("SHMS_delta", d10_event_rows_source)
 
+        d11_labels_source = source[
+            source.index("_D11_AVAILABILITY_LABELS"):
+            source.index("def _import_root")
+        ]
+        for label in (
+            "Both methods available",
+            "Both present; ratio undefined",
+            "Method A only",
+            "Method B only",
+            "Neither method available",
+        ):
+            with self.subTest(d11_availability_label=label):
+                self.assertIn(label, d11_labels_source)
+        d11_source = source[
+            source.index("def _d11_nonempty_string"):
+            source.index("def render_full_background_subtraction_procedure_pages")
+        ]
+        for required in (
+            "D11_PRESENTATION_SCHEMA_VERSION",
+            "ratio_B_over_A",
+            "log_ratio_B_over_A",
+            "TGraphAsymmErrors",
+            "TGraphErrors",
+            "TGraph",
+            "TBox",
+            "full_background.d11.ab_overlay",
+            "full_background.d11.ab_ratio_log",
+            "full_background.d11.method_availability",
+            "NON-AUTHORITATIVE DIAGNOSTIC",
+            "No refinement, correction, or method selection",
+        ):
+            with self.subTest(d11_required=required):
+                self.assertIn(required, d11_source)
+        for forbidden in (
+            "diagnostic_interval_relation",
+            "build_pion_hgcer_comparison_input_contract(",
+            "build_pion_hgcer_method_a_comparison(",
+            "build_pion_hgcer_method_b_comparison(",
+            "build_pion_hgcer_ab_comparison(",
+            "phase_d_ab_plot_payload(",
+            "find_canonical_bin(",
+            "math.log(",
+            "C_A",
+            "C_B",
+            "C_final",
+            "use_A",
+            "use_B",
+            "combine_AB",
+            "preferred_method",
+        ):
+            with self.subTest(d11_forbidden=forbidden):
+                self.assertNotIn(forbidden, d11_source)
+        d11_renderer_source = d11_source[
+            d11_source.index("def _d11_draw_notice"):
+            d11_source.index("def _render_d11_t_pages")
+        ]
+        for forbidden in ("tension", "compatibility", "significance"):
+            with self.subTest(d11_renderer_forbidden=forbidden):
+                self.assertNotIn(forbidden, d11_renderer_source)
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.10 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.11 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -2368,6 +2798,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_d8_payload",
             "build_full_background_subtraction_d9_payload",
             "build_full_background_subtraction_d10_payload",
+            "build_full_background_subtraction_d11_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -2395,6 +2826,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_d10_payload(", start),
+            runtime.index("build_full_background_subtraction_d11_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_d11_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
@@ -2410,6 +2845,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d8_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_d11_payload\"]", block)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_d10_root_histograms_preserve_frozen_boundaries_and_stored_bins(self):
@@ -2592,6 +3028,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             d10_phase_a, d10_method_b, d10_comparison
         )
         self.assertTrue(d10_payload["available"])
+        d11_payload = plots.build_full_background_subtraction_d11_payload(
+            _d11_fixture(
+                t_edges=(0.0, 1.0, 2.0),
+                delta_edges=(-10.0, 0.0, 10.0),
+            )
+        )
+        self.assertTrue(d11_payload["available"])
         d8_source_snapshots = []
         for parent in d8_parents:
             application = parent["final_diagnostic_application_result"]
@@ -2617,7 +3060,8 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             self.assertTrue(plots.open_full_background_subtraction_pdf(pdf))
             try:
                 rendered = plots.render_full_background_subtraction_procedure_pages(
-                    pdf, d6_payload, d7_payload, d8_payload, d9_payload, d10_payload
+                    pdf, d6_payload, d7_payload, d8_payload, d9_payload, d10_payload,
+                    d11_payload,
                 )
             finally:
                 plots.close_full_background_subtraction_pdf(pdf)
@@ -2639,6 +3083,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d10.method_b_mm_inputs",
                     "full_background.d10.method_b_local_closure",
                     "full_background.d10.method_b_relative",
+                    "full_background.d11.ab_overlay",
+                    "full_background.d11.ab_ratio_log",
+                    "full_background.d11.method_availability",
                     "full_background.d6.raw_mm",
                     "full_background.d6.proton_pid",
                     "full_background.d6.proton_weight",
@@ -2654,11 +3101,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     "full_background.d10.method_b_mm_inputs",
                     "full_background.d10.method_b_local_closure",
                     "full_background.d10.method_b_relative",
+                    "full_background.d11.ab_overlay",
+                    "full_background.d11.ab_ratio_log",
+                    "full_background.d11.method_availability",
                 ],
             )
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
-                ["t1"] * 15 + ["t2"] * 15,
+                ["t1"] * 18 + ["t2"] * 18,
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
             self.assertTrue(Path(pdf).exists())
