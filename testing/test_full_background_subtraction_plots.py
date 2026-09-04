@@ -1184,35 +1184,38 @@ def _d10_fixture():
         "t_edges": t_edges,
         "delta_edges": delta_edges,
         "mm_binning": mm_edges,
-        "mm_regions": [{
-            "region_name": "pi_delta",
-            "mm_low": 0.93,
-            "mm_high": 1.11,
-            "region_role": "pion_sensitive",
-            "window_source": "sentinel.pion.window",
-            "mm_offset_applied": 0.0125,
-            "available": True,
-            "protected_signal_overlap": False,
-            "reason": None,
-        }],
-        "protected_regions": [
+        "mm_regions": [
             {
-                "region_name": "KLambda",
-                "mm_low": 1.115,
-                "mm_high": 1.130,
-                "region_role": "protected_signal",
-                "window_source": "sentinel.lambda.window",
+                "region_name": "pion_sensitive_low",
+                "mm_low": 0.80,
+                "mm_high": 1.10,
+                "region_role": "pion_sensitive",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
                 "mm_offset_applied": 0.0,
+                "available": True,
+                "protected_signal_overlap": False,
+                "reason": None,
             },
             {
-                "region_name": "KSigma0",
-                "mm_low": 1.185,
-                "mm_high": 1.215,
-                "region_role": "protected_signal",
-                "window_source": "sentinel.sigma.window",
-                "mm_offset_applied": 0.020,
+                "region_name": "pion_sensitive_high",
+                "mm_low": 1.23,
+                "mm_high": 1.35,
+                "region_role": "pion_sensitive",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
+                "mm_offset_applied": 0.0,
+                "available": True,
+                "protected_signal_overlap": False,
+                "reason": None,
             },
         ],
+        "protected_regions": [{
+            "region_name": "KLambdaSigma0",
+            "mm_low": 1.10,
+            "mm_high": 1.23,
+            "region_role": "protected_signal",
+            "window_source": "method_b.fixed_lambda_sigma_protected",
+            "mm_offset_applied": 0.0,
+        }],
         "fingerprint": method_b_fingerprint,
         "cells": method_b_cells,
     }
@@ -1923,8 +1926,16 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(payload["schema_version"], plots.D10_PRESENTATION_SCHEMA_VERSION)
         self.assertEqual(payload["mm_edges"], [0.80, 0.91, 1.03, 1.17, 1.35])
         self.assertEqual(payload["host_label"], "Proton-cleaned kaon data")
-        self.assertEqual(payload["mm_regions"][0]["mm_low"], 0.93)
-        self.assertEqual(payload["mm_regions"][0]["mm_offset_applied"], 0.0125)
+        self.assertEqual(
+            [
+                (row["region_name"], row["mm_low"], row["mm_high"], row["mm_offset_applied"])
+                for row in payload["mm_regions"]
+            ],
+            [
+                ("pion_sensitive_low", 0.80, 1.10, 0.0),
+                ("pion_sensitive_high", 1.23, 1.35, 0.0),
+            ],
+        )
         self.assertEqual(
             set(payload["protected_regions"][0]),
             {
@@ -2054,13 +2065,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
 
         host = _d10_histogram(root, "H_full_background_d10_inputs_host_t1")
+        self.assertEqual(host.title, ";Missing mass [GeV];Signed normalized yield")
+        self.assertNotIn("Method B - Missing-mass closure inputs", host.title)
         self.assertLessEqual(host.display_minimum, -7.0)
         self.assertGreaterEqual(host.display_maximum, 11.0)
         self.assertLessEqual(host.display_minimum, 0.0)
         self.assertGreaterEqual(host.display_maximum, 0.0)
         self.assertEqual(
             {line.x1 for line in root.drawn_lines},
-            {0.93, 1.11, 1.115, 1.130, 1.185, 1.215},
+            {1.10, 1.23},
         )
         self.assertTrue(all(line.x1 == line.x2 for line in root.drawn_lines))
         visible = _d10_visible_text(root)
@@ -2068,14 +2081,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "Method B - Missing-mass closure inputs",
             "Proton-cleaned kaon data",
             "Baseline pion background",
-            "Pion-sensitive region",
-            "K-Lambda protected region",
-            "K-Sigma0 protected region",
-            "Diagnostic only - no refinement applied",
+            "Pion-sensitive region (outside protected window)",
+            "Lambda/Sigma protected region (1.10-1.23 GeV)",
             "|t| = [0.0000, 1.0000] GeV^2",
         ):
             with self.subTest(expected=expected):
                 self.assertIn(expected, visible)
+        self.assertEqual(visible.count("Method B - Missing-mass closure inputs"), 1)
         for internal in ("host_state", "phase_a", "window_source", "candidate_L_B"):
             with self.subTest(internal=internal):
                 self.assertNotIn(internal, visible)
@@ -2101,7 +2113,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("Proton-cleaned kaon data", visible)
         self.assertNotIn("identity_no_proton_cleaning", visible)
 
-    def test_d10_page14_renderer_locks_common_range_delta_order_and_boundaries(self):
+    def test_d10_page14_renderer_uses_independent_ranges_delta_order_and_boundaries(self):
         phase_a, method_b, comparison = _d10_fixture()
         for cell in method_b["cells"]:
             if cell["t_index"] != 0:
@@ -2128,14 +2140,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             _d10_histogram(root, "H_full_background_d10_local_t1_d{}_host".format(index))
             for index in (1, 2)
         ]
-        self.assertEqual(
-            [(histogram.display_minimum, histogram.display_maximum) for histogram in hosts],
-            [(hosts[0].display_minimum, hosts[0].display_maximum)] * 2,
-        )
-        self.assertLessEqual(hosts[0].display_minimum, -9.0)
-        self.assertGreaterEqual(hosts[0].display_maximum, 12.0)
-        self.assertLessEqual(hosts[0].display_minimum, 0.0)
-        self.assertGreaterEqual(hosts[0].display_maximum, 0.0)
+        ranges = [(histogram.display_minimum, histogram.display_maximum) for histogram in hosts]
+        self.assertNotEqual(ranges[0], ranges[1])
+        self.assertLessEqual(ranges[0][0], -5.0)
+        self.assertGreaterEqual(ranges[0][1], 7.0)
+        self.assertLessEqual(ranges[1][0], -13.0)
+        self.assertGreaterEqual(ranges[1][1], 17.0)
+        for low, high in ranges:
+            self.assertLessEqual(low, 0.0)
+            self.assertGreaterEqual(high, 0.0)
         self.assertEqual(
             [histogram.title.split(";")[0] for histogram in hosts],
             ["delta = [-10.000, 0.000] %", "delta = [0.000, 10.000] %"],
@@ -2146,14 +2159,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         baseline = _d10_histogram(root, "H_full_background_d10_local_t1_d1_baseline")
         self.assertEqual(baseline.GetBinContent(1), -3.0)
         self.assertEqual(baseline.GetBinError(1), 2.0)
-        self.assertEqual(len(root.drawn_lines), 12)
+        self.assertEqual(len(root.drawn_lines), 4)
         self.assertEqual(
-            [{line.x1 for line in root.drawn_lines[offset:offset + 6]} for offset in (0, 6)],
-            [{0.93, 1.11, 1.115, 1.130, 1.185, 1.215}] * 2,
+            [{line.x1 for line in root.drawn_lines[offset:offset + 2]} for offset in (0, 2)],
+            [{1.10, 1.23}] * 2,
         )
         visible = _d10_visible_text(root)
         self.assertIn("Method B - Local missing-mass closure", visible)
-        self.assertIn("Diagnostic only - no refinement applied", visible)
+        self.assertNotIn("Diagnostic only - no refinement applied", visible)
         self.assertIn("|t| = [0.0000, 1.0000] GeV^2", visible)
 
     def test_d10_page15_renderer_locks_d3_points_status_unity_range_and_text(self):
@@ -2181,7 +2194,6 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         for expected in (
             "Method B - Missing-mass closure diagnostic",
             "Relative pion-background diagnostic",
-            "Diagnostic only - no correction or method selection",
             "|t| = [0.0000, 1.0000] GeV^2",
         ):
             with self.subTest(expected=expected):
@@ -2340,8 +2352,8 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         visible = _d10_visible_text(root)
         self.assertIn("Method A - HGCer response diagnostic", visible)
         self.assertIn("Method B - Missing-mass closure diagnostic", visible)
-        self.assertIn("NON-AUTHORITATIVE DIAGNOSTIC", visible)
-        self.assertIn("No refinement, correction, or method selection", visible)
+        self.assertNotIn("NON-AUTHORITATIVE DIAGNOSTIC", visible)
+        self.assertNotIn("No refinement, correction, or method selection", visible)
 
         ratio_root = _D10RenderROOT()
         self.assertTrue(plots._render_d11_ratio_log_page(ratio_root, "ignored.pdf", payload, first))
@@ -2364,14 +2376,12 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "Method B only", "Neither method available",
         ])
         legend = availability_root.legends[-1]
-        notice = next(
-            pave for pave in availability_root.pave_texts
-            if "NON-AUTHORITATIVE DIAGNOSTIC" in pave._text
-        )
         self.assertEqual(legend.coordinates, (0.55, 0.44, 0.89, 0.76))
-        self.assertEqual(notice.coordinates, (0.14, 0.82, 0.86, 0.92))
-        self.assertFalse(_rectangles_overlap(legend.coordinates, notice.coordinates))
-        self.assertLess(legend.coordinates[3], notice.coordinates[1])
+        self.assertFalse(any(
+            "NON-AUTHORITATIVE DIAGNOSTIC" in pave._text
+            or "No refinement, correction, or method selection" in pave._text
+            for pave in availability_root.pave_texts
+        ))
 
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
@@ -2585,6 +2595,21 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 self.assertFalse(payload["available"])
                 self.assertEqual(payload["reason"], "method_b_contract_invalid")
 
+        for field, value in (
+            ("region_name", "KLambda"),
+            ("mm_low", 1.09),
+            ("mm_high", 1.24),
+            ("mm_offset_applied", 0.01),
+        ):
+            with self.subTest(protected_field=field):
+                phase_a, method_b, comparison = _d10_fixture()
+                method_b["protected_regions"][0][field] = value
+                payload = plots.build_full_background_subtraction_d10_payload(
+                    phase_a, method_b, comparison
+                )
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], "method_b_protected_region_contract_invalid")
+
         phase_a, method_b, comparison = _d10_fixture()
         phase_a["kaon_host_records"][0]["delta_index"] = 99
         payload = plots.build_full_background_subtraction_d10_payload(
@@ -2646,7 +2671,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertIsNone(plots._d9_method_a_threshold_text({"available": False}))
 
-    def test_d9_response_page_uses_detached_signed_weighted_clones_and_notices(self):
+    def test_d9_response_page_uses_detached_signed_weighted_clones_and_threshold_only(self):
         _BinnedHistogram.created = []
         root = _FakeROOT()
         kaon_source = _BinnedHistogram("d9-kaon", (11.0,))
@@ -2686,17 +2711,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(kaon_source.contents, [11.0])
         self.assertEqual(pion_source.contents, [13.0])
         visible_text = tuple(line for text in root.drawn_text for line in text)
-        self.assertIn("Diagnostic only - no refinement applied", visible_text)
+        self.assertNotIn("Diagnostic only - no refinement applied", visible_text)
         self.assertIn("Method A low response: 0 < HGCer NPE <= 2", visible_text)
         self.assertEqual(len(root.legends), 1)
-        self.assertEqual(len(root.pave_texts), 2)
+        self.assertEqual(len(root.pave_texts), 1)
         legend_rectangle = root.legends[0].coordinates
-        authority_rectangle = root.pave_texts[0].coordinates
-        threshold_rectangle = root.pave_texts[1].coordinates
+        threshold_rectangle = root.pave_texts[0].coordinates
         self.assertEqual(legend_rectangle, (0.62, 0.58, 0.89, 0.72))
-        self.assertFalse(_rectangles_overlap(legend_rectangle, authority_rectangle))
         self.assertFalse(_rectangles_overlap(legend_rectangle, threshold_rectangle))
-        self.assertFalse(_rectangles_overlap(authority_rectangle, threshold_rectangle))
 
         unavailable_root = _FakeROOT()
         self.assertTrue(
@@ -2707,19 +2729,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         unavailable_text = tuple(
             line for text in unavailable_root.drawn_text for line in text
         )
-        self.assertIn("Diagnostic only - no refinement applied", unavailable_text)
+        self.assertNotIn("Diagnostic only - no refinement applied", unavailable_text)
         self.assertNotIn("Method A low response: 0 < HGCer NPE <= 2", unavailable_text)
         self.assertFalse(any("threshold unavailable" in line for line in unavailable_text))
         self.assertEqual(len(unavailable_root.legends), 1)
-        self.assertEqual(len(unavailable_root.pave_texts), 1)
-        self.assertFalse(
-            _rectangles_overlap(
-                unavailable_root.legends[0].coordinates,
-                unavailable_root.pave_texts[0].coordinates,
-            )
-        )
+        self.assertFalse(unavailable_root.pave_texts)
 
-    def test_d9_delta_page_keeps_authority_and_threshold_notices_separate(self):
+    def test_d9_delta_page_keeps_only_the_threshold_notice(self):
         _BinnedHistogram2D.created = []
         group = {
             "t_index": 0,
@@ -2744,7 +2760,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             )
         )
         visible_text = tuple(line for text in root.drawn_text for line in text)
-        self.assertIn("Diagnostic only - no refinement applied", visible_text)
+        self.assertNotIn("Diagnostic only - no refinement applied", visible_text)
         self.assertIn("Method A low response: 0 < HGCer NPE <= 2", visible_text)
 
         unavailable_root = _FakeROOT()
@@ -2757,7 +2773,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         unavailable_text = tuple(
             line for text in unavailable_root.drawn_text for line in text
         )
-        self.assertIn("Diagnostic only - no refinement applied", unavailable_text)
+        self.assertNotIn("Diagnostic only - no refinement applied", unavailable_text)
         self.assertFalse(any("Method A low response" in line for line in unavailable_text))
         self.assertFalse(any("threshold unavailable" in line for line in unavailable_text))
 
@@ -2980,7 +2996,16 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "No refinement, correction, or method selection",
         ):
             with self.subTest(notice=notice):
-                self.assertIn(notice, source)
+                self.assertNotIn(notice, source)
+        technical_source = (
+            REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py"
+        ).read_text(encoding="utf-8")
+        for technical_notice in (
+            "NON-AUTHORITATIVE DIAGNOSTIC / No refinement applied",
+            "NON-AUTHORITATIVE DIAGNOSTIC",
+        ):
+            with self.subTest(technical_notice=technical_notice):
+                self.assertIn(technical_notice, technical_source)
         for forbidden_phase_object in (
             "D12_PRESENTATION_SCHEMA_VERSION",
             "build_full_background_subtraction_d12_payload",
@@ -3075,7 +3100,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ]
         self.assertIn("Method A - HGCer response diagnostic", d9_relative_renderer)
         self.assertIn("Relative pion-background diagnostic", d9_relative_renderer)
-        self.assertIn(
+        self.assertNotIn(
             "Diagnostic only - no correction or method selection", d9_relative_renderer
         )
         self.assertNotIn("Method A cell / same-|t| parent", d9_relative_renderer)
@@ -3123,8 +3148,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "Missing-mass closure inputs",
             "Local missing-mass closure",
             "Relative pion-background diagnostic",
-            "Diagnostic only - no refinement applied",
-            "Diagnostic only - no correction or method selection",
+            "KLambdaSigma0",
+            "Pion-sensitive region (outside protected window)",
+            "Lambda/Sigma protected region (1.10-1.23 GeV)",
         ):
             self.assertIn(required, d10_source)
         for forbidden in (
@@ -3187,8 +3213,6 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "full_background.d11.ab_overlay",
             "full_background.d11.ab_ratio_log",
             "full_background.d11.method_availability",
-            "NON-AUTHORITATIVE DIAGNOSTIC",
-            "No refinement, correction, or method selection",
         ):
             with self.subTest(d11_required=required):
                 self.assertIn(required, d11_source)
@@ -3213,9 +3237,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(d11_forbidden=forbidden):
                 self.assertNotIn(forbidden, d11_source)
         d11_renderer_source = d11_source[
-            d11_source.index("def _d11_draw_notice"):
+            d11_source.index("def _render_d11_ab_overlay_page"):
             d11_source.index("def _render_d11_t_pages")
         ]
+        for notice in (
+            "NON-AUTHORITATIVE DIAGNOSTIC",
+            "No refinement, correction, or method selection",
+        ):
+            with self.subTest(d11_banner_absent=notice):
+                self.assertNotIn(notice, d11_renderer_source)
         for forbidden in ("tension", "compatibility", "significance"):
             with self.subTest(d11_renderer_forbidden=forbidden):
                 self.assertNotIn(forbidden, d11_renderer_source)

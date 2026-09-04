@@ -5409,6 +5409,7 @@ def rand_sub(
                 try:
                     pion_hgcer_method_b_config = (
                         resolve_pion_hgcer_method_b_config(
+                            phase_a_contract=pion_hgcer_event_contract,
                             inp_dict=inpDict,
                             phi_setting=phi_setting,
                             mm_offset_data=MM_offset_DATA,
@@ -5426,8 +5427,12 @@ def rand_sub(
                         config={},
                     )
                     pion_hgcer_method_b.update({
-                        "reason": "runtime_method_b_configuration_exception",
-                        "diagnostic_stage": "runtime_build_exception",
+                        "reason": getattr(
+                            exc, "reason", "runtime_method_b_configuration_exception"
+                        ),
+                        "diagnostic_stage": getattr(
+                            exc, "stage", "runtime_build_exception"
+                        ),
                         "exception_type": type(exc).__name__,
                         "exception_message": str(exc),
                     })

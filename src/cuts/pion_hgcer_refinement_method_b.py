@@ -15,16 +15,14 @@ import math
 from copy import deepcopy
 from types import MappingProxyType
 
-from background_config import (
-    get_particle_subtraction_component_fit_window_config,
-    get_proton_contamination_cleaning_config,
-    resolve_particle_subtraction_component_fit_windows,
-)
 from canonical_binning import find_canonical_bin
 
 
 METHOD_B_SCHEMA_VERSION = "pion_hgcer_method_b/v1"
 METHOD_B_METHOD = "local_pion_background_closure"
+METHOD_B_PROTECTED_MM_LOW = 1.10
+METHOD_B_PROTECTED_MM_HIGH = 1.23
+METHOD_B_PROTECTED_REGION_NAME = "KLambdaSigma0"
 
 DEFAULT_METHOD_B_CONFIG = {
     "mm_regions": [],
@@ -158,112 +156,58 @@ def _canonical_index(value, edges):
     return index if index >= 0 else None
 
 
-def _window_collection(value, context):
-    if not isinstance(value, (list, tuple)):
-        raise MethodBUnavailable("{}_invalid".format(context), "configuration")
-    if len(value) == 2:
-        try:
-            low, high = float(value[0]), float(value[1])
-        except (TypeError, ValueError):
-            pass
-        else:
-            if math.isfinite(low) and math.isfinite(high) and low < high:
-                return [(low, high)]
-    windows = []
-    for entry in value:
-        if not isinstance(entry, (list, tuple)) or len(entry) != 2:
-            raise MethodBUnavailable("{}_invalid".format(context), "configuration")
-        low, high = float(entry[0]), float(entry[1])
-        if not math.isfinite(low) or not math.isfinite(high) or low >= high:
-            raise MethodBUnavailable("{}_invalid".format(context), "configuration")
-        windows.append((low, high))
-    return windows
-
-
 def resolve_pion_hgcer_method_b_config(
-    *, inp_dict, phi_setting, mm_offset_data=0.0
+    *, phase_a_contract, inp_dict=None, phi_setting=None, mm_offset_data=0.0
 ):
-    """Resolve Method-B windows from their existing configuration owners.
+    """Resolve the Method-B-only MM partition from frozen Phase-A geometry.
 
-    ``phi_setting`` is used only by the repository's existing override resolver;
-    it is deliberately absent from the returned configuration and fingerprint.
+    The retained call-compatible inputs are intentionally ignored: Method B's
+    diagnostic regions are independent of shared production windows, phi, and
+    missing-mass offsets.
     """
-    pion_config = get_particle_subtraction_component_fit_window_config(
-        "pion_control", inp_dict=inp_dict, phi_setting=phi_setting
-    ) or {}
-    resolved_windows = resolve_particle_subtraction_component_fit_windows(
-        "pion_control",
-        mm_offset_data=mm_offset_data,
-        inp_dict=inp_dict,
-        phi_setting=phi_setting,
+    del inp_dict, phi_setting, mm_offset_data
+    mm_edges = _phase_a_mm_edges(
+        phase_a_contract if isinstance(phase_a_contract, dict) else {}
     )
-    offset = (
-        float(mm_offset_data)
-        if bool(pion_config.get("apply_mm_offset_data", False)) else 0.0
-    )
-    regions = []
-    order = ("pi_n", "pi_sidis", "pi_delta")
-    for base_name in order:
-        windows = list(resolved_windows.get(base_name) or ())
-        for index, bounds in enumerate(windows):
-            if len(windows) == 1:
-                region_name = base_name
-            else:
-                suffixes = ("low", "high")
-                suffix = suffixes[index] if index < len(suffixes) else str(index + 1)
-                region_name = "{}_{}".format(base_name, suffix)
-            regions.append({
-                "region_name": region_name,
-                "mm_low": float(bounds[0]),
-                "mm_high": float(bounds[1]),
-                "region_role": "pion_sensitive",
-                "window_source": "pion_control.windows.{}".format(base_name),
-                "mm_offset_applied": offset,
-            })
-
-    proton_config = get_proton_contamination_cleaning_config(
-        inp_dict=inp_dict, phi_setting=phi_setting
-    ) or {}
-    lambda_bounds = (proton_config.get("validation_windows") or {}).get(
-        "lambda_peak"
-    )
-    lambda_windows = _window_collection(lambda_bounds, "lambda_protected_window")
-    if len(lambda_windows) != 1:
-        raise MethodBUnavailable("lambda_protected_window_invalid", "configuration")
-
-    kaon_config = get_particle_subtraction_component_fit_window_config(
-        "kaon_nosub", inp_dict=inp_dict, phi_setting=phi_setting
-    ) or {}
-    sigma_bounds = (kaon_config.get("windows") or {}).get("k_sigma0_signal")
-    sigma_windows = _window_collection(sigma_bounds, "sigma0_protected_window")
-    if len(sigma_windows) != 1:
-        raise MethodBUnavailable("sigma0_protected_window_invalid", "configuration")
-    sigma_offset = (
-        float(mm_offset_data)
-        if bool(kaon_config.get("apply_mm_offset_data", False)) else 0.0
-    )
-    sigma_low, sigma_high = sigma_windows[0]
-    protected = [
+    mm_low = float(mm_edges[0])
+    mm_high = float(mm_edges[-1])
+    if not (
+        mm_low < METHOD_B_PROTECTED_MM_LOW < METHOD_B_PROTECTED_MM_HIGH < mm_high
+    ):
+        raise MethodBUnavailable(
+            "method_b_protected_region_outside_phase_a_domain", "configuration"
+        )
+    regions = [
         {
-            "region_name": "KLambda",
-            "mm_low": float(lambda_windows[0][0]),
-            "mm_high": float(lambda_windows[0][1]),
-            "region_role": "protected_signal",
-            "window_source": "proton_cleaning.validation_windows.lambda_peak",
+            "region_name": "pion_sensitive_low",
+            "mm_low": mm_low,
+            "mm_high": METHOD_B_PROTECTED_MM_LOW,
+            "region_role": "pion_sensitive",
+            "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
             "mm_offset_applied": 0.0,
         },
         {
-            "region_name": "KSigma0",
-            "mm_low": float(sigma_low + sigma_offset),
-            "mm_high": float(sigma_high + sigma_offset),
-            "region_role": "protected_signal",
-            "window_source": "kaon_nosub.windows.k_sigma0_signal",
-            "mm_offset_applied": sigma_offset,
+            "region_name": "pion_sensitive_high",
+            "mm_low": METHOD_B_PROTECTED_MM_HIGH,
+            "mm_high": mm_high,
+            "region_role": "pion_sensitive",
+            "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
+            "mm_offset_applied": 0.0,
         },
     ]
+    protected = [{
+        "region_name": METHOD_B_PROTECTED_REGION_NAME,
+        "mm_low": METHOD_B_PROTECTED_MM_LOW,
+        "mm_high": METHOD_B_PROTECTED_MM_HIGH,
+        "region_role": "protected_signal",
+        "window_source": "method_b.fixed_lambda_sigma_protected",
+        "mm_offset_applied": 0.0,
+    }]
     resolved = deepcopy(DEFAULT_METHOD_B_CONFIG)
     resolved["mm_regions"] = regions
     resolved["protected_regions"] = protected
+    resolved = _resolved_config(resolved)
+    _validate_method_b_partition(resolved, mm_edges)
     return _json_ready(resolved)
 
 
@@ -294,6 +238,29 @@ def _normalize_regions(entries, expected_role):
     return normalized
 
 
+def _validate_method_b_partition(config, mm_edges):
+    """Require the runtime Method-B rows to tile the frozen MM domain exactly."""
+    edges = _strict_edges(mm_edges, "phase_a_mm")
+    regions = tuple(config.get("mm_regions") or ())
+    protected = tuple(config.get("protected_regions") or ())
+    if len(regions) != 2 or len(protected) != 1:
+        raise MethodBUnavailable("method_b_region_partition_invalid", "configuration")
+    low_region, high_region = regions
+    protected_region = protected[0]
+    if (
+        low_region.get("region_name") != "pion_sensitive_low"
+        or high_region.get("region_name") != "pion_sensitive_high"
+        or protected_region.get("region_name") != METHOD_B_PROTECTED_REGION_NAME
+        or low_region.get("mm_low") != edges[0]
+        or low_region.get("mm_high") != METHOD_B_PROTECTED_MM_LOW
+        or protected_region.get("mm_low") != METHOD_B_PROTECTED_MM_LOW
+        or protected_region.get("mm_high") != METHOD_B_PROTECTED_MM_HIGH
+        or high_region.get("mm_low") != METHOD_B_PROTECTED_MM_HIGH
+        or high_region.get("mm_high") != edges[-1]
+    ):
+        raise MethodBUnavailable("method_b_region_partition_invalid", "configuration")
+
+
 def _resolved_config(config):
     if not isinstance(config, dict):
         raise MethodBUnavailable("configuration_missing", "configuration")
@@ -318,8 +285,15 @@ def _resolved_config(config):
     )
     if not resolved["mm_regions"]:
         raise MethodBUnavailable("region_definitions_missing", "configuration")
-    protected_names = {entry["region_name"] for entry in resolved["protected_regions"]}
-    if not {"KLambda", "KSigma0"}.issubset(protected_names):
+    if len(resolved["protected_regions"]) != 1:
+        raise MethodBUnavailable("protected_region_definitions_missing", "configuration")
+    protected = resolved["protected_regions"][0]
+    if (
+        protected["region_name"] != METHOD_B_PROTECTED_REGION_NAME
+        or protected["mm_low"] != METHOD_B_PROTECTED_MM_LOW
+        or protected["mm_high"] != METHOD_B_PROTECTED_MM_HIGH
+        or protected["mm_offset_applied"] != 0.0
+    ):
         raise MethodBUnavailable("protected_region_definitions_missing", "configuration")
 
     support = resolved["support"]
@@ -1225,6 +1199,9 @@ def summarize_pion_hgcer_method_b(result):
 
 __all__ = [
     "METHOD_B_SCHEMA_VERSION",
+    "METHOD_B_PROTECTED_MM_LOW",
+    "METHOD_B_PROTECTED_MM_HIGH",
+    "METHOD_B_PROTECTED_REGION_NAME",
     "build_pion_hgcer_method_b",
     "resolve_pion_hgcer_method_b_config",
     "summarize_pion_hgcer_method_b",

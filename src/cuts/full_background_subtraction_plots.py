@@ -2063,9 +2063,6 @@ def _render_d9_hgcer_response_page(ROOT, pdf_name, group, thresholds):
         legend.AddEntry(pion, "Pion-control sample", "l")
         legend.Draw()
         draw_objects.extend((kaon, pion, legend))
-        draw_objects.append(
-            _d9_draw_notice(ROOT, "Diagnostic only - no refinement applied", 0.84, 0.92)
-        )
         threshold_text = _d9_method_a_threshold_text(thresholds)
         if threshold_text is not None:
             _d9_draw_threshold(
@@ -2135,9 +2132,6 @@ def _render_d9_hgcer_delta_page(ROOT, pdf_name, group, thresholds, delta_edges):
                 )
             draw_objects.append(histogram)
         canvas.cd(1)
-        draw_objects.append(
-            _d9_draw_notice(ROOT, "Diagnostic only - no refinement applied", 0.84, 0.92)
-        )
         if threshold_text is not None:
             draw_objects.append(_d9_draw_notice(ROOT, threshold_text, 0.75, 0.83))
         draw_objects.append(_draw_page_header(ROOT, canvas, "HGCer response across delta", group))
@@ -2241,9 +2235,6 @@ def _render_d9_method_a_relative_page(ROOT, pdf_name, group, delta_edges):
                 legend.AddEntry(graph, label, "p")
             legend.Draw()
             draw_objects.append(legend)
-        draw_objects.append(
-            _draw_small_note(ROOT, "Diagnostic only - no correction or method selection")
-        )
         draw_objects.append(
             _draw_page_header(ROOT, canvas, "Method A - HGCer response diagnostic", group)
         )
@@ -2389,8 +2380,17 @@ def _d10_region_rows(value, *, protected):
             })
         names.add(name)
         result.append(copied)
-    if protected and not {"KLambda", "KSigma0"}.issubset(names):
-        return None, "method_b_protected_region_contract_invalid"
+    if protected:
+        if len(result) != 1:
+            return None, "method_b_protected_region_contract_invalid"
+        protected_row = result[0]
+        if (
+            protected_row["region_name"] != "KLambdaSigma0"
+            or protected_row["mm_low"] != 1.10
+            or protected_row["mm_high"] != 1.23
+            or protected_row["mm_offset_applied"] != 0.0
+        ):
+            return None, "method_b_protected_region_contract_invalid"
     return tuple(result), None
 
 
@@ -2933,28 +2933,10 @@ def _d10_draw_region_boundaries(ROOT, presentation, y_range, draw_objects):
     if not hasattr(ROOT, "TLine"):
         return {}
     lines = {}
-    for region in tuple(presentation.get("mm_regions") or ()):
-        region = _mapping(region)
-        if not region:
-            continue
-        color = getattr(ROOT, "kBlue", 4) if region.get("available") else getattr(ROOT, "kGray", 920)
-        style = 2 if region.get("available") else 3
-        for boundary in (region.get("mm_low"), region.get("mm_high")):
-            try:
-                line = ROOT.TLine(float(boundary), float(y_range[0]), float(boundary), float(y_range[1]))
-                line.SetLineColor(color)
-                line.SetLineStyle(style)
-                line.SetLineWidth(1)
-                line.Draw()
-                draw_objects.append(line)
-                lines.setdefault("pion", line)
-            except Exception:
-                continue
     for region in tuple(presentation.get("protected_regions") or ()):
         region = _mapping(region)
-        if not region:
+        if region.get("region_name") != "KLambdaSigma0":
             continue
-        name = str(region.get("region_name"))
         for boundary in (region.get("mm_low"), region.get("mm_high")):
             try:
                 line = ROOT.TLine(
@@ -2965,19 +2947,20 @@ def _d10_draw_region_boundaries(ROOT, presentation, y_range, draw_objects):
                 line.SetLineWidth(1)
                 line.Draw()
                 draw_objects.append(line)
-                lines.setdefault(name, line)
+                lines.setdefault("protected", line)
             except Exception:
                 continue
     return lines
 
 
 def _d10_add_region_legend_entries(legend, lines):
-    if "pion" in lines:
-        legend.AddEntry(lines["pion"], "Pion-sensitive region", "l")
-    if "KLambda" in lines:
-        legend.AddEntry(lines["KLambda"], "K-Lambda protected region", "l")
-    if "KSigma0" in lines:
-        legend.AddEntry(lines["KSigma0"], "K-Sigma0 protected region", "l")
+    if "protected" in lines:
+        legend.AddEntry(
+            lines["protected"], "Pion-sensitive region (outside protected window)", "l"
+        )
+        legend.AddEntry(
+            lines["protected"], "Lambda/Sigma protected region (1.10-1.23 GeV)", "l"
+        )
 
 
 def _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
@@ -2998,7 +2981,7 @@ def _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
     if host is None or baseline is None:
         return False
     title = "Method B - Missing-mass closure inputs - {}".format(_t_context(group))
-    _set_histogram_title(host, "{};Missing mass [GeV];Signed normalized yield".format(title))
+    _set_histogram_title(host, ";Missing mass [GeV];Signed normalized yield")
     y_range = _combined_histogram_y_range((host, baseline))
     _apply_display_y_range(host, y_range)
     _style_histogram(host, getattr(ROOT, "kBlack", 1))
@@ -3019,7 +3002,6 @@ def _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
         _d10_add_region_legend_entries(legend, lines)
         legend.Draw()
         draw_objects.append(legend)
-        draw_objects.append(_draw_small_note(ROOT, "Diagnostic only - no refinement applied"))
         draw_objects.append(
             _draw_page_header(ROOT, canvas, "Method B - Missing-mass closure inputs", group)
         )
@@ -3027,6 +3009,29 @@ def _render_d10_mm_inputs_page(ROOT, pdf_name, presentation, group):
     finally:
         canvas.Close()
     return True
+
+
+def _d10_local_closure_y_range(histograms):
+    """Return a signed display range from one local closure panel only."""
+    values = [0.0]
+    for histogram in tuple(histograms or ()):
+        try:
+            bin_count = int(histogram.GetNbinsX())
+        except Exception:
+            continue
+        for bin_index in range(1, bin_count + 1):
+            try:
+                content = float(histogram.GetBinContent(bin_index))
+                error = abs(float(histogram.GetBinError(bin_index)))
+            except Exception:
+                continue
+            if math.isfinite(content) and math.isfinite(error):
+                values.extend((content - error, content + error))
+    low, high = min(values), max(values)
+    if high <= low:
+        return -0.05, 0.05
+    padding = 0.05 * (high - low)
+    return low - padding, high + padding
 
 
 def _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
@@ -3055,9 +3060,6 @@ def _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
             if host is None or baseline is None:
                 return False
             pairs.append((cell, host, baseline))
-        y_range = _combined_histogram_y_range(
-            [histogram for _cell, host, baseline in pairs for histogram in (host, baseline)]
-        )
         for panel_index, (cell, host, baseline) in enumerate(pairs, 1):
             canvas.cd(panel_index)
             panel_title = "delta = [{:.3f}, {:.3f}] %".format(
@@ -3066,6 +3068,7 @@ def _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
             _set_histogram_title(
                 host, "{};Missing mass [GeV];Signed normalized yield".format(panel_title)
             )
+            y_range = _d10_local_closure_y_range((host, baseline))
             _apply_display_y_range(host, y_range)
             _style_histogram(host, getattr(ROOT, "kBlack", 1))
             _style_histogram(baseline, getattr(ROOT, "kBlue", 4))
@@ -3083,7 +3086,6 @@ def _render_d10_local_closure_page(ROOT, pdf_name, presentation, group):
                 draw_objects.append(legend)
             draw_objects.extend((host, baseline))
         canvas.cd(1)
-        draw_objects.append(_draw_small_note(ROOT, "Diagnostic only - no refinement applied"))
         draw_objects.append(
             _draw_page_header(ROOT, canvas, "Method B - Local missing-mass closure", group)
         )
@@ -3167,9 +3169,6 @@ def _render_d10_method_b_relative_page(ROOT, pdf_name, group, delta_edges):
             unity.SetLineWidth(2)
             unity.Draw()
             draw_objects.append(unity)
-        draw_objects.append(
-            _draw_small_note(ROOT, "Diagnostic only - no correction or method selection")
-        )
         draw_objects.append(
             _draw_page_header(ROOT, canvas, "Method B - Missing-mass closure diagnostic", group)
         )
@@ -3788,18 +3787,6 @@ def _d11_new_frame(ROOT, name, title, delta_edges, y_range):
         return None
 
 
-def _d11_draw_notice(ROOT):
-    note = ROOT.TPaveText(0.14, 0.82, 0.86, 0.92, "NDC")
-    note.SetFillStyle(0)
-    note.SetBorderSize(0)
-    note.SetTextAlign(22)
-    note.SetTextSize(0.028)
-    note.AddText("NON-AUTHORITATIVE DIAGNOSTIC")
-    note.AddText("No refinement, correction, or method selection")
-    note.Draw()
-    return note
-
-
 def _render_d11_ab_overlay_page(ROOT, pdf_name, presentation, group):
     overlay = _mapping(group.get("ab_overlay"))
     cells = tuple(overlay.get("cells") or ())
@@ -3876,7 +3863,6 @@ def _render_d11_ab_overlay_page(ROOT, pdf_name, presentation, group):
         unity.SetLineWidth(2)
         unity.Draw()
         draw_objects.append(unity)
-        draw_objects.append(_d11_draw_notice(ROOT))
         draw_objects.append(_draw_page_header(ROOT, canvas, "Method A / Method B diagnostic comparison", group))
         canvas.Print(pdf_name)
     finally:
@@ -3928,7 +3914,6 @@ def _render_d11_ratio_log_page(ROOT, pdf_name, presentation, group):
             line.Draw()
             draw_objects.extend((frame, graph, line))
         canvas.cd(1)
-        draw_objects.append(_d11_draw_notice(ROOT))
         draw_objects.append(_draw_page_header(ROOT, canvas, "Method A / Method B relative comparison", group))
         canvas.Print(pdf_name)
     finally:
@@ -3983,7 +3968,6 @@ def _render_d11_availability_page(ROOT, pdf_name, presentation, group):
             draw_objects.append(exemplar)
         legend.Draw()
         draw_objects.append(legend)
-        draw_objects.append(_d11_draw_notice(ROOT))
         draw_objects.append(_draw_page_header(ROOT, canvas, "Method availability across delta", group))
         canvas.Print(pdf_name)
     finally:

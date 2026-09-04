@@ -27,37 +27,29 @@ def _config(*, regions=None, protected=None):
     return {
         "mm_regions": regions or [
             {
-                "region_name": "pi_n",
-                "mm_low": 0.9,
-                "mm_high": 1.0,
+                "region_name": "pion_sensitive_low",
+                "mm_low": 0.8,
+                "mm_high": 1.10,
                 "region_role": "pion_sensitive",
-                "window_source": "pion_control.windows.pi_n",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
                 "mm_offset_applied": 0.0,
             },
             {
-                "region_name": "pi_sidis",
-                "mm_low": 1.0,
-                "mm_high": 1.1,
+                "region_name": "pion_sensitive_high",
+                "mm_low": 1.23,
+                "mm_high": 1.5,
                 "region_role": "pion_sensitive",
-                "window_source": "pion_control.windows.pi_sidis",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
                 "mm_offset_applied": 0.0,
             },
         ],
         "protected_regions": protected or [
             {
-                "region_name": "KLambda",
-                "mm_low": 1.3,
-                "mm_high": 1.35,
+                "region_name": "KLambdaSigma0",
+                "mm_low": 1.10,
+                "mm_high": 1.23,
                 "region_role": "protected_signal",
-                "window_source": "proton_cleaning.validation_windows.lambda_peak",
-                "mm_offset_applied": 0.0,
-            },
-            {
-                "region_name": "KSigma0",
-                "mm_low": 1.35,
-                "mm_high": 1.4,
-                "region_role": "protected_signal",
-                "window_source": "kaon_nosub.windows.k_sigma0_signal",
+                "window_source": "method_b.fixed_lambda_sigma_protected",
                 "mm_offset_applied": 0.0,
             },
         ],
@@ -169,7 +161,7 @@ def _add_region_events(
 def _supported_phase(*, host_state="proton_cleaned", t_edges=(0.0, 1.0), delta_edges=(0.0, 10.0, 20.0)):
     phase = _phase_a(t_edges=t_edges, delta_edges=delta_edges, host_state=host_state)
     for delta in ((delta_edges[0] + delta_edges[1]) / 2.0, (delta_edges[1] + delta_edges[2]) / 2.0):
-        for mm in (0.95, 1.05):
+        for mm in (0.95, 1.35):
             _add_region_events(phase, delta=delta, mm=mm)
     return phase
 
@@ -182,6 +174,156 @@ def _cell(result, t_index=0, delta_index=0):
 
 
 class PionHGCerMethodBTests(unittest.TestCase):
+    def test_runtime_resolver_uses_only_the_fixed_phase_a_complement_partition(self):
+        phase = _phase_a()
+        expected_regions = [
+            {
+                "region_name": "pion_sensitive_low",
+                "mm_low": 0.8,
+                "mm_high": 1.10,
+                "region_role": "pion_sensitive",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
+                "mm_offset_applied": 0.0,
+            },
+            {
+                "region_name": "pion_sensitive_high",
+                "mm_low": 1.23,
+                "mm_high": 1.5,
+                "region_role": "pion_sensitive",
+                "window_source": "phase_a.mm_binning_complement_of_lambda_sigma_protected",
+                "mm_offset_applied": 0.0,
+            },
+        ]
+        expected_protected = [{
+            "region_name": "KLambdaSigma0",
+            "mm_low": 1.10,
+            "mm_high": 1.23,
+            "region_role": "protected_signal",
+            "window_source": "method_b.fixed_lambda_sigma_protected",
+            "mm_offset_applied": 0.0,
+        }]
+        resolved = []
+        for phi_setting, mm_offset_data in (("Left", 0.0), ("Center", 0.015), ("Right", -0.020)):
+            config = method_b.resolve_pion_hgcer_method_b_config(
+                phase_a_contract=phase,
+                inp_dict={"pion_component_windows": {"must_not": "matter"}},
+                phi_setting=phi_setting,
+                mm_offset_data=mm_offset_data,
+            )
+            self.assertEqual(config["mm_regions"], expected_regions)
+            self.assertEqual(config["protected_regions"], expected_protected)
+            resolved.append(config)
+        self.assertEqual(resolved[0], resolved[1])
+        self.assertEqual(resolved[1], resolved[2])
+
+        low, high = resolved[0]["mm_regions"]
+        protected = resolved[0]["protected_regions"][0]
+        self.assertTrue(method_b._in_region(0.8, low))
+        self.assertFalse(method_b._in_region(1.10, low))
+        self.assertTrue(method_b._in_region(1.10, protected))
+        self.assertFalse(method_b._in_region(1.23, protected))
+        self.assertTrue(method_b._in_region(1.23, high))
+        self.assertFalse(method_b._in_region(1.5, high))
+
+        outputs = []
+        for phi_setting, mm_offset_data in (("Left", 0.0), ("Center", 0.015), ("Right", -0.020)):
+            config = method_b.resolve_pion_hgcer_method_b_config(
+                phase_a_contract=_supported_phase(),
+                inp_dict={"pion_component_windows": {"must_not": "matter"}},
+                phi_setting=phi_setting,
+                mm_offset_data=mm_offset_data,
+            )
+            result = method_b.build_pion_hgcer_method_b(_supported_phase(), config=config)
+            self.assertTrue(result["available"])
+            outputs.append(result)
+        self.assertEqual(outputs[0]["cells"], outputs[1]["cells"])
+        self.assertEqual(outputs[1]["cells"], outputs[2]["cells"])
+        self.assertEqual(outputs[0]["parent_region_references"], outputs[2]["parent_region_references"])
+        self.assertEqual(outputs[0]["fingerprint"], outputs[2]["fingerprint"])
+        first_cell = _cell(outputs[0])
+        self.assertEqual(
+            [row["region_name"] for row in first_cell["regions"]],
+            ["pion_sensitive_low", "pion_sensitive_high"],
+        )
+        self.assertEqual(
+            {
+                (reference["t_index"], reference["region_name"])
+                for reference in outputs[0]["parent_region_references"]
+            },
+            {(0, "pion_sensitive_low"), (0, "pion_sensitive_high")},
+        )
+        usable = [
+            row for row in first_cell["regions"]
+            if row["parent_relative_status"] == "available"
+        ]
+        expected_candidate, expected_sigma, expected_status = method_b._candidate(
+            usable,
+            first_cell["region_consistency_status"],
+            first_cell["shape_status"],
+        )
+        self.assertEqual(first_cell["candidate_L_B_status"], expected_status)
+        self.assertAlmostEqual(first_cell["candidate_L_B"], expected_candidate)
+        self.assertAlmostEqual(first_cell["candidate_L_B_uncertainty"], expected_sigma)
+
+    def test_runtime_resolver_rejects_phase_a_domains_that_do_not_straddle_window(self):
+        phase = _phase_a()
+        narrow_edges = [0.8, 0.9, 1.0, 1.10, 1.23]
+        for closure_name in ("pion_closure", "host_closure"):
+            phase[closure_name]["global_full"]["authoritative"] = {
+                "edges": narrow_edges,
+                "nbins": len(narrow_edges) - 1,
+            }
+        with self.assertRaises(method_b.MethodBUnavailable) as raised:
+            method_b.resolve_pion_hgcer_method_b_config(phase_a_contract=phase)
+        self.assertEqual(
+            raised.exception.reason,
+            "method_b_protected_region_outside_phase_a_domain",
+        )
+
+    def test_shape_bins_must_be_fully_inside_the_fixed_sensitive_complement(self):
+        config = method_b.resolve_pion_hgcer_method_b_config(
+            phase_a_contract=_phase_a()
+        )
+        regions = method_b._annotate_regions(
+            config["mm_regions"], config["protected_regions"]
+        )
+        protected = config["protected_regions"]
+        self.assertTrue(method_b._bin_allowed(0.8, 1.10, regions, protected))
+        self.assertFalse(method_b._bin_allowed(1.05, 1.15, regions, protected))
+        self.assertFalse(method_b._bin_allowed(1.20, 1.30, regions, protected))
+        self.assertTrue(method_b._bin_allowed(1.23, 1.5, regions, protected))
+
+    def test_runtime_resolver_has_no_shared_subtraction_window_dependency(self):
+        source = (REPO_ROOT / "src/cuts/pion_hgcer_refinement_method_b.py").read_text(
+            encoding="utf-8"
+        )
+        resolver = source[
+            source.index("def resolve_pion_hgcer_method_b_config("):
+            source.index("\ndef _normalize_regions", source.index("def resolve_pion_hgcer_method_b_config("))
+        ]
+        for forbidden in (
+            "get_particle_subtraction_component_fit_window_config",
+            "get_proton_contamination_cleaning_config",
+            "resolve_particle_subtraction_component_fit_windows",
+        ):
+            self.assertNotIn(forbidden, resolver)
+
+    def test_method_b_partition_identifiers_do_not_reach_production_pion_weights(self):
+        production = (
+            REPO_ROOT / "src/cuts/pion_component_subtraction.py"
+        ).read_text(encoding="utf-8")
+        production_weight_application = production[
+            production.index("def fill_simc_shape_pion_subtraction_templates("):
+        ]
+        for method_b_only_identifier in (
+            "METHOD_B_PROTECTED_MM_LOW",
+            "METHOD_B_PROTECTED_MM_HIGH",
+            "METHOD_B_PROTECTED_REGION_NAME",
+            "KLambdaSigma0",
+        ):
+            with self.subTest(identifier=method_b_only_identifier):
+                self.assertNotIn(method_b_only_identifier, production_weight_application)
+
     def test_phase_a_event_contributions_are_used_exactly_once(self):
         phase = _phase_a()
         for delta in (5.0, 15.0):
@@ -240,11 +382,11 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertAlmostEqual(row["residual"], 10.0)
         self.assertAlmostEqual(row["residual_sigma"], math.sqrt(50.0))
 
-    def test_protected_signal_overlap_excludes_lambda_and_sigma0_regions(self):
+    def test_protected_signal_overlap_excludes_fixed_lambda_sigma_window(self):
         protected = _config()["protected_regions"]
         regions = [
-            {**_config()["mm_regions"][0], "region_name": "overlap_lambda", "mm_low": 1.30, "mm_high": 1.34},
-            {**_config()["mm_regions"][1], "region_name": "overlap_sigma0", "mm_low": 1.35, "mm_high": 1.39},
+            {**_config()["mm_regions"][0], "region_name": "overlap_low", "mm_low": 1.05, "mm_high": 1.15},
+            {**_config()["mm_regions"][1], "region_name": "overlap_high", "mm_low": 1.20, "mm_high": 1.25},
         ]
         phase = _supported_phase()
         result = method_b.build_pion_hgcer_method_b(phase, config=_config(regions=regions, protected=protected))
@@ -264,8 +406,8 @@ class PionHGCerMethodBTests(unittest.TestCase):
                     _add_region_events(phase, t=t, delta=delta, mm=mm, host_weights=(ratio,) * 10)
         result = method_b.build_pion_hgcer_method_b(phase, config=_config())
         references = {(entry["t_index"], entry["region_name"]): entry for entry in result["parent_region_references"]}
-        self.assertAlmostEqual(references[(0, "pi_n")]["parent_reference_ratio"], 2.0)
-        self.assertAlmostEqual(references[(1, "pi_n")]["parent_reference_ratio"], 3.0)
+        self.assertAlmostEqual(references[(0, "pion_sensitive_low")]["parent_reference_ratio"], 2.0)
+        self.assertAlmostEqual(references[(1, "pion_sensitive_low")]["parent_reference_ratio"], 3.0)
         self.assertAlmostEqual(_cell(result, 1, 0)["regions"][0]["parent_relative_ratio"], 1.0)
         one_cell = _phase_a()
         _add_region_events(one_cell, delta=5.0, mm=0.95)
@@ -341,7 +483,7 @@ class PionHGCerMethodBTests(unittest.TestCase):
         )
         self.assertEqual(mismatch["shape_status"], "poor")
         protected_only = method_b._shape_payload(
-            {"host_events": [(1.32, 100.0), (1.37, 100.0)], "pion_events": [(1.32, 1.0), (1.37, 1.0)]},
+            {"host_events": [(1.15, 100.0), (1.20, 100.0)], "pion_events": [(1.15, 1.0), (1.20, 1.0)]},
             MM_EDGES, annotated_regions, protected, method_b.DEFAULT_METHOD_B_CONFIG["shape"], 1.0e-12,
         )
         self.assertEqual(protected_only["shape_usable_bin_count"], 0)
@@ -414,6 +556,17 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertLess(event_position, method_b_position)
         self.assertIn('histDict["_pion_hgcer_method_b"]', source)
         self.assertIn("resolve_pion_hgcer_method_b_config(", source)
+        resolver_call = source[
+            source.index("resolve_pion_hgcer_method_b_config("):
+            source.index("build_pion_hgcer_method_b(", source.index("resolve_pion_hgcer_method_b_config("))
+        ]
+        self.assertIn("phase_a_contract=pion_hgcer_event_contract", resolver_call)
+        runtime_failure = source[
+            source.index("except Exception as exc:", source.index("resolve_pion_hgcer_method_b_config(")):
+            source.index('histDict["_pion_hgcer_method_b"]', source.index("resolve_pion_hgcer_method_b_config("))
+        ]
+        self.assertIn('"reason": getattr(', runtime_failure)
+        self.assertIn('"runtime_method_b_configuration_exception"', runtime_failure)
 
 
 if __name__ == "__main__":
