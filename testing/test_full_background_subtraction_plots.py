@@ -222,6 +222,7 @@ class _FakeCanvas:
 class _FakeLegend:
     def __init__(self, *coordinates):
         self.coordinates = tuple(float(value) for value in coordinates[:4])
+        self.entries = []
 
     def SetBorderSize(self, _size):
         return None
@@ -229,8 +230,8 @@ class _FakeLegend:
     def SetFillStyle(self, _style):
         return None
 
-    def AddEntry(self, *_args):
-        return None
+    def AddEntry(self, _object, label, option):
+        self.entries.append((str(label), str(option)))
 
     def Draw(self):
         return None
@@ -299,17 +300,44 @@ class _D10Axis:
 
 
 class _D10DisplayHistogram:
-    def __init__(self, _name, _title, bin_count, edges):
+    def __init__(self, name, title, bin_count, edges):
+        self.name = str(name)
+        self.title = str(title)
         self.edges = tuple(float(edge) for edge in edges)
         self.contents = [0.0] * (int(bin_count) + 2)
         self.errors = [0.0] * (int(bin_count) + 2)
         self.directory = object()
+        self.display_minimum = None
+        self.display_maximum = None
+        self.root = None
 
     def SetDirectory(self, directory):
         self.directory = directory
 
     def Sumw2(self):
         return None
+
+    def SetTitle(self, title):
+        self.title = str(title)
+
+    def SetMinimum(self, value):
+        self.display_minimum = float(value)
+
+    def SetMaximum(self, value):
+        self.display_maximum = float(value)
+
+    def SetStats(self, _value):
+        return None
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetLineWidth(self, _width):
+        return None
+
+    def Draw(self, option):
+        if self.root is not None:
+            self.root.drawn_histograms.append((self, str(option)))
 
     def SetBinContent(self, index, value):
         self.contents[int(index)] = float(value)
@@ -338,6 +366,93 @@ class _D10ROOT:
         histogram = _D10DisplayHistogram(*args)
         self.histograms.append(histogram)
         return histogram
+
+
+class _D10Line:
+    def __init__(self, root, x1, y1, x2, y2):
+        self.root = root
+        self.x1 = float(x1)
+        self.y1 = float(y1)
+        self.x2 = float(x2)
+        self.y2 = float(y2)
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetLineStyle(self, _style):
+        return None
+
+    def SetLineWidth(self, _width):
+        return None
+
+    def Draw(self):
+        self.root.drawn_lines.append(self)
+
+
+class _D10GraphErrors:
+    def __init__(self, root, point_count):
+        self.root = root
+        self.points = [(None, None)] * int(point_count)
+        self.errors = [(None, None)] * int(point_count)
+
+    def SetPoint(self, index, x_value, y_value):
+        self.points[int(index)] = (float(x_value), float(y_value))
+
+    def SetPointError(self, index, x_error, y_error):
+        self.errors[int(index)] = (float(x_error), float(y_error))
+
+    def SetMarkerColor(self, _color):
+        return None
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetMarkerStyle(self, _style):
+        return None
+
+    def SetMarkerSize(self, _size):
+        return None
+
+    def Draw(self, _option):
+        self.root.drawn_graphs.append(self)
+
+
+class _D10RenderROOT(_FakeROOT):
+    """Test-only capture ROOT for the detached D.10 page renderers."""
+
+    kGray = 920
+
+    def __init__(self):
+        super().__init__()
+        self.histograms = []
+        self.drawn_histograms = []
+        self.drawn_lines = []
+        self.drawn_graphs = []
+
+    def TH1D(self, *args):
+        histogram = _D10DisplayHistogram(*args)
+        histogram.root = self
+        self.histograms.append(histogram)
+        return histogram
+
+    def TLine(self, *args):
+        return _D10Line(self, *args)
+
+    def TGraphErrors(self, point_count):
+        return _D10GraphErrors(self, point_count)
+
+
+def _d10_visible_text(root):
+    pieces = [histogram.title for histogram in root.histograms]
+    pieces.extend(
+        label for legend in root.legends for label, _option in legend.entries
+    )
+    pieces.extend(text for block in root.drawn_text for text in block)
+    return "\n".join(pieces)
+
+
+def _d10_histogram(root, name):
+    return next(histogram for histogram in root.histograms if histogram.name == name)
 
 
 def _rectangles_overlap(left, right):
@@ -1484,6 +1599,194 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(histogram.GetBinError(5), 2.0)
         self.assertEqual(histogram.GetBinContent(1), -3.0)
         self.assertEqual(histogram.GetBinError(1), 3.0)
+
+    def test_d10_page13_renderer_locks_signed_range_boundaries_and_text(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        phase_a["kaon_host_records"][0].update(
+            analysis_MM=0.85, signed_host_event_contribution=-7.0
+        )
+        phase_a["kaon_host_records"][1].update(
+            analysis_MM=0.95, signed_host_event_contribution=3.0
+        )
+        phase_a["pion_records"][0].update(
+            analysis_MM=0.85, signed_baseline_event_contribution=-2.0
+        )
+        phase_a["pion_records"][1].update(
+            analysis_MM=0.95, signed_baseline_event_contribution=11.0
+        )
+        presentation = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        root = _D10RenderROOT()
+        self.assertTrue(
+            plots._render_d10_mm_inputs_page(root, "ignored.pdf", presentation, presentation["per_t"][0])
+        )
+
+        host = _d10_histogram(root, "H_full_background_d10_inputs_host_t1")
+        self.assertLessEqual(host.display_minimum, -7.0)
+        self.assertGreaterEqual(host.display_maximum, 11.0)
+        self.assertLessEqual(host.display_minimum, 0.0)
+        self.assertGreaterEqual(host.display_maximum, 0.0)
+        self.assertEqual(
+            {line.x1 for line in root.drawn_lines},
+            {0.93, 1.11, 1.115, 1.130, 1.185, 1.215},
+        )
+        self.assertTrue(all(line.x1 == line.x2 for line in root.drawn_lines))
+        visible = _d10_visible_text(root)
+        for expected in (
+            "Method B - Missing-mass closure inputs",
+            "Proton-cleaned kaon data",
+            "Baseline pion background",
+            "Pion-sensitive region",
+            "K-Lambda protected region",
+            "K-Sigma0 protected region",
+            "Diagnostic only - no refinement applied",
+            "|t| = [0.0000, 1.0000] GeV^2",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, visible)
+        for internal in ("host_state", "phase_a", "window_source", "candidate_L_B"):
+            with self.subTest(internal=internal):
+                self.assertNotIn(internal, visible)
+
+    def test_d10_page13_renderer_uses_identity_host_physics_label(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        for mapping in (phase_a, method_b, comparison):
+            mapping["host_state"] = "identity_no_proton_cleaning"
+        for record in phase_a["kaon_host_records"]:
+            record["host_state"] = "identity_no_proton_cleaning"
+        for cell in method_b["cells"]:
+            cell["host_state"] = "identity_no_proton_cleaning"
+        presentation = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        self.assertTrue(presentation["available"])
+        root = _D10RenderROOT()
+        self.assertTrue(
+            plots._render_d10_mm_inputs_page(root, "ignored.pdf", presentation, presentation["per_t"][0])
+        )
+        visible = _d10_visible_text(root)
+        self.assertIn("Kaon-selected data", visible)
+        self.assertNotIn("Proton-cleaned kaon data", visible)
+        self.assertNotIn("identity_no_proton_cleaning", visible)
+
+    def test_d10_page14_renderer_locks_common_range_delta_order_and_boundaries(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        for cell in method_b["cells"]:
+            if cell["t_index"] != 0:
+                continue
+            for row in cell["bins"][1:-1]:
+                row.update(host_yield=0.0, host_sumw2=0.0, baseline_yield=0.0, baseline_sumw2=0.0)
+        method_b["cells"][0]["bins"][1].update(
+            host_yield=4.0, host_sumw2=9.0, baseline_yield=-3.0, baseline_sumw2=4.0
+        )
+        method_b["cells"][1]["bins"][1].update(
+            host_yield=-9.0, host_sumw2=16.0, baseline_yield=12.0, baseline_sumw2=25.0
+        )
+        presentation = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        root = _D10RenderROOT()
+        self.assertTrue(
+            plots._render_d10_local_closure_page(
+                root, "ignored.pdf", presentation, presentation["per_t"][0]
+            )
+        )
+
+        hosts = [
+            _d10_histogram(root, "H_full_background_d10_local_t1_d{}_host".format(index))
+            for index in (1, 2)
+        ]
+        self.assertEqual(
+            [(histogram.display_minimum, histogram.display_maximum) for histogram in hosts],
+            [(hosts[0].display_minimum, hosts[0].display_maximum)] * 2,
+        )
+        self.assertLessEqual(hosts[0].display_minimum, -9.0)
+        self.assertGreaterEqual(hosts[0].display_maximum, 12.0)
+        self.assertLessEqual(hosts[0].display_minimum, 0.0)
+        self.assertGreaterEqual(hosts[0].display_maximum, 0.0)
+        self.assertEqual(
+            [histogram.title.split(";")[0] for histogram in hosts],
+            ["delta = [-10.000, 0.000] %", "delta = [0.000, 10.000] %"],
+        )
+        self.assertTrue(all(histogram.edges == (0.80, 0.91, 1.03, 1.17, 1.35) for histogram in hosts))
+        self.assertEqual(hosts[0].GetBinContent(1), 4.0)
+        self.assertEqual(hosts[0].GetBinError(1), 3.0)
+        baseline = _d10_histogram(root, "H_full_background_d10_local_t1_d1_baseline")
+        self.assertEqual(baseline.GetBinContent(1), -3.0)
+        self.assertEqual(baseline.GetBinError(1), 2.0)
+        self.assertEqual(len(root.drawn_lines), 12)
+        self.assertEqual(
+            [{line.x1 for line in root.drawn_lines[offset:offset + 6]} for offset in (0, 6)],
+            [{0.93, 1.11, 1.115, 1.130, 1.185, 1.215}] * 2,
+        )
+        visible = _d10_visible_text(root)
+        self.assertIn("Method B - Local missing-mass closure", visible)
+        self.assertIn("Diagnostic only - no refinement applied", visible)
+        self.assertIn("|t| = [0.0000, 1.0000] GeV^2", visible)
+
+    def test_d10_page15_renderer_locks_d3_points_status_unity_range_and_text(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        presentation = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        root = _D10RenderROOT()
+        self.assertTrue(
+            plots._render_d10_method_b_relative_page(
+                root, "ignored.pdf", presentation["per_t"][0], presentation["delta_edges"]
+            )
+        )
+        self.assertEqual(len(root.drawn_graphs), 1)
+        graph = root.drawn_graphs[0]
+        self.assertEqual(graph.points, [(-5.0, 1.25)])
+        self.assertEqual(graph.errors, [(0.0, 0.15)])
+        self.assertNotIn((None, 9.0), graph.points)
+        self.assertNotIn((0.0, 8.0), graph.errors)
+        self.assertEqual([(line.x1, line.y1, line.x2, line.y2) for line in root.drawn_lines], [(-10.0, 1.0, 10.0, 1.0)])
+        frame = _d10_histogram(root, "H_full_background_d10_relative_t1")
+        self.assertLessEqual(frame.display_minimum, 1.10)
+        self.assertGreaterEqual(frame.display_maximum, 1.40)
+        visible = _d10_visible_text(root)
+        for expected in (
+            "Method B - Missing-mass closure diagnostic",
+            "Relative pion-background diagnostic",
+            "Diagnostic only - no correction or method selection",
+            "|t| = [0.0000, 1.0000] GeV^2",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, visible)
+
+        isolated_cells = []
+        statuses = (
+            "available_multi_region", "single_region_only", "region_marginal",
+            "region_inconsistent", "shape_poor_veto", "unavailable",
+        )
+        for index, status in enumerate(statuses):
+            isolated_cells.append({
+                "delta_low": -30.0 + 10.0 * index,
+                "delta_high": -20.0 + 10.0 * index,
+                "method_b_comparison_candidate_status": status,
+                "method_b_comparison_candidate": 0.20 if status == "available_multi_region" else None,
+                "method_b_comparison_candidate_uncertainty": 0.35 if status == "available_multi_region" else None,
+            })
+        isolated_group = {
+            "t_index": 0,
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "method_b_relative": {"available": True, "cells": isolated_cells},
+        }
+        isolated_root = _D10RenderROOT()
+        self.assertTrue(
+            plots._render_d10_method_b_relative_page(
+                isolated_root, "ignored.pdf", isolated_group,
+                [-30.0, -20.0, -10.0, 0.0, 10.0, 20.0, 30.0],
+            )
+        )
+        self.assertEqual(len(isolated_root.drawn_graphs), 1)
+        self.assertEqual(isolated_root.drawn_graphs[0].points, [(-25.0, 0.20)])
+        isolated_frame = _d10_histogram(isolated_root, "H_full_background_d10_relative_t1")
+        self.assertLessEqual(isolated_frame.display_minimum, -0.15)
+        self.assertGreaterEqual(isolated_frame.display_maximum, 1.0)
 
     def test_d10_d3_failures_are_local_to_the_relative_page(self):
         mutations = (
