@@ -68,6 +68,63 @@ def _assert_full_background_manifest_contract(test_case, manifest):
         test_case.assertEqual(len(positions), len(set(positions)))
 
 
+def _snapshot_root_th1(histogram):
+    """Capture all regular-bin and axis state of a detached D.6/D.7/D.9 TH1."""
+    axis = histogram.GetXaxis()
+    bin_count = histogram.GetNbinsX()
+    return {
+        "nbins_x": bin_count,
+        "contents": tuple(
+            histogram.GetBinContent(index)
+            for index in range(1, bin_count + 1)
+        ),
+        "errors": tuple(
+            histogram.GetBinError(index)
+            for index in range(1, bin_count + 1)
+        ),
+        "x_min": axis.GetXmin(),
+        "x_max": axis.GetXmax(),
+        "x_edges": tuple(
+            axis.GetBinLowEdge(index)
+            for index in range(1, bin_count + 2)
+        ),
+    }
+
+
+def _snapshot_root_th2(histogram):
+    """Capture all regular-bin and axis state of a detached D.6/D.9 TH2."""
+    x_axis = histogram.GetXaxis()
+    y_axis = histogram.GetYaxis()
+    x_bins = histogram.GetNbinsX()
+    y_bins = histogram.GetNbinsY()
+    return {
+        "nbins_x": x_bins,
+        "nbins_y": y_bins,
+        "contents": tuple(
+            histogram.GetBinContent(x_index, y_index)
+            for x_index in range(1, x_bins + 1)
+            for y_index in range(1, y_bins + 1)
+        ),
+        "errors": tuple(
+            histogram.GetBinError(x_index, y_index)
+            for x_index in range(1, x_bins + 1)
+            for y_index in range(1, y_bins + 1)
+        ),
+        "x_min": x_axis.GetXmin(),
+        "x_max": x_axis.GetXmax(),
+        "y_min": y_axis.GetXmin(),
+        "y_max": y_axis.GetXmax(),
+        "x_edges": tuple(
+            x_axis.GetBinLowEdge(index)
+            for index in range(1, x_bins + 2)
+        ),
+        "y_edges": tuple(
+            y_axis.GetBinLowEdge(index)
+            for index in range(1, y_bins + 2)
+        ),
+    }
+
+
 class _Histogram:
     def __init__(self, label):
         self.label = label
@@ -2924,13 +2981,16 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ):
             with self.subTest(notice=notice):
                 self.assertIn(notice, source)
-        for forbidden_d12 in (
+        for forbidden_phase_object in (
             "D12_PRESENTATION_SCHEMA_VERSION",
             "build_full_background_subtraction_d12_payload",
             "full_background.d12.",
+            "D12_1_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_d12_1_payload",
+            "full_background.d12_1.",
         ):
-            with self.subTest(forbidden_d12=forbidden_d12):
-                self.assertNotIn(forbidden_d12, source)
+            with self.subTest(forbidden_phase_object=forbidden_phase_object):
+                self.assertNotIn(forbidden_phase_object, source)
         open_helper_source = source[
             source.index("def open_full_background_subtraction_pdf"):
             source.index("def close_full_background_subtraction_pdf")
@@ -3165,7 +3225,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ]
         for forbidden in (
             "C_A", "C_B", "C_final", "use_A", "use_B", "combine_AB",
-            "preferred_method", "selected_method", "tension", "compatibility", "significance",
+            "preferred_method", "selected_method", "chosen_method",
+            "refined_pion_weight", "applied_refinement_weight",
+            "tension", "compatibility", "significance", "chi2", "p_value",
         ):
             with self.subTest(cumulative_renderer_forbidden=forbidden):
                 self.assertNotIn(forbidden, cumulative_renderer_source)
@@ -3196,15 +3258,23 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(lifecycle_call=call):
                 self.assertEqual(block.count(call + "("), 1)
         self.assertNotIn("open_diagnostic_pdf", block)
-        for forbidden in ("C_A", "C_B", "C_final", "use_A", "use_B", "combine_AB"):
+        for forbidden in (
+            "C_A", "C_B", "C_final", "use_A", "use_B", "combine_AB",
+            "preferred_method", "selected_method", "chosen_method",
+            "refined_pion_weight", "applied_refinement_weight",
+            "tension", "compatibility", "significance", "chi2", "p_value",
+        ):
             self.assertNotIn(forbidden, block)
-        for forbidden_d12 in (
+        for forbidden_phase_object in (
             "D12_PRESENTATION_SCHEMA_VERSION",
             "build_full_background_subtraction_d12_payload",
             "full_background.d12.",
+            "D12_1_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_d12_1_payload",
+            "full_background.d12_1.",
         ):
-            with self.subTest(runtime_forbidden_d12=forbidden_d12):
-                self.assertNotIn(forbidden_d12, runtime)
+            with self.subTest(runtime_forbidden_phase_object=forbidden_phase_object):
+                self.assertNotIn(forbidden_phase_object, runtime)
         self.assertLess(
             runtime.index("build_full_background_subtraction_d6_payload(", start),
             runtime.index("build_full_background_subtraction_d7_payload(", start),
@@ -3368,12 +3438,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         raw = ROOT.TH1D("H_d6_raw", "source", 3, 0.0, 3.0)
         raw.SetDirectory(0)
         raw.SetBinContent(1, 4.0)
+        raw.SetBinError(1, 0.4)
         proton = ROOT.TH1D("H_d7_proton", "source", 3, 0.0, 3.0)
         proton.SetDirectory(0)
         proton.SetBinContent(1, 1.0)
+        proton.SetBinError(1, 0.2)
         cleaned = ROOT.TH1D("H_d7_cleaned", "source", 3, 0.0, 3.0)
         cleaned.SetDirectory(0)
         cleaned.SetBinContent(1, 3.0)
+        cleaned.SetBinError(1, 0.3)
         timing_cells = []
         for delta_index in range(2):
             row = []
@@ -3383,11 +3456,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 )
                 histogram.SetDirectory(0)
                 histogram.SetBinContent(1, 1.0)
+                histogram.SetBinError(1, 0.1 * (1 + delta_index + t_index))
                 row.append(histogram)
             timing_cells.append(tuple(row))
         weight = ROOT.TH2D("H_d6_weight", "source", 2, -10.0, 10.0, 2, 0.0, 2.0)
         weight.SetDirectory(0)
         weight.SetBinContent(1, 1, 0.25)
+        weight.SetBinError(1, 1, 0.025)
         result = _d7_timing_result()
         result["H_delta_timing_t_cells"] = timing_cells
         application = {
@@ -3472,24 +3547,22 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             )
             response_histogram.SetDirectory(0)
             response_histogram.SetBinContent(1, 7.0 if side == "kaon" else -5.0)
+            response_histogram.SetBinError(1, 0.7 if side == "kaon" else 0.5)
             delta_histogram = ROOT.TH2D(
                 "H_d9_{}_delta".format(side), "source", 2, -10.0, 10.0, 4, 0.0, 4.0
             )
             delta_histogram.SetDirectory(0)
             delta_histogram.SetBinContent(1, 1, 3.0 if side == "kaon" else -2.0)
+            delta_histogram.SetBinError(1, 1, 0.3 if side == "kaon" else 0.2)
             d9_diagnostic["histograms"]["H_hgcer_{}_weighted".format(side)] = response_histogram
             d9_diagnostic["histograms"]["H_hgcer_vs_delta_{}_weighted".format(side)] = delta_histogram
             d9_source_snapshots.append((
                 response_histogram,
-                tuple(response_histogram.GetBinContent(index) for index in range(1, 5)),
+                _snapshot_root_th1(response_histogram),
             ))
             d9_source_snapshots.append((
                 delta_histogram,
-                tuple(
-                    delta_histogram.GetBinContent(x_index, y_index)
-                    for x_index in range(1, 3)
-                    for y_index in range(1, 5)
-                ),
+                _snapshot_root_th2(delta_histogram),
             ))
         d9_payload = plots.build_full_background_subtraction_d9_payload(
             d9_diagnostic, d9_method_a, d9_comparison
@@ -3510,27 +3583,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             d11_checkpoint
         )
         self.assertTrue(d11_payload["available"])
-        d6_d7_source_snapshots = []
-        for histogram in (raw, proton, cleaned) + tuple(
-            histogram for row in timing_cells for histogram in row
-        ):
-            d6_d7_source_snapshots.append((
-                histogram,
-                histogram.GetNbinsX(),
-                tuple(
-                    histogram.GetBinContent(index)
-                    for index in range(1, histogram.GetNbinsX() + 1)
-                ),
-            ))
-        d6_weight_snapshot = (
-            weight.GetNbinsX(),
-            weight.GetNbinsY(),
-            tuple(
-                weight.GetBinContent(x_index, y_index)
-                for x_index in range(1, weight.GetNbinsX() + 1)
-                for y_index in range(1, weight.GetNbinsY() + 1)
-            ),
+        d6_d7_source_snapshots = tuple(
+            (histogram, _snapshot_root_th1(histogram))
+            for histogram in (raw, proton, cleaned) + tuple(
+                histogram for row in timing_cells for histogram in row
+            )
         )
+        d6_weight_snapshot = _snapshot_root_th2(weight)
         d8_source_snapshots = []
         for parent in d8_parents:
             application = parent["final_diagnostic_application_result"]
@@ -3595,45 +3654,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     int(page_count_line.split(":", 1)[1].strip()),
                     len(rendered["manifest"]),
                 )
-        for histogram, bin_count, contents in d6_d7_source_snapshots:
-            self.assertEqual(histogram.GetNbinsX(), bin_count)
-            self.assertEqual(
-                tuple(
-                    histogram.GetBinContent(index)
-                    for index in range(1, histogram.GetNbinsX() + 1)
-                ),
-                contents,
-            )
-        self.assertEqual(
-            (
-                weight.GetNbinsX(),
-                weight.GetNbinsY(),
-                tuple(
-                    weight.GetBinContent(x_index, y_index)
-                    for x_index in range(1, weight.GetNbinsX() + 1)
-                    for y_index in range(1, weight.GetNbinsY() + 1)
-                ),
-            ),
-            d6_weight_snapshot,
-        )
-        for histogram, contents in d9_source_snapshots:
+        for histogram, snapshot in d6_d7_source_snapshots:
+            self.assertEqual(_snapshot_root_th1(histogram), snapshot)
+        self.assertEqual(_snapshot_root_th2(weight), d6_weight_snapshot)
+        for histogram, snapshot in d9_source_snapshots:
             if histogram.InheritsFrom("TH2"):
-                self.assertEqual(histogram.GetNbinsX(), 2)
-                self.assertEqual(histogram.GetNbinsY(), 4)
-                self.assertEqual(
-                    tuple(
-                        histogram.GetBinContent(x_index, y_index)
-                        for x_index in range(1, 3)
-                        for y_index in range(1, 5)
-                    ),
-                    contents,
-                )
+                self.assertEqual(_snapshot_root_th2(histogram), snapshot)
             else:
-                self.assertEqual(histogram.GetNbinsX(), 4)
-                self.assertEqual(
-                    tuple(histogram.GetBinContent(index) for index in range(1, 5)),
-                    contents,
-                )
+                self.assertEqual(_snapshot_root_th1(histogram), snapshot)
         for histogram, bin_count, bins, x_minimum, x_maximum in d8_source_snapshots:
             self.assertEqual(histogram.GetNbinsX(), bin_count)
             self.assertEqual(
