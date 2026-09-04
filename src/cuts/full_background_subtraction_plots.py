@@ -1,4 +1,4 @@
-"""Detached D.6 through D.11 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11 and E.2 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -25,6 +25,7 @@ D8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d8/v1"
 D9_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d9/v1"
 D10_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d10/v1"
 D11_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d11/v1"
+E2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e2/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -4028,9 +4029,9 @@ def render_full_background_subtraction_d11_pages(pdf_name, payload, *, page_mani
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
-    *, page_manifest=None
+    *, e2_payload=None, page_manifest=None
 ):
-    """Append available D.6 through D.11 groups in complete canonical-t order."""
+    """Append available D.6 through D.11 and E.2 groups in canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4039,6 +4040,7 @@ def render_full_background_subtraction_procedure_pages(
     d9 = _mapping(d9_payload)
     d10 = _mapping(d10_payload)
     d11 = _mapping(d11_payload)
+    e2 = _mapping(e2_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -4049,7 +4051,9 @@ def render_full_background_subtraction_procedure_pages(
     d10_available = bool(d10.get("available"))
     d11_requested = d11_payload is not None
     d11_available = bool(d11.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available:
+    e2_requested = e2_payload is not None
+    e2_available = bool(e2.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4073,6 +4077,10 @@ def render_full_background_subtraction_procedure_pages(
         if d11_requested:
             result["failures"].append(
                 "D.11 procedure input unavailable: {}".format(d11.get("reason"))
+            )
+        if e2_requested:
+            result["failures"].append(
+                "E.2 procedure input unavailable: {}".format(e2.get("reason"))
             )
         return result
     if not d6_available:
@@ -4099,10 +4107,18 @@ def render_full_background_subtraction_procedure_pages(
         result["failures"].append(
             "D.11 procedure input unavailable: {}".format(d11.get("reason"))
         )
+    if e2_requested and not e2_available:
+        result["failures"].append(
+            "E.2 procedure input unavailable: {}".format(e2.get("reason"))
+        )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
         d7_available = False
-    geometry_owner = d6 if d6_available else d7 if d7_available else d8 if d8_available else d9 if d9_available else d10 if d10_available else d11
+    geometry_owner = (
+        d6 if d6_available else d7 if d7_available else d8 if d8_available
+        else d9 if d9_available else d10 if d10_available else d11 if d11_available
+        else None
+    )
     if (
         d8_available
         and geometry_owner is not None
@@ -4191,6 +4207,12 @@ def render_full_background_subtraction_procedure_pages(
             )
             if hard_gate:
                 d11_available = False
+    if e2_available and geometry_owner is not None and (
+        list(geometry_owner.get("t_edges") or ()) != list(e2.get("t_edges") or ())
+        or list(geometry_owner.get("delta_edges") or ()) != list(e2.get("delta_edges") or ())
+    ):
+        result["failures"].append("E.2 frozen procedure geometry mismatch")
+        e2_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -4220,6 +4242,11 @@ def render_full_background_subtraction_procedure_pages(
     d11_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(d11.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    e2_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(e2.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -4267,6 +4294,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_d11_t_pages(ROOT, pdf_name, d11, d11_group, manifest, result["failures"])
 
+    def render_e2_group(t_index):
+        if not e2_available:
+            return
+        e2_group = e2_by_index.get(t_index)
+        if e2_group is None:
+            result["failures"].append(
+                "E.2 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_e2_t_pages(ROOT, pdf_name, e2, e2_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -4283,6 +4321,7 @@ def render_full_background_subtraction_procedure_pages(
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
+            render_e2_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
@@ -4291,6 +4330,7 @@ def render_full_background_subtraction_procedure_pages(
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
+            render_e2_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
             group = _mapping(group)
@@ -4298,19 +4338,383 @@ def render_full_background_subtraction_procedure_pages(
             render_d9_group(group.get("t_index"))
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
+            render_e2_group(group.get("t_index"))
     elif d9_available:
         for group in tuple(d9.get("per_t") or ()):
             _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
             render_d10_group(_mapping(group).get("t_index"))
             render_d11_group(_mapping(group).get("t_index"))
+            render_e2_group(_mapping(group).get("t_index"))
     elif d10_available:
         for group in tuple(d10.get("per_t") or ()):
             _render_d10_t_pages(ROOT, pdf_name, d10, _mapping(group), manifest, result["failures"])
             render_d11_group(_mapping(group).get("t_index"))
+            render_e2_group(_mapping(group).get("t_index"))
     elif d11_available:
         for group in tuple(d11.get("per_t") or ()):
             _render_d11_t_pages(ROOT, pdf_name, d11, _mapping(group), manifest, result["failures"])
+            render_e2_group(_mapping(group).get("t_index"))
+    elif e2_available:
+        for group in tuple(e2.get("per_t") or ()):
+            _render_e2_t_pages(ROOT, pdf_name, e2, _mapping(group), manifest, result["failures"])
     return result
+
+
+def _e2_unavailable(reason):
+    """Return an E.2-local unavailable payload without source aliases."""
+    return {
+        "schema_version": E2_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "host_state": None,
+        "host_label": None,
+        "source_target_state": None,
+        "physical_pion_control_threshold": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "per_t": [],
+    }
+
+
+def _e2_finite(value):
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return None
+    return scalar if math.isfinite(scalar) else None
+
+
+def _e2_integer(value):
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return int(value)
+
+
+def _e2_optional_coordinate(value):
+    if value is None:
+        return None, True
+    scalar = _e2_finite(value)
+    return scalar, scalar is not None
+
+
+def _e2_sidecar_row(row, side, phase):
+    """Validate one frozen acceptance row without assigning a new cell."""
+    row = _mapping(row)
+    required = (
+        "side", "source_label", "entry_index", "coordinate_fingerprint",
+        "analysis_t", "canonical_t_index", "ssdelta", "delta_index",
+        "P_hgcer_npeSum", "ssxptar", "ssyptar", "diagnostic_weight",
+        "allcuts", "nommcuts", "rf_applied_to_diagnostic",
+    )
+    if not row or any(key not in row for key in required):
+        return None, "e2_sidecar_row_invalid"
+    t_index = _e2_integer(row["canonical_t_index"])
+    delta_index = _e2_integer(row["delta_index"])
+    entry_index = _e2_integer(row["entry_index"])
+    analysis_t = _e2_finite(row["analysis_t"])
+    delta = _e2_finite(row["ssdelta"])
+    npe = _e2_finite(row["P_hgcer_npeSum"])
+    weight = _e2_finite(row["diagnostic_weight"])
+    ssxptar, x_valid = _e2_optional_coordinate(row["ssxptar"])
+    ssyptar, y_valid = _e2_optional_coordinate(row["ssyptar"])
+    if (
+        row["side"] != side
+        or not _d10_nonempty_string(row["source_label"])
+        or entry_index is None
+        or row["coordinate_fingerprint"] != phase["coordinate_fingerprint"]
+        or analysis_t is None
+        or delta is None
+        or npe is None
+        or weight is None
+        or not x_valid
+        or not y_valid
+        or type(row["allcuts"]) is not bool
+        or type(row["nommcuts"]) is not bool
+        or row["rf_applied_to_diagnostic"] is not False
+        or t_index is None
+        or delta_index is None
+        or not 0 <= t_index < len(phase["t_edges"]) - 1
+        or not 0 <= delta_index < len(phase["delta_edges"]) - 1
+    ):
+        return None, "e2_sidecar_row_invalid"
+    if (
+        find_canonical_bin(analysis_t, tuple(phase["t_edges"])) != t_index
+        or find_canonical_bin(delta, tuple(phase["delta_edges"])) != delta_index
+    ):
+        return None, "e2_sidecar_cell_assignment_mismatch"
+    return {
+        "t_index": t_index,
+        "delta_index": delta_index,
+        "npe": npe,
+        "ssxptar": ssxptar,
+        "ssyptar": ssyptar,
+        "absolute_support_weight": abs(weight),
+        "nommcuts": row["nommcuts"],
+    }, None
+
+
+def build_full_background_subtraction_e2_payload(
+    pion_hgcer_tdelta_diagnostic, pion_hgcer_event_contract,
+):
+    """Build detached SHMS-angle support shapes from frozen Part-1 rows."""
+    phase, reason = _d10_phase_a_contract(pion_hgcer_event_contract)
+    if reason is not None:
+        return _e2_unavailable("e2_phase_a_contract_invalid")
+    diagnostic = _mapping(pion_hgcer_tdelta_diagnostic)
+    sidecar = _mapping(diagnostic.get("phase_e_acceptance_records"))
+    t_edges = _strict_edges(diagnostic.get("t_edges"))
+    delta_edges = _strict_edges(diagnostic.get("delta_edges"))
+    configuration = _mapping(diagnostic.get("config"))
+    threshold = _e2_finite(configuration.get("production_hgcer_threshold"))
+    if (
+        not diagnostic
+        or diagnostic.get("status") != "available"
+        or diagnostic.get("non_authoritative") is not True
+        or diagnostic.get("production_side_effect_free") is not True
+        or diagnostic.get("production_hgcer_pid_unchanged") is not True
+        or diagnostic.get("rf_restoration_applied") is not False
+        or not _d10_nonempty_string(diagnostic.get("coordinate_fingerprint"))
+        or t_edges is None
+        or delta_edges is None
+        or list(t_edges) != phase["t_edges"]
+        or list(delta_edges) != phase["delta_edges"]
+        or diagnostic.get("coordinate_fingerprint") != phase["coordinate_fingerprint"]
+        or threshold is None
+        or abs(threshold - 2.0) > 1.0e-12
+    ):
+        return _e2_unavailable("e2_part1_contract_invalid")
+    if set(sidecar) != {"kaon", "pion"}:
+        return _e2_unavailable("e2_acceptance_sidecar_invalid")
+    if any(
+        not _d10_sequence(sidecar[side])
+        for side in ("kaon", "pion")
+    ):
+        return _e2_unavailable("e2_acceptance_sidecar_invalid")
+
+    cells_by_index = {
+        (t_index, delta_index): {
+            "delta_index": delta_index,
+            "delta_low": float(delta_edges[delta_index]),
+            "delta_high": float(delta_edges[delta_index + 1]),
+            "kaon_rows": [],
+            "pion_rows": [],
+        }
+        for t_index in range(len(t_edges) - 1)
+        for delta_index in range(len(delta_edges) - 1)
+    }
+    for side in ("kaon", "pion"):
+        for source_row in sidecar[side]:
+            row, row_reason = _e2_sidecar_row(source_row, side, phase)
+            if row_reason is not None:
+                return _e2_unavailable(row_reason)
+            if not row["nommcuts"]:
+                continue
+            if side == "pion" and not row["npe"] > threshold:
+                continue
+            cells_by_index[(row["t_index"], row["delta_index"])][
+                "{}_rows".format(side)
+            ].append({
+                "ssxptar": row["ssxptar"],
+                "ssyptar": row["ssyptar"],
+                "absolute_support_weight": row["absolute_support_weight"],
+            })
+
+    per_t = []
+    for t_index in range(len(t_edges) - 1):
+        cells = []
+        for delta_index in range(len(delta_edges) - 1):
+            source = cells_by_index[(t_index, delta_index)]
+            cells.append({
+                "delta_index": delta_index,
+                "delta_low": source["delta_low"],
+                "delta_high": source["delta_high"],
+                "kaon_rows": tuple(dict(row) for row in source["kaon_rows"]),
+                "pion_rows": tuple(dict(row) for row in source["pion_rows"]),
+            })
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "cells": tuple(cells),
+        })
+    host_state = phase["host_state"]
+    return {
+        "schema_version": E2_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "phase_a_contract_fingerprint": phase["contract_fingerprint"],
+        "coordinate_fingerprint": phase["coordinate_fingerprint"],
+        "host_state": host_state,
+        "host_label": (
+            "Proton-cleaned kaon sample"
+            if host_state == "proton_cleaned" else "Kaon-selected sample"
+        ),
+        "source_target_state": phase["source_target_state"],
+        "physical_pion_control_threshold": 2.0,
+        "selection_definition": {
+            "common": "noRF_nommcuts_canonical_t_delta",
+            "kaon": "kaon_side_noRF_nommcuts",
+            "pion": "pion_control_noRF_nommcuts_HGCer_gt_2",
+            "weighting": "absolute_diagnostic_support",
+            "normalization": "unit_area_independently_per_side_per_cell",
+        },
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e2_histogram(ROOT, name, title, coordinate, rows):
+    """Fill and independently normalize one detached E.2 display histogram."""
+    try:
+        histogram = ROOT.TH1D(
+            str(name), str(title), 50,
+            -0.10 if coordinate == "ssxptar" else -0.06,
+            0.10 if coordinate == "ssxptar" else 0.06,
+        )
+        histogram.SetDirectory(0)
+        if hasattr(histogram, "SetStats"):
+            histogram.SetStats(0)
+    except Exception:
+        return None
+    for row in tuple(rows or ()):
+        row = _mapping(row)
+        value = _e2_finite(row.get(coordinate))
+        weight = _e2_finite(row.get("absolute_support_weight"))
+        if value is not None and weight is not None and weight > 0.0:
+            histogram.Fill(value, weight)
+    try:
+        integral = float(histogram.Integral())
+    except Exception:
+        return None
+    if not math.isfinite(integral) or integral <= 0.0:
+        return None
+    histogram.Scale(1.0 / integral)
+    return histogram
+
+
+def _e2_panel_notice(ROOT, text):
+    try:
+        note = ROOT.TPaveText(0.12, 0.38, 0.88, 0.62, "NDC")
+        note.SetFillStyle(0)
+        note.SetBorderSize(0)
+        note.SetTextAlign(22)
+        note.SetTextSize(0.045)
+        note.AddText(str(text))
+        note.Draw()
+        return note
+    except Exception:
+        return None
+
+
+def _render_e2_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
+    cells = tuple(group.get("cells") or ())
+    if not cells or not hasattr(ROOT, "TH1D"):
+        return False
+    x_label = "SHMS x'_{tar}" if coordinate == "ssxptar" else "SHMS y'_{tar}"
+    heading = "{} acceptance across delta".format(x_label)
+    title = "{} - {}".format(heading, _t_context(group))
+    columns = min(3, len(cells))
+    rows = int(math.ceil(float(len(cells)) / float(columns)))
+    canvas = ROOT.TCanvas(
+        "C_full_background_e2_{}_t{}".format(coordinate, group["t_index"] + 1),
+        title,
+        1400,
+        900,
+    )
+    canvas.Divide(columns, rows)
+    draw_objects = []
+    legend_drawn = False
+    try:
+        for panel_index, cell in enumerate(cells, 1):
+            cell = _mapping(cell)
+            canvas.cd(panel_index)
+            panel_title = "delta = [{:.3f}, {:.3f}] %;{};Normalized absolute support".format(
+                float(cell["delta_low"]), float(cell["delta_high"]), x_label,
+            )
+            kaon = _e2_histogram(
+                ROOT,
+                "H_full_background_e2_{}_kaon_t{}_d{}".format(
+                    coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                panel_title,
+                coordinate,
+                cell.get("kaon_rows"),
+            )
+            pion = _e2_histogram(
+                ROOT,
+                "H_full_background_e2_{}_pion_t{}_d{}".format(
+                    coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                panel_title,
+                coordinate,
+                cell.get("pion_rows"),
+            )
+            if kaon is None and pion is None:
+                notice = _e2_panel_notice(ROOT, "No finite acceptance support")
+                if notice is not None:
+                    draw_objects.append(notice)
+                continue
+            frame = kaon if kaon is not None else pion
+            maximum = max(
+                float(histogram.GetMaximum())
+                for histogram in (kaon, pion) if histogram is not None
+            )
+            frame.SetMinimum(0.0)
+            frame.SetMaximum(max(1.0e-12, 1.15 * maximum))
+            _style_histogram(kaon, getattr(ROOT, "kBlack", 1))
+            _style_histogram(pion, getattr(ROOT, "kBlue", 4))
+            frame.Draw("hist")
+            other = pion if frame is kaon else kaon
+            if other is not None:
+                other.Draw("hist same")
+            if not legend_drawn and hasattr(ROOT, "TLegend"):
+                legend = ROOT.TLegend(0.48, 0.66, 0.89, 0.86)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                if kaon is not None:
+                    legend.AddEntry(kaon, presentation["host_label"], "l")
+                if pion is not None:
+                    legend.AddEntry(pion, "Pion-control sample (HGCer NPE > 2)", "l")
+                legend.Draw()
+                draw_objects.append(legend)
+                legend_drawn = True
+            if kaon is None or pion is None:
+                missing = presentation["host_label"] if kaon is None else "Pion-control sample"
+                notice = _e2_panel_notice(ROOT, "{} unavailable".format(missing))
+                if notice is not None:
+                    draw_objects.append(notice)
+            draw_objects.extend(histogram for histogram in (kaon, pion) if histogram is not None)
+        canvas.cd(1)
+        draw_objects.append(_draw_small_note(
+            ROOT, "Shapes normalized independently; noRF, no MM cut; diagnostic only."
+        ))
+        draw_objects.append(_draw_page_header(ROOT, canvas, heading, group))
+        canvas._full_background_e2_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e2_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Append detached E.2 SHMS acceptance pages for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    pages = (
+        ("ssxptar", "full_background.e2.shms_xptar_acceptance"),
+        ("ssyptar", "full_background.e2.shms_yptar_acceptance"),
+    )
+    for coordinate, page_id in pages:
+        if _render_e2_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
+            manifest.append({"page_id": page_id, "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("E.2 {} page unavailable for t{}".format(coordinate, t_number))
 
 
 __all__ = (
@@ -4320,6 +4724,7 @@ __all__ = (
     "D9_PRESENTATION_SCHEMA_VERSION",
     "D10_PRESENTATION_SCHEMA_VERSION",
     "D11_PRESENTATION_SCHEMA_VERSION",
+    "E2_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
@@ -4327,6 +4732,7 @@ __all__ = (
     "build_full_background_subtraction_d9_payload",
     "build_full_background_subtraction_d10_payload",
     "build_full_background_subtraction_d11_payload",
+    "build_full_background_subtraction_e2_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",

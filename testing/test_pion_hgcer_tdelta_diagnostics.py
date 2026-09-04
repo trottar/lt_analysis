@@ -26,11 +26,13 @@ from background_config import get_pion_hgcer_diagnostic_config
 
 
 class _Event:
-    def __init__(self, *, mm, mandel_t, delta, npe):
+    def __init__(self, *, mm, mandel_t, delta, npe, ssxptar=0.01, ssyptar=-0.01):
         self.MM = float(mm)
         self.MandelT = float(mandel_t)
         self.ssdelta = float(delta)
         self.P_hgcer_npeSum = float(npe)
+        self.ssxptar = float(ssxptar)
+        self.ssyptar = float(ssyptar)
         self.P_hgcer_xAtCer = 0.0
         self.P_hgcer_yAtCer = 0.0
         self.Q2 = 4.4
@@ -418,13 +420,20 @@ class PionHGCerTDeltaRootTests(unittest.TestCase):
         self.assertIn("P_hgcer_npeSum", title)
         self.assertIn("signed weighted yield", title)
 
-    def _build_renderable_synthetic_result(self):
+    def _build_renderable_synthetic_result(self, event_coordinates=None):
         contract = build_kaon_data_coordinate_contract(
             "Center", {"shift": 0.0}, {"shift": 0.0}, require_t_shift=True
         )
+        event_coordinates = event_coordinates or ((0.011, -0.021), (-0.031, 0.031))
         events = [
-            _Event(mm=1.08, mandel_t=-0.4, delta=-10.0, npe=0.5),
-            _Event(mm=1.12, mandel_t=-0.9, delta=20.0, npe=3.0),
+            _Event(
+                mm=1.08, mandel_t=-0.4, delta=-10.0, npe=0.5,
+                ssxptar=event_coordinates[0][0], ssyptar=event_coordinates[0][1],
+            ),
+            _Event(
+                mm=1.12, mandel_t=-0.9, delta=20.0, npe=3.0,
+                ssxptar=event_coordinates[1][0], ssyptar=event_coordinates[1][1],
+            ),
         ]
         proton_cleaning_result = {
             "accepted": True,
@@ -574,6 +583,31 @@ class PionHGCerTDeltaRootTests(unittest.TestCase):
         histogram = result["histograms"]["H_hgcer_kaon_absolute"]
         gc.collect()
         self.assertGreater(histogram.Integral(), 0.0)
+
+    def test_phase_e_acceptance_sidecar_is_detached_and_coordinate_independent(self):
+        result, *_unused = self._build_renderable_synthetic_result(
+            ((0.011, float("nan")), (float("nan"), 0.031))
+        )
+        self.assertEqual(set(result["phase_e_acceptance_records"]), {"kaon", "pion"})
+        for side in ("kaon", "pion"):
+            sidecar = result["phase_e_acceptance_records"][side]
+            self.assertEqual(len(sidecar), 2)
+            self.assertEqual(sidecar[0]["ssxptar"], 0.011)
+            self.assertIsNone(sidecar[0]["ssyptar"])
+            self.assertIsNone(sidecar[1]["ssxptar"])
+            self.assertEqual(sidecar[1]["ssyptar"], 0.031)
+            self.assertEqual(
+                [row["canonical_t_index"] for row in sidecar], [0, 1]
+            )
+            self.assertEqual([row["delta_index"] for row in sidecar], [0, 1])
+            self.assertTrue(all(row["nommcuts"] is True for row in sidecar))
+            self.assertTrue(all(row["rf_applied_to_diagnostic"] is False for row in sidecar))
+            self.assertTrue(all(
+                "ssxptar" not in row and "ssyptar" not in row
+                for row in result["records"][side]
+            ))
+        serialized = diagnostics.serialize_pion_hgcer_tdelta_diagnostic(result)
+        self.assertNotIn("phase_e_acceptance_records", serialized)
 
     def test_pre_hgcer_populations_share_coordinates_and_preserve_factor_scope(self):
         contract = build_kaon_data_coordinate_contract(

@@ -639,6 +639,10 @@ def build_pion_hgcer_tdelta_diagnostic(
             "histogram_construction", exc
         ) from exc
     records = {side: [] for side in _SIDES}
+    # Phase E acceptance metadata is intentionally detached from the accepted
+    # Part-1 records.  It is kept only in memory for descriptive SHMS-angle
+    # presentation and is deliberately absent from the Part-1 serializer.
+    phase_e_acceptance_records = {side: [] for side in _SIDES}
     source_audit = {side: {} for side in _SIDES}
     cells = {
         (t_index, delta_index): {
@@ -744,6 +748,23 @@ def build_pion_hgcer_tdelta_diagnostic(
             "rf_applied_to_diagnostic": False,
         }
         records[side].append(record)
+        phase_e_acceptance_records[side].append({
+            "side": str(side),
+            "source_label": str(source_label),
+            "entry_index": int(entry_index),
+            "coordinate_fingerprint": coordinate_fingerprint,
+            "analysis_t": float(analysis_t),
+            "canonical_t_index": int(t_index),
+            "ssdelta": float(delta_value),
+            "delta_index": int(delta_index),
+            "P_hgcer_npeSum": float(npe),
+            "ssxptar": _finite(getattr(evt, "ssxptar", None)),
+            "ssyptar": _finite(getattr(evt, "ssyptar", None)),
+            "diagnostic_weight": float(diagnostic_weight),
+            "allcuts": bool(allcuts),
+            "nommcuts": bool(nommcuts),
+            "rf_applied_to_diagnostic": False,
+        })
         _record_metric(audit, record)
         _record_metric(cells[(t_index, delta_index)][side], record)
         if pion_hgcer_boundary_contains(side, npe, boundary):
@@ -917,6 +938,10 @@ def build_pion_hgcer_tdelta_diagnostic(
                 )
 
     frozen_records = {side: _freeze_records(section) for side, section in records.items()}
+    frozen_phase_e_acceptance_records = {
+        side: _freeze_records(section)
+        for side, section in phase_e_acceptance_records.items()
+    }
     return {
         "status": "available",
         "diagnostic_label": DIAGNOSTIC_LABEL,
@@ -935,6 +960,7 @@ def build_pion_hgcer_tdelta_diagnostic(
         "source_provenance": source_provenance,
         "source_audit": source_audit,
         "records": frozen_records,
+        "phase_e_acceptance_records": frozen_phase_e_acceptance_records,
         "cells": tuple(MappingProxyType(dict(cell)) for cell in serialized_cells),
         "histograms": histograms,
     }

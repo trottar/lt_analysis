@@ -41,6 +41,10 @@ EXPECTED_FULL_BACKGROUND_PAGE_IDS = (
     "full_background.d11.ab_ratio_log",
     "full_background.d11.method_availability",
 )
+E2_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.e2.shms_xptar_acceptance",
+    "full_background.e2.shms_yptar_acceptance",
+)
 
 
 def _assert_full_background_manifest_contract(test_case, manifest):
@@ -473,6 +477,71 @@ class _D10ROOT:
 
     def TH1D(self, *args):
         histogram = _D10DisplayHistogram(*args)
+        self.histograms.append(histogram)
+        return histogram
+
+
+class _E2DisplayHistogram:
+    def __init__(self, name, title, bin_count, lower, upper):
+        self.name = str(name)
+        self.title = str(title)
+        self.bin_count = int(bin_count)
+        self.lower = float(lower)
+        self.upper = float(upper)
+        self.contents = [0.0] * self.bin_count
+        self.directory = object()
+        self.display_minimum = None
+        self.display_maximum = None
+        self.root = None
+
+    def SetDirectory(self, directory):
+        self.directory = directory
+
+    def SetStats(self, _value):
+        return None
+
+    def SetLineColor(self, _color):
+        return None
+
+    def SetLineWidth(self, _width):
+        return None
+
+    def SetMinimum(self, value):
+        self.display_minimum = float(value)
+
+    def SetMaximum(self, value):
+        self.display_maximum = float(value)
+
+    def Fill(self, value, weight):
+        value = float(value)
+        if self.lower <= value < self.upper:
+            fraction = (value - self.lower) / (self.upper - self.lower)
+            index = min(self.bin_count - 1, max(0, int(fraction * self.bin_count)))
+            self.contents[index] += float(weight)
+
+    def Integral(self):
+        return sum(self.contents)
+
+    def Scale(self, factor):
+        self.contents = [float(factor) * value for value in self.contents]
+
+    def GetMaximum(self):
+        return max(self.contents, default=0.0)
+
+    def Draw(self, option):
+        if self.root is not None:
+            self.root.drawn_histograms.append((self, str(option)))
+
+
+class _E2ROOT(_FakeROOT):
+    def __init__(self):
+        super().__init__()
+        self.histograms = []
+        self.drawn_histograms = []
+
+    def TH1D(self, *args):
+        histogram = _E2DisplayHistogram(*args)
+        histogram.root = self
         self.histograms.append(histogram)
         return histogram
 
@@ -1042,6 +1111,66 @@ def _d9_fixture():
         "cells": cells,
     }
     return diagnostic, method_a, comparison
+
+
+def _e2_fixture():
+    """Return two-bin frozen Part-1/Phase-A inputs for E.2 acceptance pages."""
+    phase_a, _method_b, _comparison = _d10_fixture()
+    t_edges = list(phase_a["canonical_t_edges"])
+    delta_edges = list(phase_a["delta_edges"])
+    coordinate_fingerprint = phase_a["coordinate_fingerprint"]
+    rows = {"kaon": [], "pion": []}
+
+    def append_row(side, t_index, delta_index, npe, weight, x_value, y_value, *, nommcuts=True):
+        rows[side].append({
+            "side": side,
+            "source_label": "prompt" if weight >= 0.0 else "random",
+            "entry_index": len(rows[side]),
+            "coordinate_fingerprint": coordinate_fingerprint,
+            "analysis_t": 0.5 * (t_edges[t_index] + t_edges[t_index + 1]),
+            "canonical_t_index": t_index,
+            "ssdelta": 0.5 * (delta_edges[delta_index] + delta_edges[delta_index + 1]),
+            "delta_index": delta_index,
+            "P_hgcer_npeSum": float(npe),
+            "ssxptar": x_value,
+            "ssyptar": y_value,
+            "diagnostic_weight": float(weight),
+            "allcuts": False,
+            "nommcuts": bool(nommcuts),
+            "rf_applied_to_diagnostic": False,
+        })
+
+    for t_index in range(2):
+        for delta_index in range(2):
+            selected_x = 0.012 + 0.004 * (t_index + delta_index)
+            selected_y = -0.018 + 0.006 * (t_index + delta_index)
+            kaon_x = selected_x if (t_index, delta_index) != (0, 1) else None
+            kaon_y = selected_y if (t_index, delta_index) != (0, 0) else None
+            pion_x = selected_x + 0.007 if (t_index, delta_index) != (0, 0) else None
+            pion_y = selected_y - 0.007 if (t_index, delta_index) != (0, 1) else None
+            append_row("kaon", t_index, delta_index, 0.0, -2.5, kaon_x, kaon_y)
+            append_row("kaon", t_index, delta_index, 9.0, 19.0, 0.05, 0.04, nommcuts=False)
+            append_row("pion", t_index, delta_index, 2.0, -4.0, 0.02, -0.02)
+            append_row("pion", t_index, delta_index, 2.25, -5.0, pion_x, pion_y)
+            append_row("pion", t_index, delta_index, 1.75, 7.0, 0.03, -0.03)
+            append_row("pion", t_index, delta_index, 3.0, 11.0, 0.04, -0.04, nommcuts=False)
+            if (t_index, delta_index) == (1, 1):
+                append_row("kaon", t_index, delta_index, 0.0, 1.5, None, None)
+    diagnostic = {
+        "status": "available",
+        "non_authoritative": True,
+        "production_side_effect_free": True,
+        "production_hgcer_pid_unchanged": True,
+        "rf_restoration_applied": False,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "config": {"production_hgcer_threshold": 2.0},
+        "phase_e_acceptance_records": {
+            side: tuple(side_rows) for side, side_rows in rows.items()
+        },
+    }
+    return diagnostic, phase_a
 
 
 def _d10_fixture():
@@ -2383,6 +2512,197 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             for pave in availability_root.pave_texts
         ))
 
+    def test_e2_uses_frozen_sidecar_rows_and_coordinate_independent_selection(self):
+        diagnostic, phase_a = _e2_fixture()
+        diagnostic_before = deepcopy(diagnostic)
+        phase_before = deepcopy(phase_a)
+        payload = plots.build_full_background_subtraction_e2_payload(
+            diagnostic, phase_a
+        )
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.E2_PRESENTATION_SCHEMA_VERSION)
+        self.assertEqual(payload["host_label"], "Proton-cleaned kaon sample")
+        self.assertEqual(payload["physical_pion_control_threshold"], 2.0)
+        self.assertEqual(
+            payload["selection_definition"]["pion"],
+            "pion_control_noRF_nommcuts_HGCer_gt_2",
+        )
+        cell = payload["per_t"][0]["cells"][0]
+        self.assertEqual(len(cell["kaon_rows"]), 1)
+        self.assertEqual(len(cell["pion_rows"]), 1)
+        self.assertEqual(cell["kaon_rows"][0]["absolute_support_weight"], 2.5)
+        self.assertEqual(cell["pion_rows"][0]["absolute_support_weight"], 5.0)
+        self.assertEqual(cell["kaon_rows"][0]["ssxptar"], 0.012)
+        self.assertIsNone(cell["kaon_rows"][0]["ssyptar"])
+        self.assertIsNone(cell["pion_rows"][0]["ssxptar"])
+        self.assertAlmostEqual(cell["pion_rows"][0]["ssyptar"], -0.025)
+        both_missing = payload["per_t"][1]["cells"][1]["kaon_rows"]
+        self.assertTrue(any(
+            row["ssxptar"] is None and row["ssyptar"] is None
+            for row in both_missing
+        ))
+        self.assertEqual(diagnostic, diagnostic_before)
+        self.assertEqual(phase_a, phase_before)
+
+        cell["kaon_rows"][0]["absolute_support_weight"] = 99.0
+        self.assertEqual(
+            diagnostic["phase_e_acceptance_records"]["kaon"][0]["diagnostic_weight"],
+            -2.5,
+        )
+        identity_phase = deepcopy(phase_a)
+        identity_phase["host_state"] = "identity_no_proton_cleaning"
+        identity_payload = plots.build_full_background_subtraction_e2_payload(
+            diagnostic, identity_phase
+        )
+        self.assertTrue(identity_payload["available"])
+        self.assertEqual(identity_payload["host_label"], "Kaon-selected sample")
+
+    def test_e2_rejects_local_contract_and_frozen_cell_failures(self):
+        cases = (
+            (
+                lambda diagnostic, _phase: diagnostic.update(
+                    coordinate_fingerprint="wrong-coordinate"
+                ),
+                "e2_part1_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _phase: diagnostic.pop("phase_e_acceptance_records"),
+                "e2_acceptance_sidecar_invalid",
+            ),
+            (
+                lambda diagnostic, _phase: diagnostic["phase_e_acceptance_records"]["kaon"][0].update(
+                    canonical_t_index=1
+                ),
+                "e2_sidecar_cell_assignment_mismatch",
+            ),
+            (
+                lambda diagnostic, _phase: diagnostic["phase_e_acceptance_records"]["pion"][0].update(
+                    delta_index=1
+                ),
+                "e2_sidecar_cell_assignment_mismatch",
+            ),
+        )
+        for mutation, expected_reason in cases:
+            with self.subTest(expected_reason=expected_reason):
+                diagnostic, phase_a = _e2_fixture()
+                mutation(diagnostic, phase_a)
+                payload = plots.build_full_background_subtraction_e2_payload(
+                    diagnostic, phase_a
+                )
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], expected_reason)
+
+    def test_e2_rendering_normalizes_each_support_shape_independently(self):
+        root = _E2ROOT()
+        kaon = plots._e2_histogram(
+            root,
+            "H_e2_kaon",
+            "x;SHMS x'_{tar};Normalized absolute support",
+            "ssxptar",
+            (
+                {"ssxptar": -0.02, "absolute_support_weight": 2.0},
+                {"ssxptar": 0.02, "absolute_support_weight": 8.0},
+            ),
+        )
+        pion = plots._e2_histogram(
+            root,
+            "H_e2_pion",
+            "x;SHMS x'_{tar};Normalized absolute support",
+            "ssxptar",
+            ({"ssxptar": 0.01, "absolute_support_weight": 5.0},),
+        )
+        self.assertIsNotNone(kaon)
+        self.assertIsNotNone(pion)
+        self.assertEqual(kaon.Integral(), 1.0)
+        self.assertEqual(pion.Integral(), 1.0)
+
+        diagnostic, phase_a = _e2_fixture()
+        payload = plots.build_full_background_subtraction_e2_payload(
+            diagnostic, phase_a
+        )
+        payload_before = deepcopy(payload)
+        manifest, failures = [], []
+        plots._render_e2_t_pages(
+            root, "ignored.pdf", payload, payload["per_t"][0], manifest, failures
+        )
+        self.assertEqual(payload, payload_before)
+        self.assertEqual(failures, [])
+        self.assertEqual(
+            [page["page_id"] for page in manifest], list(E2_FULL_BACKGROUND_PAGE_IDS)
+        )
+
+    def test_e2_cumulative_pages_follow_d11_and_fail_locally(self):
+        phase_page_ids = (
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[3:6],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[6:9],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[9:12],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[12:15],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[15:18],
+        )
+        payloads = {
+            label: _d12_cumulative_payload(label)
+            for label in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+        }
+        e2 = _d12_cumulative_payload("E.2")
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d6_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[0], set())
+        ), patch.object(
+            plots, "_render_d7_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[1], set())
+        ), patch.object(
+            plots, "_render_d8_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[2], set())
+        ), patch.object(
+            plots, "_render_d9_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[3], set())
+        ), patch.object(
+            plots, "_render_d10_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[4], set())
+        ), patch.object(
+            plots, "_render_d11_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[5], set())
+        ), patch.object(
+            plots, "_render_e2_t_pages", side_effect=_d12_record_phase_pages(E2_FULL_BACKGROUND_PAGE_IDS, set())
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf",
+                payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                e2_payload=e2,
+            )
+        expected = [
+            (scope, page_id)
+            for scope in ("t1", "t2")
+            for page_id in EXPECTED_FULL_BACKGROUND_PAGE_IDS + E2_FULL_BACKGROUND_PAGE_IDS
+        ]
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            expected,
+        )
+
+        e2["delta_edges"] = [-10.0, 5.0, 10.0]
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d6_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[0], set())
+        ), patch.object(
+            plots, "_render_d7_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[1], set())
+        ), patch.object(
+            plots, "_render_d8_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[2], set())
+        ), patch.object(
+            plots, "_render_d9_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[3], set())
+        ), patch.object(
+            plots, "_render_d10_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[4], set())
+        ), patch.object(
+            plots, "_render_d11_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[5], set())
+        ), patch.object(plots, "_render_e2_t_pages"):
+            isolated = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf",
+                payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                e2_payload=e2,
+            )
+        self.assertIn("E.2 frozen procedure geometry mismatch", isolated["failures"])
+        self.assertEqual(
+            [page["page_id"] for page in isolated["manifest"]],
+            list(EXPECTED_FULL_BACKGROUND_PAGE_IDS) * 2,
+        )
+
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
         phase_page_ids = (
@@ -3262,8 +3582,30 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(cumulative_renderer_forbidden=forbidden):
                 self.assertNotIn(forbidden, cumulative_renderer_source)
 
+        e2_source = source[
+            source.index("def _e2_unavailable"):
+            source.index("__all__", source.index("def _e2_unavailable"))
+        ]
+        for required in (
+            "E2_PRESENTATION_SCHEMA_VERSION",
+            "find_canonical_bin",
+            "full_background.e2.shms_xptar_acceptance",
+            "full_background.e2.shms_yptar_acceptance",
+            "Shapes normalized independently; noRF, no MM cut; diagnostic only.",
+            "Pion-control sample (HGCer NPE > 2)",
+        ):
+            with self.subTest(e2_required=required):
+                self.assertIn(required, e2_source)
+        for forbidden in (
+            "KS", "Kolmogorov", "chi2", "p_value", "pvalue", "significance",
+            "acceptance_weight", "acceptance_correction", "preferred_method",
+            "selected_method", "combine_AB",
+        ):
+            with self.subTest(e2_forbidden=forbidden):
+                self.assertNotIn(forbidden, e2_source)
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.11 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.11 and E.2 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -3273,6 +3615,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_d9_payload",
             "build_full_background_subtraction_d10_payload",
             "build_full_background_subtraction_d11_payload",
+            "build_full_background_subtraction_e2_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -3327,6 +3670,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_d11_payload(", start),
+            runtime.index("build_full_background_subtraction_e2_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_e2_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
