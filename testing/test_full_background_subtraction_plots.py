@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 import sys
@@ -17,6 +19,53 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "utility"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "cuts"))
 
 import full_background_subtraction_plots as plots
+
+
+EXPECTED_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.d6.raw_mm",
+    "full_background.d6.proton_pid",
+    "full_background.d6.proton_weight",
+    "full_background.d7.proton_mm",
+    "full_background.d7.proton_cleaned_mm",
+    "full_background.d7.proton_delta_mm",
+    "full_background.d8.pion_background_mm",
+    "full_background.d8.pion_subtracted_mm",
+    "full_background.d8.pion_delta_mm",
+    "full_background.d9.hgcer_response",
+    "full_background.d9.hgcer_delta_response",
+    "full_background.d9.method_a_relative",
+    "full_background.d10.method_b_mm_inputs",
+    "full_background.d10.method_b_local_closure",
+    "full_background.d10.method_b_relative",
+    "full_background.d11.ab_overlay",
+    "full_background.d11.ab_ratio_log",
+    "full_background.d11.method_availability",
+)
+
+
+def _assert_full_background_manifest_contract(test_case, manifest):
+    """D.12: every retained page is a canonical non-authoritative t page."""
+    seen_scopes = set()
+    current_scope = None
+    page_positions_by_scope = {}
+    for page in manifest:
+        page_id = page.get("page_id")
+        scope = page.get("scope")
+        test_case.assertIn(page_id, EXPECTED_FULL_BACKGROUND_PAGE_IDS)
+        test_case.assertRegex(scope, r"^t[1-9][0-9]*$")
+        test_case.assertIs(page.get("authoritative"), False)
+        for forbidden in ("global", "status", "provenance", "warning", "qa"):
+            test_case.assertNotIn(forbidden, page_id.lower())
+        if scope != current_scope:
+            test_case.assertNotIn(scope, seen_scopes)
+            seen_scopes.add(scope)
+            current_scope = scope
+        page_positions_by_scope.setdefault(scope, []).append(
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS.index(page_id)
+        )
+    for positions in page_positions_by_scope.values():
+        test_case.assertEqual(positions, sorted(positions))
+        test_case.assertEqual(len(positions), len(set(positions)))
 
 
 class _Histogram:
@@ -1291,16 +1340,64 @@ def _d11_cumulative_payload(label, t_edges=(0.0, 1.0), delta_edges=(-10.0, 0.0, 
     }
 
 
+def _d12_cumulative_payload(
+    label, t_edges=(0.0, 1.0, 2.0), delta_edges=(-10.0, 0.0, 10.0)
+):
+    """Detached two-bin presentation groups for D.12 cumulative-order tests."""
+    return {
+        "label": str(label),
+        "available": True,
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": [
+            {"t_index": index}
+            for index in range(len(t_edges) - 1)
+        ],
+    }
+
+
+def _d12_record_phase_pages(page_ids, omissions):
+    """Record detached page availability without invoking ROOT page builders."""
+    def recorder(_root, _pdf_name, _presentation, group, manifest, failures):
+        scope = "t{}".format(int(group["t_index"]) + 1)
+        for page_id in page_ids:
+            if (scope, page_id) in omissions:
+                failures.append("{} unavailable for {}".format(page_id, scope))
+                continue
+            manifest.append({
+                "page_id": page_id,
+                "scope": scope,
+                "authoritative": False,
+            })
+    return recorder
+
+
 class FullBackgroundSubtractionD6Tests(unittest.TestCase):
     def test_pdf_path_is_deterministic_and_detached(self):
-        main = r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf"
-        path = plots.full_background_subtraction_pdf_path(main)
-        self.assertEqual(
-            path,
-            r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_full-background-subtraction.pdf",
+        cases = (
+            (
+                r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf",
+                r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe_full-background-subtraction.pdf",
+            ),
+            (
+                "/analysis/Left_kaon_rand_sub_Q4p4W2p74_highe.pdf",
+                "/analysis/Left_kaon_rand_sub_Q4p4W2p74_highe_full-background-subtraction.pdf",
+            ),
+            (
+                "/analysis/Left_kaon_rand_sub_Q4p4W2p74_highe",
+                "/analysis/Left_kaon_rand_sub_Q4p4W2p74_highe_full-background-subtraction.pdf",
+            ),
         )
-        self.assertNotEqual(path, main)
-        self.assertNotIn("hgcer-ab-comparison", path)
+        for main, expected in cases:
+            with self.subTest(main=main):
+                path = plots.full_background_subtraction_pdf_path(main)
+                self.assertEqual(path, expected)
+                self.assertNotEqual(path, main)
+                self.assertNotIn("hgcer-ab-comparison", path)
+                self.assertNotEqual(
+                    path,
+                    main.rsplit(".pdf", 1)[0] + "_hgcer-ab-comparison.pdf",
+                )
 
     def test_timing_t_payload_uses_exact_products_and_native_inputs(self):
         raw = (_Histogram("raw-t0"), _Histogram("raw-t1"))
@@ -2219,6 +2316,84 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertFalse(_rectangles_overlap(legend.coordinates, notice.coordinates))
         self.assertLess(legend.coordinates[3], notice.coordinates[1])
 
+    def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
+        """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
+        phase_page_ids = (
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[3:6],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[6:9],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[9:12],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[12:15],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[15:18],
+        )
+        omissions = {
+            ("t1", "full_background.d6.proton_pid"),
+            ("t1", "full_background.d8.pion_delta_mm"),
+            ("t1", "full_background.d10.method_b_relative"),
+            ("t2", "full_background.d9.method_a_relative"),
+            ("t2", "full_background.d11.ab_ratio_log"),
+        }
+        payloads = {
+            label: _d12_cumulative_payload(label)
+            for label in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+        }
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots,
+            "_render_d6_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[0], omissions),
+        ), patch.object(
+            plots,
+            "_render_d7_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[1], omissions),
+        ), patch.object(
+            plots,
+            "_render_d8_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[2], omissions),
+        ), patch.object(
+            plots,
+            "_render_d9_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[3], omissions),
+        ), patch.object(
+            plots,
+            "_render_d10_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[4], omissions),
+        ), patch.object(
+            plots,
+            "_render_d11_t_pages",
+            side_effect=_d12_record_phase_pages(phase_page_ids[5], omissions),
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf",
+                payloads["D.6"],
+                payloads["D.7"],
+                payloads["D.8"],
+                payloads["D.9"],
+                payloads["D.10"],
+                payloads["D.11"],
+            )
+
+        expected_manifest = [
+            (scope, page_id)
+            for scope in ("t1", "t2")
+            for page_id in EXPECTED_FULL_BACKGROUND_PAGE_IDS
+            if (scope, page_id) not in omissions
+        ]
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            expected_manifest,
+        )
+        self.assertEqual(len(rendered["manifest"]), 36 - len(omissions))
+        _assert_full_background_manifest_contract(self, rendered["manifest"])
+        for scope, page_id in omissions:
+            self.assertNotIn(
+                (scope, page_id),
+                [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            )
+            self.assertIn(
+                "{} unavailable for {}".format(page_id, scope),
+                rendered["failures"],
+            )
+
     def test_d11_early_display_delta_mismatches_do_not_suppress_d11(self):
         def record_d11(_root, _pdf_name, _presentation, group, manifest, _failures):
             for page_id in (
@@ -2719,6 +2894,55 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
 
     def test_static_presentation_and_runtime_contracts(self):
         source = (REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py").read_text(encoding="utf-8")
+        for heading in (
+            "Kaon-selected missing mass",
+            "Proton-identification timing",
+            "Proton contamination weight",
+            "Proton contamination in missing mass",
+            "Before and after proton subtraction",
+            "Proton subtraction across delta",
+            "Baseline pion background in missing mass",
+            "Before and after baseline pion subtraction",
+            "Baseline pion background across delta",
+            "HGCer response",
+            "HGCer response across delta",
+            "Method A - HGCer response diagnostic",
+            "Method B - Missing-mass closure inputs",
+            "Method B - Local missing-mass closure",
+            "Method B - Missing-mass closure diagnostic",
+            "Method A / Method B diagnostic comparison",
+            "Method A / Method B relative comparison",
+            "Method availability across delta",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, source)
+        for notice in (
+            "Diagnostic only - no refinement applied",
+            "Diagnostic only - no correction or method selection",
+            "NON-AUTHORITATIVE DIAGNOSTIC",
+            "No refinement, correction, or method selection",
+        ):
+            with self.subTest(notice=notice):
+                self.assertIn(notice, source)
+        for forbidden_d12 in (
+            "D12_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_d12_payload",
+            "full_background.d12.",
+        ):
+            with self.subTest(forbidden_d12=forbidden_d12):
+                self.assertNotIn(forbidden_d12, source)
+        open_helper_source = source[
+            source.index("def open_full_background_subtraction_pdf"):
+            source.index("def close_full_background_subtraction_pdf")
+        ]
+        close_helper_source = source[
+            source.index("def close_full_background_subtraction_pdf"):
+            source.index("def _render_d6_t_pages")
+        ]
+        self.assertIn('canvas.Print("{}[".format(pdf_name))', open_helper_source)
+        self.assertIn('canvas.Print("{}]".format(pdf_name))', close_helper_source)
+        self.assertNotIn("canvas.Print(pdf_name)", open_helper_source)
+        self.assertNotIn("canvas.Print(pdf_name)", close_helper_source)
         pre_d9_source = source[:source.index("def _d9_integer")]
         for forbidden in (
             "import proton_contamination_weights",
@@ -2935,6 +3159,16 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         for forbidden in ("tension", "compatibility", "significance"):
             with self.subTest(d11_renderer_forbidden=forbidden):
                 self.assertNotIn(forbidden, d11_renderer_source)
+        cumulative_renderer_source = source[
+            source.index("def render_full_background_subtraction_procedure_pages"):
+            source.index("__all__", source.index("def render_full_background_subtraction_procedure_pages"))
+        ]
+        for forbidden in (
+            "C_A", "C_B", "C_final", "use_A", "use_B", "combine_AB",
+            "preferred_method", "selected_method", "tension", "compatibility", "significance",
+        ):
+            with self.subTest(cumulative_renderer_forbidden=forbidden):
+                self.assertNotIn(forbidden, cumulative_renderer_source)
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
         start = runtime.index("# Phases D.6 through D.11 are terminal presentation only.")
@@ -2953,9 +3187,24 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "close_full_background_subtraction_pdf",
         ):
             self.assertIn(name, block)
+        for call in (
+            "full_background_subtraction_pdf_path",
+            "open_full_background_subtraction_pdf",
+            "render_full_background_subtraction_procedure_pages",
+            "close_full_background_subtraction_pdf",
+        ):
+            with self.subTest(lifecycle_call=call):
+                self.assertEqual(block.count(call + "("), 1)
         self.assertNotIn("open_diagnostic_pdf", block)
         for forbidden in ("C_A", "C_B", "C_final", "use_A", "use_B", "combine_AB"):
             self.assertNotIn(forbidden, block)
+        for forbidden_d12 in (
+            "D12_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_d12_payload",
+            "full_background.d12.",
+        ):
+            with self.subTest(runtime_forbidden_d12=forbidden_d12):
+                self.assertNotIn(forbidden_d12, runtime)
         self.assertLess(
             runtime.index("build_full_background_subtraction_d6_payload(", start),
             runtime.index("build_full_background_subtraction_d7_payload(", start),
@@ -2981,6 +3230,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         self.assertLess(
+            runtime.index("full_background_subtraction_pdf_path(", start),
+            runtime.index("open_full_background_subtraction_pdf(", start),
+        )
+        self.assertLess(
+            runtime.index("open_full_background_subtraction_pdf(", start),
+            runtime.index("render_full_background_subtraction_procedure_pages(", start),
+        )
+        self.assertLess(
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
             runtime.index("close_full_background_subtraction_pdf(", start),
         )
@@ -2994,6 +3251,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d11_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_d12_payload\"]", block)
+        self.assertEqual(block.count('histDict["full_background_subtraction_'), 2)
+        self.assertIn('histDict["full_background_subtraction_page_manifest"]', block)
+        self.assertIn('histDict["full_background_subtraction_renderer_failures"]', block)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_d10_root_histograms_preserve_frozen_boundaries_and_stored_bins(self):
@@ -3240,13 +3501,36 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             d10_phase_a, d10_method_b, d10_comparison
         )
         self.assertTrue(d10_payload["available"])
+        d11_checkpoint = _d11_fixture(
+            t_edges=(0.0, 1.0, 2.0),
+            delta_edges=(-10.0, 0.0, 10.0),
+        )
+        d11_checkpoint_before = deepcopy(d11_checkpoint)
         d11_payload = plots.build_full_background_subtraction_d11_payload(
-            _d11_fixture(
-                t_edges=(0.0, 1.0, 2.0),
-                delta_edges=(-10.0, 0.0, 10.0),
-            )
+            d11_checkpoint
         )
         self.assertTrue(d11_payload["available"])
+        d6_d7_source_snapshots = []
+        for histogram in (raw, proton, cleaned) + tuple(
+            histogram for row in timing_cells for histogram in row
+        ):
+            d6_d7_source_snapshots.append((
+                histogram,
+                histogram.GetNbinsX(),
+                tuple(
+                    histogram.GetBinContent(index)
+                    for index in range(1, histogram.GetNbinsX() + 1)
+                ),
+            ))
+        d6_weight_snapshot = (
+            weight.GetNbinsX(),
+            weight.GetNbinsY(),
+            tuple(
+                weight.GetBinContent(x_index, y_index)
+                for x_index in range(1, weight.GetNbinsX() + 1)
+                for y_index in range(1, weight.GetNbinsY() + 1)
+            ),
+        )
         d8_source_snapshots = []
         for parent in d8_parents:
             application = parent["final_diagnostic_application_result"]
@@ -3277,60 +3561,61 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 )
             finally:
                 plots.close_full_background_subtraction_pdf(pdf)
+            self.assertTrue(Path(pdf).exists())
+            self.assertGreater(Path(pdf).stat().st_size, 0)
             self.assertEqual(
                 [page["page_id"] for page in rendered["manifest"]],
-                [
-                    "full_background.d6.raw_mm",
-                    "full_background.d6.proton_pid",
-                    "full_background.d6.proton_weight",
-                    "full_background.d7.proton_mm",
-                    "full_background.d7.proton_cleaned_mm",
-                    "full_background.d7.proton_delta_mm",
-                    "full_background.d8.pion_background_mm",
-                    "full_background.d8.pion_subtracted_mm",
-                    "full_background.d8.pion_delta_mm",
-                    "full_background.d9.hgcer_response",
-                    "full_background.d9.hgcer_delta_response",
-                    "full_background.d9.method_a_relative",
-                    "full_background.d10.method_b_mm_inputs",
-                    "full_background.d10.method_b_local_closure",
-                    "full_background.d10.method_b_relative",
-                    "full_background.d11.ab_overlay",
-                    "full_background.d11.ab_ratio_log",
-                    "full_background.d11.method_availability",
-                    "full_background.d6.raw_mm",
-                    "full_background.d6.proton_pid",
-                    "full_background.d6.proton_weight",
-                    "full_background.d7.proton_mm",
-                    "full_background.d7.proton_cleaned_mm",
-                    "full_background.d7.proton_delta_mm",
-                    "full_background.d8.pion_background_mm",
-                    "full_background.d8.pion_subtracted_mm",
-                    "full_background.d8.pion_delta_mm",
-                    "full_background.d9.hgcer_response",
-                    "full_background.d9.hgcer_delta_response",
-                    "full_background.d9.method_a_relative",
-                    "full_background.d10.method_b_mm_inputs",
-                    "full_background.d10.method_b_local_closure",
-                    "full_background.d10.method_b_relative",
-                    "full_background.d11.ab_overlay",
-                    "full_background.d11.ab_ratio_log",
-                    "full_background.d11.method_availability",
-                ],
+                list(EXPECTED_FULL_BACKGROUND_PAGE_IDS) * 2,
             )
+            self.assertEqual(len(rendered["manifest"]), 36)
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
                 ["t1"] * 18 + ["t2"] * 18,
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
-            self.assertTrue(Path(pdf).exists())
-        self.assertEqual(raw.GetBinContent(1), 4.0)
-        self.assertEqual(raw.GetNbinsX(), 3)
-        self.assertEqual(proton.GetBinContent(1), 1.0)
-        self.assertEqual(cleaned.GetBinContent(1), 3.0)
-        self.assertEqual(timing_cells[0][0].GetNbinsX(), 4)
-        self.assertEqual(weight.GetNbinsX(), 2)
-        self.assertEqual(weight.GetNbinsY(), 2)
+            _assert_full_background_manifest_contract(self, rendered["manifest"])
+            pdfinfo = shutil.which("pdfinfo")
+            if pdfinfo is not None:
+                pdfinfo_result = subprocess.run(
+                    [pdfinfo, pdf],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+                self.assertEqual(pdfinfo_result.returncode, 0, pdfinfo_result.stderr)
+                page_count_line = next(
+                    (
+                        line for line in pdfinfo_result.stdout.splitlines()
+                        if line.startswith("Pages:")
+                    ),
+                    None,
+                )
+                self.assertIsNotNone(page_count_line, pdfinfo_result.stdout)
+                self.assertEqual(
+                    int(page_count_line.split(":", 1)[1].strip()),
+                    len(rendered["manifest"]),
+                )
+        for histogram, bin_count, contents in d6_d7_source_snapshots:
+            self.assertEqual(histogram.GetNbinsX(), bin_count)
+            self.assertEqual(
+                tuple(
+                    histogram.GetBinContent(index)
+                    for index in range(1, histogram.GetNbinsX() + 1)
+                ),
+                contents,
+            )
+        self.assertEqual(
+            (
+                weight.GetNbinsX(),
+                weight.GetNbinsY(),
+                tuple(
+                    weight.GetBinContent(x_index, y_index)
+                    for x_index in range(1, weight.GetNbinsX() + 1)
+                    for y_index in range(1, weight.GetNbinsY() + 1)
+                ),
+            ),
+            d6_weight_snapshot,
+        )
         for histogram, contents in d9_source_snapshots:
             if histogram.InheritsFrom("TH2"):
                 self.assertEqual(histogram.GetNbinsX(), 2)
@@ -3361,6 +3646,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             self.assertEqual(histogram.GetXaxis().GetXmin(), x_minimum)
             self.assertEqual(histogram.GetXaxis().GetXmax(), x_maximum)
         self.assertEqual((d10_phase_a, d10_method_b, d10_comparison), d10_sources_before)
+        self.assertEqual(d11_checkpoint, d11_checkpoint_before)
 
 
 if __name__ == "__main__":
