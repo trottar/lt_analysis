@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -517,6 +518,46 @@ class _D10RenderROOT(_FakeROOT):
 
     def TBox(self, *args):
         return _D11Box(self, *args)
+
+
+class _D11ROOTCapture:
+    """Proxy real PyROOT constructors while retaining D.11 draw objects."""
+
+    def __init__(self, root):
+        self._root = root
+        self.asymmetric_graphs = []
+        self.symmetric_graphs = []
+        self.central_graphs = []
+        self.lines = []
+        self.boxes = []
+
+    def __getattr__(self, name):
+        return getattr(self._root, name)
+
+    def TGraphAsymmErrors(self, point_count):
+        graph = self._root.TGraphAsymmErrors(int(point_count))
+        self.asymmetric_graphs.append(graph)
+        return graph
+
+    def TGraphErrors(self, point_count):
+        graph = self._root.TGraphErrors(int(point_count))
+        self.symmetric_graphs.append(graph)
+        return graph
+
+    def TGraph(self, point_count):
+        graph = self._root.TGraph(int(point_count))
+        self.central_graphs.append(graph)
+        return graph
+
+    def TLine(self, *args):
+        line = self._root.TLine(*args)
+        self.lines.append(line)
+        return line
+
+    def TBox(self, *args):
+        box = self._root.TBox(*args)
+        self.boxes.append(box)
+        return box
 
 
 def _d10_visible_text(root):
@@ -1236,6 +1277,17 @@ def _d11_fixture(t_edges=(0.0, 1.0, 2.0), delta_edges=(-12.0, -5.0, 1.0, 6.0, 14
         "classification_scope": "availability_only_non_prescriptive",
         "decision_performed": False, "statistical_compatibility_claimed": False,
         "production_objects_mutated": False, "refinement_applied": False,
+    }
+
+
+def _d11_cumulative_payload(label, t_edges=(0.0, 1.0), delta_edges=(-10.0, 0.0, 10.0)):
+    """Minimal already-built page group for cumulative D.11 gate tests."""
+    return {
+        "label": str(label),
+        "available": True,
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": [{"t_index": 0}],
     }
 
 
@@ -2157,6 +2209,100 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "Both methods available", "Both present; ratio undefined", "Method A only",
             "Method B only", "Neither method available",
         ])
+        legend = availability_root.legends[-1]
+        notice = next(
+            pave for pave in availability_root.pave_texts
+            if "NON-AUTHORITATIVE DIAGNOSTIC" in pave._text
+        )
+        self.assertEqual(legend.coordinates, (0.55, 0.44, 0.89, 0.76))
+        self.assertEqual(notice.coordinates, (0.14, 0.82, 0.86, 0.92))
+        self.assertFalse(_rectangles_overlap(legend.coordinates, notice.coordinates))
+        self.assertLess(legend.coordinates[3], notice.coordinates[1])
+
+    def test_d11_early_display_delta_mismatches_do_not_suppress_d11(self):
+        def record_d11(_root, _pdf_name, _presentation, group, manifest, _failures):
+            for page_id in (
+                "full_background.d11.ab_overlay",
+                "full_background.d11.ab_ratio_log",
+                "full_background.d11.method_availability",
+            ):
+                manifest.append({
+                    "page_id": page_id,
+                    "scope": "t{}".format(int(group["t_index"]) + 1),
+                    "authoritative": False,
+                })
+
+        def noop(*_args):
+            return None
+
+        for mismatched_phase in ("D.6", "D.7", "D.8"):
+            with self.subTest(mismatched_phase=mismatched_phase):
+                payloads = {
+                    phase: _d11_cumulative_payload(phase)
+                    for phase in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+                }
+                payloads[mismatched_phase]["delta_edges"] = [-12.0, -2.0, 8.0]
+                with patch.object(plots, "_import_root", return_value=object()), patch.object(
+                    plots, "_render_d6_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d7_t_pages", side_effect=noop), patch.object(
+                    plots, "_render_d8_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d9_t_pages", side_effect=noop), patch.object(
+                    plots, "_render_d10_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d11_t_pages", side_effect=record_d11):
+                    rendered = plots.render_full_background_subtraction_procedure_pages(
+                        "ignored.pdf", payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                        payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                    )
+                self.assertIn(
+                    "D.11 frozen delta geometry differs from {}".format(mismatched_phase),
+                    rendered["failures"],
+                )
+                self.assertEqual(
+                    [page["page_id"] for page in rendered["manifest"]],
+                    [
+                        "full_background.d11.ab_overlay",
+                        "full_background.d11.ab_ratio_log",
+                        "full_background.d11.method_availability",
+                    ],
+                )
+
+    def test_d11_frozen_delta_and_t_mismatches_suppress_d11(self):
+        def record_d11(_root, _pdf_name, _presentation, _group, manifest, _failures):
+            manifest.append({"page_id": "full_background.d11.method_availability"})
+
+        def noop(*_args):
+            return None
+
+        cases = (
+            ("D.9", "delta_edges", [-10.0, 5.0, 10.0],
+             "D.11 frozen delta geometry differs from D.9"),
+            ("D.10", "delta_edges", [-10.0, 5.0, 10.0],
+             "D.11 frozen delta geometry differs from D.10"),
+            ("D.11", "t_edges", [0.0, 2.0], "D.11 canonical t geometry mismatch"),
+        )
+        for phase, key, value, expected_failure in cases:
+            with self.subTest(phase=phase, key=key):
+                payloads = {
+                    label: _d11_cumulative_payload(label)
+                    for label in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+                }
+                payloads[phase][key] = value
+                with patch.object(plots, "_import_root", return_value=object()), patch.object(
+                    plots, "_render_d6_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d7_t_pages", side_effect=noop), patch.object(
+                    plots, "_render_d8_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d9_t_pages", side_effect=noop), patch.object(
+                    plots, "_render_d10_t_pages", side_effect=noop
+                ), patch.object(plots, "_render_d11_t_pages", side_effect=record_d11):
+                    rendered = plots.render_full_background_subtraction_procedure_pages(
+                        "ignored.pdf", payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                        payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                    )
+                self.assertIn(expected_failure, rendered["failures"])
+                self.assertFalse(any(
+                    page["page_id"].startswith("full_background.d11.")
+                    for page in rendered["manifest"]
+                ))
 
     def test_d10_d3_failures_are_local_to_the_relative_page(self):
         mutations = (
@@ -2677,6 +2823,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "use_B",
             "combine_AB",
             "preferred_method",
+            "selected_method",
         ):
             with self.subTest(d9_forbidden=forbidden):
                 self.assertNotIn(forbidden, d9_source)
@@ -2777,6 +2924,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "use_B",
             "combine_AB",
             "preferred_method",
+            "selected_method",
         ):
             with self.subTest(d11_forbidden=forbidden):
                 self.assertNotIn(forbidden, d11_source)
@@ -2887,6 +3035,70 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertAlmostEqual(host.GetBinError(1), 3.0)
         self.assertAlmostEqual(baseline.GetBinContent(1), -2.0)
         self.assertAlmostEqual(baseline.GetBinError(1), 2.0)
+
+    @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
+    def test_d11_root_graphs_boxes_and_stored_values_are_preserved(self):
+        """D.11.1: real ROOT receives the frozen A/B scalar presentation unchanged."""
+        ROOT = plots._import_root()
+        ROOT.gROOT.SetBatch(True)
+        checkpoint = _d11_fixture()
+        checkpoint_before = deepcopy(checkpoint)
+        payload = plots.build_full_background_subtraction_d11_payload(checkpoint)
+        payload_before = deepcopy(payload)
+        self.assertTrue(payload["available"])
+        group = payload["per_t"][0]
+        capture = _D11ROOTCapture(ROOT)
+        with tempfile.TemporaryDirectory() as temporary:
+            pdf_name = str(Path(temporary) / "d11-root-regression.pdf")
+            self.assertTrue(
+                plots._render_d11_ab_overlay_page(capture, pdf_name, payload, group)
+            )
+            self.assertTrue(
+                plots._render_d11_ratio_log_page(capture, pdf_name, payload, group)
+            )
+            self.assertTrue(
+                plots._render_d11_availability_page(capture, pdf_name, payload, group)
+            )
+
+        self.assertEqual(len(capture.asymmetric_graphs), 1)
+        self.assertEqual(len(capture.symmetric_graphs), 1)
+        self.assertEqual(len(capture.central_graphs), 2)
+        asymmetric = capture.asymmetric_graphs[0]
+        zero_index = next(
+            index for index in range(asymmetric.GetN())
+            if asymmetric.GetPointY(index) == 0.0
+        )
+        self.assertEqual(asymmetric.GetPointY(zero_index), 0.0)
+        self.assertEqual(asymmetric.GetErrorYlow(zero_index), 0.0)
+        self.assertEqual(asymmetric.GetErrorYhigh(zero_index), 0.25)
+        symmetric = capture.symmetric_graphs[0]
+        method_b_index = next(
+            index for index in range(symmetric.GetN())
+            if symmetric.GetPointY(index) == 4.0
+        )
+        self.assertEqual(symmetric.GetErrorY(method_b_index), 0.5)
+        self.assertEqual(
+            [graph.GetPointY(0) for graph in capture.central_graphs], [7.25, -3.5]
+        )
+        self.assertIn(
+            (-12.0, 1.0, 23.0, 1.0),
+            [(line.GetX1(), line.GetY1(), line.GetX2(), line.GetY2()) for line in capture.lines],
+        )
+        self.assertIn(
+            (-12.0, 0.0, 23.0, 0.0),
+            [(line.GetX1(), line.GetY1(), line.GetX2(), line.GetY2()) for line in capture.lines],
+        )
+        main_boxes = [
+            box for box in capture.boxes
+            if box.GetY1() == 0.0 and box.GetY2() == 1.0
+        ]
+        self.assertEqual(len(main_boxes), len(group["availability"]["cells"]))
+        self.assertEqual(
+            [(box.GetX1(), box.GetX2()) for box in main_boxes],
+            [(-12.0, -5.0), (-5.0, 1.0), (1.0, 6.0), (6.0, 14.0), (14.0, 23.0)],
+        )
+        self.assertEqual(checkpoint, checkpoint_before)
+        self.assertEqual(payload, payload_before)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_root_rendering_preserves_source_and_page_order(self):

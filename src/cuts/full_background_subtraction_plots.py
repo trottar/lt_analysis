@@ -3972,7 +3972,7 @@ def _render_d11_availability_page(ROOT, pdf_name, presentation, group):
             box.SetLineColor(getattr(ROOT, "kBlack", 1))
             box.Draw()
             draw_objects.append(box)
-        legend = ROOT.TLegend(0.55, 0.52, 0.89, 0.84)
+        legend = ROOT.TLegend(0.55, 0.44, 0.89, 0.76)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
         for state, label in _D11_AVAILABILITY_LABELS.items():
@@ -4189,12 +4189,12 @@ def render_full_background_subtraction_procedure_pages(
             result["failures"].append(
                 "D.10 frozen delta geometry differs from {}".format(comparison_name)
             )
-    for comparison_name, comparison_payload, comparison_available in (
-        ("D.6", d6, d6_available),
-        ("D.7", d7, d7_available),
-        ("D.8", d8, d8_available),
-        ("D.9", d9, d9_available),
-        ("D.10", d10, d10_available),
+    for comparison_name, comparison_payload, comparison_available, hard_gate in (
+        ("D.6", d6, d6_available, False),
+        ("D.7", d7, d7_available, False),
+        ("D.8", d8, d8_available, False),
+        ("D.9", d9, d9_available, True),
+        ("D.10", d10, d10_available, True),
     ):
         if (
             d11_available
@@ -4205,7 +4205,8 @@ def render_full_background_subtraction_procedure_pages(
             result["failures"].append(
                 "D.11 frozen delta geometry differs from {}".format(comparison_name)
             )
-            d11_available = False
+            if hard_gate:
+                d11_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
