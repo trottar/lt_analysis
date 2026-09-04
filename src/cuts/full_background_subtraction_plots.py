@@ -2341,13 +2341,7 @@ def _d10_region_rows(value, *, protected):
             "window_source": str(row["window_source"]),
             "mm_offset_applied": offset,
         }
-        if protected:
-            copied.update({
-                "available": True,
-                "protected_signal_overlap": False,
-                "reason": None,
-            })
-        else:
+        if not protected:
             if (
                 not isinstance(row.get("available"), bool)
                 or not isinstance(row.get("protected_signal_overlap"), bool)
@@ -2481,11 +2475,17 @@ def _d10_event_rows(records, *, contribution_key, t_count, delta_count, host_sta
         row = _mapping(source)
         if row.get("nommcuts") is not True:
             continue
-        t_index = _d10_integer(row.get("canonical_t_index"))
-        delta_index = _d10_integer(row.get("delta_index"))
+        raw_t_index = row.get("canonical_t_index")
+        raw_delta_index = row.get("delta_index")
+        if raw_t_index is None:
+            continue
+        t_index = _d10_integer(raw_t_index)
         if t_index is None or not 0 <= t_index < t_count:
             fail(None, "phase_a_record_t_membership_invalid")
             continue
+        if raw_delta_index is None:
+            continue
+        delta_index = _d10_integer(raw_delta_index)
         if delta_index is None or not 0 <= delta_index < delta_count:
             fail(t_index, "phase_a_record_delta_membership_invalid")
             continue
@@ -2842,9 +2842,30 @@ def _d10_event_histogram(ROOT, name, edges, rows):
     if histogram is None:
         return None
     try:
+        bin_count = len(edges) - 1
+        contents = [0.0] * (bin_count + 2)
+        sumw2 = [0.0] * (bin_count + 2)
         for row in rows:
             row = _mapping(row)
-            histogram.Fill(float(row["missing_mass"]), float(row["signed_contribution"]))
+            value = float(row["missing_mass"])
+            contribution = float(row["signed_contribution"])
+            if value < edges[0]:
+                bin_index = 0
+            elif value > edges[-1]:
+                bin_index = bin_count + 1
+            elif value == edges[-1]:
+                bin_index = bin_count
+            else:
+                bin_index = next(
+                    index
+                    for index in range(1, bin_count + 1)
+                    if value < edges[index]
+                )
+            contents[bin_index] += contribution
+            sumw2[bin_index] += contribution * contribution
+        for bin_index, (content, variance) in enumerate(zip(contents, sumw2)):
+            histogram.SetBinContent(bin_index, content)
+            histogram.SetBinError(bin_index, math.sqrt(variance))
     except Exception:
         return None
     return histogram

@@ -285,6 +285,61 @@ class _FakeROOT:
         return pave_text
 
 
+class _D10Axis:
+    def __init__(self, edges):
+        self.edges = tuple(float(edge) for edge in edges)
+
+    def GetBinLowEdge(self, index):
+        index = int(index)
+        if index <= 0:
+            return self.edges[0]
+        if index >= len(self.edges):
+            return self.edges[-1]
+        return self.edges[index - 1]
+
+
+class _D10DisplayHistogram:
+    def __init__(self, _name, _title, bin_count, edges):
+        self.edges = tuple(float(edge) for edge in edges)
+        self.contents = [0.0] * (int(bin_count) + 2)
+        self.errors = [0.0] * (int(bin_count) + 2)
+        self.directory = object()
+
+    def SetDirectory(self, directory):
+        self.directory = directory
+
+    def Sumw2(self):
+        return None
+
+    def SetBinContent(self, index, value):
+        self.contents[int(index)] = float(value)
+
+    def SetBinError(self, index, value):
+        self.errors[int(index)] = float(value)
+
+    def GetBinContent(self, index):
+        return self.contents[int(index)]
+
+    def GetBinError(self, index):
+        return self.errors[int(index)]
+
+    def GetNbinsX(self):
+        return len(self.edges) - 1
+
+    def GetXaxis(self):
+        return _D10Axis(self.edges)
+
+
+class _D10ROOT:
+    def __init__(self):
+        self.histograms = []
+
+    def TH1D(self, *args):
+        histogram = _D10DisplayHistogram(*args)
+        self.histograms.append(histogram)
+        return histogram
+
+
 def _rectangles_overlap(left, right):
     """Return whether two NDC rectangles have a positive-area overlap."""
     left_x1, left_y1, left_x2, left_y2 = (float(value) for value in left)
@@ -1325,6 +1380,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(payload["mm_regions"][0]["mm_low"], 0.93)
         self.assertEqual(payload["mm_regions"][0]["mm_offset_applied"], 0.0125)
         self.assertEqual(
+            set(payload["protected_regions"][0]),
+            {
+                "region_name", "mm_low", "mm_high", "region_role", "window_source",
+                "mm_offset_applied",
+            },
+        )
+        self.assertEqual(
             payload["per_t"][0]["mm_inputs"]["host_rows"][0]["signed_contribution"], 3.0
         )
         self.assertEqual(
@@ -1351,6 +1413,77 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(phase_a, phase_before)
         self.assertEqual(method_b, method_before)
         self.assertEqual(comparison, comparison_before)
+
+    def test_d10_none_membership_is_outside_geometry_but_non_none_invalid_is_local(self):
+        phase_a, method_b, comparison = _d10_fixture()
+        phase_a["kaon_host_records"].extend((
+            {
+                "canonical_t_index": None,
+                "delta_index": None,
+                "analysis_MM": 99.0,
+                "analysis_abs_t": -999.0,
+                "SHMS_delta": -999.0,
+                "nommcuts": True,
+                "host_state": "proton_cleaned",
+                "signed_host_event_contribution": 44.0,
+            },
+            {
+                "canonical_t_index": 0,
+                "delta_index": None,
+                "analysis_MM": 98.0,
+                "analysis_abs_t": 999.0,
+                "SHMS_delta": 999.0,
+                "nommcuts": True,
+                "host_state": "proton_cleaned",
+                "signed_host_event_contribution": 55.0,
+            },
+        ))
+        payload = plots.build_full_background_subtraction_d10_payload(
+            phase_a, method_b, comparison
+        )
+        self.assertTrue(payload["available"])
+        self.assertTrue(payload["per_t"][0]["mm_inputs"]["available"])
+        self.assertEqual(len(payload["per_t"][0]["mm_inputs"]["host_rows"]), 2)
+        self.assertTrue(payload["per_t"][0]["local_closure"]["available"])
+        self.assertTrue(payload["per_t"][0]["method_b_relative"]["available"])
+
+        for key, invalid in (("canonical_t_index", 99), ("delta_index", 99), ("delta_index", 0.5)):
+            with self.subTest(key=key, invalid=invalid):
+                phase_a, method_b, comparison = _d10_fixture()
+                phase_a["kaon_host_records"][0][key] = invalid
+                payload = plots.build_full_background_subtraction_d10_payload(
+                    phase_a, method_b, comparison
+                )
+                self.assertTrue(payload["available"])
+                self.assertFalse(payload["per_t"][0]["mm_inputs"]["available"])
+                self.assertTrue(payload["per_t"][0]["local_closure"]["available"])
+                self.assertTrue(payload["per_t"][0]["method_b_relative"]["available"])
+
+    def test_d10_page13_histogram_uses_native_upper_edge_and_signed_sumw2(self):
+        root = _D10ROOT()
+        edges = [0.80, 0.91, 1.03, 1.17, 1.35]
+        histogram = plots._d10_event_histogram(
+            root,
+            "d10-upper-edge",
+            edges,
+            (
+                {"missing_mass": 1.35, "signed_contribution": 6.25},
+                {"missing_mass": 1.36, "signed_contribution": -2.0},
+                {"missing_mass": 0.80, "signed_contribution": -3.0},
+            ),
+        )
+        self.assertIsNotNone(histogram)
+        self.assertEqual(histogram.GetNbinsX(), 4)
+        self.assertEqual(
+            tuple(histogram.GetXaxis().GetBinLowEdge(index) for index in range(1, 6)),
+            tuple(edges),
+        )
+        self.assertEqual(histogram.GetBinContent(4), 6.25)
+        self.assertEqual(histogram.GetBinError(4), 6.25)
+        self.assertEqual(histogram.GetBinContent(5), -2.0)
+        self.assertEqual(histogram.GetBinError(5), 2.0)
+        self.assertEqual(histogram.GetBinContent(1), -3.0)
+        self.assertEqual(histogram.GetBinError(1), 3.0)
 
     def test_d10_d3_failures_are_local_to_the_relative_page(self):
         mutations = (
@@ -1913,6 +2046,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ):
             with self.subTest(d10_forbidden=forbidden):
                 self.assertNotIn(forbidden, d10_source)
+        d10_event_rows_source = source[
+            source.index("def _d10_event_rows"):
+            source.index("def _d10_copy_cell_bins")
+        ]
+        self.assertIn("raw_t_index is None", d10_event_rows_source)
+        self.assertIn("raw_delta_index is None", d10_event_rows_source)
+        self.assertNotIn("analysis_abs_t", d10_event_rows_source)
+        self.assertNotIn("SHMS_delta", d10_event_rows_source)
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
         start = runtime.index("# Phases D.6 through D.10 are terminal presentation only.")
@@ -1966,6 +2107,47 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d8_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
+
+    @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
+    def test_d10_root_histograms_preserve_frozen_boundaries_and_stored_bins(self):
+        """D.10.1: match frozen Method-B regular-bin ownership exactly."""
+        ROOT = plots._import_root()
+        ROOT.gROOT.SetBatch(True)
+        edges = [0.80, 0.91, 1.03, 1.17, 1.35]
+        event_histogram = plots._d10_event_histogram(
+            ROOT,
+            "H_d10_native_boundary",
+            edges,
+            (
+                {"missing_mass": 1.35, "signed_contribution": 6.25},
+                {"missing_mass": 1.36, "signed_contribution": -2.0},
+                {"missing_mass": 0.80, "signed_contribution": -3.0},
+            ),
+        )
+        self.assertIsNotNone(event_histogram)
+        self.assertEqual(event_histogram.GetNbinsX(), 4)
+        self.assertEqual(
+            [event_histogram.GetXaxis().GetBinLowEdge(index) for index in range(1, 6)],
+            edges,
+        )
+        self.assertAlmostEqual(event_histogram.GetBinContent(1), -3.0)
+        self.assertAlmostEqual(event_histogram.GetBinError(1), 3.0)
+        self.assertAlmostEqual(event_histogram.GetBinContent(4), 6.25)
+        self.assertAlmostEqual(event_histogram.GetBinError(4), 6.25)
+        self.assertAlmostEqual(event_histogram.GetBinContent(5), -2.0)
+        self.assertAlmostEqual(event_histogram.GetBinError(5), 2.0)
+
+        _phase_a, method_b, _comparison = _d10_fixture()
+        host, baseline = plots._d10_local_histograms(
+            ROOT, "H_d10_stored_local", method_b["cells"][0]
+        )
+        self.assertIsNotNone(host)
+        self.assertIsNotNone(baseline)
+        self.assertEqual(host.GetNbinsX(), 4)
+        self.assertAlmostEqual(host.GetBinContent(1), 7.0)
+        self.assertAlmostEqual(host.GetBinError(1), 3.0)
+        self.assertAlmostEqual(baseline.GetBinContent(1), -2.0)
+        self.assertAlmostEqual(baseline.GetBinError(1), 2.0)
 
     @unittest.skipUnless(plots._import_root() is not None, "PyROOT not available")
     def test_root_rendering_preserves_source_and_page_order(self):
