@@ -4570,13 +4570,19 @@ def build_full_background_subtraction_e2_payload(
     }
 
 
+def _e2_display_bounds(coordinate):
+    """Return the fixed, presentation-only E.2 SHMS coordinate bounds."""
+    if coordinate == "ssxptar":
+        return -0.10, 0.10
+    return -0.06, 0.06
+
+
 def _e2_histogram(ROOT, name, title, coordinate, rows):
     """Fill and independently normalize one detached E.2 display histogram."""
+    lower, upper = _e2_display_bounds(coordinate)
     try:
         histogram = ROOT.TH1D(
-            str(name), str(title), 50,
-            -0.10 if coordinate == "ssxptar" else -0.06,
-            0.10 if coordinate == "ssxptar" else 0.06,
+            str(name), str(title), 50, lower, upper,
         )
         histogram.SetDirectory(0)
         if hasattr(histogram, "SetStats"):
@@ -4597,6 +4603,21 @@ def _e2_histogram(ROOT, name, title, coordinate, rows):
         return None
     histogram.Scale(1.0 / integral)
     return histogram
+
+
+def _e2_empty_frame(ROOT, name, title, coordinate):
+    """Create an unfilled, detached frame for an empty E.2 canonical cell."""
+    lower, upper = _e2_display_bounds(coordinate)
+    try:
+        frame = ROOT.TH1D(str(name), str(title), 50, lower, upper)
+        frame.SetDirectory(0)
+        if hasattr(frame, "SetStats"):
+            frame.SetStats(0)
+        frame.SetMinimum(0.0)
+        frame.SetMaximum(1.0)
+        return frame
+    except Exception:
+        return None
 
 
 def _e2_panel_notice(ROOT, text):
@@ -4657,6 +4678,18 @@ def _render_e2_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
                 cell.get("pion_rows"),
             )
             if kaon is None and pion is None:
+                frame = _e2_empty_frame(
+                    ROOT,
+                    "H_full_background_e2_{}_frame_t{}_d{}".format(
+                        coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                    ),
+                    panel_title,
+                    coordinate,
+                )
+                if frame is None:
+                    return False
+                frame.Draw("hist")
+                draw_objects.append(frame)
                 notice = _e2_panel_notice(ROOT, "No finite acceptance support")
                 if notice is not None:
                     draw_objects.append(notice)

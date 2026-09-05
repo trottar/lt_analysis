@@ -2632,6 +2632,53 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             [page["page_id"] for page in manifest], list(E2_FULL_BACKGROUND_PAGE_IDS)
         )
 
+    def test_e2_empty_cells_keep_their_canonical_frame_titles_and_axes(self):
+        for coordinate, coordinate_label, lower, upper in (
+            ("ssxptar", "SHMS x'_{tar}", -0.10, 0.10),
+            ("ssyptar", "SHMS y'_{tar}", -0.06, 0.06),
+        ):
+            with self.subTest(coordinate=coordinate):
+                diagnostic, phase_a = _e2_fixture()
+                payload = plots.build_full_background_subtraction_e2_payload(
+                    diagnostic, phase_a
+                )
+                group = payload["per_t"][0]
+                first_cell = group["cells"][0]
+                first_cell["kaon_rows"] = ()
+                first_cell["pion_rows"] = ()
+
+                root = _E2ROOT()
+                self.assertTrue(
+                    plots._render_e2_acceptance_page(
+                        root, "ignored.pdf", payload, group, coordinate
+                    )
+                )
+                frame_name = "H_full_background_e2_{}_frame_t1_d1".format(coordinate)
+                frame = next(histogram for histogram in root.histograms if histogram.name == frame_name)
+                expected_title = (
+                    "delta = [-10.000, 0.000] %;{};Normalized absolute support"
+                ).format(coordinate_label)
+                self.assertEqual(frame.title, expected_title)
+                self.assertEqual(frame.bin_count, 50)
+                self.assertEqual((frame.lower, frame.upper), (lower, upper))
+                self.assertEqual((frame.display_minimum, frame.display_maximum), (0.0, 1.0))
+                self.assertIn((frame, "hist"), root.drawn_histograms)
+                self.assertIn(("No finite acceptance support",), root.drawn_text)
+
+                visible_panel_titles = []
+                for histogram, _option in root.drawn_histograms:
+                    if histogram.title not in visible_panel_titles:
+                        visible_panel_titles.append(histogram.title)
+                self.assertEqual(
+                    visible_panel_titles,
+                    [
+                        "delta = [{:.3f}, {:.3f}] %;{};Normalized absolute support".format(
+                            cell["delta_low"], cell["delta_high"], coordinate_label
+                        )
+                        for cell in group["cells"]
+                    ],
+                )
+
     def test_e2_cumulative_pages_follow_d11_and_fail_locally(self):
         phase_page_ids = (
             EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
