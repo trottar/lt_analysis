@@ -19,6 +19,7 @@ for relative_path in ("src/cuts", "src/utility"):
         sys.path.insert(0, path)
 
 import pion_hgcer_refinement_plots as plots
+import pion_hgcer_refinement_checkpoint as refinement_checkpoint
 
 
 def _checkpoint():
@@ -219,6 +220,37 @@ def _cfix1_method_b():
             "candidate_status_counts": {"available_multi_region": 1, "single_region_only": 1, "region_marginal": 1, "region_inconsistent": 1, "shape_poor_veto": 1, "unavailable": 1},
         },
     }
+
+
+def _cfix1_checkpoint(method_b):
+    """Build the Phase-A/B/C persistence boundary used by C.Fix.1 display."""
+    return refinement_checkpoint.build_pion_hgcer_refinement_checkpoint(
+        setting={
+            "kinematic_token": "Q4p4W2p74",
+            "Q2": 4.4,
+            "W": 2.74,
+            "epsilon_setting": "high",
+            "epsilon_filename_token": "highe",
+            "phi_setting": "Left",
+            "particle_type": "kaon",
+        },
+        phase_a={
+            "contract_fingerprint": "cfix1-phase-a-contract",
+            "coordinate_fingerprint": "cfix1-coordinate-fingerprint",
+            "host_state": "proton_cleaned",
+            "source_target_state": "post_proton_noRF",
+            "canonical_t_edges": list(method_b["t_edges"]),
+            "delta_edges": list(method_b["delta_edges"]),
+        },
+        phase_a_summary={"status": "available"},
+        method_a={
+            "status": "available", "available": True,
+            "fingerprint": "cfix1-method-a-fingerprint", "cells": [],
+        },
+        method_a_summary={"status": "available"},
+        method_b=method_b,
+        method_b_summary=method_b["summary"],
+    )
 
 
 def _left_low_method_b():
@@ -1392,6 +1424,67 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         )
         for expected_type in (FakeTH1D, FakeTGraphErrors, FakeTLine, FakeTLegend, FakeTPaveText, FakeTLatex):
             self.assertTrue(any(isinstance(item, expected_type) for item in retained))
+
+    def test_cfix1_checkpoint_first_round_trip_preserves_region_provenance(self):
+        live_method_b = _cfix1_method_b()
+        checkpoint_payload = _cfix1_checkpoint(live_method_b)
+        self.assertEqual(
+            checkpoint_payload["method_b"]["mm_regions"],
+            _cfix1_method_b()["mm_regions"],
+        )
+        self.assertEqual(
+            checkpoint_payload["method_b"]["protected_regions"],
+            _cfix1_method_b()["protected_regions"],
+        )
+        live_method_b["mm_regions"][0]["region_name"] = "LIVE_ONLY_LOW"
+        live_method_b["mm_regions"][1]["region_name"] = "LIVE_ONLY_HIGH"
+        live_method_b["protected_regions"][0]["region_name"] = "LIVE_ONLY_PROTECTED"
+
+        method_b_display = plots.method_b_display_payload(live_method_b, checkpoint_payload)
+        self.assertEqual(method_b_display["source"], "checkpoint_method_b")
+        self.assertEqual(
+            [region["region_name"] for region in method_b_display["mm_regions"]],
+            ["pion_sensitive_low", "pion_sensitive_high"],
+        )
+        self.assertEqual(
+            [region["region_name"] for region in method_b_display["protected_regions"]],
+            ["KLambdaSigma0"],
+        )
+        self.assertNotIn("LIVE_ONLY_LOW", repr(method_b_display))
+        self.assertNotIn("LIVE_ONLY_HIGH", repr(method_b_display))
+
+        presentation = plots.method_b_cfix1_display_payload(method_b_display)
+        self.assertTrue(presentation["available"])
+        self.assertEqual(
+            [region["region_name"] for region in presentation["regions"]],
+            ["pion_sensitive_low", "pion_sensitive_high"],
+        )
+        root = FakeROOT()
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            result = plots.render_pion_hgcer_method_b_cfix1_pages(
+                "synthetic_hgcer_debug.pdf", method_b_display, page_manifest=manifest
+            )
+        self.assertIs(result, manifest)
+        self.assertEqual(
+            [(entry["page_id"], entry["t_index"]) for entry in manifest],
+            [
+                ("hgcer.cfix1.method_b.regional_values", 0),
+                ("hgcer.cfix1.method_b.status_audit", 0),
+                ("hgcer.cfix1.method_b.regional_values", 1),
+                ("hgcer.cfix1.method_b.status_audit", 1),
+            ],
+        )
+        self.assertEqual(len(root.print_records), 4)
+        legend_labels = [label for legend in root.legends for label, _option in legend.entries]
+        self.assertIn("pion_sensitive_low (MM [0.800, 1.100] GeV)", legend_labels)
+        self.assertIn("pion_sensitive_high (MM [1.230, 1.450] GeV)", legend_labels)
+        for excluded in ("LIVE_ONLY_LOW", "LIVE_ONLY_HIGH", "KLambdaSigma0"):
+            self.assertFalse(any(excluded in label for label in legend_labels))
+        graph_points = [graph.recorded_points() for graph in root.graphs]
+        self.assertIn(((-8.5, 0.65, 0.0, 0.10),), [points[:1] for points in graph_points])
+        self.assertIn(((-8.5, 0.60, 0.0, 0.10),), [points[:1] for points in graph_points])
+        self.assertIn(((-8.5, 1.10, 0.0, 0.15),), graph_points)
 
     def test_cfix1_fake_root_renderer_keeps_empty_regional_page_and_audit_lattice(self):
         method_b = _cfix1_method_b()

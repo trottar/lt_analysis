@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 import sys
 import tempfile
@@ -32,7 +33,7 @@ def _phase(status="available"):
 
 
 def _method(name, status="available"):
-    return {
+    payload = {
         "status": status,
         "available": status == "available",
         "reason": None if status == "available" else "synthetic_unavailable",
@@ -41,6 +42,28 @@ def _method(name, status="available"):
         "cells": [{"t_index": 0, "delta_index": 0, "method": name}],
         "parent_region_references": ([{"t_index": 0, "region_name": "pi_n"}] if name == "b" else []),
     }
+    if name == "b":
+        payload["mm_regions"] = [
+            {
+                "region_name": "pion_sensitive_low",
+                "mm_low": 0.80,
+                "mm_high": 1.10,
+                "region_role": "pion_sensitive",
+            },
+            {
+                "region_name": "pion_sensitive_high",
+                "mm_low": 1.23,
+                "mm_high": 1.45,
+                "region_role": "pion_sensitive",
+            },
+        ]
+        payload["protected_regions"] = [{
+            "region_name": "KLambdaSigma0",
+            "mm_low": 1.10,
+            "mm_high": 1.23,
+            "region_role": "protected_signal",
+        }]
+    return payload
 
 
 def _payload(
@@ -77,6 +100,8 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         self.assertEqual(payload["method_a"]["cells"], _method("a")["cells"])
         self.assertEqual(payload["method_b"]["cells"], _method("b")["cells"])
         self.assertEqual(payload["method_b"]["parent_region_references"], _method("b")["parent_region_references"])
+        self.assertEqual(payload["method_b"]["mm_regions"], _method("b")["mm_regions"])
+        self.assertEqual(payload["method_b"]["protected_regions"], _method("b")["protected_regions"])
         self.assertEqual(payload["host_state_summary"]["phase_a_host_state"], "proton_cleaned")
         self.assertTrue(payload["non_authoritative"])
         self.assertFalse(payload["production_objects_mutated"])
@@ -93,7 +118,10 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
             checkpoint.write_pion_hgcer_refinement_checkpoint_json(first, payload)
             checkpoint.write_pion_hgcer_refinement_checkpoint_json(second, payload)
             self.assertEqual(first.read_bytes(), second.read_bytes())
-            self.assertEqual(json.loads(first.read_text(encoding="utf-8")), payload)
+            decoded = json.loads(first.read_text(encoding="utf-8"))
+            self.assertEqual(decoded, payload)
+            self.assertEqual(decoded["method_b"]["mm_regions"], _method("b")["mm_regions"])
+            self.assertEqual(decoded["method_b"]["protected_regions"], _method("b")["protected_regions"])
 
     def test_unavailable_method_is_retained_not_dropped(self):
         for method_a_status, method_b_status in (("unavailable", "available"), ("available", "unavailable")):
@@ -101,6 +129,44 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
                 payload = _payload(method_a_status, method_b_status)
                 self.assertEqual(payload["method_a"]["status"], method_a_status)
                 self.assertEqual(payload["method_b"]["status"], method_b_status)
+                self.assertEqual(payload["method_b"]["mm_regions"], _method("b")["mm_regions"])
+                self.assertEqual(payload["method_b"]["protected_regions"], _method("b")["protected_regions"])
+
+    def test_method_b_region_provenance_is_detached_and_absent_provenance_is_empty(self):
+        method_b = _method("b")
+        payload = checkpoint.build_pion_hgcer_refinement_checkpoint(
+            setting={
+                "kinematic_token": "Q4p4W2p74", "epsilon_setting": "low",
+                "epsilon_filename_token": "lowe", "phi_setting": "Left",
+                "particle_type": "kaon",
+            },
+            phase_a=_phase(), method_a=_method("a"), method_b=method_b,
+        )
+        expected_mm_regions = deepcopy(method_b["mm_regions"])
+        expected_protected_regions = deepcopy(method_b["protected_regions"])
+        method_b["mm_regions"][0]["region_name"] = "live_mutation"
+        method_b["protected_regions"][0]["region_name"] = "live_mutation"
+        self.assertEqual(payload["method_b"]["mm_regions"], expected_mm_regions)
+        self.assertEqual(payload["method_b"]["protected_regions"], expected_protected_regions)
+        payload["method_b"]["mm_regions"][0]["region_name"] = "checkpoint_mutation"
+        payload["method_b"]["protected_regions"][0]["region_name"] = "checkpoint_mutation"
+        self.assertEqual(method_b["mm_regions"][0]["region_name"], "live_mutation")
+        self.assertEqual(method_b["protected_regions"][0]["region_name"], "live_mutation")
+
+        absent = _method("b")
+        absent.pop("mm_regions")
+        absent.pop("protected_regions")
+        unavailable = checkpoint.build_pion_hgcer_refinement_checkpoint(
+            setting={
+                "kinematic_token": "Q4p4W2p74", "epsilon_setting": "low",
+                "epsilon_filename_token": "lowe", "phi_setting": "Left",
+                "particle_type": "kaon",
+            },
+            phase_a=_phase(), method_a=_method("a"),
+            method_b=dict(absent, status="unavailable", available=False),
+        )
+        self.assertEqual(unavailable["method_b"]["mm_regions"], [])
+        self.assertEqual(unavailable["method_b"]["protected_regions"], [])
 
     def test_checkpoint_rejects_opaque_objects_nonfinite_values_and_corrections(self):
         with self.assertRaisesRegex(ValueError, "not_json_safe"):

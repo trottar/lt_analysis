@@ -171,6 +171,16 @@ def build_pion_hgcer_refinement_checkpoint(
         if isinstance(method_b, Mapping)
         else []
     )
+    method_b_payload["mm_regions"] = (
+        (method_b or {}).get("mm_regions") or []
+        if isinstance(method_b, Mapping)
+        else []
+    )
+    method_b_payload["protected_regions"] = (
+        (method_b or {}).get("protected_regions") or []
+        if isinstance(method_b, Mapping)
+        else []
+    )
     payload = {
         "schema_version": CHECKPOINT_SCHEMA_VERSION,
         "setting": {
