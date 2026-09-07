@@ -9,6 +9,7 @@ It never evaluates a weight, changes a fit, or changes a production object.
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 import math
 import os
 import textwrap
@@ -53,7 +54,14 @@ def build_pdf_route_manifest(main_pdf):
             "pion.refinement.detail",
             "pion.dummy_random.detail",
         ),
-        "hgcer_debug": ("hgcer.pid", "hgcer.part1", "hgcer.part1_5", "hgcer.part2"),
+        "hgcer_debug": (
+            "hgcer.pid",
+            "hgcer.part1",
+            "hgcer.part1_5",
+            "hgcer.part2",
+            "hgcer.cfix1.method_b.regional_values",
+            "hgcer.cfix1.method_b.status_audit",
+        ),
         "phase_d_ab": (
             "hgcer.phase_d.ab.overlay",
             "hgcer.phase_d.ab.central_comparison",
@@ -764,8 +772,26 @@ def _method_b_presentation_snapshot(method_b):
     """Extract only presentation-relevant Method-B fields for parity auditing."""
     payload = _mapping(method_b)
     summary = _mapping(payload.get("summary"))
-    cells = [dict(_mapping(cell)) for cell in (payload.get("cells") or ())]
+    cells = [deepcopy(dict(_mapping(cell))) for cell in (payload.get("cells") or ())]
     cells.sort(key=_cell_key)
+    region_definitions = tuple(
+        (
+            _method_b_presentation_value(_mapping(region).get("region_name")),
+            _method_b_presentation_value(_mapping(region).get("mm_low")),
+            _method_b_presentation_value(_mapping(region).get("mm_high")),
+            _method_b_presentation_value(_mapping(region).get("region_role")),
+        )
+        for region in (payload.get("mm_regions") or ())
+    )
+    protected_region_definitions = tuple(
+        (
+            _method_b_presentation_value(_mapping(region).get("region_name")),
+            _method_b_presentation_value(_mapping(region).get("mm_low")),
+            _method_b_presentation_value(_mapping(region).get("mm_high")),
+            _method_b_presentation_value(_mapping(region).get("region_role")),
+        )
+        for region in (payload.get("protected_regions") or ())
+    )
     return {
         "status": _method_b_presentation_value(payload.get("status", "unavailable")),
         "available": bool(payload.get("available", False)),
@@ -802,6 +828,8 @@ def _method_b_presentation_snapshot(method_b):
         "method_B_status_counts": tuple(sorted(
             _method_b_summary_counts(summary, "method_B_status_counts").items()
         )),
+        "mm_regions": region_definitions,
+        "protected_regions": protected_region_definitions,
     }
 
 
@@ -835,7 +863,7 @@ def method_b_display_payload(method_b=None, checkpoint=None):
         source = _mapping(method_b)
         source_name = "runtime_method_b_fallback"
     summary = _mapping(source.get("summary"))
-    cells = [dict(_mapping(cell)) for cell in (source.get("cells") or ())]
+    cells = [deepcopy(dict(_mapping(cell))) for cell in (source.get("cells") or ())]
     cells.sort(key=_cell_key)
     method_status_counts, other_method_status_counts = _stored_category_counts(
         cells, "method_B_status", _METHOD_B_CANONICAL_STATUSES,
@@ -853,12 +881,20 @@ def method_b_display_payload(method_b=None, checkpoint=None):
         "reason": source.get("reason"),
         "t_edges": t_edges,
         "delta_edges": delta_edges,
-        "summary": dict(summary),
+        "summary": deepcopy(dict(summary)),
         "method_status_counts": method_status_counts,
         "other_method_status_counts": other_method_status_counts,
         "shape_status_counts": _method_b_summary_counts(summary, "shape_status_counts"),
         "candidate_status_counts": _method_b_summary_counts(summary, "candidate_status_counts"),
         "cells": cells,
+        "mm_regions": [
+            deepcopy(dict(_mapping(region)))
+            for region in (source.get("mm_regions") or ())
+        ],
+        "protected_regions": [
+            deepcopy(dict(_mapping(region)))
+            for region in (source.get("protected_regions") or ())
+        ],
         "non_authoritative": True,
         "frozen_pion_baseline": True,
         "no_refinement": True,
@@ -871,6 +907,25 @@ def method_b_display_payload(method_b=None, checkpoint=None):
 def method_b_plot_payload(method_b, checkpoint=None):
     """Backward-compatible alias for the checkpoint-first Method-B display payload."""
     return method_b_display_payload(method_b, checkpoint)
+
+
+def _method_b_pion_sensitive_regions(payload):
+    """Return stored Method-B pion-sensitive definitions in their frozen order."""
+    regions = []
+    for region in _mapping(payload).get("mm_regions") or ():
+        entry = _mapping(region)
+        if str(entry.get("region_role") or "").strip() != "pion_sensitive":
+            continue
+        name = str(entry.get("region_name") or "").strip()
+        if not name or any(existing["region_name"] == name for existing in regions):
+            continue
+        regions.append({
+            "region_name": name,
+            "mm_low": entry.get("mm_low"),
+            "mm_high": entry.get("mm_high"),
+            "region_role": entry.get("region_role"),
+        })
+    return tuple(regions)
 
 
 def method_b_candidate_points(payload):
@@ -954,30 +1009,40 @@ def method_b_candidate_page_state(payload):
 
 def method_b_regional_rows(payload):
     """Return only the recorded C.4 regional closure rows for display."""
-    selected = {"pi_n", "pi_sidis", "pi_delta_high"}
+    definitions = _method_b_pion_sensitive_regions(payload)
+    selected = {region["region_name"]: region for region in definitions}
     rows = []
     for cell in _mapping(payload).get("cells") or ():
         entry = _mapping(cell)
         for region in entry.get("regions") or ():
             value = _mapping(region)
-            if str(value.get("region_name") or "") not in selected:
+            name = str(value.get("region_name") or "")
+            if name not in selected:
                 continue
             rows.append({
                 "t_index": entry.get("t_index"),
                 "delta_index": entry.get("delta_index"),
                 "delta_low": entry.get("delta_low"),
                 "delta_high": entry.get("delta_high"),
-                "region_name": value.get("region_name"),
+                "region_name": name,
+                "mm_low": selected[name].get("mm_low"),
+                "mm_high": selected[name].get("mm_high"),
+                "region_role": selected[name].get("region_role"),
+                "raw_ratio": value.get("raw_ratio"),
+                "raw_ratio_sigma": value.get("raw_ratio_sigma"),
+                "support_status": value.get("support_status"),
+                "support_reason": value.get("support_reason"),
                 "parent_relative_ratio": value.get("parent_relative_ratio"),
                 "parent_relative_sigma": value.get("parent_relative_sigma"),
                 "parent_relative_status": value.get("parent_relative_status"),
+                "parent_relative_reason": value.get("parent_relative_reason"),
             })
     return rows
 
 
 def method_b_regional_panels(payload):
     """Group recorded regional Qtilde ratios by their canonical-t parent."""
-    regions = ("pi_n", "pi_sidis", "pi_delta_high")
+    regions = tuple(region["region_name"] for region in _method_b_pion_sensitive_regions(payload))
     panels = {}
     for cell in _mapping(payload).get("cells") or ():
         try:
@@ -1016,6 +1081,237 @@ def method_b_regional_panels(payload):
             points.sort(key=lambda entry: entry["delta_index"])
         result.append(panel)
     return result
+
+
+def _method_b_cfix1_unavailable(reason):
+    """Return a detached unavailable C.Fix.1 presentation result."""
+    return {
+        "available": False,
+        "reason": str(reason),
+        "t_edges": (),
+        "delta_edges": (),
+        "regions": (),
+        "per_t": (),
+        "non_authoritative": True,
+        "no_refinement": True,
+    }
+
+
+def _method_b_cfix1_edges(payload, name):
+    """Require finite, strictly increasing frozen presentation edges."""
+    edges = _edges(payload, name)
+    if len(edges) < 2 or any(high <= low for low, high in zip(edges, edges[1:])):
+        return ()
+    return tuple(edges)
+
+
+def _method_b_cfix1_index(value, limit):
+    """Return one stored canonical index without assigning a new bin."""
+    if isinstance(value, bool):
+        return None
+    try:
+        index = int(value)
+    except (TypeError, ValueError):
+        return None
+    if index != value or index < 0 or index >= limit:
+        return None
+    return index
+
+
+def _method_b_cfix1_regions(payload):
+    """Validate the stored, ordered pion-sensitive region definitions."""
+    result = []
+    for region in _mapping(payload).get("mm_regions") or ():
+        entry = _mapping(region)
+        if str(entry.get("region_role") or "").strip() != "pion_sensitive":
+            continue
+        name = str(entry.get("region_name") or "").strip()
+        low = _finite(entry.get("mm_low"))
+        high = _finite(entry.get("mm_high"))
+        if not name or low is None or high is None or high <= low:
+            return ()
+        if any(existing["region_name"] == name for existing in result):
+            return ()
+        result.append({
+            "region_name": name,
+            "mm_low": low,
+            "mm_high": high,
+            "region_role": "pion_sensitive",
+            "label": "{} (MM [{:.3f}, {:.3f}] GeV)".format(name, low, high),
+        })
+    return tuple(result)
+
+
+def _method_b_cfix1_region_row(definition, row):
+    """Copy one stored regional row without deriving Method-B values."""
+    source = _mapping(row)
+    return {
+        "region_name": definition["region_name"],
+        "label": definition["label"],
+        "mm_low": definition["mm_low"],
+        "mm_high": definition["mm_high"],
+        "region_role": definition["region_role"],
+        "support_status": source.get("support_status"),
+        "support_reason": source.get("support_reason"),
+        "raw_ratio": source.get("raw_ratio"),
+        "raw_ratio_sigma": source.get("raw_ratio_sigma"),
+        "parent_relative_status": source.get("parent_relative_status"),
+        "parent_relative_reason": source.get("parent_relative_reason"),
+        "parent_relative_ratio": source.get("parent_relative_ratio"),
+        "parent_relative_sigma": source.get("parent_relative_sigma"),
+    }
+
+
+def method_b_cfix1_display_payload(method_b_display):
+    """Detach stored Method-B regional evidence for the C.Fix.1 audit pages."""
+    display = _mapping(method_b_display)
+    if not display or not bool(display.get("available", False)):
+        return _method_b_cfix1_unavailable("method_b_display_unavailable")
+    t_edges = _method_b_cfix1_edges(display, "t_edges")
+    delta_edges = _method_b_cfix1_edges(display, "delta_edges")
+    if not t_edges or not delta_edges:
+        return _method_b_cfix1_unavailable("cfix1_geometry_invalid")
+    regions = _method_b_cfix1_regions(display)
+    if not regions:
+        return _method_b_cfix1_unavailable("cfix1_region_definitions_invalid")
+
+    expected_keys = {
+        (t_index, delta_index)
+        for t_index in range(len(t_edges) - 1)
+        for delta_index in range(len(delta_edges) - 1)
+    }
+    cells_by_key = {}
+    for raw_cell in display.get("cells") or ():
+        cell = _mapping(raw_cell)
+        t_index = _method_b_cfix1_index(cell.get("t_index"), len(t_edges) - 1)
+        delta_index = _method_b_cfix1_index(cell.get("delta_index"), len(delta_edges) - 1)
+        if t_index is None or delta_index is None:
+            return _method_b_cfix1_unavailable("cfix1_cell_lattice_invalid")
+        key = (t_index, delta_index)
+        if key in cells_by_key:
+            return _method_b_cfix1_unavailable("cfix1_cell_lattice_invalid")
+        if (
+            _finite(cell.get("t_low")) != t_edges[t_index]
+            or _finite(cell.get("t_high")) != t_edges[t_index + 1]
+            or _finite(cell.get("delta_low")) != delta_edges[delta_index]
+            or _finite(cell.get("delta_high")) != delta_edges[delta_index + 1]
+        ):
+            return _method_b_cfix1_unavailable("cfix1_cell_geometry_mismatch")
+        cells_by_key[key] = cell
+    if len(cells_by_key) != len(expected_keys) or set(cells_by_key) != expected_keys:
+        return _method_b_cfix1_unavailable("cfix1_cell_lattice_invalid")
+
+    groups = []
+    selected_names = {region["region_name"] for region in regions}
+    for t_index in range(len(t_edges) - 1):
+        raw_series = {region["region_name"]: [] for region in regions}
+        relative_series = {region["region_name"]: [] for region in regions}
+        combined_points = []
+        audit_cells = []
+        for delta_index in range(len(delta_edges) - 1):
+            cell = cells_by_key[(t_index, delta_index)]
+            rows_by_name = {}
+            extra_regions = []
+            for raw_region in cell.get("regions") or ():
+                region = _mapping(raw_region)
+                name = str(region.get("region_name") or "").strip()
+                if name not in selected_names:
+                    extra_regions.append(deepcopy(dict(region)))
+                    continue
+                if name in rows_by_name:
+                    return _method_b_cfix1_unavailable("cfix1_region_rows_invalid")
+                rows_by_name[name] = region
+            if set(rows_by_name) != selected_names:
+                return _method_b_cfix1_unavailable("cfix1_region_rows_invalid")
+
+            region_rows = []
+            delta_low, delta_high = delta_edges[delta_index:delta_index + 2]
+            delta_center = 0.5 * (delta_low + delta_high)
+            for definition in regions:
+                name = definition["region_name"]
+                region = _method_b_cfix1_region_row(definition, rows_by_name[name])
+                region_rows.append(region)
+                raw_ratio = _finite(region["raw_ratio"])
+                raw_sigma = _finite(region["raw_ratio_sigma"])
+                if (
+                    _cell_status(region, "support_status") == "usable"
+                    and raw_ratio is not None and raw_sigma is not None and raw_sigma >= 0.0
+                ):
+                    raw_series[name].append({
+                        "delta_index": delta_index,
+                        "delta_center": delta_center,
+                        "raw_ratio": raw_ratio,
+                        "raw_ratio_sigma": raw_sigma,
+                        "region_name": name,
+                        "label": region["label"],
+                    })
+                relative_ratio = _finite(region["parent_relative_ratio"])
+                relative_sigma = _finite(region["parent_relative_sigma"])
+                if (
+                    _cell_status(region, "parent_relative_status") == "available"
+                    and relative_ratio is not None and relative_sigma is not None
+                    and relative_sigma >= 0.0
+                ):
+                    relative_series[name].append({
+                        "delta_index": delta_index,
+                        "delta_center": delta_center,
+                        "Qtilde": relative_ratio,
+                        "Qtilde_uncertainty": relative_sigma,
+                        "region_name": name,
+                        "label": region["label"],
+                    })
+
+            candidate = _finite(cell.get("candidate_L_B"))
+            candidate_sigma = _finite(cell.get("candidate_L_B_uncertainty"))
+            if (
+                _cell_status(cell, "candidate_L_B_status") == "available_multi_region"
+                and candidate is not None and candidate_sigma is not None
+                and candidate_sigma >= 0.0
+            ):
+                combined_points.append({
+                    "delta_index": delta_index,
+                    "delta_center": delta_center,
+                    "candidate_L_B": candidate,
+                    "candidate_L_B_uncertainty": candidate_sigma,
+                })
+            audit_cells.append({
+                "t_index": t_index,
+                "delta_index": delta_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_low": delta_low,
+                "delta_high": delta_high,
+                "regions": tuple(region_rows),
+                "non_display_regions": tuple(extra_regions),
+                "region_consistency_status": cell.get("region_consistency_status"),
+                "region_consistency_reason": cell.get("region_consistency_reason"),
+                "shape_status": cell.get("shape_status"),
+                "shape_reason": cell.get("shape_reason"),
+                "candidate_L_B_status": cell.get("candidate_L_B_status"),
+                "candidate_L_B": cell.get("candidate_L_B"),
+                "candidate_L_B_uncertainty": cell.get("candidate_L_B_uncertainty"),
+                "method_B_status": cell.get("method_B_status"),
+                "method_B_reason": cell.get("method_B_reason"),
+            })
+        groups.append({
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "raw_series": {name: tuple(points) for name, points in raw_series.items()},
+            "relative_series": {name: tuple(points) for name, points in relative_series.items()},
+            "combined_points": tuple(combined_points),
+            "cells": tuple(audit_cells),
+        })
+    return {
+        "available": True,
+        "reason": None,
+        "t_edges": tuple(t_edges),
+        "delta_edges": tuple(delta_edges),
+        "regions": tuple(deepcopy(regions)),
+        "per_t": tuple(groups),
+        "non_authoritative": True,
+        "no_refinement": True,
+    }
 
 
 def unity_line_limits(payload):
@@ -1709,7 +2005,9 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest, display_pay
     regional_canvas = ROOT.TCanvas("C_hgcer_method_b_regional", _title(setting, "Method B", "regional closure"), 1500, 800)
     try:
         draw_objects = []
-        regions = ("pi_n", "pi_sidis", "pi_delta_high")
+        region_definitions = _method_b_pion_sensitive_regions(payload)
+        regions = tuple(region["region_name"] for region in region_definitions)
+        labels = {region["region_name"]: region["region_name"] for region in region_definitions}
         regional_canvas.Divide(max(1, min(len(regional_panels), 4)), 1)
         plotted = False
         for pad, panel in enumerate(regional_panels[:4], start=1):
@@ -1739,7 +2037,7 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest, display_pay
             legend.SetFillStyle(0)
             draw_objects.append(legend)
             has_series = False
-            for region_name, marker_style in zip(regions, (20, 24, 25)):
+            for region_index, region_name in enumerate(regions):
                 graph = ROOT.TGraphErrors()
                 draw_objects.append(graph)
                 point = 0
@@ -1748,9 +2046,9 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest, display_pay
                     graph.SetPointError(point, 0.0, row["Qtilde_uncertainty"])
                     point += 1
                 if point:
-                    graph.SetMarkerStyle(marker_style)
+                    graph.SetMarkerStyle((20, 24, 25, 26, 27)[region_index % 5])
                     graph.Draw("P same")
-                    legend.AddEntry(graph, region_name, "p")
+                    legend.AddEntry(graph, labels[region_name], "p")
                     has_series = True
                     plotted = True
             if has_series:
@@ -1776,6 +2074,279 @@ def _render_method_b_pages(pdf_name, checkpoint, method_b, manifest, display_pay
 
     _draw_shape_quality_page(ROOT, pdf_name, _title(setting, "Method B", "shape quality"), payload, manifest)
     return True
+
+
+def _method_b_cfix1_annotation(ROOT):
+    """Return the required visible C.Fix.1 diagnostic-only annotation."""
+    label = ROOT.TPaveText(0.10, 0.90, 0.90, 0.985, "NDC")
+    label.SetFillStyle(0)
+    label.SetBorderSize(0)
+    label.SetTextAlign(12)
+    label.SetTextSize(0.022)
+    label.AddText("Stored regional Method-B diagnostic; not a correction")
+    label.AddText("NON-AUTHORITATIVE DIAGNOSTIC / No refinement applied")
+    return label
+
+
+def _method_b_cfix1_limits(points):
+    """Return one unclipped display range for stored values and uncertainties."""
+    limit_points = []
+    for value_key, uncertainty_key, entries in points:
+        for entry in entries:
+            value = _finite(_mapping(entry).get(value_key))
+            uncertainty = _finite(_mapping(entry).get(uncertainty_key))
+            if value is not None and uncertainty is not None:
+                limit_points.append({"value": value, "uncertainty": uncertainty})
+    return display_y_range(limit_points, "value", "uncertainty", include_values=(1.0,)) or (0.9, 1.1)
+
+
+def _method_b_cfix1_draw_series(ROOT, draw_objects, legend, series, definitions, value_key, uncertainty_key):
+    """Draw stored regional points without altering their canonical cell positions."""
+    drawn = False
+    marker_styles = (20, 24, 25, 26, 27)
+    marker_colors = (1, 4, 2, 6, 8)
+    for region_index, definition in enumerate(definitions):
+        points = tuple(_mapping(series).get(definition["region_name"]) or ())
+        if not points:
+            continue
+        graph = ROOT.TGraphErrors()
+        draw_objects.append(graph)
+        point_count = 0
+        for point in points:
+            entry = _mapping(point)
+            center = _finite(entry.get("delta_center"))
+            value = _finite(entry.get(value_key))
+            uncertainty = _finite(entry.get(uncertainty_key))
+            if None in (center, value, uncertainty):
+                continue
+            graph.SetPoint(point_count, center, value)
+            graph.SetPointError(point_count, 0.0, uncertainty)
+            point_count += 1
+        if not point_count:
+            continue
+        graph.SetMarkerStyle(marker_styles[region_index % len(marker_styles)])
+        graph.SetMarkerColor(marker_colors[region_index % len(marker_colors)])
+        graph.SetLineColor(marker_colors[region_index % len(marker_colors)])
+        graph.Draw("P same")
+        legend.AddEntry(graph, definition["label"], "p")
+        drawn = True
+    return drawn
+
+
+def _method_b_cfix1_text(value):
+    """Format one copied audit scalar without synthesizing a replacement value."""
+    scalar = _finite(value)
+    return "{:.5g}".format(scalar) if scalar is not None else "-"
+
+
+def _method_b_cfix1_reason(value):
+    return "-" if value is None else str(value)
+
+
+def _method_b_cfix1_audit_lines(cell):
+    """Return compact text using only stored regional and cell-level audit fields."""
+    entry = _mapping(cell)
+    lines = []
+    for region in entry.get("regions") or ():
+        row = _mapping(region)
+        lines.extend((
+            "{}: support={} reason={}".format(
+                row.get("region_name"), _method_b_cfix1_reason(row.get("support_status")),
+                _method_b_cfix1_reason(row.get("support_reason")),
+            ),
+            "  raw Q={} #pm {}".format(
+                _method_b_cfix1_text(row.get("raw_ratio")),
+                _method_b_cfix1_text(row.get("raw_ratio_sigma")),
+            ),
+            "  Qtilde status={} reason={}".format(
+                _method_b_cfix1_reason(row.get("parent_relative_status")),
+                _method_b_cfix1_reason(row.get("parent_relative_reason")),
+            ),
+            "  Qtilde={} #pm {}".format(
+                _method_b_cfix1_text(row.get("parent_relative_ratio")),
+                _method_b_cfix1_text(row.get("parent_relative_sigma")),
+            ),
+        ))
+    lines.extend((
+        "region consistency={} reason={}".format(
+            _method_b_cfix1_reason(entry.get("region_consistency_status")),
+            _method_b_cfix1_reason(entry.get("region_consistency_reason")),
+        ),
+        "shape={} reason={}".format(
+            _method_b_cfix1_reason(entry.get("shape_status")),
+            _method_b_cfix1_reason(entry.get("shape_reason")),
+        ),
+        "candidate={} value={} #pm {}".format(
+            _method_b_cfix1_reason(entry.get("candidate_L_B_status")),
+            _method_b_cfix1_text(entry.get("candidate_L_B")),
+            _method_b_cfix1_text(entry.get("candidate_L_B_uncertainty")),
+        ),
+        "Method B={} reason={}".format(
+            _method_b_cfix1_reason(entry.get("method_B_status")),
+            _method_b_cfix1_reason(entry.get("method_B_reason")),
+        ),
+    ))
+    return tuple(lines)
+
+
+def _render_method_b_cfix1_regional_values_page(ROOT, pdf_name, presentation, group, manifest):
+    """Render the stored raw-Q and Qtilde evidence for one canonical t parent."""
+    t_index = int(group["t_index"])
+    delta_limits = (presentation["delta_edges"][0], presentation["delta_edges"][-1])
+    title = "Method-B C.Fix.1 regional values |t| = [{:.4g}, {:.4g}] GeV^2".format(
+        group["t_low"], group["t_high"]
+    )
+    canvas = ROOT.TCanvas("C_hgcer_cfix1_regional_values_t{}".format(t_index + 1), title, 1400, 1000)
+    try:
+        draw_objects = []
+        canvas.Divide(1, 2)
+        page_parts = (
+            (
+                "raw",
+                "Raw host / baseline ratio Q",
+                group["raw_series"],
+                "raw_ratio",
+                "raw_ratio_sigma",
+            ),
+            (
+                "relative",
+                "Parent-relative regional diagnostic Qtilde",
+                group["relative_series"],
+                "Qtilde",
+                "Qtilde_uncertainty",
+            ),
+        )
+        for pad, (kind, y_label, series, value_key, uncertainty_key) in enumerate(page_parts, start=1):
+            canvas.cd(pad)
+            regional_points = [
+                point
+                for points in series.values()
+                for point in points
+            ]
+            limit_sources = [(value_key, uncertainty_key, regional_points)]
+            if kind == "relative":
+                limit_sources.append(("candidate_L_B", "candidate_L_B_uncertainty", group["combined_points"]))
+            y_limits = _method_b_cfix1_limits(limit_sources)
+            frame = _display_frame(
+                ROOT,
+                "H_hgcer_cfix1_{}_frame_t{}".format(kind, t_index + 1),
+                title,
+                delta_limits,
+                y_limits,
+                y_label,
+            )
+            draw_objects.append(frame)
+            frame.Draw("AXIS")
+            unity = ROOT.TLine(delta_limits[0], 1.0, delta_limits[1], 1.0)
+            unity.SetLineStyle(2)
+            unity.Draw("same")
+            draw_objects.append(unity)
+            legend = ROOT.TLegend(0.54, 0.66, 0.90, 0.87)
+            legend.SetBorderSize(0)
+            legend.SetFillStyle(0)
+            draw_objects.append(legend)
+            drawn = _method_b_cfix1_draw_series(
+                ROOT, draw_objects, legend, series, presentation["regions"], value_key, uncertainty_key
+            )
+            if kind == "relative" and group["combined_points"]:
+                graph = ROOT.TGraphErrors()
+                draw_objects.append(graph)
+                point_count = 0
+                for point in group["combined_points"]:
+                    entry = _mapping(point)
+                    graph.SetPoint(point_count, entry["delta_center"], entry["candidate_L_B"])
+                    graph.SetPointError(point_count, 0.0, entry["candidate_L_B_uncertainty"])
+                    point_count += 1
+                graph.SetMarkerStyle(21)
+                graph.SetMarkerColor(1)
+                graph.SetLineColor(1)
+                graph.Draw("P same")
+                legend.AddEntry(graph, "combined Method-B candidate", "p")
+                drawn = True
+            if drawn:
+                legend.Draw()
+            else:
+                message = ROOT.TLatex()
+                message.DrawLatexNDC(0.15, 0.55, "No stored eligible regional values")
+                draw_objects.append(message)
+            label = _method_b_cfix1_annotation(ROOT)
+            label.Draw()
+            draw_objects.append(label)
+        canvas._method_b_cfix1_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+        manifest.append({
+            "page_id": "hgcer.cfix1.method_b.regional_values",
+            "scope": "t_bin",
+            "t_index": t_index,
+            "authoritative": False,
+        })
+    finally:
+        canvas.Close()
+
+
+def _render_method_b_cfix1_status_audit_page(ROOT, pdf_name, presentation, group, manifest):
+    """Render copied Method-B status and reason fields for every canonical delta cell."""
+    cells = tuple(group["cells"])
+    t_index = int(group["t_index"])
+    columns = min(3, len(cells))
+    rows = int(math.ceil(float(len(cells)) / float(columns)))
+    title = "Method-B C.Fix.1 status audit |t| = [{:.4g}, {:.4g}] GeV^2".format(
+        group["t_low"], group["t_high"]
+    )
+    canvas = ROOT.TCanvas("C_hgcer_cfix1_status_audit_t{}".format(t_index + 1), title, 1800, 1200)
+    try:
+        draw_objects = []
+        canvas.Divide(columns, rows)
+        for pad, cell in enumerate(cells, start=1):
+            canvas.cd(pad)
+            panel_title = "delta = [{:.3f}, {:.3f}] %".format(cell["delta_low"], cell["delta_high"])
+            frame = _display_frame(
+                ROOT,
+                "H_hgcer_cfix1_status_frame_t{}_d{}".format(t_index + 1, cell["delta_index"] + 1),
+                panel_title,
+                (0.0, 1.0),
+                (0.0, 1.0),
+                "stored status / reason",
+            )
+            draw_objects.append(frame)
+            frame.Draw("AXIS")
+            text = ROOT.TLatex()
+            text.SetNDC()
+            text.SetTextSize(0.024)
+            y_position = 0.90
+            for line in _method_b_cfix1_audit_lines(cell):
+                text.DrawLatexNDC(0.04, y_position, line)
+                y_position -= 0.052
+            draw_objects.append(text)
+            label = _method_b_cfix1_annotation(ROOT)
+            label.SetTextSize(0.015)
+            label.Draw()
+            draw_objects.append(label)
+        canvas._method_b_cfix1_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+        manifest.append({
+            "page_id": "hgcer.cfix1.method_b.status_audit",
+            "scope": "t_bin",
+            "t_index": t_index,
+            "authoritative": False,
+        })
+    finally:
+        canvas.Close()
+
+
+def render_pion_hgcer_method_b_cfix1_pages(pdf_name, method_b_display, *, page_manifest=None):
+    """Append C.Fix.1 Method-B evidence pages to the open HGCer supplement."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    presentation = method_b_cfix1_display_payload(method_b_display)
+    if not presentation["available"]:
+        raise ValueError("C.Fix.1 Method-B display unavailable: {}".format(presentation["reason"]))
+    ROOT = _import_root()
+    if ROOT is None:
+        return manifest
+    for group in presentation["per_t"]:
+        _render_method_b_cfix1_regional_values_page(ROOT, pdf_name, presentation, group, manifest)
+        _render_method_b_cfix1_status_audit_page(ROOT, pdf_name, presentation, group, manifest)
+    return manifest
 
 
 def render_pion_hgcer_refinement_pages(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, method_b_display=None, phase_a_display_context=None, page_manifest=None):
@@ -2037,6 +2608,7 @@ __all__ = (
     "method_b_candidate_page_state",
     "method_b_candidate_points",
     "method_b_candidate_frame_limits",
+    "method_b_cfix1_display_payload",
     "method_b_coverage_parity",
     "method_b_display_payload",
     "method_b_display_source_parity",
@@ -2053,6 +2625,7 @@ __all__ = (
     "proton_closure_summary_lines",
     "refinement_annotation_lines",
     "render_pion_hgcer_refinement_pages",
+    "render_pion_hgcer_method_b_cfix1_pages",
     "render_pion_hgcer_ab_comparison_pages",
     "render_proton_main_summary_pages",
     "render_setting_warning_page",

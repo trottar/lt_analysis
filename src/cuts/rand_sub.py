@@ -205,6 +205,7 @@ from pion_hgcer_refinement_plots import (
     method_b_display_payload,
     method_b_display_source_parity,
     open_diagnostic_pdf,
+    render_pion_hgcer_method_b_cfix1_pages,
     render_pion_hgcer_refinement_pages,
     render_pion_hgcer_ab_comparison_pages,
     render_proton_main_summary_pages,
@@ -7388,6 +7389,27 @@ def rand_sub(
             )
             _print_rand_debug(
                 "detached HGCer refinement PDF pages unavailable",
+                renderer="pion_hgcer_refinement_plots",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
+        try:
+            # C.Fix.1 consumes the already checkpoint-first, parity-audited
+            # Method-B display snapshot and appends only to the open technical
+            # HGCer supplement.  It cannot affect the analysis or main PDF.
+            render_pion_hgcer_method_b_cfix1_pages(
+                pdf_destinations["hgcer_debug"],
+                method_b_display,
+                page_manifest=supplement_manifests["hgcer_debug"],
+            )
+        except Exception as exc:
+            setting_renderer_failures.append(
+                "C.Fix.1 Method-B regional audit: {}: {}".format(
+                    type(exc).__name__, exc
+                )
+            )
+            _print_rand_debug(
+                "detached C.Fix.1 Method-B regional audit unavailable",
                 renderer="pion_hgcer_refinement_plots",
                 exception_type=type(exc).__name__,
                 exception=str(exc),

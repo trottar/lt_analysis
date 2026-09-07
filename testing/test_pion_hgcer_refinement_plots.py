@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from copy import deepcopy
 import importlib.util
 from pathlib import Path
 import sys
@@ -69,6 +70,14 @@ def _method_b():
         "available": True,
         "t_edges": [0.1, 0.2, 0.3],
         "delta_edges": [-10.0, 0.0, 10.0],
+        "mm_regions": [
+            {"region_name": "pi_n", "mm_low": 0.80, "mm_high": 0.95, "region_role": "pion_sensitive"},
+            {"region_name": "pi_sidis", "mm_low": 0.95, "mm_high": 1.05, "region_role": "pion_sensitive"},
+            {"region_name": "pi_delta_high", "mm_low": 1.23, "mm_high": 1.35, "region_role": "pion_sensitive"},
+        ],
+        "protected_regions": [
+            {"region_name": "KLambdaSigma0", "mm_low": 1.10, "mm_high": 1.23, "region_role": "protected_signal"},
+        ],
         "summary": {"method_B_status_counts": {"available": 1, "marginal": 1, "unavailable": 2}},
         "cells": [
             {
@@ -91,6 +100,124 @@ def _method_b():
                 "regions": [],
             },
         ],
+    }
+
+
+def _cfix1_method_b():
+    """Return a complete frozen Method-B lattice for C.Fix.1 presentation tests."""
+    t_edges = [0.10, 0.20, 0.30]
+    delta_edges = [-10.0, -7.0, 0.0, 4.0]
+    definitions = [
+        {"region_name": "pion_sensitive_low", "mm_low": 0.80, "mm_high": 1.10, "region_role": "pion_sensitive"},
+        {"region_name": "pion_sensitive_high", "mm_low": 1.23, "mm_high": 1.45, "region_role": "pion_sensitive"},
+    ]
+    protected = {"region_name": "KLambdaSigma0", "mm_low": 1.10, "mm_high": 1.23, "region_role": "protected_signal"}
+
+    def regional(name, support, raw, raw_sigma, relative, relative_sigma, *, support_reason=None, relative_reason=None):
+        return {
+            "region_name": name,
+            "support_status": support,
+            "support_reason": support_reason,
+            "raw_ratio": raw,
+            "raw_ratio_sigma": raw_sigma,
+            "parent_relative_status": "available" if relative is not None else "unavailable",
+            "parent_relative_reason": relative_reason,
+            "parent_relative_ratio": relative,
+            "parent_relative_sigma": relative_sigma,
+        }
+
+    cells = [
+        {
+            "t_index": 0, "delta_index": 0, "t_low": 0.10, "t_high": 0.20,
+            "delta_low": -10.0, "delta_high": -7.0,
+            "regions": [
+                regional("pion_sensitive_low", "usable", 0.65, 0.10, 0.60, 0.10),
+                regional("pion_sensitive_high", "usable", 1.70, 0.20, 1.80, 0.30),
+                regional("KLambdaSigma0", "usable", 99.0, 1.0, 99.0, 1.0),
+            ],
+            "region_consistency_status": "region_consistent", "region_consistency_reason": None,
+            "shape_status": "good", "shape_reason": None,
+            "candidate_L_B_status": "available_multi_region", "candidate_L_B": 1.10,
+            "candidate_L_B_uncertainty": 0.15, "method_B_status": "available", "method_B_reason": None,
+        },
+        {
+            "t_index": 0, "delta_index": 1, "t_low": 0.10, "t_high": 0.20,
+            "delta_low": -7.0, "delta_high": 0.0,
+            "regions": [
+                regional("pion_sensitive_low", "usable", 1.40, 0.20, 1.50, 0.25),
+                regional("pion_sensitive_high", "unavailable", 7.0, 0.4, None, None, support_reason="baseline_support_below_minimum", relative_reason="baseline_support_below_minimum"),
+                regional("KLambdaSigma0", "usable", 98.0, 1.0, 98.0, 1.0),
+            ],
+            "region_consistency_status": "insufficient_regions", "region_consistency_reason": "one_usable_region",
+            "shape_status": "good", "shape_reason": None,
+            "candidate_L_B_status": "single_region_only", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "method_B_status": "marginal", "method_B_reason": "single_region_only",
+        },
+        {
+            "t_index": 1, "delta_index": 0, "t_low": 0.20, "t_high": 0.30,
+            "delta_low": -10.0, "delta_high": -7.0,
+            "regions": [
+                regional("pion_sensitive_low", "usable", 0.45, 0.10, 0.40, 0.10),
+                regional("pion_sensitive_high", "usable", 2.10, 0.20, 2.00, 0.20),
+                regional("KLambdaSigma0", "usable", 97.0, 1.0, 97.0, 1.0),
+            ],
+            "region_consistency_status": "region_marginal", "region_consistency_reason": "marginal_overlap_only",
+            "shape_status": "marginal", "shape_reason": "limited_shape_support",
+            "candidate_L_B_status": "region_marginal", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "method_B_status": "marginal", "method_B_reason": "region_marginal",
+        },
+        {
+            "t_index": 1, "delta_index": 1, "t_low": 0.20, "t_high": 0.30,
+            "delta_low": -7.0, "delta_high": 0.0,
+            "regions": [
+                regional("pion_sensitive_low", "usable", 1.30, 0.10, 1.20, 0.15),
+                regional("pion_sensitive_high", "usable", 0.70, 0.10, 0.75, 0.15),
+                regional("KLambdaSigma0", "usable", 96.0, 1.0, 96.0, 1.0),
+            ],
+            "region_consistency_status": "region_consistent", "region_consistency_reason": None,
+            "shape_status": "poor", "shape_reason": "shape_max_pull_above_threshold",
+            "candidate_L_B_status": "shape_poor_veto", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "method_B_status": "shape_inconsistent", "method_B_reason": "shape_max_pull_above_threshold",
+        },
+        {
+            "t_index": 0, "delta_index": 2, "t_low": 0.10, "t_high": 0.20,
+            "delta_low": 0.0, "delta_high": 4.0,
+            "regions": [
+                regional("pion_sensitive_low", "usable", 0.80, 0.10, 0.75, 0.10),
+                regional("pion_sensitive_high", "usable", 1.30, 0.15, 1.40, 0.15),
+                regional("KLambdaSigma0", "usable", 95.0, 1.0, 95.0, 1.0),
+            ],
+            "region_consistency_status": "region_inconsistent", "region_consistency_reason": "primary_intervals_disjoint",
+            "shape_status": "good", "shape_reason": None,
+            "candidate_L_B_status": "region_inconsistent", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "method_B_status": "internally_inconsistent", "method_B_reason": "primary_intervals_disjoint",
+        },
+        {
+            "t_index": 1, "delta_index": 2, "t_low": 0.20, "t_high": 0.30,
+            "delta_low": 0.0, "delta_high": 4.0,
+            "regions": [
+                regional("pion_sensitive_low", "unavailable", None, None, None, None, support_reason="host_support_below_minimum", relative_reason="host_support_below_minimum"),
+                regional("pion_sensitive_high", "unavailable", None, None, None, None, support_reason="baseline_support_below_minimum", relative_reason="baseline_support_below_minimum"),
+                regional("KLambdaSigma0", "usable", 94.0, 1.0, 94.0, 1.0),
+            ],
+            "region_consistency_status": "insufficient_regions", "region_consistency_reason": "no_usable_regions",
+            "shape_status": "unavailable", "shape_reason": "no_shape_support",
+            "candidate_L_B_status": "unavailable", "candidate_L_B": None,
+            "candidate_L_B_uncertainty": None, "method_B_status": "unavailable", "method_B_reason": "no_usable_regions",
+        },
+    ]
+    return {
+        "status": "available",
+        "available": True,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "mm_regions": definitions,
+        "protected_regions": [protected],
+        "cells": cells,
+        "summary": {
+            "method_B_status_counts": {"available": 1, "marginal": 1, "shape_inconsistent": 1, "unavailable": 2, "internally_inconsistent": 1},
+            "candidate_status_counts": {"available_multi_region": 1, "single_region_only": 1, "region_marginal": 1, "region_inconsistent": 1, "shape_poor_veto": 1, "unavailable": 1},
+        },
     }
 
 
@@ -330,6 +457,13 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         )
         self.assertIn("pion.coordinate.detail", manifest["routes"]["pion_fit_debug"])
         self.assertIn("hgcer.part2", manifest["routes"]["hgcer_debug"])
+        self.assertEqual(
+            manifest["routes"]["hgcer_debug"][-2:],
+            [
+                "hgcer.cfix1.method_b.regional_values",
+                "hgcer.cfix1.method_b.status_audit",
+            ],
+        )
         self.assertIn("proton.detail", manifest["routes"]["proton_debug"])
         self.assertEqual(
             manifest["routes"]["phase_d_ab"],
@@ -343,6 +477,9 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertFalse(
             any(page.startswith("hgcer.phase_d") for page in manifest["routes"]["main"])
         )
+        for route_name in ("main", "proton_debug", "pion_fit_debug", "phase_d_ab"):
+            self.assertNotIn("hgcer.cfix1.method_b.regional_values", manifest["routes"][route_name])
+            self.assertNotIn("hgcer.cfix1.method_b.status_audit", manifest["routes"][route_name])
 
     def test_phase_d_plot_payload_uses_stored_values_and_preserves_missing_states(self):
         payload = plots.phase_d_ab_plot_payload(_phase_d_checkpoint())
@@ -702,6 +839,9 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         method_b = {
             "t_edges": [0.1, 0.2, 0.3],
             "delta_edges": [-10.0, 10.0],
+            "mm_regions": [
+                {"region_name": "pi_n", "mm_low": 0.80, "mm_high": 1.10, "region_role": "pion_sensitive"},
+            ],
             "cells": [
                 {
                     "t_index": 0, "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
@@ -719,6 +859,160 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual([panel["t_index"] for panel in panels], [0, 1])
         self.assertEqual(panels[0]["series"]["pi_n"][0]["Qtilde"], 1.0)
         self.assertEqual(panels[1]["series"]["pi_n"][0]["Qtilde"], 1.2)
+
+    def test_cfix1_copies_current_regions_and_preserves_regional_evidence(self):
+        method_b = _cfix1_method_b()
+        source_before = deepcopy(method_b)
+        display = plots.method_b_display_payload(method_b, {})
+        display_before = deepcopy(display)
+        presentation = plots.method_b_cfix1_display_payload(display)
+
+        self.assertTrue(presentation["available"])
+        self.assertEqual(
+            [region["region_name"] for region in presentation["regions"]],
+            ["pion_sensitive_low", "pion_sensitive_high"],
+        )
+        self.assertEqual(len(presentation["per_t"]), 2)
+        self.assertEqual(
+            [cell["delta_index"] for cell in presentation["per_t"][0]["cells"]], [0, 1, 2]
+        )
+        self.assertEqual(
+            [point["delta_index"] for point in presentation["per_t"][0]["raw_series"]["pion_sensitive_low"]],
+            [0, 1, 2],
+        )
+        self.assertEqual(
+            [point["delta_index"] for point in presentation["per_t"][0]["raw_series"]["pion_sensitive_high"]],
+            [0, 2],
+        )
+        self.assertEqual(
+            [point["delta_index"] for point in presentation["per_t"][0]["relative_series"]["pion_sensitive_low"]],
+            [0, 1, 2],
+        )
+        self.assertEqual(
+            [point["delta_index"] for point in presentation["per_t"][1]["relative_series"]["pion_sensitive_high"]],
+            [0, 1],
+        )
+        self.assertEqual(presentation["per_t"][0]["combined_points"], ({
+            "delta_index": 0, "delta_center": -8.5,
+            "candidate_L_B": 1.10, "candidate_L_B_uncertainty": 0.15,
+        },))
+        self.assertEqual(
+            presentation["per_t"][0]["cells"][1]["candidate_L_B_status"], "single_region_only"
+        )
+        self.assertEqual(
+            presentation["per_t"][1]["cells"][0]["candidate_L_B_status"], "region_marginal"
+        )
+        self.assertEqual(
+            presentation["per_t"][0]["cells"][0]["non_display_regions"],
+            (method_b["cells"][0]["regions"][2],),
+        )
+        self.assertEqual(
+            presentation["per_t"][0]["cells"][1]["regions"][1]["support_reason"],
+            "baseline_support_below_minimum",
+        )
+        self.assertEqual(
+            presentation["per_t"][1]["cells"][0]["region_consistency_reason"],
+            "marginal_overlap_only",
+        )
+        self.assertEqual(
+            [cell["candidate_L_B_status"] for group in presentation["per_t"] for cell in group["cells"]],
+            [
+                "available_multi_region", "single_region_only", "region_inconsistent",
+                "region_marginal", "shape_poor_veto", "unavailable",
+            ],
+        )
+        self.assertEqual(display, display_before)
+        self.assertEqual(method_b, source_before)
+        presentation["per_t"][0]["cells"][0]["regions"][0]["support_status"] = "changed"
+        display["mm_regions"][0]["region_name"] = "changed"
+        self.assertEqual(method_b, source_before)
+
+    def test_cfix1_region_names_are_dynamic_and_protected_rows_are_never_series(self):
+        method_b = _cfix1_method_b()
+        method_b["mm_regions"][0]["region_name"] = "stored_low_sideband"
+        for cell in method_b["cells"]:
+            for region in cell["regions"]:
+                if region["region_name"] == "pion_sensitive_low":
+                    region["region_name"] = "stored_low_sideband"
+        presentation = plots.method_b_cfix1_display_payload(
+            plots.method_b_display_payload(method_b, {})
+        )
+        self.assertTrue(presentation["available"])
+        self.assertIn("stored_low_sideband", presentation["per_t"][0]["raw_series"])
+        self.assertNotIn("KLambdaSigma0", presentation["per_t"][0]["raw_series"])
+        self.assertTrue(
+            presentation["regions"][0]["label"].startswith("stored_low_sideband (MM [")
+        )
+
+    def test_cfix1_rejects_incomplete_lattice_and_selected_row_contracts(self):
+        cases = (
+            (
+                "cfix1_cell_lattice_invalid",
+                lambda payload: payload["cells"].pop(),
+            ),
+            (
+                "cfix1_cell_lattice_invalid",
+                lambda payload: payload["cells"].append(deepcopy(payload["cells"][0])),
+            ),
+            (
+                "cfix1_cell_lattice_invalid",
+                lambda payload: payload["cells"][0].update(t_index=99),
+            ),
+            (
+                "cfix1_cell_geometry_mismatch",
+                lambda payload: payload["cells"][0].update(delta_high=-6.5),
+            ),
+            (
+                "cfix1_region_rows_invalid",
+                lambda payload: payload["cells"][0]["regions"].pop(1),
+            ),
+            (
+                "cfix1_region_rows_invalid",
+                lambda payload: payload["cells"][0]["regions"].append(
+                    deepcopy(payload["cells"][0]["regions"][0])
+                ),
+            ),
+        )
+        for expected_reason, mutation in cases:
+            with self.subTest(expected_reason=expected_reason):
+                method_b = _cfix1_method_b()
+                mutation(method_b)
+                presentation = plots.method_b_cfix1_display_payload(
+                    plots.method_b_display_payload(method_b, {})
+                )
+                self.assertFalse(presentation["available"])
+                self.assertEqual(presentation["reason"], expected_reason)
+
+    def test_cfix1_combined_overlay_and_display_ranges_remain_conservative(self):
+        method_b = _cfix1_method_b()
+        method_b["cells"][0]["candidate_L_B_uncertainty"] = -1.0
+        presentation = plots.method_b_cfix1_display_payload(
+            plots.method_b_display_payload(method_b, {})
+        )
+        self.assertTrue(presentation["available"])
+        self.assertEqual(presentation["per_t"][0]["combined_points"], ())
+        relative = presentation["per_t"][1]["relative_series"]
+        ymin, ymax = plots._method_b_cfix1_limits((
+            ("Qtilde", "Qtilde_uncertainty", tuple(
+                point for points in relative.values() for point in points
+            )),
+        ))
+        self.assertLessEqual(ymin, 0.30)
+        self.assertGreaterEqual(ymax, 2.20)
+        self.assertLessEqual(ymin, 1.0)
+        self.assertGreaterEqual(ymax, 1.0)
+
+    def test_cfix1_renderer_is_a_noop_without_root_and_never_mutates_display(self):
+        display = plots.method_b_display_payload(_cfix1_method_b(), {})
+        display_before = deepcopy(display)
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=None):
+            result = plots.render_pion_hgcer_method_b_cfix1_pages(
+                "synthetic.pdf", display, page_manifest=manifest
+            )
+        self.assertIs(result, manifest)
+        self.assertEqual(manifest, [])
+        self.assertEqual(display, display_before)
 
     def test_single_region_candidate_does_not_create_method_b_availability(self):
         method_b = {
@@ -1123,16 +1417,27 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         final_qa = source.index('"renderer_failures": setting_renderer_failures')
         warning_page = source.index("render_setting_warning_page(")
         method_b_display = source.index("method_b_display = method_b_display_payload(")
+        cfix1_call = source.index("render_pion_hgcer_method_b_cfix1_pages(", refinement_call)
+        cfix1_block = source[cfix1_call:warning_page]
         self.assertLess(proton_call, proton_failure)
         self.assertLess(proton_failure, final_qa)
         self.assertLess(proton_failure, refinement_call)
         self.assertLess(refinement_call, warning_page)
+        self.assertLess(method_b_display, cfix1_call)
+        self.assertLess(refinement_call, cfix1_call)
+        self.assertLess(cfix1_call, warning_page)
         self.assertLess(method_b_display, final_qa)
         self.assertIn("Method-B display-source parity mismatch", source)
         self.assertIn("method_b_display=method_b_display", source)
         self.assertIn("canonical_parent_k_lambda_render", source)
         self.assertNotIn("k_lambda_scope_template_availability", source)
         self.assertNotIn("k_lambda_source_availability", source)
+        self.assertIn('pdf_destinations["hgcer_debug"]', cfix1_block)
+        self.assertIn('supplement_manifests["hgcer_debug"]', cfix1_block)
+        self.assertIn("C.Fix.1 Method-B regional audit", cfix1_block)
+        self.assertNotIn("pion_hgcer_method_a", cfix1_block)
+        self.assertNotIn("pion_hgcer_event_contract", cfix1_block)
+        self.assertNotIn("phase_d_checkpoint", cfix1_block)
 
     def test_category_labels_f_low_styles_and_annotation_are_explicit(self):
         self.assertEqual(set(plots._METHOD_A_SUPPORT_LABELS), {"supported", "marginal", "unsupported"})
@@ -1166,6 +1471,40 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIs(result, manifest)
         self.assertEqual(manifest, [])
 
+    def test_cfix1_presentation_source_is_dynamic_and_never_rebuilds_method_b(self):
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        extractor_start = source.index("def _method_b_cfix1_unavailable")
+        extractor_end = source.index("def unity_line_limits", extractor_start)
+        renderer_start = source.index("def _method_b_cfix1_annotation")
+        renderer_end = source.index("def render_pion_hgcer_refinement_pages", renderer_start)
+        cfix_source = source[extractor_start:extractor_end] + source[renderer_start:renderer_end]
+        for forbidden in (
+            "pi_n",
+            "pi_sidis",
+            "pi_delta_high",
+            "find_canonical_bin",
+            "inverse_variance",
+            "parent_reference_ratio",
+            "shape_chi2",
+            "minimum_host_neff",
+            "cfix1_class",
+            "promote_single_region",
+        ):
+            self.assertNotIn(forbidden, cfix_source)
+        for required in (
+            "method_b_cfix1_display_payload",
+            "render_pion_hgcer_method_b_cfix1_pages",
+            "Stored regional Method-B diagnostic; not a correction",
+            "hgcer.cfix1.method_b.regional_values",
+            "hgcer.cfix1.method_b.status_audit",
+            "available_multi_region",
+        ):
+            self.assertIn(required, cfix_source)
+        procedure_source = (
+            REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("hgcer.cfix1", procedure_source)
+
     def test_renderer_has_no_analysis_or_physics_imports_or_calls(self):
         source_path = REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py"
         source = source_path.read_text(encoding="utf-8")
@@ -1176,7 +1515,7 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
                 imports.extend(alias.name for alias in node.names)
             elif isinstance(node, ast.ImportFrom):
                 imports.append(node.module or "")
-        self.assertTrue(set(imports).issubset({"__future__", "ROOT", "array", "collections.abc", "math", "os", "textwrap"}))
+        self.assertTrue(set(imports).issubset({"__future__", "ROOT", "array", "collections.abc", "copy", "math", "os", "textwrap"}))
         forbidden = {"method_comparison", "method_agreement", "C_B", "C_final", "refined_pion_weight", "applied_refinement_weight"}
         self.assertTrue(forbidden.isdisjoint(source))
         for marker in ("build_pion", "apply_pion", "particle_subtraction", "pion_component_fits", "pion_t_bin_parents"):
