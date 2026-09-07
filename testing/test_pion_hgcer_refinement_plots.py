@@ -436,6 +436,237 @@ def _load_parent_lambda_renderer(comparison_renderer):
     return module
 
 
+class FakeCanvas:
+    """Minimal ROOT canvas recorder for the C.Fix.1 renderer regression."""
+
+    def __init__(self, root, name, title, width, height):
+        self.root = root
+        self.name = str(name)
+        self.title = str(title)
+        self.width = int(width)
+        self.height = int(height)
+        self.divisions = []
+        self.pad_selections = []
+        self.print_targets = []
+        self.close_count = 0
+
+    def Divide(self, columns, rows):
+        self.divisions.append((int(columns), int(rows)))
+
+    def cd(self, pad):
+        self.pad_selections.append(int(pad))
+        return self
+
+    def Print(self, target):
+        retained = tuple(getattr(self, "_method_b_cfix1_draw_objects", ()))
+        self.print_targets.append(str(target))
+        self.root.print_records.append({
+            "canvas": self,
+            "target": str(target),
+            "retained": retained,
+            "closed_at_print": bool(self.close_count),
+        })
+
+    def Close(self):
+        self.close_count += 1
+
+
+class FakeTH1D:
+    """Minimal detached frame recorder for the C.Fix.1 renderer regression."""
+
+    def __init__(self, name, title, nbins, xmin, xmax):
+        self.name = str(name)
+        self.title = str(title)
+        self.nbins = int(nbins)
+        self.xmin = float(xmin)
+        self.xmax = float(xmax)
+        self.minimum = None
+        self.maximum = None
+        self.draw_options = []
+
+    def SetDirectory(self, _directory):
+        return None
+
+    def SetStats(self, _stats):
+        return None
+
+    def SetMinimum(self, value):
+        self.minimum = float(value)
+
+    def SetMaximum(self, value):
+        self.maximum = float(value)
+
+    def Draw(self, option=""):
+        self.draw_options.append(str(option))
+
+
+class FakeTGraphErrors:
+    """Minimal graph recorder retaining each stored value and uncertainty."""
+
+    def __init__(self):
+        self.points = {}
+        self.point_errors = {}
+        self.marker_style = None
+        self.marker_color = None
+        self.line_color = None
+        self.draw_options = []
+
+    def SetPoint(self, index, x_value, y_value):
+        self.points[int(index)] = (float(x_value), float(y_value))
+
+    def SetPointError(self, index, x_error, y_error):
+        self.point_errors[int(index)] = (float(x_error), float(y_error))
+
+    def SetMarkerStyle(self, value):
+        self.marker_style = int(value)
+
+    def SetMarkerColor(self, value):
+        self.marker_color = int(value)
+
+    def SetLineColor(self, value):
+        self.line_color = int(value)
+
+    def Draw(self, option=""):
+        self.draw_options.append(str(option))
+
+    def recorded_points(self):
+        return tuple(
+            self.points[index] + self.point_errors[index]
+            for index in sorted(self.points)
+        )
+
+
+class FakeTLine:
+    """Minimal line recorder for the C.Fix.1 unity references."""
+
+    def __init__(self, x1, y1, x2, y2):
+        self.endpoints = (float(x1), float(y1), float(x2), float(y2))
+        self.line_style = None
+        self.draw_options = []
+
+    def SetLineStyle(self, value):
+        self.line_style = int(value)
+
+    def Draw(self, option=""):
+        self.draw_options.append(str(option))
+
+
+class FakeTLegend:
+    """Minimal legend recorder for dynamic C.Fix.1 labels."""
+
+    def __init__(self, *_coordinates):
+        self.entries = []
+        self.draw_options = []
+
+    def SetBorderSize(self, _value):
+        return None
+
+    def SetFillStyle(self, _value):
+        return None
+
+    def AddEntry(self, _object, label, option):
+        self.entries.append((str(label), str(option)))
+
+    def Draw(self, option=""):
+        self.draw_options.append(str(option))
+
+
+class FakeTPaveText:
+    """Minimal annotation recorder for the C.Fix.1 diagnostic banner."""
+
+    def __init__(self, x1, y1, x2, y2, option):
+        self.coordinates = (float(x1), float(y1), float(x2), float(y2))
+        self.option = str(option)
+        self.texts = []
+        self.draw_options = []
+        self.text_size = None
+
+    def SetFillStyle(self, _value):
+        return None
+
+    def SetBorderSize(self, _value):
+        return None
+
+    def SetTextAlign(self, _value):
+        return None
+
+    def SetTextSize(self, value):
+        self.text_size = float(value)
+
+    def AddText(self, text):
+        self.texts.append(str(text))
+
+    def Draw(self, option=""):
+        self.draw_options.append(str(option))
+
+
+class FakeTLatex:
+    """Minimal text recorder for C.Fix.1 audit-panel strings and notices."""
+
+    def __init__(self):
+        self.ndc = False
+        self.text_size = None
+        self.draws = []
+
+    def SetNDC(self):
+        self.ndc = True
+
+    def SetTextSize(self, value):
+        self.text_size = float(value)
+
+    def DrawLatexNDC(self, x_value, y_value, text):
+        self.draws.append((float(x_value), float(y_value), str(text)))
+
+
+class FakeROOT:
+    """Small test-local ROOT surface that executes only the C.Fix.1 pages."""
+
+    def __init__(self):
+        self.canvases = []
+        self.frames = []
+        self.graphs = []
+        self.lines = []
+        self.legends = []
+        self.pave_texts = []
+        self.latex = []
+        self.print_records = []
+
+    def TCanvas(self, name, title, width, height):
+        canvas = FakeCanvas(self, name, title, width, height)
+        self.canvases.append(canvas)
+        return canvas
+
+    def TH1D(self, name, title, nbins, xmin, xmax):
+        frame = FakeTH1D(name, title, nbins, xmin, xmax)
+        self.frames.append(frame)
+        return frame
+
+    def TGraphErrors(self):
+        graph = FakeTGraphErrors()
+        self.graphs.append(graph)
+        return graph
+
+    def TLine(self, x1, y1, x2, y2):
+        line = FakeTLine(x1, y1, x2, y2)
+        self.lines.append(line)
+        return line
+
+    def TLegend(self, *coordinates):
+        legend = FakeTLegend(*coordinates)
+        self.legends.append(legend)
+        return legend
+
+    def TPaveText(self, x1, y1, x2, y2, option):
+        label = FakeTPaveText(x1, y1, x2, y2, option)
+        self.pave_texts.append(label)
+        return label
+
+    def TLatex(self):
+        text = FakeTLatex()
+        self.latex.append(text)
+        return text
+
+
 class PionHGCerRefinementPlotTests(unittest.TestCase):
     def test_supplement_names_and_routes_are_deterministic(self):
         main = r"C:\analysis\Left_kaon_rand_sub_Q4p4W2p74_highe.pdf"
@@ -1013,6 +1244,212 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIs(result, manifest)
         self.assertEqual(manifest, [])
         self.assertEqual(display, display_before)
+
+    def test_cfix1_renderer_executes_with_fake_root_and_preserves_stored_evidence(self):
+        display = plots.method_b_display_payload(_cfix1_method_b(), {})
+        display_before = deepcopy(display)
+        root = FakeROOT()
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            result = plots.render_pion_hgcer_method_b_cfix1_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=manifest
+            )
+
+        expected_manifest = [
+            {
+                "page_id": "hgcer.cfix1.method_b.regional_values",
+                "scope": "t_bin", "t_index": 0, "authoritative": False,
+            },
+            {
+                "page_id": "hgcer.cfix1.method_b.status_audit",
+                "scope": "t_bin", "t_index": 0, "authoritative": False,
+            },
+            {
+                "page_id": "hgcer.cfix1.method_b.regional_values",
+                "scope": "t_bin", "t_index": 1, "authoritative": False,
+            },
+            {
+                "page_id": "hgcer.cfix1.method_b.status_audit",
+                "scope": "t_bin", "t_index": 1, "authoritative": False,
+            },
+        ]
+        self.assertIs(result, manifest)
+        self.assertEqual(manifest, expected_manifest)
+        self.assertEqual(display, display_before)
+        self.assertEqual(len(root.print_records), 4)
+        self.assertEqual(
+            [record["canvas"].name for record in root.print_records],
+            [
+                "C_hgcer_cfix1_regional_values_t1",
+                "C_hgcer_cfix1_status_audit_t1",
+                "C_hgcer_cfix1_regional_values_t2",
+                "C_hgcer_cfix1_status_audit_t2",
+            ],
+        )
+        self.assertEqual(
+            [record["target"] for record in root.print_records],
+            ["synthetic_hgcer_debug.pdf"] * 4,
+        )
+        self.assertTrue(all(not record["closed_at_print"] for record in root.print_records))
+        self.assertTrue(all(record["retained"] for record in root.print_records))
+        self.assertTrue(all(canvas.close_count == 1 for canvas in root.canvases))
+        self.assertEqual([canvas.divisions for canvas in root.canvases], [
+            [(1, 2)], [(3, 1)], [(1, 2)], [(3, 1)],
+        ])
+        self.assertEqual(root.canvases[1].pad_selections, [1, 2, 3])
+        self.assertEqual(root.canvases[3].pad_selections, [1, 2, 3])
+
+        graph_points = [graph.recorded_points() for graph in root.graphs]
+        self.assertIn((
+            (-8.5, 0.65, 0.0, 0.10),
+            (-3.5, 1.40, 0.0, 0.20),
+            (2.0, 0.80, 0.0, 0.10),
+        ), graph_points)
+        self.assertIn((
+            (-8.5, 1.70, 0.0, 0.20),
+            (2.0, 1.30, 0.0, 0.15),
+        ), graph_points)
+        self.assertFalse(any(
+            any(point[:2] == (-3.5, 7.0) for point in points)
+            for points in graph_points
+        ))
+        self.assertIn((
+            (-8.5, 0.60, 0.0, 0.10),
+            (-3.5, 1.50, 0.0, 0.25),
+            (2.0, 0.75, 0.0, 0.10),
+        ), graph_points)
+        self.assertIn((
+            (-8.5, 1.80, 0.0, 0.30),
+            (2.0, 1.40, 0.0, 0.15),
+        ), graph_points)
+        self.assertIn((
+            (-8.5, 0.40, 0.0, 0.10),
+            (-3.5, 1.20, 0.0, 0.15),
+        ), graph_points)
+        self.assertIn((
+            (-8.5, 2.00, 0.0, 0.20),
+            (-3.5, 0.75, 0.0, 0.15),
+        ), graph_points)
+        self.assertEqual(
+            [points for points in graph_points if points == ((-8.5, 1.10, 0.0, 0.15),)],
+            [((-8.5, 1.10, 0.0, 0.15),)],
+        )
+
+        legend_labels = [label for legend in root.legends for label, _option in legend.entries]
+        self.assertIn("pion_sensitive_low (MM [0.800, 1.100] GeV)", legend_labels)
+        self.assertIn("pion_sensitive_high (MM [1.230, 1.450] GeV)", legend_labels)
+        self.assertIn("combined Method-B candidate", legend_labels)
+        for excluded in ("KLambdaSigma0", "pi_n", "pi_sidis", "pi_delta_high"):
+            self.assertFalse(any(excluded in label for label in legend_labels))
+
+        self.assertEqual(len(root.lines), 4)
+        self.assertTrue(all(
+            line.endpoints == (-10.0, 1.0, 4.0, 1.0)
+            for line in root.lines
+        ))
+        frames = {frame.name: frame for frame in root.frames}
+        relative_t2 = frames["H_hgcer_cfix1_relative_frame_t2"]
+        self.assertEqual((relative_t2.xmin, relative_t2.xmax), (-10.0, 4.0))
+        self.assertLessEqual(relative_t2.minimum, 0.30)
+        self.assertGreaterEqual(relative_t2.maximum, 2.20)
+        self.assertLessEqual(relative_t2.minimum, 1.0)
+        self.assertGreaterEqual(relative_t2.maximum, 1.0)
+
+        audit_titles = [
+            frame.title.split(";", 1)[0]
+            for frame in root.frames
+            if frame.name.startswith("H_hgcer_cfix1_status_frame")
+        ]
+        self.assertEqual(audit_titles, [
+            "delta = [-10.000, -7.000] %",
+            "delta = [-7.000, 0.000] %",
+            "delta = [0.000, 4.000] %",
+        ] * 2)
+        audit_text = "\n".join(
+            text for latex in root.latex for _x, _y, text in latex.draws
+        )
+        for expected in (
+            "single_region_only", "region_marginal", "region_inconsistent",
+            "shape_poor_veto", "unavailable", "baseline_support_below_minimum",
+            "shape_max_pull_above_threshold",
+        ):
+            self.assertIn(expected, audit_text)
+        self.assertNotIn("KLambdaSigma0", audit_text)
+        self.assertTrue(all(
+            label.texts == [
+                "Stored regional Method-B diagnostic; not a correction",
+                "NON-AUTHORITATIVE DIAGNOSTIC / No refinement applied",
+            ]
+            for label in root.pave_texts
+        ))
+        annotation_bottom = min(label.coordinates[1] for label in root.pave_texts)
+        self.assertTrue(all(
+            latex.draws and latex.draws[0][1] < annotation_bottom
+            for latex in root.latex
+        ))
+        retained = tuple(
+            item for record in root.print_records for item in record["retained"]
+        )
+        for expected_type in (FakeTH1D, FakeTGraphErrors, FakeTLine, FakeTLegend, FakeTPaveText, FakeTLatex):
+            self.assertTrue(any(isinstance(item, expected_type) for item in retained))
+
+    def test_cfix1_fake_root_renderer_keeps_empty_regional_page_and_audit_lattice(self):
+        method_b = _cfix1_method_b()
+        for cell in method_b["cells"]:
+            if cell["t_index"] != 0:
+                continue
+            cell.update(
+                candidate_L_B_status="unavailable",
+                candidate_L_B=None,
+                candidate_L_B_uncertainty=None,
+            )
+            for region in cell["regions"]:
+                if region["region_name"].startswith("pion_sensitive_"):
+                    region.update(
+                        support_status="unavailable",
+                        raw_ratio=99.0,
+                        raw_ratio_sigma=1.0,
+                        parent_relative_status="unavailable",
+                        parent_relative_ratio=None,
+                        parent_relative_sigma=None,
+                    )
+        display = plots.method_b_display_payload(method_b, {})
+        root = FakeROOT()
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix1_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=manifest
+            )
+
+        self.assertEqual(len(root.print_records), 4)
+        values_canvas = root.canvases[0]
+        self.assertFalse(any(
+            isinstance(item, FakeTGraphErrors)
+            for item in values_canvas._method_b_cfix1_draw_objects
+        ))
+        values_frames = [
+            item for item in values_canvas._method_b_cfix1_draw_objects
+            if isinstance(item, FakeTH1D)
+        ]
+        self.assertEqual(len(values_frames), 2)
+        self.assertTrue(all((frame.xmin, frame.xmax) == (-10.0, 4.0) for frame in values_frames))
+        values_lines = [
+            item for item in values_canvas._method_b_cfix1_draw_objects
+            if isinstance(item, FakeTLine)
+        ]
+        self.assertEqual([line.endpoints for line in values_lines], [
+            (-10.0, 1.0, 4.0, 1.0), (-10.0, 1.0, 4.0, 1.0),
+        ])
+        self.assertEqual(
+            [draw[2] for item in values_canvas._method_b_cfix1_draw_objects if isinstance(item, FakeTLatex) for draw in item.draws],
+            ["No stored eligible regional values", "No stored eligible regional values"],
+        )
+        audit_canvas = root.canvases[1]
+        self.assertEqual(audit_canvas.divisions, [(3, 1)])
+        self.assertEqual(sum(
+            isinstance(item, FakeTH1D) for item in audit_canvas._method_b_cfix1_draw_objects
+        ), 3)
+        self.assertEqual([entry["t_index"] for entry in manifest], [0, 0, 1, 1])
 
     def test_single_region_candidate_does_not_create_method_b_availability(self):
         method_b = {

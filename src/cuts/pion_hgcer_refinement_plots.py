@@ -2313,7 +2313,8 @@ def _render_method_b_cfix1_status_audit_page(ROOT, pdf_name, presentation, group
             text = ROOT.TLatex()
             text.SetNDC()
             text.SetTextSize(0.024)
-            y_position = 0.90
+            # Keep copied audit text below the fixed diagnostic banner (0.90--0.985 NDC).
+            y_position = 0.82
             for line in _method_b_cfix1_audit_lines(cell):
                 text.DrawLatexNDC(0.04, y_position, line)
                 y_position -= 0.052
