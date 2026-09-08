@@ -2758,6 +2758,16 @@ def _method_b_cfix2_text(value):
     return "{:.5g}".format(scalar) if scalar is not None else "-"
 
 
+def _method_b_cfix2_partition_label_anchor(row, frame_low, frame_high):
+    """Return a page-safe stored-slice label anchor without changing its bounds."""
+    low = float(row["mm_low"])
+    high = float(row["mm_high"])
+    inset = min(0.01 * (float(frame_high) - float(frame_low)), 0.10 * (high - low))
+    if row["side"] == "high":
+        return max(frame_low, min(frame_high, high - inset)), 32
+    return max(frame_low, min(frame_high, low + inset)), 12
+
+
 def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, group, manifest):
     t_index = int(group["t_index"])
     title = "Method-B C.Fix.2 adaptive slices |t| = [{:.4g}, {:.4g}] GeV^2".format(
@@ -2765,11 +2775,10 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
     )
     sorted_slices = sorted(group["slices"], key=lambda entry: entry["mm_low"])
     partition_line_count = max(1, len(sorted_slices))
-    canvas_height = max(1100, 850 + 70 * partition_line_count)
     partition_text_size = min(0.022, 0.33 / float(partition_line_count + 2))
     partition_y_maximum = float(partition_line_count) + 1.0
     canvas = ROOT.TCanvas(
-        "C_hgcer_cfix2_slices_t{}".format(t_index + 1), title, 1500, canvas_height
+        "C_hgcer_cfix2_slices_t{}".format(t_index + 1), title, 1400, 1000
     )
     try:
         draw_objects = []
@@ -2792,6 +2801,7 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
             draw_objects.append(line)
         text = ROOT.TLatex()
         text.SetTextSize(partition_text_size)
+        text.SetTextAlign(22)
         text.DrawLatex(
             0.5 * (protected["mm_low"] + protected["mm_high"]),
             partition_y_maximum - 0.30,
@@ -2803,8 +2813,13 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
             line.SetLineWidth(3)
             line.SetLineColor(4 if row["side"] == "low" else 8)
             line.Draw("same")
+            anchor, alignment = _method_b_cfix2_partition_label_anchor(
+                row, presentation["phase_a_mm_edges"][0],
+                presentation["phase_a_mm_edges"][-1],
+            )
+            text.SetTextAlign(alignment)
             text.DrawLatex(
-                row["mm_low"], y + 0.10,
+                anchor, y + 0.10,
                 "{} [{:.3f}, {:.3f}] N_{{d}}={} N_{{eff}}={} {}".format(
                     row["slice_id"], row["mm_low"], row["mm_high"],
                     row.get("baseline_supported_delta_cell_count"),
@@ -2917,13 +2932,11 @@ def _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest):
     cells = tuple(group["cells"])
     columns = min(3, len(cells))
     rows = int(math.ceil(float(len(cells)) / float(columns)))
-    max_lines = max(3 + len(cell["slices"]) for cell in cells)
-    canvas_height = max(1200, 220 * max_lines)
     title = "Method-B C.Fix.2 adaptive status |t| = [{:.4g}, {:.4g}] GeV^2".format(
         group["t_low"], group["t_high"]
     )
     canvas = ROOT.TCanvas(
-        "C_hgcer_cfix2_status_t{}".format(t_index + 1), title, 1800, canvas_height
+        "C_hgcer_cfix2_status_t{}".format(t_index + 1), title, 1800, 1200
     )
     try:
         draw_objects = []

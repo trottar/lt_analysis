@@ -454,6 +454,66 @@ def _cfix2_method_b_with_slice_count(slice_count):
     return method_b
 
 
+def _cfix2_display_with_t_count(t_count):
+    """Extend a detached display fixture to test canonical C.Fix.2 page ownership."""
+    if t_count != 3:
+        raise AssertionError("fixture only needs the normal three-t setting")
+    display = plots.method_b_display_payload(_cfix2_method_b(), {})
+    adaptive = display["adaptive_slice_diagnostic"]
+    t_edges = list(adaptive["t_edges"])
+    t_edges.append(t_edges[-1] + (t_edges[-1] - t_edges[-2]))
+    display["t_edges"] = deepcopy(t_edges)
+    adaptive["t_edges"] = deepcopy(t_edges)
+
+    def remap_row(row):
+        copied = deepcopy(row)
+        copied["t_index"] = 2
+        copied["t_low"] = t_edges[2]
+        copied["t_high"] = t_edges[3]
+        copied["slice_id"] = copied["slice_id"].replace("t1_", "t2_", 1)
+        return copied
+
+    source_partition = deepcopy(adaptive["t_partitions"][1])
+    source_partition["t_index"] = 2
+    source_partition["t_low"] = t_edges[2]
+    source_partition["t_high"] = t_edges[3]
+    for field in ("low_slices", "high_slices", "slices"):
+        source_partition[field] = [remap_row(row) for row in source_partition[field]]
+    adaptive["t_partitions"].append(source_partition)
+
+    source_cells = [
+        deepcopy(cell) for cell in adaptive["cells"] if cell["t_index"] == 1
+    ]
+    for cell in source_cells:
+        cell["t_index"] = 2
+        cell["t_low"] = t_edges[2]
+        cell["t_high"] = t_edges[3]
+        cell["slices"] = [remap_row(row) for row in cell["slices"]]
+    adaptive["cells"].extend(source_cells)
+    return display
+
+
+def _cfix2_status_group_with_ten_cells(slice_count):
+    """Return a dense fixed-layout status group without changing display evidence."""
+    display = plots.method_b_display_payload(
+        _cfix2_method_b_with_slice_count(slice_count), {}
+    )
+    presentation = plots.method_b_cfix2_display_payload(display)
+    if not presentation["available"]:
+        raise AssertionError("test fixture must provide valid C.Fix.2 evidence")
+    group = deepcopy(presentation["per_t"][0])
+    delta_edges = (-10.0, -7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0, 17.0, 20.0)
+    prototype = deepcopy(group["cells"][0])
+    group["cells"] = []
+    for delta_index, (low, high) in enumerate(zip(delta_edges, delta_edges[1:])):
+        cell = deepcopy(prototype)
+        cell["delta_index"] = delta_index
+        cell["delta_low"] = low
+        cell["delta_high"] = high
+        group["cells"].append(cell)
+    return group
+
+
 def _cfix1_checkpoint(method_b):
     """Build the Phase-A/B/C persistence boundary used by C.Fix.1 display."""
     return refinement_checkpoint.build_pion_hgcer_refinement_checkpoint(
@@ -893,7 +953,9 @@ class FakeTLatex:
     def __init__(self):
         self.ndc = False
         self.text_size = None
+        self.text_align = None
         self.draws = []
+        self.draw_alignments = []
 
     def SetNDC(self):
         self.ndc = True
@@ -901,11 +963,16 @@ class FakeTLatex:
     def SetTextSize(self, value):
         self.text_size = float(value)
 
+    def SetTextAlign(self, value):
+        self.text_align = int(value)
+
     def DrawLatexNDC(self, x_value, y_value, text):
         self.draws.append((float(x_value), float(y_value), str(text)))
+        self.draw_alignments.append(self.text_align)
 
     def DrawLatex(self, x_value, y_value, text):
         self.draws.append((float(x_value), float(y_value), str(text)))
+        self.draw_alignments.append(self.text_align)
 
 
 class FakeROOT:
@@ -2512,9 +2579,8 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertEqual(len(labels), 8)
         self.assertTrue(any("N_{d}=2" in label for label in labels))
 
-    def test_cfix2_renderer_scales_canvas_and_status_positions_for_many_slices(self):
-        heights = []
-        for slice_count in (3, 8, 15):
+    def test_cfix2_canvases_are_fixed_for_all_adaptive_slice_and_status_counts(self):
+        for slice_count in (3, 8, 15, 36):
             root = FakeROOT()
             display = plots.method_b_display_payload(
                 _cfix2_method_b_with_slice_count(slice_count), {}
@@ -2523,22 +2589,124 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
                 plots.render_pion_hgcer_method_b_cfix2_pages(
                     "synthetic_hgcer_debug.pdf", display, page_manifest=[]
                 )
-            heights.append(root.print_records[0]["canvas"].height)
-            if slice_count == 15:
-                status_record = root.print_records[1]
-                status_text = next(
-                    text for text in status_record["retained"]
-                    if isinstance(text, FakeTLatex)
-                    and any(draw[2].startswith("available slices=") for draw in text.draws)
-                )
-                positions = [draw[1] for draw in status_text.draws]
-                self.assertEqual(len(positions), 18)
-                self.assertTrue(all(0.06 <= position <= 0.82 for position in positions))
-                self.assertEqual(positions, sorted(positions, reverse=True))
-                self.assertEqual(len(set(positions)), len(positions))
-                self.assertGreater(status_record["canvas"].height, 1200)
-        self.assertEqual(heights, sorted(heights))
-        self.assertGreater(heights[-1], heights[0])
+            slice_canvases = [
+                record["canvas"] for record in root.print_records
+                if "_slices_" in record["canvas"].name
+            ]
+            status_canvases = [
+                record["canvas"] for record in root.print_records
+                if "_status_" in record["canvas"].name
+            ]
+            self.assertTrue(slice_canvases)
+            self.assertTrue(status_canvases)
+            self.assertTrue(all(
+                (canvas.width, canvas.height) == (1400, 1000)
+                for canvas in slice_canvases
+            ))
+            self.assertTrue(all(
+                (canvas.width, canvas.height) == (1800, 1200)
+                for canvas in status_canvases
+            ))
+            partition_labels = [
+                draw[2]
+                for text in root.print_records[0]["retained"]
+                if isinstance(text, FakeTLatex)
+                for draw in text.draws if "N_{d}=" in draw[2]
+            ]
+            self.assertEqual(len(partition_labels), slice_count)
+            rendered_slice_series = [
+                item for item in root.print_records[0]["retained"]
+                if isinstance(item, FakeTGraphErrors)
+                and item.marker_style not in {24, 25}
+            ]
+            self.assertEqual(len(rendered_slice_series), slice_count)
+
+    def test_cfix2_status_page_keeps_all_ten_cells_and_dense_lines_within_fixed_grid(self):
+        root = FakeROOT()
+        group = _cfix2_status_group_with_ten_cells(36)
+        manifest = []
+        plots._render_method_b_cfix2_status_page(
+            root, "synthetic_hgcer_debug.pdf", group, manifest
+        )
+        self.assertEqual(
+            manifest,
+            [{
+                "page_id": "hgcer.cfix2.method_b.adaptive_status",
+                "scope": "t_bin",
+                "t_index": 0,
+                "authoritative": False,
+            }],
+        )
+        canvas = root.print_records[0]["canvas"]
+        self.assertEqual((canvas.width, canvas.height), (1800, 1200))
+        self.assertEqual(canvas.divisions, [(3, 4)])
+        self.assertEqual(canvas.pad_selections, list(range(1, 11)))
+        frames = [
+            item for item in root.print_records[0]["retained"]
+            if isinstance(item, FakeTH1D)
+        ]
+        self.assertEqual(len(frames), 10)
+        status_blocks = [
+            item for item in root.print_records[0]["retained"]
+            if isinstance(item, FakeTLatex)
+            and any(draw[2].startswith("available slices=") for draw in item.draws)
+        ]
+        self.assertEqual(len(status_blocks), 10)
+        for block in status_blocks:
+            positions = [draw[1] for draw in block.draws]
+            self.assertEqual(len(positions), 39)
+            self.assertTrue(all(0.06 <= position <= 0.82 for position in positions))
+            self.assertEqual(positions, sorted(positions, reverse=True))
+            self.assertEqual(len(set(positions)), len(positions))
+
+    def test_cfix2_high_side_partition_labels_are_right_anchored_inside_frame(self):
+        root = FakeROOT()
+        display = plots.method_b_display_payload(_cfix2_method_b(), {})
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+            )
+        partition_record = root.print_records[0]
+        labels = [
+            (draw, alignment)
+            for text in partition_record["retained"] if isinstance(text, FakeTLatex)
+            for draw, alignment in zip(text.draws, text.draw_alignments)
+            if "N_{d}=" in draw[2]
+        ]
+        high_draw, high_alignment = next(
+            (draw, alignment) for draw, alignment in labels
+            if "t0_high_slice" in draw[2]
+        )
+        low_draw, low_alignment = next(
+            (draw, alignment) for draw, alignment in labels
+            if "t0_low_slice" in draw[2]
+        )
+        self.assertEqual(high_alignment, 32)
+        self.assertGreaterEqual(high_draw[0], 1.23)
+        self.assertLess(high_draw[0], 1.45)
+        self.assertEqual(low_alignment, 12)
+        self.assertGreater(low_draw[0], 0.80)
+        self.assertLessEqual(low_draw[0], 1.10)
+
+    def test_cfix2_three_t_setting_keeps_exact_two_page_ownership_per_t(self):
+        root = FakeROOT()
+        display = _cfix2_display_with_t_count(3)
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=manifest
+            )
+        self.assertEqual(len(manifest), 6)
+        self.assertEqual(
+            [entry["page_id"] for entry in manifest],
+            [
+                "hgcer.cfix2.method_b.adaptive_slices",
+                "hgcer.cfix2.method_b.adaptive_status",
+            ] * 3,
+        )
+        self.assertEqual(
+            [entry["t_index"] for entry in manifest], [0, 0, 1, 1, 2, 2]
+        )
 
     def test_cfix1_presentation_source_is_dynamic_and_never_rebuilds_method_b(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
