@@ -181,6 +181,11 @@ def build_pion_hgcer_refinement_checkpoint(
         if isinstance(method_b, Mapping)
         else []
     )
+    method_b_payload["adaptive_slice_diagnostic"] = (
+        (method_b or {}).get("adaptive_slice_diagnostic") or {}
+        if isinstance(method_b, Mapping)
+        else {}
+    )
     payload = {
         "schema_version": CHECKPOINT_SCHEMA_VERSION,
         "setting": {

@@ -19,10 +19,18 @@ from canonical_binning import find_canonical_bin
 
 
 METHOD_B_SCHEMA_VERSION = "pion_hgcer_method_b/v1"
+METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION = (
+    "pion_hgcer_method_b_adaptive_slices/v1"
+)
 METHOD_B_METHOD = "local_pion_background_closure"
 METHOD_B_PROTECTED_MM_LOW = 1.10
 METHOD_B_PROTECTED_MM_HIGH = 1.23
 METHOD_B_PROTECTED_REGION_NAME = "KLambdaSigma0"
+
+_ADAPTIVE_PARTITION_METHOD = (
+    "baseline_parent_neff_first_passing_protected_outward/v1"
+)
+_ADAPTIVE_PARTITION_SOURCE = "phase_a_mm_edges_and_baseline_support_only"
 
 DEFAULT_METHOD_B_CONFIG = {
     "mm_regions": [],
@@ -855,6 +863,576 @@ def _candidate(rows, consistency_status, shape_status):
     return value, value * log_sigma, "available_multi_region"
 
 
+def _adaptive_unavailable(
+    reason, *, t_edges=(), delta_edges=(), mm_edges=(), protected_regions=(),
+    exception=None,
+):
+    """Return an additive unavailable adaptive-slice diagnostic payload."""
+    result = {
+        "schema_version": METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION,
+        "status": "unavailable",
+        "available": False,
+        "reason": str(reason),
+        "partition_method": _ADAPTIVE_PARTITION_METHOD,
+        "partition_source": _ADAPTIVE_PARTITION_SOURCE,
+        "phase_a_mm_edges": list(mm_edges or ()),
+        "protected_regions": deepcopy(list(protected_regions or ())),
+        "t_edges": list(t_edges or ()),
+        "delta_edges": list(delta_edges or ()),
+        "t_partitions": [],
+        "parent_slice_references": [],
+        "cells": [],
+        "summary": {},
+        "fingerprint_inputs": {},
+        "fingerprint": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "candidate_replaces_legacy_method_b": False,
+    }
+    if exception is not None:
+        result["exception_type"] = type(exception).__name__
+        result["exception_message"] = str(exception)
+    return _json_ready(result)
+
+
+def _adaptive_partition_support_reason(baseline, support, target_neff):
+    """Return the baseline-only reason that a tentative adaptive slice cannot close."""
+    if baseline["effective_entries"] < target_neff:
+        return "parent_baseline_effective_entries_below_target"
+    if baseline["signed_yield"] <= support["denominator_absolute_epsilon"]:
+        return "parent_baseline_signed_yield_nonpositive"
+    significance = (
+        baseline["signed_yield"] / baseline["sigma"]
+        if baseline["sigma"] > 0.0 else None
+    )
+    if significance is None or significance < support["minimum_baseline_significance"]:
+        return "parent_baseline_cancellation_dominated"
+    return None
+
+
+def _adaptive_metric(events, mm_low, mm_high):
+    metric = _new_metric()
+    for mm_value, weight in events:
+        if mm_low <= mm_value < mm_high:
+            _add_metric(metric, weight)
+    return _finish_metric(metric)
+
+
+def _adaptive_atomic_intervals(mm_edges, side):
+    """Return one protected-complement side in protected-boundary-outward order."""
+    if side == "low":
+        side_low, side_high = mm_edges[0], METHOD_B_PROTECTED_MM_LOW
+    elif side == "high":
+        side_low, side_high = METHOD_B_PROTECTED_MM_HIGH, mm_edges[-1]
+    else:
+        raise MethodBUnavailable("adaptive_partition_side_invalid", "adaptive_partition")
+    atomic = []
+    for index, (edge_low, edge_high) in enumerate(zip(mm_edges, mm_edges[1:])):
+        low = max(edge_low, side_low)
+        high = min(edge_high, side_high)
+        if high > low:
+            atomic.append({
+                "mm_low": float(low),
+                "mm_high": float(high),
+                "phase_a_mm_bin_index": int(index),
+            })
+    if not atomic:
+        raise MethodBUnavailable("adaptive_partition_domain_empty", "adaptive_partition")
+    return list(reversed(atomic)) if side == "low" else atomic
+
+
+def _adaptive_slice_metadata(t_index, t_edges, side, slice_index, atoms, baseline, reason):
+    """Create detached t-parent provenance for one finalized adaptive slice."""
+    return {
+        "t_index": int(t_index),
+        "t_low": float(t_edges[t_index]),
+        "t_high": float(t_edges[t_index + 1]),
+        "side": side,
+        "slice_index": int(slice_index),
+        "slice_index_within_side": int(slice_index),
+        "slice_id": "t{}_{}_slice{}".format(t_index, side, slice_index),
+        "mm_low": min(atom["mm_low"] for atom in atoms),
+        "mm_high": max(atom["mm_high"] for atom in atoms),
+        "atomic_interval_indices": [
+            int(atom["phase_a_mm_bin_index"]) for atom in atoms
+        ],
+        "partition_support_status": "available" if reason is None else "unavailable",
+        "partition_support_reason": reason,
+        "parent_baseline_record_count": baseline["record_count"],
+        "parent_baseline_signed_yield": baseline["signed_yield"],
+        "parent_baseline_abs_support": baseline["absolute_weight_support"],
+        "parent_baseline_sumw2": baseline["sumw2"],
+        "parent_baseline_sigma": baseline["sigma"],
+        "parent_baseline_neff": baseline["effective_entries"],
+        "parent_baseline_significance": (
+            baseline["signed_yield"] / baseline["sigma"]
+            if baseline["sigma"] > 0.0 else None
+        ),
+    }
+
+
+def _adaptive_partition_side(t_index, t_edges, baseline_events, mm_edges, side, support, target_neff):
+    """Partition one sensitive side, retaining even unsupported outer coverage."""
+    atoms = _adaptive_atomic_intervals(mm_edges, side)
+    closed = []
+    tentative = []
+    for atom in atoms:
+        tentative.append(atom)
+        baseline = _adaptive_metric(
+            baseline_events,
+            min(entry["mm_low"] for entry in tentative),
+            max(entry["mm_high"] for entry in tentative),
+        )
+        reason = _adaptive_partition_support_reason(baseline, support, target_neff)
+        if reason is None:
+            closed.append((list(tentative), baseline, None))
+            tentative = []
+    if tentative:
+        merged = list(tentative)
+        while closed:
+            previous_atoms, _, _ = closed.pop()
+            merged = list(previous_atoms) + merged
+            baseline = _adaptive_metric(
+                baseline_events,
+                min(entry["mm_low"] for entry in merged),
+                max(entry["mm_high"] for entry in merged),
+            )
+            reason = _adaptive_partition_support_reason(baseline, support, target_neff)
+            if reason is None:
+                closed.append((merged, baseline, None))
+                break
+        else:
+            baseline = _adaptive_metric(
+                baseline_events,
+                min(entry["mm_low"] for entry in merged),
+                max(entry["mm_high"] for entry in merged),
+            )
+            reason = _adaptive_partition_support_reason(baseline, support, target_neff)
+            closed.append((merged, baseline, reason))
+    return [
+        _adaptive_slice_metadata(
+            t_index, t_edges, side, index, atoms_for_slice, baseline, reason
+        )
+        for index, (atoms_for_slice, baseline, reason) in enumerate(closed)
+    ]
+
+
+def _adaptive_validate_partition(t_partition, mm_edges):
+    """Require exact adaptive tiling of the frozen Phase-A MM domain."""
+    expected = (
+        (mm_edges[0], METHOD_B_PROTECTED_MM_LOW),
+        (METHOD_B_PROTECTED_MM_LOW, METHOD_B_PROTECTED_MM_HIGH),
+        (METHOD_B_PROTECTED_MM_HIGH, mm_edges[-1]),
+    )
+    low = sorted(t_partition["low_slices"], key=lambda entry: entry["mm_low"])
+    high = sorted(t_partition["high_slices"], key=lambda entry: entry["mm_low"])
+    for slices, (side_low, side_high) in ((low, expected[0]), (high, expected[2])):
+        if not slices or slices[0]["mm_low"] != side_low or slices[-1]["mm_high"] != side_high:
+            raise MethodBUnavailable("adaptive_partition_tiling_invalid", "adaptive_partition")
+        if any(
+            left["mm_high"] != right["mm_low"]
+            for left, right in zip(slices, slices[1:])
+        ):
+            raise MethodBUnavailable("adaptive_partition_tiling_invalid", "adaptive_partition")
+    if expected[0][1] != expected[1][0] or expected[1][1] != expected[2][0]:
+        raise MethodBUnavailable("adaptive_partition_tiling_invalid", "adaptive_partition")
+
+
+def _adaptive_t_partitions(cells, t_edges, mm_edges, support, parent_config):
+    """Build one baseline-only adaptive partition for each canonical t parent."""
+    target_neff = (
+        support["minimum_baseline_neff"]
+        * parent_config["minimum_usable_delta_cells"]
+    )
+    result = []
+    for t_index in range(len(t_edges) - 1):
+        baseline_events = [
+            event
+            for cell in cells.values() if cell["t_index"] == t_index
+            for event in cell["pion_events"]
+        ]
+        low_slices = _adaptive_partition_side(
+            t_index, t_edges, baseline_events, mm_edges, "low", support, target_neff
+        )
+        high_slices = _adaptive_partition_side(
+            t_index, t_edges, baseline_events, mm_edges, "high", support, target_neff
+        )
+        partition = {
+            "t_index": int(t_index),
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "low_slices": low_slices,
+            "high_slices": high_slices,
+            "slices": low_slices + high_slices,
+            "derived_parent_baseline_neff_target": target_neff,
+        }
+        _adaptive_validate_partition(partition, mm_edges)
+        result.append(partition)
+    return result, target_neff
+
+
+def _adaptive_slice_row(slice_definition, host_events, baseline_events, support):
+    """Measure one already-frozen adaptive slice in one canonical delta cell."""
+    metrics = {"host": _new_metric(), "baseline": _new_metric()}
+    for mm_value, weight in host_events:
+        if slice_definition["mm_low"] <= mm_value < slice_definition["mm_high"]:
+            _add_metric(metrics["host"], weight)
+    for mm_value, weight in baseline_events:
+        if slice_definition["mm_low"] <= mm_value < slice_definition["mm_high"]:
+            _add_metric(metrics["baseline"], weight)
+    regional = _region_row({"available": True, "reason": None}, metrics, support)
+    regional.pop("available", None)
+    regional.pop("reason", None)
+    return {
+        **deepcopy(slice_definition),
+        **regional,
+    }
+
+
+def _adaptive_parent_references(cells, t_edges, support, parent_config):
+    """Apply the legacy same-t inverse-variance parent equations per slice ID."""
+    references = []
+    lookup = {}
+    for t_index in range(len(t_edges) - 1):
+        slice_ids = [
+            row["slice_id"] for row in cells[(t_index, 0)]["slices"]
+        ]
+        for slice_id in slice_ids:
+            rows = [
+                next(
+                    row for row in cell["slices"] if row["slice_id"] == slice_id
+                )
+                for cell in cells.values() if cell["t_index"] == t_index
+            ]
+            usable = [
+                row for row in rows
+                if row["support_status"] == "usable"
+                and row["raw_ratio_sigma"] is not None
+                and row["raw_ratio_sigma"] > 0.0
+            ]
+            host = _finish_metric(_aggregate_rows(usable, "host"))
+            baseline = _finish_metric(_aggregate_rows(usable, "baseline"))
+            definition = rows[0]
+            reference = {
+                "t_index": int(t_index),
+                "t_low": float(t_edges[t_index]),
+                "t_high": float(t_edges[t_index + 1]),
+                "slice_id": slice_id,
+                "side": definition["side"],
+                "slice_index": definition["slice_index"],
+                "mm_low": definition["mm_low"],
+                "mm_high": definition["mm_high"],
+                "usable_delta_cell_count": len(usable),
+                "contributing_delta_indices": [
+                    int(cell["delta_index"])
+                    for cell in cells.values() if cell["t_index"] == t_index
+                    for row in cell["slices"]
+                    if row["slice_id"] == slice_id
+                    and row["support_status"] == "usable"
+                    and row["raw_ratio_sigma"] is not None
+                    and row["raw_ratio_sigma"] > 0.0
+                ],
+                "combined_host_abs_support": host["absolute_weight_support"],
+                "combined_host_sumw2": host["sumw2"],
+                "combined_host_neff": host["effective_entries"],
+                "combined_baseline_abs_support": baseline["absolute_weight_support"],
+                "combined_baseline_sumw2": baseline["sumw2"],
+                "combined_baseline_neff": baseline["effective_entries"],
+                "parent_reference_ratio": None,
+                "parent_reference_uncertainty": None,
+                "parent_reference_status": "unavailable",
+                "parent_reference_reason": None,
+                "weighting": parent_config["weighting"],
+            }
+            if len(usable) < parent_config["minimum_usable_delta_cells"]:
+                reference["parent_reference_reason"] = "insufficient_usable_delta_cells"
+            elif host["effective_entries"] < support["minimum_host_neff"]:
+                reference["parent_reference_reason"] = "combined_host_support_below_minimum"
+            elif baseline["effective_entries"] < support["minimum_baseline_neff"]:
+                reference["parent_reference_reason"] = "combined_baseline_support_below_minimum"
+            else:
+                inverse_variances = [1.0 / (row["raw_ratio_sigma"] ** 2) for row in usable]
+                total_inverse_variance = sum(inverse_variances)
+                ratio = sum(
+                    row["raw_ratio"] * weight
+                    for row, weight in zip(usable, inverse_variances)
+                ) / total_inverse_variance
+                if math.isfinite(ratio) and ratio > 0.0:
+                    reference.update({
+                        "parent_reference_ratio": ratio,
+                        "parent_reference_uncertainty": math.sqrt(
+                            1.0 / total_inverse_variance
+                        ),
+                        "parent_reference_status": "available",
+                        "parent_reference_reason": None,
+                    })
+                else:
+                    reference["parent_reference_reason"] = "parent_reference_nonpositive"
+            references.append(reference)
+            lookup[(t_index, slice_id)] = reference
+    return references, lookup
+
+
+def _apply_adaptive_parent_references(cells, reference_lookup):
+    for cell in cells.values():
+        for row in cell["slices"]:
+            reference = reference_lookup[(cell["t_index"], row["slice_id"])]
+            row["parent_reference_ratio"] = reference["parent_reference_ratio"]
+            row["parent_reference_sigma"] = reference["parent_reference_uncertainty"]
+            if row["support_status"] != "usable":
+                row["parent_relative_reason"] = row["support_reason"]
+                continue
+            if reference["parent_reference_status"] != "available":
+                row["parent_relative_reason"] = reference["parent_reference_reason"]
+                continue
+            ratio = row["raw_ratio"] / reference["parent_reference_ratio"]
+            sigma = math.sqrt(
+                (row["raw_ratio_sigma"] / reference["parent_reference_ratio"]) ** 2
+                + (
+                    row["raw_ratio"] * reference["parent_reference_uncertainty"]
+                    / (reference["parent_reference_ratio"] ** 2)
+                ) ** 2
+            )
+            if not math.isfinite(ratio) or not math.isfinite(sigma) or ratio <= 0.0:
+                row["parent_relative_reason"] = "nonpositive_parent_relative_ratio"
+                continue
+            row.update({
+                "parent_relative_ratio": ratio,
+                "parent_relative_sigma": sigma,
+                "parent_relative_status": "available",
+                "parent_relative_reason": None,
+            })
+
+
+def _adaptive_candidate_and_consistency(rows):
+    """Combine available adaptive slices without applying a consistency veto."""
+    usable = []
+    for row in rows:
+        value = row["parent_relative_ratio"]
+        sigma = row["parent_relative_sigma"]
+        if (
+            row["parent_relative_status"] != "available"
+            or value is None or sigma is None or value <= 0.0 or sigma <= 0.0
+        ):
+            continue
+        sigma_log = sigma / value
+        if math.isfinite(value) and math.isfinite(sigma_log) and sigma_log > 0.0:
+            usable.append((row, math.log(value), sigma_log))
+    result = {
+        "N_available_slices": len(usable),
+        "N_available_low_slices": sum(row["side"] == "low" for row, _, _ in usable),
+        "N_available_high_slices": sum(row["side"] == "high" for row, _, _ in usable),
+        "adaptive_candidate": None,
+        "adaptive_candidate_uncertainty": None,
+        "adaptive_candidate_status": "unavailable",
+        "slice_consistency_status": "not_evaluable",
+        "slice_consistency_chi2": None,
+        "slice_consistency_ndf": None,
+        "slice_consistency_chi2_ndf": None,
+        "slice_consistency_max_abs_log_pull": None,
+        "slice_consistency_log_pulls": [],
+    }
+    if len(usable) == 1:
+        row, _, _ = usable[0]
+        result.update({
+            "adaptive_candidate": row["parent_relative_ratio"],
+            "adaptive_candidate_uncertainty": row["parent_relative_sigma"],
+            "adaptive_candidate_status": "available_single_slice",
+        })
+        return result
+    if len(usable) < 2:
+        return result
+    weights = [1.0 / (sigma_log * sigma_log) for _, _, sigma_log in usable]
+    total_weight = sum(weights)
+    mean_log = sum(
+        log_value * weight for (_, log_value, _), weight in zip(usable, weights)
+    ) / total_weight
+    candidate = math.exp(mean_log)
+    candidate_sigma = candidate * math.sqrt(1.0 / total_weight)
+    pulls = [
+        {
+            "slice_id": row["slice_id"],
+            "log_pull": (log_value - mean_log) / sigma_log,
+        }
+        for row, log_value, sigma_log in usable
+    ]
+    chi2 = sum(entry["log_pull"] ** 2 for entry in pulls)
+    ndf = len(usable) - 1
+    result.update({
+        "adaptive_candidate": candidate,
+        "adaptive_candidate_uncertainty": candidate_sigma,
+        "adaptive_candidate_status": "available_multi_slice",
+        "slice_consistency_status": "evaluated",
+        "slice_consistency_chi2": chi2,
+        "slice_consistency_ndf": ndf,
+        "slice_consistency_chi2_ndf": chi2 / ndf,
+        "slice_consistency_max_abs_log_pull": max(
+            abs(entry["log_pull"]) for entry in pulls
+        ),
+        "slice_consistency_log_pulls": pulls,
+    })
+    return result
+
+
+def _build_adaptive_slice_diagnostic(
+    phase, resolved, t_edges, delta_edges, mm_edges, source_cells,
+):
+    """Build the C.Fix.2 parallel adaptive Method-B diagnostic only."""
+    protected = deepcopy(resolved["protected_regions"])
+    try:
+        partitions, target_neff = _adaptive_t_partitions(
+            source_cells, t_edges, mm_edges, resolved["support"],
+            resolved["parent_reference"],
+        )
+        cells = {}
+        partitions_by_t = {entry["t_index"]: entry for entry in partitions}
+        for key in sorted(source_cells):
+            source = source_cells[key]
+            partition = partitions_by_t[source["t_index"]]
+            rows = [
+                _adaptive_slice_row(
+                    definition, source["host_events"], source["pion_events"],
+                    resolved["support"],
+                )
+                for definition in partition["slices"]
+            ]
+            cells[key] = {
+                "t_index": source["t_index"],
+                "t_low": source["t_low"],
+                "t_high": source["t_high"],
+                "delta_index": source["delta_index"],
+                "delta_low": source["delta_low"],
+                "delta_high": source["delta_high"],
+                "slices": rows,
+            }
+        references, lookup = _adaptive_parent_references(
+            cells, t_edges, resolved["support"], resolved["parent_reference"]
+        )
+        _apply_adaptive_parent_references(cells, lookup)
+
+        local_support_counts = {}
+        relative_status_counts = {}
+        candidate_status_counts = {}
+        available_distribution = {}
+        evaluable_cell_count = 0
+        serialized_cells = []
+        for key in sorted(cells):
+            cell = cells[key]
+            candidate = _adaptive_candidate_and_consistency(cell["slices"])
+            cell.update(candidate)
+            serialized_cells.append(cell)
+            candidate_status = candidate["adaptive_candidate_status"]
+            candidate_status_counts[candidate_status] = (
+                candidate_status_counts.get(candidate_status, 0) + 1
+            )
+            available_key = str(candidate["N_available_slices"])
+            available_distribution[available_key] = (
+                available_distribution.get(available_key, 0) + 1
+            )
+            if candidate["slice_consistency_status"] == "evaluated":
+                evaluable_cell_count += 1
+            for row in cell["slices"]:
+                support_status = row["support_status"]
+                relative_status = row["parent_relative_status"]
+                local_support_counts[support_status] = (
+                    local_support_counts.get(support_status, 0) + 1
+                )
+                relative_status_counts[relative_status] = (
+                    relative_status_counts.get(relative_status, 0) + 1
+                )
+
+        partition_support_counts = {}
+        low_counts = {}
+        high_counts = {}
+        total_counts = {}
+        for partition in partitions:
+            t_key = str(partition["t_index"])
+            low_counts[t_key] = len(partition["low_slices"])
+            high_counts[t_key] = len(partition["high_slices"])
+            total_counts[t_key] = len(partition["slices"])
+            for definition in partition["slices"]:
+                status = definition["partition_support_status"]
+                partition_support_counts[status] = (
+                    partition_support_counts.get(status, 0) + 1
+                )
+
+        candidate_definition = {
+            "combination": "inverse_variance_log_space",
+            "single_slice_policy": "retain_available_value",
+            "slice_consistency": "descriptive_no_veto",
+            "legacy_shape_veto_applied": False,
+        }
+        fingerprint_inputs = {
+            "schema_version": METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION,
+            "phase_a_contract_fingerprint": phase.get("contract_fingerprint"),
+            "coordinate_fingerprint": phase.get("coordinate_fingerprint"),
+            "t_edges": t_edges,
+            "delta_edges": delta_edges,
+            "phase_a_mm_edges": mm_edges,
+            "protected_regions": protected,
+            "partition_method": _ADAPTIVE_PARTITION_METHOD,
+            "partition_source": _ADAPTIVE_PARTITION_SOURCE,
+            "derived_parent_baseline_neff_target": target_neff,
+            "support": resolved["support"],
+            "parent_reference": resolved["parent_reference"],
+            "t_partitions": partitions,
+            "cells": serialized_cells,
+            "parent_slice_references": references,
+            "candidate_definition": candidate_definition,
+        }
+        result = {
+            "schema_version": METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION,
+            "status": "available",
+            "available": True,
+            "reason": None,
+            "partition_method": _ADAPTIVE_PARTITION_METHOD,
+            "partition_source": _ADAPTIVE_PARTITION_SOURCE,
+            "phase_a_contract_fingerprint": phase.get("contract_fingerprint"),
+            "coordinate_fingerprint": phase.get("coordinate_fingerprint"),
+            "t_edges": list(t_edges),
+            "delta_edges": list(delta_edges),
+            "phase_a_mm_edges": list(mm_edges),
+            "protected_regions": protected,
+            "derived_parent_baseline_neff_target": target_neff,
+            "t_partitions": partitions,
+            "parent_slice_references": references,
+            "cells": serialized_cells,
+            "summary": {
+                "t_partition_slice_counts": total_counts,
+                "low_slice_counts_by_t": low_counts,
+                "high_slice_counts_by_t": high_counts,
+                "partition_support_status_counts": partition_support_counts,
+                "local_slice_support_status_counts": local_support_counts,
+                "parent_relative_status_counts": relative_status_counts,
+                "adaptive_candidate_status_counts": candidate_status_counts,
+                "available_slice_count_distribution": available_distribution,
+                "slice_consistency_evaluable_cell_count": evaluable_cell_count,
+            },
+            "candidate_definition": candidate_definition,
+            "fingerprint_inputs": fingerprint_inputs,
+            "fingerprint": _payload_hash(fingerprint_inputs),
+            "non_authoritative": True,
+            "production_objects_mutated": False,
+            "refinement_applied": False,
+            "candidate_replaces_legacy_method_b": False,
+        }
+        result = _json_ready(result)
+        json.dumps(result, allow_nan=False)
+        return result
+    except MethodBUnavailable as exc:
+        return _adaptive_unavailable(
+            exc.reason, t_edges=t_edges, delta_edges=delta_edges,
+            mm_edges=mm_edges, protected_regions=protected, exception=exc,
+        )
+    except Exception as exc:
+        return _adaptive_unavailable(
+            "unexpected_adaptive_slice_diagnostic_failure", t_edges=t_edges,
+            delta_edges=delta_edges, mm_edges=mm_edges,
+            protected_regions=protected, exception=exc,
+        )
+
+
 def _validate_phase_a(phase):
     if not phase.get("available") or phase.get("status") != "available":
         raise MethodBUnavailable("phase_a_contract_unavailable", "phase_a_provenance")
@@ -936,6 +1514,13 @@ def _unavailable(
     if exception is not None:
         result["exception_type"] = type(exception).__name__
         result["exception_message"] = str(exception)
+    result["adaptive_slice_diagnostic"] = _adaptive_unavailable(
+        "legacy_method_b_unavailable",
+        t_edges=available_t_edges,
+        delta_edges=available_delta_edges,
+        mm_edges=result["mm_binning"],
+        protected_regions=result["protected_regions"],
+    )
     result = _json_ready(result)
     json.dumps(result, allow_nan=False)
     return result
@@ -1128,6 +1713,9 @@ def build_pion_hgcer_method_b(phase_a_contract, *, config):
                 ),
             },
         }
+        result["adaptive_slice_diagnostic"] = _build_adaptive_slice_diagnostic(
+            phase, resolved, t_edges, delta_edges, mm_edges, cells
+        )
         result = _json_ready(result)
         json.dumps(result, allow_nan=False)
         return result
@@ -1199,6 +1787,7 @@ def summarize_pion_hgcer_method_b(result):
 
 __all__ = [
     "METHOD_B_SCHEMA_VERSION",
+    "METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION",
     "METHOD_B_PROTECTED_MM_LOW",
     "METHOD_B_PROTECTED_MM_HIGH",
     "METHOD_B_PROTECTED_REGION_NAME",

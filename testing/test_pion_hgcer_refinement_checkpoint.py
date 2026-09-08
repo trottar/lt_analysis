@@ -63,6 +63,20 @@ def _method(name, status="available"):
             "mm_high": 1.23,
             "region_role": "protected_signal",
         }]
+        payload["adaptive_slice_diagnostic"] = {
+            "schema_version": "pion_hgcer_method_b_adaptive_slices/v1",
+            "status": "available",
+            "available": True,
+            "reason": None,
+            "t_partitions": [{"t_index": 0, "slices": []}],
+            "cells": [{"t_index": 0, "delta_index": 0, "slices": []}],
+            "parent_slice_references": [],
+            "fingerprint": "adaptive-{}-fingerprint".format(name),
+            "non_authoritative": True,
+            "production_objects_mutated": False,
+            "refinement_applied": False,
+            "candidate_replaces_legacy_method_b": False,
+        }
     return payload
 
 
@@ -102,6 +116,10 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         self.assertEqual(payload["method_b"]["parent_region_references"], _method("b")["parent_region_references"])
         self.assertEqual(payload["method_b"]["mm_regions"], _method("b")["mm_regions"])
         self.assertEqual(payload["method_b"]["protected_regions"], _method("b")["protected_regions"])
+        self.assertEqual(
+            payload["method_b"]["adaptive_slice_diagnostic"],
+            _method("b")["adaptive_slice_diagnostic"],
+        )
         self.assertEqual(payload["host_state_summary"]["phase_a_host_state"], "proton_cleaned")
         self.assertTrue(payload["non_authoritative"])
         self.assertFalse(payload["production_objects_mutated"])
@@ -122,6 +140,10 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
             self.assertEqual(decoded, payload)
             self.assertEqual(decoded["method_b"]["mm_regions"], _method("b")["mm_regions"])
             self.assertEqual(decoded["method_b"]["protected_regions"], _method("b")["protected_regions"])
+            self.assertEqual(
+                decoded["method_b"]["adaptive_slice_diagnostic"],
+                _method("b")["adaptive_slice_diagnostic"],
+            )
 
     def test_unavailable_method_is_retained_not_dropped(self):
         for method_a_status, method_b_status in (("unavailable", "available"), ("available", "unavailable")):
@@ -144,18 +166,24 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         )
         expected_mm_regions = deepcopy(method_b["mm_regions"])
         expected_protected_regions = deepcopy(method_b["protected_regions"])
+        expected_adaptive = deepcopy(method_b["adaptive_slice_diagnostic"])
         method_b["mm_regions"][0]["region_name"] = "live_mutation"
         method_b["protected_regions"][0]["region_name"] = "live_mutation"
+        method_b["adaptive_slice_diagnostic"]["fingerprint"] = "live_mutation"
         self.assertEqual(payload["method_b"]["mm_regions"], expected_mm_regions)
         self.assertEqual(payload["method_b"]["protected_regions"], expected_protected_regions)
+        self.assertEqual(payload["method_b"]["adaptive_slice_diagnostic"], expected_adaptive)
         payload["method_b"]["mm_regions"][0]["region_name"] = "checkpoint_mutation"
         payload["method_b"]["protected_regions"][0]["region_name"] = "checkpoint_mutation"
+        payload["method_b"]["adaptive_slice_diagnostic"]["fingerprint"] = "checkpoint_mutation"
         self.assertEqual(method_b["mm_regions"][0]["region_name"], "live_mutation")
         self.assertEqual(method_b["protected_regions"][0]["region_name"], "live_mutation")
+        self.assertEqual(method_b["adaptive_slice_diagnostic"]["fingerprint"], "live_mutation")
 
         absent = _method("b")
         absent.pop("mm_regions")
         absent.pop("protected_regions")
+        absent.pop("adaptive_slice_diagnostic")
         unavailable = checkpoint.build_pion_hgcer_refinement_checkpoint(
             setting={
                 "kinematic_token": "Q4p4W2p74", "epsilon_setting": "low",
@@ -167,6 +195,7 @@ class PionHGCerRefinementCheckpointTests(unittest.TestCase):
         )
         self.assertEqual(unavailable["method_b"]["mm_regions"], [])
         self.assertEqual(unavailable["method_b"]["protected_regions"], [])
+        self.assertEqual(unavailable["method_b"]["adaptive_slice_diagnostic"], {})
 
     def test_checkpoint_rejects_opaque_objects_nonfinite_values_and_corrections(self):
         with self.assertRaisesRegex(ValueError, "not_json_safe"):

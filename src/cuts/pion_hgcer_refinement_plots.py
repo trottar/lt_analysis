@@ -61,6 +61,8 @@ def build_pdf_route_manifest(main_pdf):
             "hgcer.part2",
             "hgcer.cfix1.method_b.regional_values",
             "hgcer.cfix1.method_b.status_audit",
+            "hgcer.cfix2.method_b.adaptive_slices",
+            "hgcer.cfix2.method_b.adaptive_status",
         ),
         "phase_d_ab": (
             "hgcer.phase_d.ab.overlay",
@@ -830,6 +832,9 @@ def _method_b_presentation_snapshot(method_b):
         )),
         "mm_regions": region_definitions,
         "protected_regions": protected_region_definitions,
+        "adaptive_slice_diagnostic": deepcopy(dict(_mapping(
+            payload.get("adaptive_slice_diagnostic")
+        ))),
     }
 
 
@@ -895,6 +900,9 @@ def method_b_display_payload(method_b=None, checkpoint=None):
             deepcopy(dict(_mapping(region)))
             for region in (source.get("protected_regions") or ())
         ],
+        "adaptive_slice_diagnostic": deepcopy(dict(_mapping(
+            source.get("adaptive_slice_diagnostic")
+        ))),
         "non_authoritative": True,
         "frozen_pion_baseline": True,
         "no_refinement": True,
@@ -2350,6 +2358,494 @@ def render_pion_hgcer_method_b_cfix1_pages(pdf_name, method_b_display, *, page_m
     return manifest
 
 
+def _method_b_cfix2_unavailable(reason):
+    """Return a detached unavailable C.Fix.2 presentation payload."""
+    return {
+        "available": False,
+        "reason": str(reason),
+        "t_edges": (),
+        "delta_edges": (),
+        "phase_a_mm_edges": (),
+        "protected_regions": (),
+        "per_t": (),
+        "non_authoritative": True,
+        "no_refinement": True,
+    }
+
+
+def _method_b_cfix2_scalar(value):
+    """Return one finite copied scalar or None without reconstructing it."""
+    return _finite(value)
+
+
+def _method_b_cfix2_slice_row(raw, *, measurement=True):
+    """Detach the stored adaptive slice fields needed by the technical pages."""
+    row = _mapping(raw)
+    required = [
+        "slice_id", "side", "slice_index", "mm_low", "mm_high",
+        "partition_support_status",
+    ]
+    if measurement:
+        required.extend(("support_status", "parent_relative_status"))
+    if any(row.get(name) is None for name in required):
+        return None
+    low = _method_b_cfix2_scalar(row.get("mm_low"))
+    high = _method_b_cfix2_scalar(row.get("mm_high"))
+    if low is None or high is None or high <= low or row.get("side") not in {"low", "high"}:
+        return None
+    copied = {
+        name: deepcopy(row.get(name))
+        for name in (
+            "slice_id", "side", "slice_index", "slice_index_within_side",
+            "atomic_interval_indices", "partition_support_status",
+            "partition_support_reason", "parent_baseline_record_count",
+            "parent_baseline_signed_yield", "parent_baseline_abs_support",
+            "parent_baseline_sumw2", "parent_baseline_sigma",
+            "parent_baseline_neff", "parent_baseline_significance",
+            "support_status", "support_reason", "host_record_count", "host_yield",
+            "host_abs_support", "host_sumw2", "host_neff", "host_sigma",
+            "baseline_record_count", "baseline_pion_yield",
+            "baseline_pion_abs_support", "baseline_pion_sumw2",
+            "baseline_pion_neff", "baseline_pion_sigma",
+            "baseline_pion_significance", "raw_ratio", "raw_ratio_sigma",
+            "parent_reference_ratio", "parent_reference_sigma",
+            "parent_relative_ratio", "parent_relative_sigma",
+            "parent_relative_status", "parent_relative_reason",
+        )
+    }
+    copied["mm_low"] = low
+    copied["mm_high"] = high
+    return copied
+
+
+def method_b_cfix2_display_payload(method_b_display):
+    """Detach and validate frozen C.Fix.2 adaptive Method-B evidence for display."""
+    display = _mapping(method_b_display)
+    adaptive = _mapping(display.get("adaptive_slice_diagnostic"))
+    if not display or not bool(display.get("available", False)):
+        return _method_b_cfix2_unavailable("method_b_display_unavailable")
+    if (
+        adaptive.get("schema_version") != "pion_hgcer_method_b_adaptive_slices/v1"
+        or not bool(adaptive.get("available", False))
+        or adaptive.get("status") != "available"
+    ):
+        return _method_b_cfix2_unavailable("adaptive_slice_diagnostic_unavailable")
+    if not (
+        adaptive.get("non_authoritative") is True
+        and adaptive.get("production_objects_mutated") is False
+        and adaptive.get("refinement_applied") is False
+        and adaptive.get("candidate_replaces_legacy_method_b") is False
+    ):
+        return _method_b_cfix2_unavailable("adaptive_slice_authority_invalid")
+    t_edges = _method_b_cfix1_edges(adaptive, "t_edges")
+    delta_edges = _method_b_cfix1_edges(adaptive, "delta_edges")
+    mm_edges = _method_b_cfix1_edges(adaptive, "phase_a_mm_edges")
+    if not t_edges or not delta_edges or not mm_edges:
+        return _method_b_cfix2_unavailable("adaptive_slice_geometry_invalid")
+    if tuple(t_edges) != tuple(_method_b_cfix1_edges(display, "t_edges")) or tuple(
+        delta_edges
+    ) != tuple(_method_b_cfix1_edges(display, "delta_edges")):
+        return _method_b_cfix2_unavailable("adaptive_slice_display_geometry_mismatch")
+
+    protected = [deepcopy(dict(_mapping(entry))) for entry in adaptive.get("protected_regions") or ()]
+    if len(protected) != 1:
+        return _method_b_cfix2_unavailable("adaptive_slice_protected_region_invalid")
+    protected_low = _method_b_cfix2_scalar(protected[0].get("mm_low"))
+    protected_high = _method_b_cfix2_scalar(protected[0].get("mm_high"))
+    if protected_low is None or protected_high is None or protected_high <= protected_low:
+        return _method_b_cfix2_unavailable("adaptive_slice_protected_region_invalid")
+
+    partitions_by_t = {}
+    for raw_partition in adaptive.get("t_partitions") or ():
+        partition = _mapping(raw_partition)
+        t_index = _method_b_cfix1_index(partition.get("t_index"), len(t_edges) - 1)
+        if t_index is None or t_index in partitions_by_t:
+            return _method_b_cfix2_unavailable("adaptive_slice_partition_lattice_invalid")
+        if (
+            _method_b_cfix2_scalar(partition.get("t_low")) != t_edges[t_index]
+            or _method_b_cfix2_scalar(partition.get("t_high")) != t_edges[t_index + 1]
+        ):
+            return _method_b_cfix2_unavailable("adaptive_slice_partition_geometry_mismatch")
+        rows = [
+            _method_b_cfix2_slice_row(row, measurement=False)
+            for row in partition.get("slices") or ()
+        ]
+        if not rows or any(row is None for row in rows):
+            return _method_b_cfix2_unavailable("adaptive_slice_partition_rows_invalid")
+        if len({row["slice_id"] for row in rows}) != len(rows):
+            return _method_b_cfix2_unavailable("adaptive_slice_partition_rows_invalid")
+        low_rows = sorted(
+            (row for row in rows if row["side"] == "low"), key=lambda row: row["mm_low"]
+        )
+        high_rows = sorted(
+            (row for row in rows if row["side"] == "high"), key=lambda row: row["mm_low"]
+        )
+        if (
+            not low_rows or not high_rows
+            or low_rows[0]["mm_low"] != mm_edges[0]
+            or low_rows[-1]["mm_high"] != protected_low
+            or high_rows[0]["mm_low"] != protected_high
+            or high_rows[-1]["mm_high"] != mm_edges[-1]
+            or any(left["mm_high"] != right["mm_low"] for left, right in zip(low_rows, low_rows[1:]))
+            or any(left["mm_high"] != right["mm_low"] for left, right in zip(high_rows, high_rows[1:]))
+        ):
+            return _method_b_cfix2_unavailable("adaptive_slice_partition_tiling_invalid")
+        partitions_by_t[t_index] = {
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "slices": rows,
+        }
+    if set(partitions_by_t) != set(range(len(t_edges) - 1)):
+        return _method_b_cfix2_unavailable("adaptive_slice_partition_lattice_invalid")
+
+    expected_keys = {
+        (t_index, delta_index)
+        for t_index in range(len(t_edges) - 1)
+        for delta_index in range(len(delta_edges) - 1)
+    }
+    cells_by_key = {}
+    for raw_cell in adaptive.get("cells") or ():
+        cell = _mapping(raw_cell)
+        t_index = _method_b_cfix1_index(cell.get("t_index"), len(t_edges) - 1)
+        delta_index = _method_b_cfix1_index(cell.get("delta_index"), len(delta_edges) - 1)
+        if t_index is None or delta_index is None or (t_index, delta_index) in cells_by_key:
+            return _method_b_cfix2_unavailable("adaptive_slice_cell_lattice_invalid")
+        if (
+            _method_b_cfix2_scalar(cell.get("t_low")) != t_edges[t_index]
+            or _method_b_cfix2_scalar(cell.get("t_high")) != t_edges[t_index + 1]
+            or _method_b_cfix2_scalar(cell.get("delta_low")) != delta_edges[delta_index]
+            or _method_b_cfix2_scalar(cell.get("delta_high")) != delta_edges[delta_index + 1]
+        ):
+            return _method_b_cfix2_unavailable("adaptive_slice_cell_geometry_mismatch")
+        rows = [_method_b_cfix2_slice_row(row) for row in cell.get("slices") or ()]
+        expected_slice_ids = [row["slice_id"] for row in partitions_by_t[t_index]["slices"]]
+        if (
+            any(row is None for row in rows)
+            or [row["slice_id"] for row in rows] != expected_slice_ids
+        ):
+            return _method_b_cfix2_unavailable("adaptive_slice_cell_rows_invalid")
+        candidate = {
+            name: deepcopy(cell.get(name))
+            for name in (
+                "N_available_slices", "N_available_low_slices",
+                "N_available_high_slices", "adaptive_candidate",
+                "adaptive_candidate_uncertainty", "adaptive_candidate_status",
+                "slice_consistency_status", "slice_consistency_chi2",
+                "slice_consistency_ndf", "slice_consistency_chi2_ndf",
+                "slice_consistency_max_abs_log_pull", "slice_consistency_log_pulls",
+            )
+        }
+        cells_by_key[(t_index, delta_index)] = {
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "delta_index": delta_index,
+            "delta_low": delta_edges[delta_index],
+            "delta_high": delta_edges[delta_index + 1],
+            "slices": rows,
+            **candidate,
+        }
+    if set(cells_by_key) != expected_keys:
+        return _method_b_cfix2_unavailable("adaptive_slice_cell_lattice_invalid")
+
+    groups = []
+    for t_index in range(len(t_edges) - 1):
+        partition = partitions_by_t[t_index]
+        series = {row["slice_id"]: [] for row in partition["slices"]}
+        candidate_points = []
+        group_cells = []
+        for delta_index in range(len(delta_edges) - 1):
+            cell = cells_by_key[(t_index, delta_index)]
+            center = 0.5 * (cell["delta_low"] + cell["delta_high"])
+            for row in cell["slices"]:
+                value = _method_b_cfix2_scalar(row.get("parent_relative_ratio"))
+                sigma = _method_b_cfix2_scalar(row.get("parent_relative_sigma"))
+                if (
+                    row.get("parent_relative_status") == "available"
+                    and value is not None and sigma is not None and sigma >= 0.0
+                ):
+                    series[row["slice_id"]].append({
+                        "delta_index": delta_index,
+                        "delta_center": center,
+                        "Qtilde": value,
+                        "Qtilde_uncertainty": sigma,
+                    })
+            candidate = _method_b_cfix2_scalar(cell.get("adaptive_candidate"))
+            candidate_sigma = _method_b_cfix2_scalar(cell.get("adaptive_candidate_uncertainty"))
+            if (
+                cell.get("adaptive_candidate_status") in {
+                    "available_single_slice", "available_multi_slice"
+                }
+                and candidate is not None and candidate_sigma is not None
+                and candidate_sigma >= 0.0
+            ):
+                candidate_points.append({
+                    "delta_index": delta_index,
+                    "delta_center": center,
+                    "adaptive_candidate": candidate,
+                    "adaptive_candidate_uncertainty": candidate_sigma,
+                    "adaptive_candidate_status": cell.get("adaptive_candidate_status"),
+                })
+            group_cells.append(cell)
+        groups.append({
+            **partition,
+            "cells": group_cells,
+            "slice_series": series,
+            "candidate_points": candidate_points,
+        })
+    return {
+        "available": True,
+        "reason": None,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "phase_a_mm_edges": mm_edges,
+        "protected_regions": tuple(protected),
+        "per_t": tuple(groups),
+        "non_authoritative": True,
+        "no_refinement": True,
+    }
+
+
+def _method_b_cfix2_annotation(ROOT):
+    label = ROOT.TLatex()
+    label.SetNDC()
+    label.SetTextSize(0.020)
+    label.DrawLatexNDC(0.12, 0.965, "C.Fix.2 diagnostic only; no production refinement")
+    return label
+
+
+def _method_b_cfix2_limits(series, candidates):
+    values = [1.0]
+    for point in list(series) + list(candidates):
+        value = _finite(point.get("Qtilde", point.get("adaptive_candidate")))
+        sigma = _finite(point.get("Qtilde_uncertainty", point.get("adaptive_candidate_uncertainty")))
+        if value is None:
+            continue
+        values.append(value)
+        if sigma is not None and sigma >= 0.0:
+            values.extend((value - sigma, value + sigma))
+    low, high = min(values), max(values)
+    padding = 0.10 * max(1.0, high - low)
+    return low - padding, high + padding
+
+
+def _method_b_cfix2_text(value):
+    scalar = _finite(value)
+    return "{:.5g}".format(scalar) if scalar is not None else "-"
+
+
+def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, group, manifest):
+    t_index = int(group["t_index"])
+    title = "Method-B C.Fix.2 adaptive slices |t| = [{:.4g}, {:.4g}] GeV^2".format(
+        group["t_low"], group["t_high"]
+    )
+    canvas = ROOT.TCanvas("C_hgcer_cfix2_slices_t{}".format(t_index + 1), title, 1500, 1100)
+    try:
+        draw_objects = []
+        canvas.Divide(1, 2)
+        canvas.cd(1)
+        frame = _display_frame(
+            ROOT, "H_hgcer_cfix2_partition_t{}".format(t_index + 1), title,
+            (presentation["phase_a_mm_edges"][0], presentation["phase_a_mm_edges"][-1]),
+            (0.0, 1.0), "baseline-support partition",
+        )
+        frame.Draw("AXIS")
+        draw_objects.append(frame)
+        protected = presentation["protected_regions"][0]
+        for edge in (protected["mm_low"], protected["mm_high"]):
+            line = ROOT.TLine(edge, 0.0, edge, 1.0)
+            line.SetLineStyle(2)
+            line.SetLineColor(2)
+            line.Draw("same")
+            draw_objects.append(line)
+        text = ROOT.TLatex()
+        text.SetTextSize(0.022)
+        text.DrawLatex(
+            0.5 * (protected["mm_low"] + protected["mm_high"]), 0.90,
+            "protected; not used",
+        )
+        for index, row in enumerate(sorted(group["slices"], key=lambda entry: entry["mm_low"])):
+            y = 0.72 - 0.10 * (index % 6)
+            line = ROOT.TLine(row["mm_low"], y, row["mm_high"], y)
+            line.SetLineWidth(3)
+            line.SetLineColor(4 if row["side"] == "low" else 8)
+            line.Draw("same")
+            text.DrawLatex(
+                row["mm_low"], y + 0.03,
+                "{} [{:.3f}, {:.3f}] N_{{eff}}={} {}".format(
+                    row["slice_id"], row["mm_low"], row["mm_high"],
+                    _method_b_cfix2_text(row.get("parent_baseline_neff")),
+                    row.get("partition_support_status"),
+                ),
+            )
+            draw_objects.append(line)
+        draw_objects.append(text)
+        label = _method_b_cfix2_annotation(ROOT)
+        draw_objects.append(label)
+
+        canvas.cd(2)
+        all_points = [point for points in group["slice_series"].values() for point in points]
+        limits = _method_b_cfix2_limits(all_points, group["candidate_points"])
+        frame = _display_frame(
+            ROOT, "H_hgcer_cfix2_relative_t{}".format(t_index + 1), title,
+            (presentation["delta_edges"][0], presentation["delta_edges"][-1]), limits,
+            "adaptive parent-relative Qtilde",
+        )
+        frame.Draw("AXIS")
+        draw_objects.append(frame)
+        unity = ROOT.TLine(
+            presentation["delta_edges"][0], 1.0,
+            presentation["delta_edges"][-1], 1.0,
+        )
+        unity.SetLineStyle(2)
+        unity.Draw("same")
+        draw_objects.append(unity)
+        legend = ROOT.TLegend(0.50, 0.61, 0.90, 0.88)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        draw_objects.append(legend)
+        for index, row in enumerate(group["slices"]):
+            points = group["slice_series"].get(row["slice_id"], ())
+            if not points:
+                continue
+            graph = ROOT.TGraphErrors()
+            for point_index, point in enumerate(points):
+                graph.SetPoint(point_index, point["delta_center"], point["Qtilde"])
+                graph.SetPointError(point_index, 0.0, point["Qtilde_uncertainty"])
+            graph.SetMarkerStyle((20, 21, 22, 23, 29, 33)[index % 6])
+            graph.SetMarkerColor((4, 8, 6, 46, 38, 28)[index % 6])
+            graph.SetLineColor((4, 8, 6, 46, 38, 28)[index % 6])
+            graph.Draw("P same")
+            legend.AddEntry(
+                graph, "{} {} [{:.3f}, {:.3f}]".format(
+                    row["slice_id"], row["side"], row["mm_low"], row["mm_high"]
+                ), "p",
+            )
+            draw_objects.append(graph)
+        for status, marker in (("available_single_slice", 24), ("available_multi_slice", 25)):
+            points = [
+                point for point in group["candidate_points"]
+                if point["adaptive_candidate_status"] == status
+            ]
+            if not points:
+                continue
+            graph = ROOT.TGraphErrors()
+            for point_index, point in enumerate(points):
+                graph.SetPoint(point_index, point["delta_center"], point["adaptive_candidate"])
+                graph.SetPointError(point_index, 0.0, point["adaptive_candidate_uncertainty"])
+            graph.SetMarkerStyle(marker)
+            graph.SetMarkerColor(1)
+            graph.SetLineColor(1)
+            graph.Draw("P same")
+            legend.AddEntry(graph, "adaptive candidate ({})".format(status), "p")
+            draw_objects.append(graph)
+        if legend.GetNRows() > 0:
+            legend.Draw()
+        elif not all_points:
+            empty = ROOT.TLatex()
+            empty.DrawLatexNDC(0.18, 0.50, "No stored available adaptive Qtilde values")
+            draw_objects.append(empty)
+        label = _method_b_cfix2_annotation(ROOT)
+        draw_objects.append(label)
+        canvas._method_b_cfix2_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+        manifest.append({
+            "page_id": "hgcer.cfix2.method_b.adaptive_slices",
+            "scope": "t_bin",
+            "t_index": t_index,
+            "authoritative": False,
+        })
+    finally:
+        canvas.Close()
+
+
+def _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest):
+    t_index = int(group["t_index"])
+    cells = tuple(group["cells"])
+    columns = min(3, len(cells))
+    rows = int(math.ceil(float(len(cells)) / float(columns)))
+    title = "Method-B C.Fix.2 adaptive status |t| = [{:.4g}, {:.4g}] GeV^2".format(
+        group["t_low"], group["t_high"]
+    )
+    canvas = ROOT.TCanvas("C_hgcer_cfix2_status_t{}".format(t_index + 1), title, 1800, 1200)
+    try:
+        draw_objects = []
+        canvas.Divide(columns, rows)
+        for pad, cell in enumerate(cells, start=1):
+            canvas.cd(pad)
+            frame = _display_frame(
+                ROOT, "H_hgcer_cfix2_status_t{}_d{}".format(t_index + 1, cell["delta_index"] + 1),
+                "delta = [{:.3f}, {:.3f}] %".format(cell["delta_low"], cell["delta_high"]),
+                (0.0, 1.0), (0.0, 1.0), "stored adaptive status / reason",
+            )
+            frame.Draw("AXIS")
+            draw_objects.append(frame)
+            text = ROOT.TLatex()
+            text.SetNDC()
+            text.SetTextSize(0.021)
+            lines = [
+                "available slices={} (low={}, high={})".format(
+                    cell.get("N_available_slices"), cell.get("N_available_low_slices"),
+                    cell.get("N_available_high_slices"),
+                ),
+                "candidate={} {} #pm {}".format(
+                    cell.get("adaptive_candidate_status"),
+                    _method_b_cfix2_text(cell.get("adaptive_candidate")),
+                    _method_b_cfix2_text(cell.get("adaptive_candidate_uncertainty")),
+                ),
+                "consistency={} chi2/ndf={} max|z|={}".format(
+                    cell.get("slice_consistency_status"),
+                    _method_b_cfix2_text(cell.get("slice_consistency_chi2_ndf")),
+                    _method_b_cfix2_text(cell.get("slice_consistency_max_abs_log_pull")),
+                ),
+            ]
+            for row in cell["slices"]:
+                lines.append(
+                    "{}: {} {} Qtilde={} #pm {}".format(
+                        row["slice_id"], row.get("support_status"),
+                        row.get("support_reason") or "-",
+                        _method_b_cfix2_text(row.get("parent_relative_ratio")),
+                        _method_b_cfix2_text(row.get("parent_relative_sigma")),
+                    )
+                )
+            y_position = 0.82
+            for line in lines:
+                text.DrawLatexNDC(0.04, y_position, line)
+                y_position -= 0.052
+            draw_objects.append(text)
+            label = _method_b_cfix2_annotation(ROOT)
+            label.SetTextSize(0.015)
+            draw_objects.append(label)
+        canvas._method_b_cfix2_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+        manifest.append({
+            "page_id": "hgcer.cfix2.method_b.adaptive_status",
+            "scope": "t_bin",
+            "t_index": t_index,
+            "authoritative": False,
+        })
+    finally:
+        canvas.Close()
+
+
+def render_pion_hgcer_method_b_cfix2_pages(pdf_name, method_b_display, *, page_manifest=None):
+    """Append C.Fix.2 adaptive Method-B pages to the open HGCer supplement."""
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    presentation = method_b_cfix2_display_payload(method_b_display)
+    if not presentation["available"]:
+        raise ValueError("C.Fix.2 Method-B display unavailable: {}".format(presentation["reason"]))
+    ROOT = _import_root()
+    if ROOT is None:
+        return manifest
+    for group in presentation["per_t"]:
+        _render_method_b_cfix2_adaptive_slices_page(
+            ROOT, pdf_name, presentation, group, manifest
+        )
+        _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest)
+    return manifest
+
+
 def render_pion_hgcer_refinement_pages(pdf_name, checkpoint, *, phase_a=None, method_a=None, method_b=None, method_b_display=None, phase_a_display_context=None, page_manifest=None):
     """Append all new detached Phase-A/Method-A/Method-B pages to an open PDF."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
@@ -2610,6 +3106,7 @@ __all__ = (
     "method_b_candidate_points",
     "method_b_candidate_frame_limits",
     "method_b_cfix1_display_payload",
+    "method_b_cfix2_display_payload",
     "method_b_coverage_parity",
     "method_b_display_payload",
     "method_b_display_source_parity",
@@ -2627,6 +3124,7 @@ __all__ = (
     "refinement_annotation_lines",
     "render_pion_hgcer_refinement_pages",
     "render_pion_hgcer_method_b_cfix1_pages",
+    "render_pion_hgcer_method_b_cfix2_pages",
     "render_pion_hgcer_ab_comparison_pages",
     "render_proton_main_summary_pages",
     "render_setting_warning_page",

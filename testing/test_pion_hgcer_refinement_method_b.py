@@ -166,6 +166,18 @@ def _supported_phase(*, host_state="proton_cleaned", t_edges=(0.0, 1.0), delta_e
     return phase
 
 
+def _adaptive_supported_phase(*, t_edges=(0.0, 1.0), delta_edges=(0.0, 10.0, 20.0)):
+    """Populate every frozen Phase-A atomic MM interval with two delta parents."""
+    phase = _phase_a(t_edges=t_edges, delta_edges=delta_edges)
+    for t_low, t_high in zip(t_edges, t_edges[1:]):
+        t = 0.5 * (t_low + t_high)
+        for delta_low, delta_high in zip(delta_edges, delta_edges[1:]):
+            delta = 0.5 * (delta_low + delta_high)
+            for mm in (0.85, 0.95, 1.05, 1.25, 1.35, 1.45):
+                _add_region_events(phase, t=t, delta=delta, mm=mm)
+    return phase
+
+
 def _cell(result, t_index=0, delta_index=0):
     return next(
         entry for entry in result["cells"]
@@ -514,6 +526,135 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertEqual(missing["regions"][0]["support_status"], "unavailable")
         self.assertEqual(missing["regions"][0]["parent_relative_status"], "unavailable")
 
+    def test_adaptive_slice_payload_is_additive_and_legacy_serialization_is_exactly_stable(self):
+        phase = _adaptive_supported_phase()
+        phase_before = copy.deepcopy(phase)
+        with mock.patch.object(
+            method_b,
+            "_build_adaptive_slice_diagnostic",
+            return_value={"synthetic": "adaptive-only"},
+        ):
+            baseline = method_b.build_pion_hgcer_method_b(phase, config=_config())
+        result = method_b.build_pion_hgcer_method_b(phase, config=_config())
+
+        baseline.pop("adaptive_slice_diagnostic")
+        adaptive = result.pop("adaptive_slice_diagnostic")
+        self.assertEqual(
+            json.dumps(result, sort_keys=True, separators=(",", ":"), allow_nan=False),
+            json.dumps(baseline, sort_keys=True, separators=(",", ":"), allow_nan=False),
+        )
+        self.assertEqual(phase, phase_before)
+        self.assertTrue(adaptive["available"])
+        self.assertEqual(
+            adaptive["schema_version"],
+            method_b.METHOD_B_ADAPTIVE_SLICE_SCHEMA_VERSION,
+        )
+        self.assertTrue(adaptive["non_authoritative"])
+        self.assertFalse(adaptive["candidate_replaces_legacy_method_b"])
+        self.assertEqual(adaptive["derived_parent_baseline_neff_target"], 20.0)
+        self.assertEqual(len(adaptive["t_partitions"][0]["low_slices"]), 3)
+        self.assertEqual(len(adaptive["t_partitions"][0]["high_slices"]), 3)
+        repeat = method_b.build_pion_hgcer_method_b(phase, config=_config())
+        self.assertEqual(
+            adaptive["fingerprint"],
+            repeat["adaptive_slice_diagnostic"]["fingerprint"],
+        )
+        self.assertTrue(all(
+            cell["adaptive_candidate_status"] == "available_multi_slice"
+            for cell in adaptive["cells"]
+        ))
+
+    def test_adaptive_partition_uses_baseline_only_and_is_shared_by_delta_cells(self):
+        phase = _adaptive_supported_phase()
+        baseline = method_b.build_pion_hgcer_method_b(phase, config=_config())
+        changed_host = copy.deepcopy(phase)
+        for record in changed_host["kaon_host_records"]:
+            factor = 37.0 if record["analysis_MM"] < 1.1 else 0.25
+            record["signed_host_event_contribution"] *= factor
+        changed = method_b.build_pion_hgcer_method_b(changed_host, config=_config())
+        base_adaptive = baseline["adaptive_slice_diagnostic"]
+        changed_adaptive = changed["adaptive_slice_diagnostic"]
+        self.assertEqual(
+            base_adaptive["t_partitions"], changed_adaptive["t_partitions"]
+        )
+        expected_ids = [
+            row["slice_id"] for row in base_adaptive["t_partitions"][0]["slices"]
+        ]
+        self.assertTrue(all(
+            [row["slice_id"] for row in cell["slices"]] == expected_ids
+            for cell in base_adaptive["cells"]
+        ))
+        partition = base_adaptive["t_partitions"][0]
+        low_slices = sorted(partition["low_slices"], key=lambda row: row["mm_low"])
+        high_slices = sorted(partition["high_slices"], key=lambda row: row["mm_low"])
+        self.assertEqual(low_slices[0]["mm_low"], MM_EDGES[0])
+        self.assertEqual(low_slices[-1]["mm_high"], method_b.METHOD_B_PROTECTED_MM_LOW)
+        self.assertEqual(high_slices[0]["mm_low"], method_b.METHOD_B_PROTECTED_MM_HIGH)
+        self.assertEqual(high_slices[-1]["mm_high"], MM_EDGES[-1])
+
+    def test_adaptive_candidates_and_consistency_keep_single_and_inconsistent_evidence(self):
+        def row(slice_id, value, sigma, side="low"):
+            return {
+                "slice_id": slice_id,
+                "side": side,
+                "parent_relative_status": "available",
+                "parent_relative_ratio": value,
+                "parent_relative_sigma": sigma,
+            }
+
+        single = method_b._adaptive_candidate_and_consistency([row("one", 1.60, 0.25)])
+        self.assertEqual(single["adaptive_candidate_status"], "available_single_slice")
+        self.assertEqual(single["adaptive_candidate"], 1.60)
+        self.assertEqual(single["slice_consistency_status"], "not_evaluable")
+        self.assertIsNone(single["slice_consistency_ndf"])
+
+        multi_rows = [row("low", 0.40, 0.04), row("high", 2.50, 0.25, "high")]
+        multi = method_b._adaptive_candidate_and_consistency(multi_rows)
+        self.assertEqual(multi["adaptive_candidate_status"], "available_multi_slice")
+        self.assertTrue(math.isfinite(multi["adaptive_candidate"]))
+        self.assertEqual(multi["slice_consistency_status"], "evaluated")
+        self.assertEqual(multi["slice_consistency_ndf"], 1)
+        self.assertGreater(multi["slice_consistency_chi2"], 1.0)
+        self.assertEqual(len(multi["slice_consistency_log_pulls"]), 2)
+
+    def test_adaptive_partition_merges_low_support_and_retains_unsupported_side(self):
+        weak = _phase_a()
+        for delta in (5.0, 15.0):
+            for mm in (0.85, 0.95, 1.05, 1.25, 1.35, 1.45):
+                _add_region_events(
+                    weak, delta=delta, mm=mm,
+                    pion_weights=(1.0,) * 5, host_weights=(1.0,) * 10,
+                )
+        weak_result = method_b.build_pion_hgcer_method_b(weak, config=_config())
+        weak_partition = weak_result["adaptive_slice_diagnostic"]["t_partitions"][0]
+        self.assertEqual(len(weak_partition["low_slices"]), 1)
+        self.assertEqual(len(weak_partition["high_slices"]), 1)
+        self.assertEqual(weak_partition["low_slices"][0]["mm_low"], MM_EDGES[0])
+        self.assertEqual(
+            weak_partition["low_slices"][0]["mm_high"],
+            method_b.METHOD_B_PROTECTED_MM_LOW,
+        )
+
+        unsupported = _phase_a()
+        for delta in (5.0, 15.0):
+            for mm in (1.25, 1.35, 1.45):
+                _add_region_events(unsupported, delta=delta, mm=mm)
+        unsupported_result = method_b.build_pion_hgcer_method_b(
+            unsupported, config=_config()
+        )
+        adaptive = unsupported_result["adaptive_slice_diagnostic"]
+        partition = adaptive["t_partitions"][0]
+        self.assertTrue(adaptive["available"])
+        self.assertEqual(len(partition["low_slices"]), 1)
+        self.assertEqual(
+            partition["low_slices"][0]["partition_support_status"], "unavailable"
+        )
+        self.assertTrue(all(
+            row["mm_high"] <= method_b.METHOD_B_PROTECTED_MM_LOW
+            or row["mm_low"] >= method_b.METHOD_B_PROTECTED_MM_HIGH
+            for row in partition["slices"]
+        ))
+
     def test_unavailable_result_keeps_available_phase_a_provenance_and_forbids_application(self):
         phase = _phase_a()
         result = method_b.build_pion_hgcer_method_b(phase, config=_config())
@@ -525,6 +666,7 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertEqual(result["delta_edges"], [0.0, 10.0, 20.0])
         self.assertEqual(result["mm_regions"], _config()["mm_regions"])
         self.assertEqual(result["protected_regions"], _config()["protected_regions"])
+        self.assertFalse(result["adaptive_slice_diagnostic"]["available"])
         json.dumps(result, allow_nan=False)
         phase_unavailable = _supported_phase()
         phase_unavailable["available"] = False

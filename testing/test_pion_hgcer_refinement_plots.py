@@ -222,6 +222,127 @@ def _cfix1_method_b():
     }
 
 
+def _cfix2_method_b():
+    """Return a complete frozen adaptive payload without rebuilding Method B."""
+    method_b = _cfix1_method_b()
+    t_edges = method_b["t_edges"]
+    delta_edges = method_b["delta_edges"]
+    mm_edges = [0.80, 0.95, 1.10, 1.23, 1.35, 1.45]
+
+    def definition(t_index, side, index, low, high, *, partition="available"):
+        return {
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "side": side,
+            "slice_index": index,
+            "slice_index_within_side": index,
+            "slice_id": "t{}_{}_slice{}".format(t_index, side, index),
+            "mm_low": low,
+            "mm_high": high,
+            "atomic_interval_indices": [index],
+            "partition_support_status": partition,
+            "partition_support_reason": None if partition == "available" else "parent_baseline_effective_entries_below_target",
+            "parent_baseline_record_count": 40,
+            "parent_baseline_signed_yield": 40.0,
+            "parent_baseline_abs_support": 40.0,
+            "parent_baseline_sumw2": 40.0,
+            "parent_baseline_sigma": 40.0 ** 0.5,
+            "parent_baseline_neff": 40.0,
+            "parent_baseline_significance": 40.0 / (40.0 ** 0.5),
+        }
+
+    partitions = []
+    cells = []
+    for t_index in range(2):
+        low_slices = [definition(t_index, "low", 0, 0.80, 0.95), definition(t_index, "low", 1, 0.95, 1.10)]
+        high_slices = [definition(t_index, "high", 0, 1.23, 1.45)]
+        slices = low_slices + high_slices
+        partitions.append({
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "low_slices": deepcopy(low_slices),
+            "high_slices": deepcopy(high_slices),
+            "slices": deepcopy(slices),
+        })
+        for delta_index, (delta_low, delta_high) in enumerate(zip(delta_edges, delta_edges[1:])):
+            rows = []
+            for slice_index, item in enumerate(slices):
+                available = not (delta_index == 2 and slice_index > 0)
+                value = 1.10 + 0.10 * slice_index + 0.05 * delta_index
+                row = deepcopy(item)
+                row.update({
+                    "support_status": "usable" if available else "unavailable",
+                    "support_reason": None if available else "host_effective_entries_below_minimum",
+                    "host_record_count": 20,
+                    "host_yield": value * 20.0,
+                    "host_abs_support": 20.0,
+                    "host_sumw2": 20.0,
+                    "host_neff": 20.0,
+                    "host_sigma": 20.0 ** 0.5,
+                    "baseline_record_count": 20,
+                    "baseline_pion_yield": 20.0,
+                    "baseline_pion_abs_support": 20.0,
+                    "baseline_pion_sumw2": 20.0,
+                    "baseline_pion_neff": 20.0,
+                    "baseline_pion_sigma": 20.0 ** 0.5,
+                    "baseline_pion_significance": 20.0 / (20.0 ** 0.5),
+                    "raw_ratio": value if available else None,
+                    "raw_ratio_sigma": 0.10 if available else None,
+                    "parent_reference_ratio": 1.0,
+                    "parent_reference_sigma": 0.05,
+                    "parent_relative_status": "available" if available else "unavailable",
+                    "parent_relative_reason": None if available else "host_effective_entries_below_minimum",
+                    "parent_relative_ratio": value if available else None,
+                    "parent_relative_sigma": 0.10 if available else None,
+                })
+                rows.append(row)
+            usable = [row for row in rows if row["parent_relative_status"] == "available"]
+            cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_low,
+                "delta_high": delta_high,
+                "slices": rows,
+                "N_available_slices": len(usable),
+                "N_available_low_slices": sum(row["side"] == "low" for row in usable),
+                "N_available_high_slices": sum(row["side"] == "high" for row in usable),
+                "adaptive_candidate": 1.18 + 0.02 * delta_index if usable else None,
+                "adaptive_candidate_uncertainty": 0.08 if usable else None,
+                "adaptive_candidate_status": "available_multi_slice" if len(usable) > 1 else "available_single_slice" if usable else "unavailable",
+                "slice_consistency_status": "evaluated" if len(usable) > 1 else "not_evaluable",
+                "slice_consistency_chi2": 0.4 if len(usable) > 1 else None,
+                "slice_consistency_ndf": len(usable) - 1 if len(usable) > 1 else None,
+                "slice_consistency_chi2_ndf": 0.2 if len(usable) > 1 else None,
+                "slice_consistency_max_abs_log_pull": 0.4 if len(usable) > 1 else None,
+                "slice_consistency_log_pulls": [],
+            })
+    method_b["adaptive_slice_diagnostic"] = {
+        "schema_version": "pion_hgcer_method_b_adaptive_slices/v1",
+        "status": "available",
+        "available": True,
+        "reason": None,
+        "t_edges": deepcopy(t_edges),
+        "delta_edges": deepcopy(delta_edges),
+        "phase_a_mm_edges": mm_edges,
+        "protected_regions": deepcopy(method_b["protected_regions"]),
+        "t_partitions": partitions,
+        "parent_slice_references": [],
+        "cells": cells,
+        "summary": {},
+        "fingerprint_inputs": {},
+        "fingerprint": "adaptive-fingerprint",
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "candidate_replaces_legacy_method_b": False,
+    }
+    return method_b
+
+
 def _cfix1_checkpoint(method_b):
     """Build the Phase-A/B/C persistence boundary used by C.Fix.1 display."""
     return refinement_checkpoint.build_pion_hgcer_refinement_checkpoint(
@@ -490,7 +611,10 @@ class FakeCanvas:
         return self
 
     def Print(self, target):
-        retained = tuple(getattr(self, "_method_b_cfix1_draw_objects", ()))
+        retained = tuple(
+            getattr(self, "_method_b_cfix1_draw_objects", ())
+            or getattr(self, "_method_b_cfix2_draw_objects", ())
+        )
         self.print_targets.append(str(target))
         self.root.print_records.append({
             "canvas": self,
@@ -574,10 +698,18 @@ class FakeTLine:
     def __init__(self, x1, y1, x2, y2):
         self.endpoints = (float(x1), float(y1), float(x2), float(y2))
         self.line_style = None
+        self.line_color = None
+        self.line_width = None
         self.draw_options = []
 
     def SetLineStyle(self, value):
         self.line_style = int(value)
+
+    def SetLineColor(self, value):
+        self.line_color = int(value)
+
+    def SetLineWidth(self, value):
+        self.line_width = int(value)
 
     def Draw(self, option=""):
         self.draw_options.append(str(option))
@@ -601,6 +733,9 @@ class FakeTLegend:
 
     def Draw(self, option=""):
         self.draw_options.append(str(option))
+
+    def GetNRows(self):
+        return len(self.entries)
 
 
 class FakeTPaveText:
@@ -647,6 +782,9 @@ class FakeTLatex:
         self.text_size = float(value)
 
     def DrawLatexNDC(self, x_value, y_value, text):
+        self.draws.append((float(x_value), float(y_value), str(text)))
+
+    def DrawLatex(self, x_value, y_value, text):
         self.draws.append((float(x_value), float(y_value), str(text)))
 
 
@@ -721,10 +859,12 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIn("pion.coordinate.detail", manifest["routes"]["pion_fit_debug"])
         self.assertIn("hgcer.part2", manifest["routes"]["hgcer_debug"])
         self.assertEqual(
-            manifest["routes"]["hgcer_debug"][-2:],
+            manifest["routes"]["hgcer_debug"][-4:],
             [
                 "hgcer.cfix1.method_b.regional_values",
                 "hgcer.cfix1.method_b.status_audit",
+                "hgcer.cfix2.method_b.adaptive_slices",
+                "hgcer.cfix2.method_b.adaptive_status",
             ],
         )
         self.assertIn("proton.detail", manifest["routes"]["proton_debug"])
@@ -2001,12 +2141,91 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertIs(result, manifest)
         self.assertEqual(manifest, [])
 
+    def test_cfix2_copies_checkpoint_first_adaptive_evidence_and_validates_lattice(self):
+        method_b = _cfix2_method_b()
+        source_before = deepcopy(method_b)
+        display = plots.method_b_display_payload(method_b, {})
+        display_before = deepcopy(display)
+        presentation = plots.method_b_cfix2_display_payload(display)
+
+        self.assertTrue(presentation["available"])
+        self.assertEqual(len(presentation["per_t"]), 2)
+        self.assertEqual(
+            [cell["delta_index"] for cell in presentation["per_t"][0]["cells"]],
+            [0, 1, 2],
+        )
+        self.assertEqual(
+            [row["slice_id"] for row in presentation["per_t"][0]["slices"]],
+            ["t0_low_slice0", "t0_low_slice1", "t0_high_slice0"],
+        )
+        self.assertEqual(
+            presentation["per_t"][0]["candidate_points"][0]["adaptive_candidate"],
+            1.18,
+        )
+        self.assertNotIn("KLambdaSigma0", presentation["per_t"][0]["slice_series"])
+        self.assertEqual(method_b, source_before)
+        self.assertEqual(display, display_before)
+
+        checkpoint = _cfix1_checkpoint(method_b)
+        stale_runtime = deepcopy(method_b)
+        stale_runtime["adaptive_slice_diagnostic"]["fingerprint"] = "runtime-only-change"
+        checkpoint_first = plots.method_b_display_payload(stale_runtime, checkpoint)
+        self.assertEqual(checkpoint_first["source"], "checkpoint_method_b")
+        self.assertEqual(
+            checkpoint_first["adaptive_slice_diagnostic"],
+            method_b["adaptive_slice_diagnostic"],
+        )
+
+        broken = deepcopy(method_b)
+        broken["adaptive_slice_diagnostic"]["cells"].pop()
+        unavailable = plots.method_b_cfix2_display_payload(
+            plots.method_b_display_payload(broken, {})
+        )
+        self.assertFalse(unavailable["available"])
+        self.assertEqual(unavailable["reason"], "adaptive_slice_cell_lattice_invalid")
+
+    def test_cfix2_renderer_uses_frozen_values_and_appends_two_pages_per_t(self):
+        display = plots.method_b_display_payload(_cfix2_method_b(), {})
+        display_before = deepcopy(display)
+        root = FakeROOT()
+        manifest = []
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            result = plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=manifest
+            )
+        self.assertIs(result, manifest)
+        self.assertEqual(
+            [entry["page_id"] for entry in manifest],
+            [
+                "hgcer.cfix2.method_b.adaptive_slices",
+                "hgcer.cfix2.method_b.adaptive_status",
+                "hgcer.cfix2.method_b.adaptive_slices",
+                "hgcer.cfix2.method_b.adaptive_status",
+            ],
+        )
+        self.assertTrue(all(entry["scope"] == "t_bin" for entry in manifest))
+        self.assertTrue(all(entry["authoritative"] is False for entry in manifest))
+        self.assertEqual(len(root.print_records), 4)
+        self.assertEqual(
+            [record["canvas"].name for record in root.print_records],
+            [
+                "C_hgcer_cfix2_slices_t1", "C_hgcer_cfix2_status_t1",
+                "C_hgcer_cfix2_slices_t2", "C_hgcer_cfix2_status_t2",
+            ],
+        )
+        self.assertEqual(display, display_before)
+        self.assertTrue(all(record["retained"] for record in root.print_records))
+        self.assertTrue(any(
+            line.endpoints[1] == 1.0 and line.endpoints[3] == 1.0
+            for line in root.lines
+        ))
+
     def test_cfix1_presentation_source_is_dynamic_and_never_rebuilds_method_b(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
         extractor_start = source.index("def _method_b_cfix1_unavailable")
         extractor_end = source.index("def unity_line_limits", extractor_start)
         renderer_start = source.index("def _method_b_cfix1_annotation")
-        renderer_end = source.index("def render_pion_hgcer_refinement_pages", renderer_start)
+        renderer_end = source.index("def _method_b_cfix2_unavailable", renderer_start)
         cfix_source = source[extractor_start:extractor_end] + source[renderer_start:renderer_end]
         for forbidden in (
             "pi_n",
@@ -2034,6 +2253,34 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py"
         ).read_text(encoding="utf-8")
         self.assertNotIn("hgcer.cfix1", procedure_source)
+
+    def test_cfix2_presentation_is_stored_value_only_and_runtime_routes_after_cfix1(self):
+        source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")
+        extractor_start = source.index("def _method_b_cfix2_unavailable")
+        extractor_end = source.index("def render_pion_hgcer_refinement_pages", extractor_start)
+        cfix_source = source[extractor_start:extractor_end]
+        for forbidden in (
+            "build_pion_hgcer_method_b(", "_candidate(", "_record_population(",
+            "find_canonical_bin", "method_a", "phase_d", "C_final",
+        ):
+            self.assertNotIn(forbidden, cfix_source)
+        for required in (
+            "method_b_cfix2_display_payload",
+            "render_pion_hgcer_method_b_cfix2_pages",
+            "hgcer.cfix2.method_b.adaptive_slices",
+            "hgcer.cfix2.method_b.adaptive_status",
+            "available_single_slice", "available_multi_slice",
+        ):
+            self.assertIn(required, cfix_source)
+        runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
+        cfix1_call = runtime.index("render_pion_hgcer_method_b_cfix1_pages(")
+        cfix2_call = runtime.index("render_pion_hgcer_method_b_cfix2_pages(")
+        warning_page = runtime.index("render_setting_warning_page(", cfix2_call)
+        self.assertLess(cfix1_call, cfix2_call)
+        self.assertLess(cfix2_call, warning_page)
+        cfix2_block = runtime[cfix2_call:warning_page]
+        self.assertIn('pdf_destinations["hgcer_debug"]', cfix2_block)
+        self.assertIn('supplement_manifests["hgcer_debug"]', cfix2_block)
 
     def test_renderer_has_no_analysis_or_physics_imports_or_calls(self):
         source_path = REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py"

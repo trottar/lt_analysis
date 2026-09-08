@@ -206,6 +206,7 @@ from pion_hgcer_refinement_plots import (
     method_b_display_source_parity,
     open_diagnostic_pdf,
     render_pion_hgcer_method_b_cfix1_pages,
+    render_pion_hgcer_method_b_cfix2_pages,
     render_pion_hgcer_refinement_pages,
     render_pion_hgcer_ab_comparison_pages,
     render_proton_main_summary_pages,
@@ -7410,6 +7411,27 @@ def rand_sub(
             )
             _print_rand_debug(
                 "detached C.Fix.1 Method-B regional audit unavailable",
+                renderer="pion_hgcer_refinement_plots",
+                exception_type=type(exc).__name__,
+                exception=str(exc),
+            )
+        try:
+            # C.Fix.2 is a parallel, checkpoint-first adaptive-slice audit.
+            # It follows C.Fix.1 in the same technical PDF and cannot affect
+            # the legacy Method-B result, Phase D, or production subtraction.
+            render_pion_hgcer_method_b_cfix2_pages(
+                pdf_destinations["hgcer_debug"],
+                method_b_display,
+                page_manifest=supplement_manifests["hgcer_debug"],
+            )
+        except Exception as exc:
+            setting_renderer_failures.append(
+                "C.Fix.2 Method-B adaptive-slice audit: {}: {}".format(
+                    type(exc).__name__, exc
+                )
+            )
+            _print_rand_debug(
+                "detached C.Fix.2 Method-B adaptive-slice audit unavailable",
                 renderer="pion_hgcer_refinement_plots",
                 exception_type=type(exc).__name__,
                 exception=str(exc),
