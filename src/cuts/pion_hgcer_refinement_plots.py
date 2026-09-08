@@ -1703,13 +1703,18 @@ def _clone_display(histogram, name):
         return None
 
 
-def _display_frame(ROOT, name, title, x_limits, y_limits, y_label):
+def _display_frame(
+    ROOT, name, title, x_limits, y_limits, y_label, x_label="SHMS delta",
+):
     """Create a detached ROOT frame with the prescribed visible ranges."""
     xmin, xmax = x_limits
     ymin, ymax = y_limits
     if None in (xmin, xmax, ymin, ymax):
         return None
-    frame = ROOT.TH1D(str(name), "{};SHMS delta;{}".format(title, y_label), 1, float(xmin), float(xmax))
+    frame = ROOT.TH1D(
+        str(name), "{};{};{}".format(title, x_label, y_label), 1,
+        float(xmin), float(xmax),
+    )
     frame.SetDirectory(0)
     frame.SetStats(0)
     frame.SetMinimum(float(ymin))
@@ -2378,6 +2383,38 @@ def _method_b_cfix2_scalar(value):
     return _finite(value)
 
 
+_METHOD_B_CFIX2_PARTITION_METHOD = (
+    "baseline_delta_support_first_passing_protected_outward/v2"
+)
+_METHOD_B_CFIX2_PARTITION_SOURCE = (
+    "phase_a_mm_edges_and_baseline_support_only"
+)
+
+
+def _method_b_cfix2_series_style(index):
+    """Return one deterministic, presentation-only adaptive slice style pair."""
+    marker_styles = (20, 21, 22, 23, 29, 33)
+    marker_colors = (4, 8, 6, 46, 38, 28)
+    style_index = index % len(marker_styles)
+    color_index = (index // len(marker_styles)) % len(marker_colors)
+    return marker_styles[style_index], marker_colors[color_index]
+
+
+def _method_b_cfix2_legend_layout(entry_count):
+    """Return the bounded multi-column legend geometry for stored C.Fix.2 series."""
+    maximum_rows = 6
+    columns = max(1, int(math.ceil(float(entry_count) / float(maximum_rows))))
+    rows = int(math.ceil(float(entry_count) / float(columns)))
+    y2 = 0.88
+    y1 = max(0.54, y2 - 0.035 * rows - 0.02)
+    return {
+        "columns": columns,
+        "rows": rows,
+        "coordinates": (0.38, y1, 0.92, y2),
+        "text_size": min(0.020, 0.060 / float(max(1, columns))),
+    }
+
+
 def _method_b_cfix2_slice_row(raw, *, measurement=True):
     """Detach the stored adaptive slice fields needed by the technical pages."""
     row = _mapping(raw)
@@ -2458,6 +2495,13 @@ def method_b_cfix2_display_payload(method_b_display):
         delta_edges
     ) != tuple(_method_b_cfix1_edges(display, "delta_edges")):
         return _method_b_cfix2_unavailable("adaptive_slice_display_geometry_mismatch")
+    if not (
+        adaptive.get("partition_method") == _METHOD_B_CFIX2_PARTITION_METHOD
+        and adaptive.get("partition_source") == _METHOD_B_CFIX2_PARTITION_SOURCE
+    ):
+        return _method_b_cfix2_unavailable(
+            "adaptive_slice_partition_definition_invalid"
+        )
     if not (
         adaptive.get("partition_minimum_baseline_usable_delta_cells") == 2
         and _method_b_cfix2_scalar(
@@ -2735,6 +2779,7 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
             ROOT, "H_hgcer_cfix2_partition_t{}".format(t_index + 1), title,
             (presentation["phase_a_mm_edges"][0], presentation["phase_a_mm_edges"][-1]),
             (0.0, partition_y_maximum), "baseline-support partition",
+            x_label="missing mass [GeV]",
         )
         frame.Draw("AXIS")
         draw_objects.append(frame)
@@ -2789,26 +2834,40 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
         unity.SetLineStyle(2)
         unity.Draw("same")
         draw_objects.append(unity)
-        legend = ROOT.TLegend(0.50, 0.61, 0.90, 0.88)
+        slice_rows = tuple(sorted(
+            group["slices"],
+            key=lambda row: (row["mm_low"], row["mm_high"], row["slice_id"]),
+        ))
+        displayed_slice_rows = tuple(
+            row for row in slice_rows
+            if group["slice_series"].get(row["slice_id"], ())
+        )
+        candidate_statuses = tuple(
+            status for status in ("available_single_slice", "available_multi_slice")
+            if any(
+                point["adaptive_candidate_status"] == status
+                for point in group["candidate_points"]
+            )
+        )
+        legend_layout = _method_b_cfix2_legend_layout(
+            len(displayed_slice_rows) + len(candidate_statuses)
+        )
+        legend = ROOT.TLegend(*legend_layout["coordinates"])
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
+        legend.SetNColumns(legend_layout["columns"])
+        legend.SetTextSize(legend_layout["text_size"])
         draw_objects.append(legend)
-        for index, row in enumerate(group["slices"]):
-            points = group["slice_series"].get(row["slice_id"], ())
-            if not points:
-                continue
-            marker_styles = (20, 21, 22, 23, 29, 33)
-            marker_colors = (4, 8, 6, 46, 38, 28)
-            marker_index = index - len(marker_styles) * (
-                index // len(marker_styles)
-            )
+        for index, row in enumerate(displayed_slice_rows):
+            points = group["slice_series"][row["slice_id"]]
+            marker_style, marker_color = _method_b_cfix2_series_style(index)
             graph = ROOT.TGraphErrors()
             for point_index, point in enumerate(points):
                 graph.SetPoint(point_index, point["delta_center"], point["Qtilde"])
                 graph.SetPointError(point_index, 0.0, point["Qtilde_uncertainty"])
-            graph.SetMarkerStyle(marker_styles[marker_index])
-            graph.SetMarkerColor(marker_colors[marker_index])
-            graph.SetLineColor(marker_colors[marker_index])
+            graph.SetMarkerStyle(marker_style)
+            graph.SetMarkerColor(marker_color)
+            graph.SetLineColor(marker_color)
             graph.Draw("P same")
             legend.AddEntry(
                 graph, "{} {} [{:.3f}, {:.3f}]".format(

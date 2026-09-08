@@ -334,6 +334,8 @@ def _cfix2_method_b():
         "status": "available",
         "available": True,
         "reason": None,
+        "partition_method": "baseline_delta_support_first_passing_protected_outward/v2",
+        "partition_source": "phase_a_mm_edges_and_baseline_support_only",
         "t_edges": deepcopy(t_edges),
         "delta_edges": deepcopy(delta_edges),
         "phase_a_mm_edges": mm_edges,
@@ -828,14 +830,23 @@ class FakeTLegend:
     """Minimal legend recorder for dynamic C.Fix.1 labels."""
 
     def __init__(self, *_coordinates):
+        self.coordinates = tuple(float(value) for value in _coordinates)
         self.entries = []
         self.draw_options = []
+        self.column_count = 1
+        self.text_size = None
 
     def SetBorderSize(self, _value):
         return None
 
     def SetFillStyle(self, _value):
         return None
+
+    def SetNColumns(self, value):
+        self.column_count = int(value)
+
+    def SetTextSize(self, value):
+        self.text_size = float(value)
 
     def AddEntry(self, _object, label, option):
         self.entries.append((str(label), str(option)))
@@ -2310,6 +2321,26 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         self.assertFalse(unavailable["available"])
         self.assertEqual(unavailable["reason"], "adaptive_slice_partition_provenance_invalid")
 
+        for field, value in (
+            ("partition_method", "baseline_parent_neff_first_passing_protected_outward/v1"),
+            ("partition_source", "runtime_host_driven_partition"),
+            ("partition_method", None),
+            ("partition_source", None),
+        ):
+            invalid_definition = deepcopy(method_b)
+            if value is None:
+                invalid_definition["adaptive_slice_diagnostic"].pop(field)
+            else:
+                invalid_definition["adaptive_slice_diagnostic"][field] = value
+            unavailable = plots.method_b_cfix2_display_payload(
+                plots.method_b_display_payload(invalid_definition, {})
+            )
+            self.assertFalse(unavailable["available"])
+            self.assertEqual(
+                unavailable["reason"],
+                "adaptive_slice_partition_definition_invalid",
+            )
+
     def test_cfix2_renderer_uses_frozen_values_and_appends_two_pages_per_t(self):
         display = plots.method_b_display_payload(_cfix2_method_b(), {})
         display_before = deepcopy(display)
@@ -2345,6 +2376,101 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             line.endpoints[1] == 1.0 and line.endpoints[3] == 1.0
             for line in root.lines
         ))
+
+    def test_cfix2_partition_frame_uses_missing_mass_and_default_frames_stay_delta(self):
+        root = FakeROOT()
+        display = plots.method_b_display_payload(_cfix2_method_b(), {})
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+            )
+        partition = next(
+            frame for frame in root.frames
+            if frame.name == "H_hgcer_cfix2_partition_t1"
+        )
+        relative = next(
+            frame for frame in root.frames
+            if frame.name == "H_hgcer_cfix2_relative_t1"
+        )
+        self.assertIn(";missing mass [GeV];", partition.title)
+        self.assertNotIn(";SHMS delta;", partition.title)
+        self.assertIn(";SHMS delta;", relative.title)
+
+        default_frame = plots._display_frame(
+            root, "H_default_delta", "ordinary detached frame", (0.0, 1.0),
+            (0.0, 1.0), "stored value",
+        )
+        self.assertEqual(
+            default_frame.title,
+            "ordinary detached frame;SHMS delta;stored value",
+        )
+
+    def test_cfix2_series_styles_are_unique_through_36_and_legends_scale_without_omission(self):
+        pairs = [plots._method_b_cfix2_series_style(index) for index in range(36)]
+        self.assertEqual(len(set(pairs)), 36)
+        self.assertEqual(
+            plots._method_b_cfix2_series_style(36),
+            plots._method_b_cfix2_series_style(0),
+        )
+
+        expected_columns = {3: 1, 8: 2, 15: 3}
+        for slice_count, expected_column_count in expected_columns.items():
+            root = FakeROOT()
+            display = plots.method_b_display_payload(
+                _cfix2_method_b_with_slice_count(slice_count), {}
+            )
+            with mock.patch.object(plots, "_import_root", return_value=root):
+                plots.render_pion_hgcer_method_b_cfix2_pages(
+                    "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+                )
+            retained = root.print_records[0]["retained"]
+            legend = next(item for item in retained if isinstance(item, FakeTLegend))
+            slice_graphs = [
+                item for item in retained if isinstance(item, FakeTGraphErrors)
+                and item.marker_style not in {24, 25}
+            ]
+            slice_labels = [
+                label for label, _option in legend.entries
+                if not label.startswith("adaptive candidate")
+            ]
+            self.assertEqual(len(slice_graphs), slice_count)
+            self.assertEqual(
+                len({(graph.marker_style, graph.marker_color) for graph in slice_graphs}),
+                slice_count,
+            )
+            self.assertEqual(len(slice_labels), slice_count)
+            self.assertEqual(len(set(slice_labels)), slice_count)
+            self.assertTrue(all("t0_" in label and "[" in label for label in slice_labels))
+            self.assertEqual(legend.column_count, expected_column_count)
+            self.assertTrue(all(0.0 <= value <= 1.0 for value in legend.coordinates))
+            self.assertIsNotNone(legend.text_size)
+            self.assertNotIn("KLambdaSigma0", " ".join(slice_labels))
+
+    def test_cfix2_candidate_legend_entries_remain_distinct_from_slice_series(self):
+        root = FakeROOT()
+        display = plots.method_b_display_payload(_cfix2_method_b(), {})
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+            )
+        retained = root.print_records[0]["retained"]
+        legend = next(item for item in retained if isinstance(item, FakeTLegend))
+        candidate_labels = [
+            label for label, _option in legend.entries
+            if label.startswith("adaptive candidate")
+        ]
+        candidate_graphs = [
+            item for item in retained if isinstance(item, FakeTGraphErrors)
+            and item.marker_style in {24, 25}
+        ]
+        self.assertEqual(
+            set(candidate_labels),
+            {
+                "adaptive candidate (available_single_slice)",
+                "adaptive candidate (available_multi_slice)",
+            },
+        )
+        self.assertEqual({graph.marker_style for graph in candidate_graphs}, {24, 25})
 
     def test_cfix2_renderer_scales_partition_rows_and_copies_delta_support_provenance(self):
         display = plots.method_b_display_payload(_cfix2_method_b_with_slice_count(8), {})
