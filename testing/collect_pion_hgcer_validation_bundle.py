@@ -22,7 +22,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Union
 import zipfile
 
 
@@ -48,10 +48,10 @@ class PdfBackend:
     identity: str
     kind: str
     module: Any = None
-    executable: str | None = None
+    executable: Optional[str] = None
 
 
-CommandRunner = Callable[[Sequence[str], Path | None], Mapping[str, Any]]
+CommandRunner = Callable[[Sequence[str], Optional[Path]], Mapping[str, Any]]
 
 
 def _safe_token(value: object, field: str) -> str:
@@ -63,7 +63,9 @@ def _safe_token(value: object, field: str) -> str:
     return token
 
 
-def resolve_settings(phi: str | None = None, epsilon: str | None = None) -> tuple[tuple[str, str], ...]:
+def resolve_settings(
+    phi: Optional[str] = None, epsilon: Optional[str] = None
+) -> tuple[tuple[str, str], ...]:
     """Return one explicit setting or the frozen normal five-setting list."""
     if (phi is None) != (epsilon is None):
         raise ValueError("phi_and_epsilon_must_be_supplied_together")
@@ -124,7 +126,9 @@ def _command_text(command: Sequence[str]) -> str:
     return " ".join(str(item) for item in command)
 
 
-def run_command(command: Sequence[str], cwd: Path | None = None) -> dict[str, Any]:
+def run_command(
+    command: Sequence[str], cwd: Optional[Path] = None
+) -> dict[str, Any]:
     """Run a read-only helper command and retain complete diagnostic output."""
     try:
         completed = subprocess.run(
@@ -159,7 +163,9 @@ def _normalized_command_result(result: Mapping[str, Any], command: Sequence[str]
     }
 
 
-def _run(command_runner: CommandRunner, command: Sequence[str], cwd: Path | None) -> dict[str, Any]:
+def _run(
+    command_runner: CommandRunner, command: Sequence[str], cwd: Optional[Path]
+) -> dict[str, Any]:
     return _normalized_command_result(command_runner(command, cwd), command)
 
 
@@ -171,7 +177,7 @@ def _module_identity(module_name: str, module: Any) -> str:
 def discover_pdf_backends(
     *,
     importer: Callable[[str], Any] = importlib.import_module,
-    which: Callable[[str], str | None] = shutil.which,
+    which: Callable[[str], Optional[str]] = shutil.which,
 ) -> list[PdfBackend]:
     """Discover only supported non-raster PDF page-copy tools in priority order."""
     backends: list[PdfBackend] = []
@@ -221,7 +227,9 @@ def _page_range_spec(pages: Iterable[int]) -> str:
     return ",".join(ranges)
 
 
-def _successful_command(command_runner: CommandRunner, command: Sequence[str], cwd: Path | None) -> dict[str, Any]:
+def _successful_command(
+    command_runner: CommandRunner, command: Sequence[str], cwd: Optional[Path]
+) -> dict[str, Any]:
     result = _run(command_runner, command, cwd)
     if result["returncode"] != 0:
         raise RuntimeError(
@@ -372,7 +380,14 @@ def extract_pdf_pages(
     }
 
 
-def _issue(issues: list[dict[str, Any]], code: str, *, setting: Mapping[str, str] | None = None, artifact: str | None = None, detail: str | None = None) -> None:
+def _issue(
+    issues: list[dict[str, Any]],
+    code: str,
+    *,
+    setting: Optional[Mapping[str, str]] = None,
+    artifact: Optional[str] = None,
+    detail: Optional[str] = None,
+) -> None:
     entry: dict[str, Any] = {"code": code}
     if setting is not None:
         entry["setting"] = dict(setting)
@@ -472,7 +487,9 @@ def _format_command_records(records: Sequence[Mapping[str, Any]]) -> str:
     return "\n".join(blocks).rstrip() + "\n"
 
 
-def collect_source_state(repo_root: Path, command_runner: CommandRunner = run_command) -> tuple[str, str | None]:
+def collect_source_state(
+    repo_root: Path, command_runner: CommandRunner = run_command
+) -> tuple[str, Optional[str]]:
     """Capture source identity without changing the repository."""
     records = [
         _run(command_runner, ["git", "rev-parse", "HEAD"], repo_root),
@@ -517,13 +534,13 @@ def _validate_output_path(output_path: Path, source_paths: Sequence[Path]) -> No
 
 def collect_validation_bundle(
     *,
-    outdir: Path | str,
+    outdir: Union[Path, str],
     kinematic: str,
-    output: Path | str,
-    phi: str | None = None,
-    epsilon: str | None = None,
-    repo_root: Path | str | None = None,
-    pdf_backends: Sequence[PdfBackend] | None = None,
+    output: Union[Path, str],
+    phi: Optional[str] = None,
+    epsilon: Optional[str] = None,
+    repo_root: Optional[Union[Path, str]] = None,
+    pdf_backends: Optional[Sequence[PdfBackend]] = None,
     command_runner: CommandRunner = run_command,
 ) -> dict[str, Any]:
     """Create a best-effort bundle and return its manifest/result status."""
@@ -662,7 +679,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     arguments = build_argument_parser().parse_args(argv)
     try:
         result = collect_validation_bundle(
