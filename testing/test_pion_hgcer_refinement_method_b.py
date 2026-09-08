@@ -185,6 +185,18 @@ def _cell(result, t_index=0, delta_index=0):
     )
 
 
+def _adaptive_partition_cells(delta_count, events_by_delta):
+    """Build the baseline-only source cells consumed by the adaptive partitioner."""
+    return {
+        (0, delta_index): {
+            "t_index": 0,
+            "delta_index": delta_index,
+            "pion_events": list(events_by_delta.get(delta_index, ())),
+        }
+        for delta_index in range(delta_count)
+    }
+
+
 class PionHGCerMethodBTests(unittest.TestCase):
     def test_runtime_resolver_uses_only_the_fixed_phase_a_complement_partition(self):
         phase = _phase_a()
@@ -551,7 +563,11 @@ class PionHGCerMethodBTests(unittest.TestCase):
         )
         self.assertTrue(adaptive["non_authoritative"])
         self.assertFalse(adaptive["candidate_replaces_legacy_method_b"])
-        self.assertEqual(adaptive["derived_parent_baseline_neff_target"], 20.0)
+        self.assertEqual(adaptive["derived_parent_baseline_neff_reference"], 20.0)
+        self.assertEqual(
+            adaptive["partition_minimum_baseline_usable_delta_cells"], 2
+        )
+        self.assertEqual(adaptive["partition_cell_minimum_baseline_neff"], 10.0)
         self.assertEqual(len(adaptive["t_partitions"][0]["low_slices"]), 3)
         self.assertEqual(len(adaptive["t_partitions"][0]["high_slices"]), 3)
         repeat = method_b.build_pion_hgcer_method_b(phase, config=_config())
@@ -592,6 +608,207 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertEqual(high_slices[0]["mm_low"], method_b.METHOD_B_PROTECTED_MM_HIGH)
         self.assertEqual(high_slices[-1]["mm_high"], MM_EDGES[-1])
 
+    def test_adaptive_partition_requires_two_independently_baseline_supported_delta_cells(self):
+        """Aggregate parent Neff cannot close a slice with no locally usable deltas."""
+        resolved = method_b._resolved_config(_config())
+        t_edges = (0.0, 1.0)
+        events = {
+            delta_index: [(1.05, 1.0), (1.05, 1.0)]
+            for delta_index in range(10)
+        }
+        partitions, reference = method_b._adaptive_t_partitions(
+            _adaptive_partition_cells(10, events), t_edges, MM_EDGES,
+            resolved["support"], resolved["parent_reference"],
+        )
+        low = partitions[0]["low_slices"]
+        self.assertEqual(reference, 20.0)
+        self.assertEqual(len(low), 1)
+        self.assertEqual(low[0]["parent_baseline_neff"], 20.0)
+        self.assertEqual(low[0]["baseline_supported_delta_cell_count"], 0)
+        self.assertEqual(low[0]["partition_support_status"], "unavailable")
+        self.assertEqual(
+            low[0]["partition_support_reason"],
+            "insufficient_baseline_supported_delta_cells",
+        )
+        self.assertTrue(all(
+            row["reason"] == "baseline_effective_entries_below_minimum"
+            for row in low[0]["baseline_delta_support_reasons"]
+        ))
+
+        repaired = copy.deepcopy(events)
+        repaired[0].extend([(1.05, 1.0)] * 8)
+        repaired[1].extend([(0.95, 1.0)] * 8)
+        repaired[2] = [(0.85, 1.0)] * 10
+        repaired[3] = [(0.85, 1.0)] * 10
+        partitions, _ = method_b._adaptive_t_partitions(
+            _adaptive_partition_cells(10, repaired), t_edges, MM_EDGES,
+            resolved["support"], resolved["parent_reference"],
+        )
+        low = sorted(partitions[0]["low_slices"], key=lambda row: row["mm_low"])
+        self.assertEqual([(row["mm_low"], row["mm_high"]) for row in low], [
+            (0.8, 0.9), (0.9, 1.1),
+        ])
+        inner = low[1]
+        self.assertEqual(inner["baseline_supported_delta_indices"], [0, 1])
+        self.assertEqual(inner["baseline_supported_delta_cell_count"], 2)
+        self.assertEqual(inner["partition_support_status"], "available")
+
+    def test_adaptive_partition_support_is_baseline_only_and_uses_legacy_reason_vocabulary(self):
+        resolved = method_b._resolved_config(_config())
+        support = resolved["support"]
+        self.assertEqual(
+            method_b._adaptive_baseline_support_reason(
+                method_b._adaptive_metric([(1.0, 1.0)] * 9, 0.8, 1.1), support
+            ),
+            "baseline_effective_entries_below_minimum",
+        )
+        self.assertEqual(
+            method_b._adaptive_baseline_support_reason(
+                method_b._adaptive_metric([(1.0, -1.0)] * 10, 0.8, 1.1), support
+            ),
+            "baseline_signed_yield_nonpositive",
+        )
+        self.assertEqual(
+            method_b._adaptive_baseline_support_reason(
+                method_b._adaptive_metric(
+                    [(1.0, 1.0)] * 10 + [(1.0, -1.0)] * 9, 0.8, 1.1
+                ), support
+            ),
+            "baseline_cancellation_dominated",
+        )
+
+        phase = _adaptive_supported_phase()
+        baseline = method_b.build_pion_hgcer_method_b(phase, config=_config())
+        changed_host = copy.deepcopy(phase)
+        for index, record in enumerate(changed_host["kaon_host_records"]):
+            record["signed_host_event_contribution"] = (
+                -100.0 if index % 2 else 0.001
+            )
+        changed = method_b.build_pion_hgcer_method_b(changed_host, config=_config())
+        base_partitions = baseline["adaptive_slice_diagnostic"]["t_partitions"]
+        changed_partitions = changed["adaptive_slice_diagnostic"]["t_partitions"]
+        self.assertEqual(base_partitions, changed_partitions)
+        self.assertEqual(
+            baseline["adaptive_slice_diagnostic"]["fingerprint_inputs"]["t_partitions"],
+            changed["adaptive_slice_diagnostic"]["fingerprint_inputs"]["t_partitions"],
+        )
+
+    def test_adaptive_partition_refines_as_baseline_delta_support_allows_and_keeps_sides_asymmetric(self):
+        high = method_b.build_pion_hgcer_method_b(
+            _adaptive_supported_phase(), config=_config()
+        )["adaptive_slice_diagnostic"]["t_partitions"][0]
+        low_phase = _phase_a()
+        for delta in (5.0, 15.0):
+            for mm in (0.85, 0.95, 1.05):
+                _add_region_events(low_phase, delta=delta, mm=mm)
+            for mm in (1.25, 1.35, 1.45):
+                _add_region_events(
+                    low_phase, delta=delta, mm=mm,
+                    pion_weights=(1.0,) * 5, host_weights=(1.0,) * 10,
+                )
+        low = method_b.build_pion_hgcer_method_b(
+            low_phase, config=_config()
+        )["adaptive_slice_diagnostic"]["t_partitions"][0]
+        self.assertGreaterEqual(
+            len(high["low_slices"]), len(low["low_slices"])
+        )
+        self.assertGreater(len(low["low_slices"]), len(low["high_slices"]))
+        self.assertEqual(len(low["high_slices"]), 1)
+
+    def test_adaptive_outer_remainder_recomputes_signed_delta_support_recursively(self):
+        resolved = method_b._resolved_config(_config())
+        events = {index: [] for index in range(4)}
+        events[0].extend([(1.05, 1.0)] * 10)
+        events[1].extend([(1.05, 1.0)] * 10)
+        events[2].extend([(0.95, 1.0)] * 10)
+        events[3].extend([(0.95, 1.0)] * 10)
+        events[2].extend([(0.85, -1.0)] * 9)
+        events[3].extend([(0.85, -1.0)] * 9)
+        partitions, _ = method_b._adaptive_t_partitions(
+            _adaptive_partition_cells(4, events), (0.0, 1.0), MM_EDGES,
+            resolved["support"], resolved["parent_reference"],
+        )
+        low = partitions[0]["low_slices"]
+        self.assertEqual(len(low), 1)
+        self.assertEqual((low[0]["mm_low"], low[0]["mm_high"]), (0.8, 1.1))
+        self.assertEqual(low[0]["baseline_supported_delta_indices"], [0, 1])
+        self.assertEqual(low[0]["partition_support_status"], "available")
+
+    def test_adaptive_partition_repair_does_not_change_local_support_evaluation(self):
+        resolved = method_b._resolved_config(_config())
+        definition = {
+            "slice_id": "t0_low_slice0", "side": "low", "slice_index": 0,
+            "mm_low": 0.8, "mm_high": 1.1,
+        }
+        baseline_failure = method_b._adaptive_slice_row(
+            definition, [(0.95, 1.0)] * 10, [(0.95, 1.0)] * 9,
+            resolved["support"],
+        )
+        host_failure = method_b._adaptive_slice_row(
+            definition, [(0.95, 1.0)] * 9, [(0.95, 1.0)] * 10,
+            resolved["support"],
+        )
+        usable = method_b._adaptive_slice_row(
+            definition, [(0.95, 1.0)] * 10, [(0.95, 1.0)] * 10,
+            resolved["support"],
+        )
+        self.assertEqual(
+            baseline_failure["support_reason"],
+            "baseline_effective_entries_below_minimum",
+        )
+        self.assertEqual(host_failure["support_reason"], "host_effective_entries_below_minimum")
+        self.assertEqual(usable["support_status"], "usable")
+
+    def test_adaptive_parent_references_are_numerically_equivalent_to_legacy_equations(self):
+        resolved = method_b._resolved_config(_config())
+        legacy_cells = []
+        adaptive_cells = {}
+        for delta_index, host_weight in enumerate((1.0, 1.5, 2.0)):
+            metrics = {
+                "host": method_b._adaptive_metric(
+                    [(0.95, host_weight)] * 12, 0.8, 1.1
+                ),
+                "baseline": method_b._adaptive_metric(
+                    [(0.95, 1.0)] * 12, 0.8, 1.1
+                ),
+            }
+            legacy_row = method_b._region_row(
+                {"region_name": "equivalent", "available": True, "reason": None},
+                metrics, resolved["support"],
+            )
+            adaptive_row = {
+                **copy.deepcopy(legacy_row),
+                "slice_id": "t0_low_slice0",
+                "side": "low",
+                "slice_index": 0,
+                "mm_low": 0.8,
+                "mm_high": 1.1,
+            }
+            legacy_cells.append({
+                "t_index": 0, "delta_index": delta_index,
+                "regions": [legacy_row],
+            })
+            adaptive_cells[(0, delta_index)] = {
+                "t_index": 0, "delta_index": delta_index,
+                "slices": [adaptive_row],
+            }
+        legacy, _ = method_b._parent_references(
+            legacy_cells,
+            [{"region_name": "equivalent", "available": True}],
+            (0.0, 1.0), resolved["support"], resolved["parent_reference"],
+        )
+        adaptive, _ = method_b._adaptive_parent_references(
+            adaptive_cells, (0.0, 1.0), resolved["support"],
+            resolved["parent_reference"],
+        )
+        for field in (
+            "parent_reference_ratio", "parent_reference_uncertainty",
+            "usable_delta_cell_count", "contributing_delta_indices",
+            "combined_host_neff", "combined_baseline_neff",
+            "parent_reference_status", "parent_reference_reason",
+        ):
+            self.assertEqual(legacy[0][field], adaptive[0][field])
+
     def test_adaptive_candidates_and_consistency_keep_single_and_inconsistent_evidence(self):
         def row(slice_id, value, sigma, side="low"):
             return {
@@ -602,6 +819,10 @@ class PionHGCerMethodBTests(unittest.TestCase):
                 "parent_relative_sigma": sigma,
             }
 
+        empty = method_b._adaptive_candidate_and_consistency([])
+        self.assertEqual(empty["adaptive_candidate_status"], "unavailable")
+        self.assertIsNone(empty["adaptive_candidate"])
+        self.assertEqual(empty["slice_consistency_status"], "not_evaluable")
         single = method_b._adaptive_candidate_and_consistency([row("one", 1.60, 0.25)])
         self.assertEqual(single["adaptive_candidate_status"], "available_single_slice")
         self.assertEqual(single["adaptive_candidate"], 1.60)
@@ -616,6 +837,10 @@ class PionHGCerMethodBTests(unittest.TestCase):
         self.assertEqual(multi["slice_consistency_ndf"], 1)
         self.assertGreater(multi["slice_consistency_chi2"], 1.0)
         self.assertEqual(len(multi["slice_consistency_log_pulls"]), 2)
+        small = method_b._adaptive_candidate_and_consistency([row("small", 0.05, 0.01)])
+        large = method_b._adaptive_candidate_and_consistency([row("large", 25.0, 2.0)])
+        self.assertEqual(small["adaptive_candidate"], 0.05)
+        self.assertEqual(large["adaptive_candidate"], 25.0)
 
     def test_adaptive_partition_merges_low_support_and_retains_unsupported_side(self):
         weak = _phase_a()

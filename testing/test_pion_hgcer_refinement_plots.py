@@ -242,7 +242,16 @@ def _cfix2_method_b():
             "mm_high": high,
             "atomic_interval_indices": [index],
             "partition_support_status": partition,
-            "partition_support_reason": None if partition == "available" else "parent_baseline_effective_entries_below_target",
+            "partition_support_reason": (
+                None if partition == "available"
+                else "insufficient_baseline_supported_delta_cells"
+            ),
+            "baseline_supported_delta_cell_count": len(delta_edges) - 1,
+            "baseline_supported_delta_indices": list(range(len(delta_edges) - 1)),
+            "baseline_delta_support_reasons": [
+                {"delta_index": delta_index, "status": "available", "reason": None}
+                for delta_index in range(len(delta_edges) - 1)
+            ],
             "parent_baseline_record_count": 40,
             "parent_baseline_signed_yield": 40.0,
             "parent_baseline_abs_support": 40.0,
@@ -329,6 +338,10 @@ def _cfix2_method_b():
         "delta_edges": deepcopy(delta_edges),
         "phase_a_mm_edges": mm_edges,
         "protected_regions": deepcopy(method_b["protected_regions"]),
+        "partition_minimum_baseline_usable_delta_cells": 2,
+        "partition_cell_minimum_baseline_neff": 10.0,
+        "partition_cell_minimum_baseline_significance": 2.0,
+        "derived_parent_baseline_neff_reference": 20.0,
         "t_partitions": partitions,
         "parent_slice_references": [],
         "cells": cells,
@@ -340,6 +353,102 @@ def _cfix2_method_b():
         "refinement_applied": False,
         "candidate_replaces_legacy_method_b": False,
     }
+    return method_b
+
+
+def _cfix2_method_b_with_slice_count(slice_count):
+    """Expand one detached C.Fix.2 t parent without changing its frozen geometry."""
+    if slice_count < 2:
+        raise AssertionError("fixture needs one slice on each protected complement side")
+    method_b = _cfix2_method_b()
+    adaptive = method_b["adaptive_slice_diagnostic"]
+    delta_count = len(adaptive["delta_edges"]) - 1
+    low_count = slice_count - 1
+    low_width = (1.10 - 0.80) / float(low_count)
+
+    def partition_row(index, side, low, high):
+        return {
+            "t_index": 0,
+            "t_low": adaptive["t_edges"][0],
+            "t_high": adaptive["t_edges"][1],
+            "side": side,
+            "slice_index": index,
+            "slice_index_within_side": index,
+            "slice_id": "t0_{}_slice{}".format(side, index),
+            "mm_low": low,
+            "mm_high": high,
+            "atomic_interval_indices": [index],
+            "partition_support_status": "available",
+            "partition_support_reason": None,
+            "baseline_supported_delta_cell_count": delta_count,
+            "baseline_supported_delta_indices": list(range(delta_count)),
+            "baseline_delta_support_reasons": [
+                {"delta_index": delta_index, "status": "available", "reason": None}
+                for delta_index in range(delta_count)
+            ],
+            "parent_baseline_record_count": 40,
+            "parent_baseline_signed_yield": 40.0,
+            "parent_baseline_abs_support": 40.0,
+            "parent_baseline_sumw2": 40.0,
+            "parent_baseline_sigma": 40.0 ** 0.5,
+            "parent_baseline_neff": 40.0 + index,
+            "parent_baseline_significance": 40.0 / (40.0 ** 0.5),
+        }
+
+    slices = [
+        partition_row(
+            index, "low", 0.80 + index * low_width,
+            1.10 if index == low_count - 1 else 0.80 + (index + 1) * low_width,
+        )
+        for index in range(low_count)
+    ]
+    slices.append(partition_row(0, "high", 1.23, 1.45))
+    partition = {
+        "t_index": 0,
+        "t_low": adaptive["t_edges"][0],
+        "t_high": adaptive["t_edges"][1],
+        "low_slices": deepcopy(slices[:-1]),
+        "high_slices": deepcopy(slices[-1:]),
+        "slices": deepcopy(slices),
+    }
+    adaptive["t_partitions"][0] = partition
+    for cell in adaptive["cells"]:
+        if cell["t_index"] != 0:
+            continue
+        rows = []
+        for slice_index, definition in enumerate(slices):
+            row = deepcopy(definition)
+            value = 1.0 + 0.01 * slice_index
+            row.update({
+                "support_status": "usable",
+                "support_reason": None,
+                "host_record_count": 20,
+                "host_yield": value * 20.0,
+                "host_abs_support": 20.0,
+                "host_sumw2": 20.0,
+                "host_neff": 20.0,
+                "host_sigma": 20.0 ** 0.5,
+                "baseline_record_count": 20,
+                "baseline_pion_yield": 20.0,
+                "baseline_pion_abs_support": 20.0,
+                "baseline_pion_sumw2": 20.0,
+                "baseline_pion_neff": 20.0,
+                "baseline_pion_sigma": 20.0 ** 0.5,
+                "baseline_pion_significance": 20.0 / (20.0 ** 0.5),
+                "raw_ratio": value,
+                "raw_ratio_sigma": 0.10,
+                "parent_reference_ratio": 1.0,
+                "parent_reference_sigma": 0.05,
+                "parent_relative_status": "available",
+                "parent_relative_reason": None,
+                "parent_relative_ratio": value,
+                "parent_relative_sigma": 0.10,
+            })
+            rows.append(row)
+        cell["slices"] = rows
+        cell["N_available_slices"] = len(rows)
+        cell["N_available_low_slices"] = len(rows) - 1
+        cell["N_available_high_slices"] = 1
     return method_b
 
 
@@ -2162,6 +2271,13 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             presentation["per_t"][0]["candidate_points"][0]["adaptive_candidate"],
             1.18,
         )
+        first_slice = presentation["per_t"][0]["slices"][0]
+        self.assertEqual(first_slice["baseline_supported_delta_cell_count"], 3)
+        self.assertEqual(first_slice["baseline_supported_delta_indices"], [0, 1, 2])
+        self.assertEqual(
+            [entry["status"] for entry in first_slice["baseline_delta_support_reasons"]],
+            ["available", "available", "available"],
+        )
         self.assertNotIn("KLambdaSigma0", presentation["per_t"][0]["slice_series"])
         self.assertEqual(method_b, source_before)
         self.assertEqual(display, display_before)
@@ -2183,6 +2299,16 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
         )
         self.assertFalse(unavailable["available"])
         self.assertEqual(unavailable["reason"], "adaptive_slice_cell_lattice_invalid")
+
+        broken_provenance = deepcopy(method_b)
+        broken_provenance["adaptive_slice_diagnostic"][
+            "partition_cell_minimum_baseline_neff"
+        ] = 9.0
+        unavailable = plots.method_b_cfix2_display_payload(
+            plots.method_b_display_payload(broken_provenance, {})
+        )
+        self.assertFalse(unavailable["available"])
+        self.assertEqual(unavailable["reason"], "adaptive_slice_partition_provenance_invalid")
 
     def test_cfix2_renderer_uses_frozen_values_and_appends_two_pages_per_t(self):
         display = plots.method_b_display_payload(_cfix2_method_b(), {})
@@ -2219,6 +2345,74 @@ class PionHGCerRefinementPlotTests(unittest.TestCase):
             line.endpoints[1] == 1.0 and line.endpoints[3] == 1.0
             for line in root.lines
         ))
+
+    def test_cfix2_renderer_scales_partition_rows_and_copies_delta_support_provenance(self):
+        display = plots.method_b_display_payload(_cfix2_method_b_with_slice_count(8), {})
+        adaptive = display["adaptive_slice_diagnostic"]
+        stored = adaptive["t_partitions"][0]["slices"][0]
+        stored["baseline_supported_delta_cell_count"] = 2
+        stored["baseline_supported_delta_indices"] = [0, 1]
+        stored["baseline_delta_support_reasons"] = [
+            {"delta_index": 0, "status": "available", "reason": None},
+            {"delta_index": 1, "status": "available", "reason": None},
+            {
+                "delta_index": 2,
+                "status": "unavailable",
+                "reason": "baseline_effective_entries_below_minimum",
+            },
+        ]
+        root = FakeROOT()
+        with mock.patch.object(plots, "_import_root", return_value=root):
+            plots.render_pion_hgcer_method_b_cfix2_pages(
+                "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+            )
+        partition_record = root.print_records[0]
+        partition_lines = [
+            line for line in partition_record["retained"]
+            if isinstance(line, FakeTLine)
+            and line.endpoints[0] != line.endpoints[2]
+            and 0.80 <= line.endpoints[0] <= 1.45
+            and 0.80 <= line.endpoints[2] <= 1.45
+        ]
+        self.assertEqual(len(partition_lines), 8)
+        self.assertEqual(
+            len({line.endpoints[1] for line in partition_lines}), 8
+        )
+        labels = [
+            draw[2]
+            for text in partition_record["retained"] if isinstance(text, FakeTLatex)
+            for draw in text.draws if "N_{d}=" in draw[2]
+        ]
+        self.assertEqual(len(labels), 8)
+        self.assertTrue(any("N_{d}=2" in label for label in labels))
+
+    def test_cfix2_renderer_scales_canvas_and_status_positions_for_many_slices(self):
+        heights = []
+        for slice_count in (3, 8, 15):
+            root = FakeROOT()
+            display = plots.method_b_display_payload(
+                _cfix2_method_b_with_slice_count(slice_count), {}
+            )
+            with mock.patch.object(plots, "_import_root", return_value=root):
+                plots.render_pion_hgcer_method_b_cfix2_pages(
+                    "synthetic_hgcer_debug.pdf", display, page_manifest=[]
+                )
+            heights.append(root.print_records[0]["canvas"].height)
+            if slice_count == 15:
+                status_record = root.print_records[1]
+                status_text = next(
+                    text for text in status_record["retained"]
+                    if isinstance(text, FakeTLatex)
+                    and any(draw[2].startswith("available slices=") for draw in text.draws)
+                )
+                positions = [draw[1] for draw in status_text.draws]
+                self.assertEqual(len(positions), 18)
+                self.assertTrue(all(0.06 <= position <= 0.82 for position in positions))
+                self.assertEqual(positions, sorted(positions, reverse=True))
+                self.assertEqual(len(set(positions)), len(positions))
+                self.assertGreater(status_record["canvas"].height, 1200)
+        self.assertEqual(heights, sorted(heights))
+        self.assertGreater(heights[-1], heights[0])
 
     def test_cfix1_presentation_source_is_dynamic_and_never_rebuilds_method_b(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_refinement_plots.py").read_text(encoding="utf-8")

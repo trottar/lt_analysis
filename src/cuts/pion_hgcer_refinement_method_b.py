@@ -28,7 +28,7 @@ METHOD_B_PROTECTED_MM_HIGH = 1.23
 METHOD_B_PROTECTED_REGION_NAME = "KLambdaSigma0"
 
 _ADAPTIVE_PARTITION_METHOD = (
-    "baseline_parent_neff_first_passing_protected_outward/v1"
+    "baseline_delta_support_first_passing_protected_outward/v2"
 )
 _ADAPTIVE_PARTITION_SOURCE = "phase_a_mm_edges_and_baseline_support_only"
 
@@ -896,18 +896,18 @@ def _adaptive_unavailable(
     return _json_ready(result)
 
 
-def _adaptive_partition_support_reason(baseline, support, target_neff):
-    """Return the baseline-only reason that a tentative adaptive slice cannot close."""
-    if baseline["effective_entries"] < target_neff:
-        return "parent_baseline_effective_entries_below_target"
+def _adaptive_baseline_support_reason(baseline, support):
+    """Return the legacy baseline-side support reason for one adaptive delta cell."""
+    if baseline["effective_entries"] < support["minimum_baseline_neff"]:
+        return "baseline_effective_entries_below_minimum"
     if baseline["signed_yield"] <= support["denominator_absolute_epsilon"]:
-        return "parent_baseline_signed_yield_nonpositive"
+        return "baseline_signed_yield_nonpositive"
     significance = (
         baseline["signed_yield"] / baseline["sigma"]
         if baseline["sigma"] > 0.0 else None
     )
     if significance is None or significance < support["minimum_baseline_significance"]:
-        return "parent_baseline_cancellation_dominated"
+        return "baseline_cancellation_dominated"
     return None
 
 
@@ -942,8 +942,38 @@ def _adaptive_atomic_intervals(mm_edges, side):
     return list(reversed(atomic)) if side == "low" else atomic
 
 
-def _adaptive_slice_metadata(t_index, t_edges, side, slice_index, atoms, baseline, reason):
+def _adaptive_partition_baseline_metrics(
+    baseline_events_by_delta, mm_low, mm_high, support,
+):
+    """Measure baseline-only partition support separately in every frozen delta cell."""
+    all_events = []
+    supported_indices = []
+    delta_support = []
+    for delta_index in sorted(baseline_events_by_delta):
+        events = baseline_events_by_delta[delta_index]
+        baseline = _adaptive_metric(events, mm_low, mm_high)
+        reason = _adaptive_baseline_support_reason(baseline, support)
+        if reason is None:
+            supported_indices.append(int(delta_index))
+        delta_support.append({
+            "delta_index": int(delta_index),
+            "status": "available" if reason is None else "unavailable",
+            "reason": reason,
+        })
+        all_events.extend(events)
+    return (
+        _adaptive_metric(all_events, mm_low, mm_high),
+        supported_indices,
+        delta_support,
+    )
+
+
+def _adaptive_slice_metadata(
+    t_index, t_edges, side, slice_index, atoms, baseline, supported_indices,
+    delta_support, minimum_usable_delta_cells,
+):
     """Create detached t-parent provenance for one finalized adaptive slice."""
+    available = len(supported_indices) >= minimum_usable_delta_cells
     return {
         "t_index": int(t_index),
         "t_low": float(t_edges[t_index]),
@@ -957,8 +987,13 @@ def _adaptive_slice_metadata(t_index, t_edges, side, slice_index, atoms, baselin
         "atomic_interval_indices": [
             int(atom["phase_a_mm_bin_index"]) for atom in atoms
         ],
-        "partition_support_status": "available" if reason is None else "unavailable",
-        "partition_support_reason": reason,
+        "partition_support_status": "available" if available else "unavailable",
+        "partition_support_reason": (
+            None if available else "insufficient_baseline_supported_delta_cells"
+        ),
+        "baseline_supported_delta_cell_count": len(supported_indices),
+        "baseline_supported_delta_indices": list(supported_indices),
+        "baseline_delta_support_reasons": deepcopy(delta_support),
         "parent_baseline_record_count": baseline["record_count"],
         "parent_baseline_signed_yield": baseline["signed_yield"],
         "parent_baseline_abs_support": baseline["absolute_weight_support"],
@@ -972,49 +1007,52 @@ def _adaptive_slice_metadata(t_index, t_edges, side, slice_index, atoms, baselin
     }
 
 
-def _adaptive_partition_side(t_index, t_edges, baseline_events, mm_edges, side, support, target_neff):
+def _adaptive_partition_side(
+    t_index, t_edges, baseline_events_by_delta, mm_edges, side, support,
+    minimum_usable_delta_cells,
+):
     """Partition one sensitive side, retaining even unsupported outer coverage."""
     atoms = _adaptive_atomic_intervals(mm_edges, side)
     closed = []
     tentative = []
     for atom in atoms:
         tentative.append(atom)
-        baseline = _adaptive_metric(
-            baseline_events,
+        baseline, supported_indices, delta_support = _adaptive_partition_baseline_metrics(
+            baseline_events_by_delta,
             min(entry["mm_low"] for entry in tentative),
-            max(entry["mm_high"] for entry in tentative),
+            max(entry["mm_high"] for entry in tentative), support,
         )
-        reason = _adaptive_partition_support_reason(baseline, support, target_neff)
-        if reason is None:
-            closed.append((list(tentative), baseline, None))
+        if len(supported_indices) >= minimum_usable_delta_cells:
+            closed.append((list(tentative), baseline, supported_indices, delta_support))
             tentative = []
     if tentative:
         merged = list(tentative)
         while closed:
-            previous_atoms, _, _ = closed.pop()
+            previous_atoms, _, _, _ = closed.pop()
             merged = list(previous_atoms) + merged
-            baseline = _adaptive_metric(
-                baseline_events,
+            baseline, supported_indices, delta_support = _adaptive_partition_baseline_metrics(
+                baseline_events_by_delta,
                 min(entry["mm_low"] for entry in merged),
-                max(entry["mm_high"] for entry in merged),
+                max(entry["mm_high"] for entry in merged), support,
             )
-            reason = _adaptive_partition_support_reason(baseline, support, target_neff)
-            if reason is None:
-                closed.append((merged, baseline, None))
+            if len(supported_indices) >= minimum_usable_delta_cells:
+                closed.append((merged, baseline, supported_indices, delta_support))
                 break
         else:
-            baseline = _adaptive_metric(
-                baseline_events,
+            baseline, supported_indices, delta_support = _adaptive_partition_baseline_metrics(
+                baseline_events_by_delta,
                 min(entry["mm_low"] for entry in merged),
-                max(entry["mm_high"] for entry in merged),
+                max(entry["mm_high"] for entry in merged), support,
             )
-            reason = _adaptive_partition_support_reason(baseline, support, target_neff)
-            closed.append((merged, baseline, reason))
+            closed.append((merged, baseline, supported_indices, delta_support))
     return [
         _adaptive_slice_metadata(
-            t_index, t_edges, side, index, atoms_for_slice, baseline, reason
+            t_index, t_edges, side, index, atoms_for_slice, baseline,
+            supported_indices, delta_support, minimum_usable_delta_cells,
         )
-        for index, (atoms_for_slice, baseline, reason) in enumerate(closed)
+        for index, (
+            atoms_for_slice, baseline, supported_indices, delta_support,
+        ) in enumerate(closed)
     ]
 
 
@@ -1041,22 +1079,30 @@ def _adaptive_validate_partition(t_partition, mm_edges):
 
 def _adaptive_t_partitions(cells, t_edges, mm_edges, support, parent_config):
     """Build one baseline-only adaptive partition for each canonical t parent."""
-    target_neff = (
+    derived_parent_neff_reference = (
         support["minimum_baseline_neff"]
         * parent_config["minimum_usable_delta_cells"]
     )
     result = []
     for t_index in range(len(t_edges) - 1):
-        baseline_events = [
-            event
-            for cell in cells.values() if cell["t_index"] == t_index
-            for event in cell["pion_events"]
-        ]
+        baseline_events_by_delta = {
+            delta_index: []
+            for delta_index in sorted({
+                cell["delta_index"] for cell in cells.values()
+                if cell["t_index"] == t_index
+            })
+        }
+        for key in sorted(cells):
+            cell = cells[key]
+            if cell["t_index"] == t_index:
+                baseline_events_by_delta[cell["delta_index"]] = list(cell["pion_events"])
         low_slices = _adaptive_partition_side(
-            t_index, t_edges, baseline_events, mm_edges, "low", support, target_neff
+            t_index, t_edges, baseline_events_by_delta, mm_edges, "low", support,
+            parent_config["minimum_usable_delta_cells"],
         )
         high_slices = _adaptive_partition_side(
-            t_index, t_edges, baseline_events, mm_edges, "high", support, target_neff
+            t_index, t_edges, baseline_events_by_delta, mm_edges, "high", support,
+            parent_config["minimum_usable_delta_cells"],
         )
         partition = {
             "t_index": int(t_index),
@@ -1065,11 +1111,18 @@ def _adaptive_t_partitions(cells, t_edges, mm_edges, support, parent_config):
             "low_slices": low_slices,
             "high_slices": high_slices,
             "slices": low_slices + high_slices,
-            "derived_parent_baseline_neff_target": target_neff,
+            "partition_minimum_baseline_usable_delta_cells": (
+                parent_config["minimum_usable_delta_cells"]
+            ),
+            "partition_cell_minimum_baseline_neff": support["minimum_baseline_neff"],
+            "partition_cell_minimum_baseline_significance": (
+                support["minimum_baseline_significance"]
+            ),
+            "derived_parent_baseline_neff_reference": derived_parent_neff_reference,
         }
         _adaptive_validate_partition(partition, mm_edges)
         result.append(partition)
-    return result, target_neff
+    return result, derived_parent_neff_reference
 
 
 def _adaptive_slice_row(slice_definition, host_events, baseline_events, support):
@@ -1281,7 +1334,7 @@ def _build_adaptive_slice_diagnostic(
     """Build the C.Fix.2 parallel adaptive Method-B diagnostic only."""
     protected = deepcopy(resolved["protected_regions"])
     try:
-        partitions, target_neff = _adaptive_t_partitions(
+        partitions, derived_parent_neff_reference = _adaptive_t_partitions(
             source_cells, t_edges, mm_edges, resolved["support"],
             resolved["parent_reference"],
         )
@@ -1373,7 +1426,16 @@ def _build_adaptive_slice_diagnostic(
             "protected_regions": protected,
             "partition_method": _ADAPTIVE_PARTITION_METHOD,
             "partition_source": _ADAPTIVE_PARTITION_SOURCE,
-            "derived_parent_baseline_neff_target": target_neff,
+            "partition_minimum_baseline_usable_delta_cells": (
+                resolved["parent_reference"]["minimum_usable_delta_cells"]
+            ),
+            "partition_cell_minimum_baseline_neff": (
+                resolved["support"]["minimum_baseline_neff"]
+            ),
+            "partition_cell_minimum_baseline_significance": (
+                resolved["support"]["minimum_baseline_significance"]
+            ),
+            "derived_parent_baseline_neff_reference": derived_parent_neff_reference,
             "support": resolved["support"],
             "parent_reference": resolved["parent_reference"],
             "t_partitions": partitions,
@@ -1394,7 +1456,16 @@ def _build_adaptive_slice_diagnostic(
             "delta_edges": list(delta_edges),
             "phase_a_mm_edges": list(mm_edges),
             "protected_regions": protected,
-            "derived_parent_baseline_neff_target": target_neff,
+            "partition_minimum_baseline_usable_delta_cells": (
+                resolved["parent_reference"]["minimum_usable_delta_cells"]
+            ),
+            "partition_cell_minimum_baseline_neff": (
+                resolved["support"]["minimum_baseline_neff"]
+            ),
+            "partition_cell_minimum_baseline_significance": (
+                resolved["support"]["minimum_baseline_significance"]
+            ),
+            "derived_parent_baseline_neff_reference": derived_parent_neff_reference,
             "t_partitions": partitions,
             "parent_slice_references": references,
             "cells": serialized_cells,

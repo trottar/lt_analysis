@@ -2383,7 +2383,8 @@ def _method_b_cfix2_slice_row(raw, *, measurement=True):
     row = _mapping(raw)
     required = [
         "slice_id", "side", "slice_index", "mm_low", "mm_high",
-        "partition_support_status",
+        "partition_support_status", "baseline_supported_delta_cell_count",
+        "baseline_supported_delta_indices", "baseline_delta_support_reasons",
     ]
     if measurement:
         required.extend(("support_status", "parent_relative_status"))
@@ -2402,6 +2403,8 @@ def _method_b_cfix2_slice_row(raw, *, measurement=True):
             "parent_baseline_signed_yield", "parent_baseline_abs_support",
             "parent_baseline_sumw2", "parent_baseline_sigma",
             "parent_baseline_neff", "parent_baseline_significance",
+            "baseline_supported_delta_cell_count",
+            "baseline_supported_delta_indices", "baseline_delta_support_reasons",
             "support_status", "support_reason", "host_record_count", "host_yield",
             "host_abs_support", "host_sumw2", "host_neff", "host_sigma",
             "baseline_record_count", "baseline_pion_yield",
@@ -2415,6 +2418,15 @@ def _method_b_cfix2_slice_row(raw, *, measurement=True):
     }
     copied["mm_low"] = low
     copied["mm_high"] = high
+    count = copied["baseline_supported_delta_cell_count"]
+    indices = copied["baseline_supported_delta_indices"]
+    reasons = copied["baseline_delta_support_reasons"]
+    if (
+        isinstance(count, bool) or not isinstance(count, int) or count < 0
+        or not isinstance(indices, list) or len(indices) != count
+        or len(set(indices)) != len(indices) or not isinstance(reasons, list)
+    ):
+        return None
     return copied
 
 
@@ -2446,6 +2458,19 @@ def method_b_cfix2_display_payload(method_b_display):
         delta_edges
     ) != tuple(_method_b_cfix1_edges(display, "delta_edges")):
         return _method_b_cfix2_unavailable("adaptive_slice_display_geometry_mismatch")
+    if not (
+        adaptive.get("partition_minimum_baseline_usable_delta_cells") == 2
+        and _method_b_cfix2_scalar(
+            adaptive.get("partition_cell_minimum_baseline_neff")
+        ) == 10.0
+        and _method_b_cfix2_scalar(
+            adaptive.get("partition_cell_minimum_baseline_significance")
+        ) == 2.0
+        and _method_b_cfix2_scalar(
+            adaptive.get("derived_parent_baseline_neff_reference")
+        ) == 20.0
+    ):
+        return _method_b_cfix2_unavailable("adaptive_slice_partition_provenance_invalid")
 
     protected = [deepcopy(dict(_mapping(entry))) for entry in adaptive.get("protected_regions") or ()]
     if len(protected) != 1:
@@ -2474,6 +2499,60 @@ def method_b_cfix2_display_payload(method_b_display):
             return _method_b_cfix2_unavailable("adaptive_slice_partition_rows_invalid")
         if len({row["slice_id"] for row in rows}) != len(rows):
             return _method_b_cfix2_unavailable("adaptive_slice_partition_rows_invalid")
+        for row in rows:
+            supported_indices = row["baseline_supported_delta_indices"]
+            support_reasons = row["baseline_delta_support_reasons"]
+            if (
+                any(
+                    _method_b_cfix1_index(index, len(delta_edges) - 1) is None
+                    for index in supported_indices
+                )
+                or len(support_reasons) != len(delta_edges) - 1
+            ):
+                return _method_b_cfix2_unavailable("adaptive_slice_partition_support_invalid")
+            reasons_by_delta = {}
+            for entry in support_reasons:
+                entry = _mapping(entry)
+                delta_index = _method_b_cfix1_index(
+                    entry.get("delta_index"), len(delta_edges) - 1
+                )
+                if delta_index is None or delta_index in reasons_by_delta:
+                    return _method_b_cfix2_unavailable(
+                        "adaptive_slice_partition_support_invalid"
+                    )
+                status = entry.get("status")
+                reason = entry.get("reason")
+                if status not in {"available", "unavailable"}:
+                    return _method_b_cfix2_unavailable(
+                        "adaptive_slice_partition_support_invalid"
+                    )
+                if (status == "available") != (reason is None):
+                    return _method_b_cfix2_unavailable(
+                        "adaptive_slice_partition_support_invalid"
+                    )
+                reasons_by_delta[delta_index] = status
+            if (
+                set(reasons_by_delta) != set(range(len(delta_edges) - 1))
+                or {index for index, status in reasons_by_delta.items() if status == "available"}
+                != set(supported_indices)
+                or row["partition_support_status"] not in {"available", "unavailable"}
+                or (
+                    row["partition_support_status"] == "available"
+                    and (
+                        len(supported_indices) < 2
+                        or row.get("partition_support_reason") is not None
+                    )
+                )
+                or (
+                    row["partition_support_status"] == "unavailable"
+                    and (
+                        len(supported_indices) >= 2
+                        or row.get("partition_support_reason")
+                        != "insufficient_baseline_supported_delta_cells"
+                    )
+                )
+            ):
+                return _method_b_cfix2_unavailable("adaptive_slice_partition_support_invalid")
         low_rows = sorted(
             (row for row in rows if row["side"] == "low"), key=lambda row: row["mm_low"]
         )
@@ -2640,7 +2719,14 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
     title = "Method-B C.Fix.2 adaptive slices |t| = [{:.4g}, {:.4g}] GeV^2".format(
         group["t_low"], group["t_high"]
     )
-    canvas = ROOT.TCanvas("C_hgcer_cfix2_slices_t{}".format(t_index + 1), title, 1500, 1100)
+    sorted_slices = sorted(group["slices"], key=lambda entry: entry["mm_low"])
+    partition_line_count = max(1, len(sorted_slices))
+    canvas_height = max(1100, 850 + 70 * partition_line_count)
+    partition_text_size = min(0.022, 0.33 / float(partition_line_count + 2))
+    partition_y_maximum = float(partition_line_count) + 1.0
+    canvas = ROOT.TCanvas(
+        "C_hgcer_cfix2_slices_t{}".format(t_index + 1), title, 1500, canvas_height
+    )
     try:
         draw_objects = []
         canvas.Divide(1, 2)
@@ -2648,33 +2734,35 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
         frame = _display_frame(
             ROOT, "H_hgcer_cfix2_partition_t{}".format(t_index + 1), title,
             (presentation["phase_a_mm_edges"][0], presentation["phase_a_mm_edges"][-1]),
-            (0.0, 1.0), "baseline-support partition",
+            (0.0, partition_y_maximum), "baseline-support partition",
         )
         frame.Draw("AXIS")
         draw_objects.append(frame)
         protected = presentation["protected_regions"][0]
         for edge in (protected["mm_low"], protected["mm_high"]):
-            line = ROOT.TLine(edge, 0.0, edge, 1.0)
+            line = ROOT.TLine(edge, 0.0, edge, partition_y_maximum)
             line.SetLineStyle(2)
             line.SetLineColor(2)
             line.Draw("same")
             draw_objects.append(line)
         text = ROOT.TLatex()
-        text.SetTextSize(0.022)
+        text.SetTextSize(partition_text_size)
         text.DrawLatex(
-            0.5 * (protected["mm_low"] + protected["mm_high"]), 0.90,
+            0.5 * (protected["mm_low"] + protected["mm_high"]),
+            partition_y_maximum - 0.30,
             "protected; not used",
         )
-        for index, row in enumerate(sorted(group["slices"], key=lambda entry: entry["mm_low"])):
-            y = 0.72 - 0.10 * (index % 6)
+        for index, row in enumerate(sorted_slices):
+            y = float(partition_line_count - index)
             line = ROOT.TLine(row["mm_low"], y, row["mm_high"], y)
             line.SetLineWidth(3)
             line.SetLineColor(4 if row["side"] == "low" else 8)
             line.Draw("same")
             text.DrawLatex(
-                row["mm_low"], y + 0.03,
-                "{} [{:.3f}, {:.3f}] N_{{eff}}={} {}".format(
+                row["mm_low"], y + 0.10,
+                "{} [{:.3f}, {:.3f}] N_{{d}}={} N_{{eff}}={} {}".format(
                     row["slice_id"], row["mm_low"], row["mm_high"],
+                    row.get("baseline_supported_delta_cell_count"),
                     _method_b_cfix2_text(row.get("parent_baseline_neff")),
                     row.get("partition_support_status"),
                 ),
@@ -2709,13 +2797,18 @@ def _render_method_b_cfix2_adaptive_slices_page(ROOT, pdf_name, presentation, gr
             points = group["slice_series"].get(row["slice_id"], ())
             if not points:
                 continue
+            marker_styles = (20, 21, 22, 23, 29, 33)
+            marker_colors = (4, 8, 6, 46, 38, 28)
+            marker_index = index - len(marker_styles) * (
+                index // len(marker_styles)
+            )
             graph = ROOT.TGraphErrors()
             for point_index, point in enumerate(points):
                 graph.SetPoint(point_index, point["delta_center"], point["Qtilde"])
                 graph.SetPointError(point_index, 0.0, point["Qtilde_uncertainty"])
-            graph.SetMarkerStyle((20, 21, 22, 23, 29, 33)[index % 6])
-            graph.SetMarkerColor((4, 8, 6, 46, 38, 28)[index % 6])
-            graph.SetLineColor((4, 8, 6, 46, 38, 28)[index % 6])
+            graph.SetMarkerStyle(marker_styles[marker_index])
+            graph.SetMarkerColor(marker_colors[marker_index])
+            graph.SetLineColor(marker_colors[marker_index])
             graph.Draw("P same")
             legend.AddEntry(
                 graph, "{} {} [{:.3f}, {:.3f}]".format(
@@ -2765,10 +2858,14 @@ def _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest):
     cells = tuple(group["cells"])
     columns = min(3, len(cells))
     rows = int(math.ceil(float(len(cells)) / float(columns)))
+    max_lines = max(3 + len(cell["slices"]) for cell in cells)
+    canvas_height = max(1200, 220 * max_lines)
     title = "Method-B C.Fix.2 adaptive status |t| = [{:.4g}, {:.4g}] GeV^2".format(
         group["t_low"], group["t_high"]
     )
-    canvas = ROOT.TCanvas("C_hgcer_cfix2_status_t{}".format(t_index + 1), title, 1800, 1200)
+    canvas = ROOT.TCanvas(
+        "C_hgcer_cfix2_status_t{}".format(t_index + 1), title, 1800, canvas_height
+    )
     try:
         draw_objects = []
         canvas.Divide(columns, rows)
@@ -2783,7 +2880,6 @@ def _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest):
             draw_objects.append(frame)
             text = ROOT.TLatex()
             text.SetNDC()
-            text.SetTextSize(0.021)
             lines = [
                 "available slices={} (low={}, high={})".format(
                     cell.get("N_available_slices"), cell.get("N_available_low_slices"),
@@ -2809,10 +2905,19 @@ def _render_method_b_cfix2_status_page(ROOT, pdf_name, group, manifest):
                         _method_b_cfix2_text(row.get("parent_relative_sigma")),
                     )
                 )
-            y_position = 0.82
-            for line in lines:
+            if len(lines) == 1:
+                positions = (0.82,)
+                text_size = 0.021
+            else:
+                step = (0.82 - 0.06) / float(len(lines) - 1)
+                positions = tuple(
+                    max(0.06, min(0.82, 0.82 - index * step))
+                    for index in range(len(lines))
+                )
+                text_size = min(0.021, 0.45 * step)
+            text.SetTextSize(text_size)
+            for line, y_position in zip(lines, positions):
                 text.DrawLatexNDC(0.04, y_position, line)
-                y_position -= 0.052
             draw_objects.append(text)
             label = _method_b_cfix2_annotation(ROOT)
             label.SetTextSize(0.015)
