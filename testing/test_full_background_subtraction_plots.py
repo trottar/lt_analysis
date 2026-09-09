@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import shutil
 import subprocess
@@ -2977,6 +2978,15 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         first = payload["per_t"][0]["cells"][0]
         self.assertEqual(len(first["kaon_rows"]), 2)
         self.assertEqual(len(first["pion_rows"]), 2)
+        self.assertTrue(all(
+            row["canonical_t_index"] == 0 and row["delta_index"] == 0
+            for row in first["kaon_rows"] + first["pion_rows"]
+        ))
+        self.assertEqual(
+            [row["P_hgcer_npeSum"] for row in first["kaon_rows"]], [0.45, 2.75]
+        )
+        self.assertTrue(any(row["P_hgcer_npeSum"] < 2.0 for row in first["pion_rows"]))
+        self.assertTrue(any(row["P_hgcer_npeSum"] > 2.0 for row in first["pion_rows"]))
         self.assertEqual(
             [row["diagnostic_weight"] for row in first["kaon_rows"]], [2.0, -1.25]
         )
@@ -2985,6 +2995,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertTrue(all(row["P_hgcer_npeSum"] > 0.0 for row in first["kaon_rows"]))
         self.assertTrue(all(row["source_label"] != "excluded-nommcuts" for row in first["pion_rows"]))
+        self.assertTrue(all(row["source_label"] != "excluded-nonpositive" for row in first["pion_rows"]))
         self.assertEqual(first["method_a"]["prompt_positive_count"], 101)
         self.assertEqual(first["method_a"]["prompt_low_count"], 17)
         self.assertEqual(first["method_a"]["prompt_control_count"], 84)
@@ -3007,6 +3018,37 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             template_before,
         )
 
+    def test_e3_copies_stored_method_a_annotations_without_row_recomputation(self):
+        diagnostic, method_a = _e3_fixture()
+        baseline = plots.build_full_background_subtraction_e3_payload(
+            diagnostic, method_a
+        )
+        altered_diagnostic, altered_method_a = _e3_fixture()
+        altered_diagnostic["records"]["kaon"][0].update(
+            P_hgcer_npeSum=1.75, diagnostic_weight=-41.0
+        )
+        altered_diagnostic["records"]["kaon"][1].update(
+            P_hgcer_npeSum=8.5, diagnostic_weight=73.0
+        )
+        altered = plots.build_full_background_subtraction_e3_payload(
+            altered_diagnostic, altered_method_a
+        )
+        self.assertTrue(baseline["available"])
+        self.assertTrue(altered["available"])
+        self.assertNotEqual(
+            baseline["per_t"][0]["cells"][0]["kaon_rows"],
+            altered["per_t"][0]["cells"][0]["kaon_rows"],
+        )
+        for field in (
+            "prompt_positive_count", "prompt_low_count", "prompt_control_count",
+            "f_low", "f_low_low", "f_low_high", "support_class",
+        ):
+            with self.subTest(field=field):
+                self.assertEqual(
+                    baseline["per_t"][0]["cells"][0]["method_a"][field],
+                    altered["per_t"][0]["cells"][0]["method_a"][field],
+                )
+
     def test_e3_rejects_frozen_contract_provenance_definition_and_lattice_drift(self):
         cases = (
             (
@@ -3018,8 +3060,76 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 "e3_part1_contract_invalid",
             ),
             (
+                lambda diagnostic, _method: diagnostic.update(non_authoritative=False),
+                "e3_part1_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic.update(production_side_effect_free=False),
+                "e3_part1_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic.update(production_hgcer_pid_unchanged=False),
+                "e3_part1_contract_invalid",
+            ),
+            (
                 lambda diagnostic, _method: diagnostic.update(coordinate_fingerprint=""),
                 "e3_part1_coordinate_fingerprint_missing",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"].pop("kaon"),
+                "e3_part1_records_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"].pop("pion"),
+                "e3_part1_records_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["histograms"].pop(
+                    "H_hgcer_kaon_weighted"
+                ),
+                "e3_part1_weighted_template_missing",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["histograms"].pop(
+                    "H_hgcer_pion_weighted"
+                ),
+                "e3_part1_weighted_template_missing",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["kaon"][0].update(
+                    coordinate_fingerprint="wrong"
+                ),
+                "e3_part1_kaon_record_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["pion"][0].update(
+                    rf_applied_to_diagnostic=True
+                ),
+                "e3_part1_pion_record_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["kaon"][0].update(
+                    canonical_t_index=3
+                ),
+                "e3_part1_kaon_record_scalar_or_membership_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["pion"][0].update(
+                    delta_index=10
+                ),
+                "e3_part1_pion_record_scalar_or_membership_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["kaon"][0].update(
+                    P_hgcer_npeSum=float("nan")
+                ),
+                "e3_part1_kaon_record_scalar_or_membership_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic["records"]["pion"][0].update(
+                    diagnostic_weight=float("nan")
+                ),
+                "e3_part1_pion_record_scalar_or_membership_invalid",
             ),
             (
                 lambda _diagnostic, method: method.update(available=False),
@@ -3030,12 +3140,76 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 "e3_method_a_contract_invalid",
             ),
             (
+                lambda _diagnostic, method: method.update(method="wrong"),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(non_authoritative=False),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(production_objects_mutated=True),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(refinement_applied=True),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(rf_ct_required=True),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(zerope_model_used=True),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.pop("fingerprint"),
+                "e3_method_a_provenance_mismatch",
+            ),
+            (
+                lambda _diagnostic, method: method.update(fingerprint=""),
+                "e3_method_a_provenance_mismatch",
+            ),
+            (
                 lambda _diagnostic, method: method.update(coordinate_fingerprint="wrong"),
                 "e3_method_a_provenance_mismatch",
             ),
             (
+                lambda _diagnostic, method: method.update(t_edges=[0.0, 0.20, 0.75]),
+                "e3_method_a_provenance_mismatch",
+            ),
+            (
+                lambda _diagnostic, method: method.update(delta_edges=[-10.0, 0.0, 10.0]),
+                "e3_method_a_provenance_mismatch",
+            ),
+            (
+                lambda _diagnostic, method: method.update(
+                    response_population_definition="wrong"
+                ),
+                "e3_method_a_definition_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(
+                    physical_control_definition="wrong"
+                ),
+                "e3_method_a_definition_invalid",
+            ),
+            (
                 lambda _diagnostic, method: method["configuration"].update(
                     low_response_upper_threshold=2.1
+                ),
+                "e3_method_a_thresholds_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["configuration"].update(
+                    positive_response_threshold=0.1
+                ),
+                "e3_method_a_thresholds_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["configuration"].update(
+                    uncertainty_method="wrong"
                 ),
                 "e3_method_a_thresholds_invalid",
             ),
@@ -3054,6 +3228,24 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     -1, dict(method["cells"][0])
                 ),
                 "e3_method_a_cell_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"][0].update(t_low=99.0),
+                "e3_method_a_cell_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"][0].update(delta_high=99.0),
+                "e3_method_a_cell_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"][0].update(
+                    support_class="unsupported"
+                ),
+                "e3_method_a_cell_annotation_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"][-1].update(f_low=0.5),
+                "e3_method_a_cell_annotation_invalid",
             ),
         )
         for mutation, reason in cases:
@@ -3112,6 +3304,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             for histogram in _E3Histogram.created
             for value in histogram.contents
         ))
+        self.assertEqual(
+            _E3Histogram.created[0].contents,
+            [2.0, 0.0, -1.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+        )
+        self.assertEqual(
+            _E3Histogram.created[1].contents,
+            [-2.0, 0.0, 1.25, 0.0, 0.0, 0.0, 0.0, 0.0],
+        )
         visible_text = [text for block in root.drawn_text for text in block]
         self.assertIn("0 < NPE <= 2", visible_text)
         self.assertIn("NPE > 2", visible_text)
@@ -4116,9 +4316,23 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(e3_required=required):
                 self.assertIn(required, e3_source)
         self.assertIn("E3_PRESENTATION_SCHEMA_VERSION", source)
+        e3_builder_signature = inspect.signature(
+            plots.build_full_background_subtraction_e3_payload
+        )
         self.assertEqual(
-            plots.build_full_background_subtraction_e3_payload.__code__.co_argcount,
-            2,
+            tuple(e3_builder_signature.parameters),
+            ("pion_hgcer_tdelta_diagnostic", "pion_hgcer_method_a"),
+        )
+        self.assertTrue(all(
+            parameter.kind not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+            for parameter in e3_builder_signature.parameters.values()
+        ))
+        procedure_signature = inspect.signature(
+            plots.render_full_background_subtraction_procedure_pages
+        )
+        self.assertEqual(
+            procedure_signature.parameters["e3_payload"].kind,
+            inspect.Parameter.KEYWORD_ONLY,
         )
         for forbidden in (
             "find_canonical_bin(", "candidate_L_B", "adaptive_candidate",
