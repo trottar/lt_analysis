@@ -49,6 +49,10 @@ E2_FULL_BACKGROUND_PAGE_IDS = (
 E3_FULL_BACKGROUND_PAGE_IDS = (
     "full_background.e3.method_a_local_hgcer",
 )
+E4_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.e4.ab_vs_shms_xptar",
+    "full_background.e4.ab_vs_shms_yptar",
+)
 
 
 def _assert_full_background_manifest_contract(test_case, manifest):
@@ -667,6 +671,17 @@ class _E3ROOT(_FakeROOT):
 
     def TPad(self, *args):
         return _E3Pad(self, *args)
+
+
+class _E4ROOT(_E2ROOT):
+    def __init__(self):
+        super().__init__()
+        self.canvases = []
+        self.printed = []
+        self.active_pad = None
+
+    def TCanvas(self, *args):
+        return _E3Canvas(self, *args)
 
 
 class _D10Line:
@@ -1797,6 +1812,96 @@ def _d12_cumulative_payload(
             for index in range(len(t_edges) - 1)
         ],
     }
+
+
+def _e4_fixture():
+    """Return detached, three-t/ten-delta D.11 and E.2 parent payloads."""
+    t_edges = [0.0, 0.20, 0.45, 0.75]
+    delta_edges = [-10.0, -8.0, -6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
+    phase_fingerprint = "e4-phase-a-fingerprint"
+    coordinate_fingerprint = "e4-coordinate-fingerprint"
+    definitions = (
+        ("both_comparable", True, 1.4, 1.1, 1.8, "available", True, 0.9, 0.2,
+         "available_multi_region", 7.25, -3.5),
+        ("both_present_not_comparable", True, 0.0, 0.0, 0.25, "marginal", True, 1.1,
+         0.2, "available_multi_region", None, None),
+        ("a_only", True, 0.8, 0.4, 1.2, "available", False, None, None, "unavailable", None, None),
+        ("b_only", False, None, None, None, "unavailable", True, 0.9, 0.1,
+         "available_multi_region", None, None),
+        ("neither_available", False, None, None, None, "unavailable", False, None, None,
+         "unavailable", None, None),
+    )
+    d11_groups, e2_groups = [], []
+    for t_index in range(3):
+        availability_cells, acceptance_cells = [], []
+        for delta_index in range(10):
+            (
+                availability, a_present, a_candidate, a_low, a_high, a_status,
+                b_present, b_candidate, b_uncertainty, b_status, ratio, log_ratio,
+            ) = definitions[delta_index % len(definitions)]
+            availability_cells.append({
+                "t_index": t_index, "t_low": t_edges[t_index], "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index, "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "method_a": {
+                    "present": a_present, "candidate": a_candidate, "low": a_low,
+                    "high": a_high, "status": a_status,
+                },
+                "method_b": {
+                    "present": b_present, "candidate": b_candidate,
+                    "uncertainty": b_uncertainty, "status": b_status,
+                },
+                "comparison": {
+                    "availability": availability, "ratio_B_over_A": ratio,
+                    "log_ratio_B_over_A": log_ratio,
+                },
+                "availability_label": plots._D11_AVAILABILITY_LABELS[availability],
+            })
+            acceptance_cells.append({
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "kaon_rows": ({
+                    "ssxptar": -0.04 + 0.004 * delta_index,
+                    "ssyptar": -0.025 + 0.003 * delta_index,
+                    "absolute_support_weight": 2.0 + t_index,
+                },),
+                "pion_rows": ({
+                    "ssxptar": 0.03 - 0.003 * delta_index,
+                    "ssyptar": 0.020 - 0.002 * delta_index,
+                    "absolute_support_weight": 1.5 + t_index,
+                },),
+            })
+        d11_groups.append({
+            "t_index": t_index, "t_low": t_edges[t_index], "t_high": t_edges[t_index + 1],
+            "availability": {"available": True, "reason": None, "cells": availability_cells},
+        })
+        e2_groups.append({
+            "t_index": t_index, "t_low": t_edges[t_index], "t_high": t_edges[t_index + 1],
+            "cells": acceptance_cells,
+        })
+    d11 = {
+        "schema_version": plots.D11_PRESENTATION_SCHEMA_VERSION,
+        "available": True, "reason": None,
+        "source_checkpoint_payload_fingerprint": "e4-phase-c-source",
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "method_a_comparison_fingerprint": "e4-method-a",
+        "method_b_comparison_fingerprint": "e4-method-b",
+        "ab_comparison_fingerprint": "e4-ab",
+        "host_state": "proton_cleaned", "source_target_state": "post_proton_noRF",
+        "t_edges": t_edges, "delta_edges": delta_edges, "per_t": d11_groups,
+    }
+    e2 = {
+        "schema_version": plots.E2_PRESENTATION_SCHEMA_VERSION,
+        "available": True, "reason": None, "non_authoritative": True,
+        "production_objects_mutated": False,
+        "phase_a_contract_fingerprint": phase_fingerprint,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "host_state": "proton_cleaned", "source_target_state": "post_proton_noRF",
+        "t_edges": t_edges, "delta_edges": delta_edges, "per_t": e2_groups,
+    }
+    return d11, e2
 
 
 def _d12_record_phase_pages(page_ids, omissions):
@@ -3545,6 +3650,130 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             ],
         )
 
+    def test_e4_copies_only_parent_display_fields_and_preserves_unavailable_states(self):
+        d11, e2 = _e4_fixture()
+        d11_before, e2_before = deepcopy(d11), deepcopy(e2)
+        payload = plots.build_full_background_subtraction_e4_payload(d11, e2)
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.E4_PRESENTATION_SCHEMA_VERSION)
+        self.assertTrue(payload["non_authoritative"])
+        self.assertFalse(payload["production_objects_mutated"])
+        self.assertEqual(payload["d11_ab_comparison_fingerprint"], "e4-ab")
+        self.assertEqual(payload["e2_phase_a_contract_fingerprint"], "e4-phase-a-fingerprint")
+        self.assertEqual(len(payload["per_t"]), 3)
+        first = payload["per_t"][0]["cells"]
+        self.assertEqual(first[0]["comparison"]["ratio_B_over_A"], 7.25)
+        self.assertEqual(first[0]["comparison"]["log_ratio_B_over_A"], -3.5)
+        self.assertEqual(first[1]["comparison"]["availability"], "both_present_not_comparable")
+        self.assertIsNone(first[1]["comparison"]["ratio_B_over_A"])
+        self.assertEqual(first[4]["availability_label"], "Neither method available")
+        self.assertEqual(d11, d11_before)
+        self.assertEqual(e2, e2_before)
+
+        first[0]["method_a"]["candidate"] = 99.0
+        first[0]["kaon_rows"][0]["absolute_support_weight"] = 77.0
+        self.assertEqual(d11["per_t"][0]["availability"]["cells"][0]["method_a"]["candidate"], 1.4)
+        self.assertEqual(e2["per_t"][0]["cells"][0]["kaon_rows"][0]["absolute_support_weight"], 2.0)
+
+    def test_e4_rejects_parent_contract_provenance_geometry_and_grid_failures(self):
+        cases = (
+            (lambda d11, _e2: d11.update(available=False), "e4_d11_unavailable"),
+            (lambda _d11, e2: e2.update(non_authoritative=False), "e4_e2_authority_invalid"),
+            (lambda d11, _e2: d11.update(coordinate_fingerprint="wrong"), "e4_parent_provenance_mismatch"),
+            (lambda _d11, e2: e2.update(delta_edges=[-10.0, 0.0, 10.0]), "e4_parent_geometry_mismatch"),
+            (lambda d11, _e2: d11["per_t"][0]["availability"]["cells"].pop(), "e4_parent_grid_invalid"),
+            (lambda _d11, e2: e2["per_t"][0]["cells"].__setitem__(
+                1, deepcopy(e2["per_t"][0]["cells"][0])
+            ), "e4_e2_cell_geometry_invalid"),
+        )
+        for mutation, expected_reason in cases:
+            with self.subTest(expected_reason=expected_reason):
+                d11, e2 = _e4_fixture()
+                mutation(d11, e2)
+                payload = plots.build_full_background_subtraction_e4_payload(d11, e2)
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], expected_reason)
+
+    def test_e4_renderer_uses_five_by_two_shapes_and_stored_ratio_text_only(self):
+        d11, e2 = _e4_fixture()
+        payload = plots.build_full_background_subtraction_e4_payload(d11, e2)
+        payload_before = deepcopy(payload)
+        root = _E4ROOT()
+        manifest, failures = [], []
+        for group in payload["per_t"]:
+            plots._render_e4_t_pages(root, "ignored.pdf", payload, group, manifest, failures)
+
+        self.assertEqual(failures, [])
+        self.assertEqual(payload, payload_before)
+        self.assertEqual(len(root.canvases), 6)
+        self.assertTrue(all((canvas.width, canvas.height) == (1800, 1000) for canvas in root.canvases))
+        self.assertTrue(all(canvas.divisions == [(5, 2)] for canvas in root.canvases))
+        self.assertEqual(
+            [(page["page_id"], page["scope"], page["authoritative"]) for page in manifest],
+            [
+                (page_id, "t{}".format(t_index), False)
+                for t_index in (1, 2, 3)
+                for page_id in E4_FULL_BACKGROUND_PAGE_IDS
+            ],
+        )
+        self.assertTrue(all(histogram.directory == 0 for histogram in root.histograms))
+        self.assertTrue(all(
+            histogram.Integral() == 1.0 for histogram in root.histograms
+            if "_frame_" not in histogram.name
+        ))
+        visible = [line for text in root.drawn_text for line in text]
+        self.assertIn("Method A: unavailable", visible)
+        self.assertIn("Method B: unavailable", visible)
+        self.assertEqual(sum("B/A (stored): 7.25" in line for line in visible), 12)
+        self.assertNotIn("B/A (stored): None", visible)
+
+    def test_e4_is_a_final_local_append_after_e3(self):
+        unavailable = {"available": False, "reason": "not requested"}
+        e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
+        e4 = _d12_cumulative_payload("E.4", t_edges=(0.0, 1.0, 2.0, 3.0))
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(
+            plots, "_render_e4_t_pages", side_effect=_d12_record_phase_pages(
+                E4_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, e3_payload=e3, e4_payload=e4,
+            )
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            [
+                ("t1", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+            ],
+        )
+
+        e4["delta_edges"] = [-10.0, -5.0, 10.0]
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(plots, "_render_e4_t_pages"):
+            isolated = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, e3_payload=e3, e4_payload=e4,
+            )
+        self.assertIn("E.4 frozen procedure geometry mismatch", isolated["failures"])
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in isolated["manifest"]],
+            [("t{}".format(index), E3_FULL_BACKGROUND_PAGE_IDS[0]) for index in (1, 2, 3)],
+        )
+
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
         phase_page_ids = (
@@ -4500,8 +4729,47 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             cumulative_renderer_source[final_e3_append:],
         )
 
+        e4_source = source[
+            source.index("def _e4_unavailable"):
+            source.index("def _e3_integer")
+        ]
+        for required in (
+            "E4_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_e4_payload",
+            "full_background.e4.ab_vs_shms_xptar",
+            "full_background.e4.ab_vs_shms_yptar",
+            "canvas.Divide(5, 2)",
+            "B/A (stored)",
+            "Normalized absolute support",
+        ):
+            with self.subTest(e4_required=required):
+                self.assertIn(required, e4_source)
+        for forbidden in (
+            "find_canonical_bin(", "build_pion_hgcer_method_a(",
+            "build_pion_hgcer_method_b(", "build_pion_hgcer_ab_comparison(",
+            "math.log(", "correlation", "C_A", "C_B", "C_final", "use_A",
+            "use_B", "combine_AB", "preferred_method", "selected_method",
+        ):
+            with self.subTest(e4_forbidden=forbidden):
+                self.assertNotIn(forbidden, e4_source)
+        self.assertIn("E4_PRESENTATION_SCHEMA_VERSION", source)
+        e4_builder_signature = inspect.signature(
+            plots.build_full_background_subtraction_e4_payload
+        )
+        self.assertEqual(tuple(e4_builder_signature.parameters), ("d11_payload", "e2_payload"))
+        self.assertEqual(
+            procedure_signature.parameters["e4_payload"].kind,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
+        final_e4_append = cumulative_renderer_source.rindex("if e4_available:")
+        self.assertLess(final_e3_append, final_e4_append)
+        self.assertIn(
+            "for t_index in range(max(0, len(e4_edges) - 1))",
+            cumulative_renderer_source[final_e4_append:],
+        )
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.11, E.2, and E.3 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.11 and E.2 through E.4 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -4513,6 +4781,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_d11_payload",
             "build_full_background_subtraction_e2_payload",
             "build_full_background_subtraction_e3_payload",
+            "build_full_background_subtraction_e4_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -4575,6 +4844,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_e3_payload(", start),
+            runtime.index("build_full_background_subtraction_e4_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_e4_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         e3_call_start = runtime.index(

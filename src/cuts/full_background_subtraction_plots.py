@@ -1,4 +1,4 @@
-"""Detached D.6 through D.11 and E.2/E.3 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11 and E.2-E.4 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -27,6 +27,7 @@ D10_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d10/v1"
 D11_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d11/v1"
 E2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e2/v1"
 E3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e3/v1"
+E4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e4/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -4050,9 +4051,9 @@ def render_full_background_subtraction_d11_pages(pdf_name, payload, *, page_mani
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
-    *, e2_payload=None, e3_payload=None, page_manifest=None
+    *, e2_payload=None, e3_payload=None, e4_payload=None, page_manifest=None
 ):
-    """Append D.6-E.2 per-t groups, then final E.3 groups in canonical-t order."""
+    """Append D.6-E.2 groups, then final E.3 and E.4 groups in canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4063,6 +4064,7 @@ def render_full_background_subtraction_procedure_pages(
     d11 = _mapping(d11_payload)
     e2 = _mapping(e2_payload)
     e3 = _mapping(e3_payload)
+    e4 = _mapping(e4_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -4077,7 +4079,9 @@ def render_full_background_subtraction_procedure_pages(
     e2_available = bool(e2.get("available"))
     e3_requested = e3_payload is not None
     e3_available = bool(e3.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available:
+    e4_requested = e4_payload is not None
+    e4_available = bool(e4.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4109,6 +4113,10 @@ def render_full_background_subtraction_procedure_pages(
         if e3_requested:
             result["failures"].append(
                 "E.3 procedure input unavailable: {}".format(e3.get("reason"))
+            )
+        if e4_requested:
+            result["failures"].append(
+                "E.4 procedure input unavailable: {}".format(e4.get("reason"))
             )
         return result
     if not d6_available:
@@ -4142,6 +4150,10 @@ def render_full_background_subtraction_procedure_pages(
     if e3_requested and not e3_available:
         result["failures"].append(
             "E.3 procedure input unavailable: {}".format(e3.get("reason"))
+        )
+    if e4_requested and not e4_available:
+        result["failures"].append(
+            "E.4 procedure input unavailable: {}".format(e4.get("reason"))
         )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
@@ -4254,6 +4266,15 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.3 frozen procedure geometry mismatch")
         e3_available = False
+    e4_geometry_reference = geometry_owner if geometry_owner is not None else (
+        e2 if e2_available else e3 if e3_available else None
+    )
+    if e4_available and e4_geometry_reference is not None and (
+        list(e4_geometry_reference.get("t_edges") or ()) != list(e4.get("t_edges") or ())
+        or list(e4_geometry_reference.get("delta_edges") or ()) != list(e4.get("delta_edges") or ())
+    ):
+        result["failures"].append("E.4 frozen procedure geometry mismatch")
+        e4_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -4293,6 +4314,11 @@ def render_full_background_subtraction_procedure_pages(
     e3_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(e3.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    e4_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(e4.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -4362,6 +4388,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_e3_t_pages(ROOT, pdf_name, e3, e3_group, manifest, result["failures"])
 
+    def render_e4_group(t_index):
+        if not e4_available:
+            return
+        e4_group = e4_by_index.get(t_index)
+        if e4_group is None:
+            result["failures"].append(
+                "E.4 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_e4_t_pages(ROOT, pdf_name, e4, e4_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -4418,6 +4455,10 @@ def render_full_background_subtraction_procedure_pages(
         e3_edges = list(e3.get("t_edges") or ())
         for t_index in range(max(0, len(e3_edges) - 1)):
             render_e3_group(t_index)
+    if e4_available:
+        e4_edges = list(e4.get("t_edges") or ())
+        for t_index in range(max(0, len(e4_edges) - 1)):
+            render_e4_group(t_index)
     return result
 
 
@@ -4809,6 +4850,491 @@ def _render_e2_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
             manifest.append({"page_id": page_id, "scope": "t{}".format(t_number), "authoritative": False})
         else:
             failures.append("E.2 {} page unavailable for t{}".format(coordinate, t_number))
+
+
+def _e4_unavailable(reason):
+    """Return an E.4-local unavailable payload without aliases to either parent."""
+    return {
+        "schema_version": E4_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "d11_source_checkpoint_payload_fingerprint": None,
+        "d11_method_a_comparison_fingerprint": None,
+        "d11_method_b_comparison_fingerprint": None,
+        "d11_ab_comparison_fingerprint": None,
+        "e2_phase_a_contract_fingerprint": None,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "host_state": None,
+        "source_target_state": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "per_t": (),
+    }
+
+
+def _e4_parent_contract(d11_payload, e2_payload):
+    """Validate only the frozen D.11/E.2 provenance and common geometry."""
+    d11 = _mapping(d11_payload)
+    e2 = _mapping(e2_payload)
+    d11_required = (
+        "schema_version", "available", "source_checkpoint_payload_fingerprint",
+        "phase_a_contract_fingerprint", "coordinate_fingerprint",
+        "method_a_comparison_fingerprint", "method_b_comparison_fingerprint",
+        "ab_comparison_fingerprint", "host_state", "source_target_state",
+        "t_edges", "delta_edges", "per_t",
+    )
+    e2_required = (
+        "schema_version", "available", "non_authoritative",
+        "production_objects_mutated", "phase_a_contract_fingerprint",
+        "coordinate_fingerprint", "host_state", "source_target_state",
+        "t_edges", "delta_edges", "per_t",
+    )
+    if not d11 or any(key not in d11 for key in d11_required):
+        return None, None, None, None, "e4_d11_contract_invalid"
+    if not e2 or any(key not in e2 for key in e2_required):
+        return None, None, None, None, "e4_e2_contract_invalid"
+    if d11.get("schema_version") != D11_PRESENTATION_SCHEMA_VERSION:
+        return None, None, None, None, "e4_d11_contract_invalid"
+    if e2.get("schema_version") != E2_PRESENTATION_SCHEMA_VERSION:
+        return None, None, None, None, "e4_e2_contract_invalid"
+    if d11.get("available") is not True:
+        return None, None, None, None, "e4_d11_unavailable"
+    if e2.get("available") is not True:
+        return None, None, None, None, "e4_e2_unavailable"
+    if e2.get("non_authoritative") is not True or e2.get("production_objects_mutated") is not False:
+        return None, None, None, None, "e4_e2_authority_invalid"
+    if not all(
+        _d11_nonempty_string(d11.get(key))
+        for key in (
+            "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+            "coordinate_fingerprint", "method_a_comparison_fingerprint",
+            "method_b_comparison_fingerprint", "ab_comparison_fingerprint",
+        )
+    ) or not all(
+        _d11_nonempty_string(e2.get(key))
+        for key in ("phase_a_contract_fingerprint", "coordinate_fingerprint")
+    ):
+        return None, None, None, None, "e4_parent_provenance_invalid"
+    if (
+        d11["phase_a_contract_fingerprint"] != e2["phase_a_contract_fingerprint"]
+        or d11["coordinate_fingerprint"] != e2["coordinate_fingerprint"]
+        or d11["host_state"] != e2["host_state"]
+        or d11["source_target_state"] != e2["source_target_state"]
+        or d11["host_state"] not in {"proton_cleaned", "identity_no_proton_cleaning"}
+        or d11["source_target_state"] != _D11_SOURCE_TARGET_STATE
+    ):
+        return None, None, None, None, "e4_parent_provenance_mismatch"
+    t_edges = _strict_edges(d11.get("t_edges"))
+    delta_edges = _strict_edges(d11.get("delta_edges"))
+    if t_edges is None or delta_edges is None:
+        return None, None, None, None, "e4_d11_geometry_invalid"
+    if not _d11_serialized_equal(d11["t_edges"], e2.get("t_edges")) or not _d11_serialized_equal(
+        d11["delta_edges"], e2.get("delta_edges")
+    ):
+        return None, None, None, None, "e4_parent_geometry_mismatch"
+    if not _d10_sequence(d11["per_t"]) or not _d10_sequence(e2["per_t"]):
+        return None, None, None, None, "e4_parent_grid_invalid"
+    return d11, e2, t_edges, delta_edges, None
+
+
+def _e4_scalar_cell(source, t_edges, delta_edges):
+    """Detach one stored D.11 availability cell without calculating a value."""
+    cell = _mapping(source)
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "method_a", "method_b", "comparison", "availability_label",
+    )
+    if not cell or any(key not in cell for key in required):
+        return None, "e4_d11_cell_contract_invalid"
+    t_index = _d11_integer(cell["t_index"])
+    delta_index = _d11_integer(cell["delta_index"])
+    if (
+        t_index is None or delta_index is None
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _d11_serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        return None, "e4_d11_cell_geometry_invalid"
+    method_a = _mapping(cell["method_a"])
+    method_b = _mapping(cell["method_b"])
+    comparison = _mapping(cell["comparison"])
+    if any(key not in method_a for key in ("present", "candidate", "low", "high", "status")) or any(
+        key not in method_b for key in ("present", "candidate", "uncertainty", "status")
+    ) or any(key not in comparison for key in ("availability", "ratio_B_over_A", "log_ratio_B_over_A")):
+        return None, "e4_d11_cell_contract_invalid"
+    availability = comparison["availability"]
+    if (
+        availability not in _D11_AVAILABILITY_LABELS
+        or cell["availability_label"] != _D11_AVAILABILITY_LABELS[availability]
+        or not isinstance(method_a["present"], bool)
+        or not isinstance(method_b["present"], bool)
+    ):
+        return None, "e4_d11_cell_contract_invalid"
+    a_values = tuple(_d11_finite(method_a[key]) for key in ("candidate", "low", "high"))
+    b_values = tuple(_d11_finite(method_b[key]) for key in ("candidate", "uncertainty"))
+    if method_a["present"]:
+        if (
+            method_a["status"] not in {"available", "marginal"}
+            or None in a_values or a_values[0] < 0.0 or a_values[1] < 0.0
+            or a_values[1] > a_values[0] or a_values[0] > a_values[2]
+        ):
+            return None, "e4_d11_cell_contract_invalid"
+    elif (
+        method_a["status"] != "unavailable"
+        or any(method_a[key] is not None for key in ("candidate", "low", "high"))
+    ):
+        return None, "e4_d11_cell_contract_invalid"
+    if method_b["present"]:
+        if (
+            method_b["status"] != "available_multi_region" or None in b_values
+            or b_values[0] <= 0.0 or b_values[1] <= 0.0
+        ):
+            return None, "e4_d11_cell_contract_invalid"
+    elif (
+        method_b["status"] not in {
+            "single_region_only", "unavailable", "region_marginal", "region_inconsistent",
+            "shape_poor_veto",
+        }
+        or any(method_b[key] is not None for key in ("candidate", "uncertainty"))
+    ):
+        return None, "e4_d11_cell_contract_invalid"
+    if availability == "both_comparable":
+        if not method_a["present"] or not method_b["present"] or a_values[0] <= 0.0 or (
+            _d11_finite(comparison["ratio_B_over_A"]) is None
+            or _d11_finite(comparison["log_ratio_B_over_A"]) is None
+        ):
+            return None, "e4_d11_cell_contract_invalid"
+    elif availability == "both_present_not_comparable":
+        if not method_a["present"] or not method_b["present"] or a_values[0] != 0.0:
+            return None, "e4_d11_cell_contract_invalid"
+    elif availability == "a_only":
+        if not method_a["present"] or method_b["present"]:
+            return None, "e4_d11_cell_contract_invalid"
+    elif availability == "b_only":
+        if method_a["present"] or not method_b["present"]:
+            return None, "e4_d11_cell_contract_invalid"
+    elif method_a["present"] or method_b["present"]:
+        return None, "e4_d11_cell_contract_invalid"
+    if availability != "both_comparable" and (
+        comparison["ratio_B_over_A"] is not None or comparison["log_ratio_B_over_A"] is not None
+    ):
+        return None, "e4_d11_cell_contract_invalid"
+    return {
+        "t_index": t_index,
+        "t_low": float(t_edges[t_index]),
+        "t_high": float(t_edges[t_index + 1]),
+        "delta_index": delta_index,
+        "delta_low": float(delta_edges[delta_index]),
+        "delta_high": float(delta_edges[delta_index + 1]),
+        "method_a": dict(method_a),
+        "method_b": dict(method_b),
+        "comparison": dict(comparison),
+        "availability_label": str(cell["availability_label"]),
+    }, None
+
+
+def _e4_acceptance_rows(rows):
+    if not _d10_sequence(rows):
+        return None, "e4_e2_rows_invalid"
+    copied = []
+    for row in rows:
+        row = _mapping(row)
+        if set(row) != {"ssxptar", "ssyptar", "absolute_support_weight"}:
+            return None, "e4_e2_rows_invalid"
+        x_value, x_valid = _e2_optional_coordinate(row["ssxptar"])
+        y_value, y_valid = _e2_optional_coordinate(row["ssyptar"])
+        weight = _e2_finite(row["absolute_support_weight"])
+        if not x_valid or not y_valid or weight is None or weight < 0.0:
+            return None, "e4_e2_rows_invalid"
+        copied.append({
+            "ssxptar": x_value,
+            "ssyptar": y_value,
+            "absolute_support_weight": weight,
+        })
+    return tuple(copied), None
+
+
+def _e4_acceptance_cell(source, t_index, delta_index, t_edges, delta_edges):
+    cell = _mapping(source)
+    required = ("delta_index", "delta_low", "delta_high", "kaon_rows", "pion_rows")
+    if not cell or any(key not in cell for key in required):
+        return None, "e4_e2_cell_contract_invalid"
+    stored_delta_index = _d11_integer(cell["delta_index"])
+    if (
+        stored_delta_index != delta_index
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        return None, "e4_e2_cell_geometry_invalid"
+    kaon_rows, reason = _e4_acceptance_rows(cell["kaon_rows"])
+    if reason is not None:
+        return None, reason
+    pion_rows, reason = _e4_acceptance_rows(cell["pion_rows"])
+    if reason is not None:
+        return None, reason
+    return {
+        "t_index": int(t_index),
+        "t_low": float(t_edges[t_index]),
+        "t_high": float(t_edges[t_index + 1]),
+        "delta_index": int(delta_index),
+        "delta_low": float(delta_edges[delta_index]),
+        "delta_high": float(delta_edges[delta_index + 1]),
+        "kaon_rows": kaon_rows,
+        "pion_rows": pion_rows,
+    }, None
+
+
+def build_full_background_subtraction_e4_payload(d11_payload, e2_payload):
+    """Join stored D.11 and E.2 display fields without a new numerical study."""
+    d11, e2, t_edges, delta_edges, reason = _e4_parent_contract(d11_payload, e2_payload)
+    if reason is not None:
+        return _e4_unavailable(reason)
+    t_count = len(t_edges) - 1
+    delta_count = len(delta_edges) - 1
+    if len(d11["per_t"]) != t_count or len(e2["per_t"]) != t_count:
+        return _e4_unavailable("e4_parent_grid_invalid")
+    per_t = []
+    for t_index in range(t_count):
+        d11_group = _mapping(d11["per_t"][t_index])
+        e2_group = _mapping(e2["per_t"][t_index])
+        d11_availability = _mapping(d11_group.get("availability"))
+        if (
+            _d11_integer(d11_group.get("t_index")) != t_index
+            or not _d11_serialized_equal(d11_group.get("t_low"), t_edges[t_index])
+            or not _d11_serialized_equal(d11_group.get("t_high"), t_edges[t_index + 1])
+            or d11_availability.get("available") is not True
+            or not _d10_sequence(d11_availability.get("cells"))
+        ):
+            return _e4_unavailable("e4_d11_grid_invalid")
+        if (
+            _d11_integer(e2_group.get("t_index")) != t_index
+            or not _d11_serialized_equal(e2_group.get("t_low"), t_edges[t_index])
+            or not _d11_serialized_equal(e2_group.get("t_high"), t_edges[t_index + 1])
+            or not _d10_sequence(e2_group.get("cells"))
+        ):
+            return _e4_unavailable("e4_e2_grid_invalid")
+        if len(d11_availability["cells"]) != delta_count or len(e2_group["cells"]) != delta_count:
+            return _e4_unavailable("e4_parent_grid_invalid")
+        d11_cells = {}
+        for source in d11_availability["cells"]:
+            cell, cell_reason = _e4_scalar_cell(source, t_edges, delta_edges)
+            if cell_reason is not None:
+                return _e4_unavailable(cell_reason)
+            key = (cell["t_index"], cell["delta_index"])
+            if key in d11_cells:
+                return _e4_unavailable("e4_d11_grid_invalid")
+            d11_cells[key] = cell
+        e2_cells = {}
+        for expected_delta_index, source in enumerate(e2_group["cells"]):
+            cell, cell_reason = _e4_acceptance_cell(
+                source, t_index, expected_delta_index, t_edges, delta_edges,
+            )
+            if cell_reason is not None:
+                return _e4_unavailable(cell_reason)
+            key = (t_index, cell["delta_index"])
+            if key in e2_cells:
+                return _e4_unavailable("e4_e2_grid_invalid")
+            e2_cells[key] = cell
+        expected = {(t_index, delta_index) for delta_index in range(delta_count)}
+        if set(d11_cells) != expected or set(e2_cells) != expected:
+            return _e4_unavailable("e4_parent_grid_invalid")
+        cells = []
+        for delta_index in range(delta_count):
+            d11_cell = d11_cells[(t_index, delta_index)]
+            e2_cell = e2_cells[(t_index, delta_index)]
+            cells.append({
+                **d11_cell,
+                "kaon_rows": tuple(dict(row) for row in e2_cell["kaon_rows"]),
+                "pion_rows": tuple(dict(row) for row in e2_cell["pion_rows"]),
+            })
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "cells": tuple(cells),
+        })
+    return {
+        "schema_version": E4_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "d11_source_checkpoint_payload_fingerprint": str(
+            d11["source_checkpoint_payload_fingerprint"]
+        ),
+        "d11_method_a_comparison_fingerprint": str(
+            d11["method_a_comparison_fingerprint"]
+        ),
+        "d11_method_b_comparison_fingerprint": str(
+            d11["method_b_comparison_fingerprint"]
+        ),
+        "d11_ab_comparison_fingerprint": str(d11["ab_comparison_fingerprint"]),
+        "e2_phase_a_contract_fingerprint": str(e2["phase_a_contract_fingerprint"]),
+        "phase_a_contract_fingerprint": str(d11["phase_a_contract_fingerprint"]),
+        "coordinate_fingerprint": str(d11["coordinate_fingerprint"]),
+        "host_state": str(d11["host_state"]),
+        "source_target_state": str(d11["source_target_state"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e4_cell_text(cell):
+    """Use only stored state/value fields in a concise panel annotation."""
+    method_a = _mapping(cell.get("method_a"))
+    method_b = _mapping(cell.get("method_b"))
+    comparison = _mapping(cell.get("comparison"))
+    if method_a.get("present") is True:
+        a_line = "Method A: {} ({:.4g})".format(
+            method_a.get("status"), float(method_a["candidate"]),
+        )
+    else:
+        a_line = "Method A: {}".format(method_a.get("status", "unavailable"))
+    if method_b.get("present") is True:
+        b_line = "Method B: {} ({:.4g})".format(
+            method_b.get("status"), float(method_b["candidate"]),
+        )
+    else:
+        b_line = "Method B: {}".format(method_b.get("status", "unavailable"))
+    lines = (a_line, b_line, "A/B: {}".format(cell.get("availability_label", "not recorded")))
+    if comparison.get("availability") == "both_comparable":
+        lines += ("B/A (stored): {:.4g}".format(float(comparison["ratio_B_over_A"])),)
+    return lines
+
+
+def _e4_panel_note(ROOT, lines):
+    try:
+        note = ROOT.TPaveText(0.11, 0.51, 0.89, 0.82, "NDC")
+        note.SetFillStyle(0)
+        note.SetBorderSize(0)
+        note.SetTextAlign(12)
+        note.SetTextSize(0.040)
+        for line in tuple(lines):
+            note.AddText(str(line))
+        note.Draw()
+        return note
+    except Exception:
+        return None
+
+
+def _render_e4_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
+    """Render frozen acceptance context beside stored D.11 states, panel by panel."""
+    cells = tuple(group.get("cells") or ())
+    if len(cells) != 10 or not hasattr(ROOT, "TH1D"):
+        return False
+    coordinate_label = "SHMS x'_{tar}" if coordinate == "ssxptar" else "SHMS y'_{tar}"
+    title = "Frozen A/B and {} acceptance context - {}".format(
+        coordinate_label, _t_context(group),
+    )
+    canvas = ROOT.TCanvas(
+        "C_full_background_e4_{}_t{}".format(coordinate, group["t_index"] + 1),
+        title,
+        1800,
+        1000,
+    )
+    canvas.Divide(5, 2)
+    draw_objects = []
+    legend_drawn = False
+    try:
+        for panel_index, cell in enumerate(cells, 1):
+            cell = _mapping(cell)
+            canvas.cd(panel_index)
+            panel_title = "delta = [{:.3f}, {:.3f}] %;{};Normalized absolute support".format(
+                float(cell["delta_low"]), float(cell["delta_high"]), coordinate_label,
+            )
+            kaon = _e2_histogram(
+                ROOT,
+                "H_full_background_e4_{}_kaon_t{}_d{}".format(
+                    coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                panel_title,
+                coordinate,
+                cell.get("kaon_rows"),
+            )
+            pion = _e2_histogram(
+                ROOT,
+                "H_full_background_e4_{}_pion_t{}_d{}".format(
+                    coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                panel_title,
+                coordinate,
+                cell.get("pion_rows"),
+            )
+            if kaon is None and pion is None:
+                frame = _e2_empty_frame(
+                    ROOT,
+                    "H_full_background_e4_{}_frame_t{}_d{}".format(
+                        coordinate, group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                    ),
+                    panel_title,
+                    coordinate,
+                )
+                if frame is None:
+                    return False
+                frame.Draw("hist")
+                draw_objects.append(frame)
+            else:
+                frame = kaon if kaon is not None else pion
+                maximum = max(
+                    float(histogram.GetMaximum())
+                    for histogram in (kaon, pion) if histogram is not None
+                )
+                frame.SetMinimum(0.0)
+                frame.SetMaximum(max(1.0e-12, 1.15 * maximum))
+                _style_histogram(kaon, getattr(ROOT, "kBlack", 1))
+                _style_histogram(pion, getattr(ROOT, "kBlue", 4))
+                frame.Draw("hist")
+                other = pion if frame is kaon else kaon
+                if other is not None:
+                    other.Draw("hist same")
+                draw_objects.extend(
+                    histogram for histogram in (kaon, pion) if histogram is not None
+                )
+                if not legend_drawn and hasattr(ROOT, "TLegend"):
+                    legend = ROOT.TLegend(0.48, 0.70, 0.89, 0.88)
+                    legend.SetBorderSize(0)
+                    legend.SetFillStyle(0)
+                    if kaon is not None:
+                        legend.AddEntry(kaon, "Proton-cleaned kaon sample", "l")
+                    if pion is not None:
+                        legend.AddEntry(pion, "Pion-control sample (HGCer NPE > 2)", "l")
+                    legend.Draw()
+                    draw_objects.append(legend)
+                    legend_drawn = True
+            note = _e4_panel_note(ROOT, _e4_cell_text(cell))
+            if note is not None:
+                draw_objects.append(note)
+        canvas.cd(1)
+        draw_objects.append(_draw_small_note(
+            ROOT,
+            "Diagnostic context only: stored A/B values and independently normalized SHMS shapes.",
+        ))
+        draw_objects.append(_draw_page_header(ROOT, canvas, title, group))
+        canvas._full_background_e4_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e4_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Append the frozen x and y acceptance-context pages for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    for coordinate, page_id in (
+        ("ssxptar", "full_background.e4.ab_vs_shms_xptar"),
+        ("ssyptar", "full_background.e4.ab_vs_shms_yptar"),
+    ):
+        if _render_e4_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
+            manifest.append({"page_id": page_id, "scope": "t{}".format(t_number), "authoritative": False})
+        else:
+            failures.append("E.4 {} page unavailable for t{}".format(coordinate, t_number))
 
 
 def _e3_integer(value):
@@ -5294,6 +5820,7 @@ __all__ = (
     "D11_PRESENTATION_SCHEMA_VERSION",
     "E2_PRESENTATION_SCHEMA_VERSION",
     "E3_PRESENTATION_SCHEMA_VERSION",
+    "E4_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
@@ -5303,6 +5830,7 @@ __all__ = (
     "build_full_background_subtraction_d11_payload",
     "build_full_background_subtraction_e2_payload",
     "build_full_background_subtraction_e3_payload",
+    "build_full_background_subtraction_e4_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",

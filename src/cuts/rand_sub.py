@@ -194,6 +194,7 @@ from full_background_subtraction_plots import (
     build_full_background_subtraction_d11_payload,
     build_full_background_subtraction_e2_payload,
     build_full_background_subtraction_e3_payload,
+    build_full_background_subtraction_e4_payload,
     close_full_background_subtraction_pdf,
     full_background_subtraction_pdf_path,
     open_full_background_subtraction_pdf,
@@ -7478,7 +7479,7 @@ def rand_sub(
                     exception_type=type(exc).__name__,
                     exception=str(exc),
                 )
-        # Phases D.6 through D.11, E.2, and E.3 are terminal presentation only.  They receive the
+        # Phases D.6 through D.11 and E.2 through E.4 are terminal presentation only.  They receive the
         # already constructed proton-cleaning products and retain no
         # ROOT-bearing object in histDict or any downstream physics input.
         full_background_subtraction_manifest = []
@@ -7538,6 +7539,12 @@ def rand_sub(
                     pion_hgcer_method_a,
                 )
             )
+            full_background_subtraction_e4_payload = (
+                build_full_background_subtraction_e4_payload(
+                    full_background_subtraction_d11_payload,
+                    full_background_subtraction_e2_payload,
+                )
+            )
             if (
                 not full_background_subtraction_d6_payload.get("available")
                 and not full_background_subtraction_d7_payload.get("available")
@@ -7547,6 +7554,7 @@ def rand_sub(
                 and not full_background_subtraction_d11_payload.get("available")
                 and not full_background_subtraction_e2_payload.get("available")
                 and not full_background_subtraction_e3_payload.get("available")
+                and not full_background_subtraction_e4_payload.get("available")
             ):
                 full_background_subtraction_failures.extend((
                     "D.6 procedure input unavailable: {}".format(
@@ -7573,6 +7581,9 @@ def rand_sub(
                     "E.3 procedure input unavailable: {}".format(
                         full_background_subtraction_e3_payload.get("reason")
                     ),
+                    "E.4 procedure input unavailable: {}".format(
+                        full_background_subtraction_e4_payload.get("reason")
+                    ),
                 ))
             else:
                 full_background_subtraction_open = (
@@ -7596,6 +7607,7 @@ def rand_sub(
                             full_background_subtraction_d11_payload,
                             e2_payload=full_background_subtraction_e2_payload,
                             e3_payload=full_background_subtraction_e3_payload,
+                            e4_payload=full_background_subtraction_e4_payload,
                             page_manifest=full_background_subtraction_manifest,
                         )
                     )
@@ -7609,7 +7621,7 @@ def rand_sub(
                 )
             )
             _print_rand_debug(
-                "detached full background-subtraction D.6 through D.11, E.2, and E.3 pages unavailable",
+                "detached full background-subtraction D.6 through D.11 and E.2 through E.4 pages unavailable",
                 renderer="full_background_subtraction_plots",
                 exception_type=type(exc).__name__,
                 exception=str(exc),
