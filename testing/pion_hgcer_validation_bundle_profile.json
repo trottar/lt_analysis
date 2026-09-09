@@ -1,0 +1,31 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v1",
+  "validation_profile": "phase_e3_fix2_left_lowe_farm_review/v1",
+  "settings": [
+    {
+      "phi": "Left",
+      "epsilon": "lowe"
+    }
+  ],
+  "artifacts": {
+    "phase_c_checkpoint": {
+      "basename_template": "{phi}_kaon_pion-background_hgcer_refinement_checkpoint_{kinematic}_{epsilon}.json"
+    },
+    "procedure_pdf": {
+      "source_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction.pdf",
+      "slim_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_E3-validation.pdf",
+      "page_selection": {
+        "kind": "final_pages",
+        "count": 3
+      }
+    }
+  },
+  "source_identity": {
+    "required_analysis_commit": "eb1710f4739ba6ef14f51419806e9fc5bd53c175",
+    "allowed_committed_files": [
+      "testing/collect_pion_hgcer_validation_bundle.py",
+      "testing/test_collect_pion_hgcer_validation_bundle.py",
+      "testing/pion_hgcer_validation_bundle_profile.json"
+    ]
+  }
+}

@@ -27,15 +27,10 @@ import zipfile
 
 
 COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v1"
-VALIDATION_PROFILE = "phase_e3_fix2_left_lowe_farm_review/v1"
-E3_FIX2_REQUIRED_COMMIT = "eb1710f4739ba6ef14f51419806e9fc5bd53c175"
-E3_FIX2_AUTHORIZED_SETTINGS = (("Left", "lowe"),)
-E3_FIX2_ALLOWED_COMMITTED_FILES = frozenset({
-    "testing/collect_pion_hgcer_validation_bundle.py",
-    "testing/test_collect_pion_hgcer_validation_bundle.py",
-})
-_CHECKPOINT_SUFFIX = "_kaon_pion-background_hgcer_refinement_checkpoint_"
-_FULL_BACKGROUND_SUBTRACTION_SUFFIX = "_kaon_rand_sub_"
+PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v1"
+DEFAULT_PROFILE_PATH = Path(__file__).with_name(
+    "pion_hgcer_validation_bundle_profile.json"
+)
 
 
 class PdfPageSelectionError(ValueError):
@@ -69,51 +64,171 @@ def _safe_token(value: object, field: str) -> str:
     return token
 
 
+def load_validation_profile(
+    profile_path: Optional[Union[Path, str]] = None,
+) -> dict[str, Any]:
+    """Read the declarative bundle profile without importing analysis code."""
+    path = DEFAULT_PROFILE_PATH if profile_path is None else Path(profile_path)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("validation_bundle_profile_invalid: {}".format(exc)) from exc
+    if not isinstance(payload, dict) or payload.get("schema_version") != PROFILE_SCHEMA_VERSION:
+        raise ValueError("validation_bundle_profile_invalid")
+    if not isinstance(payload.get("validation_profile"), str):
+        raise ValueError("validation_bundle_profile_invalid")
+    settings = payload.get("settings")
+    if not isinstance(settings, list) or not settings:
+        raise ValueError("validation_bundle_profile_invalid")
+    for setting in settings:
+        if not isinstance(setting, dict):
+            raise ValueError("validation_bundle_profile_invalid")
+        _safe_token(setting.get("phi"), "profile_phi")
+        _safe_token(setting.get("epsilon"), "profile_epsilon")
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, dict):
+        raise ValueError("validation_bundle_profile_invalid")
+    checkpoint = artifacts.get("phase_c_checkpoint")
+    procedure = artifacts.get("procedure_pdf")
+    if not isinstance(checkpoint, dict) or not isinstance(procedure, dict):
+        raise ValueError("validation_bundle_profile_invalid")
+    for artifact, field in (
+        (checkpoint, "basename_template"),
+        (procedure, "source_basename_template"),
+        (procedure, "slim_basename_template"),
+    ):
+        if not isinstance(artifact.get(field), str):
+            raise ValueError("validation_bundle_profile_invalid")
+    selection = procedure.get("page_selection")
+    if (
+        not isinstance(selection, dict)
+        or selection.get("kind") != "final_pages"
+        or isinstance(selection.get("count"), bool)
+        or not isinstance(selection.get("count"), int)
+        or selection["count"] < 1
+    ):
+        raise ValueError("validation_bundle_profile_invalid")
+    source_identity = payload.get("source_identity")
+    if not isinstance(source_identity, dict):
+        raise ValueError("validation_bundle_profile_invalid")
+    required_commit = source_identity.get("required_analysis_commit")
+    allowed_files = source_identity.get("allowed_committed_files")
+    if (
+        not isinstance(required_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", required_commit) is None
+        or not isinstance(allowed_files, list)
+        or not all(isinstance(path, str) and path for path in allowed_files)
+    ):
+        raise ValueError("validation_bundle_profile_invalid")
+    return json.loads(json.dumps(payload, ensure_ascii=True, allow_nan=False))
+
+
+_DEFAULT_PROFILE = load_validation_profile()
+VALIDATION_PROFILE = _DEFAULT_PROFILE["validation_profile"]
+E3_FIX2_REQUIRED_COMMIT = _DEFAULT_PROFILE["source_identity"]["required_analysis_commit"]
+E3_FIX2_AUTHORIZED_SETTINGS = tuple(
+    (setting["phi"], setting["epsilon"])
+    for setting in _DEFAULT_PROFILE["settings"]
+)
+E3_FIX2_ALLOWED_COMMITTED_FILES = frozenset(
+    _DEFAULT_PROFILE["source_identity"]["allowed_committed_files"]
+)
+
+
+def _format_profile_basename(
+    template: str, phi: str, kinematic: str, epsilon: str,
+) -> str:
+    """Format one profile-owned basename and reject path traversal."""
+    try:
+        basename = template.format(phi=phi, kinematic=kinematic, epsilon=epsilon)
+    except (KeyError, ValueError) as exc:
+        raise ValueError("validation_bundle_profile_invalid") from exc
+    if Path(basename).name != basename or not basename:
+        raise ValueError("validation_bundle_profile_invalid")
+    return basename
+
+
 def resolve_settings(
-    phi: Optional[str] = None, epsilon: Optional[str] = None
+    phi: Optional[str] = None,
+    epsilon: Optional[str] = None,
+    profile: Optional[Mapping[str, Any]] = None,
 ) -> tuple[tuple[str, str], ...]:
-    """Return the sole frozen E.3.Fix.2 Left/lowe review setting."""
+    """Return the settings declared by the active bundle profile."""
+    active = _DEFAULT_PROFILE if profile is None else profile
+    authorized = tuple(
+        (str(setting["phi"]), str(setting["epsilon"]))
+        for setting in active["settings"]
+    )
     if (phi is None) != (epsilon is None):
         raise ValueError("phi_and_epsilon_must_be_supplied_together")
     if phi is None:
-        return E3_FIX2_AUTHORIZED_SETTINGS
+        return authorized
     normalized_phi = _safe_token(phi, "phi")
     normalized_epsilon = _safe_token(epsilon, "epsilon").lower()
-    if (normalized_phi, normalized_epsilon) != E3_FIX2_AUTHORIZED_SETTINGS[0]:
-        raise ValueError("phase_e3_fix2_setting_not_authorized")
-    return E3_FIX2_AUTHORIZED_SETTINGS
+    if (normalized_phi, normalized_epsilon) not in authorized:
+        raise ValueError("validation_bundle_profile_setting_not_authorized")
+    return ((normalized_phi, normalized_epsilon),)
 
 
-def checkpoint_basename(phi: str, kinematic: str, epsilon: str) -> str:
+def checkpoint_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
     """Return the existing deterministic Phase-C checkpoint basename."""
-    phi, epsilon = resolve_settings(phi, epsilon)[0]
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
     kinematic = _safe_token(kinematic, "kinematic")
-    return "{}{}{}_{}.json".format(phi, _CHECKPOINT_SUFFIX, kinematic, epsilon)
-
-
-def full_background_subtraction_basename(phi: str, kinematic: str, epsilon: str) -> str:
-    """Return the deterministic full-background procedure-PDF basename."""
-    phi, epsilon = resolve_settings(phi, epsilon)[0]
-    kinematic = _safe_token(kinematic, "kinematic")
-    return "{}{}{}_{}_full-background-subtraction.pdf".format(
-        phi, _FULL_BACKGROUND_SUBTRACTION_SUFFIX, kinematic, epsilon
+    return _format_profile_basename(
+        active["artifacts"]["phase_c_checkpoint"]["basename_template"],
+        phi, kinematic, epsilon,
     )
 
 
-def e3_validation_basename(phi: str, kinematic: str, epsilon: str) -> str:
+def full_background_subtraction_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
+    """Return the deterministic full-background procedure-PDF basename."""
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
+    kinematic = _safe_token(kinematic, "kinematic")
+    return _format_profile_basename(
+        active["artifacts"]["procedure_pdf"]["source_basename_template"],
+        phi, kinematic, epsilon,
+    )
+
+
+def e3_validation_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
     """Return the deterministic final-three-page E.3 review-PDF basename."""
-    source_name = full_background_subtraction_basename(phi, kinematic, epsilon)
-    suffix = "_full-background-subtraction.pdf"
-    return "{}_E3-validation.pdf".format(source_name[:-len(suffix)])
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
+    kinematic = _safe_token(kinematic, "kinematic")
+    return _format_profile_basename(
+        active["artifacts"]["procedure_pdf"]["slim_basename_template"],
+        phi, kinematic, epsilon,
+    )
 
 
-def select_validation_pages(page_count: int) -> list[int]:
+def select_validation_pages(
+    page_count: int,
+    page_selection: Optional[Mapping[str, Any]] = None,
+) -> list[int]:
     """Return exactly the final three 1-based E.3 procedure-PDF pages."""
     if isinstance(page_count, bool) or not isinstance(page_count, int) or page_count < 1:
         raise ValueError("pdf_page_count_invalid")
-    if page_count < 3:
+    selection = (
+        _DEFAULT_PROFILE["artifacts"]["procedure_pdf"]["page_selection"]
+        if page_selection is None else page_selection
+    )
+    if selection.get("kind") != "final_pages" or not isinstance(selection.get("count"), int):
+        raise ValueError("pdf_page_selection_invalid")
+    count = selection["count"]
+    if page_count < count:
         raise PdfPageSelectionError(page_count)
-    return list(range(page_count - 2, page_count + 1))
+    return list(range(page_count - count + 1, page_count + 1))
 
 
 def sha256_file(path: Path) -> str:
@@ -263,6 +378,7 @@ def _extract_with_python(source: Path, pages: Sequence[int], backend: PdfBackend
 
 def _extract_with_qpdf(
     source: Path, backend: PdfBackend, command_runner: CommandRunner, temporary: Path,
+    page_selection: Mapping[str, Any],
 ) -> tuple[int, list[int], bytes]:
     count_result = _successful_command(
         command_runner, [backend.executable, "--show-npages", os.fspath(source)], None,
@@ -271,7 +387,7 @@ def _extract_with_qpdf(
         page_count = int(count_result["stdout"].strip())
     except ValueError as exc:
         raise RuntimeError("qpdf_page_count_invalid") from exc
-    pages = select_validation_pages(page_count)
+    pages = select_validation_pages(page_count, page_selection)
     destination = temporary / "slim-qpdf.pdf"
     _successful_command(
         command_runner,
@@ -283,6 +399,7 @@ def _extract_with_qpdf(
 
 def _extract_with_pdfseparate_pdfunite(
     source: Path, backend: PdfBackend, command_runner: CommandRunner, temporary: Path,
+    page_selection: Mapping[str, Any],
 ) -> tuple[int, list[int], bytes]:
     separator, unite = backend.executable.split("\n", 1)
     pattern = temporary / "page-%d.pdf"
@@ -292,7 +409,7 @@ def _extract_with_pdfseparate_pdfunite(
         key=lambda path: int(re.search(r"(\d+)(?=\.pdf$)", path.name).group(1)),
     )
     page_count = len(extracted)
-    pages = select_validation_pages(page_count)
+    pages = select_validation_pages(page_count, page_selection)
     destination = temporary / "slim-pdfunite.pdf"
     _successful_command(
         command_runner,
@@ -304,6 +421,7 @@ def _extract_with_pdfseparate_pdfunite(
 
 def _extract_with_mutool(
     source: Path, backend: PdfBackend, command_runner: CommandRunner, temporary: Path,
+    page_selection: Mapping[str, Any],
 ) -> tuple[int, list[int], bytes]:
     info_result = _successful_command(
         command_runner, [backend.executable, "info", os.fspath(source)], None,
@@ -312,7 +430,7 @@ def _extract_with_mutool(
     if match is None:
         raise RuntimeError("mutool_page_count_invalid")
     page_count = int(match.group(1))
-    pages = select_validation_pages(page_count)
+    pages = select_validation_pages(page_count, page_selection)
     destination = temporary / "slim-mutool.pdf"
     _successful_command(
         command_runner,
@@ -327,6 +445,7 @@ def extract_pdf_pages(
     *,
     backends: Sequence[PdfBackend],
     command_runner: CommandRunner = run_command,
+    page_selection: Optional[Mapping[str, Any]] = None,
 ) -> dict[str, Any]:
     """Extract the fixed final-three-page E.3 review set with one backend."""
     if not backends:
@@ -335,13 +454,17 @@ def extract_pdf_pages(
             "error_code": "pdf_extraction_dependency_unavailable",
             "attempts": [],
         }
+    active_selection = (
+        _DEFAULT_PROFILE["artifacts"]["procedure_pdf"]["page_selection"]
+        if page_selection is None else page_selection
+    )
     attempts: list[dict[str, str]] = []
     for backend in backends:
         try:
             if backend.kind == "python":
                 reader = backend.module.PdfReader(os.fspath(source))
                 page_count = len(reader.pages)
-                pages = select_validation_pages(page_count)
+                pages = select_validation_pages(page_count, active_selection)
                 writer = backend.module.PdfWriter()
                 for page_number in pages:
                     writer.add_page(reader.pages[page_number - 1])
@@ -353,15 +476,15 @@ def extract_pdf_pages(
                     temporary = Path(temporary_name)
                     if backend.kind == "qpdf":
                         page_count, pages, payload = _extract_with_qpdf(
-                            source, backend, command_runner, temporary
+                            source, backend, command_runner, temporary, active_selection
                         )
                     elif backend.kind == "pdfseparate_pdfunite":
                         page_count, pages, payload = _extract_with_pdfseparate_pdfunite(
-                            source, backend, command_runner, temporary
+                            source, backend, command_runner, temporary, active_selection
                         )
                     elif backend.kind == "mutool":
                         page_count, pages, payload = _extract_with_mutool(
-                            source, backend, command_runner, temporary
+                            source, backend, command_runner, temporary, active_selection
                         )
                     else:
                         raise RuntimeError("pdf_backend_kind_invalid")
@@ -523,21 +646,26 @@ def collect_source_state(
     return _format_command_records(records), head or None
 
 
-def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_command) -> tuple[str, list[dict[str, Any]]]:
+def collect_source_checks(
+    repo_root: Path,
+    command_runner: CommandRunner = run_command,
+    *,
+    required_analysis_commit: str = E3_FIX2_REQUIRED_COMMIT,
+) -> tuple[str, list[dict[str, Any]]]:
     """Run the required E.3.Fix.2 source and committed-identity checks."""
     checks = (
         (
             "required_analysis_commit_ancestor",
             [
                 "git", "merge-base", "--is-ancestor",
-                E3_FIX2_REQUIRED_COMMIT, "HEAD",
+                required_analysis_commit, "HEAD",
             ],
         ),
         (
             "committed_files_after_required_analysis_commit",
             [
                 "git", "diff", "--name-only",
-                "{}..HEAD".format(E3_FIX2_REQUIRED_COMMIT),
+                "{}..HEAD".format(required_analysis_commit),
             ],
         ),
         (
@@ -577,6 +705,7 @@ def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_c
 
 def _committed_identity(
     source_checks: Sequence[Mapping[str, Any]],
+    allowed_committed_files: Iterable[str] = E3_FIX2_ALLOWED_COMMITTED_FILES,
 ) -> tuple[bool, list[str], list[str]]:
     """Return the frozen-base ancestry result and committed post-base paths."""
     by_name = {str(record.get("name")): record for record in source_checks}
@@ -589,9 +718,10 @@ def _committed_identity(
         line.strip() for line in str(diff.get("stdout", "")).splitlines()
         if line.strip()
     })
+    allowed = frozenset(allowed_committed_files)
     unexpected = [
         path for path in committed_files
-        if path not in E3_FIX2_ALLOWED_COMMITTED_FILES
+        if path not in allowed
     ]
     return is_ancestor, committed_files, unexpected
 
@@ -620,12 +750,14 @@ def collect_validation_bundle(
     output: Union[Path, str],
     phi: Optional[str] = None,
     epsilon: Optional[str] = None,
+    profile_path: Optional[Union[Path, str]] = None,
     repo_root: Optional[Union[Path, str]] = None,
     pdf_backends: Optional[Sequence[PdfBackend]] = None,
     command_runner: CommandRunner = run_command,
 ) -> dict[str, Any]:
     """Create a best-effort bundle and return its manifest/result status."""
-    selected = resolve_settings(phi, epsilon)
+    profile = load_validation_profile(profile_path)
+    selected = resolve_settings(phi, epsilon, profile)
     kinematic = _safe_token(kinematic, "kinematic")
     source_root = Path(outdir).expanduser()
     output_path = Path(output).expanduser()
@@ -635,9 +767,11 @@ def collect_validation_bundle(
     source_paths = []
     for selected_phi, selected_epsilon in selected:
         source_paths.extend((
-            source_root / checkpoint_basename(selected_phi, kinematic, selected_epsilon),
+            source_root / checkpoint_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            ),
             source_root / full_background_subtraction_basename(
-                selected_phi, kinematic, selected_epsilon
+                selected_phi, kinematic, selected_epsilon, profile
             ),
         ))
     _validate_output_path(output_path, source_paths)
@@ -645,20 +779,27 @@ def collect_validation_bundle(
     repository = repository.resolve()
     backends = list(discover_pdf_backends() if pdf_backends is None else pdf_backends)
     source_state_text, git_head = collect_source_state(repository, command_runner)
-    source_checks_text, source_checks = collect_source_checks(repository, command_runner)
+    source_identity = profile["source_identity"]
+    required_analysis_commit = source_identity["required_analysis_commit"]
+    allowed_committed_files = source_identity["allowed_committed_files"]
+    source_checks_text, source_checks = collect_source_checks(
+        repository,
+        command_runner,
+        required_analysis_commit=required_analysis_commit,
+    )
     issues: list[dict[str, Any]] = []
     for check in source_checks:
         if check["returncode"] != 0:
             _issue(issues, "source_check_failed", artifact=check["name"], detail="returncode={}".format(check["returncode"]))
     required_analysis_commit_is_ancestor, committed_files, unexpected_committed_files = (
-        _committed_identity(source_checks)
+        _committed_identity(source_checks, allowed_committed_files)
     )
     if not required_analysis_commit_is_ancestor:
         _issue(
             issues,
             "required_analysis_commit_not_present",
             artifact="required_analysis_commit_ancestor",
-            detail=E3_FIX2_REQUIRED_COMMIT,
+            detail=required_analysis_commit,
         )
     if unexpected_committed_files:
         _issue(
@@ -670,10 +811,13 @@ def collect_validation_bundle(
 
     manifest: dict[str, Any] = {
         "schema_version": COLLECTOR_SCHEMA_VERSION,
-        "validation_profile": VALIDATION_PROFILE,
+        "validation_profile": profile["validation_profile"],
+        "validation_profile_source": os.fspath(
+            (DEFAULT_PROFILE_PATH if profile_path is None else Path(profile_path)).resolve()
+        ),
         "generated_at_utc": _datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "git_head": git_head,
-        "required_analysis_commit": E3_FIX2_REQUIRED_COMMIT,
+        "required_analysis_commit": required_analysis_commit,
         "required_analysis_commit_is_ancestor": required_analysis_commit_is_ancestor,
         "committed_files_after_required_analysis_commit": committed_files,
         "unexpected_committed_files_after_required_analysis_commit": unexpected_committed_files,
@@ -701,13 +845,17 @@ def collect_validation_bundle(
             setting = {"phi": selected_phi, "epsilon": selected_epsilon, "kinematic": kinematic}
             directory = "{}_{}".format(selected_phi, selected_epsilon)
             archive.writestr(directory + "/", b"")
-            checkpoint_path = source_root / checkpoint_basename(selected_phi, kinematic, selected_epsilon)
+            checkpoint_path = source_root / checkpoint_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            )
             full_background_path = source_root / full_background_subtraction_basename(
-                selected_phi, kinematic, selected_epsilon
+                selected_phi, kinematic, selected_epsilon, profile
             )
             checkpoint_archive = "{}/{}".format(directory, checkpoint_path.name)
             slim_archive = "{}/{}".format(
-                directory, e3_validation_basename(selected_phi, kinematic, selected_epsilon)
+                directory, e3_validation_basename(
+                    selected_phi, kinematic, selected_epsilon, profile
+                )
             )
             setting_manifest: dict[str, Any] = {
                 "phi": selected_phi,
@@ -749,7 +897,10 @@ def collect_validation_bundle(
                 setting_manifest["errors"].append(code)
             else:
                 extraction = extract_pdf_pages(
-                    full_background_path, backends=backends, command_runner=command_runner
+                    full_background_path,
+                    backends=backends,
+                    command_runner=command_runner,
+                    page_selection=profile["artifacts"]["procedure_pdf"]["page_selection"],
                 )
                 full_background["extraction_attempts"] = extraction.get("attempts", [])
                 if extraction.get("page_count") is not None:
@@ -801,8 +952,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--outdir", required=True, help="directory containing existing analysis artifacts")
     parser.add_argument("--kinematic", required=True, help="kinematic filename token, for example Q4p4W2p74")
     parser.add_argument("--output", required=True, help="new validation ZIP path")
-    parser.add_argument("--phi", help="one phi setting: Left, Center, or Right")
-    parser.add_argument("--epsilon", help="one epsilon filename token: lowe or highe")
+    parser.add_argument("--phi", help="optional profile setting override")
+    parser.add_argument("--epsilon", help="optional profile epsilon override")
+    parser.add_argument(
+        "--profile",
+        help="optional JSON bundle profile; defaults to the shipped profile",
+    )
     return parser
 
 
@@ -815,6 +970,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             output=arguments.output,
             phi=arguments.phi,
             epsilon=arguments.epsilon,
+            profile_path=arguments.profile,
         )
     except ValueError as exc:
         print("collector configuration error: {}".format(exc), file=sys.stderr)

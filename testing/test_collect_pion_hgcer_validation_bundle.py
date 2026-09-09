@@ -17,6 +17,7 @@ import zipfile
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTOR_PATH = REPO_ROOT / "testing" / "collect_pion_hgcer_validation_bundle.py"
+PROFILE_PATH = REPO_ROOT / "testing" / "pion_hgcer_validation_bundle_profile.json"
 SPEC = importlib.util.spec_from_file_location("_phase_e3_validation_bundle_collector", COLLECTOR_PATH)
 collector = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = collector
@@ -91,11 +92,13 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         _FakePdfReader.page_count = 112
         _FakePdfReader.fail = False
 
-    def _write_setting(self, outdir, *, checkpoint=None, pdf=True):
+    def _write_setting(self, outdir, *, checkpoint=None, pdf=True, profile=None):
         outdir = Path(outdir)
-        checkpoint_path = outdir / collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe")
+        checkpoint_path = outdir / collector.checkpoint_basename(
+            "Left", "Q4p4W2p74", "lowe", profile
+        )
         pdf_path = outdir / collector.full_background_subtraction_basename(
-            "Left", "Q4p4W2p74", "lowe"
+            "Left", "Q4p4W2p74", "lowe", profile
         )
         if checkpoint is not None:
             checkpoint_path.write_bytes(checkpoint)
@@ -103,24 +106,31 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             pdf_path.write_bytes(b"original-debug-pdf-bytes")
         return checkpoint_path, pdf_path
 
-    def _collect_left_lowe(self, temporary, *, checkpoint=None, pdf=True, backends=None, command_runner=_clean_command_runner):
+    def _collect_left_lowe(self, temporary, *, checkpoint=None, pdf=True, backends=None,
+                           command_runner=_clean_command_runner, profile_path=None,
+                           use_default_setting=False):
         source = Path(temporary) / "source"
         source.mkdir()
+        profile = collector.load_validation_profile(profile_path)
         checkpoint_path, pdf_path = self._write_setting(
             source,
             checkpoint=(json.dumps(_checkpoint(), sort_keys=True).encode("utf-8") if checkpoint is None else checkpoint),
             pdf=pdf,
+            profile=profile,
         )
+        setting_arguments = {} if use_default_setting else {
+            "phi": "Left", "epsilon": "lowe",
+        }
         output = Path(temporary) / "bundle.zip"
         result = collector.collect_validation_bundle(
             outdir=source,
             kinematic="Q4p4W2p74",
             output=output,
-            phi="Left",
-            epsilon="lowe",
             repo_root=REPO_ROOT,
             pdf_backends=[_python_backend()] if backends is None else backends,
             command_runner=command_runner,
+            profile_path=profile_path,
+            **setting_arguments,
         )
         return result, output, checkpoint_path, pdf_path
 
@@ -139,7 +149,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "pdf_page_count_invalid"):
             collector.select_validation_pages(0)
 
-    def test_e3_fix2_profile_requires_only_explicit_left_lowe(self):
+    def test_e3_fix2_profile_defaults_to_its_declared_setting(self):
         self.assertEqual(collector.resolve_settings(), (("Left", "lowe"),))
         self.assertEqual(collector.resolve_settings("Left", "lowe"), (("Left", "lowe"),))
         with self.assertRaisesRegex(ValueError, "phi_and_epsilon"):
@@ -147,6 +157,31 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         for phi, epsilon in (("Left", "highe"), ("Center", "lowe"), ("Right", "highe")):
             with self.assertRaisesRegex(ValueError, "setting_not_authorized"):
                 collector.resolve_settings(phi, epsilon)
+
+    def test_json_profile_owns_default_setting_filenames_and_page_selection(self):
+        profile = collector.load_validation_profile(PROFILE_PATH)
+        self.assertEqual(profile["validation_profile"], collector.VALIDATION_PROFILE)
+        self.assertEqual(profile["settings"], [{"phi": "Left", "epsilon": "lowe"}])
+        self.assertEqual(
+            collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe", profile),
+            "Left_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
+        )
+        self.assertEqual(
+            collector.full_background_subtraction_basename("Left", "Q4p4W2p74", "lowe", profile),
+            "Left_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf",
+        )
+        self.assertEqual(
+            collector.select_validation_pages(
+                60, profile["artifacts"]["procedure_pdf"]["page_selection"]
+            ),
+            [58, 59, 60],
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _checkpoint_path, _pdf_path = self._collect_left_lowe(
+                temporary, use_default_setting=True
+            )
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.is_file())
 
     def test_deterministic_names_and_sha256(self):
         self.assertEqual(
