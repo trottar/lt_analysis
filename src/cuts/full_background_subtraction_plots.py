@@ -163,6 +163,7 @@ def _d11_unavailable(reason):
         "method_b_comparison_fingerprint": None,
         "ab_comparison_fingerprint": None,
         "host_state": None,
+        "host_label": None,
         "source_target_state": None,
         "t_edges": [],
         "delta_edges": [],
@@ -4257,6 +4258,11 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.2 frozen procedure geometry mismatch")
         e2_available = False
+    if e4_available and (not d11_available or not e2_available):
+        result["failures"].append(
+            "E.4 frozen parent unavailable after procedure validation"
+        )
+        e4_available = False
     e3_geometry_reference = geometry_owner if geometry_owner is not None else (
         e2 if e2_available else None
     )
@@ -4266,9 +4272,7 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.3 frozen procedure geometry mismatch")
         e3_available = False
-    e4_geometry_reference = geometry_owner if geometry_owner is not None else (
-        e2 if e2_available else e3 if e3_available else None
-    )
+    e4_geometry_reference = geometry_owner if geometry_owner is not None else d11
     if e4_available and e4_geometry_reference is not None and (
         list(e4_geometry_reference.get("t_edges") or ()) != list(e4.get("t_edges") or ())
         or list(e4_geometry_reference.get("delta_edges") or ()) != list(e4.get("delta_edges") or ())
@@ -4890,7 +4894,7 @@ def _e4_parent_contract(d11_payload, e2_payload):
         "schema_version", "available", "non_authoritative",
         "production_objects_mutated", "phase_a_contract_fingerprint",
         "coordinate_fingerprint", "host_state", "source_target_state",
-        "t_edges", "delta_edges", "per_t",
+        "host_label", "t_edges", "delta_edges", "per_t",
     )
     if not d11 or any(key not in d11 for key in d11_required):
         return None, None, None, None, "e4_d11_contract_invalid"
@@ -4927,6 +4931,12 @@ def _e4_parent_contract(d11_payload, e2_payload):
         or d11["source_target_state"] != _D11_SOURCE_TARGET_STATE
     ):
         return None, None, None, None, "e4_parent_provenance_mismatch"
+    expected_host_label = {
+        "proton_cleaned": "Proton-cleaned kaon sample",
+        "identity_no_proton_cleaning": "Kaon-selected sample",
+    }[d11["host_state"]]
+    if e2["host_label"] != expected_host_label:
+        return None, None, None, None, "e4_e2_host_label_invalid"
     t_edges = _strict_edges(d11.get("t_edges"))
     delta_edges = _strict_edges(d11.get("delta_edges"))
     if t_edges is None or delta_edges is None:
@@ -5179,6 +5189,7 @@ def build_full_background_subtraction_e4_payload(d11_payload, e2_payload):
         "phase_a_contract_fingerprint": str(d11["phase_a_contract_fingerprint"]),
         "coordinate_fingerprint": str(d11["coordinate_fingerprint"]),
         "host_state": str(d11["host_state"]),
+        "host_label": str(e2["host_label"]),
         "source_target_state": str(d11["source_target_state"]),
         "t_edges": list(t_edges),
         "delta_edges": list(delta_edges),
@@ -5224,28 +5235,76 @@ def _e4_panel_note(ROOT, lines):
         return None
 
 
+def _draw_e4_page_header(ROOT, group, coordinate):
+    """Draw the E.4-only header without reusing the grid-page header helper."""
+    coordinate_label = "SHMS x'_{tar}" if coordinate == "ssxptar" else "SHMS y'_{tar}"
+    header = ROOT.TPaveText(0.02, 0.16, 0.70, 0.90, "NDC")
+    header.SetFillStyle(0)
+    header.SetBorderSize(0)
+    header.SetTextAlign(12)
+    header.SetTextSize(0.105)
+    header.AddText(
+        "Frozen Method A / legacy Method B with {} acceptance context - {}".format(
+            coordinate_label, _t_context(group),
+        )
+    )
+    header.SetTextSize(0.070)
+    header.AddText(
+        "Qualitative diagnostic only: frozen Method A, frozen legacy Method B, and "
+        "frozen SHMS acceptance context; no new correlation metric; no refinement or "
+        "correction applied."
+    )
+    header.Draw()
+    return header
+
+
 def _render_e4_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
     """Render frozen acceptance context beside stored D.11 states, panel by panel."""
     cells = tuple(group.get("cells") or ())
-    if len(cells) != 10 or not hasattr(ROOT, "TH1D"):
+    if len(cells) != 10 or not hasattr(ROOT, "TH1D") or not hasattr(ROOT, "TPad"):
         return False
     coordinate_label = "SHMS x'_{tar}" if coordinate == "ssxptar" else "SHMS y'_{tar}"
-    title = "Frozen A/B and {} acceptance context - {}".format(
-        coordinate_label, _t_context(group),
+    title = "Frozen Method A / legacy Method B with {} acceptance context".format(
+        coordinate_label,
     )
     canvas = ROOT.TCanvas(
         "C_full_background_e4_{}_t{}".format(coordinate, group["t_index"] + 1),
         title,
         1800,
-        1000,
+        1200,
     )
-    canvas.Divide(5, 2)
+    header_pad = ROOT.TPad(
+        "P_full_background_e4_header_{}_t{}".format(coordinate, group["t_index"] + 1),
+        "E.4 header",
+        0.0,
+        0.90,
+        1.0,
+        1.0,
+    )
+    grid_pad = ROOT.TPad(
+        "P_full_background_e4_grid_{}_t{}".format(coordinate, group["t_index"] + 1),
+        "E.4 delta-cell grid",
+        0.0,
+        0.0,
+        1.0,
+        0.90,
+    )
     draw_objects = []
-    legend_drawn = False
+    host_legend_object = None
+    pion_legend_object = None
     try:
+        canvas.cd()
+        header_pad.Draw()
+        grid_pad.Draw()
+        header_pad.cd()
+        header = _draw_e4_page_header(ROOT, group, coordinate)
+        if header is not None:
+            draw_objects.append(header)
+        grid_pad.cd()
+        grid_pad.Divide(5, 2)
         for panel_index, cell in enumerate(cells, 1):
             cell = _mapping(cell)
-            canvas.cd(panel_index)
+            grid_pad.cd(panel_index)
             panel_title = "delta = [{:.3f}, {:.3f}] %;{};Normalized absolute support".format(
                 float(cell["delta_low"]), float(cell["delta_high"]), coordinate_label,
             )
@@ -5297,27 +5356,25 @@ def _render_e4_acceptance_page(ROOT, pdf_name, presentation, group, coordinate):
                 draw_objects.extend(
                     histogram for histogram in (kaon, pion) if histogram is not None
                 )
-                if not legend_drawn and hasattr(ROOT, "TLegend"):
-                    legend = ROOT.TLegend(0.48, 0.70, 0.89, 0.88)
-                    legend.SetBorderSize(0)
-                    legend.SetFillStyle(0)
-                    if kaon is not None:
-                        legend.AddEntry(kaon, "Proton-cleaned kaon sample", "l")
-                    if pion is not None:
-                        legend.AddEntry(pion, "Pion-control sample (HGCer NPE > 2)", "l")
-                    legend.Draw()
-                    draw_objects.append(legend)
-                    legend_drawn = True
+                if host_legend_object is None and kaon is not None:
+                    host_legend_object = kaon
+                if pion_legend_object is None and pion is not None:
+                    pion_legend_object = pion
             note = _e4_panel_note(ROOT, _e4_cell_text(cell))
             if note is not None:
                 draw_objects.append(note)
-        canvas.cd(1)
-        draw_objects.append(_draw_small_note(
-            ROOT,
-            "Diagnostic context only: stored A/B values and independently normalized SHMS shapes.",
-        ))
-        draw_objects.append(_draw_page_header(ROOT, canvas, title, group))
-        canvas._full_background_e4_draw_objects = tuple(draw_objects)
+        if hasattr(ROOT, "TLegend"):
+            header_pad.cd()
+            legend = ROOT.TLegend(0.72, 0.16, 0.98, 0.88)
+            legend.SetBorderSize(0)
+            legend.SetFillStyle(0)
+            legend.AddEntry(host_legend_object, presentation["host_label"], "l")
+            legend.AddEntry(pion_legend_object, "Pion-control sample (HGCer NPE > 2)", "l")
+            legend.Draw()
+            draw_objects.append(legend)
+        canvas._full_background_e4_draw_objects = tuple(
+            [header_pad, grid_pad] + draw_objects
+        )
         canvas.Print(pdf_name)
     finally:
         canvas.Close()

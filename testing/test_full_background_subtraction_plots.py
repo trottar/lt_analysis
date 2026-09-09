@@ -355,6 +355,7 @@ class _FakeLegend:
         self.entries.append((str(label), str(option)))
 
     def Draw(self):
+        self.drawn_on = getattr(getattr(self, "_root", None), "active_pad", None)
         return None
 
 
@@ -399,6 +400,7 @@ class _FakeROOT:
 
     def TLegend(self, *_args):
         legend = _FakeLegend(*_args)
+        legend._root = self
         self.legends.append(legend)
         return legend
 
@@ -539,6 +541,7 @@ class _E2DisplayHistogram:
 
     def Draw(self, option):
         if self.root is not None:
+            self.drawn_on = getattr(self.root, "active_pad", None)
             self.root.drawn_histograms.append((self, str(option)))
 
 
@@ -679,9 +682,14 @@ class _E4ROOT(_E2ROOT):
         self.canvases = []
         self.printed = []
         self.active_pad = None
+        self.pads = []
+        self.drawn_pads = []
 
     def TCanvas(self, *args):
         return _E3Canvas(self, *args)
+
+    def TPad(self, *args):
+        return _E3Pad(self, *args)
 
 
 class _D10Line:
@@ -1899,6 +1907,7 @@ def _e4_fixture():
         "phase_a_contract_fingerprint": phase_fingerprint,
         "coordinate_fingerprint": coordinate_fingerprint,
         "host_state": "proton_cleaned", "source_target_state": "post_proton_noRF",
+        "host_label": "Proton-cleaned kaon sample",
         "t_edges": t_edges, "delta_edges": delta_edges, "per_t": e2_groups,
     }
     return d11, e2
@@ -3661,6 +3670,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertFalse(payload["production_objects_mutated"])
         self.assertEqual(payload["d11_ab_comparison_fingerprint"], "e4-ab")
         self.assertEqual(payload["e2_phase_a_contract_fingerprint"], "e4-phase-a-fingerprint")
+        self.assertEqual(payload["host_label"], "Proton-cleaned kaon sample")
         self.assertEqual(len(payload["per_t"]), 3)
         first = payload["per_t"][0]["cells"]
         self.assertEqual(first[0]["comparison"]["ratio_B_over_A"], 7.25)
@@ -3675,6 +3685,29 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         first[0]["kaon_rows"][0]["absolute_support_weight"] = 77.0
         self.assertEqual(d11["per_t"][0]["availability"]["cells"][0]["method_a"]["candidate"], 1.4)
         self.assertEqual(e2["per_t"][0]["cells"][0]["kaon_rows"][0]["absolute_support_weight"], 2.0)
+
+    def test_e4_uses_the_validated_host_label_for_each_supported_host_state(self):
+        d11, e2 = _e4_fixture()
+        cleaned = plots.build_full_background_subtraction_e4_payload(d11, e2)
+        self.assertTrue(cleaned["available"])
+        self.assertEqual(cleaned["host_label"], "Proton-cleaned kaon sample")
+
+        d11, e2 = _e4_fixture()
+        d11["host_state"] = "identity_no_proton_cleaning"
+        e2["host_state"] = "identity_no_proton_cleaning"
+        e2["host_label"] = "Kaon-selected sample"
+        identity = plots.build_full_background_subtraction_e4_payload(d11, e2)
+        self.assertTrue(identity["available"])
+        self.assertEqual(identity["host_label"], "Kaon-selected sample")
+
+        root = _E4ROOT()
+        manifest, failures = [], []
+        plots._render_e4_t_pages(root, "ignored.pdf", identity, identity["per_t"][0], manifest, failures)
+        labels = [label for legend in root.legends for label, _option in legend.entries]
+        self.assertIn("Kaon-selected sample", labels)
+        self.assertNotIn("Proton-cleaned kaon sample", labels)
+        visible = [line for text in root.drawn_text for line in text]
+        self.assertNotIn("identity_no_proton_cleaning", visible)
 
     def test_e4_rejects_parent_contract_provenance_geometry_and_grid_failures(self):
         cases = (
@@ -3707,8 +3740,19 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(failures, [])
         self.assertEqual(payload, payload_before)
         self.assertEqual(len(root.canvases), 6)
-        self.assertTrue(all((canvas.width, canvas.height) == (1800, 1000) for canvas in root.canvases))
-        self.assertTrue(all(canvas.divisions == [(5, 2)] for canvas in root.canvases))
+        self.assertTrue(all((canvas.width, canvas.height) == (1800, 1200) for canvas in root.canvases))
+        self.assertTrue(all(canvas.divisions == [] for canvas in root.canvases))
+        self.assertEqual(len(root.pads), 12)
+        header_pads = [pad for pad in root.pads if "_header_" in pad.name]
+        grid_pads = [pad for pad in root.pads if "_grid_" in pad.name]
+        self.assertEqual(len(header_pads), 6)
+        self.assertEqual(len(grid_pads), 6)
+        self.assertTrue(all(pad.coordinates == (0.0, 0.9, 1.0, 1.0) for pad in header_pads))
+        self.assertTrue(all(pad.coordinates == (0.0, 0.0, 1.0, 0.9) for pad in grid_pads))
+        self.assertTrue(all(pad.divisions == [] for pad in header_pads))
+        self.assertTrue(all(pad.divisions == [(5, 2)] for pad in grid_pads))
+        self.assertTrue(all(len(pad.cells) == 10 for pad in grid_pads))
+        self.assertEqual(root.drawn_pads, [item for pair in zip(header_pads, grid_pads) for item in pair])
         self.assertEqual(
             [(page["page_id"], page["scope"], page["authoritative"]) for page in manifest],
             [
@@ -3727,12 +3771,47 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertIn("Method B: unavailable", visible)
         self.assertEqual(sum("B/A (stored): 7.25" in line for line in visible), 12)
         self.assertNotIn("B/A (stored): None", visible)
+        page_headers = [
+            pave for pave in root.pave_texts
+            if any("Frozen Method A / legacy Method B" in line for line in pave._text)
+        ]
+        self.assertEqual(len(page_headers), 6)
+        self.assertTrue(all(pave.drawn_on in header_pads for pave in page_headers))
+        self.assertTrue(all(
+            "Qualitative diagnostic only" in " ".join(pave._text)
+            and "legacy Method B" in " ".join(pave._text)
+            and "SHMS acceptance context" in " ".join(pave._text)
+            and "no new correlation metric" in " ".join(pave._text)
+            and "no refinement or correction applied" in " ".join(pave._text)
+            for pave in page_headers
+        ))
+        self.assertEqual(
+            sum("|t| = [0.0000, 0.2000] GeV^2" in line for line in page_headers[0]._text),
+            1,
+        )
+        self.assertTrue(all(legend.drawn_on in header_pads for legend in root.legends))
+        grid_pave_texts = [pave for pave in root.pave_texts if pave not in page_headers]
+        self.assertTrue(all(
+            isinstance(pave.drawn_on, _E3GridCellPad) and pave.drawn_on.parent in grid_pads
+            for pave in grid_pave_texts
+        ))
+        self.assertTrue(all(
+            isinstance(histogram.drawn_on, _E3GridCellPad)
+            and histogram.drawn_on.parent in grid_pads
+            for histogram in root.histograms
+        ))
 
     def test_e4_is_a_final_local_append_after_e3(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
         e4 = _d12_cumulative_payload("E.4", t_edges=(0.0, 1.0, 2.0, 3.0))
+        d11 = _d12_cumulative_payload("D.11", t_edges=(0.0, 1.0, 2.0, 3.0))
+        e2 = _d12_cumulative_payload("E.2", t_edges=(0.0, 1.0, 2.0, 3.0))
         with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d11_t_pages"
+        ), patch.object(
+            plots, "_render_e2_t_pages"
+        ), patch.object(
             plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
                 E3_FULL_BACKGROUND_PAGE_IDS, set()
             )
@@ -3742,7 +3821,8 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             )
         ):
             rendered = plots.render_full_background_subtraction_procedure_pages(
-                "ignored.pdf", unavailable, unavailable, e3_payload=e3, e4_payload=e4,
+                "ignored.pdf", unavailable, unavailable, d11_payload=d11,
+                e2_payload=e2, e3_payload=e3, e4_payload=e4,
             )
         self.assertEqual(
             [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
@@ -3761,18 +3841,83 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
 
         e4["delta_edges"] = [-10.0, -5.0, 10.0]
         with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d11_t_pages"
+        ), patch.object(
+            plots, "_render_e2_t_pages"
+        ), patch.object(
             plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
                 E3_FULL_BACKGROUND_PAGE_IDS, set()
             )
         ), patch.object(plots, "_render_e4_t_pages"):
             isolated = plots.render_full_background_subtraction_procedure_pages(
-                "ignored.pdf", unavailable, unavailable, e3_payload=e3, e4_payload=e4,
+                "ignored.pdf", unavailable, unavailable, d11_payload=d11,
+                e2_payload=e2, e3_payload=e3, e4_payload=e4,
             )
         self.assertIn("E.4 frozen procedure geometry mismatch", isolated["failures"])
         self.assertEqual(
             [(page["scope"], page["page_id"]) for page in isolated["manifest"]],
             [("t{}".format(index), E3_FULL_BACKGROUND_PAGE_IDS[0]) for index in (1, 2, 3)],
         )
+
+    def test_e4_respects_finalized_d11_and_e2_parent_availability(self):
+        phase_page_ids = (
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[3:6],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[6:9],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[9:12],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[12:15],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[15:18],
+        )
+        for parent_name in ("D.11", "E.2"):
+            with self.subTest(parent_name=parent_name):
+                payloads = {
+                    label: _d12_cumulative_payload(label)
+                    for label in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+                }
+                e2 = _d12_cumulative_payload("E.2")
+                e3 = _d12_cumulative_payload("E.3")
+                e4 = _d12_cumulative_payload("E.4")
+                if parent_name == "D.11":
+                    payloads["D.9"]["delta_edges"] = [-10.0, -5.0, 10.0]
+                else:
+                    e2["delta_edges"] = [-10.0, -5.0, 10.0]
+                with patch.object(plots, "_import_root", return_value=object()), patch.object(
+                    plots, "_render_d6_t_pages",
+                    side_effect=_d12_record_phase_pages(phase_page_ids[0], set()),
+                ), patch.object(plots, "_render_d7_t_pages"), patch.object(
+                    plots, "_render_d8_t_pages"
+                ), patch.object(plots, "_render_d9_t_pages"), patch.object(
+                    plots, "_render_d10_t_pages"
+                ), patch.object(plots, "_render_d11_t_pages"), patch.object(
+                    plots, "_render_e2_t_pages"
+                ), patch.object(
+                    plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                        E3_FULL_BACKGROUND_PAGE_IDS, set()
+                    )
+                ), patch.object(plots, "_render_e4_t_pages") as render_e4:
+                    rendered = plots.render_full_background_subtraction_procedure_pages(
+                        "ignored.pdf",
+                        payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                        payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                        e2_payload=e2, e3_payload=e3, e4_payload=e4,
+                    )
+                self.assertIn(
+                    "E.4 frozen parent unavailable after procedure validation",
+                    rendered["failures"],
+                )
+                self.assertTrue(any(
+                    page["page_id"] == "full_background.d6.raw_mm"
+                    for page in rendered["manifest"]
+                ))
+                self.assertEqual(
+                    [page["page_id"] for page in rendered["manifest"][-2:]],
+                    list(E3_FULL_BACKGROUND_PAGE_IDS) * 2,
+                )
+                self.assertFalse(any(
+                    page["page_id"] in E4_FULL_BACKGROUND_PAGE_IDS
+                    for page in rendered["manifest"]
+                ))
+                render_e4.assert_not_called()
 
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
@@ -4738,20 +4883,30 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_e4_payload",
             "full_background.e4.ab_vs_shms_xptar",
             "full_background.e4.ab_vs_shms_yptar",
-            "canvas.Divide(5, 2)",
+            "grid_pad.Divide(5, 2)",
+            "ROOT.TPad",
+            "_draw_e4_page_header",
+            "host_label",
             "B/A (stored)",
             "Normalized absolute support",
+            "Qualitative diagnostic only",
+            "frozen legacy Method B",
+            "no new correlation metric",
+            "no refinement or ",
+            "correction applied",
         ):
             with self.subTest(e4_required=required):
                 self.assertIn(required, e4_source)
         for forbidden in (
             "find_canonical_bin(", "build_pion_hgcer_method_a(",
             "build_pion_hgcer_method_b(", "build_pion_hgcer_ab_comparison(",
-            "math.log(", "correlation", "C_A", "C_B", "C_final", "use_A",
+            "math.log(", "correlation(", "C_A", "C_B", "C_final", "use_A",
             "use_B", "combine_AB", "preferred_method", "selected_method",
         ):
             with self.subTest(e4_forbidden=forbidden):
                 self.assertNotIn(forbidden, e4_source)
+        self.assertNotIn("_draw_page_header(", e4_source)
+        self.assertNotIn("canvas.cd(1)", e4_source)
         self.assertIn("E4_PRESENTATION_SCHEMA_VERSION", source)
         e4_builder_signature = inspect.signature(
             plots.build_full_background_subtraction_e4_payload
