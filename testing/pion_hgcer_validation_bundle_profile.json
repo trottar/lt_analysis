@@ -1,10 +1,26 @@
 {
   "schema_version": "pion_hgcer_validation_bundle_profile/v1",
-  "validation_profile": "phase_e3_fix2_left_lowe_farm_review/v1",
+  "validation_profile": "phase_e3_fix2_full_five_setting_farm_review/v1",
   "settings": [
     {
       "phi": "Left",
       "epsilon": "lowe"
+    },
+    {
+      "phi": "Left",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Right",
+      "epsilon": "highe"
     }
   ],
   "artifacts": {

@@ -92,13 +92,14 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         _FakePdfReader.page_count = 112
         _FakePdfReader.fail = False
 
-    def _write_setting(self, outdir, *, checkpoint=None, pdf=True, profile=None):
+    def _write_setting(self, outdir, *, phi="Left", epsilon="lowe", checkpoint=None,
+                       pdf=True, profile=None):
         outdir = Path(outdir)
         checkpoint_path = outdir / collector.checkpoint_basename(
-            "Left", "Q4p4W2p74", "lowe", profile
+            phi, "Q4p4W2p74", epsilon, profile
         )
         pdf_path = outdir / collector.full_background_subtraction_basename(
-            "Left", "Q4p4W2p74", "lowe", profile
+            phi, "Q4p4W2p74", epsilon, profile
         )
         if checkpoint is not None:
             checkpoint_path.write_bytes(checkpoint)
@@ -112,12 +113,25 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         source = Path(temporary) / "source"
         source.mkdir()
         profile = collector.load_validation_profile(profile_path)
-        checkpoint_path, pdf_path = self._write_setting(
-            source,
-            checkpoint=(json.dumps(_checkpoint(), sort_keys=True).encode("utf-8") if checkpoint is None else checkpoint),
-            pdf=pdf,
-            profile=profile,
+        checkpoint_payload = (
+            json.dumps(_checkpoint(), sort_keys=True).encode("utf-8")
+            if checkpoint is None else checkpoint
         )
+        checkpoint_path, pdf_path = self._write_setting(
+            source, checkpoint=checkpoint_payload, pdf=pdf, profile=profile,
+        )
+        if use_default_setting:
+            for phi, epsilon in collector.resolve_settings(profile=profile)[1:]:
+                self._write_setting(
+                    source,
+                    phi=phi,
+                    epsilon=epsilon,
+                    checkpoint=json.dumps(
+                        _checkpoint(phi, epsilon), sort_keys=True,
+                    ).encode("utf-8"),
+                    pdf=pdf,
+                    profile=profile,
+                )
         setting_arguments = {} if use_default_setting else {
             "phi": "Left", "epsilon": "lowe",
         }
@@ -149,19 +163,35 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "pdf_page_count_invalid"):
             collector.select_validation_pages(0)
 
-    def test_e3_fix2_profile_defaults_to_its_declared_setting(self):
-        self.assertEqual(collector.resolve_settings(), (("Left", "lowe"),))
+    def test_e3_fix2_profile_defaults_to_its_declared_settings(self):
+        self.assertEqual(
+            collector.resolve_settings(),
+            (
+                ("Left", "lowe"), ("Left", "highe"),
+                ("Center", "lowe"), ("Center", "highe"),
+                ("Right", "highe"),
+            ),
+        )
         self.assertEqual(collector.resolve_settings("Left", "lowe"), (("Left", "lowe"),))
         with self.assertRaisesRegex(ValueError, "phi_and_epsilon"):
             collector.resolve_settings("Left", None)
-        for phi, epsilon in (("Left", "highe"), ("Center", "lowe"), ("Right", "highe")):
+        for phi, epsilon in (("Right", "lowe"), ("Center", "other")):
             with self.assertRaisesRegex(ValueError, "setting_not_authorized"):
                 collector.resolve_settings(phi, epsilon)
 
     def test_json_profile_owns_default_setting_filenames_and_page_selection(self):
         profile = collector.load_validation_profile(PROFILE_PATH)
         self.assertEqual(profile["validation_profile"], collector.VALIDATION_PROFILE)
-        self.assertEqual(profile["settings"], [{"phi": "Left", "epsilon": "lowe"}])
+        self.assertEqual(
+            profile["settings"],
+            [
+                {"phi": "Left", "epsilon": "lowe"},
+                {"phi": "Left", "epsilon": "highe"},
+                {"phi": "Center", "epsilon": "lowe"},
+                {"phi": "Center", "epsilon": "highe"},
+                {"phi": "Right", "epsilon": "highe"},
+            ],
+        )
         self.assertEqual(
             collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe", profile),
             "Left_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
