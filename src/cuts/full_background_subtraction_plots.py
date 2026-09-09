@@ -1,4 +1,4 @@
-"""Detached D.6 through D.11 and E.2 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11 and E.2/E.3 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -26,6 +26,7 @@ D9_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d9/v1"
 D10_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d10/v1"
 D11_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d11/v1"
 E2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e2/v1"
+E3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e3/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -165,6 +166,26 @@ def _d11_unavailable(reason):
         "t_edges": [],
         "delta_edges": [],
         "per_t": [],
+    }
+
+
+def _e3_unavailable(
+    reason, *, t_edges=None, delta_edges=None, coordinate_fingerprint=None,
+    method_a_fingerprint=None, thresholds=None,
+):
+    """Return an E.3-local unavailable payload without display-source aliases."""
+    return {
+        "schema_version": E3_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "t_edges": list(t_edges or ()),
+        "delta_edges": list(delta_edges or ()),
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "method_a_fingerprint": method_a_fingerprint,
+        "thresholds": dict(thresholds or {}),
+        "per_t": (),
     }
 
 
@@ -4029,9 +4050,9 @@ def render_full_background_subtraction_d11_pages(pdf_name, payload, *, page_mani
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
-    *, e2_payload=None, page_manifest=None
+    *, e2_payload=None, e3_payload=None, page_manifest=None
 ):
-    """Append available D.6 through D.11 and E.2 groups in canonical-t order."""
+    """Append available D.6 through D.11, E.2, and E.3 groups in canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4041,6 +4062,7 @@ def render_full_background_subtraction_procedure_pages(
     d10 = _mapping(d10_payload)
     d11 = _mapping(d11_payload)
     e2 = _mapping(e2_payload)
+    e3 = _mapping(e3_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -4053,7 +4075,9 @@ def render_full_background_subtraction_procedure_pages(
     d11_available = bool(d11.get("available"))
     e2_requested = e2_payload is not None
     e2_available = bool(e2.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available:
+    e3_requested = e3_payload is not None
+    e3_available = bool(e3.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4081,6 +4105,10 @@ def render_full_background_subtraction_procedure_pages(
         if e2_requested:
             result["failures"].append(
                 "E.2 procedure input unavailable: {}".format(e2.get("reason"))
+            )
+        if e3_requested:
+            result["failures"].append(
+                "E.3 procedure input unavailable: {}".format(e3.get("reason"))
             )
         return result
     if not d6_available:
@@ -4110,6 +4138,10 @@ def render_full_background_subtraction_procedure_pages(
     if e2_requested and not e2_available:
         result["failures"].append(
             "E.2 procedure input unavailable: {}".format(e2.get("reason"))
+        )
+    if e3_requested and not e3_available:
+        result["failures"].append(
+            "E.3 procedure input unavailable: {}".format(e3.get("reason"))
         )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
@@ -4213,6 +4245,15 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.2 frozen procedure geometry mismatch")
         e2_available = False
+    e3_geometry_reference = geometry_owner if geometry_owner is not None else (
+        e2 if e2_available else None
+    )
+    if e3_available and e3_geometry_reference is not None and (
+        list(e3_geometry_reference.get("t_edges") or ()) != list(e3.get("t_edges") or ())
+        or list(e3_geometry_reference.get("delta_edges") or ()) != list(e3.get("delta_edges") or ())
+    ):
+        result["failures"].append("E.3 frozen procedure geometry mismatch")
+        e3_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -4247,6 +4288,11 @@ def render_full_background_subtraction_procedure_pages(
     e2_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(e2.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    e3_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(e3.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -4305,6 +4351,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_e2_t_pages(ROOT, pdf_name, e2, e2_group, manifest, result["failures"])
 
+    def render_e3_group(t_index):
+        if not e3_available:
+            return
+        e3_group = e3_by_index.get(t_index)
+        if e3_group is None:
+            result["failures"].append(
+                "E.3 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_e3_t_pages(ROOT, pdf_name, e3, e3_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -4322,6 +4379,7 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
+            render_e3_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
@@ -4331,6 +4389,7 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
+            render_e3_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
             group = _mapping(group)
@@ -4339,24 +4398,32 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
+            render_e3_group(group.get("t_index"))
     elif d9_available:
         for group in tuple(d9.get("per_t") or ()):
             _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
             render_d10_group(_mapping(group).get("t_index"))
             render_d11_group(_mapping(group).get("t_index"))
             render_e2_group(_mapping(group).get("t_index"))
+            render_e3_group(_mapping(group).get("t_index"))
     elif d10_available:
         for group in tuple(d10.get("per_t") or ()):
             _render_d10_t_pages(ROOT, pdf_name, d10, _mapping(group), manifest, result["failures"])
             render_d11_group(_mapping(group).get("t_index"))
             render_e2_group(_mapping(group).get("t_index"))
+            render_e3_group(_mapping(group).get("t_index"))
     elif d11_available:
         for group in tuple(d11.get("per_t") or ()):
             _render_d11_t_pages(ROOT, pdf_name, d11, _mapping(group), manifest, result["failures"])
             render_e2_group(_mapping(group).get("t_index"))
+            render_e3_group(_mapping(group).get("t_index"))
     elif e2_available:
         for group in tuple(e2.get("per_t") or ()):
             _render_e2_t_pages(ROOT, pdf_name, e2, _mapping(group), manifest, result["failures"])
+            render_e3_group(_mapping(group).get("t_index"))
+    elif e3_available:
+        for group in tuple(e3.get("per_t") or ()):
+            _render_e3_t_pages(ROOT, pdf_name, e3, _mapping(group), manifest, result["failures"])
     return result
 
 
@@ -4750,6 +4817,446 @@ def _render_e2_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
             failures.append("E.2 {} page unavailable for t{}".format(coordinate, t_number))
 
 
+def _e3_integer(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _e3_finite(value):
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
+
+
+def _e3_part1_rows(records, side, t_count, delta_count, coordinate_fingerprint):
+    """Validate and detach stored positive-response Part-1 display rows."""
+    if not isinstance(records, Sequence) or isinstance(records, (str, bytes)):
+        return None, "e3_part1_{}_records_invalid".format(side)
+    grouped = [[[] for _unused in range(delta_count)] for _unused in range(t_count)]
+    for source_record in records:
+        record = _mapping(source_record)
+        if (
+            not record
+            or record.get("side") != side
+            or record.get("coordinate_fingerprint") != coordinate_fingerprint
+            or not isinstance(record.get("source_label"), str)
+            or not record.get("source_label")
+            or not isinstance(record.get("nommcuts"), bool)
+            or record.get("rf_applied_to_diagnostic") is not False
+        ):
+            return None, "e3_part1_{}_record_contract_invalid".format(side)
+        t_index = record.get("canonical_t_index")
+        delta_index = record.get("delta_index")
+        npe = _e3_finite(record.get("P_hgcer_npeSum"))
+        weight = _e3_finite(record.get("diagnostic_weight"))
+        if (
+            not _e3_integer(t_index)
+            or not _e3_integer(delta_index)
+            or not 0 <= t_index < t_count
+            or not 0 <= delta_index < delta_count
+            or npe is None
+            or weight is None
+        ):
+            return None, "e3_part1_{}_record_scalar_or_membership_invalid".format(side)
+        if record["nommcuts"] and npe > 0.0:
+            grouped[t_index][delta_index].append({
+                "side": str(side),
+                "canonical_t_index": int(t_index),
+                "delta_index": int(delta_index),
+                "P_hgcer_npeSum": npe,
+                "diagnostic_weight": weight,
+                "source_label": str(record["source_label"]),
+            })
+    return tuple(tuple(tuple(rows) for rows in by_delta) for by_delta in grouped), None
+
+
+def _e3_thresholds(method_a):
+    configuration = _mapping(method_a.get("configuration"))
+    positive = _e3_finite(configuration.get("positive_response_threshold"))
+    low_upper = _e3_finite(configuration.get("low_response_upper_threshold"))
+    if (
+        positive != 0.0
+        or low_upper != 2.0
+        or configuration.get("uncertainty_method") != "wilson_95_percent"
+    ):
+        return None
+    return {
+        "positive_response_threshold": positive,
+        "low_response_upper_threshold": low_upper,
+        "uncertainty_method": "wilson_95_percent",
+    }
+
+
+def _e3_method_a_cells(method_a, t_edges, delta_edges):
+    """Validate and copy the complete stored Method-A canonical cell lattice."""
+    source_cells = method_a.get("cells")
+    expected_count = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    if not isinstance(source_cells, Sequence) or isinstance(source_cells, (str, bytes)):
+        return None, "e3_method_a_cell_lattice_invalid"
+    if len(source_cells) != expected_count:
+        return None, "e3_method_a_cell_lattice_invalid"
+    copied = [[None for _unused in range(len(delta_edges) - 1)] for _unused in range(len(t_edges) - 1)]
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "support_class", "method_A_status", "method_A_reason",
+        "prompt_positive_count", "prompt_low_count", "prompt_control_count",
+        "partition_closure_passed", "f_low", "f_low_low", "f_low_high",
+    )
+    for source_cell in source_cells:
+        cell = _mapping(source_cell)
+        if not cell or any(key not in cell for key in required):
+            return None, "e3_method_a_cell_contract_invalid"
+        t_index = cell.get("t_index")
+        delta_index = cell.get("delta_index")
+        if (
+            not _e3_integer(t_index)
+            or not _e3_integer(delta_index)
+            or not 0 <= t_index < len(t_edges) - 1
+            or not 0 <= delta_index < len(delta_edges) - 1
+            or cell.get("t_low") != t_edges[t_index]
+            or cell.get("t_high") != t_edges[t_index + 1]
+            or cell.get("delta_low") != delta_edges[delta_index]
+            or cell.get("delta_high") != delta_edges[delta_index + 1]
+            or copied[t_index][delta_index] is not None
+            or cell.get("support_class") not in {"supported", "marginal", "unsupported"}
+            or cell.get("method_A_status") not in {"available", "unavailable"}
+            or not isinstance(cell.get("partition_closure_passed"), bool)
+            or any(
+                not _e3_integer(cell.get(key)) or cell.get(key) < 0
+                for key in (
+                    "prompt_positive_count", "prompt_low_count", "prompt_control_count",
+                )
+            )
+        ):
+            return None, "e3_method_a_cell_contract_invalid"
+        status = cell["method_A_status"]
+        support = cell["support_class"]
+        f_low = _e3_finite(cell.get("f_low"))
+        f_low_low = _e3_finite(cell.get("f_low_low"))
+        f_low_high = _e3_finite(cell.get("f_low_high"))
+        if status == "available":
+            if (
+                support not in {"supported", "marginal"}
+                or f_low is None
+                or f_low_low is None
+                or f_low_high is None
+                or not 0.0 <= f_low_low <= f_low <= f_low_high <= 1.0
+            ):
+                return None, "e3_method_a_cell_annotation_invalid"
+        elif (
+            support != "unsupported"
+            or any(value is not None for value in (f_low, f_low_low, f_low_high))
+        ):
+            return None, "e3_method_a_cell_annotation_invalid"
+        copied[t_index][delta_index] = {
+            "t_index": int(t_index),
+            "t_low": float(cell["t_low"]),
+            "t_high": float(cell["t_high"]),
+            "delta_index": int(delta_index),
+            "delta_low": float(cell["delta_low"]),
+            "delta_high": float(cell["delta_high"]),
+            "support_class": str(support),
+            "method_A_status": str(status),
+            "method_A_reason": cell["method_A_reason"],
+            "prompt_positive_count": int(cell["prompt_positive_count"]),
+            "prompt_low_count": int(cell["prompt_low_count"]),
+            "prompt_control_count": int(cell["prompt_control_count"]),
+            "partition_closure_passed": bool(cell["partition_closure_passed"]),
+            "f_low": f_low,
+            "f_low_low": f_low_low,
+            "f_low_high": f_low_high,
+        }
+    if any(cell is None for by_delta in copied for cell in by_delta):
+        return None, "e3_method_a_cell_lattice_invalid"
+    return tuple(tuple(by_delta) for by_delta in copied), None
+
+
+def build_full_background_subtraction_e3_payload(
+    pion_hgcer_tdelta_diagnostic, pion_hgcer_method_a,
+):
+    """Build a detached local Method-A HGCer presentation payload only."""
+    diagnostic = _mapping(pion_hgcer_tdelta_diagnostic)
+    t_edges = _strict_edges(diagnostic.get("t_edges"))
+    delta_edges = _strict_edges(diagnostic.get("delta_edges"))
+    coordinate_fingerprint = diagnostic.get("coordinate_fingerprint")
+    if (
+        diagnostic.get("status") != "available"
+        or diagnostic.get("non_authoritative") is not True
+        or diagnostic.get("production_side_effect_free") is not True
+        or diagnostic.get("production_hgcer_pid_unchanged") is not True
+        or diagnostic.get("rf_restoration_applied") is not False
+    ):
+        return _e3_unavailable("e3_part1_contract_invalid")
+    if t_edges is None or delta_edges is None:
+        return _e3_unavailable("e3_part1_geometry_invalid")
+    if not isinstance(coordinate_fingerprint, str) or not coordinate_fingerprint:
+        return _e3_unavailable(
+            "e3_part1_coordinate_fingerprint_missing",
+            t_edges=t_edges,
+            delta_edges=delta_edges,
+        )
+    method_a = _mapping(pion_hgcer_method_a)
+    method_a_fingerprint = method_a.get("fingerprint")
+    if not isinstance(method_a_fingerprint, str) or not method_a_fingerprint:
+        method_a_fingerprint = None
+    method_a_thresholds = _e3_thresholds(method_a) or {}
+    if (
+        method_a.get("schema_version") != "pion_hgcer_method_a/v1"
+        or method_a.get("method") != "observed_positive_hgcer_response"
+        or method_a.get("status") != "available"
+        or method_a.get("available") is not True
+        or method_a.get("non_authoritative") is not True
+        or method_a.get("production_objects_mutated") is not False
+        or method_a.get("refinement_applied") is not False
+        or method_a.get("rf_ct_required") is not False
+        or method_a.get("zerope_model_used") is not False
+    ):
+        return _e3_unavailable(
+            "e3_method_a_contract_invalid", t_edges=t_edges,
+            delta_edges=delta_edges, coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint, thresholds=method_a_thresholds,
+        )
+    if (
+        method_a_fingerprint is None
+        or method_a.get("coordinate_fingerprint") != coordinate_fingerprint
+        or _strict_edges(method_a.get("t_edges")) != t_edges
+        or _strict_edges(method_a.get("delta_edges")) != delta_edges
+    ):
+        return _e3_unavailable(
+            "e3_method_a_provenance_mismatch", t_edges=t_edges,
+            delta_edges=delta_edges, coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint,
+        )
+    if (
+        method_a.get("response_population_definition")
+        != "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0"
+        or method_a.get("physical_control_definition") != "P_hgcer_npeSum_gt_2"
+        or method_a.get("low_response_definition") != "0_lt_P_hgcer_npeSum_le_2"
+    ):
+        return _e3_unavailable(
+            "e3_method_a_definition_invalid", t_edges=t_edges,
+            delta_edges=delta_edges, coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint,
+        )
+    thresholds = _e3_thresholds(method_a)
+    if thresholds is None:
+        return _e3_unavailable(
+            "e3_method_a_thresholds_invalid", t_edges=t_edges,
+            delta_edges=delta_edges, coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint,
+        )
+    records = _mapping(diagnostic.get("records"))
+    histograms = _mapping(diagnostic.get("histograms"))
+    if not {"kaon", "pion"}.issubset(records):
+        return _e3_unavailable(
+            "e3_part1_records_invalid", t_edges=t_edges, delta_edges=delta_edges,
+            coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint, thresholds=thresholds,
+        )
+    templates = {
+        "kaon": histograms.get("H_hgcer_kaon_weighted"),
+        "pion": histograms.get("H_hgcer_pion_weighted"),
+    }
+    if any(template is None for template in templates.values()):
+        return _e3_unavailable(
+            "e3_part1_weighted_template_missing", t_edges=t_edges,
+            delta_edges=delta_edges, coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint, thresholds=thresholds,
+        )
+    rows = {}
+    for side in ("kaon", "pion"):
+        rows[side], reason = _e3_part1_rows(
+            records[side], side, len(t_edges) - 1, len(delta_edges) - 1,
+            coordinate_fingerprint,
+        )
+        if reason is not None:
+            return _e3_unavailable(
+                reason, t_edges=t_edges, delta_edges=delta_edges,
+                coordinate_fingerprint=coordinate_fingerprint,
+                method_a_fingerprint=method_a_fingerprint, thresholds=thresholds,
+            )
+    method_a_cells, reason = _e3_method_a_cells(method_a, t_edges, delta_edges)
+    if reason is not None:
+        return _e3_unavailable(
+            reason, t_edges=t_edges, delta_edges=delta_edges,
+            coordinate_fingerprint=coordinate_fingerprint,
+            method_a_fingerprint=method_a_fingerprint, thresholds=thresholds,
+        )
+    per_t = []
+    for t_index in range(len(t_edges) - 1):
+        cells = []
+        for delta_index in range(len(delta_edges) - 1):
+            annotation = method_a_cells[t_index][delta_index]
+            cells.append({
+                "t_index": t_index,
+                "t_low": float(t_edges[t_index]),
+                "t_high": float(t_edges[t_index + 1]),
+                "delta_index": delta_index,
+                "delta_low": float(delta_edges[delta_index]),
+                "delta_high": float(delta_edges[delta_index + 1]),
+                "kaon_rows": tuple(dict(row) for row in rows["kaon"][t_index][delta_index]),
+                "pion_rows": tuple(dict(row) for row in rows["pion"][t_index][delta_index]),
+                "method_a": dict(annotation),
+            })
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "kaon_template": templates["kaon"],
+            "pion_template": templates["pion"],
+            "cells": tuple(cells),
+        })
+    return {
+        "schema_version": E3_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "coordinate_fingerprint": str(coordinate_fingerprint),
+        "method_a_fingerprint": str(method_a_fingerprint),
+        "thresholds": dict(thresholds),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e3_fresh_weighted_histogram(source, name, rows):
+    """Fill a detached local signed-HGCer context histogram from stored rows."""
+    histogram = _clone_display_histogram(source, name)
+    if histogram is None or not hasattr(histogram, "Reset") or not hasattr(histogram, "Fill"):
+        return None
+    try:
+        histogram.Reset("ICES")
+        for row in tuple(rows or ()):
+            row = _mapping(row)
+            histogram.Fill(row["P_hgcer_npeSum"], row["diagnostic_weight"])
+    except Exception:
+        return None
+    return histogram
+
+
+def _e3_panel_notice(ROOT, text, y_low, y_high):
+    try:
+        notice = ROOT.TPaveText(0.12, float(y_low), 0.88, float(y_high), "NDC")
+        notice.SetFillStyle(0)
+        notice.SetBorderSize(0)
+        notice.SetTextAlign(22)
+        notice.SetTextSize(0.030)
+        notice.AddText(str(text))
+        notice.Draw()
+        return notice
+    except Exception:
+        return None
+
+
+def _e3_cell_annotation(cell):
+    annotation = _mapping(cell.get("method_a"))
+    support = annotation.get("support_class", "not recorded")
+    if annotation.get("method_A_status") != "available":
+        reason = annotation.get("method_A_reason") or "support insufficient"
+        return "Method-A support: {}; unavailable: {}".format(support, reason)
+    return "Method-A support: {}; f_low = {:.4f} [{:.4f}, {:.4f}] (Wilson 95%)".format(
+        support,
+        float(annotation["f_low"]),
+        float(annotation["f_low_low"]),
+        float(annotation["f_low_high"]),
+    )
+
+
+def _render_e3_local_hgcer_page(ROOT, pdf_name, presentation, group):
+    """Render one fixed-size, all-delta E.3 local HGCer page."""
+    cells = tuple(group.get("cells") or ())
+    if not cells:
+        return False
+    columns = 5
+    rows = max(1, int(math.ceil(float(len(cells)) / float(columns))))
+    title = "Method-A local HGCer response - {}".format(_t_context(group))
+    canvas = ROOT.TCanvas(
+        "C_full_background_e3_method_a_local_hgcer_t{}".format(group["t_index"] + 1),
+        title,
+        1800,
+        1200,
+    )
+    canvas.Divide(columns, rows)
+    draw_objects = []
+    legend_drawn = False
+    threshold = float(_mapping(presentation.get("thresholds"))["low_response_upper_threshold"])
+    try:
+        for panel_index, cell in enumerate(cells, 1):
+            cell = _mapping(cell)
+            canvas.cd(panel_index)
+            kaon = _e3_fresh_weighted_histogram(
+                group.get("kaon_template"),
+                "H_full_background_e3_kaon_t{}_d{}".format(
+                    group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                cell.get("kaon_rows"),
+            )
+            pion = _e3_fresh_weighted_histogram(
+                group.get("pion_template"),
+                "H_full_background_e3_pion_t{}_d{}".format(
+                    group["t_index"] + 1, int(cell["delta_index"]) + 1,
+                ),
+                cell.get("pion_rows"),
+            )
+            if kaon is None or pion is None:
+                return False
+            panel_title = "delta = [{:.3f}, {:.3f}] %;HGCer NPE;Signed weighted yield".format(
+                float(cell["delta_low"]), float(cell["delta_high"]),
+            )
+            _set_histogram_title(kaon, panel_title)
+            _set_histogram_title(pion, panel_title)
+            y_range = _combined_histogram_y_range((kaon, pion))
+            _apply_display_y_range(kaon, y_range)
+            _apply_display_y_range(pion, y_range)
+            _style_histogram(kaon, getattr(ROOT, "kBlack", 1))
+            _style_histogram(pion, getattr(ROOT, "kBlue", 4))
+            kaon.Draw("hist e")
+            pion.Draw("hist e same")
+            _d9_draw_threshold(ROOT, threshold, y_range, 0.0, threshold, draw_objects)
+            low_label = _e3_panel_notice(ROOT, "0 < NPE <= 2", 0.77, 0.84)
+            control_label = _e3_panel_notice(ROOT, "NPE > 2", 0.68, 0.75)
+            annotation = _e3_panel_notice(ROOT, _e3_cell_annotation(cell), 0.49, 0.63)
+            draw_objects.extend(
+                item for item in (kaon, pion, low_label, control_label, annotation) if item is not None
+            )
+            if not legend_drawn and hasattr(ROOT, "TLegend"):
+                legend = ROOT.TLegend(0.43, 0.08, 0.89, 0.24)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                legend.AddEntry(kaon, "Proton-cleaned kaon-side context", "l")
+                legend.AddEntry(pion, "Pion-control context", "l")
+                legend.Draw()
+                draw_objects.append(legend)
+                legend_drawn = True
+        canvas.cd()
+        draw_objects.append(_draw_small_note(
+            ROOT,
+            "E.3 Method-A local HGCer presentation - diagnostic only; signed noRF no-MM-cut response context; stored prompt-pion f_low; no refinement or correction applied.",
+        ))
+        draw_objects.append(_draw_page_header(ROOT, canvas, "Method-A local HGCer response", group))
+        canvas._full_background_e3_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e3_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Append the single E.3 local Method-A HGCer page for one canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    if _render_e3_local_hgcer_page(ROOT, pdf_name, presentation, group):
+        manifest.append({
+            "page_id": "full_background.e3.method_a_local_hgcer",
+            "scope": "t{}".format(t_number),
+            "authoritative": False,
+        })
+    else:
+        failures.append("E.3 Method-A local HGCer page unavailable for t{}".format(t_number))
+
+
 __all__ = (
     "D6_PRESENTATION_SCHEMA_VERSION",
     "D7_PRESENTATION_SCHEMA_VERSION",
@@ -4758,6 +5265,7 @@ __all__ = (
     "D10_PRESENTATION_SCHEMA_VERSION",
     "D11_PRESENTATION_SCHEMA_VERSION",
     "E2_PRESENTATION_SCHEMA_VERSION",
+    "E3_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
@@ -4766,6 +5274,7 @@ __all__ = (
     "build_full_background_subtraction_d10_payload",
     "build_full_background_subtraction_d11_payload",
     "build_full_background_subtraction_e2_payload",
+    "build_full_background_subtraction_e3_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",

@@ -45,6 +45,9 @@ E2_FULL_BACKGROUND_PAGE_IDS = (
     "full_background.e2.shms_xptar_acceptance",
     "full_background.e2.shms_yptar_acceptance",
 )
+E3_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.e3.method_a_local_hgcer",
+)
 
 
 def _assert_full_background_manifest_contract(test_case, manifest):
@@ -544,6 +547,79 @@ class _E2ROOT(_FakeROOT):
         histogram.root = self
         self.histograms.append(histogram)
         return histogram
+
+
+class _E3Canvas:
+    def __init__(self, root, name, title, width, height):
+        self.root = root
+        self.name = str(name)
+        self.title = str(title)
+        self.width = int(width)
+        self.height = int(height)
+        self.divisions = []
+        self.closed = False
+        root.canvases.append(self)
+
+    def Divide(self, columns, rows):
+        self.divisions.append((int(columns), int(rows)))
+
+    def cd(self, *_args):
+        return self
+
+    def Print(self, name):
+        self.root.printed.append(str(name))
+
+    def Close(self):
+        self.closed = True
+
+
+class _E3Histogram(_BinnedHistogram):
+    created = []
+
+    def __init__(self, label, contents=(), root=None):
+        super().__init__(label, contents)
+        self.root = root
+
+    def Clone(self, name):
+        clone = type(self)("{}:{}".format(self.label, name), self.contents, self.root)
+        type(self).created.append(clone)
+        return clone
+
+    def Draw(self, option):
+        self.root.drawn_histograms.append((self, str(option)))
+
+
+class _E3Line:
+    def __init__(self, root, x1, y1, x2, y2):
+        self.root = root
+        self.x1 = float(x1)
+        self.y1 = float(y1)
+        self.x2 = float(x2)
+        self.y2 = float(y2)
+
+    def SetLineStyle(self, _style):
+        return None
+
+    def SetLineWidth(self, _width):
+        return None
+
+    def Draw(self):
+        self.root.drawn_lines.append(self)
+
+
+class _E3ROOT(_FakeROOT):
+    def __init__(self):
+        super().__init__()
+        self.canvases = []
+        self.printed = []
+        self.drawn_histograms = []
+        self.drawn_lines = []
+
+    def TCanvas(self, *args):
+        return _E3Canvas(self, *args)
+
+    def TLine(self, *args):
+        return _E3Line(self, *args)
 
 
 class _D10Line:
@@ -1111,6 +1187,137 @@ def _d9_fixture():
         "cells": cells,
     }
     return diagnostic, method_a, comparison
+
+
+def _e3_fixture():
+    """Return three canonical t bins and ten frozen delta cells for E.3."""
+    t_edges = [0.0, 0.20, 0.45, 0.75]
+    delta_edges = [-10.0, -8.0, -6.0, -4.0, -2.0, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0]
+    coordinate_fingerprint = "e3-coordinate-fingerprint"
+    method_a_fingerprint = "e3-method-a-fingerprint"
+    records = {"kaon": [], "pion": []}
+    for t_index in range(3):
+        for delta_index in range(10):
+            for side, sign in (("kaon", 1.0), ("pion", -1.0)):
+                records[side].extend((
+                    {
+                        "side": side,
+                        "source_label": "prompt" if sign > 0.0 else "random",
+                        "coordinate_fingerprint": coordinate_fingerprint,
+                        "canonical_t_index": t_index,
+                        "delta_index": delta_index,
+                        "P_hgcer_npeSum": 0.45 + 0.05 * delta_index,
+                        "diagnostic_weight": sign * (2.0 + t_index),
+                        "nommcuts": True,
+                        "allcuts": False,
+                        "rf_applied_to_diagnostic": False,
+                        "analysis_t": 99.0,
+                        "ssdelta": 99.0,
+                    },
+                    {
+                        "side": side,
+                        "source_label": "prompt",
+                        "coordinate_fingerprint": coordinate_fingerprint,
+                        "canonical_t_index": t_index,
+                        "delta_index": delta_index,
+                        "P_hgcer_npeSum": 2.75 + 0.05 * delta_index,
+                        "diagnostic_weight": -sign * (1.25 + 0.1 * t_index),
+                        "nommcuts": True,
+                        "allcuts": False,
+                        "rf_applied_to_diagnostic": False,
+                        "analysis_t": -99.0,
+                        "ssdelta": -99.0,
+                    },
+                    {
+                        "side": side,
+                        "source_label": "excluded-nommcuts",
+                        "coordinate_fingerprint": coordinate_fingerprint,
+                        "canonical_t_index": t_index,
+                        "delta_index": delta_index,
+                        "P_hgcer_npeSum": 5.0,
+                        "diagnostic_weight": 1000.0,
+                        "nommcuts": False,
+                        "allcuts": True,
+                        "rf_applied_to_diagnostic": False,
+                    },
+                    {
+                        "side": side,
+                        "source_label": "excluded-nonpositive",
+                        "coordinate_fingerprint": coordinate_fingerprint,
+                        "canonical_t_index": t_index,
+                        "delta_index": delta_index,
+                        "P_hgcer_npeSum": 0.0,
+                        "diagnostic_weight": 2000.0,
+                        "nommcuts": True,
+                        "allcuts": False,
+                        "rf_applied_to_diagnostic": False,
+                    },
+                ))
+    method_cells = []
+    for t_index in range(3):
+        for delta_index in range(10):
+            unavailable = (t_index, delta_index) == (2, 9)
+            method_cells.append({
+                "t_index": t_index,
+                "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1],
+                "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "support_class": "unsupported" if unavailable else (
+                    "marginal" if delta_index == 1 else "supported"
+                ),
+                "method_A_status": "unavailable" if unavailable else "available",
+                "method_A_reason": "support_insufficient" if unavailable else None,
+                # Intentionally non-derivable presentation values.
+                "prompt_positive_count": 101 + 10 * t_index + delta_index,
+                "prompt_low_count": 17 + delta_index,
+                "prompt_control_count": 84 + 10 * t_index,
+                "partition_closure_passed": True,
+                "f_low": None if unavailable else 0.314 + 0.001 * delta_index,
+                "f_low_low": None if unavailable else 0.210 + 0.001 * delta_index,
+                "f_low_high": None if unavailable else 0.460 + 0.001 * delta_index,
+            })
+    diagnostic = {
+        "status": "available",
+        "non_authoritative": True,
+        "production_side_effect_free": True,
+        "production_hgcer_pid_unchanged": True,
+        "rf_restoration_applied": False,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "records": {side: tuple(side_rows) for side, side_rows in records.items()},
+        "histograms": {
+            "H_hgcer_kaon_weighted": _E3Histogram("e3-kaon", [7.0] * 8),
+            "H_hgcer_pion_weighted": _E3Histogram("e3-pion", [-3.0] * 8),
+        },
+    }
+    method_a = {
+        "schema_version": "pion_hgcer_method_a/v1",
+        "method": "observed_positive_hgcer_response",
+        "status": "available",
+        "available": True,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "refinement_applied": False,
+        "rf_ct_required": False,
+        "zerope_model_used": False,
+        "coordinate_fingerprint": coordinate_fingerprint,
+        "t_edges": t_edges,
+        "delta_edges": delta_edges,
+        "fingerprint": method_a_fingerprint,
+        "response_population_definition": "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0",
+        "physical_control_definition": "P_hgcer_npeSum_gt_2",
+        "low_response_definition": "0_lt_P_hgcer_npeSum_le_2",
+        "configuration": {
+            "positive_response_threshold": 0.0,
+            "low_response_upper_threshold": 2.0,
+            "uncertainty_method": "wilson_95_percent",
+        },
+        "cells": method_cells,
+    }
+    return diagnostic, method_a
 
 
 def _e2_fixture():
@@ -2750,6 +2957,246 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             list(EXPECTED_FULL_BACKGROUND_PAGE_IDS) * 2,
         )
 
+    def test_e3_copies_frozen_positive_rows_and_method_a_annotations(self):
+        diagnostic, method_a = _e3_fixture()
+        diagnostic_before = deepcopy(diagnostic["records"])
+        method_a_before = deepcopy(method_a)
+        template_before = {
+            side: list(histogram.contents)
+            for side, histogram in diagnostic["histograms"].items()
+        }
+        payload = plots.build_full_background_subtraction_e3_payload(
+            diagnostic, method_a
+        )
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.E3_PRESENTATION_SCHEMA_VERSION)
+        self.assertEqual(payload["t_edges"], diagnostic["t_edges"])
+        self.assertEqual(payload["delta_edges"], diagnostic["delta_edges"])
+        self.assertEqual(len(payload["per_t"]), 3)
+        first = payload["per_t"][0]["cells"][0]
+        self.assertEqual(len(first["kaon_rows"]), 2)
+        self.assertEqual(len(first["pion_rows"]), 2)
+        self.assertEqual(
+            [row["diagnostic_weight"] for row in first["kaon_rows"]], [2.0, -1.25]
+        )
+        self.assertEqual(
+            [row["diagnostic_weight"] for row in first["pion_rows"]], [-2.0, 1.25]
+        )
+        self.assertTrue(all(row["P_hgcer_npeSum"] > 0.0 for row in first["kaon_rows"]))
+        self.assertTrue(all(row["source_label"] != "excluded-nommcuts" for row in first["pion_rows"]))
+        self.assertEqual(first["method_a"]["prompt_positive_count"], 101)
+        self.assertEqual(first["method_a"]["prompt_low_count"], 17)
+        self.assertEqual(first["method_a"]["prompt_control_count"], 84)
+        self.assertEqual(first["method_a"]["f_low"], 0.314)
+        self.assertEqual(first["method_a"]["f_low_low"], 0.210)
+        self.assertEqual(first["method_a"]["f_low_high"], 0.460)
+        unavailable = payload["per_t"][2]["cells"][9]["method_a"]
+        self.assertEqual(unavailable["method_A_status"], "unavailable")
+        self.assertIsNone(unavailable["f_low"])
+
+        first["kaon_rows"][0]["diagnostic_weight"] = 99.0
+        first["method_a"]["f_low"] = 0.99
+        self.assertEqual(diagnostic["records"], diagnostic_before)
+        self.assertEqual(method_a, method_a_before)
+        self.assertEqual(
+            {
+                side: histogram.contents
+                for side, histogram in diagnostic["histograms"].items()
+            },
+            template_before,
+        )
+
+    def test_e3_rejects_frozen_contract_provenance_definition_and_lattice_drift(self):
+        cases = (
+            (
+                lambda diagnostic, _method: diagnostic.update(status="unavailable"),
+                "e3_part1_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic.update(rf_restoration_applied=True),
+                "e3_part1_contract_invalid",
+            ),
+            (
+                lambda diagnostic, _method: diagnostic.update(coordinate_fingerprint=""),
+                "e3_part1_coordinate_fingerprint_missing",
+            ),
+            (
+                lambda _diagnostic, method: method.update(available=False),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(schema_version="wrong"),
+                "e3_method_a_contract_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(coordinate_fingerprint="wrong"),
+                "e3_method_a_provenance_mismatch",
+            ),
+            (
+                lambda _diagnostic, method: method["configuration"].update(
+                    low_response_upper_threshold=2.1
+                ),
+                "e3_method_a_thresholds_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method.update(
+                    low_response_definition="wrong"
+                ),
+                "e3_method_a_definition_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"].pop(),
+                "e3_method_a_cell_lattice_invalid",
+            ),
+            (
+                lambda _diagnostic, method: method["cells"].__setitem__(
+                    -1, dict(method["cells"][0])
+                ),
+                "e3_method_a_cell_contract_invalid",
+            ),
+        )
+        for mutation, reason in cases:
+            with self.subTest(reason=reason):
+                diagnostic, method_a = _e3_fixture()
+                mutation(diagnostic, method_a)
+                payload = plots.build_full_background_subtraction_e3_payload(
+                    diagnostic, method_a
+                )
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], reason)
+
+    def test_e3_renderer_uses_detached_signed_clones_and_all_delta_panels(self):
+        diagnostic, method_a = _e3_fixture()
+        _E3Histogram.created = []
+        root = _E3ROOT()
+        for template in diagnostic["histograms"].values():
+            template.root = root
+        template_before = {
+            side: list(histogram.contents)
+            for side, histogram in diagnostic["histograms"].items()
+        }
+        payload = plots.build_full_background_subtraction_e3_payload(
+            diagnostic, method_a
+        )
+        manifest, failures = [], []
+        for group in payload["per_t"]:
+            plots._render_e3_t_pages(root, "ignored.pdf", payload, group, manifest, failures)
+
+        self.assertEqual(failures, [])
+        self.assertEqual(len(root.canvases), 3)
+        self.assertEqual(root.printed, ["ignored.pdf"] * 3)
+        self.assertTrue(all((canvas.width, canvas.height) == (1800, 1200) for canvas in root.canvases))
+        self.assertTrue(all(canvas.divisions == [(5, 2)] for canvas in root.canvases))
+        self.assertEqual(len(root.drawn_lines), 30)
+        self.assertTrue(all(line.x1 == 2.0 and line.x2 == 2.0 for line in root.drawn_lines))
+        self.assertEqual(
+            [(page["page_id"], page["scope"], page["authoritative"]) for page in manifest],
+            [
+                ("full_background.e3.method_a_local_hgcer", "t1", False),
+                ("full_background.e3.method_a_local_hgcer", "t2", False),
+                ("full_background.e3.method_a_local_hgcer", "t3", False),
+            ],
+        )
+        self.assertEqual(
+            {
+                side: histogram.contents
+                for side, histogram in diagnostic["histograms"].items()
+            },
+            template_before,
+        )
+        self.assertEqual(len(_E3Histogram.created), 60)
+        self.assertTrue(all(histogram.directory == 0 for histogram in _E3Histogram.created))
+        self.assertTrue(any(
+            value < 0.0
+            for histogram in _E3Histogram.created
+            for value in histogram.contents
+        ))
+        visible_text = [text for block in root.drawn_text for text in block]
+        self.assertIn("0 < NPE <= 2", visible_text)
+        self.assertIn("NPE > 2", visible_text)
+        self.assertTrue(any("f_low = 0.3140" in text for text in visible_text))
+        self.assertTrue(any("unavailable: support_insufficient" in text for text in visible_text))
+
+    def test_e3_cumulative_pages_follow_e2_and_fail_locally(self):
+        phase_page_ids = (
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[3:6],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[6:9],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[9:12],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[12:15],
+            EXPECTED_FULL_BACKGROUND_PAGE_IDS[15:18],
+        )
+        payloads = {
+            label: _d12_cumulative_payload(label)
+            for label in ("D.6", "D.7", "D.8", "D.9", "D.10", "D.11")
+        }
+        e2 = _d12_cumulative_payload("E.2")
+        e3 = _d12_cumulative_payload("E.3")
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d6_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[0], set())
+        ), patch.object(
+            plots, "_render_d7_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[1], set())
+        ), patch.object(
+            plots, "_render_d8_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[2], set())
+        ), patch.object(
+            plots, "_render_d9_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[3], set())
+        ), patch.object(
+            plots, "_render_d10_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[4], set())
+        ), patch.object(
+            plots, "_render_d11_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[5], set())
+        ), patch.object(
+            plots, "_render_e2_t_pages", side_effect=_d12_record_phase_pages(E2_FULL_BACKGROUND_PAGE_IDS, set())
+        ), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(E3_FULL_BACKGROUND_PAGE_IDS, set())
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf",
+                payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                e2_payload=e2, e3_payload=e3,
+            )
+        expected = [
+            (scope, page_id)
+            for scope in ("t1", "t2")
+            for page_id in (
+                EXPECTED_FULL_BACKGROUND_PAGE_IDS
+                + E2_FULL_BACKGROUND_PAGE_IDS
+                + E3_FULL_BACKGROUND_PAGE_IDS
+            )
+        ]
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]], expected
+        )
+
+        e3["delta_edges"] = [-10.0, 5.0, 10.0]
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d6_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[0], set())
+        ), patch.object(
+            plots, "_render_d7_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[1], set())
+        ), patch.object(
+            plots, "_render_d8_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[2], set())
+        ), patch.object(
+            plots, "_render_d9_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[3], set())
+        ), patch.object(
+            plots, "_render_d10_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[4], set())
+        ), patch.object(
+            plots, "_render_d11_t_pages", side_effect=_d12_record_phase_pages(phase_page_ids[5], set())
+        ), patch.object(
+            plots, "_render_e2_t_pages", side_effect=_d12_record_phase_pages(E2_FULL_BACKGROUND_PAGE_IDS, set())
+        ), patch.object(plots, "_render_e3_t_pages"):
+            isolated = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf",
+                payloads["D.6"], payloads["D.7"], payloads["D.8"],
+                payloads["D.9"], payloads["D.10"], payloads["D.11"],
+                e2_payload=e2, e3_payload=e3,
+            )
+        self.assertIn("E.3 frozen procedure geometry mismatch", isolated["failures"])
+        self.assertEqual(
+            [page["page_id"] for page in isolated["manifest"]],
+            list(EXPECTED_FULL_BACKGROUND_PAGE_IDS + E2_FULL_BACKGROUND_PAGE_IDS) * 2,
+        )
+
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
         phase_page_ids = (
@@ -3651,8 +4098,38 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(e2_forbidden=forbidden):
                 self.assertNotIn(forbidden, e2_source)
 
+        e3_source = source[
+            source.index("def _e3_integer"):
+            source.index("__all__", source.index("def _e3_integer"))
+        ]
+        for required in (
+            "build_full_background_subtraction_e3_payload",
+            "H_hgcer_kaon_weighted",
+            "H_hgcer_pion_weighted",
+            "full_background.e3.method_a_local_hgcer",
+            "0 < NPE <= 2",
+            "NPE > 2",
+            "low_response_upper_threshold",
+            "1800",
+            "1200",
+        ):
+            with self.subTest(e3_required=required):
+                self.assertIn(required, e3_source)
+        self.assertIn("E3_PRESENTATION_SCHEMA_VERSION", source)
+        self.assertEqual(
+            plots.build_full_background_subtraction_e3_payload.__code__.co_argcount,
+            2,
+        )
+        for forbidden in (
+            "find_canonical_bin(", "candidate_L_B", "adaptive_candidate",
+            "method_B_status", "ratio_B_over_A", "log_ratio_B_over_A",
+            "build_pion_hgcer_method_b", "build_pion_hgcer_ab_comparison",
+        ):
+            with self.subTest(e3_forbidden=forbidden):
+                self.assertNotIn(forbidden, e3_source)
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.11 and E.2 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.11, E.2, and E.3 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -3663,6 +4140,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_d10_payload",
             "build_full_background_subtraction_d11_payload",
             "build_full_background_subtraction_e2_payload",
+            "build_full_background_subtraction_e3_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -3721,8 +4199,25 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_e2_payload(", start),
+            runtime.index("build_full_background_subtraction_e3_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_e3_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
+        e3_call_start = runtime.index(
+            "build_full_background_subtraction_e3_payload(", start
+        )
+        e3_call_end = runtime.index(")", e3_call_start) + 1
+        e3_call = runtime[e3_call_start:e3_call_end]
+        self.assertIn("pion_hgcer_tdelta_diagnostic", e3_call)
+        self.assertIn("pion_hgcer_method_a", e3_call)
+        for forbidden_input in (
+            "pion_hgcer_method_b", "pion_hgcer_method_b_comparison",
+            "pion_hgcer_ab_comparison", "phase_d_checkpoint",
+        ):
+            with self.subTest(e3_runtime_forbidden_input=forbidden_input):
+                self.assertNotIn(forbidden_input, e3_call)
         self.assertLess(
             runtime.index("full_background_subtraction_pdf_path(", start),
             runtime.index("open_full_background_subtraction_pdf(", start),
@@ -3745,6 +4240,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d9_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d11_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_e3_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d12_payload\"]", block)
         self.assertEqual(block.count('histDict["full_background_subtraction_'), 2)
         self.assertIn('histDict["full_background_subtraction_page_manifest"]', block)
