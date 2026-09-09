@@ -1,4 +1,4 @@
-"""Focused, dependency-free tests for the Phase-C validation bundle collector."""
+"""Focused, dependency-free tests for the Phase-E.3 validation bundle collector."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import zipfile
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTOR_PATH = REPO_ROOT / "testing" / "collect_pion_hgcer_validation_bundle.py"
-SPEC = importlib.util.spec_from_file_location("_phase_c_validation_bundle_collector", COLLECTOR_PATH)
+SPEC = importlib.util.spec_from_file_location("_phase_e3_validation_bundle_collector", COLLECTOR_PATH)
 collector = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = collector
 SPEC.loader.exec_module(collector)
@@ -92,7 +92,9 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
     def _write_setting(self, outdir, *, checkpoint=None, pdf=True):
         outdir = Path(outdir)
         checkpoint_path = outdir / collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe")
-        pdf_path = outdir / collector.hgcer_debug_basename("Left", "Q4p4W2p74", "lowe")
+        pdf_path = outdir / collector.full_background_subtraction_basename(
+            "Left", "Q4p4W2p74", "lowe"
+        )
         if checkpoint is not None:
             checkpoint_path.write_bytes(checkpoint)
         if pdf:
@@ -120,18 +122,19 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         )
         return result, output, checkpoint_path, pdf_path
 
-    def test_page_selection_is_exact_and_unique_for_long_and_short_pdfs(self):
+    def test_e3_page_selection_is_exact_for_final_three_pages(self):
         self.assertEqual(
-            collector.select_validation_pages(112),
-            [1, 106, 107, 108, 109, 110, 111, 112],
+            collector.select_validation_pages(60),
+            [58, 59, 60],
         )
         self.assertEqual(
-            collector.select_validation_pages(110),
-            [1, 104, 105, 106, 107, 108, 109, 110],
+            collector.select_validation_pages(45),
+            [43, 44, 45],
         )
-        self.assertEqual(collector.select_validation_pages(8), list(range(1, 9)))
-        self.assertEqual(collector.select_validation_pages(5), list(range(1, 6)))
-        with self.assertRaises(ValueError):
+        self.assertEqual(collector.select_validation_pages(3), [1, 2, 3])
+        with self.assertRaisesRegex(ValueError, "pdf_page_count_too_short_for_e3"):
+            collector.select_validation_pages(2)
+        with self.assertRaisesRegex(ValueError, "pdf_page_count_invalid"):
             collector.select_validation_pages(0)
 
     def test_normal_settings_and_cli_pair_validation_exclude_right_low(self):
@@ -156,12 +159,12 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             "Center_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_highe.json",
         )
         self.assertEqual(
-            collector.hgcer_debug_basename("Left", "Q4p4W2p74", "lowe"),
-            "Left_kaon_rand_sub_Q4p4W2p74_lowe_hgcer-debug.pdf",
+            collector.full_background_subtraction_basename("Left", "Q4p4W2p74", "lowe"),
+            "Left_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf",
         )
         self.assertEqual(
-            collector.hgcer_validation_basename("Left", "Q4p4W2p74", "lowe"),
-            "Left_kaon_rand_sub_Q4p4W2p74_lowe_hgcer-validation.pdf",
+            collector.e3_validation_basename("Left", "Q4p4W2p74", "lowe"),
+            "Left_kaon_rand_sub_Q4p4W2p74_lowe_E3-validation.pdf",
         )
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "bytes.bin"
@@ -198,18 +201,28 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 names = set(archive.namelist())
                 checkpoint_name = "Left_lowe/" + checkpoint_path.name
-                slim_name = "Left_lowe/" + collector.hgcer_validation_basename("Left", "Q4p4W2p74", "lowe")
+                slim_name = "Left_lowe/" + collector.e3_validation_basename(
+                    "Left", "Q4p4W2p74", "lowe"
+                )
                 self.assertEqual(
                     names,
                     {"Left_lowe/", checkpoint_name, slim_name, "manifest.json", "source_state.txt", "source_checks.txt"},
                 )
                 self.assertEqual(archive.read(checkpoint_name), checkpoint_before)
                 self.assertNotIn(pdf_path.name, names)
+                self.assertNotIn("Left_kaon_rand_sub_Q4p4W2p74_lowe_hgcer-debug.pdf", names)
+                self.assertNotIn("Left_kaon_rand_sub_Q4p4W2p74_lowe_hgcer-validation.pdf", names)
                 manifest = json.loads(archive.read("manifest.json"))
-            pdf_artifact = manifest["settings"][0]["artifacts"]["hgcer_debug_pdf"]
+                slim_payload = archive.read(slim_name)
+            pdf_artifact = manifest["settings"][0]["artifacts"]["full_background_subtraction_pdf"]
             self.assertEqual(pdf_artifact["original_page_count"], 112)
             self.assertEqual(pdf_artifact["extracted_pages"], collector.select_validation_pages(112))
             self.assertEqual(pdf_artifact["slim_pdf"]["backend"], "pypdf")
+            self.assertEqual(pdf_artifact["sha256"], hashlib.sha256(pdf_before).hexdigest())
+            self.assertEqual(pdf_artifact["slim_pdf"]["sha256"], hashlib.sha256(slim_payload).hexdigest())
+            self.assertEqual(slim_payload, b"fake-pdf-pages=[110, 111, 112]")
+            self.assertEqual(manifest["validation_profile"], collector.VALIDATION_PROFILE)
+            self.assertEqual(manifest["settings"][0]["kinematic"], "Q4p4W2p74")
             self.assertEqual(manifest["git_head"], "test-head")
             self.assertTrue(manifest["complete"])
 
@@ -251,6 +264,87 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 self.assertIn("Left_lowe/", archive.namelist())
                 self.assertIn("manifest.json", archive.namelist())
+
+    def test_missing_checkpoint_or_full_background_pdf_still_writes_e3_zip(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "missing-checkpoint"
+            source.mkdir()
+            _checkpoint_path, full_background_path = self._write_setting(
+                source, checkpoint=None, pdf=True
+            )
+            output = Path(temporary) / "missing-checkpoint.zip"
+            result = collector.collect_validation_bundle(
+                outdir=source, kinematic="Q4p4W2p74", output=output,
+                phi="Left", epsilon="lowe", repo_root=REPO_ROOT,
+                pdf_backends=[_python_backend()], command_runner=_clean_command_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.is_file())
+            self.assertTrue(full_background_path.is_file())
+            self.assertIn(
+                "missing_source_artifact",
+                [issue["code"] for issue in result["manifest"]["errors"]],
+            )
+            with zipfile.ZipFile(output) as archive:
+                self.assertIn(
+                    "Left_lowe/" + collector.e3_validation_basename(
+                        "Left", "Q4p4W2p74", "lowe"
+                    ),
+                    archive.namelist(),
+                )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "missing-full-background"
+            source.mkdir()
+            checkpoint_path, _full_background_path = self._write_setting(
+                source, checkpoint=json.dumps(_checkpoint()).encode("utf-8"), pdf=False
+            )
+            output = Path(temporary) / "missing-full-background.zip"
+            result = collector.collect_validation_bundle(
+                outdir=source, kinematic="Q4p4W2p74", output=output,
+                phi="Left", epsilon="lowe", repo_root=REPO_ROOT,
+                pdf_backends=[_python_backend()], command_runner=_clean_command_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.is_file())
+            with zipfile.ZipFile(output) as archive:
+                self.assertIn("Left_lowe/" + checkpoint_path.name, archive.namelist())
+                self.assertNotIn(
+                    "Left_lowe/" + collector.e3_validation_basename(
+                        "Left", "Q4p4W2p74", "lowe"
+                    ),
+                    archive.namelist(),
+                )
+            artifact = result["manifest"]["settings"][0]["artifacts"][
+                "full_background_subtraction_pdf"
+            ]
+            self.assertEqual(artifact["status"], "missing")
+
+    def test_short_full_background_pdf_records_narrow_e3_page_error(self):
+        _FakePdfReader.page_count = 2
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _checkpoint_path, _pdf_path = self._collect_left_lowe(
+                temporary
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.is_file())
+            self.assertIn(
+                "pdf_page_count_too_short_for_e3",
+                [issue["code"] for issue in result["manifest"]["errors"]],
+            )
+            artifact = result["manifest"]["settings"][0]["artifacts"][
+                "full_background_subtraction_pdf"
+            ]
+            self.assertEqual(artifact["original_page_count"], 2)
+            self.assertEqual(artifact["extracted_pages"], [])
+            self.assertEqual(artifact["extraction_error"], "pdf_page_count_too_short_for_e3")
+            with zipfile.ZipFile(output) as archive:
+                self.assertNotIn(
+                    "Left_lowe/" + collector.e3_validation_basename(
+                        "Left", "Q4p4W2p74", "lowe"
+                    ),
+                    archive.namelist(),
+                )
 
     def test_checkpoint_json_and_metadata_failures_are_recorded_without_aborting(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -299,6 +393,45 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             with zipfile.ZipFile(output) as archive:
                 source_checks = archive.read("source_checks.txt").decode("utf-8")
             self.assertIn("synthetic compile failure", source_checks)
+            self.assertIn(
+                "src/cuts/full_background_subtraction_plots.py", source_checks
+            )
+            self.assertIn("src/cuts/rand_sub.py", source_checks)
+            self.assertIn(
+                "testing/test_full_background_subtraction_plots.py", source_checks
+            )
+
+    def test_e3_source_check_profile_and_existing_output_protection(self):
+        source_checks_text, source_checks = collector.collect_source_checks(
+            REPO_ROOT, _clean_command_runner
+        )
+        self.assertEqual(
+            [record["name"] for record in source_checks],
+            [
+                "py_compile",
+                "full_background_subtraction_plots_unittest",
+                "hgcer_refinement_plots_unittest",
+                "git_diff_check",
+            ],
+        )
+        self.assertIn("testing.test_full_background_subtraction_plots", source_checks_text)
+        self.assertIn("testing.test_pion_hgcer_refinement_plots", source_checks_text)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / "source"
+            source.mkdir()
+            self._write_setting(
+                source, checkpoint=json.dumps(_checkpoint()).encode("utf-8")
+            )
+            output = Path(temporary) / "existing.zip"
+            output.write_bytes(b"do-not-overwrite")
+            with self.assertRaisesRegex(ValueError, "output_path_already_exists"):
+                collector.collect_validation_bundle(
+                    outdir=source, kinematic="Q4p4W2p74", output=output,
+                    phi="Left", epsilon="lowe", repo_root=REPO_ROOT,
+                    pdf_backends=[_python_backend()], command_runner=_clean_command_runner,
+                )
+            self.assertEqual(output.read_bytes(), b"do-not-overwrite")
 
     def test_extraction_failure_is_recorded_without_discarding_the_bundle(self):
         class _AlwaysFailingPdfModule:
@@ -326,7 +459,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 "pdf_extraction_failed",
                 [issue["code"] for issue in result["manifest"]["errors"]],
             )
-            artifact = result["manifest"]["settings"][0]["artifacts"]["hgcer_debug_pdf"]
+            artifact = result["manifest"]["settings"][0]["artifacts"]["full_background_subtraction_pdf"]
             self.assertEqual(artifact["extraction_error"], "pdf_extraction_failed")
             self.assertEqual(artifact["extraction_attempts"][0]["backend"], "pypdf")
             with zipfile.ZipFile(output) as archive:
@@ -344,7 +477,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             command = [str(item) for item in command]
             if "--show-npages" in command:
                 return {"command": command, "returncode": 0, "stdout": "110\n", "stderr": ""}
-            self.assertIn("1,104-110", command)
+            self.assertIn("108-110", command)
             Path(command[-1]).write_bytes(b"qpdf-slim-pdf")
             return {"command": command, "returncode": 0, "stdout": "", "stderr": ""}
 
@@ -358,7 +491,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             )
         self.assertTrue(result["available"])
         self.assertEqual(result["backend"], "qpdf")
-        self.assertEqual(result["pages"], [1, 104, 105, 106, 107, 108, 109, 110])
+        self.assertEqual(result["pages"], [108, 109, 110])
         self.assertEqual(result["payload"], b"qpdf-slim-pdf")
         self.assertEqual(result["attempts"][0]["backend"], "pypdf")
 

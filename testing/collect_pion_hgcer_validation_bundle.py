@@ -1,4 +1,4 @@
-"""Collect a narrow, read-only Phase-C HGCer validation review bundle.
+"""Collect a narrow, read-only Phase-E.3 HGCer validation review bundle.
 
 This utility never imports the analysis runtime.  It only locates frozen
 artifacts, validates checkpoint metadata, extracts selected PDF pages, hashes
@@ -27,6 +27,7 @@ import zipfile
 
 
 COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v1"
+VALIDATION_PROFILE = "phase_e3_method_a_local_hgcer_farm_review/v1"
 NORMAL_Q4P4W2P74_SETTINGS = (
     ("Left", "lowe"),
     ("Left", "highe"),
@@ -37,7 +38,15 @@ NORMAL_Q4P4W2P74_SETTINGS = (
 _VALID_PHI_SETTINGS = frozenset({"Left", "Center", "Right"})
 _VALID_EPSILON_TOKENS = frozenset({"lowe", "highe"})
 _CHECKPOINT_SUFFIX = "_kaon_pion-background_hgcer_refinement_checkpoint_"
-_HGCER_DEBUG_SUFFIX = "_kaon_rand_sub_"
+_FULL_BACKGROUND_SUBTRACTION_SUFFIX = "_kaon_rand_sub_"
+
+
+class PdfPageSelectionError(ValueError):
+    """A source PDF cannot contain the fixed E.3 final-page selection."""
+
+    def __init__(self, page_count: int):
+        self.page_count = int(page_count)
+        super().__init__("pdf_page_count_too_short_for_e3")
 
 
 @dataclass(frozen=True)
@@ -87,26 +96,29 @@ def checkpoint_basename(phi: str, kinematic: str, epsilon: str) -> str:
     return "{}{}{}_{}.json".format(phi, _CHECKPOINT_SUFFIX, kinematic, epsilon)
 
 
-def hgcer_debug_basename(phi: str, kinematic: str, epsilon: str) -> str:
-    """Return the existing deterministic HGCer-debug PDF basename."""
+def full_background_subtraction_basename(phi: str, kinematic: str, epsilon: str) -> str:
+    """Return the deterministic full-background procedure-PDF basename."""
     phi, epsilon = resolve_settings(phi, epsilon)[0]
     kinematic = _safe_token(kinematic, "kinematic")
-    return "{}{}{}_{}_hgcer-debug.pdf".format(phi, _HGCER_DEBUG_SUFFIX, kinematic, epsilon)
+    return "{}{}{}_{}_full-background-subtraction.pdf".format(
+        phi, _FULL_BACKGROUND_SUBTRACTION_SUFFIX, kinematic, epsilon
+    )
 
 
-def hgcer_validation_basename(phi: str, kinematic: str, epsilon: str) -> str:
-    """Return the slim validation-PDF basename derived from the debug basename."""
-    debug_name = hgcer_debug_basename(phi, kinematic, epsilon)
-    return "{}_hgcer-validation.pdf".format(debug_name[:-len("_hgcer-debug.pdf")])
+def e3_validation_basename(phi: str, kinematic: str, epsilon: str) -> str:
+    """Return the deterministic final-three-page E.3 review-PDF basename."""
+    source_name = full_background_subtraction_basename(phi, kinematic, epsilon)
+    suffix = "_full-background-subtraction.pdf"
+    return "{}_E3-validation.pdf".format(source_name[:-len(suffix)])
 
 
 def select_validation_pages(page_count: int) -> list[int]:
-    """Return the exact, unique 1-based page selection for a slim review PDF."""
+    """Return exactly the final three 1-based E.3 procedure-PDF pages."""
     if isinstance(page_count, bool) or not isinstance(page_count, int) or page_count < 1:
         raise ValueError("pdf_page_count_invalid")
-    if page_count <= 8:
-        return list(range(1, page_count + 1))
-    return [1] + list(range(page_count - 6, page_count + 1))
+    if page_count < 3:
+        raise PdfPageSelectionError(page_count)
+    return list(range(page_count - 2, page_count + 1))
 
 
 def sha256_file(path: Path) -> str:
@@ -321,7 +333,7 @@ def extract_pdf_pages(
     backends: Sequence[PdfBackend],
     command_runner: CommandRunner = run_command,
 ) -> dict[str, Any]:
-    """Extract page 1 plus the final seven pages with the first working backend."""
+    """Extract the fixed final-three-page E.3 review set with one backend."""
     if not backends:
         return {
             "available": False,
@@ -342,7 +354,7 @@ def extract_pdf_pages(
                 writer.write(output)
                 payload = output.getvalue()
             else:
-                with tempfile.TemporaryDirectory(prefix="kaonlt-hgcer-bundle-") as temporary_name:
+                with tempfile.TemporaryDirectory(prefix="kaonlt-e3-bundle-") as temporary_name:
                     temporary = Path(temporary_name)
                     if backend.kind == "qpdf":
                         page_count, pages, payload = _extract_with_qpdf(
@@ -365,6 +377,19 @@ def extract_pdf_pages(
                 "page_count": page_count,
                 "pages": pages,
                 "payload": payload,
+                "attempts": attempts,
+            }
+        except PdfPageSelectionError as exc:
+            attempts.append({
+                "backend": backend.name,
+                "backend_identity": backend.identity,
+                "error": "{}: {}".format(type(exc).__name__, exc),
+            })
+            return {
+                "available": False,
+                "error_code": str(exc),
+                "page_count": exc.page_count,
+                "pages": [],
                 "attempts": attempts,
             }
         except Exception as exc:
@@ -398,7 +423,9 @@ def _issue(
     issues.append(entry)
 
 
-def _source_artifact(path: Path, archive_path: str, artifact: str) -> dict[str, Any]:
+def _source_artifact(
+    path: Path, archive_path: Optional[str], artifact: str,
+) -> dict[str, Any]:
     result: dict[str, Any] = {
         "artifact": artifact,
         "source_path": os.fspath(path.resolve()),
@@ -501,10 +528,25 @@ def collect_source_state(
 
 
 def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_command) -> tuple[str, list[dict[str, Any]]]:
-    """Run the required local source checks and retain failures instead of raising."""
+    """Run the required E.3 source checks and retain failures instead of raising."""
     checks = (
-        ("py_compile", [sys.executable, "-m", "py_compile", "src/cuts/pion_hgcer_refinement_plots.py", "testing/test_pion_hgcer_refinement_plots.py"]),
-        ("hgcer_refinement_plots_unittest", [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_refinement_plots"]),
+        (
+            "py_compile",
+            [
+                sys.executable, "-m", "py_compile",
+                "src/cuts/full_background_subtraction_plots.py",
+                "src/cuts/rand_sub.py",
+                "testing/test_full_background_subtraction_plots.py",
+            ],
+        ),
+        (
+            "full_background_subtraction_plots_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_full_background_subtraction_plots"],
+        ),
+        (
+            "hgcer_refinement_plots_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_refinement_plots"],
+        ),
         ("git_diff_check", ["git", "diff", "--check"]),
     )
     records: list[dict[str, Any]] = []
@@ -555,7 +597,9 @@ def collect_validation_bundle(
     for selected_phi, selected_epsilon in selected:
         source_paths.extend((
             source_root / checkpoint_basename(selected_phi, kinematic, selected_epsilon),
-            source_root / hgcer_debug_basename(selected_phi, kinematic, selected_epsilon),
+            source_root / full_background_subtraction_basename(
+                selected_phi, kinematic, selected_epsilon
+            ),
         ))
     _validate_output_path(output_path, source_paths)
     repository = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[1]
@@ -570,6 +614,7 @@ def collect_validation_bundle(
 
     manifest: dict[str, Any] = {
         "schema_version": COLLECTOR_SCHEMA_VERSION,
+        "validation_profile": VALIDATION_PROFILE,
         "generated_at_utc": _datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "git_head": git_head,
         "requested_kinematic": kinematic,
@@ -584,7 +629,7 @@ def collect_validation_bundle(
     }
 
     staging_descriptor, staging_name = tempfile.mkstemp(
-        prefix=".kaonlt-hgcer-validation-", suffix=".zip", dir=output_path.parent
+        prefix=".kaonlt-e3-validation-", suffix=".zip", dir=output_path.parent
     )
     os.close(staging_descriptor)
     staging_path = Path(staging_name)
@@ -597,12 +642,17 @@ def collect_validation_bundle(
             directory = "{}_{}".format(selected_phi, selected_epsilon)
             archive.writestr(directory + "/", b"")
             checkpoint_path = source_root / checkpoint_basename(selected_phi, kinematic, selected_epsilon)
-            debug_path = source_root / hgcer_debug_basename(selected_phi, kinematic, selected_epsilon)
+            full_background_path = source_root / full_background_subtraction_basename(
+                selected_phi, kinematic, selected_epsilon
+            )
             checkpoint_archive = "{}/{}".format(directory, checkpoint_path.name)
-            slim_archive = "{}/{}".format(directory, hgcer_validation_basename(selected_phi, kinematic, selected_epsilon))
+            slim_archive = "{}/{}".format(
+                directory, e3_validation_basename(selected_phi, kinematic, selected_epsilon)
+            )
             setting_manifest: dict[str, Any] = {
                 "phi": selected_phi,
                 "epsilon": selected_epsilon,
+                "kinematic": kinematic,
                 "artifacts": {},
                 "errors": [],
             }
@@ -621,21 +671,35 @@ def collect_validation_bundle(
                     _issue(issues, error["code"], setting=setting, artifact="phase_c_checkpoint", detail=error["detail"])
                     setting_manifest["errors"].append(error["code"])
 
-            debug = _source_artifact(debug_path, slim_archive, "hgcer_debug_pdf")
-            setting_manifest["artifacts"]["hgcer_debug_pdf"] = debug
-            if debug["status"] != "exists":
-                code = "missing_source_artifact" if debug["status"] == "missing" else "source_artifact_unreadable"
-                _issue(issues, code, setting=setting, artifact="hgcer_debug_pdf", detail=debug.get("error"))
+            full_background = _source_artifact(
+                full_background_path, None, "full_background_subtraction_pdf"
+            )
+            setting_manifest["artifacts"]["full_background_subtraction_pdf"] = full_background
+            if full_background["status"] != "exists":
+                code = (
+                    "missing_source_artifact"
+                    if full_background["status"] == "missing"
+                    else "source_artifact_unreadable"
+                )
+                _issue(
+                    issues, code, setting=setting,
+                    artifact="full_background_subtraction_pdf",
+                    detail=full_background.get("error"),
+                )
                 setting_manifest["errors"].append(code)
             else:
                 extraction = extract_pdf_pages(
-                    debug_path, backends=backends, command_runner=command_runner
+                    full_background_path, backends=backends, command_runner=command_runner
                 )
-                debug["extraction_attempts"] = extraction.get("attempts", [])
+                full_background["extraction_attempts"] = extraction.get("attempts", [])
+                if extraction.get("page_count") is not None:
+                    full_background["original_page_count"] = extraction["page_count"]
+                if "pages" in extraction:
+                    full_background["extracted_pages"] = extraction["pages"]
                 if extraction["available"]:
                     slim_payload = extraction["payload"]
                     archive.writestr(slim_archive, slim_payload)
-                    debug.update({
+                    full_background.update({
                         "original_page_count": extraction["page_count"],
                         "extracted_pages": extraction["pages"],
                         "slim_pdf": {
@@ -647,8 +711,11 @@ def collect_validation_bundle(
                         },
                     })
                 else:
-                    debug["extraction_error"] = extraction["error_code"]
-                    _issue(issues, extraction["error_code"], setting=setting, artifact="hgcer_debug_pdf")
+                    full_background["extraction_error"] = extraction["error_code"]
+                    _issue(
+                        issues, extraction["error_code"], setting=setting,
+                        artifact="full_background_subtraction_pdf",
+                    )
                     setting_manifest["errors"].append(extraction["error_code"])
             manifest["settings"].append(setting_manifest)
 
