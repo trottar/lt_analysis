@@ -77,8 +77,10 @@ def _checkpoint(phi="Left", epsilon="lowe", kinematic="Q4p4W2p74"):
 def _clean_command_runner(command, _cwd):
     command = [str(item) for item in command]
     stdout = ""
-    if command[:3] == ["git", "rev-parse", "HEAD"]:
+    if command == ["git", "rev-parse", "HEAD"]:
         stdout = "test-head\n"
+    elif command == ["git", "rev-parse", "HEAD^"]:
+        stdout = "test-parent\n"
     elif command[-1:] == ["--version"]:
         stdout = "Python fake\n"
     return {"command": command, "returncode": 0, "stdout": stdout, "stderr": ""}
@@ -137,26 +139,20 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "pdf_page_count_invalid"):
             collector.select_validation_pages(0)
 
-    def test_normal_settings_and_cli_pair_validation_exclude_right_low(self):
-        self.assertEqual(
-            collector.resolve_settings(),
-            (
-                ("Left", "lowe"), ("Left", "highe"),
-                ("Center", "lowe"), ("Center", "highe"),
-                ("Right", "highe"),
-            ),
-        )
-        self.assertNotIn(("Right", "lowe"), collector.resolve_settings())
+    def test_e3_fix2_profile_requires_only_explicit_left_lowe(self):
         self.assertEqual(collector.resolve_settings("Left", "lowe"), (("Left", "lowe"),))
+        with self.assertRaisesRegex(ValueError, "requires_explicit_left_lowe"):
+            collector.resolve_settings()
         with self.assertRaisesRegex(ValueError, "phi_and_epsilon"):
             collector.resolve_settings("Left", None)
-        with self.assertRaisesRegex(ValueError, "epsilon_invalid"):
-            collector.resolve_settings("Left", "low")
+        for phi, epsilon in (("Left", "highe"), ("Center", "lowe"), ("Right", "highe")):
+            with self.assertRaisesRegex(ValueError, "setting_not_authorized"):
+                collector.resolve_settings(phi, epsilon)
 
     def test_deterministic_names_and_sha256(self):
         self.assertEqual(
-            collector.checkpoint_basename("Center", "Q4p4W2p74", "highe"),
-            "Center_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_highe.json",
+            collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe"),
+            "Left_kaon_pion-background_hgcer_refinement_checkpoint_Q4p4W2p74_lowe.json",
         )
         self.assertEqual(
             collector.full_background_subtraction_basename("Left", "Q4p4W2p74", "lowe"),
@@ -224,6 +220,9 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             self.assertEqual(manifest["validation_profile"], collector.VALIDATION_PROFILE)
             self.assertEqual(manifest["settings"][0]["kinematic"], "Q4p4W2p74")
             self.assertEqual(manifest["git_head"], "test-head")
+            self.assertEqual(manifest["required_analysis_commit"], collector.E3_FIX2_REQUIRED_COMMIT)
+            self.assertTrue(manifest["required_analysis_commit_is_ancestor"])
+            self.assertEqual(manifest["committed_files_after_required_analysis_commit"], [])
             self.assertTrue(manifest["complete"])
 
     def test_collector_has_no_analysis_runtime_imports(self):
@@ -396,26 +395,39 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             self.assertIn(
                 "src/cuts/full_background_subtraction_plots.py", source_checks
             )
-            self.assertIn("src/cuts/rand_sub.py", source_checks)
             self.assertIn(
                 "testing/test_full_background_subtraction_plots.py", source_checks
             )
+            self.assertIn(
+                "testing/test_collect_pion_hgcer_validation_bundle.py", source_checks
+            )
 
     def test_e3_source_check_profile_and_existing_output_protection(self):
+        source_state_text, source_head = collector.collect_source_state(
+            REPO_ROOT, _clean_command_runner
+        )
+        self.assertEqual(source_head, "test-head")
+        self.assertIn("git rev-parse HEAD^", source_state_text)
+        self.assertIn("git status --short", source_state_text)
+        self.assertIn("Python fake", source_state_text)
         source_checks_text, source_checks = collector.collect_source_checks(
             REPO_ROOT, _clean_command_runner
         )
         self.assertEqual(
             [record["name"] for record in source_checks],
             [
+                "required_analysis_commit_ancestor",
+                "committed_files_after_required_analysis_commit",
                 "py_compile",
                 "full_background_subtraction_plots_unittest",
                 "hgcer_refinement_plots_unittest",
+                "validation_bundle_collector_unittest",
                 "git_diff_check",
             ],
         )
         self.assertIn("testing.test_full_background_subtraction_plots", source_checks_text)
         self.assertIn("testing.test_pion_hgcer_refinement_plots", source_checks_text)
+        self.assertIn("testing.test_collect_pion_hgcer_validation_bundle", source_checks_text)
 
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary) / "source"
@@ -432,6 +444,67 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                     pdf_backends=[_python_backend()], command_runner=_clean_command_runner,
                 )
             self.assertEqual(output.read_bytes(), b"do-not-overwrite")
+
+    def test_required_analysis_commit_gate_is_best_effort_for_stale_or_extra_commits(self):
+        def stale_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            command = result["command"]
+            if command == ["git", "rev-parse", "HEAD"]:
+                result["stdout"] = "85db000000000000000000000000000000000000\n"
+            elif command[:4] == ["git", "merge-base", "--is-ancestor", collector.E3_FIX2_REQUIRED_COMMIT]:
+                result["returncode"] = 1
+                result["stderr"] = "required commit absent\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _checkpoint_path, _pdf_path = self._collect_left_lowe(
+                temporary, command_runner=stale_runner
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.is_file())
+            self.assertFalse(result["manifest"]["required_analysis_commit_is_ancestor"])
+            self.assertIn(
+                "required_analysis_commit_not_present",
+                [issue["code"] for issue in result["manifest"]["errors"]],
+            )
+
+        def allowed_file_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if result["command"][:3] == ["git", "diff", "--name-only"]:
+                result["stdout"] = "testing/collect_pion_hgcer_validation_bundle.py\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _checkpoint_path, _pdf_path = self._collect_left_lowe(
+                temporary, command_runner=allowed_file_runner
+            )
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.is_file())
+            self.assertEqual(
+                result["manifest"]["committed_files_after_required_analysis_commit"],
+                ["testing/collect_pion_hgcer_validation_bundle.py"],
+            )
+
+        def extra_file_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if result["command"][:3] == ["git", "diff", "--name-only"]:
+                result["stdout"] = "src/cuts/full_background_subtraction_plots.py\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _checkpoint_path, _pdf_path = self._collect_left_lowe(
+                temporary, command_runner=extra_file_runner
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.is_file())
+            self.assertEqual(
+                result["manifest"]["unexpected_committed_files_after_required_analysis_commit"],
+                ["src/cuts/full_background_subtraction_plots.py"],
+            )
+            self.assertIn(
+                "unexpected_committed_files_after_required_analysis_commit",
+                [issue["code"] for issue in result["manifest"]["errors"]],
+            )
 
     def test_extraction_failure_is_recorded_without_discarding_the_bundle(self):
         class _AlwaysFailingPdfModule:

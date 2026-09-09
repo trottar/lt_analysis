@@ -27,16 +27,13 @@ import zipfile
 
 
 COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v1"
-VALIDATION_PROFILE = "phase_e3_method_a_local_hgcer_farm_review/v1"
-NORMAL_Q4P4W2P74_SETTINGS = (
-    ("Left", "lowe"),
-    ("Left", "highe"),
-    ("Center", "lowe"),
-    ("Center", "highe"),
-    ("Right", "highe"),
-)
-_VALID_PHI_SETTINGS = frozenset({"Left", "Center", "Right"})
-_VALID_EPSILON_TOKENS = frozenset({"lowe", "highe"})
+VALIDATION_PROFILE = "phase_e3_fix2_left_lowe_farm_review/v1"
+E3_FIX2_REQUIRED_COMMIT = "eb1710f4739ba6ef14f51419806e9fc5bd53c175"
+E3_FIX2_AUTHORIZED_SETTINGS = (("Left", "lowe"),)
+E3_FIX2_ALLOWED_COMMITTED_FILES = frozenset({
+    "testing/collect_pion_hgcer_validation_bundle.py",
+    "testing/test_collect_pion_hgcer_validation_bundle.py",
+})
 _CHECKPOINT_SUFFIX = "_kaon_pion-background_hgcer_refinement_checkpoint_"
 _FULL_BACKGROUND_SUBTRACTION_SUFFIX = "_kaon_rand_sub_"
 
@@ -75,18 +72,16 @@ def _safe_token(value: object, field: str) -> str:
 def resolve_settings(
     phi: Optional[str] = None, epsilon: Optional[str] = None
 ) -> tuple[tuple[str, str], ...]:
-    """Return one explicit setting or the frozen normal five-setting list."""
+    """Return the sole frozen E.3.Fix.2 Left/lowe review setting."""
     if (phi is None) != (epsilon is None):
         raise ValueError("phi_and_epsilon_must_be_supplied_together")
     if phi is None:
-        return NORMAL_Q4P4W2P74_SETTINGS
+        raise ValueError("phase_e3_fix2_requires_explicit_left_lowe")
     normalized_phi = _safe_token(phi, "phi")
     normalized_epsilon = _safe_token(epsilon, "epsilon").lower()
-    if normalized_phi not in _VALID_PHI_SETTINGS:
-        raise ValueError("phi_invalid")
-    if normalized_epsilon not in _VALID_EPSILON_TOKENS:
-        raise ValueError("epsilon_invalid")
-    return ((normalized_phi, normalized_epsilon),)
+    if (normalized_phi, normalized_epsilon) != E3_FIX2_AUTHORIZED_SETTINGS[0]:
+        raise ValueError("phase_e3_fix2_setting_not_authorized")
+    return E3_FIX2_AUTHORIZED_SETTINGS
 
 
 def checkpoint_basename(phi: str, kinematic: str, epsilon: str) -> str:
@@ -520,6 +515,7 @@ def collect_source_state(
     """Capture source identity without changing the repository."""
     records = [
         _run(command_runner, ["git", "rev-parse", "HEAD"], repo_root),
+        _run(command_runner, ["git", "rev-parse", "HEAD^"], repo_root),
         _run(command_runner, ["git", "status", "--short"], repo_root),
         _run(command_runner, [sys.executable, "--version"], repo_root),
     ]
@@ -528,15 +524,30 @@ def collect_source_state(
 
 
 def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_command) -> tuple[str, list[dict[str, Any]]]:
-    """Run the required E.3 source checks and retain failures instead of raising."""
+    """Run the required E.3.Fix.2 source and committed-identity checks."""
     checks = (
+        (
+            "required_analysis_commit_ancestor",
+            [
+                "git", "merge-base", "--is-ancestor",
+                E3_FIX2_REQUIRED_COMMIT, "HEAD",
+            ],
+        ),
+        (
+            "committed_files_after_required_analysis_commit",
+            [
+                "git", "diff", "--name-only",
+                "{}..HEAD".format(E3_FIX2_REQUIRED_COMMIT),
+            ],
+        ),
         (
             "py_compile",
             [
                 sys.executable, "-m", "py_compile",
                 "src/cuts/full_background_subtraction_plots.py",
-                "src/cuts/rand_sub.py",
                 "testing/test_full_background_subtraction_plots.py",
+                "testing/collect_pion_hgcer_validation_bundle.py",
+                "testing/test_collect_pion_hgcer_validation_bundle.py",
             ],
         ),
         (
@@ -547,6 +558,13 @@ def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_c
             "hgcer_refinement_plots_unittest",
             [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_refinement_plots"],
         ),
+        (
+            "validation_bundle_collector_unittest",
+            [
+                sys.executable, "-m", "unittest",
+                "testing.test_collect_pion_hgcer_validation_bundle",
+            ],
+        ),
         ("git_diff_check", ["git", "diff", "--check"]),
     )
     records: list[dict[str, Any]] = []
@@ -555,6 +573,27 @@ def collect_source_checks(repo_root: Path, command_runner: CommandRunner = run_c
         record["name"] = name
         records.append(record)
     return _format_command_records(records), records
+
+
+def _committed_identity(
+    source_checks: Sequence[Mapping[str, Any]],
+) -> tuple[bool, list[str], list[str]]:
+    """Return the frozen-base ancestry result and committed post-base paths."""
+    by_name = {str(record.get("name")): record for record in source_checks}
+    ancestry = by_name.get("required_analysis_commit_ancestor", {})
+    diff = by_name.get("committed_files_after_required_analysis_commit", {})
+    is_ancestor = int(ancestry.get("returncode", 127)) == 0
+    if int(diff.get("returncode", 127)) != 0:
+        return is_ancestor, [], []
+    committed_files = sorted({
+        line.strip() for line in str(diff.get("stdout", "")).splitlines()
+        if line.strip()
+    })
+    unexpected = [
+        path for path in committed_files
+        if path not in E3_FIX2_ALLOWED_COMMITTED_FILES
+    ]
+    return is_ancestor, committed_files, unexpected
 
 
 def _archive_json(archive: zipfile.ZipFile, archive_path: str, payload: Mapping[str, Any]) -> None:
@@ -611,12 +650,33 @@ def collect_validation_bundle(
     for check in source_checks:
         if check["returncode"] != 0:
             _issue(issues, "source_check_failed", artifact=check["name"], detail="returncode={}".format(check["returncode"]))
+    required_analysis_commit_is_ancestor, committed_files, unexpected_committed_files = (
+        _committed_identity(source_checks)
+    )
+    if not required_analysis_commit_is_ancestor:
+        _issue(
+            issues,
+            "required_analysis_commit_not_present",
+            artifact="required_analysis_commit_ancestor",
+            detail=E3_FIX2_REQUIRED_COMMIT,
+        )
+    if unexpected_committed_files:
+        _issue(
+            issues,
+            "unexpected_committed_files_after_required_analysis_commit",
+            artifact="committed_files_after_required_analysis_commit",
+            detail=json.dumps(unexpected_committed_files, sort_keys=True),
+        )
 
     manifest: dict[str, Any] = {
         "schema_version": COLLECTOR_SCHEMA_VERSION,
         "validation_profile": VALIDATION_PROFILE,
         "generated_at_utc": _datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         "git_head": git_head,
+        "required_analysis_commit": E3_FIX2_REQUIRED_COMMIT,
+        "required_analysis_commit_is_ancestor": required_analysis_commit_is_ancestor,
+        "committed_files_after_required_analysis_commit": committed_files,
+        "unexpected_committed_files_after_required_analysis_commit": unexpected_committed_files,
         "requested_kinematic": kinematic,
         "requested_settings": [
             {"phi": selected_phi, "epsilon": selected_epsilon}
