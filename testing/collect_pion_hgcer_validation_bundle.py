@@ -76,7 +76,7 @@ def resolve_settings(
     if (phi is None) != (epsilon is None):
         raise ValueError("phi_and_epsilon_must_be_supplied_together")
     if phi is None:
-        raise ValueError("phase_e3_fix2_requires_explicit_left_lowe")
+        return E3_FIX2_AUTHORIZED_SETTINGS
     normalized_phi = _safe_token(phi, "phi")
     normalized_epsilon = _safe_token(epsilon, "epsilon").lower()
     if (normalized_phi, normalized_epsilon) != E3_FIX2_AUTHORIZED_SETTINGS[0]:

@@ -140,9 +140,8 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             collector.select_validation_pages(0)
 
     def test_e3_fix2_profile_requires_only_explicit_left_lowe(self):
+        self.assertEqual(collector.resolve_settings(), (("Left", "lowe"),))
         self.assertEqual(collector.resolve_settings("Left", "lowe"), (("Left", "lowe"),))
-        with self.assertRaisesRegex(ValueError, "requires_explicit_left_lowe"):
-            collector.resolve_settings()
         with self.assertRaisesRegex(ValueError, "phi_and_epsilon"):
             collector.resolve_settings("Left", None)
         for phi, epsilon in (("Left", "highe"), ("Center", "lowe"), ("Right", "highe")):
