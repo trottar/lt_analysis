@@ -376,6 +376,7 @@ class _FakePaveText:
         self._text.append(str(text))
 
     def Draw(self):
+        self.drawn_on = getattr(self._root, "active_pad", None)
         self._root.drawn_text.append(tuple(self._text))
 
 
@@ -565,6 +566,7 @@ class _E3Canvas:
         self.divisions.append((int(columns), int(rows)))
 
     def cd(self, *_args):
+        self.root.active_pad = self
         return self
 
     def Print(self, name):
@@ -572,6 +574,42 @@ class _E3Canvas:
 
     def Close(self):
         self.closed = True
+
+
+class _E3GridCellPad:
+    def __init__(self, parent, index):
+        self.parent = parent
+        self.index = int(index)
+
+
+class _E3Pad:
+    def __init__(self, root, name, title, x_low, y_low, x_high, y_high):
+        self.root = root
+        self.name = str(name)
+        self.title = str(title)
+        self.coordinates = (
+            float(x_low), float(y_low), float(x_high), float(y_high),
+        )
+        self.divisions = []
+        self.cells = []
+        self.drawn = False
+        root.pads.append(self)
+
+    def Draw(self):
+        self.drawn = True
+        self.root.drawn_pads.append(self)
+
+    def Divide(self, columns, rows):
+        columns, rows = int(columns), int(rows)
+        self.divisions.append((columns, rows))
+        self.cells = [_E3GridCellPad(self, index) for index in range(1, columns * rows + 1)]
+
+    def cd(self, index=None):
+        if index is None:
+            self.root.active_pad = self
+        else:
+            self.root.active_pad = self.cells[int(index) - 1]
+        return self.root.active_pad
 
 
 class _E3Histogram(_BinnedHistogram):
@@ -587,6 +625,7 @@ class _E3Histogram(_BinnedHistogram):
         return clone
 
     def Draw(self, option):
+        self.drawn_on = self.root.active_pad
         self.root.drawn_histograms.append((self, str(option)))
 
 
@@ -605,6 +644,7 @@ class _E3Line:
         return None
 
     def Draw(self):
+        self.drawn_on = self.root.active_pad
         self.root.drawn_lines.append(self)
 
 
@@ -615,12 +655,18 @@ class _E3ROOT(_FakeROOT):
         self.printed = []
         self.drawn_histograms = []
         self.drawn_lines = []
+        self.pads = []
+        self.drawn_pads = []
+        self.active_pad = None
 
     def TCanvas(self, *args):
         return _E3Canvas(self, *args)
 
     def TLine(self, *args):
         return _E3Line(self, *args)
+
+    def TPad(self, *args):
+        return _E3Pad(self, *args)
 
 
 class _D10Line:
@@ -3279,9 +3325,24 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(len(root.canvases), 3)
         self.assertEqual(root.printed, ["ignored.pdf"] * 3)
         self.assertTrue(all((canvas.width, canvas.height) == (1800, 1200) for canvas in root.canvases))
-        self.assertTrue(all(canvas.divisions == [(5, 2)] for canvas in root.canvases))
+        self.assertTrue(all(canvas.divisions == [] for canvas in root.canvases))
+        self.assertEqual(len(root.pads), 6)
+        header_pads = [pad for pad in root.pads if "_header_" in pad.name]
+        grid_pads = [pad for pad in root.pads if "_grid_" in pad.name]
+        self.assertEqual(len(header_pads), 3)
+        self.assertEqual(len(grid_pads), 3)
+        self.assertTrue(all(pad.coordinates == (0.0, 0.9, 1.0, 1.0) for pad in header_pads))
+        self.assertTrue(all(pad.coordinates == (0.0, 0.0, 1.0, 0.9) for pad in grid_pads))
+        self.assertTrue(all(pad.divisions == [] for pad in header_pads))
+        self.assertTrue(all(pad.divisions == [(5, 2)] for pad in grid_pads))
+        self.assertTrue(all(len(pad.cells) == 10 for pad in grid_pads))
+        self.assertEqual(root.drawn_pads, [item for pair in zip(header_pads, grid_pads) for item in pair])
         self.assertEqual(len(root.drawn_lines), 30)
         self.assertTrue(all(line.x1 == 2.0 and line.x2 == 2.0 for line in root.drawn_lines))
+        self.assertTrue(all(
+            isinstance(line.drawn_on, _E3GridCellPad) and line.drawn_on.parent in grid_pads
+            for line in root.drawn_lines
+        ))
         self.assertEqual(
             [(page["page_id"], page["scope"], page["authoritative"]) for page in manifest],
             [
@@ -3299,6 +3360,21 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertEqual(len(_E3Histogram.created), 60)
         self.assertTrue(all(histogram.directory == 0 for histogram in _E3Histogram.created))
+        self.assertTrue(all(
+            isinstance(histogram.drawn_on, _E3GridCellPad)
+            and histogram.drawn_on.parent in grid_pads
+            for histogram in _E3Histogram.created
+        ))
+        for grid_pad in grid_pads:
+            cell_histograms = [
+                histogram for histogram in _E3Histogram.created
+                if histogram.drawn_on.parent is grid_pad
+            ]
+            self.assertEqual(len(cell_histograms), 20)
+            self.assertEqual(
+                {histogram.drawn_on.index for histogram in cell_histograms},
+                set(range(1, 11)),
+            )
         self.assertTrue(any(
             value < 0.0
             for histogram in _E3Histogram.created
@@ -3317,6 +3393,23 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertIn("NPE > 2", visible_text)
         self.assertTrue(any("f_low = 0.3140" in text for text in visible_text))
         self.assertTrue(any("unavailable: support_insufficient" in text for text in visible_text))
+        page_headers = [
+            pave for pave in root.pave_texts
+            if any("Method-A local HGCer response" in text for text in pave._text)
+        ]
+        self.assertEqual(len(page_headers), 3)
+        self.assertTrue(all(pave.drawn_on in header_pads for pave in page_headers))
+        self.assertTrue(all(
+            "Diagnostic only: signed noRF" in " ".join(pave._text)
+            for pave in page_headers
+        ))
+        grid_pave_texts = [pave for pave in root.pave_texts if pave not in page_headers]
+        self.assertTrue(all(
+            isinstance(pave.drawn_on, _E3GridCellPad)
+            and pave.drawn_on.parent in grid_pads
+            for pave in grid_pave_texts
+        ))
+        self.assertTrue(all(pave.drawn_on not in root.canvases for pave in root.pave_texts))
 
     def test_e3_cumulative_pages_follow_e2_and_fail_locally(self):
         phase_page_ids = (
@@ -3360,13 +3453,22 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             (scope, page_id)
             for scope in ("t1", "t2")
             for page_id in (
-                EXPECTED_FULL_BACKGROUND_PAGE_IDS
-                + E2_FULL_BACKGROUND_PAGE_IDS
-                + E3_FULL_BACKGROUND_PAGE_IDS
+                EXPECTED_FULL_BACKGROUND_PAGE_IDS + E2_FULL_BACKGROUND_PAGE_IDS
             )
+        ] + [
+            (scope, E3_FULL_BACKGROUND_PAGE_IDS[0])
+            for scope in ("t1", "t2")
         ]
         self.assertEqual(
             [(page["scope"], page["page_id"]) for page in rendered["manifest"]], expected
+        )
+        self.assertEqual(
+            [(page["page_id"], page["scope"], page["authoritative"])
+            for page in rendered["manifest"][-2:]],
+            [
+                ("full_background.e3.method_a_local_hgcer", "t1", False),
+                ("full_background.e3.method_a_local_hgcer", "t2", False),
+            ],
         )
 
         e3["delta_edges"] = [-10.0, 5.0, 10.0]
@@ -3395,6 +3497,52 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertEqual(
             [page["page_id"] for page in isolated["manifest"]],
             list(EXPECTED_FULL_BACKGROUND_PAGE_IDS + E2_FULL_BACKGROUND_PAGE_IDS) * 2,
+        )
+
+    def test_e3_missing_final_group_is_local_and_never_creates_a_placeholder(self):
+        e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
+        e3["per_t"] = [
+            group for group in e3["per_t"] if group["t_index"] != 1
+        ]
+        unavailable = {"available": False, "reason": "not requested"}
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, e3_payload=e3,
+            )
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            [
+                ("t1", "full_background.e3.method_a_local_hgcer"),
+                ("t3", "full_background.e3.method_a_local_hgcer"),
+            ],
+        )
+        self.assertIn("E.3 input missing canonical t2", rendered["failures"])
+
+    def test_e3_final_manifest_scopes_are_canonical_for_three_t_bins(self):
+        e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
+        unavailable = {"available": False, "reason": "not requested"}
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, e3_payload=e3,
+            )
+        self.assertEqual(
+            [
+                (page["page_id"], page["scope"], page["authoritative"])
+                for page in rendered["manifest"][-3:]
+            ],
+            [
+                ("full_background.e3.method_a_local_hgcer", "t1", False),
+                ("full_background.e3.method_a_local_hgcer", "t2", False),
+                ("full_background.e3.method_a_local_hgcer", "t3", False),
+            ],
         )
 
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
@@ -4312,6 +4460,9 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "low_response_upper_threshold",
             "1800",
             "1200",
+            "ROOT.TPad",
+            "_draw_e3_page_header",
+            "signed noRF, no-MM-cut response context",
         ):
             with self.subTest(e3_required=required):
                 self.assertIn(required, e3_source)
@@ -4341,6 +4492,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ):
             with self.subTest(e3_forbidden=forbidden):
                 self.assertNotIn(forbidden, e3_source)
+        self.assertNotIn("canvas.Divide", e3_source)
+        final_e3_append = cumulative_renderer_source.rindex("if e3_available:")
+        self.assertNotIn("render_e3_group(group.get", cumulative_renderer_source[:final_e3_append])
+        self.assertIn(
+            "for t_index in range(max(0, len(e3_edges) - 1))",
+            cumulative_renderer_source[final_e3_append:],
+        )
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
         start = runtime.index("# Phases D.6 through D.11, E.2, and E.3 are terminal presentation only.")

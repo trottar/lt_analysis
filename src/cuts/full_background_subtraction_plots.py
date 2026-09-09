@@ -4052,7 +4052,7 @@ def render_full_background_subtraction_procedure_pages(
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, page_manifest=None
 ):
-    """Append available D.6 through D.11, E.2, and E.3 groups in canonical-t order."""
+    """Append D.6-E.2 per-t groups, then final E.3 groups in canonical-t order."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4379,7 +4379,6 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
-            render_e3_group(group.get("t_index"))
     elif d7_available:
         for group in tuple(d7.get("per_t") or ()):
             group = _mapping(group)
@@ -4389,7 +4388,6 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
-            render_e3_group(group.get("t_index"))
     elif d8_available:
         for group in tuple(d8.get("per_t") or ()):
             group = _mapping(group)
@@ -4398,32 +4396,28 @@ def render_full_background_subtraction_procedure_pages(
             render_d10_group(group.get("t_index"))
             render_d11_group(group.get("t_index"))
             render_e2_group(group.get("t_index"))
-            render_e3_group(group.get("t_index"))
     elif d9_available:
         for group in tuple(d9.get("per_t") or ()):
             _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
             render_d10_group(_mapping(group).get("t_index"))
             render_d11_group(_mapping(group).get("t_index"))
             render_e2_group(_mapping(group).get("t_index"))
-            render_e3_group(_mapping(group).get("t_index"))
     elif d10_available:
         for group in tuple(d10.get("per_t") or ()):
             _render_d10_t_pages(ROOT, pdf_name, d10, _mapping(group), manifest, result["failures"])
             render_d11_group(_mapping(group).get("t_index"))
             render_e2_group(_mapping(group).get("t_index"))
-            render_e3_group(_mapping(group).get("t_index"))
     elif d11_available:
         for group in tuple(d11.get("per_t") or ()):
             _render_d11_t_pages(ROOT, pdf_name, d11, _mapping(group), manifest, result["failures"])
             render_e2_group(_mapping(group).get("t_index"))
-            render_e3_group(_mapping(group).get("t_index"))
     elif e2_available:
         for group in tuple(e2.get("per_t") or ()):
             _render_e2_t_pages(ROOT, pdf_name, e2, _mapping(group), manifest, result["failures"])
-            render_e3_group(_mapping(group).get("t_index"))
-    elif e3_available:
-        for group in tuple(e3.get("per_t") or ()):
-            _render_e3_t_pages(ROOT, pdf_name, e3, _mapping(group), manifest, result["failures"])
+    if e3_available:
+        e3_edges = list(e3.get("t_edges") or ())
+        for t_index in range(max(0, len(e3_edges) - 1)):
+            render_e3_group(t_index)
     return result
 
 
@@ -5165,6 +5159,22 @@ def _e3_cell_annotation(cell):
     )
 
 
+def _draw_e3_page_header(ROOT, group):
+    """Draw E.3 page-level context inside its dedicated header pad only."""
+    header = ROOT.TPaveText(0.02, 0.10, 0.98, 0.92, "NDC")
+    header.SetFillStyle(0)
+    header.SetBorderSize(0)
+    header.SetTextAlign(22)
+    header.SetTextSize(0.14)
+    header.AddText("Method-A local HGCer response - {}".format(_t_context(group)))
+    header.AddText(
+        "Diagnostic only: signed noRF, no-MM-cut response context; stored "
+        "prompt-pion f_low; no refinement or correction applied."
+    )
+    header.Draw()
+    return header
+
+
 def _render_e3_local_hgcer_page(ROOT, pdf_name, presentation, group):
     """Render one fixed-size, all-delta E.3 local HGCer page."""
     cells = tuple(group.get("cells") or ())
@@ -5179,14 +5189,36 @@ def _render_e3_local_hgcer_page(ROOT, pdf_name, presentation, group):
         1800,
         1200,
     )
-    canvas.Divide(columns, rows)
+    header_pad = ROOT.TPad(
+        "P_full_background_e3_header_t{}".format(group["t_index"] + 1),
+        "E.3 header",
+        0.0,
+        0.90,
+        1.0,
+        1.0,
+    )
+    grid_pad = ROOT.TPad(
+        "P_full_background_e3_grid_t{}".format(group["t_index"] + 1),
+        "E.3 delta-cell grid",
+        0.0,
+        0.0,
+        1.0,
+        0.90,
+    )
     draw_objects = []
     legend_drawn = False
     threshold = float(_mapping(presentation.get("thresholds"))["low_response_upper_threshold"])
     try:
+        canvas.cd()
+        header_pad.Draw()
+        grid_pad.Draw()
+        header_pad.cd()
+        draw_objects.append(_draw_e3_page_header(ROOT, group))
+        grid_pad.cd()
+        grid_pad.Divide(columns, rows)
         for panel_index, cell in enumerate(cells, 1):
             cell = _mapping(cell)
-            canvas.cd(panel_index)
+            grid_pad.cd(panel_index)
             kaon = _e3_fresh_weighted_histogram(
                 group.get("kaon_template"),
                 "H_full_background_e3_kaon_t{}_d{}".format(
@@ -5231,13 +5263,9 @@ def _render_e3_local_hgcer_page(ROOT, pdf_name, presentation, group):
                 legend.Draw()
                 draw_objects.append(legend)
                 legend_drawn = True
-        canvas.cd()
-        draw_objects.append(_draw_small_note(
-            ROOT,
-            "E.3 Method-A local HGCer presentation - diagnostic only; signed noRF no-MM-cut response context; stored prompt-pion f_low; no refinement or correction applied.",
-        ))
-        draw_objects.append(_draw_page_header(ROOT, canvas, "Method-A local HGCer response", group))
-        canvas._full_background_e3_draw_objects = tuple(draw_objects)
+        canvas._full_background_e3_draw_objects = tuple(
+            [header_pad, grid_pad] + draw_objects
+        )
         canvas.Print(pdf_name)
     finally:
         canvas.Close()
