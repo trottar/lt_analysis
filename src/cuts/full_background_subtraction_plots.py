@@ -7620,6 +7620,45 @@ def _f1_prompt_rows(rows):
     return result
 
 
+def _f1_distribution_summary(rows, feature_name):
+    values = tuple(row[feature_name] for row in rows)
+    return {
+        "median": _f1_quantile(values, 0.50),
+        "q1": _f1_quantile(values, 0.25),
+        "q3": _f1_quantile(values, 0.75),
+    }
+
+
+def _f1_phi_children(rows, phi_edges):
+    """Group stored F.1 rows into detached descriptive (t, phi) children."""
+    children = []
+    for phi_index in range(len(phi_edges) - 1):
+        child_rows = tuple(
+            row for row in rows if row.get("phi_index") == phi_index
+        )
+        prompt = _f1_prompt_rows(child_rows)
+        children.append({
+            "phi_index": phi_index,
+            "phi_low": phi_edges[phi_index],
+            "phi_high": phi_edges[phi_index + 1],
+            "linked_record_count": len(child_rows),
+            "prompt_low_response_count": len(prompt["low"]),
+            "prompt_control_response_count": len(prompt["control"]),
+            "acceptance_summaries": {
+                "SHMS_delta": _f1_distribution_summary(
+                    child_rows, "SHMS_delta"
+                ),
+                "SHMS_xptar": _f1_distribution_summary(
+                    child_rows, "SHMS_xptar"
+                ),
+                "SHMS_yptar": _f1_distribution_summary(
+                    child_rows, "SHMS_yptar"
+                ),
+            },
+        })
+    return tuple(children)
+
+
 def build_full_background_subtraction_f1_payload(acceptance_contract):
     """Detach stored F.1 scalar observations for presentation only."""
     contract, t_edges, delta_edges, phi_edges, reason = _f1_contract(acceptance_contract)
@@ -7647,6 +7686,7 @@ def build_full_background_subtraction_f1_payload(acceptance_contract):
             "rows": tuple(rows),
             "prompt_low_rows": tuple(prompt_rows["low"]),
             "prompt_control_rows": tuple(prompt_rows["control"]),
+            "phi_children": _f1_phi_children(rows, phi_edges),
         })
     return {
         "schema_version": F1_PRESENTATION_SCHEMA_VERSION,
@@ -7777,33 +7817,86 @@ def _f1_mapping_page(ROOT, pdf_name, presentation):
             canvas.Divide(len(groups), 1)
         for panel, group in enumerate(groups, 1):
             canvas.cd(panel)
-            rows = [row for row in tuple(group.get("rows") or ()) if row.get("phi_index") is not None]
-            counts = [0] * (len(phi_edges) - 1)
-            low_count = control_count = 0
-            for row in rows:
-                counts[int(row["phi_index"])] += 1
-                low_count += int(row.get("prompt_response_class") == "low")
-                control_count += int(row.get("prompt_response_class") == "control")
+            children = tuple(group.get("phi_children") or ())
+            if len(children) != len(phi_edges) - 1:
+                return False
+            series = (
+                ("linked_record_count", "all linked", getattr(ROOT, "kBlack", 1), 20, -0.16),
+                ("prompt_low_response_count", "prompt low", getattr(ROOT, "kBlue", 4), 24, 0.0),
+                ("prompt_control_response_count", "prompt control", getattr(ROOT, "kRed", 2), 21, 0.16),
+            )
+            maximum = max(
+                [
+                    float(child[name]) for child in children
+                    for name, _label, _color, _marker, _offset in series
+                ] or [0.0]
+            )
             frame = ROOT.TH1D(
                 "H_full_background_f1_phi_occupancy_t{}".format(panel),
-                "{};#phi [deg];Stored child-record count".format(_t_context(group)),
+                "{};canonical #phi child [deg];Stored child-record count".format(_t_context(group)),
                 len(phi_edges) - 1, array("d", phi_edges),
             )
             if hasattr(frame, "SetDirectory"):
                 frame.SetDirectory(0)
             if hasattr(frame, "SetStats"):
                 frame.SetStats(0)
-            for index, count in enumerate(counts, 1):
-                frame.SetBinContent(index, float(count))
-            frame.Draw("HIST")
+            if hasattr(frame, "SetMinimum"):
+                frame.SetMinimum(0.0)
+            if hasattr(frame, "SetMaximum"):
+                frame.SetMaximum(max(1.0, 1.20 * maximum + 0.25))
+            frame.Draw("AXIS")
             retained.append(frame)
-            lines = ["Stored t -> (t, phi) child occupancy"]
-            for name, label in (("SHMS_delta", "delta"), ("SHMS_xptar", "x' tar"), ("SHMS_yptar", "y' tar")):
-                median, lower, upper = (_f1_quantile((row[name] for row in rows), 0.50), _f1_quantile((row[name] for row in rows), 0.25), _f1_quantile((row[name] for row in rows), 0.75))
-                if median is not None:
-                    lines.append("{} median/IQR: {:.4g} [{:.4g}, {:.4g}]".format(label, median, lower, upper))
-            lines.extend(("prompt low/control: {}/{}".format(low_count, control_count), "phi is downstream only; no child renormalization or weight adjustment."))
-            retained.append(_f1_text(ROOT, (0.12, 0.62, 0.89, 0.91), lines, 0.033))
+            for name, _label, color, marker, offset in series:
+                graph = ROOT.TGraph(len(children))
+                for index, child in enumerate(children):
+                    center = 0.5 * (child["phi_low"] + child["phi_high"])
+                    width = child["phi_high"] - child["phi_low"]
+                    graph.SetPoint(
+                        index, center + offset * width, float(child[name])
+                    )
+                graph.SetMarkerColor(color)
+                graph.SetLineColor(color)
+                graph.SetMarkerStyle(marker)
+                graph.SetMarkerSize(1.10)
+                graph.Draw("P SAME")
+                retained.append(graph)
+            lines = [
+                "Stored t -> (t, phi) child occupancy",
+                "black open: all linked; blue open: low; red filled: control",
+            ]
+            for child in children:
+                summaries = child["acceptance_summaries"]
+                values = []
+                for field, label in (
+                    ("SHMS_delta", "delta"),
+                    ("SHMS_xptar", "x'"),
+                    ("SHMS_yptar", "y'"),
+                ):
+                    summary = summaries[field]
+                    median, lower, upper = (
+                        summary["median"], summary["q1"], summary["q3"]
+                    )
+                    values.append(
+                        "{} {}".format(
+                            label,
+                            "none" if median is None else "{:.4g}[{:.4g},{:.4g}]".format(
+                                median, lower, upper
+                            ),
+                        )
+                    )
+                lines.append(
+                    "#phi [{:.4g}, {:.4g}]: linked {} low {} control {}; {}".format(
+                        child["phi_low"], child["phi_high"],
+                        child["linked_record_count"],
+                        child["prompt_low_response_count"],
+                        child["prompt_control_response_count"],
+                        "; ".join(values),
+                    )
+                )
+            lines.append(
+                "phi is downstream only; no child renormalization or weight adjustment."
+            )
+            retained.append(_f1_text(ROOT, (0.10, 0.53, 0.90, 0.91), lines, 0.028))
         canvas.cd()
         retained.append(_f1_text(ROOT, (0.03, 0.935, 0.97, 0.995), ("Stored canonical t -> (t, phi) yield-child mapping", "Occupancy and direct acceptance summaries only; no phi model, correction, or yield change."), 0.036))
         canvas._full_background_f1_draw_objects = tuple(retained)

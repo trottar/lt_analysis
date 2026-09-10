@@ -36,6 +36,13 @@ _PRIMARY_FEATURES = (
 )
 _PROMPT_SOURCE = "prompt"
 _LOW_RESPONSE_UPPER_BOUND = 2.0
+_PARENT_CACHE_REQUIRED_FIELDS = (
+    "source_label", "entry_index", "coordinate_fingerprint", "rf_state",
+    "source_tree_name", "t_index", "adj_t", "adj_MM", "coefficient",
+    "allcuts", "nommcuts", "ssdelta", "delta_index", "P_hgcer_npeSum",
+    "P_hgcer_xAtCer", "P_hgcer_yAtCer", "ssxptar", "ssyptar",
+    "hsxptar", "hsyptar", "phi_degrees", "phi_index",
+)
 
 
 class MethodAAcceptanceContractUnavailable(RuntimeError):
@@ -192,6 +199,14 @@ def _cache_parent_rows(cache):
     index = {}
     for source in rows:
         row = _mapping(source)
+        if any(field not in row for field in _PARENT_CACHE_REQUIRED_FIELDS):
+            raise MethodAAcceptanceContractUnavailable(
+                "pion_cache_parent_fields_missing"
+            )
+        if _nonempty_string(row.get("source_tree_name")) is None:
+            raise MethodAAcceptanceContractUnavailable(
+                "pion_cache_parent_provenance_invalid"
+            )
         key = _identity(row, "pion_cache_parent")
         if key in index:
             raise MethodAAcceptanceContractUnavailable("pion_cache_parent_identity_duplicate")
@@ -299,6 +314,24 @@ def _parent_parity(phase, parent, t_index, delta_index):
         raise MethodAAcceptanceContractUnavailable("phase_a_parent_delta_index_mismatch")
     if _integer(parent.get("t_index")) != t_index:
         raise MethodAAcceptanceContractUnavailable("phase_a_parent_t_index_mismatch")
+
+
+def _parent_no_rf_provenance(phase, parent):
+    """Close the frozen Phase-A to authoritative-cache no-RF link exactly."""
+    phase_no_rf = phase.get("noRF_provenance")
+    parent_no_rf = parent.get("rf_state")
+    if phase_no_rf != "noRF":
+        raise MethodAAcceptanceContractUnavailable(
+            "phase_a_noRF_provenance_invalid"
+        )
+    if parent_no_rf != "noRF":
+        raise MethodAAcceptanceContractUnavailable(
+            "pion_cache_parent_noRF_provenance_invalid"
+        )
+    if phase_no_rf != parent_no_rf:
+        raise MethodAAcceptanceContractUnavailable(
+            "phase_a_parent_noRF_provenance_mismatch"
+        )
 
 
 def _child_parity(parent, child, phi_index):
@@ -467,6 +500,7 @@ def build_pion_hgcer_method_a_acceptance_event_contract(
             t_index, t_low, t_high, delta_index, delta_low, delta_high = _record_geometry(
                 phase_record, t_edges, delta_edges
             )
+            _parent_no_rf_provenance(phase_record, parent)
             _parent_parity(phase_record, parent, t_index, delta_index)
             for feature_name in (
                 "P_hgcer_xAtCer", "P_hgcer_yAtCer", "ssxptar", "ssyptar",

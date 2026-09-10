@@ -31,6 +31,7 @@ _PHASE_A_SCHEMA = "pion_hgcer_event_contract/v1"
 _PHASE_A_FINGERPRINT_SCHEMA = "pion_hgcer_event_contract_fingerprint/v2"
 _PHASE_A_FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS = frozenset((
     "canonical_interval_pair_id",
+    "entry_index",
 ))
 _PHASE_D_SCHEMA = "pion_hgcer_phase_d_checkpoint/v1"
 _SOURCE_TARGET_STATE = "post_proton_noRF"

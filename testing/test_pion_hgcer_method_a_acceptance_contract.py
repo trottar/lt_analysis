@@ -43,6 +43,7 @@ def _phase_record(source, entry, t_index, delta_index, delta, npe, *, nommcuts=T
         "P_hgcer_yAtCer": -1.0 - entry,
         "baseline_pion_weight_w0": 0.5 + 0.1 * entry,
         "signed_baseline_event_contribution": (-0.25 if entry == 1 else 1.0) * (0.5 + 0.1 * entry),
+        "noRF_provenance": "noRF",
     }
 
 
@@ -52,6 +53,8 @@ def _parent(record, phi_index):
         "source_label": record["source_label"],
         "entry_index": entry,
         "coordinate_fingerprint": record["coordinate_fingerprint"],
+        "rf_state": "noRF",
+        "source_tree_name": "PionEvents_noRF",
         "t_index": record["canonical_t_index"],
         "adj_t": record["analysis_abs_t"],
         "adj_MM": record["analysis_MM"],
@@ -104,11 +107,15 @@ def _fixture():
     records = [
         _phase_record("prompt", 0, 0, 0, -5.0, 1.5),
         _phase_record("prompt", 1, 0, 1, 5.0, 2.0),
+        _phase_record("prompt", 4, 0, 0, -5.0, 1.2),
+        _phase_record("prompt", 5, 0, 1, 5.0, 2.5),
         _phase_record("prompt", 2, 1, 0, -5.0, 2.1),
         _phase_record("rand", 3, 1, 1, 5.0, 3.0),
     ]
-    parents = [_parent(record, 0 if index == 0 else 1 if index < 3 else None)
-               for index, record in enumerate(records)]
+    parents = [
+        _parent(record, phi_index)
+        for record, phi_index in zip(records, (0, 1, 1, 1, 1, None))
+    ]
     children = [_child(parent) for parent in parents if parent["phi_index"] is not None]
     fields = tuple(children[0])
     child_columns = {field: [row[field] for row in children] for field in fields}
@@ -146,11 +153,11 @@ class MethodAAcceptanceContractTests(unittest.TestCase):
         self.assertEqual(first["fingerprint"], second["fingerprint"])
         self.assertEqual(first["event_population_fingerprint"], second["event_population_fingerprint"])
         self.assertFalse(first["method_b_numerical_dependency"])
-        self.assertEqual(len(first["records"]), 4)
+        self.assertEqual(len(first["records"]), 6)
         self.assertEqual(first["records"][-1]["phi_status"], "outside_phi")
         self.assertIsNone(first["records"][-1]["phi_index"])
-        self.assertEqual(first["summary"]["prompt_low_count"], 2)
-        self.assertEqual(first["summary"]["prompt_control_count"], 1)
+        self.assertEqual(first["summary"]["prompt_low_count"], 3)
+        self.assertEqual(first["summary"]["prompt_control_count"], 2)
         first["records"][0]["SHMS_xptar"] = 99.0
         self.assertEqual((phase, cache), before)
 
@@ -176,6 +183,41 @@ class MethodAAcceptanceContractTests(unittest.TestCase):
                 mutate(candidate_phase, candidate_cache)
                 result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
                     candidate_phase, candidate_cache, phi_edges=PHI_EDGES
+                )
+                self.assertFalse(result["available"])
+                self.assertEqual(result["reason"], reason)
+
+    def test_phase_a_and_parent_cache_no_rf_provenance_are_required(self):
+        cases = (
+            (
+                lambda phase, _cache: phase["pion_records"][0].pop(
+                    "noRF_provenance"
+                ),
+                "phase_a_noRF_provenance_invalid",
+            ),
+            (
+                lambda phase, _cache: phase["pion_records"][0].update(
+                    noRF_provenance="withRF"
+                ),
+                "phase_a_noRF_provenance_invalid",
+            ),
+            (
+                lambda _phase, cache: cache["records"][0].pop("rf_state"),
+                "pion_cache_parent_fields_missing",
+            ),
+            (
+                lambda _phase, cache: cache["records"][0].update(
+                    rf_state="withRF"
+                ),
+                "pion_cache_parent_noRF_provenance_invalid",
+            ),
+        )
+        for mutate, reason in cases:
+            with self.subTest(reason=reason):
+                phase, cache = _fixture()
+                mutate(phase, cache)
+                result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+                    phase, cache, phi_edges=PHI_EDGES
                 )
                 self.assertFalse(result["available"])
                 self.assertEqual(result["reason"], reason)

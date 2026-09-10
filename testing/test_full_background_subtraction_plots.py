@@ -6498,7 +6498,7 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         self.assertEqual(payload["schema_version"], plots.F1_PRESENTATION_SCHEMA_VERSION)
         self.assertFalse(payload["method_b_numerical_dependency"])
         self.assertEqual(
-            len(payload["per_t"][0]["prompt_low_rows"]), 2
+            len(payload["per_t"][0]["prompt_low_rows"]), 3
         )
         self.assertEqual(
             len(payload["per_t"][1]["prompt_control_rows"]), 1
@@ -6513,6 +6513,47 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         ))
         payload["per_t"][0]["rows"][0]["SHMS_xptar"] = 99.0
         self.assertEqual(contract, before)
+
+    def test_f1_page5_summaries_remain_separate_for_each_t_phi_child(self):
+        _contract, payload = self._payload()
+        children = payload["per_t"][0]["phi_children"]
+        self.assertEqual(len(children), 2)
+        first, second = children
+        self.assertEqual(
+            (
+                first["linked_record_count"],
+                first["prompt_low_response_count"],
+                first["prompt_control_response_count"],
+            ),
+            (1, 1, 0),
+        )
+        self.assertEqual(
+            (
+                second["linked_record_count"],
+                second["prompt_low_response_count"],
+                second["prompt_control_response_count"],
+            ),
+            (3, 2, 1),
+        )
+        for feature in ("SHMS_delta", "SHMS_xptar", "SHMS_yptar"):
+            self.assertNotEqual(
+                first["acceptance_summaries"][feature]["median"],
+                second["acceptance_summaries"][feature]["median"],
+            )
+
+        root = MagicMock()
+        lines = []
+        with patch.object(
+            plots, "_f1_text",
+            side_effect=lambda _root, _coordinates, value, _size=0.040: (
+                lines.extend(value), MagicMock()
+            )[1],
+        ):
+            self.assertTrue(plots._f1_mapping_page(root, "f1.pdf", payload))
+        rendered = "\n".join(str(line) for line in lines)
+        self.assertIn("linked 1 low 1 control 0", rendered)
+        self.assertIn("linked 3 low 2 control 1", rendered)
+        self.assertIn("phi is downstream only; no child renormalization", rendered)
 
     def test_f1_payload_rejects_contract_and_geometry_failures_locally(self):
         contract, _payload = self._payload()
@@ -6559,15 +6600,40 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         with patch.object(plots, "_import_root", return_value=object()), patch.object(
             plots, "_render_e7_t_pages", side_effect=lambda _root, _pdf, _payload, group, page_manifest, _failures: page_manifest.append({"page_id": "e7-{}".format(group["t_index"]), "scope": "t", "authoritative": False})
         ), patch.object(
-            plots, "_render_f1_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.append({"page_id": "f1", "scope": "setting", "authoritative": False})
+            plots, "_render_f1_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.extend({"page_id": page_id, "scope": "setting", "authoritative": False} for page_id in (
+                "full_background.f1.acceptance_delta_xptar",
+                "full_background.f1.acceptance_delta_yptar",
+                "full_background.f1.acceptance_xptar_yptar",
+                "full_background.f1.acceptance_hgcer_xy",
+                "full_background.f1.yield_child_mapping",
+            ))
         ), patch.object(
-            plots, "_render_e72_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.append({"page_id": "e72", "scope": "setting", "authoritative": False})
+            plots, "_render_e72_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.extend({"page_id": page_id, "scope": "setting", "authoritative": False} for page_id in (
+                "full_background.e72.meeting_overview",
+                "full_background.e72.ab_evidence_summary",
+                "full_background.e72.parent_preserving_map_summary",
+                "full_background.e72.parent_closure_summary",
+            ))
         ):
             rendered = plots.render_full_background_subtraction_procedure_pages(
                 "unused.pdf", {"available": False}, {"available": False},
                 e7_payload=e7, f1_payload=payload, e72_payload=e72,
             )
-        self.assertEqual([entry["page_id"] for entry in rendered["manifest"]], ["e7-0", "e7-1", "f1", "e72"])
+        self.assertEqual(
+            [entry["page_id"] for entry in rendered["manifest"]],
+            [
+                "e7-0", "e7-1",
+                "full_background.f1.acceptance_delta_xptar",
+                "full_background.f1.acceptance_delta_yptar",
+                "full_background.f1.acceptance_xptar_yptar",
+                "full_background.f1.acceptance_hgcer_xy",
+                "full_background.f1.yield_child_mapping",
+                "full_background.e72.meeting_overview",
+                "full_background.e72.ab_evidence_summary",
+                "full_background.e72.parent_preserving_map_summary",
+                "full_background.e72.parent_closure_summary",
+            ],
+        )
 
     def test_f1_fake_root_rendering_keeps_stored_rows_and_fixed_canvas_size(self):
         _contract, payload = self._payload()
@@ -6588,8 +6654,20 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         self.assertFalse(failures)
         self.assertEqual(len(canvases), 5)
         self.assertTrue(all(canvas.args[-2:] == (1800, 1200) for canvas in canvases))
-        self.assertEqual(root.TGraph.call_count, 8)
+        self.assertEqual(root.TGraph.call_count, 18)
         self.assertTrue(all(canvas.Print.called for canvas in canvases))
+
+    def test_f1_presentation_has_no_inference_machinery(self):
+        source = Path(plots.__file__).read_text(encoding="utf-8")
+        f1_source = source.split("def _f1_unavailable", 1)[1].split(
+            "def _full_background_manifest_setting", 1
+        )[0]
+        for forbidden in (
+            "TF1", ".Fit(", "TSpline", "interpolate", "interp1d", "KDE",
+            "sklearn", "tensorflow", "acceptance_correction",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, f1_source)
 
 
 if __name__ == "__main__":
