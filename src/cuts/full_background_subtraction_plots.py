@@ -7061,6 +7061,20 @@ def _e72_meeting_legend(ROOT, entries):
     return legend
 
 
+def _e72_legend_object_or_proxy(
+    ROOT, object_, retained_proxies, *, color, marker_style, line_style=None,
+):
+    """Return a legend sample and retain a fallback proxy through Print()."""
+    if object_ is not None:
+        return object_
+    proxy = _e72_legend_proxy(
+        ROOT, color=color, marker_style=marker_style, line_style=line_style,
+    )
+    if proxy is not None:
+        retained_proxies.append(proxy)
+    return proxy
+
+
 def _e72_closure_y_range(before, after):
     """Choose a signed, scale-aware closure frame without touching stored totals."""
     before, after = float(before), float(after)
@@ -7100,12 +7114,16 @@ def _render_e72_overview_page(ROOT, pdf_name, presentation):
             ), size=0.050,
         ))
         stages = (
-            (0.04, 0.23, "Established baseline pion subtraction", "w_pi^0(MM; t)"),
-            (0.28, 0.47, "Two independent local diagnostics", "Method A: HGCer response   |   Method B: missing-mass closure"),
-            (0.52, 0.71, "E.7 raw A/B scale", "S(t,delta) = sqrt(A B)"),
-            (0.76, 0.95, "E.7.1 parent-preserving map", "C_final(t,delta)"),
+            (0.04, 0.23, "Established baseline pion subtraction", ("w_pi^0(MM; t)",)),
+            (
+                0.28, 0.47, "Two independent local diagnostics", (
+                    "Method A: HGCer response", "Method B: missing-mass closure",
+                ),
+            ),
+            (0.52, 0.71, "E.7 raw A/B scale", ("S(t,delta) = sqrt(A B)",)),
+            (0.76, 0.95, "E.7.1 parent-preserving map", ("C_final(t,delta)",)),
         )
-        for index, (x_low, x_high, title, detail) in enumerate(stages):
+        for index, (x_low, x_high, title, details) in enumerate(stages):
             if hasattr(ROOT, "TBox"):
                 box = ROOT.TBox(x_low, 0.58, x_high, 0.78)
                 if hasattr(box, "SetFillStyle"):
@@ -7113,7 +7131,8 @@ def _render_e72_overview_page(ROOT, pdf_name, presentation):
                 box.Draw()
                 draw_objects.append(box)
             draw_objects.append(_e72_add_text(
-                ROOT, (x_low + 0.01, 0.62, x_high - 0.01, 0.74), (title, detail), size=0.026,
+                ROOT, (x_low + 0.01, 0.60, x_high - 0.01, 0.75),
+                (title,) + tuple(details), size=0.026,
             ))
             if index < len(stages) - 1:
                 if hasattr(ROOT, "TArrow"):
@@ -7159,6 +7178,7 @@ def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
     canvas, header, grid = layout
     draw_objects = [header, grid]
     legend_objects = {"method_a": None, "method_b": None, "prototype": None, "unity": None}
+    legend_proxies = []
     try:
         header.cd()
         draw_objects.append(_e72_header(
@@ -7212,26 +7232,31 @@ def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
         gray = getattr(ROOT, "kGray", 920)
         legend = _e72_meeting_legend(ROOT, (
             (
-                legend_objects["method_a"] or _e72_legend_proxy(
-                    ROOT, color=blue, marker_style=24,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["method_a"], legend_proxies,
+                    color=blue, marker_style=24,
                 ), "Method A — HGCer response", "p",
             ),
             (
-                legend_objects["method_b"] or _e72_legend_proxy(
-                    ROOT, color=orange, marker_style=25,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["method_b"], legend_proxies,
+                    color=orange, marker_style=25,
                 ), "Legacy Method B — MM closure", "p",
             ),
             (
-                legend_objects["prototype"] or _e72_legend_proxy(
-                    ROOT, color=gray, marker_style=27,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["prototype"], legend_proxies,
+                    color=gray, marker_style=27,
                 ), "E.7 raw equal-log scale", "p",
             ),
             (
-                legend_objects["unity"] or _e72_legend_proxy(
-                    ROOT, color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["unity"], legend_proxies,
+                    color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
                 ), "Baseline = 1", "l",
             ),
         ))
+        draw_objects.extend(legend_proxies)
         draw_objects.append(legend)
         canvas._full_background_e72_draw_objects = tuple(draw_objects)
         canvas.Print(pdf_name)
@@ -7251,11 +7276,15 @@ def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
     canvas, header, grid = layout
     draw_objects = [header, grid]
     legend_objects = {"raw": None, "final": None, "unity": None}
+    legend_proxies = []
     try:
         header.cd()
-        draw_objects.append(_e72_header(
-            ROOT, "Raw E.7 shape to parent-preserving C_final",
-            "Raw A/B shape is rescaled only within each t parent; unsupported cells stay at unity.",
+        draw_objects.append(_e72_add_text(
+            ROOT, (0.03, 0.06, 0.97, 0.94), (
+                "Raw E.7 shape to parent-preserving C_final",
+                "Raw A/B shape is rescaled only within each t parent; unsupported cells stay at unity.",
+                "Detached scientific map only — not applied to events or production yields.",
+            ), size=0.043,
         ))
         for panel_index, group in enumerate(presentation["per_t"], start=1):
             grid.cd(panel_index)
@@ -7301,26 +7330,26 @@ def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
         grid.cd(1)
         legend = _e72_meeting_legend(ROOT, (
             (
-                legend_objects["raw"] or _e72_legend_proxy(
-                    ROOT, color=getattr(ROOT, "kGray", 920), marker_style=27,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["raw"], legend_proxies,
+                    color=getattr(ROOT, "kGray", 920), marker_style=27,
                 ), "Raw E.7 scale", "p",
             ),
             (
-                legend_objects["final"] or _e72_legend_proxy(
-                    ROOT, color=getattr(ROOT, "kGreen", 3), marker_style=20,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["final"], legend_proxies,
+                    color=getattr(ROOT, "kGreen", 3), marker_style=20,
                 ), "Parent-preserving C_final", "p",
             ),
             (
-                legend_objects["unity"] or _e72_legend_proxy(
-                    ROOT, color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
+                _e72_legend_object_or_proxy(
+                    ROOT, legend_objects["unity"], legend_proxies,
+                    color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
                 ), "Unity", "l",
             ),
         ))
+        draw_objects.extend(legend_proxies)
         draw_objects.append(legend)
-        draw_objects.append(_e72_add_text(
-            ROOT, (0.12, 0.06, 0.88, 0.16),
-            ("Detached scientific map only — not applied to events or production yields.",), size=0.032,
-        ))
         canvas._full_background_e72_draw_objects = tuple(draw_objects)
         canvas.Print(pdf_name)
     finally:

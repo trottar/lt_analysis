@@ -4491,6 +4491,13 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         arrows = [line for line in root.drawn_lines if line.y1 == 0.68 and line.y2 == 0.68]
         self.assertEqual(len(arrows), 3)
         self.assertTrue(all(arrow.x1 < arrow.x2 for arrow in arrows))
+        overview_text = [line for text in root.drawn_text for line in text]
+        self.assertIn("Method A: HGCer response", overview_text)
+        self.assertIn("Method B: missing-mass closure", overview_text)
+        self.assertNotIn(
+            "Method A: HGCer response   |   Method B: missing-mass closure",
+            overview_text,
+        )
 
         root = _E7ROOT()
         self.assertTrue(plots._render_e72_ab_evidence_page(root, "ignored.pdf", payload))
@@ -4529,6 +4536,39 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         map_legend = root.legends[-1]
         self.assertEqual(len(map_legend.entries), 3)
         self.assertTrue(all(object_ is not None for object_ in map_legend.objects))
+        map_header = next(
+            pad for pad in root.pads if pad.name == "C_full_background_e72_parent_map_header"
+        )
+        map_grid = next(
+            pad for pad in root.pads if pad.name == "C_full_background_e72_parent_map_grid"
+        )
+        disclaimer = next(
+            text for text in root.pave_texts
+            if any("Detached scientific map only" in line for line in text._text)
+        )
+        self.assertIs(disclaimer.drawn_on, map_header)
+        self.assertIs(map_legend.drawn_on, map_grid.cells[0])
+        for text in root.pave_texts:
+            if text.drawn_on is map_legend.drawn_on:
+                self.assertFalse(_rectangles_overlap(
+                    map_legend.coordinates, text.coordinates,
+                ))
+
+    def test_e72_legend_fallback_proxy_is_retained_without_a_data_point(self):
+        e7, correction = _e72_fixture()
+        payload = plots.build_full_background_subtraction_e72_payload(e7, correction)
+        for group in payload["per_t"]:
+            for cell in group["cells"]:
+                cell["prototype_status"] = "unavailable"
+                cell["prototype_relative_scale"] = None
+        root = _E7ROOT()
+        self.assertTrue(plots._render_e72_parent_map_page(root, "ignored.pdf", payload))
+        legend = root.legends[-1]
+        raw_proxy = legend.objects[0]
+        canvas = root.canvases[-1]
+        self.assertIsNotNone(raw_proxy)
+        self.assertIn(raw_proxy, canvas._full_background_e72_draw_objects)
+        self.assertNotIn(raw_proxy, root.drawn_plain_graphs)
 
     def test_e72_closure_range_is_signed_and_scale_aware(self):
         cases = (
