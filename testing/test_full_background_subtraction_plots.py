@@ -3659,6 +3659,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             ],
         )
 
+    def test_e4_unavailable_schema_owns_host_label_not_d11(self):
+        d11_unavailable = plots._d11_unavailable("test")
+        e4_unavailable = plots._e4_unavailable("test")
+
+        self.assertNotIn("host_label", d11_unavailable)
+        self.assertIn("host_label", e4_unavailable)
+        self.assertIsNone(e4_unavailable["host_label"])
+
     def test_e4_copies_only_parent_display_fields_and_preserves_unavailable_states(self):
         d11, e2 = _e4_fixture()
         d11_before, e2_before = deepcopy(d11), deepcopy(e2)
