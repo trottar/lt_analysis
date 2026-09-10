@@ -7484,9 +7484,11 @@ def rand_sub(
                     exception_type=type(exc).__name__,
                     exception=str(exc),
                 )
-        # Phases D.6 through D.11 and E.2 through E.7 are terminal presentation only.  They receive the
-        # already constructed proton-cleaning products and retain no
-        # ROOT-bearing object in histDict or any downstream physics input.
+        # Phases D.6 through D.11 and E.2 through E.6 are detached terminal
+        # diagnostic/presentation work.  E.7 additionally builds a detached,
+        # non-authoritative numerical A/B prototype before terminal presentation.
+        # None of these products feed production subtraction, yields, or
+        # ROOT-bearing downstream physics objects.
         full_background_subtraction_manifest = []
         full_background_subtraction_failures = []
         full_background_subtraction_pdf = full_background_subtraction_pdf_path(

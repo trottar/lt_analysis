@@ -1984,9 +1984,10 @@ def _e7_render_payload():
             cell = deepcopy(source_cell)
             availability = cell["comparison"]["availability"]
             cell["comparison"]["diagnostic_interval_relation"] = (
-                "overlap" if availability == "both_comparable" else "not_evaluable"
+                "disjoint" if availability == "both_comparable" else "not_evaluable"
             )
             if availability == "both_comparable":
+                cell["method_a"]["status"] = "marginal"
                 cell.update({
                     "prototype_status": "available",
                     "prototype_reason": None,
@@ -4220,13 +4221,35 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertTrue(root.drawn_asymm_graphs)
         self.assertTrue(root.drawn_graphs)
         self.assertTrue(root.drawn_plain_graphs)
+        known_disjoint = payload["per_t"][0]["cells"][0]
+        self.assertEqual(known_disjoint["comparison"]["availability"], "both_comparable")
+        self.assertEqual(known_disjoint["method_a"]["status"], "marginal")
+        self.assertEqual(
+            known_disjoint["comparison"]["diagnostic_interval_relation"], "disjoint"
+        )
+        self.assertEqual(known_disjoint["prototype_status"], "available")
+        self.assertIn(
+            (-9.0, 1.455),
+            [point for graph in root.drawn_plain_graphs for point in graph.points],
+        )
         self.assertTrue(all(
             point[1] == 1.455
             for graph in root.drawn_plain_graphs for point in graph.points
         ))
         visible = [line for text in root.drawn_text for line in text]
+        self.assertIn("A status: marginal", visible)
+        self.assertIn("intervals: disjoint", visible)
+        self.assertIn("A status: unavailable", visible)
+        self.assertIn("intervals: not_evaluable", visible)
         self.assertTrue(any("prototype: unavailable" in line for line in visible))
         self.assertTrue(any("No combined uncertainty" in line for line in visible))
+        self.assertTrue(any("Non-authoritative prototype only" in line for line in visible))
+        self.assertTrue(any("no production application" in line for line in visible))
+        for forbidden in (
+            "PASS", "FAIL", "preferred", "selected", "compatible", "incompatible", "veto",
+        ):
+            with self.subTest(e7_rendered_text_forbidden=forbidden):
+                self.assertFalse(any(forbidden in line for line in visible))
 
     def test_e7_is_final_local_append_after_e3_e4_and_e6(self):
         unavailable = {"available": False, "reason": "not requested"}
@@ -5489,6 +5512,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "TGraph",
             "S_AB = sqrt(A B)",
             "no uncertainty bar",
+            "Non-authoritative prototype only",
+            "no production application",
+            "A status: {}",
+            "intervals: {}",
         ):
             with self.subTest(e7_required=required):
                 self.assertIn(required, e7_source)
@@ -5520,9 +5547,14 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
 
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.11 and E.2 through E.7 are terminal presentation only.")
+        start = runtime.index(
+            "# Phases D.6 through D.11 and E.2 through E.6 are detached terminal"
+        )
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
+        self.assertIn("E.7 additionally builds a detached", block)
+        self.assertIn("non-authoritative numerical A/B prototype", block)
+        self.assertIn("None of these products feed production subtraction, yields", block)
         for name in (
             "build_full_background_subtraction_d6_payload",
             "build_full_background_subtraction_d7_payload",

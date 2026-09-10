@@ -6362,11 +6362,12 @@ def _e7_page_header(ROOT, group):
     header.AddText("Detached A/B equal-log prototype - {}".format(_t_context(group)))
     header.SetTextSize(0.058)
     header.AddText(
-        "S_AB = sqrt(A B) only for frozen D.4 both-comparable cells; equal log weights (1/2, 1/2)."
+        "Non-authoritative prototype only: S_AB = sqrt(A B) for frozen D.4 both-comparable cells; "
+        "equal log weights (1/2, 1/2)."
     )
     header.AddText(
-        "No combined uncertainty, interpolation, fallback, or application to the established baseline; "
-        "Method-A and legacy-Method-B statuses remain frozen."
+        "No combined uncertainty, interpolation, or fallback; no production application. Method-A and "
+        "legacy-Method-B statuses and D.4 interval relation remain frozen."
     )
     header.Draw()
     return header
@@ -6388,6 +6389,12 @@ def _e7_status_strip(ROOT, cells):
         note.SetTextAlign(22)
         note.SetTextSize(0.075)
         note.AddText("d{}: {}".format(int(cell["delta_index"]) + 1, cell["comparison"]["availability"]))
+        note.AddText("A status: {}".format(cell["method_a"]["status"]))
+        note.AddText(
+            "intervals: {}".format(
+                cell["comparison"]["diagnostic_interval_relation"]
+            )
+        )
         note.AddText("prototype: {}".format(cell["prototype_status"]))
         if cell["prototype_status"] != "available":
             note.AddText(str(cell["prototype_reason"]))
