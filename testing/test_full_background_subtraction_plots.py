@@ -6541,7 +6541,49 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
                 second["acceptance_summaries"][feature]["median"],
             )
 
+        class _Graph:
+            def __init__(self, graph_type, count):
+                self.graph_type = graph_type
+                self.count = count
+                self.points = []
+                self.errors = []
+                self.marker_style = None
+                self.marker_color = None
+
+            def SetPoint(self, index, x_value, y_value):
+                self.points.append((index, x_value, y_value))
+
+            def SetPointError(self, index, ex_low, ex_high, ey_low, ey_high):
+                self.errors.append((index, ex_low, ex_high, ey_low, ey_high))
+
+            def SetMarkerColor(self, value):
+                self.marker_color = value
+
+            def SetLineColor(self, _value):
+                pass
+
+            def SetMarkerStyle(self, value):
+                self.marker_style = value
+
+            def SetMarkerSize(self, _value):
+                pass
+
+            def Draw(self, _option):
+                pass
+
         root = MagicMock()
+        root.kBlack, root.kBlue, root.kRed = 1, 4, 2
+        graphs = []
+
+        def graph_factory(graph_type):
+            def build(count):
+                graph = _Graph(graph_type, count)
+                graphs.append(graph)
+                return graph
+            return build
+
+        root.TGraph.side_effect = graph_factory("occupancy")
+        root.TGraphAsymmErrors.side_effect = graph_factory("summary")
         lines = []
         with patch.object(
             plots, "_f1_text",
@@ -6550,9 +6592,47 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
             )[1],
         ):
             self.assertTrue(plots._f1_mapping_page(root, "f1.pdf", payload))
+        root.TCanvas.return_value.Divide.assert_called_once_with(
+            4, len(payload["per_t"])
+        )
+
+        occupancy = [graph for graph in graphs if graph.graph_type == "occupancy"]
+        summaries = [graph for graph in graphs if graph.graph_type == "summary"]
+        self.assertEqual(len(occupancy), 3 * len(payload["per_t"]))
+        self.assertTrue(all(graph.count == len(children) for graph in occupancy[:3]))
+        self.assertEqual(
+            sorted(graph.marker_style for graph in occupancy[:3]), [21, 24, 25]
+        )
+
+        delta_graph = summaries[0]
+        self.assertEqual(delta_graph.count, len(children))
+        for index, child in enumerate(children):
+            summary = child["acceptance_summaries"]["SHMS_delta"]
+            self.assertEqual(
+                delta_graph.points[index],
+                (index, 0.5 * (child["phi_low"] + child["phi_high"]), summary["median"]),
+            )
+            self.assertEqual(
+                delta_graph.errors[index],
+                (
+                    index, 0.0, 0.0,
+                    summary["median"] - summary["q1"],
+                    summary["q3"] - summary["median"],
+                ),
+            )
+
+        empty_children = deepcopy(children)
+        empty_children[1]["acceptance_summaries"]["SHMS_xptar"] = {
+            "median": None, "q1": None, "q3": None,
+        }
+        empty_graph = plots._f1_summary_graph(
+            root, empty_children, "SHMS_xptar", root.kBlue, 20
+        )
+        self.assertEqual(empty_graph.count, 1)
+        self.assertEqual(len(empty_graph.points), 1)
+
         rendered = "\n".join(str(line) for line in lines)
-        self.assertIn("linked 1 low 1 control 0", rendered)
-        self.assertIn("linked 3 low 2 control 1", rendered)
+        self.assertIn("black open circle = all linked", rendered)
         self.assertIn("phi is downstream only; no child renormalization", rendered)
 
     def test_f1_payload_rejects_contract_and_geometry_failures_locally(self):
@@ -6654,7 +6734,10 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         self.assertFalse(failures)
         self.assertEqual(len(canvases), 5)
         self.assertTrue(all(canvas.args[-2:] == (1800, 1200) for canvas in canvases))
-        self.assertEqual(root.TGraph.call_count, 18)
+        canvases[-1].Divide.assert_called_once_with(4, len(payload["per_t"]))
+        self.assertEqual(
+            root.TGraphAsymmErrors.call_count, 3 * len(payload["per_t"])
+        )
         self.assertTrue(all(canvas.Print.called for canvas in canvases))
 
     def test_f1_presentation_has_no_inference_machinery(self):

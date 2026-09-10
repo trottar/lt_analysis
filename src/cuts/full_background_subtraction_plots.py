@@ -7806,99 +7806,152 @@ def _f1_quantile(values, fraction):
     return ordered[low] if low == high else ordered[low] + (ordered[high] - ordered[low]) * (position - low)
 
 
+def _f1_phi_child_center(child):
+    return 0.5 * (child["phi_low"] + child["phi_high"])
+
+
+def _f1_occupancy_graph(ROOT, children, field, color, marker, offset):
+    """Return a detached marker-only graph of one stored occupancy series."""
+    graph = ROOT.TGraph(len(children))
+    for index, child in enumerate(children):
+        width = child["phi_high"] - child["phi_low"]
+        graph.SetPoint(
+            index,
+            _f1_phi_child_center(child) + float(offset) * width,
+            float(child[field]),
+        )
+    graph.SetMarkerColor(color)
+    graph.SetLineColor(color)
+    graph.SetMarkerStyle(marker)
+    graph.SetMarkerSize(1.10)
+    return graph
+
+
+def _f1_summary_graph(ROOT, children, feature_name, color, marker):
+    """Return stored median/IQR points without fitting or child normalization."""
+    points = []
+    for child in children:
+        summary = _mapping(
+            _mapping(child.get("acceptance_summaries")).get(feature_name)
+        )
+        median = _f1_finite(summary.get("median"))
+        lower = _f1_finite(summary.get("q1"))
+        upper = _f1_finite(summary.get("q3"))
+        if median is None or lower is None or upper is None:
+            continue
+        if lower > median or median > upper:
+            continue
+        points.append((
+            _f1_phi_child_center(child), median,
+            median - lower, upper - median,
+        ))
+    graph = ROOT.TGraphAsymmErrors(len(points))
+    for index, (x_value, y_value, low_error, high_error) in enumerate(points):
+        graph.SetPoint(index, x_value, y_value)
+        graph.SetPointError(index, 0.0, 0.0, low_error, high_error)
+    graph.SetMarkerColor(color)
+    graph.SetLineColor(color)
+    graph.SetMarkerStyle(marker)
+    graph.SetMarkerSize(1.05)
+    return graph
+
+
+def _f1_summary_range(children, feature_name):
+    values = []
+    for child in children:
+        summary = _mapping(
+            _mapping(child.get("acceptance_summaries")).get(feature_name)
+        )
+        for name in ("q1", "median", "q3"):
+            value = _f1_finite(summary.get(name))
+            if value is not None:
+                values.append(value)
+    return _f1_range(values)
+
+
+def _f1_summary_frame(ROOT, name, title, phi_edges, values):
+    frame = ROOT.TH1D(name, title, len(phi_edges) - 1, array("d", phi_edges))
+    if hasattr(frame, "SetDirectory"):
+        frame.SetDirectory(0)
+    if hasattr(frame, "SetStats"):
+        frame.SetStats(0)
+    if hasattr(frame, "SetMinimum"):
+        frame.SetMinimum(values[0])
+    if hasattr(frame, "SetMaximum"):
+        frame.SetMaximum(values[1])
+    frame.Draw("AXIS")
+    return frame
+
+
 def _f1_mapping_page(ROOT, pdf_name, presentation):
     groups, phi_edges = tuple(presentation.get("per_t") or ()), tuple(presentation.get("phi_edges") or ())
-    if not groups or len(phi_edges) < 2 or not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TH1D"):
+    if (
+        not groups or len(phi_edges) < 2 or not hasattr(ROOT, "TCanvas")
+        or not hasattr(ROOT, "TH1D") or not hasattr(ROOT, "TGraph")
+        or not hasattr(ROOT, "TGraphAsymmErrors")
+    ):
         return False
     canvas = ROOT.TCanvas("C_full_background_f1_yield_child_mapping", "Stored t to phi child mapping", 1800, 1200)
     retained = []
     try:
         if hasattr(canvas, "Divide"):
-            canvas.Divide(len(groups), 1)
-        for panel, group in enumerate(groups, 1):
-            canvas.cd(panel)
+            canvas.Divide(4, len(groups))
+        for row_index, group in enumerate(groups):
             children = tuple(group.get("phi_children") or ())
             if len(children) != len(phi_edges) - 1:
                 return False
+            canvas.cd(4 * row_index + 1)
             series = (
-                ("linked_record_count", "all linked", getattr(ROOT, "kBlack", 1), 20, -0.16),
-                ("prompt_low_response_count", "prompt low", getattr(ROOT, "kBlue", 4), 24, 0.0),
-                ("prompt_control_response_count", "prompt control", getattr(ROOT, "kRed", 2), 21, 0.16),
+                ("linked_record_count", getattr(ROOT, "kBlack", 1), 24, -0.16),
+                ("prompt_low_response_count", getattr(ROOT, "kBlue", 4), 25, 0.0),
+                ("prompt_control_response_count", getattr(ROOT, "kRed", 2), 21, 0.16),
             )
             maximum = max(
                 [
                     float(child[name]) for child in children
-                    for name, _label, _color, _marker, _offset in series
+                    for name, _color, _marker, _offset in series
                 ] or [0.0]
             )
-            frame = ROOT.TH1D(
-                "H_full_background_f1_phi_occupancy_t{}".format(panel),
+            frame = _f1_summary_frame(
+                ROOT,
+                "H_full_background_f1_phi_occupancy_t{}".format(row_index),
                 "{};canonical #phi child [deg];Stored child-record count".format(_t_context(group)),
-                len(phi_edges) - 1, array("d", phi_edges),
+                phi_edges, (0.0, max(1.0, 1.20 * maximum + 0.25)),
             )
-            if hasattr(frame, "SetDirectory"):
-                frame.SetDirectory(0)
-            if hasattr(frame, "SetStats"):
-                frame.SetStats(0)
-            if hasattr(frame, "SetMinimum"):
-                frame.SetMinimum(0.0)
-            if hasattr(frame, "SetMaximum"):
-                frame.SetMaximum(max(1.0, 1.20 * maximum + 0.25))
-            frame.Draw("AXIS")
             retained.append(frame)
-            for name, _label, color, marker, offset in series:
-                graph = ROOT.TGraph(len(children))
-                for index, child in enumerate(children):
-                    center = 0.5 * (child["phi_low"] + child["phi_high"])
-                    width = child["phi_high"] - child["phi_low"]
-                    graph.SetPoint(
-                        index, center + offset * width, float(child[name])
-                    )
-                graph.SetMarkerColor(color)
-                graph.SetLineColor(color)
-                graph.SetMarkerStyle(marker)
-                graph.SetMarkerSize(1.10)
+            for name, color, marker, offset in series:
+                graph = _f1_occupancy_graph(
+                    ROOT, children, name, color, marker, offset
+                )
                 graph.Draw("P SAME")
                 retained.append(graph)
-            lines = [
-                "Stored t -> (t, phi) child occupancy",
-                "black open: all linked; blue open: low; red filled: control",
-            ]
-            for child in children:
-                summaries = child["acceptance_summaries"]
-                values = []
-                for field, label in (
-                    ("SHMS_delta", "delta"),
-                    ("SHMS_xptar", "x'"),
-                    ("SHMS_yptar", "y'"),
-                ):
-                    summary = summaries[field]
-                    median, lower, upper = (
-                        summary["median"], summary["q1"], summary["q3"]
-                    )
-                    values.append(
-                        "{} {}".format(
-                            label,
-                            "none" if median is None else "{:.4g}[{:.4g},{:.4g}]".format(
-                                median, lower, upper
-                            ),
-                        )
-                    )
-                lines.append(
-                    "#phi [{:.4g}, {:.4g}]: linked {} low {} control {}; {}".format(
-                        child["phi_low"], child["phi_high"],
-                        child["linked_record_count"],
-                        child["prompt_low_response_count"],
-                        child["prompt_control_response_count"],
-                        "; ".join(values),
-                    )
+            for column, (feature_name, title, color, marker) in enumerate((
+                ("SHMS_delta", "SHMS #delta [%]", getattr(ROOT, "kBlack", 1), 20),
+                ("SHMS_xptar", "SHMS x'_{tar}", getattr(ROOT, "kBlue", 4), 20),
+                ("SHMS_yptar", "SHMS y'_{tar}", getattr(ROOT, "kRed", 2), 20),
+            ), 2):
+                canvas.cd(4 * row_index + column)
+                frame = _f1_summary_frame(
+                    ROOT,
+                    "H_full_background_f1_{}_t{}".format(feature_name, row_index),
+                    "{};canonical #phi child [deg];{}".format(_t_context(group), title),
+                    phi_edges, _f1_summary_range(children, feature_name),
                 )
-            lines.append(
-                "phi is downstream only; no child renormalization or weight adjustment."
-            )
-            retained.append(_f1_text(ROOT, (0.10, 0.53, 0.90, 0.91), lines, 0.028))
+                retained.append(frame)
+                graph = _f1_summary_graph(
+                    ROOT, children, feature_name, color, marker
+                )
+                graph.Draw("P SAME")
+                retained.append(graph)
         canvas.cd()
-        retained.append(_f1_text(ROOT, (0.03, 0.935, 0.97, 0.995), ("Stored canonical t -> (t, phi) yield-child mapping", "Occupancy and direct acceptance summaries only; no phi model, correction, or yield change."), 0.036))
+        retained.append(_f1_text(
+            ROOT, (0.03, 0.935, 0.97, 0.995),
+            (
+                "Stored canonical t -> (t, phi) yield-child mapping",
+                "Occupancy: black open circle = all linked; blue open square = prompt low; red filled square = prompt control.",
+                "Stored descriptive observations only; medians/IQR are not fitted uncertainties. phi is downstream only; no child renormalization, correction, or weight adjustment.",
+            ), 0.030,
+        ))
         canvas._full_background_f1_draw_objects = tuple(retained)
         canvas.Print(pdf_name)
     finally:
