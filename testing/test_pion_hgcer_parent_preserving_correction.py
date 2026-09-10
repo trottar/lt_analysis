@@ -26,6 +26,63 @@ def _fingerprint(value):
     ).encode("ascii")).hexdigest()
 
 
+_PHASE_A_FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS = frozenset((
+    "canonical_interval_pair_id",
+))
+
+
+def _phase_a_json_ready(value):
+    if value is None or isinstance(value, (str, bool, int)):
+        return value
+    if isinstance(value, float):
+        return float(value) if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {
+            str(key): _phase_a_json_ready(child)
+            for key, child in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_phase_a_json_ready(child) for child in value]
+    try:
+        if hasattr(value, "item"):
+            return _phase_a_json_ready(value.item())
+        if hasattr(value, "tolist"):
+            return _phase_a_json_ready(value.tolist())
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return float(numeric) if math.isfinite(numeric) else None
+
+
+def _phase_a_pion_event_population_fingerprint(records):
+    projected = []
+    for record in records or ():
+        fingerprint_record = _phase_a_json_ready(record)
+        if isinstance(fingerprint_record, dict):
+            fingerprint_record = {
+                key: value
+                for key, value in fingerprint_record.items()
+                if key not in _PHASE_A_FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS
+            }
+        projected.append(fingerprint_record)
+    return _fingerprint(projected)
+
+
+def _refresh_phase_a_record_provenance(phase_a, prototype=None):
+    population_fingerprint = _phase_a_pion_event_population_fingerprint(
+        phase_a["pion_records"]
+    )
+    phase_a["pion_event_population_fingerprint"] = population_fingerprint
+    phase_a["fingerprint_inputs"]["pion_event_population_fingerprint"] = (
+        population_fingerprint
+    )
+    phase_a["contract_fingerprint"] = _fingerprint(phase_a["fingerprint_inputs"])
+    if prototype is not None:
+        prototype["phase_a_contract_fingerprint"] = phase_a["contract_fingerprint"]
+        _finalize_prototype(prototype)
+    return population_fingerprint
+
+
 def _e7_cell(t_edges, delta_edges, t_index, delta_index, scale=None):
     available = scale is not None
     return {
@@ -180,7 +237,7 @@ def _phase_a(prototype, records=None):
         "pion_closure": {"passed": True},
         "host_closure": {"passed": True},
         "coordinate_fingerprint": prototype["coordinate_fingerprint"],
-        "pion_event_population_fingerprint": "phase-a-pion-population",
+        "pion_event_population_fingerprint": None,
         "canonical_t_edges": list(t_edges),
         "delta_edges": list(delta_edges),
         "pion_records": records,
@@ -188,9 +245,7 @@ def _phase_a(prototype, records=None):
         "source_target_state": prototype["source_target_state"],
         "fingerprint_inputs": {"contract": "phase-a-fixture"},
     }
-    payload["contract_fingerprint"] = _fingerprint(payload["fingerprint_inputs"])
-    prototype["phase_a_contract_fingerprint"] = payload["contract_fingerprint"]
-    _finalize_prototype(prototype)
+    _refresh_phase_a_record_provenance(payload, prototype)
     return payload
 
 
@@ -263,6 +318,7 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
         phase_a["pion_records"].append(
             _record(prototype["t_edges"], prototype["delta_edges"], 0, 1, -99999.0, nommcuts=False)
         )
+        _refresh_phase_a_record_provenance(phase_a, prototype)
         modified = correction.build_pion_hgcer_parent_preserving_correction(
             prototype, phase_a
         )
@@ -287,6 +343,7 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 0, 4.0),
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 1, 5.0),
         ]
+        _refresh_phase_a_record_provenance(phase_a, prototype)
         result = correction.build_pion_hgcer_parent_preserving_correction(prototype, phase_a)
         parent = result["parents"][0]
         self.assertTrue(result["available"])
@@ -319,6 +376,7 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 0, -2.0),
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 1, 3.0),
         ]
+        _refresh_phase_a_record_provenance(phase_a, prototype)
         result = correction.build_pion_hgcer_parent_preserving_correction(prototype, phase_a)
         self.assertTrue(result["available"])
         self.assertEqual(result["parents"][0]["parent_status"], "identity_single_refinable_cell")
@@ -349,6 +407,7 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 0, 4.0),
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 1, 5.0),
         ]
+        _refresh_phase_a_record_provenance(phase_a, prototype)
         result = correction.build_pion_hgcer_parent_preserving_correction(prototype, phase_a)
         self.assertEqual(
             result["parents"][0]["parent_reason"],
@@ -368,6 +427,7 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 0, 4.0),
             _record(prototype["t_edges"], prototype["delta_edges"], 1, 1, 5.0),
         ]
+        _refresh_phase_a_record_provenance(phase_a, prototype)
         result = correction.build_pion_hgcer_parent_preserving_correction(prototype, phase_a)
         self.assertEqual(
             result["parents"][0]["parent_reason"],
@@ -406,14 +466,20 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
         broken_phase_a["coordinate_fingerprint"] = "wrong"
         cases.append((prototype, broken_phase_a, "e7_phase_a_provenance_mismatch"))
         broken_phase_a = deepcopy(phase_a)
+        broken_prototype = deepcopy(prototype)
         broken_phase_a["pion_records"][0]["canonical_t_upper_edge"] = 123.0
-        cases.append((prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
+        _refresh_phase_a_record_provenance(broken_phase_a, broken_prototype)
+        cases.append((broken_prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
         broken_phase_a = deepcopy(phase_a)
+        broken_prototype = deepcopy(prototype)
         broken_phase_a["pion_records"][0]["delta_upper_edge"] = 123.0
-        cases.append((prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
+        _refresh_phase_a_record_provenance(broken_phase_a, broken_prototype)
+        cases.append((broken_prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
         broken_phase_a = deepcopy(phase_a)
+        broken_prototype = deepcopy(prototype)
         broken_phase_a["pion_records"][2]["delta_lower_edge"] = 0.0
-        cases.append((prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:2"))
+        _refresh_phase_a_record_provenance(broken_phase_a, broken_prototype)
+        cases.append((broken_prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:2"))
         for source_prototype, source_phase_a, reason in cases:
             with self.subTest(reason=reason):
                 result = correction.build_pion_hgcer_parent_preserving_correction(
@@ -446,8 +512,10 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             ("signed_source_coefficient", 3.0),
         ):
             broken_phase_a = deepcopy(phase_a)
+            broken_prototype = deepcopy(prototype)
             broken_phase_a["pion_records"][0][field] = value
-            cases.append((prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
+            _refresh_phase_a_record_provenance(broken_phase_a, broken_prototype)
+            cases.append((broken_prototype, broken_phase_a, "phase_a_pion_record_contract_invalid:0"))
         for source_prototype, source_phase_a, reason in cases:
             with self.subTest(reason=reason):
                 result = correction.build_pion_hgcer_parent_preserving_correction(
@@ -464,11 +532,92 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
         )
         self.assertEqual(first["fingerprint"], second["fingerprint"])
         changed = deepcopy(phase_a)
+        changed_prototype = deepcopy(prototype)
         changed["pion_records"][0]["signed_baseline_event_contribution"] = 3.0
         changed["pion_records"][0]["signed_source_coefficient"] = 3.0
-        updated = correction.build_pion_hgcer_parent_preserving_correction(prototype, changed)
+        _refresh_phase_a_record_provenance(changed, changed_prototype)
+        updated = correction.build_pion_hgcer_parent_preserving_correction(
+            changed_prototype, changed
+        )
         self.assertTrue(updated["available"])
+        self.assertNotEqual(
+            phase_a["pion_event_population_fingerprint"],
+            changed["pion_event_population_fingerprint"],
+        )
         self.assertNotEqual(first["fingerprint"], updated["fingerprint"])
+
+    def test_phase_a_pion_record_provenance_three_way_parity_and_ephemeral_field(self):
+        prototype, phase_a = _valid_inputs()
+        recomputed = _phase_a_pion_event_population_fingerprint(
+            phase_a["pion_records"]
+        )
+        self.assertEqual(phase_a["pion_event_population_fingerprint"], recomputed)
+        self.assertEqual(
+            phase_a["fingerprint_inputs"]["pion_event_population_fingerprint"],
+            recomputed,
+        )
+        baseline = correction.build_pion_hgcer_parent_preserving_correction(
+            prototype, phase_a
+        )
+        self.assertTrue(baseline["available"])
+
+        ephemeral_only = deepcopy(phase_a)
+        ephemeral_only["pion_records"][0]["canonical_interval_pair_id"] = (
+            "display-only-provenance"
+        )
+        result = correction.build_pion_hgcer_parent_preserving_correction(
+            prototype, ephemeral_only
+        )
+        self.assertTrue(result["available"])
+        self.assertEqual(result["fingerprint"], baseline["fingerprint"])
+
+    def test_phase_a_pion_record_provenance_mismatches_fail_globally(self):
+        prototype, phase_a = _valid_inputs()
+        stale_records = deepcopy(phase_a)
+        stale_records["pion_records"][0]["signed_baseline_event_contribution"] = 3.0
+        stale_records["pion_records"][0]["signed_source_coefficient"] = 3.0
+
+        top_level_mismatch = deepcopy(phase_a)
+        top_level_mismatch["pion_event_population_fingerprint"] = "wrong"
+
+        input_mismatch = deepcopy(phase_a)
+        input_mismatch_prototype = deepcopy(prototype)
+        input_mismatch["fingerprint_inputs"]["pion_event_population_fingerprint"] = "wrong"
+        input_mismatch["contract_fingerprint"] = _fingerprint(
+            input_mismatch["fingerprint_inputs"]
+        )
+        input_mismatch_prototype["phase_a_contract_fingerprint"] = (
+            input_mismatch["contract_fingerprint"]
+        )
+        _finalize_prototype(input_mismatch_prototype)
+
+        missing_input = deepcopy(phase_a)
+        missing_input_prototype = deepcopy(prototype)
+        del missing_input["fingerprint_inputs"]["pion_event_population_fingerprint"]
+        missing_input["contract_fingerprint"] = _fingerprint(
+            missing_input["fingerprint_inputs"]
+        )
+        missing_input_prototype["phase_a_contract_fingerprint"] = (
+            missing_input["contract_fingerprint"]
+        )
+        _finalize_prototype(missing_input_prototype)
+
+        cases = (
+            (prototype, stale_records),
+            (prototype, top_level_mismatch),
+            (input_mismatch_prototype, input_mismatch),
+            (missing_input_prototype, missing_input),
+        )
+        for source_prototype, source_phase_a in cases:
+            with self.subTest(phase_a=source_phase_a):
+                result = correction.build_pion_hgcer_parent_preserving_correction(
+                    source_prototype, source_phase_a
+                )
+                self.assertFalse(result["available"])
+                self.assertEqual(
+                    result["reason"],
+                    "phase_a_pion_event_population_fingerprint_mismatch",
+                )
 
     def test_artifact_filename_and_deterministic_round_trip(self):
         prototype, phase_a = _valid_inputs()
@@ -504,7 +653,9 @@ class ParentPreservingCorrectionTests(unittest.TestCase):
             encoding="utf-8"
         )
         for forbidden in (
-            "import ROOT", "find_canonical_bin", "build_pion_hgcer_method_a",
+            "import ROOT", "from ROOT", "find_canonical_bin",
+            "import pion_hgcer_event_contract",
+            "from pion_hgcer_event_contract", "build_pion_hgcer_method_a",
             "build_pion_hgcer_method_b", "build_pion_hgcer_ab_comparison",
             "simc_shape_pion_weight_from_value", "calculate_yield", "interp1d",
             "gaussian_filter", "numpy.clip", "np.clip", "math.sqrt",

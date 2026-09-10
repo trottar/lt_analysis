@@ -29,6 +29,9 @@ _CLOSURE_TOLERANCE_DEFINITION = (
 _PROTOTYPE_SCHEMA = "pion_hgcer_ab_combination_prototype/v1"
 _PHASE_A_SCHEMA = "pion_hgcer_event_contract/v1"
 _PHASE_A_FINGERPRINT_SCHEMA = "pion_hgcer_event_contract_fingerprint/v2"
+_PHASE_A_FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS = frozenset((
+    "canonical_interval_pair_id",
+))
 _PHASE_D_SCHEMA = "pion_hgcer_phase_d_checkpoint/v1"
 _SOURCE_TARGET_STATE = "post_proton_noRF"
 _AVAILABILITY_STATES = {
@@ -144,6 +147,45 @@ def _json_copy(value, context="payload"):
     except Exception as exc:
         raise ValueError("{}_is_not_json_safe".format(context)) from exc
     raise ValueError("{}_is_not_json_safe".format(context))
+
+
+def _phase_a_json_ready(value):
+    """Mirror the frozen Phase-A JSON projection for record fingerprints."""
+    if value is None or isinstance(value, (str, bool, int)):
+        return value
+    if isinstance(value, float):
+        return float(value) if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {
+            str(key): _phase_a_json_ready(child)
+            for key, child in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_phase_a_json_ready(child) for child in value]
+    try:
+        if hasattr(value, "item"):
+            return _phase_a_json_ready(value.item())
+        if hasattr(value, "tolist"):
+            return _phase_a_json_ready(value.tolist())
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return float(numeric) if math.isfinite(numeric) else None
+
+
+def _phase_a_pion_event_population_fingerprint(records):
+    """Reproduce Phase-A's complete ordered pion-record fingerprint exactly."""
+    projected = []
+    for record in records or ():
+        fingerprint_record = _phase_a_json_ready(record)
+        if isinstance(fingerprint_record, dict):
+            fingerprint_record = {
+                key: value
+                for key, value in fingerprint_record.items()
+                if key not in _PHASE_A_FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS
+            }
+        projected.append(fingerprint_record)
+    return _fingerprint(projected)
 
 
 def _unavailable(reason):
@@ -784,6 +826,30 @@ def build_pion_hgcer_parent_preserving_correction(
             cells_by_coordinate[coordinate] = cell
         if len(cells_by_coordinate) != expected_count:
             return _unavailable("e7_prototype_cell_grid_invalid")
+        phase_a_population_fingerprint = phase_a[
+            "pion_event_population_fingerprint"
+        ]
+        phase_a_input_population_fingerprint = phase_a["fingerprint_inputs"].get(
+            "pion_event_population_fingerprint"
+        )
+        actual_population_fingerprint = _phase_a_pion_event_population_fingerprint(
+            phase_a["pion_records"]
+        )
+        if (
+            not all(
+                _nonempty_string(value)
+                for value in (
+                    phase_a_population_fingerprint,
+                    phase_a_input_population_fingerprint,
+                    actual_population_fingerprint,
+                )
+            )
+            or phase_a_population_fingerprint != phase_a_input_population_fingerprint
+            or phase_a_population_fingerprint != actual_population_fingerprint
+        ):
+            return _unavailable(
+                "phase_a_pion_event_population_fingerprint_mismatch"
+            )
         baseline_metrics, outside_metrics, reason = _collect_baseline_records(
             phase_a["pion_records"], t_edges, delta_edges, cells_by_coordinate
         )
