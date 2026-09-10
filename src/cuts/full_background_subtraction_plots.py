@@ -1,4 +1,4 @@
-"""Detached D.6 through D.11 and E.2-E.4 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11 and E.2-E.7 procedure pages for the procedure PDF.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -29,6 +29,7 @@ E2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e2/v1"
 E3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e3/v1"
 E4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e4/v1"
 E6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e6/v1"
+E7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e7/v1"
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -4053,9 +4054,10 @@ def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
+    e7_payload=None,
     page_manifest=None,
 ):
-    """Append D.6-E.2 groups, then final E.3, E.4, and E.6 groups in canonical-t order."""
+    """Append D.6-E.2 groups, then final E.3, E.4, E.6, and E.7 groups."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4068,6 +4070,7 @@ def render_full_background_subtraction_procedure_pages(
     e3 = _mapping(e3_payload)
     e4 = _mapping(e4_payload)
     e6 = _mapping(e6_payload)
+    e7 = _mapping(e7_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -4086,7 +4089,9 @@ def render_full_background_subtraction_procedure_pages(
     e4_available = bool(e4.get("available"))
     e6_requested = e6_payload is not None
     e6_available = bool(e6.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available:
+    e7_requested = e7_payload is not None
+    e7_available = bool(e7.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available and not e7_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4126,6 +4131,10 @@ def render_full_background_subtraction_procedure_pages(
         if e6_requested:
             result["failures"].append(
                 "E.6 procedure input unavailable: {}".format(e6.get("reason"))
+            )
+        if e7_requested:
+            result["failures"].append(
+                "E.7 procedure input unavailable: {}".format(e7.get("reason"))
             )
         return result
     if not d6_available:
@@ -4167,6 +4176,10 @@ def render_full_background_subtraction_procedure_pages(
     if e6_requested and not e6_available:
         result["failures"].append(
             "E.6 procedure input unavailable: {}".format(e6.get("reason"))
+        )
+    if e7_requested and not e7_available:
+        result["failures"].append(
+            "E.7 procedure input unavailable: {}".format(e7.get("reason"))
         )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
@@ -4303,6 +4316,16 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.6 frozen procedure geometry mismatch")
         e6_available = False
+    # E.7 is a Phase-D-checkpoint projection, not an E.6 child.  It is drawn
+    # after the E.6 traversal for review order only, so an E.6-local failure
+    # cannot suppress a valid frozen prototype.
+    e7_geometry_reference = geometry_owner if geometry_owner is not None else None
+    if e7_available and e7_geometry_reference is not None and (
+        list(e7_geometry_reference.get("t_edges") or ()) != list(e7.get("t_edges") or ())
+        or list(e7_geometry_reference.get("delta_edges") or ()) != list(e7.get("delta_edges") or ())
+    ):
+        result["failures"].append("E.7 frozen procedure geometry mismatch")
+        e7_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -4352,6 +4375,11 @@ def render_full_background_subtraction_procedure_pages(
     e6_by_index = {
         group.get("t_index"): _mapping(group)
         for group in tuple(e6.get("per_t") or ())
+        if isinstance(group, Mapping)
+    }
+    e7_by_index = {
+        group.get("t_index"): _mapping(group)
+        for group in tuple(e7.get("per_t") or ())
         if isinstance(group, Mapping)
     }
 
@@ -4443,6 +4471,17 @@ def render_full_background_subtraction_procedure_pages(
             return
         _render_e6_t_pages(ROOT, pdf_name, e6, e6_group, manifest, result["failures"])
 
+    def render_e7_group(t_index):
+        if not e7_available:
+            return
+        e7_group = e7_by_index.get(t_index)
+        if e7_group is None:
+            result["failures"].append(
+                "E.7 input missing canonical t{}".format(int(t_index) + 1)
+            )
+            return
+        _render_e7_t_pages(ROOT, pdf_name, e7, e7_group, manifest, result["failures"])
+
     if d6_available:
         for group in tuple(d6.get("per_t") or ()):
             group = _mapping(group)
@@ -4507,6 +4546,10 @@ def render_full_background_subtraction_procedure_pages(
         e6_edges = list(e6.get("t_edges") or ())
         for t_index in range(max(0, len(e6_edges) - 1)):
             render_e6_group(t_index)
+    if e7_available:
+        e7_edges = list(e7.get("t_edges") or ())
+        for t_index in range(max(0, len(e7_edges) - 1)):
+            render_e7_group(t_index)
     return result
 
 
@@ -5933,6 +5976,516 @@ def _render_e6_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
         failures.append("E.6 readiness-evidence page unavailable for t{}".format(t_number))
 
 
+def _e7_unavailable(reason):
+    """Return an E.7-local unavailable presentation payload without aliases."""
+    return {
+        "schema_version": E7_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "prototype_fingerprint": None,
+        "source_checkpoint_payload_fingerprint": None,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "method_a_comparison_fingerprint": None,
+        "method_b_comparison_fingerprint": None,
+        "source_method_a_comparison_payload_fingerprint": None,
+        "source_method_b_comparison_payload_fingerprint": None,
+        "ab_comparison_fingerprint": None,
+        "host_state": None,
+        "source_target_state": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "per_t": (),
+    }
+
+
+def _e7_fingerprint_inputs(payload):
+    """Return exactly the scientific prototype fields covered by its fingerprint."""
+    required = (
+        "schema_version", "method", "log_weight_method_a", "log_weight_method_b",
+        "source_phase_d_checkpoint_schema", "source_checkpoint_payload_fingerprint",
+        "phase_a_contract_fingerprint", "coordinate_fingerprint",
+        "method_a_comparison_fingerprint", "method_b_comparison_fingerprint",
+        "source_method_a_comparison_payload_fingerprint",
+        "source_method_b_comparison_payload_fingerprint",
+        "ab_comparison_fingerprint", "host_state", "source_target_state",
+        "t_edges", "delta_edges", "cells",
+    )
+    if any(key not in payload for key in required):
+        return None
+    return {key: payload[key] for key in required}
+
+
+def _e7_prototype_contract(value):
+    """Validate frozen E.7 data without deriving another numerical value."""
+    payload = _mapping(value)
+    required = (
+        "schema_version", "status", "available", "reason", "method",
+        "log_weight_method_a", "log_weight_method_b", "non_authoritative",
+        "production_objects_mutated", "refinement_applied",
+        "production_application_performed", "prototype_statistical_optimality_claimed",
+        "prototype_uncertainty_model", "source_phase_d_checkpoint_schema",
+        "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+        "coordinate_fingerprint", "method_a_comparison_fingerprint",
+        "method_b_comparison_fingerprint",
+        "source_method_a_comparison_payload_fingerprint",
+        "source_method_b_comparison_payload_fingerprint", "ab_comparison_fingerprint", "host_state",
+        "source_target_state", "t_edges", "delta_edges", "cells",
+        "fingerprint_inputs", "fingerprint",
+    )
+    if not payload or any(key not in payload for key in required):
+        return None, None, None, "e7_prototype_contract_invalid"
+    t_edges = _strict_edges(payload["t_edges"])
+    delta_edges = _strict_edges(payload["delta_edges"])
+    expected_inputs = _e7_fingerprint_inputs(payload)
+    if (
+        payload["schema_version"] != "pion_hgcer_ab_combination_prototype/v1"
+        or payload["status"] != "available"
+        or payload["available"] is not True
+        or payload["reason"] is not None
+        or payload["method"] != "equal_weight_log_geometric_mean"
+        or payload["log_weight_method_a"] != 0.5
+        or payload["log_weight_method_b"] != 0.5
+        or payload["non_authoritative"] is not True
+        or payload["production_objects_mutated"] is not False
+        or payload["refinement_applied"] is not False
+        or payload["production_application_performed"] is not False
+        or payload["prototype_statistical_optimality_claimed"] is not False
+        or payload["prototype_uncertainty_model"] != "not_defined"
+        or payload["source_phase_d_checkpoint_schema"] != _D11_PHASE_D_CHECKPOINT_SCHEMA
+        or not all(
+            _d11_nonempty_string(payload[key])
+            for key in (
+                "source_checkpoint_payload_fingerprint", "phase_a_contract_fingerprint",
+                "coordinate_fingerprint", "method_a_comparison_fingerprint",
+                "method_b_comparison_fingerprint",
+                "source_method_a_comparison_payload_fingerprint",
+                "source_method_b_comparison_payload_fingerprint", "ab_comparison_fingerprint",
+            )
+        )
+        or payload["host_state"] not in {"proton_cleaned", "identity_no_proton_cleaning"}
+        or payload["source_target_state"] != _D11_SOURCE_TARGET_STATE
+        or t_edges is None or delta_edges is None
+        or not _d10_sequence(payload["cells"])
+        or not isinstance(payload["fingerprint_inputs"], Mapping)
+        or expected_inputs is None
+        or not _d11_serialized_equal(payload["fingerprint_inputs"], expected_inputs)
+        or payload["fingerprint"] != _d11_canonical_fingerprint(expected_inputs)
+    ):
+        return None, None, None, "e7_prototype_contract_invalid"
+    return payload, t_edges, delta_edges, None
+
+
+def _e7_cell(source, t_edges, delta_edges):
+    """Detach one stored prototype cell without replaying its equal-log formula."""
+    cell = _mapping(source)
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "method_a", "method_b", "comparison", "prototype_status", "prototype_reason",
+        "prototype_log_scale", "prototype_relative_scale",
+    )
+    if not cell or any(key not in cell for key in required):
+        return None, "e7_prototype_cell_contract_invalid"
+    t_index = _d11_integer(cell["t_index"])
+    delta_index = _d11_integer(cell["delta_index"])
+    if (
+        t_index is None or delta_index is None
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _d11_serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        return None, "e7_prototype_cell_geometry_invalid"
+    method_a = _mapping(cell["method_a"])
+    method_b = _mapping(cell["method_b"])
+    comparison = _mapping(cell["comparison"])
+    if any(key not in method_a for key in ("present", "candidate", "low", "high", "status")) or any(
+        key not in method_b for key in ("present", "candidate", "uncertainty", "status")
+    ) or any(key not in comparison for key in (
+        "availability", "ratio_B_over_A", "log_ratio_B_over_A",
+        "diagnostic_interval_relation",
+    )):
+        return None, "e7_prototype_cell_contract_invalid"
+    a_present = method_a["present"]
+    b_present = method_b["present"]
+    a_candidate = _d11_finite(method_a["candidate"])
+    a_low = _d11_finite(method_a["low"])
+    a_high = _d11_finite(method_a["high"])
+    b_candidate = _d11_finite(method_b["candidate"])
+    b_uncertainty = _d11_finite(method_b["uncertainty"])
+    if not isinstance(a_present, bool) or not isinstance(b_present, bool):
+        return None, "e7_prototype_cell_contract_invalid"
+    if a_present:
+        if (
+            method_a["status"] not in {"available", "marginal"}
+            or None in (a_candidate, a_low, a_high)
+            or a_candidate < 0.0 or a_low < 0.0 or a_low > a_candidate or a_candidate > a_high
+        ):
+            return None, "e7_prototype_method_a_invalid"
+    elif (
+        method_a["status"] != "unavailable"
+        or any(method_a[key] is not None for key in ("candidate", "low", "high"))
+    ):
+        return None, "e7_prototype_method_a_invalid"
+    if b_present:
+        if (
+            method_b["status"] != "available_multi_region"
+            or b_candidate is None or b_candidate <= 0.0
+            or b_uncertainty is None or b_uncertainty <= 0.0
+        ):
+            return None, "e7_prototype_method_b_invalid"
+    elif (
+        method_b["status"] not in {
+            "single_region_only", "unavailable", "region_marginal", "region_inconsistent",
+            "shape_poor_veto",
+        }
+        or any(method_b[key] is not None for key in ("candidate", "uncertainty"))
+    ):
+        return None, "e7_prototype_method_b_invalid"
+    availability = comparison["availability"]
+    ratio = comparison["ratio_B_over_A"]
+    log_ratio = comparison["log_ratio_B_over_A"]
+    relation = comparison["diagnostic_interval_relation"]
+    if availability not in _D11_AVAILABILITY_LABELS or relation not in {
+        "overlap", "disjoint", "not_evaluable",
+    }:
+        return None, "e7_prototype_comparison_invalid"
+    if availability == "both_comparable":
+        if (
+            not a_present or not b_present or a_candidate <= 0.0
+            or _d11_finite(ratio) is None or _d11_finite(log_ratio) is None
+            or relation not in {"overlap", "disjoint"}
+            or cell["prototype_status"] != "available"
+            or cell["prototype_reason"] is not None
+            or _d11_finite(cell["prototype_log_scale"]) is None
+            or _d11_finite(cell["prototype_relative_scale"]) is None
+            or _d11_finite(cell["prototype_relative_scale"]) <= 0.0
+        ):
+            return None, "e7_prototype_comparison_invalid"
+    else:
+        expected_reason = {
+            "a_only": "method_b_unavailable",
+            "b_only": "method_a_unavailable",
+            "both_present_not_comparable": "frozen_ab_not_comparable",
+            "neither_available": "both_methods_unavailable",
+        }[availability]
+        if (
+            cell["prototype_status"] != "unavailable"
+            or cell["prototype_reason"] != expected_reason
+            or cell["prototype_log_scale"] is not None
+            or cell["prototype_relative_scale"] is not None
+        ):
+            return None, "e7_prototype_comparison_invalid"
+    return {
+        "t_index": int(t_index),
+        "t_low": float(t_edges[t_index]),
+        "t_high": float(t_edges[t_index + 1]),
+        "delta_index": int(delta_index),
+        "delta_low": float(delta_edges[delta_index]),
+        "delta_high": float(delta_edges[delta_index + 1]),
+        "method_a": dict(method_a),
+        "method_b": dict(method_b),
+        "comparison": dict(comparison),
+        "prototype_status": str(cell["prototype_status"]),
+        "prototype_reason": cell["prototype_reason"],
+        "prototype_log_scale": _d11_finite(cell["prototype_log_scale"])
+        if cell["prototype_log_scale"] is not None else None,
+        "prototype_relative_scale": _d11_finite(cell["prototype_relative_scale"])
+        if cell["prototype_relative_scale"] is not None else None,
+    }, None
+
+
+def build_full_background_subtraction_e7_payload(ab_combination_prototype):
+    """Create a detached E.7 presentation payload without a new combination."""
+    prototype, t_edges, delta_edges, reason = _e7_prototype_contract(
+        ab_combination_prototype
+    )
+    if reason is not None:
+        return _e7_unavailable(reason)
+    expected_count = (len(t_edges) - 1) * (len(delta_edges) - 1)
+    if len(prototype["cells"]) != expected_count:
+        return _e7_unavailable("e7_prototype_cell_grid_invalid")
+    grouped = [[] for _unused in range(len(t_edges) - 1)]
+    seen = set()
+    for source in prototype["cells"]:
+        cell, reason = _e7_cell(source, t_edges, delta_edges)
+        if reason is not None:
+            return _e7_unavailable(reason)
+        coordinate = (cell["t_index"], cell["delta_index"])
+        if coordinate in seen:
+            return _e7_unavailable("e7_prototype_cell_grid_invalid")
+        seen.add(coordinate)
+        grouped[cell["t_index"]].append(cell)
+    if len(seen) != expected_count:
+        return _e7_unavailable("e7_prototype_cell_grid_invalid")
+    per_t = []
+    for t_index, cells in enumerate(grouped):
+        cells.sort(key=lambda row: row["delta_index"])
+        if len(cells) != len(delta_edges) - 1:
+            return _e7_unavailable("e7_prototype_cell_grid_invalid")
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "cells": tuple(cells),
+        })
+    return {
+        "schema_version": E7_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "prototype_fingerprint": str(prototype["fingerprint"]),
+        "source_checkpoint_payload_fingerprint": str(
+            prototype["source_checkpoint_payload_fingerprint"]
+        ),
+        "phase_a_contract_fingerprint": str(prototype["phase_a_contract_fingerprint"]),
+        "coordinate_fingerprint": str(prototype["coordinate_fingerprint"]),
+        "method_a_comparison_fingerprint": str(
+            prototype["method_a_comparison_fingerprint"]
+        ),
+        "method_b_comparison_fingerprint": str(
+            prototype["method_b_comparison_fingerprint"]
+        ),
+        "source_method_a_comparison_payload_fingerprint": str(
+            prototype["source_method_a_comparison_payload_fingerprint"]
+        ),
+        "source_method_b_comparison_payload_fingerprint": str(
+            prototype["source_method_b_comparison_payload_fingerprint"]
+        ),
+        "ab_comparison_fingerprint": str(prototype["ab_comparison_fingerprint"]),
+        "host_state": str(prototype["host_state"]),
+        "source_target_state": str(prototype["source_target_state"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e7_display_bounds(cells):
+    values = [1.0]
+    for cell in tuple(cells or ()):
+        cell = _mapping(cell)
+        method_a = _mapping(cell.get("method_a"))
+        method_b = _mapping(cell.get("method_b"))
+        if method_a.get("present") is True:
+            values.extend(value for value in (
+                _d11_finite(method_a.get("low")), _d11_finite(method_a.get("high")),
+            ) if value is not None)
+        if method_b.get("present") is True:
+            candidate = _d11_finite(method_b.get("candidate"))
+            uncertainty = _d11_finite(method_b.get("uncertainty"))
+            if candidate is not None and uncertainty is not None:
+                values.extend((candidate - uncertainty, candidate + uncertainty))
+        if cell.get("prototype_status") == "available":
+            scale = _d11_finite(cell.get("prototype_relative_scale"))
+            if scale is not None:
+                values.append(scale)
+    low, high = min(values), max(values)
+    if high <= low:
+        return low - 0.05, high + 0.05
+    padding = 0.08 * (high - low)
+    return low - padding, high + padding
+
+
+def _e7_frame(ROOT, name, title, delta_edges, y_range):
+    try:
+        frame = ROOT.TH1D(
+            str(name), str(title), len(delta_edges) - 1, array("d", delta_edges),
+        )
+        frame.SetDirectory(0)
+        if hasattr(frame, "SetStats"):
+            frame.SetStats(0)
+        frame.SetMinimum(float(y_range[0]))
+        frame.SetMaximum(float(y_range[1]))
+        return frame
+    except Exception:
+        return None
+
+
+def _e7_method_a_graph(ROOT, cells):
+    selected = [cell for cell in cells if _mapping(cell.get("method_a")).get("present") is True]
+    if not selected or not hasattr(ROOT, "TGraphAsymmErrors"):
+        return None
+    graph = ROOT.TGraphAsymmErrors(len(selected))
+    for index, cell in enumerate(selected):
+        method_a = _mapping(cell["method_a"])
+        x_value = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+        value = float(method_a["candidate"])
+        graph.SetPoint(index, x_value, value)
+        graph.SetPointError(index, 0.0, 0.0, value - float(method_a["low"]), float(method_a["high"]) - value)
+    graph.SetMarkerColor(getattr(ROOT, "kBlack", 1))
+    graph.SetLineColor(getattr(ROOT, "kBlack", 1))
+    graph.SetMarkerStyle(20)
+    return graph
+
+
+def _e7_method_b_graph(ROOT, cells):
+    selected = [cell for cell in cells if _mapping(cell.get("method_b")).get("present") is True]
+    if not selected or not hasattr(ROOT, "TGraphErrors"):
+        return None
+    graph = ROOT.TGraphErrors(len(selected))
+    for index, cell in enumerate(selected):
+        method_b = _mapping(cell["method_b"])
+        x_value = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+        graph.SetPoint(index, x_value, float(method_b["candidate"]))
+        graph.SetPointError(index, 0.0, float(method_b["uncertainty"]))
+    graph.SetMarkerColor(getattr(ROOT, "kBlue", 4))
+    graph.SetLineColor(getattr(ROOT, "kBlue", 4))
+    graph.SetMarkerStyle(21)
+    return graph
+
+
+def _e7_prototype_graph(ROOT, cells):
+    selected = [cell for cell in cells if cell.get("prototype_status") == "available"]
+    if not selected or not hasattr(ROOT, "TGraph"):
+        return None
+    graph = ROOT.TGraph(len(selected))
+    for index, cell in enumerate(selected):
+        x_value = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+        graph.SetPoint(index, x_value, float(cell["prototype_relative_scale"]))
+    graph.SetMarkerColor(getattr(ROOT, "kRed", 2))
+    graph.SetMarkerStyle(29)
+    return graph
+
+
+def _e7_page_header(ROOT, group):
+    header = ROOT.TPaveText(0.02, 0.12, 0.98, 0.90, "NDC")
+    header.SetFillStyle(0)
+    header.SetBorderSize(0)
+    header.SetTextAlign(12)
+    header.SetTextSize(0.100)
+    header.AddText("Detached A/B equal-log prototype - {}".format(_t_context(group)))
+    header.SetTextSize(0.058)
+    header.AddText(
+        "S_AB = sqrt(A B) only for frozen D.4 both-comparable cells; equal log weights (1/2, 1/2)."
+    )
+    header.AddText(
+        "No combined uncertainty, interpolation, fallback, or application to the established baseline; "
+        "Method-A and legacy-Method-B statuses remain frozen."
+    )
+    header.Draw()
+    return header
+
+
+def _e7_status_strip(ROOT, cells):
+    notes = []
+    count = max(1, len(cells))
+    for index, cell in enumerate(cells):
+        note = ROOT.TPaveText(
+            float(index) / float(count) + 0.003,
+            0.10,
+            float(index + 1) / float(count) - 0.003,
+            0.90,
+            "NDC",
+        )
+        note.SetFillStyle(0)
+        note.SetBorderSize(1)
+        note.SetTextAlign(22)
+        note.SetTextSize(0.075)
+        note.AddText("d{}: {}".format(int(cell["delta_index"]) + 1, cell["comparison"]["availability"]))
+        note.AddText("prototype: {}".format(cell["prototype_status"]))
+        if cell["prototype_status"] != "available":
+            note.AddText(str(cell["prototype_reason"]))
+        note.Draw()
+        notes.append(note)
+    return notes
+
+
+def _render_e7_prototype_page(ROOT, pdf_name, presentation, group):
+    """Render stored E.7 values only; graphs intentionally never connect cells."""
+    cells = tuple(group.get("cells") or ())
+    delta_edges = tuple(presentation.get("delta_edges") or ())
+    if not cells or len(delta_edges) != len(cells) + 1 or not hasattr(ROOT, "TPad"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e7_equal_log_t{}".format(group["t_index"] + 1),
+        "Detached A/B equal-log prototype",
+        1800,
+        1200,
+    )
+    header_pad = ROOT.TPad(
+        "P_full_background_e7_header_t{}".format(group["t_index"] + 1),
+        "E.7 header", 0.0, 0.88, 1.0, 1.0,
+    )
+    plot_pad = ROOT.TPad(
+        "P_full_background_e7_plot_t{}".format(group["t_index"] + 1),
+        "E.7 delta comparison", 0.0, 0.18, 1.0, 0.88,
+    )
+    strip_pad = ROOT.TPad(
+        "P_full_background_e7_strip_t{}".format(group["t_index"] + 1),
+        "E.7 status strip", 0.0, 0.0, 1.0, 0.18,
+    )
+    draw_objects = []
+    try:
+        canvas.cd()
+        header_pad.Draw()
+        plot_pad.Draw()
+        strip_pad.Draw()
+        header_pad.cd()
+        draw_objects.append(_e7_page_header(ROOT, group))
+        plot_pad.cd()
+        y_range = _e7_display_bounds(cells)
+        frame = _e7_frame(
+            ROOT,
+            "H_full_background_e7_frame_t{}".format(group["t_index"] + 1),
+            "Frozen relative scale comparison;delta [%];Relative scale",
+            delta_edges,
+            y_range,
+        )
+        if frame is None:
+            return False
+        frame.Draw("AXIS")
+        draw_objects.append(frame)
+        unity = ROOT.TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
+        unity.SetLineStyle(2)
+        unity.Draw()
+        draw_objects.append(unity)
+        method_a_graph = _e7_method_a_graph(ROOT, cells)
+        method_b_graph = _e7_method_b_graph(ROOT, cells)
+        prototype_graph = _e7_prototype_graph(ROOT, cells)
+        for graph in (method_a_graph, method_b_graph, prototype_graph):
+            if graph is not None:
+                graph.Draw("P SAME")
+                draw_objects.append(graph)
+        label = ROOT.TPaveText(0.11, 0.72, 0.60, 0.88, "NDC")
+        label.SetFillStyle(0)
+        label.SetBorderSize(0)
+        label.SetTextAlign(12)
+        label.SetTextSize(0.040)
+        label.AddText("Black: Method A (stored asymmetric interval)")
+        label.AddText("Blue: legacy Method B (stored symmetric uncertainty)")
+        label.AddText("Red: E.7 central prototype (no uncertainty bar)")
+        label.Draw()
+        draw_objects.append(label)
+        strip_pad.cd()
+        draw_objects.extend(_e7_status_strip(ROOT, cells))
+        canvas._full_background_e7_draw_objects = tuple(
+            [header_pad, plot_pad, strip_pad] + draw_objects
+        )
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e7_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
+    """Append one non-authoritative E.7 prototype page for a canonical t bin."""
+    t_number = int(group.get("t_index", -1)) + 1
+    if _render_e7_prototype_page(ROOT, pdf_name, presentation, group):
+        manifest.append({
+            "page_id": "full_background.e7.ab_equal_log_prototype",
+            "scope": "t{}".format(t_number),
+            "authoritative": False,
+        })
+    else:
+        failures.append("E.7 equal-log prototype page unavailable for t{}".format(t_number))
+
+
 def _e3_integer(value):
     return isinstance(value, int) and not isinstance(value, bool)
 
@@ -6418,6 +6971,7 @@ __all__ = (
     "E3_PRESENTATION_SCHEMA_VERSION",
     "E4_PRESENTATION_SCHEMA_VERSION",
     "E6_PRESENTATION_SCHEMA_VERSION",
+    "E7_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
@@ -6429,6 +6983,7 @@ __all__ = (
     "build_full_background_subtraction_e3_payload",
     "build_full_background_subtraction_e4_payload",
     "build_full_background_subtraction_e6_payload",
+    "build_full_background_subtraction_e7_payload",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "open_full_background_subtraction_pdf",
