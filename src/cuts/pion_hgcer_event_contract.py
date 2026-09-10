@@ -34,6 +34,9 @@ EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION = (
 )
 FINGERPRINT_EPHEMERAL_PROVENANCE_FIELDS = frozenset((
     "canonical_interval_pair_id",
+    # The cache event identity is needed by detached downstream audits, but
+    # tree-entry ordering is not a Phase-A scientific observable.
+    "entry_index",
 ))
 DEFAULT_CLOSURE_TOLERANCE = 1.0e-10
 
@@ -995,6 +998,7 @@ def _build_pion_side(
                 )
             record = {
                 "source_label": source_label,
+                "entry_index": int(source_record.get("entry_index", -1)),
                 "source_kind": _source_kind(source_label),
                 "source_tree_name": source_tree_name,
                 "source_coefficient": abs(coefficient),

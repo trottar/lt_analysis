@@ -1,4 +1,4 @@
-"""Detached D.6 through D.11 and E.2-E.7 procedure pages for the procedure PDF.
+"""Detached D.6 through D.11, E.2-E.7, and F.1 procedure pages.
 
 This module is presentation-only.  It receives already-built proton-cleaning
 objects, clones only what it draws, and never rebuilds a fit, event lookup, or
@@ -32,6 +32,7 @@ E4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e4/v1"
 E6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e6/v1"
 E7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e7/v1"
 E72_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e72/v1"
+F1_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_f1/v1"
 FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION = (
     "full_background_subtraction_page_manifest/v1"
 )
@@ -4059,10 +4060,10 @@ def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
-    e7_payload=None, e72_payload=None,
+    e7_payload=None, f1_payload=None, e72_payload=None,
     page_manifest=None,
 ):
-    """Append D.6-E.2 groups, then final E.3, E.4, E.6, E.7, and E.7.2 pages."""
+    """Append D.6-E.2 groups, then E.3/E.4/E.6/E.7/F.1 and E.7.2 pages."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4076,6 +4077,7 @@ def render_full_background_subtraction_procedure_pages(
     e4 = _mapping(e4_payload)
     e6 = _mapping(e6_payload)
     e7 = _mapping(e7_payload)
+    f1 = _mapping(f1_payload)
     e72 = _mapping(e72_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
@@ -4097,9 +4099,11 @@ def render_full_background_subtraction_procedure_pages(
     e6_available = bool(e6.get("available"))
     e7_requested = e7_payload is not None
     e7_available = bool(e7.get("available"))
+    f1_requested = f1_payload is not None
+    f1_available = bool(f1.get("available"))
     e72_requested = e72_payload is not None
     e72_available = bool(e72.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available and not e7_available and not e72_available:
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available and not e7_available and not f1_available and not e72_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4143,6 +4147,10 @@ def render_full_background_subtraction_procedure_pages(
         if e7_requested:
             result["failures"].append(
                 "E.7 procedure input unavailable: {}".format(e7.get("reason"))
+            )
+        if f1_requested:
+            result["failures"].append(
+                "F.1 procedure input unavailable: {}".format(f1.get("reason"))
             )
         if e72_requested:
             result["failures"].append(
@@ -4192,6 +4200,10 @@ def render_full_background_subtraction_procedure_pages(
     if e7_requested and not e7_available:
         result["failures"].append(
             "E.7 procedure input unavailable: {}".format(e7.get("reason"))
+        )
+    if f1_requested and not f1_available:
+        result["failures"].append(
+            "F.1 procedure input unavailable: {}".format(f1.get("reason"))
         )
     if e72_requested and not e72_available:
         result["failures"].append(
@@ -4342,6 +4354,15 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.7 frozen procedure geometry mismatch")
         e7_available = False
+    # F.1 is a detached Phase-A/cache projection.  It is never a procedure
+    # geometry owner and a local mismatch cannot suppress earlier pages.
+    f1_geometry_reference = geometry_owner if geometry_owner is not None else e7
+    if f1_available and f1_geometry_reference is not None and (
+        list(f1_geometry_reference.get("t_edges") or ()) != list(f1.get("t_edges") or ())
+        or list(f1_geometry_reference.get("delta_edges") or ()) != list(f1.get("delta_edges") or ())
+    ):
+        result["failures"].append("F.1 frozen procedure geometry mismatch")
+        f1_available = False
     if e72_available and not e7_available:
         result["failures"].append(
             "E.7.2: frozen E.7 parent unavailable after procedure validation"
@@ -4578,6 +4599,8 @@ def render_full_background_subtraction_procedure_pages(
         e7_edges = list(e7.get("t_edges") or ())
         for t_index in range(max(0, len(e7_edges) - 1)):
             render_e7_group(t_index)
+    if f1_available:
+        _render_f1_setting_pages(ROOT, pdf_name, f1, manifest, result["failures"])
     if e72_available:
         _render_e72_setting_pages(ROOT, pdf_name, e72, manifest, result["failures"])
     return result
@@ -7441,6 +7464,375 @@ def _render_e72_setting_pages(ROOT, pdf_name, presentation, manifest, failures):
             return
 
 
+def _f1_unavailable(reason):
+    """Return an F.1-local unavailable presentation payload."""
+    return {
+        "schema_version": F1_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "phi_edges": [],
+        "per_t": [],
+    }
+
+
+def _f1_finite(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError):
+        return None
+    return scalar if math.isfinite(scalar) else None
+
+
+def _f1_integer(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        result = int(value)
+    except (TypeError, ValueError):
+        return None
+    return result if result == value else None
+
+
+def _f1_json_copy(value):
+    try:
+        return json.loads(json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+            allow_nan=False,
+        ))
+    except (TypeError, ValueError):
+        return None
+
+
+def _f1_contract(value):
+    contract = _mapping(value)
+    required = (
+        "schema_version", "fingerprint_schema_version", "status", "available",
+        "non_authoritative", "production_objects_mutated", "refinement_applied",
+        "production_application_performed", "event_application_performed",
+        "method_b_numerical_dependency", "phase_a_contract_fingerprint",
+        "coordinate_fingerprint", "host_state", "source_target_state", "t_edges",
+        "delta_edges", "phi_edges", "records", "feature_metadata",
+        "event_population_fingerprint", "acceptance_feature_metadata_fingerprint",
+        "child_assignment_projection_fingerprint", "fingerprint",
+    )
+    if any(name not in contract for name in required):
+        return None, None, None, None, "f1_contract_invalid"
+    if (
+        contract.get("schema_version") != "pion_hgcer_method_a_acceptance_event_contract/v1"
+        or contract.get("fingerprint_schema_version") != "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1"
+        or contract.get("status") != "available" or contract.get("available") is not True
+    ):
+        return None, None, None, None, "f1_contract_unavailable"
+    if (
+        contract.get("non_authoritative") is not True
+        or contract.get("production_objects_mutated") is not False
+        or contract.get("refinement_applied") is not False
+        or contract.get("production_application_performed") is not False
+        or contract.get("event_application_performed") is not False
+        or contract.get("method_b_numerical_dependency") is not False
+        or contract.get("source_target_state") != "post_proton_noRF"
+    ):
+        return None, None, None, None, "f1_contract_authority_invalid"
+    t_edges = _strict_edges(contract.get("t_edges"))
+    delta_edges = _strict_edges(contract.get("delta_edges"))
+    phi_edges = _strict_edges(contract.get("phi_edges"))
+    if t_edges is None or delta_edges is None or phi_edges is None:
+        return None, None, None, None, "f1_contract_geometry_invalid"
+    if not isinstance(contract.get("records"), Sequence) or isinstance(
+        contract.get("records"), (str, bytes)
+    ):
+        return None, None, None, None, "f1_contract_records_invalid"
+    for name in (
+        "phase_a_contract_fingerprint", "coordinate_fingerprint", "host_state",
+        "event_population_fingerprint", "acceptance_feature_metadata_fingerprint",
+        "child_assignment_projection_fingerprint", "fingerprint",
+    ):
+        if not isinstance(contract.get(name), str) or not contract.get(name):
+            return None, None, None, None, "f1_contract_provenance_invalid"
+    return contract, t_edges, delta_edges, phi_edges, None
+
+
+def _f1_row(value, t_edges, delta_edges, phi_edges):
+    row = _mapping(value)
+    required = (
+        "source_label", "entry_index", "coordinate_fingerprint", "t_index", "t_low",
+        "t_high", "phi_degrees", "phi_index", "phi_low", "phi_high", "phi_status",
+        "SHMS_delta", "delta_index", "delta_low", "delta_high", "P_hgcer_npeSum",
+        "P_hgcer_xAtCer", "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar",
+        "allcuts", "nommcuts", "prompt_response_class",
+    )
+    if any(name not in row for name in required):
+        return None, "f1_record_fields_missing"
+    t_index = _f1_integer(row["t_index"])
+    if t_index is None or not 0 <= t_index < len(t_edges) - 1:
+        return None, "f1_record_t_index_invalid"
+    if row["t_low"] != t_edges[t_index] or row["t_high"] != t_edges[t_index + 1]:
+        return None, "f1_record_t_geometry_mismatch"
+    delta_index = row["delta_index"]
+    if delta_index is None:
+        if row["delta_low"] is not None or row["delta_high"] is not None:
+            return None, "f1_record_outside_delta_geometry_invalid"
+    else:
+        delta_index = _f1_integer(delta_index)
+        if delta_index is None or not 0 <= delta_index < len(delta_edges) - 1:
+            return None, "f1_record_delta_index_invalid"
+        if row["delta_low"] != delta_edges[delta_index] or row["delta_high"] != delta_edges[delta_index + 1]:
+            return None, "f1_record_delta_geometry_mismatch"
+    phi_index = row["phi_index"]
+    if row["phi_status"] == "outside_phi":
+        if phi_index is not None or row["phi_low"] is not None or row["phi_high"] is not None:
+            return None, "f1_record_outside_phi_geometry_invalid"
+    elif row["phi_status"] == "inside_phi":
+        phi_index = _f1_integer(phi_index)
+        if phi_index is None or not 0 <= phi_index < len(phi_edges) - 1:
+            return None, "f1_record_phi_index_invalid"
+        if row["phi_low"] != phi_edges[phi_index] or row["phi_high"] != phi_edges[phi_index + 1]:
+            return None, "f1_record_phi_geometry_mismatch"
+    else:
+        return None, "f1_record_phi_status_invalid"
+    for name in (
+        "phi_degrees", "SHMS_delta", "P_hgcer_npeSum", "P_hgcer_xAtCer",
+        "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar",
+    ):
+        if _f1_finite(row[name]) is None:
+            return None, "f1_record_{}_nonfinite".format(name)
+    if not isinstance(row["source_label"], str) or not row["source_label"] or _f1_integer(row["entry_index"]) is None:
+        return None, "f1_record_identity_invalid"
+    return _f1_json_copy(row), None
+
+
+def _f1_prompt_rows(rows):
+    result = {"low": [], "control": []}
+    for row in rows:
+        if row["source_label"] != "prompt" or row["nommcuts"] is not True or float(row["P_hgcer_npeSum"]) <= 0.0:
+            continue
+        if row["prompt_response_class"] in result:
+            result[row["prompt_response_class"]].append(row)
+    return result
+
+
+def build_full_background_subtraction_f1_payload(acceptance_contract):
+    """Detach stored F.1 scalar observations for presentation only."""
+    contract, t_edges, delta_edges, phi_edges, reason = _f1_contract(acceptance_contract)
+    if reason is not None:
+        return _f1_unavailable(reason)
+    groups = [[] for _unused in range(len(t_edges) - 1)]
+    identities = set()
+    for source in contract["records"]:
+        row, reason = _f1_row(source, t_edges, delta_edges, phi_edges)
+        if reason is not None:
+            return _f1_unavailable(reason)
+        identity = (row["source_label"], row["entry_index"])
+        if identity in identities:
+            return _f1_unavailable("f1_record_identity_duplicate")
+        identities.add(identity)
+        groups[row["t_index"]].append(row)
+    per_t = []
+    for t_index, rows in enumerate(groups):
+        rows.sort(key=lambda row: (row["source_label"], row["entry_index"]))
+        prompt_rows = _f1_prompt_rows(rows)
+        per_t.append({
+            "t_index": t_index,
+            "t_low": t_edges[t_index],
+            "t_high": t_edges[t_index + 1],
+            "rows": tuple(rows),
+            "prompt_low_rows": tuple(prompt_rows["low"]),
+            "prompt_control_rows": tuple(prompt_rows["control"]),
+        })
+    return {
+        "schema_version": F1_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+        "phase_a_contract_fingerprint": contract["phase_a_contract_fingerprint"],
+        "coordinate_fingerprint": contract["coordinate_fingerprint"],
+        "host_state": contract["host_state"],
+        "source_target_state": contract["source_target_state"],
+        "acceptance_contract_fingerprint": contract["fingerprint"],
+        "event_population_fingerprint": contract["event_population_fingerprint"],
+        "feature_metadata": _f1_json_copy(contract["feature_metadata"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "phi_edges": list(phi_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _f1_range(values, fallback=(-1.0, 1.0)):
+    values = [float(value) for value in values if _f1_finite(value) is not None]
+    if not values:
+        return fallback
+    low, high = min(values), max(values)
+    padding = max(0.05, 0.08 * (high - low), 0.10 * abs(low) if low == high else 0.0)
+    return low - padding, high + padding
+
+
+def _f1_text(ROOT, coordinates, lines, size=0.040):
+    text = ROOT.TPaveText(*coordinates, "NDC")
+    text.SetFillStyle(0)
+    text.SetBorderSize(0)
+    text.SetTextAlign(12)
+    text.SetTextSize(size)
+    for line in lines:
+        text.AddText(str(line))
+    text.Draw()
+    return text
+
+
+def _f1_graph(ROOT, rows, x_name, y_name, color, marker):
+    if not rows or not hasattr(ROOT, "TGraph"):
+        return None
+    graph = ROOT.TGraph(len(rows))
+    for index, row in enumerate(rows):
+        graph.SetPoint(index, float(row[x_name]), float(row[y_name]))
+    graph.SetMarkerColor(color)
+    graph.SetLineColor(color)
+    graph.SetMarkerStyle(marker)
+    graph.SetMarkerSize(1.05)
+    return graph
+
+
+def _f1_scatter_page(ROOT, pdf_name, presentation, page_id, title, x_name, x_label, y_name, y_label):
+    groups = tuple(presentation.get("per_t") or ())
+    if not groups or not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TH2D"):
+        return False
+    canvas = ROOT.TCanvas("C_{}".format(page_id.replace(".", "_")), title, 1800, 1200)
+    retained = []
+    try:
+        if hasattr(canvas, "Divide"):
+            canvas.Divide(len(groups), 1)
+        for panel, group in enumerate(groups, 1):
+            canvas.cd(panel)
+            low_rows = tuple(group.get("prompt_low_rows") or ())
+            control_rows = tuple(group.get("prompt_control_rows") or ())
+            rows = low_rows + control_rows
+            x_low, x_high = _f1_range(row[x_name] for row in rows)
+            y_low, y_high = _f1_range(row[y_name] for row in rows)
+            frame = ROOT.TH2D(
+                "H_{}_t{}".format(page_id.replace(".", "_"), panel),
+                "{};{};{}".format(_t_context(group), x_label, y_label),
+                80, x_low, x_high, 80, y_low, y_high,
+            )
+            if hasattr(frame, "SetDirectory"):
+                frame.SetDirectory(0)
+            if hasattr(frame, "SetStats"):
+                frame.SetStats(0)
+            frame.Draw("AXIS")
+            retained.append(frame)
+            for graph in (
+                _f1_graph(ROOT, low_rows, x_name, y_name, getattr(ROOT, "kBlue", 4), 24),
+                _f1_graph(ROOT, control_rows, x_name, y_name, getattr(ROOT, "kRed", 2), 20),
+            ):
+                if graph is not None:
+                    graph.Draw("P SAME")
+                    retained.append(graph)
+            lines = [
+                "Stored prompt/no-MM-cut observations",
+                "blue open: low; red filled: control",
+                "low: {}   control: {}".format(len(low_rows), len(control_rows)),
+            ]
+            if not rows:
+                lines.append("No stored positive-NPE observation in this t parent.")
+            retained.append(_f1_text(ROOT, (0.12, 0.74, 0.88, 0.91), lines, 0.040))
+        canvas.cd()
+        retained.append(_f1_text(
+            ROOT, (0.03, 0.935, 0.97, 0.995),
+            (title, "Stored direct observations only; low: 0 < HGCer NPE <= 2, control: HGCer NPE > 2. No fit or weight adjustment."), 0.036,
+        ))
+        canvas._full_background_f1_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _f1_quantile(values, fraction):
+    ordered = sorted(float(value) for value in values if _f1_finite(value) is not None)
+    if not ordered:
+        return None
+    position = (len(ordered) - 1) * float(fraction)
+    low, high = int(math.floor(position)), int(math.ceil(position))
+    return ordered[low] if low == high else ordered[low] + (ordered[high] - ordered[low]) * (position - low)
+
+
+def _f1_mapping_page(ROOT, pdf_name, presentation):
+    groups, phi_edges = tuple(presentation.get("per_t") or ()), tuple(presentation.get("phi_edges") or ())
+    if not groups or len(phi_edges) < 2 or not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TH1D"):
+        return False
+    canvas = ROOT.TCanvas("C_full_background_f1_yield_child_mapping", "Stored t to phi child mapping", 1800, 1200)
+    retained = []
+    try:
+        if hasattr(canvas, "Divide"):
+            canvas.Divide(len(groups), 1)
+        for panel, group in enumerate(groups, 1):
+            canvas.cd(panel)
+            rows = [row for row in tuple(group.get("rows") or ()) if row.get("phi_index") is not None]
+            counts = [0] * (len(phi_edges) - 1)
+            low_count = control_count = 0
+            for row in rows:
+                counts[int(row["phi_index"])] += 1
+                low_count += int(row.get("prompt_response_class") == "low")
+                control_count += int(row.get("prompt_response_class") == "control")
+            frame = ROOT.TH1D(
+                "H_full_background_f1_phi_occupancy_t{}".format(panel),
+                "{};#phi [deg];Stored child-record count".format(_t_context(group)),
+                len(phi_edges) - 1, array("d", phi_edges),
+            )
+            if hasattr(frame, "SetDirectory"):
+                frame.SetDirectory(0)
+            if hasattr(frame, "SetStats"):
+                frame.SetStats(0)
+            for index, count in enumerate(counts, 1):
+                frame.SetBinContent(index, float(count))
+            frame.Draw("HIST")
+            retained.append(frame)
+            lines = ["Stored t -> (t, phi) child occupancy"]
+            for name, label in (("SHMS_delta", "delta"), ("SHMS_xptar", "x' tar"), ("SHMS_yptar", "y' tar")):
+                median, lower, upper = (_f1_quantile((row[name] for row in rows), 0.50), _f1_quantile((row[name] for row in rows), 0.25), _f1_quantile((row[name] for row in rows), 0.75))
+                if median is not None:
+                    lines.append("{} median/IQR: {:.4g} [{:.4g}, {:.4g}]".format(label, median, lower, upper))
+            lines.extend(("prompt low/control: {}/{}".format(low_count, control_count), "phi is downstream only; no child renormalization or weight adjustment."))
+            retained.append(_f1_text(ROOT, (0.12, 0.62, 0.89, 0.91), lines, 0.033))
+        canvas.cd()
+        retained.append(_f1_text(ROOT, (0.03, 0.935, 0.97, 0.995), ("Stored canonical t -> (t, phi) yield-child mapping", "Occupancy and direct acceptance summaries only; no phi model, correction, or yield change."), 0.036))
+        canvas._full_background_f1_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_f1_setting_pages(ROOT, pdf_name, presentation, manifest, failures):
+    """Append all five F.1 setting-scope pages before the terminal E.7.2 pages."""
+    pages = (
+        ("full_background.f1.acceptance_delta_xptar", "SHMS delta versus x'_{tar}", "SHMS_delta", "SHMS delta [%]", "SHMS_xptar", "SHMS x'_{tar}"),
+        ("full_background.f1.acceptance_delta_yptar", "SHMS delta versus y'_{tar}", "SHMS_delta", "SHMS delta [%]", "SHMS_yptar", "SHMS y'_{tar}"),
+        ("full_background.f1.acceptance_xptar_yptar", "SHMS x'_{tar} versus y'_{tar}", "SHMS_xptar", "SHMS x'_{tar}", "SHMS_yptar", "SHMS y'_{tar}"),
+        ("full_background.f1.acceptance_hgcer_xy", "HGCer x versus y", "P_hgcer_xAtCer", "HGCer x", "P_hgcer_yAtCer", "HGCer y"),
+    )
+    for page_id, title, x_name, x_label, y_name, y_label in pages:
+        if not _f1_scatter_page(ROOT, pdf_name, presentation, page_id, title, x_name, x_label, y_name, y_label):
+            failures.append("F.1: {} unavailable".format(page_id))
+            return
+        manifest.append({"page_id": page_id, "scope": "setting", "authoritative": False})
+    page_id = "full_background.f1.yield_child_mapping"
+    if _f1_mapping_page(ROOT, pdf_name, presentation):
+        manifest.append({"page_id": page_id, "scope": "setting", "authoritative": False})
+    else:
+        failures.append("F.1: {} unavailable".format(page_id))
+
+
 def _full_background_manifest_setting(setting):
     source = _mapping(setting)
     required = (
@@ -7988,6 +8380,7 @@ __all__ = (
     "E6_PRESENTATION_SCHEMA_VERSION",
     "E7_PRESENTATION_SCHEMA_VERSION",
     "E72_PRESENTATION_SCHEMA_VERSION",
+    "F1_PRESENTATION_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
@@ -8002,6 +8395,7 @@ __all__ = (
     "build_full_background_subtraction_e6_payload",
     "build_full_background_subtraction_e7_payload",
     "build_full_background_subtraction_e72_payload",
+    "build_full_background_subtraction_f1_payload",
     "build_full_background_subtraction_page_manifest_artifact",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",

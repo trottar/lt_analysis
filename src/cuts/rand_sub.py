@@ -160,6 +160,12 @@ from pion_hgcer_event_contract import (
     finalize_committed_host_application,
     summarize_pion_hgcer_event_contract,
 )
+from pion_hgcer_method_a_acceptance_contract import (
+    build_pion_hgcer_method_a_acceptance_event_contract,
+    build_pion_hgcer_method_a_acceptance_contract_artifact,
+    pion_hgcer_method_a_acceptance_contract_filename,
+    write_pion_hgcer_method_a_acceptance_contract_json,
+)
 from pion_hgcer_refinement_method_a import (
     build_pion_hgcer_method_a,
     summarize_pion_hgcer_method_a,
@@ -207,6 +213,7 @@ from full_background_subtraction_plots import (
     build_full_background_subtraction_e6_payload,
     build_full_background_subtraction_e7_payload,
     build_full_background_subtraction_e72_payload,
+    build_full_background_subtraction_f1_payload,
     build_full_background_subtraction_page_manifest_artifact,
     close_full_background_subtraction_pdf,
     full_background_subtraction_page_manifest_filename,
@@ -834,7 +841,8 @@ def _build_authoritative_pion_control_source_cache(
     child_cache_fields = (
         "source_label", "entry_index", "coefficient", "coordinate_fingerprint",
         "raw_t", "raw_MM", "adj_t", "adj_MM", "theta_cm_deg", "Q2", "W", "epsilon",
-        "ssxptar", "ssyptar", "hsxptar", "hsyptar", "allcuts",
+        "ssdelta", "P_hgcer_npeSum", "P_hgcer_xAtCer", "P_hgcer_yAtCer",
+        "ssxptar", "ssyptar", "hsxptar", "hsyptar", "phi_degrees", "allcuts",
         "nommcuts", "t_index", "phi_index",
     )
     child_cache = {
@@ -1047,6 +1055,10 @@ def _build_authoritative_pion_control_source_cache(
             t_source_audit["nommcuts_records"] += int(nommcuts)
             t_source_audit["signed_weight_sum"] += float(coefficient)
             t_source_audit["absolute_weight_support"] += abs(float(coefficient))
+            # Preserve the already-resolved child phi identity as scalar cache
+            # provenance.  This does not change the parent control selection.
+            phi_degrees = float(evt.ph_q) * (180.0 / math.pi)
+            phi_index = _canonical_t_index(phi_degrees, phi_bins)
             record = {
                 "source_label": source_label,
                 "entry_index": int(entry_index),
@@ -1066,6 +1078,12 @@ def _build_authoritative_pion_control_source_cache(
                 "P_hgcer_npeSum": float(getattr(evt, "P_hgcer_npeSum", float("nan"))),
                 "P_hgcer_xAtCer": float(getattr(evt, "P_hgcer_xAtCer", float("nan"))),
                 "P_hgcer_yAtCer": float(getattr(evt, "P_hgcer_yAtCer", float("nan"))),
+                "ssxptar": float(getattr(evt, "ssxptar", float("nan"))),
+                "ssyptar": float(getattr(evt, "ssyptar", float("nan"))),
+                "hsxptar": float(getattr(evt, "hsxptar", float("nan"))),
+                "hsyptar": float(getattr(evt, "hsyptar", float("nan"))),
+                "phi_degrees": phi_degrees,
+                "phi_index": int(phi_index) if phi_index is not None else None,
                 "allcuts": bool(allcuts),
                 "nommcuts": bool(nommcuts),
                 "proton_cleaning_factor": None,
@@ -1076,8 +1094,6 @@ def _build_authoritative_pion_control_source_cache(
                 cache["by_t"][t_index]["H_pion_control"].Fill(adj_mm, coefficient)
             if allcuts:
                 cache["by_t"][t_index]["H_pion_control_cut"].Fill(adj_mm, coefficient)
-            phi_degrees = float(evt.ph_q) * (180.0 / math.pi)
-            phi_index = _canonical_t_index(phi_degrees, phi_bins)
             if phi_index is not None:
                 try:
                     from theta_cm import calculate_theta_cm_deg
@@ -1101,10 +1117,15 @@ def _build_authoritative_pion_control_source_cache(
                     "Q2": float(evt.Q2),
                     "W": float(evt.W),
                     "epsilon": float(evt.epsilon),
+                    "ssdelta": float(getattr(evt, "ssdelta", float("nan"))),
+                    "P_hgcer_npeSum": float(getattr(evt, "P_hgcer_npeSum", float("nan"))),
+                    "P_hgcer_xAtCer": float(getattr(evt, "P_hgcer_xAtCer", float("nan"))),
+                    "P_hgcer_yAtCer": float(getattr(evt, "P_hgcer_yAtCer", float("nan"))),
                     "ssxptar": float(evt.ssxptar),
                     "ssyptar": float(evt.ssyptar),
                     "hsxptar": float(evt.hsxptar),
                     "hsyptar": float(evt.hsyptar),
+                    "phi_degrees": phi_degrees,
                     "allcuts": bool(allcuts),
                     "nommcuts": bool(nommcuts),
                     "t_index": int(t_index),
@@ -5393,6 +5414,41 @@ def rand_sub(
                         pion_hgcer_event_contract
                     )
                 )
+                # Phase F.1 is a detached scalar acceptance contract.  It
+                # observes the frozen Phase-A/cache rows only and cannot
+                # alter the Method-A/B or production paths below.
+                try:
+                    pion_hgcer_method_a_acceptance_contract = (
+                        build_pion_hgcer_method_a_acceptance_event_contract(
+                            pion_hgcer_event_contract,
+                            pion_control_cache,
+                            phi_edges=frozen_phi_bins,
+                        )
+                    )
+                except Exception as exc:
+                    pion_hgcer_method_a_acceptance_contract = {
+                        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v1",
+                        "status": "unavailable",
+                        "available": False,
+                        "reason": "runtime_method_a_acceptance_contract_exception",
+                        "diagnostic_stage": "runtime_build_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                        "non_authoritative": True,
+                        "production_objects_mutated": False,
+                        "refinement_applied": False,
+                        "production_application_performed": False,
+                        "event_application_performed": False,
+                        "method_b_numerical_dependency": False,
+                    }
+                histDict["pion_hgcer_method_a_acceptance_contract_summary"] = {
+                    key: pion_hgcer_method_a_acceptance_contract.get(key)
+                    for key in (
+                        "schema_version", "status", "available", "reason",
+                        "fingerprint", "phase_a_contract_fingerprint",
+                        "coordinate_fingerprint", "method_b_numerical_dependency",
+                    )
+                }
                 try:
                     pion_hgcer_method_a = build_pion_hgcer_method_a(
                         pion_hgcer_tdelta_diagnostic,
@@ -5478,6 +5534,42 @@ def rand_sub(
                         "phi_setting": phi_setting,
                         "particle_type": checkpoint_particle_type,
                     }
+                    histDict["pion_hgcer_method_a_acceptance_contract_artifacts"] = []
+                    try:
+                        pion_hgcer_method_a_acceptance_artifact = (
+                            build_pion_hgcer_method_a_acceptance_contract_artifact(
+                                setting=checkpoint_setting,
+                                contract=pion_hgcer_method_a_acceptance_contract,
+                            )
+                        )
+                        pion_hgcer_method_a_acceptance_json = os.path.join(
+                            OUTPATH,
+                            pion_hgcer_method_a_acceptance_contract_filename(
+                                pion_hgcer_method_a_acceptance_artifact["setting"]["phi_setting"],
+                                pion_hgcer_method_a_acceptance_artifact["setting"]["particle_type"],
+                                pion_hgcer_method_a_acceptance_artifact["setting"]["kinematic_token"],
+                                pion_hgcer_method_a_acceptance_artifact["setting"]["epsilon_filename_token"],
+                            ),
+                        )
+                        write_pion_hgcer_method_a_acceptance_contract_json(
+                            pion_hgcer_method_a_acceptance_json,
+                            pion_hgcer_method_a_acceptance_artifact,
+                        )
+                        histDict["pion_hgcer_method_a_acceptance_contract_artifacts"] = [
+                            pion_hgcer_method_a_acceptance_json
+                        ]
+                    except Exception as exc:
+                        histDict["pion_hgcer_method_a_acceptance_contract_artifact_status"] = {
+                            "status": "unavailable",
+                            "available": False,
+                            "reason": "method_a_acceptance_contract_artifact_write_exception",
+                            "diagnostic_stage": "runtime_artifact_exception",
+                            "exception_type": type(exc).__name__,
+                            "exception_message": str(exc),
+                            "non_authoritative": True,
+                            "production_objects_mutated": False,
+                            "refinement_applied": False,
+                        }
                     pion_hgcer_refinement_checkpoint = (
                         build_pion_hgcer_refinement_checkpoint(
                             setting=checkpoint_setting,
@@ -7659,6 +7751,11 @@ def rand_sub(
                     "available": False,
                     "reason": "e7_presentation_payload_missing",
                 }
+            full_background_subtraction_f1_payload = (
+                build_full_background_subtraction_f1_payload(
+                    pion_hgcer_method_a_acceptance_contract
+                )
+            )
             full_background_subtraction_e72_payload = (
                 build_full_background_subtraction_e72_payload(
                     full_background_subtraction_e7_payload,
@@ -7677,6 +7774,7 @@ def rand_sub(
                 and not full_background_subtraction_e4_payload.get("available")
                 and not full_background_subtraction_e6_payload.get("available")
                 and not full_background_subtraction_e7_payload.get("available")
+                and not full_background_subtraction_f1_payload.get("available")
                 and not full_background_subtraction_e72_payload.get("available")
             ):
                 full_background_subtraction_failures.extend((
@@ -7713,6 +7811,9 @@ def rand_sub(
                     "E.7 procedure input unavailable: {}".format(
                         full_background_subtraction_e7_payload.get("reason")
                     ),
+                    "F.1 procedure input unavailable: {}".format(
+                        full_background_subtraction_f1_payload.get("reason")
+                    ),
                     "E.7.2: procedure input unavailable: {}".format(
                         full_background_subtraction_e72_payload.get("reason")
                     ),
@@ -7742,6 +7843,7 @@ def rand_sub(
                             e4_payload=full_background_subtraction_e4_payload,
                             e6_payload=full_background_subtraction_e6_payload,
                             e7_payload=full_background_subtraction_e7_payload,
+                            f1_payload=full_background_subtraction_f1_payload,
                             e72_payload=full_background_subtraction_e72_payload,
                             page_manifest=full_background_subtraction_manifest,
                         )

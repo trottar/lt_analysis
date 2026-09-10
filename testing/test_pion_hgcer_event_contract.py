@@ -782,6 +782,29 @@ class PhaseAEventContractTests(unittest.TestCase):
         self.assertNotEqual(
             baseline["contract_fingerprint"], science_changed["contract_fingerprint"])
 
+    def test_entry_index_is_retained_for_detached_identity_but_is_fingerprint_ephemeral(self):
+        baseline_fixture = self._fixture()
+        changed_fixture = self._fixture()
+        records = list(changed_fixture["pion_control_cache"]["by_t"][0]["records"])
+        records[0] = dict(records[0], entry_index=999)
+        by_t = list(changed_fixture["pion_control_cache"]["by_t"])
+        by_t[0] = dict(by_t[0], records=tuple(records))
+        changed_fixture["pion_control_cache"]["by_t"] = by_t
+
+        baseline = self._build(baseline_fixture)
+        changed = self._build(changed_fixture)
+        self.assertTrue(baseline["available"], baseline.get("reason"))
+        self.assertTrue(changed["available"], changed.get("reason"))
+        self.assertEqual(
+            baseline["pion_event_population_fingerprint"],
+            changed["pion_event_population_fingerprint"],
+        )
+        self.assertEqual(baseline["contract_fingerprint"], changed["contract_fingerprint"])
+        self.assertEqual(
+            next(record for record in changed["pion_records"] if record["source_label"] == "prompt")["entry_index"],
+            999,
+        )
+
     def test_identity_closure_from_existing_application_passes_exact_identity(self):
         _result, application, upstream = self._accepted_application_fixture(
             production_action="bypass"

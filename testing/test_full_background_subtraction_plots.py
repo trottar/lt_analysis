@@ -12,7 +12,7 @@ from pathlib import Path
 import sys
 import unittest
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +22,11 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "cuts"))
 import full_background_subtraction_plots as plots
 import pion_hgcer_ab_combination_prototype as ab_combination_prototype
 from testing.test_pion_hgcer_ab_combination_prototype import _checkpoint as _e7_checkpoint
+from testing.test_pion_hgcer_method_a_acceptance_contract import (
+    PHI_EDGES as _f1_phi_edges,
+    _fixture as _f1_contract_fixture,
+)
+import pion_hgcer_method_a_acceptance_contract as _f1_contract_module
 
 
 EXPECTED_FULL_BACKGROUND_PAGE_IDS = (
@@ -6476,6 +6481,115 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             self.assertEqual(histogram.GetXaxis().GetXmax(), x_maximum)
         self.assertEqual((d10_phase_a, d10_method_b, d10_comparison), d10_sources_before)
         self.assertEqual(d11_checkpoint, d11_checkpoint_before)
+
+class FullBackgroundSubtractionF1Tests(unittest.TestCase):
+    def _payload(self):
+        phase, cache = _f1_contract_fixture()
+        contract = _f1_contract_module.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=_f1_phi_edges
+        )
+        payload = plots.build_full_background_subtraction_f1_payload(contract)
+        self.assertTrue(payload["available"], payload.get("reason"))
+        return contract, payload
+
+    def test_f1_payload_copies_stored_rows_and_selects_exact_prompt_response_classes(self):
+        contract, payload = self._payload()
+        before = deepcopy(contract)
+        self.assertEqual(payload["schema_version"], plots.F1_PRESENTATION_SCHEMA_VERSION)
+        self.assertFalse(payload["method_b_numerical_dependency"])
+        self.assertEqual(
+            len(payload["per_t"][0]["prompt_low_rows"]), 2
+        )
+        self.assertEqual(
+            len(payload["per_t"][1]["prompt_control_rows"]), 1
+        )
+        self.assertTrue(all(
+            row["P_hgcer_npeSum"] > 0.0
+            and row["nommcuts"] is True
+            and row["source_label"] == "prompt"
+            for group in payload["per_t"]
+            for rows in (group["prompt_low_rows"], group["prompt_control_rows"])
+            for row in rows
+        ))
+        payload["per_t"][0]["rows"][0]["SHMS_xptar"] = 99.0
+        self.assertEqual(contract, before)
+
+    def test_f1_payload_rejects_contract_and_geometry_failures_locally(self):
+        contract, _payload = self._payload()
+        cases = (
+            (lambda value: value.update(schema_version="wrong"), "f1_contract_unavailable"),
+            (lambda value: value.update(method_b_numerical_dependency=True), "f1_contract_authority_invalid"),
+            (lambda value: value["records"][0].update(t_high=999.0), "f1_record_t_geometry_mismatch"),
+            (lambda value: value["records"][0].update(phi_status="unknown"), "f1_record_phi_status_invalid"),
+        )
+        for mutate, reason in cases:
+            with self.subTest(reason=reason):
+                candidate = deepcopy(contract)
+                mutate(candidate)
+                result = plots.build_full_background_subtraction_f1_payload(candidate)
+                self.assertFalse(result["available"])
+                self.assertEqual(result["reason"], reason)
+
+    def test_f1_pages_are_setting_scope_and_are_a_local_append_before_e72(self):
+        _contract, payload = self._payload()
+        manifest, failures = [], []
+        with patch.object(plots, "_f1_scatter_page", return_value=True), patch.object(
+            plots, "_f1_mapping_page", return_value=True
+        ):
+            plots._render_f1_setting_pages(object(), "unused.pdf", payload, manifest, failures)
+        self.assertFalse(failures)
+        self.assertEqual(
+            [entry["page_id"] for entry in manifest],
+            [
+                "full_background.f1.acceptance_delta_xptar",
+                "full_background.f1.acceptance_delta_yptar",
+                "full_background.f1.acceptance_xptar_yptar",
+                "full_background.f1.acceptance_hgcer_xy",
+                "full_background.f1.yield_child_mapping",
+            ],
+        )
+        self.assertTrue(all(
+            entry["scope"] == "setting" and entry["authoritative"] is False
+            for entry in manifest
+        ))
+
+        ordered = []
+        e7 = {"available": True, "t_edges": [0.0, 1.0, 2.0], "delta_edges": [-10.0, 0.0, 10.0], "per_t": ({"t_index": 0}, {"t_index": 1})}
+        e72 = {"available": True, "t_edges": [0.0, 1.0, 2.0], "delta_edges": [-10.0, 0.0, 10.0]}
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_e7_t_pages", side_effect=lambda _root, _pdf, _payload, group, page_manifest, _failures: page_manifest.append({"page_id": "e7-{}".format(group["t_index"]), "scope": "t", "authoritative": False})
+        ), patch.object(
+            plots, "_render_f1_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.append({"page_id": "f1", "scope": "setting", "authoritative": False})
+        ), patch.object(
+            plots, "_render_e72_setting_pages", side_effect=lambda _root, _pdf, _payload, page_manifest, _failures: page_manifest.append({"page_id": "e72", "scope": "setting", "authoritative": False})
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "unused.pdf", {"available": False}, {"available": False},
+                e7_payload=e7, f1_payload=payload, e72_payload=e72,
+            )
+        self.assertEqual([entry["page_id"] for entry in rendered["manifest"]], ["e7-0", "e7-1", "f1", "e72"])
+
+    def test_f1_fake_root_rendering_keeps_stored_rows_and_fixed_canvas_size(self):
+        _contract, payload = self._payload()
+        root = MagicMock()
+        root.kBlue = 4
+        root.kRed = 2
+        canvases = []
+
+        def canvas_factory(*args):
+            canvas = MagicMock()
+            canvas.args = args
+            canvases.append(canvas)
+            return canvas
+
+        root.TCanvas.side_effect = canvas_factory
+        manifest, failures = [], []
+        plots._render_f1_setting_pages(root, "f1.pdf", payload, manifest, failures)
+        self.assertFalse(failures)
+        self.assertEqual(len(canvases), 5)
+        self.assertTrue(all(canvas.args[-2:] == (1800, 1200) for canvas in canvases))
+        self.assertEqual(root.TGraph.call_count, 8)
+        self.assertTrue(all(canvas.Print.called for canvas in canvases))
 
 
 if __name__ == "__main__":
