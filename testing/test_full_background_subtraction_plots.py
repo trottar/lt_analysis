@@ -53,6 +53,9 @@ E4_FULL_BACKGROUND_PAGE_IDS = (
     "full_background.e4.ab_vs_shms_xptar",
     "full_background.e4.ab_vs_shms_yptar",
 )
+E6_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.e6.ab_combination_readiness",
+)
 
 
 def _assert_full_background_manifest_contract(test_case, manifest):
@@ -1911,6 +1914,27 @@ def _e4_fixture():
         "t_edges": t_edges, "delta_edges": delta_edges, "per_t": e2_groups,
     }
     return d11, e2
+
+
+def _e6_fixture():
+    """Return matching detached E.3/E.4 payloads on the standard frozen lattice."""
+    diagnostic, method_a = _e3_fixture()
+    d11, e2 = _e4_fixture()
+    coordinate_fingerprint = d11["coordinate_fingerprint"]
+    diagnostic = deepcopy(diagnostic)
+    method_a = deepcopy(method_a)
+    diagnostic["coordinate_fingerprint"] = coordinate_fingerprint
+    diagnostic["records"] = {
+        side: tuple({
+            **row,
+            "coordinate_fingerprint": coordinate_fingerprint,
+        } for row in rows)
+        for side, rows in diagnostic["records"].items()
+    }
+    method_a["coordinate_fingerprint"] = coordinate_fingerprint
+    e3 = plots.build_full_background_subtraction_e3_payload(diagnostic, method_a)
+    e4 = plots.build_full_background_subtraction_e4_payload(d11, e2)
+    return e3, e4, d11, e2
 
 
 def _d12_record_phase_pages(page_ids, omissions):
@@ -3809,6 +3833,224 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             for histogram in root.histograms
         ))
 
+    def test_e6_copies_only_stored_e3_e4_evidence_without_aliases(self):
+        e3, e4, _d11, _e2 = _e6_fixture()
+        e3_cells_before = deepcopy([group["cells"] for group in e3["per_t"]])
+        e3_templates_before = [
+            (group["kaon_template"], group["pion_template"])
+            for group in e3["per_t"]
+        ]
+        e3_metadata_before = {
+            key: deepcopy(e3[key])
+            for key in (
+                "coordinate_fingerprint", "method_a_fingerprint", "thresholds",
+                "t_edges", "delta_edges",
+            )
+        }
+        e4_before = deepcopy(e4)
+        payload = plots.build_full_background_subtraction_e6_payload(e3, e4)
+
+        self.assertTrue(payload["available"])
+        self.assertEqual(payload["schema_version"], plots.E6_PRESENTATION_SCHEMA_VERSION)
+        self.assertTrue(payload["non_authoritative"])
+        self.assertFalse(payload["production_objects_mutated"])
+        self.assertEqual(payload["checkpoint_type"], "human_scientific_readiness_review")
+        self.assertEqual(payload["decision"], "not_encoded_in_software")
+        self.assertEqual(payload["coordinate_fingerprint"], e4["coordinate_fingerprint"])
+        self.assertEqual(payload["e3_method_a_fingerprint"], e3["method_a_fingerprint"])
+        self.assertEqual(payload["d11_ab_comparison_fingerprint"], e4["d11_ab_comparison_fingerprint"])
+        self.assertEqual(len(payload["per_t"]), 3)
+        self.assertEqual(sum(len(group["cells"]) for group in payload["per_t"]), 30)
+
+        source_e4_cell = e4["per_t"][0]["cells"][0]
+        source_e3_context = e3["per_t"][0]["cells"][0]["method_a"]
+        copied = payload["per_t"][0]["cells"][0]
+        self.assertEqual(copied["method_a"], source_e4_cell["method_a"])
+        self.assertEqual(copied["method_b"], source_e4_cell["method_b"])
+        self.assertEqual(copied["comparison"], source_e4_cell["comparison"])
+        self.assertEqual(copied["availability_label"], source_e4_cell["availability_label"])
+        self.assertEqual(
+            copied["e3_method_a_hgcer_context"],
+            {
+                key: source_e3_context[key]
+                for key in (
+                    "t_index", "delta_index", "support_class", "method_A_status",
+                    "method_A_reason", "prompt_positive_count", "prompt_low_count",
+                    "prompt_control_count", "partition_closure_passed", "f_low",
+                    "f_low_low", "f_low_high",
+                )
+            },
+        )
+        self.assertNotIn("kaon_rows", copied)
+        self.assertNotIn("pion_rows", copied)
+        self.assertEqual([group["cells"] for group in e3["per_t"]], e3_cells_before)
+        self.assertEqual(
+            [(group["kaon_template"], group["pion_template"]) for group in e3["per_t"]],
+            e3_templates_before,
+        )
+        self.assertEqual(
+            {key: e3[key] for key in e3_metadata_before}, e3_metadata_before
+        )
+        self.assertEqual(e4, e4_before)
+
+        copied["method_a"]["candidate"] = 99.0
+        copied["e3_method_a_hgcer_context"]["f_low"] = 0.99
+        self.assertEqual(e4["per_t"][0]["cells"][0]["method_a"]["candidate"], 1.4)
+        self.assertEqual(e3["per_t"][0]["cells"][0]["method_a"]["f_low"], 0.314)
+
+    def test_e6_rejects_parent_contract_geometry_and_grid_failures_locally(self):
+        cases = (
+            (lambda e3, _e4: e3.update(available=False), "e6_e3_unavailable"),
+            (lambda _e3, e4: e4.update(available=False), "e6_e4_unavailable"),
+            (lambda e3, _e4: e3.update(schema_version="wrong"), "e6_e3_contract_invalid"),
+            (lambda _e3, e4: e4.update(schema_version="wrong"), "e6_e4_contract_invalid"),
+            (lambda e3, _e4: e3.update(non_authoritative=False), "e6_parent_authority_invalid"),
+            (lambda _e3, e4: e4.update(production_objects_mutated=True), "e6_parent_authority_invalid"),
+            (lambda _e3, e4: e4.update(coordinate_fingerprint="wrong"), "e6_parent_provenance_mismatch"),
+            (lambda _e3, e4: e4.update(delta_edges=[-10.0, 0.0, 10.0]), "e6_parent_geometry_mismatch"),
+            (lambda e3, _e4: e3.update(per_t=e3["per_t"][:-1]), "e6_e3_grid_invalid"),
+            (
+                lambda _e3, e4: e4["per_t"][0].update(cells=tuple(
+                    [deepcopy(e4["per_t"][0]["cells"][0])] + list(e4["per_t"][0]["cells"])
+                )),
+                "e6_e4_grid_invalid",
+            ),
+            (
+                lambda e3, _e4: e3["per_t"][0]["cells"][0].update(t_low=99.0),
+                "e6_e3_cell_geometry_invalid",
+            ),
+        )
+        for mutation, expected_reason in cases:
+            with self.subTest(expected_reason=expected_reason):
+                e3, e4, _d11, _e2 = _e6_fixture()
+                mutation(e3, e4)
+                payload = plots.build_full_background_subtraction_e6_payload(e3, e4)
+                self.assertFalse(payload["available"])
+                self.assertEqual(payload["reason"], expected_reason)
+
+    def test_e6_renderer_uses_header_grid_and_stored_evidence_only(self):
+        e3, e4, _d11, _e2 = _e6_fixture()
+        payload = plots.build_full_background_subtraction_e6_payload(e3, e4)
+        payload_before = deepcopy(payload)
+        root = _E4ROOT()
+        manifest, failures = [], []
+        for group in payload["per_t"]:
+            plots._render_e6_t_pages(root, "ignored.pdf", payload, group, manifest, failures)
+
+        self.assertEqual(failures, [])
+        self.assertEqual(payload, payload_before)
+        self.assertEqual(len(root.canvases), 3)
+        self.assertTrue(all((canvas.width, canvas.height) == (1800, 1200) for canvas in root.canvases))
+        self.assertEqual(len(root.pads), 6)
+        header_pads = [pad for pad in root.pads if "_header_" in pad.name]
+        grid_pads = [pad for pad in root.pads if "_grid_" in pad.name]
+        self.assertTrue(all(pad.coordinates == (0.0, 0.9, 1.0, 1.0) for pad in header_pads))
+        self.assertTrue(all(pad.coordinates == (0.0, 0.0, 1.0, 0.9) for pad in grid_pads))
+        self.assertTrue(all(pad.divisions == [] for pad in header_pads))
+        self.assertTrue(all(pad.divisions == [(5, 2)] and len(pad.cells) == 10 for pad in grid_pads))
+        self.assertEqual(
+            [(page["page_id"], page["scope"], page["authoritative"]) for page in manifest],
+            [(E6_FULL_BACKGROUND_PAGE_IDS[0], "t{}".format(index), False) for index in (1, 2, 3)],
+        )
+        self.assertEqual(len(root.histograms), 30)
+        self.assertTrue(all(histogram.directory == 0 for histogram in root.histograms))
+        visible = [line for text in root.drawn_text for line in text]
+        self.assertTrue(any("D.11 Method A: unavailable" in line for line in visible))
+        self.assertTrue(any("Legacy Method B: unavailable" in line for line in visible))
+        self.assertTrue(any(
+            "E.3 HGCer: unsupported; unavailable: support_insufficient" in line
+            for line in visible
+        ))
+        self.assertEqual(sum("B/A (stored): 7.25" in line for line in visible), 6)
+        self.assertFalse(any("B/A (stored): None" in line for line in visible))
+        self.assertFalse(any(line in {"PASS", "FAIL", "READY", "NOT READY"} for line in visible))
+        page_headers = [
+            pave for pave in root.pave_texts
+            if any("A/B-combination readiness evidence" in line for line in pave._text)
+        ]
+        self.assertEqual(len(page_headers), 3)
+        self.assertTrue(all(pave.drawn_on in header_pads for pave in page_headers))
+        self.assertTrue(all(
+            "Human scientific checkpoint only" in " ".join(pave._text)
+            and "No automatic readiness score" in " ".join(pave._text)
+            for pave in page_headers
+        ))
+
+    def test_e6_is_a_final_local_append_after_e3_and_e4(self):
+        unavailable = {"available": False, "reason": "not requested"}
+        e3, e4, d11, e2 = _e6_fixture()
+        e6 = plots.build_full_background_subtraction_e6_payload(e3, e4)
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d11_t_pages"
+        ), patch.object(
+            plots, "_render_e2_t_pages"
+        ), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(
+            plots, "_render_e4_t_pages", side_effect=_d12_record_phase_pages(
+                E4_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(
+            plots, "_render_e6_t_pages", side_effect=_d12_record_phase_pages(
+                E6_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, d11_payload=d11,
+                e2_payload=e2, e3_payload=e3, e4_payload=e4, e6_payload=e6,
+            )
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in rendered["manifest"]],
+            [
+                ("t1", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E3_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t1", E6_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E6_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E6_FULL_BACKGROUND_PAGE_IDS[0]),
+            ],
+        )
+
+        e6["delta_edges"] = [-10.0, 0.0, 10.0]
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d11_t_pages"
+        ), patch.object(
+            plots, "_render_e2_t_pages"
+        ), patch.object(
+            plots, "_render_e3_t_pages", side_effect=_d12_record_phase_pages(
+                E3_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(
+            plots, "_render_e4_t_pages", side_effect=_d12_record_phase_pages(
+                E4_FULL_BACKGROUND_PAGE_IDS, set()
+            )
+        ), patch.object(plots, "_render_e6_t_pages") as render_e6:
+            isolated = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", unavailable, unavailable, d11_payload=d11,
+                e2_payload=e2, e3_payload=e3, e4_payload=e4, e6_payload=e6,
+            )
+        self.assertIn("E.6 frozen procedure geometry mismatch", isolated["failures"])
+        self.assertEqual(
+            [(page["scope"], page["page_id"]) for page in isolated["manifest"][-6:]],
+            [
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t1", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t2", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[0]),
+                ("t3", E4_FULL_BACKGROUND_PAGE_IDS[1]),
+            ],
+        )
+        render_e6.assert_not_called()
+
     def test_e4_is_a_final_local_append_after_e3(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
@@ -4931,8 +5173,59 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             cumulative_renderer_source[final_e4_append:],
         )
 
+        e6_source = source[
+            source.index("def _e6_unavailable"):
+            source.index("def _e3_integer")
+        ]
+        for required in (
+            "E6_PRESENTATION_SCHEMA_VERSION",
+            "build_full_background_subtraction_e6_payload",
+            "full_background.e6.ab_combination_readiness",
+            "grid_pad.Divide(5, 2)",
+            "ROOT.TPad",
+            "_draw_e6_page_header",
+            "Human scientific checkpoint only",
+            "E.3 HGCer",
+            "Legacy Method B",
+            "B/A (stored)",
+            "No automatic readiness score",
+        ):
+            with self.subTest(e6_required=required):
+                self.assertIn(required, e6_source)
+        self.assertIn("E6_PRESENTATION_SCHEMA_VERSION", source)
+        e6_builder_signature = inspect.signature(
+            plots.build_full_background_subtraction_e6_payload
+        )
+        self.assertEqual(tuple(e6_builder_signature.parameters), ("e3_payload", "e4_payload"))
+        self.assertTrue(all(
+            parameter.kind not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+            for parameter in e6_builder_signature.parameters.values()
+        ))
+        self.assertEqual(
+            procedure_signature.parameters["e6_payload"].kind,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
+        for forbidden in (
+            "find_canonical_bin(", "build_pion_hgcer_method_a(",
+            "build_pion_hgcer_method_b(", "build_pion_hgcer_ab_comparison(",
+            "build_pion_hgcer_event_contract(", "math.log(", "numpy.corrcoef",
+            "pearson", "spearman", "chi2", "p_value", "readiness_score",
+            "preferred_method", "selected_method", "use_A", "use_B", "combine_AB",
+            "C_A", "C_B", "C_final", "refined_pion_weight",
+            "applied_refinement_weight", "acceptance_correction",
+        ):
+            with self.subTest(e6_forbidden=forbidden):
+                self.assertNotIn(forbidden, e6_source)
+        self.assertNotIn("canvas.Divide", e6_source)
+        final_e6_append = cumulative_renderer_source.rindex("if e6_available:")
+        self.assertLess(final_e4_append, final_e6_append)
+        self.assertIn(
+            "for t_index in range(max(0, len(e6_edges) - 1))",
+            cumulative_renderer_source[final_e6_append:],
+        )
+
         runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
-        start = runtime.index("# Phases D.6 through D.11 and E.2 through E.4 are terminal presentation only.")
+        start = runtime.index("# Phases D.6 through D.11 and E.2 through E.6 are terminal presentation only.")
         end = runtime.index("for supplement_key, role in (", start)
         block = runtime[start:end]
         for name in (
@@ -4945,6 +5238,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             "build_full_background_subtraction_e2_payload",
             "build_full_background_subtraction_e3_payload",
             "build_full_background_subtraction_e4_payload",
+            "build_full_background_subtraction_e6_payload",
             "full_background_subtraction_pdf_path",
             "open_full_background_subtraction_pdf",
             "render_full_background_subtraction_procedure_pages",
@@ -5011,6 +5305,10 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertLess(
             runtime.index("build_full_background_subtraction_e4_payload(", start),
+            runtime.index("build_full_background_subtraction_e6_payload(", start),
+        )
+        self.assertLess(
+            runtime.index("build_full_background_subtraction_e6_payload(", start),
             runtime.index("render_full_background_subtraction_procedure_pages(", start),
         )
         e3_call_start = runtime.index(
@@ -5026,6 +5324,21 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ):
             with self.subTest(e3_runtime_forbidden_input=forbidden_input):
                 self.assertNotIn(forbidden_input, e3_call)
+        e6_call_start = runtime.index(
+            "build_full_background_subtraction_e6_payload(", start
+        )
+        e6_call_end = runtime.index(")", e6_call_start) + 1
+        e6_call = runtime[e6_call_start:e6_call_end]
+        self.assertIn("full_background_subtraction_e3_payload", e6_call)
+        self.assertIn("full_background_subtraction_e4_payload", e6_call)
+        for forbidden_input in (
+            "pion_hgcer_method_a", "pion_hgcer_method_b",
+            "pion_hgcer_method_b_comparison", "pion_hgcer_ab_comparison",
+            "phase_d_checkpoint", "pion_hgcer_tdelta_diagnostic",
+        ):
+            with self.subTest(e6_runtime_forbidden_input=forbidden_input):
+                self.assertNotIn(forbidden_input, e6_call)
+        self.assertIn("e6_payload=full_background_subtraction_e6_payload", block)
         self.assertLess(
             runtime.index("full_background_subtraction_pdf_path(", start),
             runtime.index("open_full_background_subtraction_pdf(", start),
@@ -5049,6 +5362,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertNotIn("full_background_subtraction_d10_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d11_payload\"]", block)
         self.assertNotIn("full_background_subtraction_e3_payload\"]", block)
+        self.assertNotIn("full_background_subtraction_e6_payload\"]", block)
         self.assertNotIn("full_background_subtraction_d12_payload\"]", block)
         self.assertEqual(block.count('histDict["full_background_subtraction_'), 2)
         self.assertIn('histDict["full_background_subtraction_page_manifest"]', block)
