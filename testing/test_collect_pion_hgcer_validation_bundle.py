@@ -98,7 +98,9 @@ def _correction(phi="Left", epsilon="lowe"):
         "delta_edges": [-10.0, 10.0],
         "parents": [{
             "t_index": 0,
-            "status": "identity_no_refinable_cells",
+            "t_low": 0.0,
+            "t_high": 1.0,
+            "parent_status": "identity_no_refinable_cells",
             "closure_passed": True,
             "refinable_cell_count": 0,
         }],
@@ -238,6 +240,10 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             self.assertEqual(artifacts["full_background_subtraction_pdf"]["original_page_count"], 12)
             self.assertEqual(artifacts["full_background_subtraction_pdf"]["extracted_pages"], [9, 10, 11, 12])
             self.assertEqual(artifacts["meeting_summary_pdf"]["backend_identity"], "pypdf fake-1")
+            self.assertEqual(
+                artifacts["parent_preserving_correction"]["metadata"]["parent_statuses"],
+                ["identity_no_refinable_cells"],
+            )
 
     def test_strict_setting_and_json_failures_remain_best_effort(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -284,6 +290,106 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             result, output, _source = self._collect(temporary, phase_d=bad_phase_d)
             self.assertEqual(result["returncode"], 1)
             self.assertTrue(output.exists())
+
+    def test_parent_preserving_parent_lattice_is_complete_unique_and_aligned(self):
+        def two_parent_correction():
+            payload = _correction()
+            correction = payload["correction"]
+            correction["t_edges"] = [0.0, 1.0, 2.0]
+            correction["parents"] = [
+                {
+                    "t_index": 0, "t_low": 0.0, "t_high": 1.0,
+                    "parent_status": "identity_no_refinable_cells",
+                    "closure_passed": True, "refinable_cell_count": 0,
+                },
+                {
+                    "t_index": 1, "t_low": 1.0, "t_high": 2.0,
+                    "parent_status": "identity_single_refinable_cell",
+                    "closure_passed": True, "refinable_cell_count": 1,
+                },
+            ]
+            correction["cells"] = [
+                {"t_index": 0, "delta_index": 0},
+                {"t_index": 1, "delta_index": 0},
+            ]
+            return payload
+
+        mutations = (
+            (lambda correction: correction["correction"]["parents"].pop(), "missing_parent"),
+            (
+                lambda correction: correction["correction"]["parents"].__setitem__(
+                    1, dict(correction["correction"]["parents"][0])
+                ),
+                "duplicate_parent_index",
+            ),
+            (
+                lambda correction: correction["correction"]["parents"][1].update(t_high=3.0),
+                "parent_edge_mismatch",
+            ),
+        )
+        for mutation, label in mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                bad_correction = two_parent_correction()
+                mutation(bad_correction)
+                result, output, _source = self._collect(temporary, correction=bad_correction)
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                self.assertIn(
+                    "checkpoint_metadata_mismatch",
+                    {entry["code"] for entry in result["manifest"]["errors"]},
+                )
+
+    def test_missing_required_artifacts_remain_explicit_and_best_effort(self):
+        for artifact_key, basename in (
+            (
+                "phase_c_checkpoint",
+                collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe"),
+            ),
+            (
+                "full_background_page_manifest",
+                collector.full_background_page_manifest_basename("Left", "Q4p4W2p74", "lowe"),
+            ),
+        ):
+            with self.subTest(artifact=artifact_key), tempfile.TemporaryDirectory() as temporary:
+                source = Path(temporary) / "source"
+                source.mkdir()
+                self._write_setting(source)
+                (source / basename).unlink()
+                output = Path(temporary) / "bundle.zip"
+                result = collector.collect_validation_bundle(
+                    outdir=source, kinematic="Q4p4W2p74", output=output,
+                    phi="Left", epsilon="lowe", repo_root=REPO_ROOT,
+                    pdf_backends=[_python_backend()], command_runner=_clean_command_runner,
+                )
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                self.assertIn(
+                    "missing_source_artifact",
+                    {entry["code"] for entry in result["manifest"]["errors"]},
+                )
+                self.assertEqual(
+                    result["manifest"]["settings"][0]["artifacts"][artifact_key]["status"],
+                    "missing",
+                )
+
+    def test_unexpected_committed_file_after_required_base_is_rejected(self):
+        def unexpected_file_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if list(command)[:3] == ["git", "diff", "--name-only"]:
+                result = dict(result)
+                result["stdout"] = "src/cuts/unexpected_science_change.py\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=unexpected_file_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            self.assertIn(
+                "unexpected_committed_files_after_required_analysis_commit",
+                {entry["code"] for entry in result["manifest"]["errors"]},
+            )
         with tempfile.TemporaryDirectory() as temporary:
             bad_correction = _correction()
             bad_correction["correction"]["parents"][0]["closure_passed"] = False

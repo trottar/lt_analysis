@@ -744,10 +744,6 @@ def _parent_preserving_metadata(
     ))
     parents = correction.get("parents") if isinstance(correction, Mapping) else None
     cells = correction.get("cells") if isinstance(correction, Mapping) else None
-    parents_valid = isinstance(parents, list) and bool(parents) and all(
-        isinstance(parent, Mapping) and parent.get("closure_passed") is True
-        for parent in parents
-    )
     t_edges = correction.get("t_edges") if isinstance(correction, Mapping) else None
     delta_edges = correction.get("delta_edges") if isinstance(correction, Mapping) else None
     geometry_valid = all(
@@ -761,6 +757,39 @@ def _parent_preserving_metadata(
         and all(float(edges[index]) < float(edges[index + 1]) for index in range(len(edges) - 1))
         for edges in (t_edges, delta_edges)
     )
+    expected_parent_indices = set(range(len(t_edges) - 1)) if geometry_valid else set()
+    observed_parent_indices: set[int] = set()
+    parents_valid = isinstance(parents, list) and bool(parents) and geometry_valid
+    if parents_valid:
+        for parent in parents:
+            if not isinstance(parent, Mapping):
+                parents_valid = False
+                break
+            t_index = parent.get("t_index")
+            refinable_cell_count = parent.get("refinable_cell_count")
+            if (
+                isinstance(t_index, bool) or not isinstance(t_index, int)
+                or t_index not in expected_parent_indices
+                or t_index in observed_parent_indices
+                or isinstance(parent.get("t_low"), bool)
+                or not isinstance(parent.get("t_low"), (int, float))
+                or not math.isfinite(float(parent.get("t_low")))
+                or isinstance(parent.get("t_high"), bool)
+                or not isinstance(parent.get("t_high"), (int, float))
+                or not math.isfinite(float(parent.get("t_high")))
+                or parent.get("t_low") != t_edges[t_index]
+                or parent.get("t_high") != t_edges[t_index + 1]
+                or not isinstance(parent.get("parent_status"), str)
+                or not parent.get("parent_status")
+                or parent.get("closure_passed") is not True
+                or isinstance(refinable_cell_count, bool)
+                or not isinstance(refinable_cell_count, int)
+                or refinable_cell_count < 0
+            ):
+                parents_valid = False
+                break
+            observed_parent_indices.add(t_index)
+        parents_valid = parents_valid and observed_parent_indices == expected_parent_indices
     expected_keys = {
         (t_index, delta_index)
         for t_index in range(len(t_edges) - 1)
@@ -797,7 +826,7 @@ def _parent_preserving_metadata(
         "schema_version": payload.get("schema_version"),
         "setting": payload.get("setting"),
         "correction_fingerprint": correction.get("fingerprint") if isinstance(correction, Mapping) else None,
-        "parent_statuses": [parent.get("status") for parent in parents] if isinstance(parents, list) else [],
+        "parent_statuses": [parent.get("parent_status") for parent in parents] if isinstance(parents, list) else [],
         "parent_closure_passed": [parent.get("closure_passed") for parent in parents] if isinstance(parents, list) else [],
         "refinable_cell_counts": [parent.get("refinable_cell_count") for parent in parents] if isinstance(parents, list) else [],
     })

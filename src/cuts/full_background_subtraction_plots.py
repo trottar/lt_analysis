@@ -6920,7 +6920,81 @@ def _e72_display_bounds(cells, *, include_final=False):
     return low - padding, high + padding
 
 
-def _e72_plain_graph(ROOT, cells, field, *, color, marker_style):
+_E72_DISPLAY_OFFSET_FRACTION = 0.08
+
+
+def _e72_cell_display_x(cell, offset_fraction=0.0):
+    """Return an in-bin presentation x position without changing frozen geometry."""
+    delta_low = float(cell["delta_low"])
+    delta_high = float(cell["delta_high"])
+    return 0.5 * (delta_low + delta_high) + float(offset_fraction) * (
+        delta_high - delta_low
+    )
+
+
+def _e72_style_graph(graph, *, color, marker_style, line_color=None):
+    """Apply only meeting-page styling while accepting minimal fake ROOT surfaces."""
+    if graph is None:
+        return None
+    if hasattr(graph, "SetMarkerColor"):
+        graph.SetMarkerColor(color)
+    if hasattr(graph, "SetMarkerStyle"):
+        graph.SetMarkerStyle(marker_style)
+    if hasattr(graph, "SetLineColor"):
+        graph.SetLineColor(color if line_color is None else line_color)
+    return graph
+
+
+def _e72_asymmetric_method_a_graph(ROOT, cells):
+    """Draw stored Method-A intervals with an E.7.2-only in-bin offset."""
+    selected = [
+        cell for cell in cells
+        if _mapping(cell.get("method_a")).get("present") is True
+    ]
+    if not selected or not hasattr(ROOT, "TGraphAsymmErrors"):
+        return None
+    graph = ROOT.TGraphAsymmErrors(len(selected))
+    for index, cell in enumerate(selected):
+        method_a = _mapping(cell["method_a"])
+        value = float(method_a["candidate"])
+        graph.SetPoint(
+            index,
+            _e72_cell_display_x(cell, -_E72_DISPLAY_OFFSET_FRACTION),
+            value,
+        )
+        graph.SetPointError(
+            index, 0.0, 0.0,
+            value - float(method_a["low"]),
+            float(method_a["high"]) - value,
+        )
+    return _e72_style_graph(
+        graph, color=getattr(ROOT, "kBlue", 4), marker_style=24,
+    )
+
+
+def _e72_symmetric_method_b_graph(ROOT, cells):
+    """Draw stored Method-B uncertainty with no numerical transformation."""
+    selected = [
+        cell for cell in cells
+        if _mapping(cell.get("method_b")).get("present") is True
+    ]
+    if not selected or not hasattr(ROOT, "TGraphErrors"):
+        return None
+    graph = ROOT.TGraphErrors(len(selected))
+    for index, cell in enumerate(selected):
+        method_b = _mapping(cell["method_b"])
+        graph.SetPoint(
+            index, _e72_cell_display_x(cell), float(method_b["candidate"]),
+        )
+        graph.SetPointError(index, 0.0, float(method_b["uncertainty"]))
+    return _e72_style_graph(
+        graph, color=getattr(ROOT, "kOrange", 800) + 7, marker_style=25,
+    )
+
+
+def _e72_plain_graph(
+    ROOT, cells, field, *, color, marker_style, offset_fraction=0.0,
+):
     selected = [
         cell for cell in cells
         if _d11_finite(cell.get(field)) is not None
@@ -6929,11 +7003,10 @@ def _e72_plain_graph(ROOT, cells, field, *, color, marker_style):
         return None
     graph = ROOT.TGraph(len(selected))
     for index, cell in enumerate(selected):
-        center = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
-        graph.SetPoint(index, center, float(cell[field]))
-    graph.SetMarkerColor(color)
-    graph.SetMarkerStyle(marker_style)
-    return graph
+        graph.SetPoint(
+            index, _e72_cell_display_x(cell, offset_fraction), float(cell[field]),
+        )
+    return _e72_style_graph(graph, color=color, marker_style=marker_style)
 
 
 def _e72_add_text(ROOT, coordinates, lines, *, size=0.042, align=12):
@@ -6961,6 +7034,45 @@ def _e72_draw_unity(ROOT, delta_edges):
     return line
 
 
+def _e72_legend_proxy(ROOT, *, color, marker_style, line_style=None):
+    """Build an undrawn visual legend proxy when a panel has no eligible point."""
+    if line_style is not None and hasattr(ROOT, "TLine"):
+        proxy = ROOT.TLine(0.0, 1.0, 1.0, 1.0)
+        if hasattr(proxy, "SetLineColor"):
+            proxy.SetLineColor(color)
+        proxy.SetLineStyle(line_style)
+        return proxy
+    if hasattr(ROOT, "TGraph"):
+        proxy = ROOT.TGraph(1)
+        proxy.SetPoint(0, 0.0, 0.0)
+        return _e72_style_graph(proxy, color=color, marker_style=marker_style)
+    return None
+
+
+def _e72_meeting_legend(ROOT, entries):
+    """Use actual ROOT objects so the meeting legend carries the plotted styles."""
+    legend = ROOT.TLegend(0.10, 0.06, 0.90, 0.20)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    for object_, label, option in entries:
+        if object_ is not None:
+            legend.AddEntry(object_, label, option)
+    legend.Draw()
+    return legend
+
+
+def _e72_closure_y_range(before, after):
+    """Choose a signed, scale-aware closure frame without touching stored totals."""
+    before, after = float(before), float(after)
+    scale = max(abs(before), abs(after))
+    span = abs(after - before)
+    reference = max(scale, span)
+    if reference == 0.0:
+        return -1.0e-6, 1.0e-6
+    padding = 0.15 * reference
+    return min(0.0, before, after) - padding, max(0.0, before, after) + padding
+
+
 def _e72_three_panel_canvas(ROOT, name, title):
     if not hasattr(ROOT, "TPad"):
         return None
@@ -6981,37 +7093,49 @@ def _render_e72_overview_page(ROOT, pdf_name, presentation):
     draw_objects = []
     try:
         canvas.cd()
-        draw_objects.append(_e72_header(
-            ROOT, "Pion-background refinement progress",
-            "Detached scientific review only - No event application or production change",
+        draw_objects.append(_e72_add_text(
+            ROOT, (0.04, 0.90, 0.96, 0.98), (
+                "Pion-background refinement progress",
+                "Detached scientific review only - No event application or production change",
+            ), size=0.050,
         ))
         stages = (
-            (0.05, "Established baseline pion subtraction", "w_pi^0(MM; t)"),
-            (0.26, "Two independent local diagnostics", "Method A: HGCer response   |   Method B: missing-mass closure"),
-            (0.48, "E.7 raw A/B scale", "S(t,delta) = sqrt(A B)"),
-            (0.69, "E.7.1 parent-preserving map", "C_final(t,delta)"),
-            (0.86, "CURRENT STATUS", "Detached map only - No event application / no production change"),
+            (0.04, 0.23, "Established baseline pion subtraction", "w_pi^0(MM; t)"),
+            (0.28, 0.47, "Two independent local diagnostics", "Method A: HGCer response   |   Method B: missing-mass closure"),
+            (0.52, 0.71, "E.7 raw A/B scale", "S(t,delta) = sqrt(A B)"),
+            (0.76, 0.95, "E.7.1 parent-preserving map", "C_final(t,delta)"),
         )
-        for index, (x_low, title, detail) in enumerate(stages):
-            x_high = min(0.98, x_low + (0.18 if index != 1 else 0.20))
+        for index, (x_low, x_high, title, detail) in enumerate(stages):
             if hasattr(ROOT, "TBox"):
-                box = ROOT.TBox(x_low, 0.48, x_high, 0.70)
+                box = ROOT.TBox(x_low, 0.58, x_high, 0.78)
                 if hasattr(box, "SetFillStyle"):
                     box.SetFillStyle(0)
                 box.Draw()
                 draw_objects.append(box)
             draw_objects.append(_e72_add_text(
-                ROOT, (x_low + 0.01, 0.52, x_high - 0.01, 0.66), (title, detail), size=0.030,
+                ROOT, (x_low + 0.01, 0.62, x_high - 0.01, 0.74), (title, detail), size=0.026,
             ))
             if index < len(stages) - 1:
                 if hasattr(ROOT, "TArrow"):
-                    arrow = ROOT.TArrow(x_high, 0.59, stages[index + 1][0], 0.59, 0.025, "|>")
+                    arrow = ROOT.TArrow(x_high, 0.68, stages[index + 1][0], 0.68, 0.020, "|>")
                 else:
-                    arrow = ROOT.TLine(x_high, 0.59, stages[index + 1][0], 0.59)
+                    arrow = ROOT.TLine(x_high, 0.68, stages[index + 1][0], 0.68)
                 arrow.Draw()
                 draw_objects.append(arrow)
+        if hasattr(ROOT, "TBox"):
+            status_box = ROOT.TBox(0.18, 0.39, 0.82, 0.51)
+            if hasattr(status_box, "SetFillStyle"):
+                status_box.SetFillStyle(0)
+            status_box.Draw()
+            draw_objects.append(status_box)
         draw_objects.append(_e72_add_text(
-            ROOT, (0.09, 0.16, 0.91, 0.36), (
+            ROOT, (0.20, 0.41, 0.80, 0.49), (
+                "CURRENT STATUS",
+                "Detached map only - No event application / no production change",
+            ), size=0.035,
+        ))
+        draw_objects.append(_e72_add_text(
+            ROOT, (0.09, 0.14, 0.91, 0.32), (
                 "• unsupported cells remain C_final = 1",
                 "• each valid t parent preserves its signed baseline pion total",
                 "• event-by-event application has not begun",
@@ -7034,6 +7158,7 @@ def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
         return False
     canvas, header, grid = layout
     draw_objects = [header, grid]
+    legend_objects = {"method_a": None, "method_b": None, "prototype": None, "unity": None}
     try:
         header.cd()
         draw_objects.append(_e72_header(
@@ -7051,13 +7176,20 @@ def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
                 return False
             frame.Draw("AXIS")
             draw_objects.append(frame)
-            draw_objects.append(_e72_draw_unity(ROOT, presentation["delta_edges"]))
-            method_a = _e7_method_a_graph(ROOT, cells)
-            method_b = _e7_method_b_graph(ROOT, cells)
+            unity = _e72_draw_unity(ROOT, presentation["delta_edges"])
+            draw_objects.append(unity)
+            legend_objects["unity"] = legend_objects["unity"] or unity
+            method_a = _e72_asymmetric_method_a_graph(ROOT, cells)
+            method_b = _e72_symmetric_method_b_graph(ROOT, cells)
             prototype = _e72_plain_graph(
                 ROOT, [cell for cell in cells if cell["prototype_status"] == "available"],
-                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=33,
+                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=27,
+                offset_fraction=_E72_DISPLAY_OFFSET_FRACTION,
             )
+            for name, graph in (
+                ("method_a", method_a), ("method_b", method_b), ("prototype", prototype),
+            ):
+                legend_objects[name] = legend_objects[name] or graph
             for graph in (method_a, method_b, prototype):
                 if graph is not None:
                     graph.Draw("P SAME")
@@ -7075,14 +7207,31 @@ def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
                 ), size=0.040,
             ))
         grid.cd(1)
-        legend = ROOT.TLegend(0.12, 0.08, 0.87, 0.20)
-        legend.SetBorderSize(0)
-        legend.SetFillStyle(0)
-        legend.AddEntry(None, "Method A — HGCer response", "p")
-        legend.AddEntry(None, "Legacy Method B — MM closure", "p")
-        legend.AddEntry(None, "E.7 raw equal-log scale", "p")
-        legend.AddEntry(None, "Baseline = 1", "l")
-        legend.Draw()
+        blue = getattr(ROOT, "kBlue", 4)
+        orange = getattr(ROOT, "kOrange", 800) + 7
+        gray = getattr(ROOT, "kGray", 920)
+        legend = _e72_meeting_legend(ROOT, (
+            (
+                legend_objects["method_a"] or _e72_legend_proxy(
+                    ROOT, color=blue, marker_style=24,
+                ), "Method A — HGCer response", "p",
+            ),
+            (
+                legend_objects["method_b"] or _e72_legend_proxy(
+                    ROOT, color=orange, marker_style=25,
+                ), "Legacy Method B — MM closure", "p",
+            ),
+            (
+                legend_objects["prototype"] or _e72_legend_proxy(
+                    ROOT, color=gray, marker_style=27,
+                ), "E.7 raw equal-log scale", "p",
+            ),
+            (
+                legend_objects["unity"] or _e72_legend_proxy(
+                    ROOT, color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
+                ), "Baseline = 1", "l",
+            ),
+        ))
         draw_objects.append(legend)
         canvas._full_background_e72_draw_objects = tuple(draw_objects)
         canvas.Print(pdf_name)
@@ -7101,6 +7250,7 @@ def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
         return False
     canvas, header, grid = layout
     draw_objects = [header, grid]
+    legend_objects = {"raw": None, "final": None, "unity": None}
     try:
         header.cd()
         draw_objects.append(_e72_header(
@@ -7119,14 +7269,20 @@ def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
                 return False
             frame.Draw("AXIS")
             draw_objects.append(frame)
-            draw_objects.append(_e72_draw_unity(ROOT, presentation["delta_edges"]))
+            unity = _e72_draw_unity(ROOT, presentation["delta_edges"])
+            draw_objects.append(unity)
+            legend_objects["unity"] = legend_objects["unity"] or unity
             raw = _e72_plain_graph(
                 ROOT, [cell for cell in cells if cell["prototype_status"] == "available"],
-                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=33,
+                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=27,
+                offset_fraction=-_E72_DISPLAY_OFFSET_FRACTION,
             )
             final = _e72_plain_graph(
                 ROOT, cells, "C_final", color=getattr(ROOT, "kGreen", 3), marker_style=20,
+                offset_fraction=_E72_DISPLAY_OFFSET_FRACTION,
             )
+            legend_objects["raw"] = legend_objects["raw"] or raw
+            legend_objects["final"] = legend_objects["final"] or final
             for graph in (raw, final):
                 if graph is not None:
                     graph.Draw("P SAME")
@@ -7143,6 +7299,24 @@ def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
                 ), size=0.038,
             ))
         grid.cd(1)
+        legend = _e72_meeting_legend(ROOT, (
+            (
+                legend_objects["raw"] or _e72_legend_proxy(
+                    ROOT, color=getattr(ROOT, "kGray", 920), marker_style=27,
+                ), "Raw E.7 scale", "p",
+            ),
+            (
+                legend_objects["final"] or _e72_legend_proxy(
+                    ROOT, color=getattr(ROOT, "kGreen", 3), marker_style=20,
+                ), "Parent-preserving C_final", "p",
+            ),
+            (
+                legend_objects["unity"] or _e72_legend_proxy(
+                    ROOT, color=getattr(ROOT, "kBlack", 1), marker_style=1, line_style=2,
+                ), "Unity", "l",
+            ),
+        ))
+        draw_objects.append(legend)
         draw_objects.append(_e72_add_text(
             ROOT, (0.12, 0.06, 0.88, 0.16),
             ("Detached scientific map only — not applied to events or production yields.",), size=0.032,
@@ -7178,8 +7352,7 @@ def _render_e72_parent_closure_page(ROOT, pdf_name, presentation):
             parent = group["parent"]
             before = float(parent["canonical_baseline_before"])
             after = float(parent["canonical_baseline_after"])
-            low, high = min(0.0, before, after), max(0.0, before, after)
-            padding = max(1.0, 0.12 * (high - low if high > low else 1.0))
+            low, high = _e72_closure_y_range(before, after)
             frame = ROOT.TH1D(
                 "H_full_background_e72_closure_t{}".format(panel_index),
                 "{};Stored baseline;Signed baseline pion total".format(_t_context(group)),
@@ -7191,8 +7364,8 @@ def _render_e72_parent_closure_page(ROOT, pdf_name, presentation):
             if hasattr(axis, "SetBinLabel"):
                 axis.SetBinLabel(1, "Baseline before")
                 axis.SetBinLabel(2, "Baseline after C_final")
-            frame.SetMinimum(low - padding)
-            frame.SetMaximum(high + padding)
+            frame.SetMinimum(low)
+            frame.SetMaximum(high)
             frame.SetBinContent(1, before)
             frame.SetBinContent(2, after)
             frame.Draw("HIST")

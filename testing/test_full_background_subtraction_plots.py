@@ -362,6 +362,7 @@ class _FakeLegend:
     def __init__(self, *coordinates):
         self.coordinates = tuple(float(value) for value in coordinates[:4])
         self.entries = []
+        self.objects = []
 
     def SetBorderSize(self, _size):
         return None
@@ -369,7 +370,8 @@ class _FakeLegend:
     def SetFillStyle(self, _style):
         return None
 
-    def AddEntry(self, _object, label, option):
+    def AddEntry(self, object_, label, option):
+        self.objects.append(object_)
         self.entries.append((str(label), str(option)))
 
     def Draw(self):
@@ -736,6 +738,7 @@ class _D10GraphErrors:
         self.root = root
         self.points = [(None, None)] * int(point_count)
         self.errors = [(None, None)] * int(point_count)
+        self.draw_options = []
 
     def SetPoint(self, index, x_value, y_value):
         self.points[int(index)] = (float(x_value), float(y_value))
@@ -755,7 +758,8 @@ class _D10GraphErrors:
     def SetMarkerSize(self, _size):
         return None
 
-    def Draw(self, _option):
+    def Draw(self, option):
+        self.draw_options.append(str(option))
         self.root.drawn_graphs.append(self)
 
 
@@ -764,6 +768,7 @@ class _D11GraphAsymmErrors:
         self.root = root
         self.points = [(None, None)] * int(point_count)
         self.errors = [(None, None, None, None)] * int(point_count)
+        self.draw_options = []
 
     def SetPoint(self, index, x_value, y_value):
         self.points[int(index)] = (float(x_value), float(y_value))
@@ -782,7 +787,8 @@ class _D11GraphAsymmErrors:
     def SetMarkerStyle(self, _style):
         return None
 
-    def Draw(self, _option):
+    def Draw(self, option):
+        self.draw_options.append(str(option))
         self.root.drawn_asymm_graphs.append(self)
 
 
@@ -790,6 +796,7 @@ class _D11Graph:
     def __init__(self, root, point_count):
         self.root = root
         self.points = [(None, None)] * int(point_count)
+        self.draw_options = []
 
     def SetPoint(self, index, x_value, y_value):
         self.points[int(index)] = (float(x_value), float(y_value))
@@ -800,7 +807,8 @@ class _D11Graph:
     def SetMarkerStyle(self, _style):
         return None
 
-    def Draw(self, _option):
+    def Draw(self, option):
+        self.draw_options.append(str(option))
         self.root.drawn_plain_graphs.append(self)
 
 
@@ -4457,6 +4465,88 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertTrue(any("Baseline before" in line for line in visible))
         for forbidden in ("PASS", "READY", "preferred", "production approval"):
             self.assertFalse(any(forbidden in line for line in visible))
+
+    def test_e72_meeting_visuals_use_nonoverlapping_flow_and_stored_offset_graphs(self):
+        e7, correction = _e72_fixture()
+        payload = plots.build_full_background_subtraction_e72_payload(e7, correction)
+        root = _E7ROOT()
+
+        self.assertTrue(plots._render_e72_overview_page(root, "ignored.pdf", payload))
+        science_boxes = [
+            box for box in root.drawn_boxes
+            if box.y_low == 0.58 and box.y_high == 0.78
+        ]
+        self.assertEqual(len(science_boxes), 4)
+        for index, box in enumerate(science_boxes):
+            for following in science_boxes[index + 1:]:
+                self.assertFalse(_rectangles_overlap(
+                    (box.x_low, box.y_low, box.x_high, box.y_high),
+                    (following.x_low, following.y_low, following.x_high, following.y_high),
+                ))
+        status_box = next(
+            box for box in root.drawn_boxes
+            if box.y_low == 0.39 and box.y_high == 0.51
+        )
+        self.assertLess(status_box.y_high, science_boxes[0].y_low)
+        arrows = [line for line in root.drawn_lines if line.y1 == 0.68 and line.y2 == 0.68]
+        self.assertEqual(len(arrows), 3)
+        self.assertTrue(all(arrow.x1 < arrow.x2 for arrow in arrows))
+
+        root = _E7ROOT()
+        self.assertTrue(plots._render_e72_ab_evidence_page(root, "ignored.pdf", payload))
+        first_cell = payload["per_t"][0]["cells"][0]
+        center = 0.5 * (first_cell["delta_low"] + first_cell["delta_high"])
+        offset = plots._E72_DISPLAY_OFFSET_FRACTION * (
+            first_cell["delta_high"] - first_cell["delta_low"]
+        )
+        method_a = root.drawn_asymm_graphs[0]
+        method_b = root.drawn_graphs[0]
+        prototype = root.drawn_plain_graphs[0]
+        self.assertEqual(method_a.points[0], (center - offset, first_cell["method_a"]["candidate"]))
+        self.assertEqual(method_b.points[0], (center, first_cell["method_b"]["candidate"]))
+        self.assertEqual(prototype.points[0], (center + offset, first_cell["prototype_relative_scale"]))
+        self.assertEqual(
+            method_a.errors[0][2:],
+            (
+                first_cell["method_a"]["candidate"] - first_cell["method_a"]["low"],
+                first_cell["method_a"]["high"] - first_cell["method_a"]["candidate"],
+            ),
+        )
+        self.assertEqual(method_b.errors[0], (0.0, first_cell["method_b"]["uncertainty"]))
+        self.assertTrue(all("L" not in option for graph in (
+            method_a, method_b, prototype
+        ) for option in graph.draw_options))
+        ab_legend = root.legends[-1]
+        self.assertEqual(len(ab_legend.entries), 4)
+        self.assertTrue(all(object_ is not None for object_ in ab_legend.objects))
+
+        root = _E7ROOT()
+        self.assertTrue(plots._render_e72_parent_map_page(root, "ignored.pdf", payload))
+        raw, final = root.drawn_plain_graphs[:2]
+        self.assertEqual(raw.points[0], (center - offset, first_cell["prototype_relative_scale"]))
+        self.assertEqual(final.points[0], (center + offset, first_cell["C_final"]))
+        self.assertTrue(all("L" not in option for graph in (raw, final) for option in graph.draw_options))
+        map_legend = root.legends[-1]
+        self.assertEqual(len(map_legend.entries), 3)
+        self.assertTrue(all(object_ is not None for object_ in map_legend.objects))
+
+    def test_e72_closure_range_is_signed_and_scale_aware(self):
+        cases = (
+            (2.0e-9, 2.2e-9),
+            (-2.0e-9, -1.8e-9),
+            (-2.0e-9, 3.0e-9),
+            (0.0, 0.0),
+            (2.0e6, 2.1e6),
+        )
+        for before, after in cases:
+            with self.subTest(before=before, after=after):
+                low, high = plots._e72_closure_y_range(before, after)
+                self.assertLessEqual(low, min(0.0, before, after))
+                self.assertGreaterEqual(high, max(0.0, before, after))
+                self.assertLess(low, high)
+        tiny_low, tiny_high = plots._e72_closure_y_range(2.0e-9, 2.2e-9)
+        self.assertLess(max(abs(tiny_low), abs(tiny_high)), 1.0e-6)
+        self.assertEqual(plots._e72_closure_y_range(0.0, 0.0), (-1.0e-6, 1.0e-6))
 
     def test_e72_is_a_local_final_append_after_e7(self):
         unavailable = {"available": False, "reason": "not requested"}
