@@ -188,6 +188,12 @@ from pion_hgcer_phase_d_checkpoint import (
 from pion_hgcer_ab_combination_prototype import (
     build_pion_hgcer_ab_combination_prototype,
 )
+from pion_hgcer_parent_preserving_correction import (
+    build_pion_hgcer_parent_preserving_correction,
+    build_pion_hgcer_parent_preserving_correction_artifact,
+    pion_hgcer_parent_preserving_correction_filename,
+    write_pion_hgcer_parent_preserving_correction_json,
+)
 from full_background_subtraction_plots import (
     build_full_background_subtraction_d6_payload,
     build_full_background_subtraction_d7_payload,
@@ -7486,7 +7492,8 @@ def rand_sub(
                 )
         # Phases D.6 through D.11 and E.2 through E.6 are detached terminal
         # diagnostic/presentation work.  E.7 additionally builds a detached,
-        # non-authoritative numerical A/B prototype before terminal presentation.
+        # non-authoritative numerical A/B prototype; E.7.1 derives a detached
+        # same-t parent-preserving map from that frozen prototype and Phase A.
         # None of these products feed production subtraction, yields, or
         # ROOT-bearing downstream physics objects.
         full_background_subtraction_manifest = []
@@ -7563,6 +7570,76 @@ def rand_sub(
                     phase_d_checkpoint_for_plots
                 )
             )
+            pion_hgcer_parent_preserving_correction = (
+                build_pion_hgcer_parent_preserving_correction(
+                    pion_hgcer_ab_combination_prototype,
+                    pion_hgcer_event_contract,
+                )
+            )
+            histDict["_pion_hgcer_parent_preserving_correction"] = (
+                pion_hgcer_parent_preserving_correction
+            )
+            histDict["pion_hgcer_parent_preserving_correction_summary"] = {
+                "schema_version": pion_hgcer_parent_preserving_correction.get(
+                    "schema_version"
+                ),
+                "status": pion_hgcer_parent_preserving_correction.get("status"),
+                "available": bool(
+                    pion_hgcer_parent_preserving_correction.get("available", False)
+                ),
+                "reason": pion_hgcer_parent_preserving_correction.get("reason"),
+                "fingerprint": pion_hgcer_parent_preserving_correction.get(
+                    "fingerprint"
+                ),
+                "parent_statuses": [
+                    parent.get("parent_status")
+                    for parent in (
+                        pion_hgcer_parent_preserving_correction.get("parents") or ()
+                    )
+                    if isinstance(parent, dict)
+                ],
+            }
+            histDict["pion_hgcer_parent_preserving_correction_artifacts"] = []
+            try:
+                parent_preserving_setting = (
+                    (histDict.get("pion_hgcer_refinement_checkpoint") or {}).get(
+                        "setting"
+                    )
+                )
+                parent_preserving_artifact = (
+                    build_pion_hgcer_parent_preserving_correction_artifact(
+                        setting=parent_preserving_setting,
+                        correction=pion_hgcer_parent_preserving_correction,
+                    )
+                )
+                parent_preserving_json = os.path.join(
+                    OUTPATH,
+                    pion_hgcer_parent_preserving_correction_filename(
+                        parent_preserving_artifact["setting"]["phi_setting"],
+                        parent_preserving_artifact["setting"]["particle_type"],
+                        parent_preserving_artifact["setting"]["kinematic_token"],
+                        parent_preserving_artifact["setting"]["epsilon_filename_token"],
+                    ),
+                )
+                write_pion_hgcer_parent_preserving_correction_json(
+                    parent_preserving_json,
+                    parent_preserving_artifact,
+                )
+                histDict["pion_hgcer_parent_preserving_correction_artifacts"] = [
+                    parent_preserving_json
+                ]
+            except Exception as exc:
+                histDict["pion_hgcer_parent_preserving_correction_artifact_status"] = {
+                    "status": "unavailable",
+                    "available": False,
+                    "reason": "parent_preserving_correction_artifact_write_exception",
+                    "diagnostic_stage": "runtime_artifact_exception",
+                    "exception_type": type(exc).__name__,
+                    "exception_message": str(exc),
+                    "non_authoritative": True,
+                    "production_objects_mutated": False,
+                    "refinement_applied": False,
+                }
             full_background_subtraction_e7_payload = (
                 build_full_background_subtraction_e7_payload(
                     pion_hgcer_ab_combination_prototype
