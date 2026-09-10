@@ -1,4 +1,4 @@
-"""Collect a narrow, read-only Phase-E.3 HGCer validation review bundle.
+"""Collect a narrow, read-only Phase-E.7.2 farm-review bundle.
 
 This utility never imports the analysis runtime.  It only locates frozen
 artifacts, validates checkpoint metadata, extracts selected PDF pages, hashes
@@ -14,6 +14,7 @@ import hashlib
 import importlib
 import io
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -26,19 +27,19 @@ from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Union
 import zipfile
 
 
-COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v1"
-PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v1"
+COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v2"
+PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v2"
 DEFAULT_PROFILE_PATH = Path(__file__).with_name(
     "pion_hgcer_validation_bundle_profile.json"
 )
 
 
 class PdfPageSelectionError(ValueError):
-    """A source PDF cannot contain the fixed E.3 final-page selection."""
+    """A source PDF cannot contain the required meeting-summary pages."""
 
     def __init__(self, page_count: int):
         self.page_count = int(page_count)
-        super().__init__("pdf_page_count_too_short_for_e3")
+        super().__init__("pdf_page_count_too_short_for_meeting_summary")
 
 
 @dataclass(frozen=True)
@@ -89,12 +90,22 @@ def load_validation_profile(
     if not isinstance(artifacts, dict):
         raise ValueError("validation_bundle_profile_invalid")
     checkpoint = artifacts.get("phase_c_checkpoint")
+    phase_d = artifacts.get("phase_d_checkpoint")
+    correction = artifacts.get("parent_preserving_correction")
     procedure = artifacts.get("procedure_pdf")
-    if not isinstance(checkpoint, dict) or not isinstance(procedure, dict):
+    if (
+        not isinstance(checkpoint, dict)
+        or not isinstance(phase_d, dict)
+        or not isinstance(correction, dict)
+        or not isinstance(procedure, dict)
+    ):
         raise ValueError("validation_bundle_profile_invalid")
     for artifact, field in (
         (checkpoint, "basename_template"),
+        (phase_d, "basename_template"),
+        (correction, "basename_template"),
         (procedure, "source_basename_template"),
+        (procedure, "page_manifest_basename_template"),
         (procedure, "slim_basename_template"),
     ):
         if not isinstance(artifact.get(field), str):
@@ -125,12 +136,12 @@ def load_validation_profile(
 
 _DEFAULT_PROFILE = load_validation_profile()
 VALIDATION_PROFILE = _DEFAULT_PROFILE["validation_profile"]
-E3_FIX2_REQUIRED_COMMIT = _DEFAULT_PROFILE["source_identity"]["required_analysis_commit"]
-E3_FIX2_AUTHORIZED_SETTINGS = tuple(
+REQUIRED_ANALYSIS_COMMIT = _DEFAULT_PROFILE["source_identity"]["required_analysis_commit"]
+AUTHORIZED_SETTINGS = tuple(
     (setting["phi"], setting["epsilon"])
     for setting in _DEFAULT_PROFILE["settings"]
 )
-E3_FIX2_ALLOWED_COMMITTED_FILES = frozenset(
+ALLOWED_COMMITTED_FILES = frozenset(
     _DEFAULT_PROFILE["source_identity"]["allowed_committed_files"]
 )
 
@@ -198,11 +209,50 @@ def full_background_subtraction_basename(
     )
 
 
-def e3_validation_basename(
+def phase_d_checkpoint_basename(
     phi: str, kinematic: str, epsilon: str,
     profile: Optional[Mapping[str, Any]] = None,
 ) -> str:
-    """Return the deterministic final-three-page E.3 review-PDF basename."""
+    """Return the deterministic Phase-D checkpoint basename."""
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
+    return _format_profile_basename(
+        active["artifacts"]["phase_d_checkpoint"]["basename_template"],
+        phi, _safe_token(kinematic, "kinematic"), epsilon,
+    )
+
+
+def parent_preserving_correction_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
+    """Return the deterministic E.7.1 correction-artifact basename."""
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
+    return _format_profile_basename(
+        active["artifacts"]["parent_preserving_correction"]["basename_template"],
+        phi, _safe_token(kinematic, "kinematic"), epsilon,
+    )
+
+
+def full_background_page_manifest_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
+    """Return the renderer-owned full-background page-manifest basename."""
+    active = _DEFAULT_PROFILE if profile is None else profile
+    phi, epsilon = resolve_settings(phi, epsilon, active)[0]
+    return _format_profile_basename(
+        active["artifacts"]["procedure_pdf"]["page_manifest_basename_template"],
+        phi, _safe_token(kinematic, "kinematic"), epsilon,
+    )
+
+
+def meeting_summary_basename(
+    phi: str, kinematic: str, epsilon: str,
+    profile: Optional[Mapping[str, Any]] = None,
+) -> str:
+    """Return the deterministic four-page meeting-summary PDF basename."""
     active = _DEFAULT_PROFILE if profile is None else profile
     phi, epsilon = resolve_settings(phi, epsilon, active)[0]
     kinematic = _safe_token(kinematic, "kinematic")
@@ -216,7 +266,7 @@ def select_validation_pages(
     page_count: int,
     page_selection: Optional[Mapping[str, Any]] = None,
 ) -> list[int]:
-    """Return exactly the final three 1-based E.3 procedure-PDF pages."""
+    """Return the required final 1-based meeting-summary PDF pages."""
     if isinstance(page_count, bool) or not isinstance(page_count, int) or page_count < 1:
         raise ValueError("pdf_page_count_invalid")
     selection = (
@@ -447,7 +497,7 @@ def extract_pdf_pages(
     command_runner: CommandRunner = run_command,
     page_selection: Optional[Mapping[str, Any]] = None,
 ) -> dict[str, Any]:
-    """Extract the fixed final-three-page E.3 review set with one backend."""
+    """Extract the final meeting-summary pages with one non-raster backend."""
     if not backends:
         return {
             "available": False,
@@ -567,6 +617,37 @@ def _source_artifact(
     return result
 
 
+def _strict_json_payload(path: Path) -> Mapping[str, Any]:
+    """Load a JSON artifact while rejecting nonstandard numeric constants."""
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        parse_constant=lambda constant: (_ for _ in ()).throw(
+            ValueError("nonstandard JSON constant: {}".format(constant))
+        ),
+    )
+    if not isinstance(payload, Mapping):
+        raise ValueError("artifact root is not an object")
+    return payload
+
+
+def _setting_mismatches(
+    artifact_setting: object, setting: Mapping[str, str],
+) -> dict[str, dict[str, object]]:
+    if not isinstance(artifact_setting, Mapping):
+        return {"setting": {"expected": "mapping", "actual": artifact_setting}}
+    expected = {
+        "phi_setting": setting["phi"],
+        "epsilon_filename_token": setting["epsilon"],
+        "kinematic_token": setting["kinematic"],
+        "particle_type": "kaon",
+    }
+    return {
+        field: {"expected": expected_value, "actual": artifact_setting.get(field)}
+        for field, expected_value in expected.items()
+        if artifact_setting.get(field) != expected_value
+    }
+
+
 def _checkpoint_metadata(path: Path, setting: Mapping[str, str]) -> tuple[dict[str, Any], list[dict[str, str]]]:
     metadata: dict[str, Any] = {
         "schema_version": None,
@@ -578,16 +659,11 @@ def _checkpoint_metadata(path: Path, setting: Mapping[str, str]) -> tuple[dict[s
     }
     errors: list[dict[str, str]] = []
     try:
-        payload = json.loads(
-            path.read_text(encoding="utf-8"),
-            parse_constant=lambda constant: (_ for _ in ()).throw(
-                ValueError("nonstandard JSON constant: {}".format(constant))
-            ),
-        )
+        payload = _strict_json_payload(path)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
         errors.append({"code": "checkpoint_json_invalid", "detail": "{}: {}".format(type(exc).__name__, exc)})
         return metadata, errors
-    if not isinstance(payload, dict) or not isinstance(payload.get("setting"), dict):
+    if not isinstance(payload.get("setting"), Mapping):
         errors.append({"code": "checkpoint_json_invalid", "detail": "checkpoint setting metadata is absent"})
         return metadata, errors
     checkpoint_setting = payload["setting"]
@@ -599,22 +675,197 @@ def _checkpoint_metadata(path: Path, setting: Mapping[str, str]) -> tuple[dict[s
         "refinement_applied": payload.get("refinement_applied"),
         "metadata_status": "match",
     })
-    expected = {
-        "phi_setting": setting["phi"],
-        "epsilon_filename_token": setting["epsilon"],
-        "kinematic_token": setting["kinematic"],
-        "particle_type": "kaon",
-    }
-    mismatches = {
-        field: {"expected": expected_value, "actual": checkpoint_setting.get(field)}
-        for field, expected_value in expected.items()
-        if checkpoint_setting.get(field) != expected_value
-    }
+    mismatches = _setting_mismatches(checkpoint_setting, setting)
     if mismatches:
         metadata["metadata_status"] = "mismatch"
         metadata["mismatches"] = mismatches
         errors.append({"code": "checkpoint_metadata_mismatch", "detail": json.dumps(mismatches, sort_keys=True)})
     return metadata, errors
+
+
+def _phase_d_metadata(
+    path: Path, setting: Mapping[str, str],
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Validate the detached Phase-D authority and setting contract."""
+    metadata: dict[str, Any] = {"metadata_status": "invalid"}
+    errors: list[dict[str, str]] = []
+    try:
+        payload = _strict_json_payload(path)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        return metadata, [{"code": "checkpoint_json_invalid", "detail": "{}: {}".format(type(exc).__name__, exc)}]
+    metadata.update({"schema_version": payload.get("schema_version"), "setting": payload.get("setting")})
+    mismatches = _setting_mismatches(payload.get("setting"), setting)
+    flags_valid = (
+        payload.get("schema_version") == "pion_hgcer_phase_d_checkpoint/v1"
+        and payload.get("non_authoritative") is True
+        and payload.get("decision_performed") is False
+        and payload.get("statistical_compatibility_claimed") is False
+        and payload.get("production_objects_mutated") is False
+        and payload.get("refinement_applied") is False
+    )
+    if mismatches or not flags_valid:
+        metadata["metadata_status"] = "mismatch"
+        if mismatches:
+            metadata["mismatches"] = mismatches
+        errors.append({
+            "code": "checkpoint_metadata_mismatch",
+            "detail": "phase_d_contract_invalid" if not mismatches else json.dumps(mismatches, sort_keys=True),
+        })
+    else:
+        metadata["metadata_status"] = "match"
+    return metadata, errors
+
+
+def _parent_preserving_metadata(
+    path: Path, setting: Mapping[str, str],
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Validate E.7.1's frozen wrapper, correction, lattice, and closures."""
+    metadata: dict[str, Any] = {"metadata_status": "invalid"}
+    try:
+        payload = _strict_json_payload(path)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        return metadata, [{"code": "checkpoint_json_invalid", "detail": "{}: {}".format(type(exc).__name__, exc)}]
+    correction = payload.get("correction")
+    mismatches = _setting_mismatches(payload.get("setting"), setting)
+    wrapper_flags = all(payload.get(key) is expected for key, expected in (
+        ("non_authoritative", True),
+        ("production_objects_mutated", False),
+        ("refinement_applied", False),
+        ("production_application_performed", False),
+        ("event_application_performed", False),
+    ))
+    correction_flags = isinstance(correction, Mapping) and all(correction.get(key) is expected for key, expected in (
+        ("available", True),
+        ("non_authoritative", True),
+        ("production_objects_mutated", False),
+        ("refinement_applied", False),
+        ("production_application_performed", False),
+        ("event_application_performed", False),
+    ))
+    parents = correction.get("parents") if isinstance(correction, Mapping) else None
+    cells = correction.get("cells") if isinstance(correction, Mapping) else None
+    parents_valid = isinstance(parents, list) and bool(parents) and all(
+        isinstance(parent, Mapping) and parent.get("closure_passed") is True
+        for parent in parents
+    )
+    t_edges = correction.get("t_edges") if isinstance(correction, Mapping) else None
+    delta_edges = correction.get("delta_edges") if isinstance(correction, Mapping) else None
+    geometry_valid = all(
+        isinstance(edges, list)
+        and len(edges) >= 2
+        and all(
+            isinstance(value, (int, float)) and not isinstance(value, bool)
+            and math.isfinite(float(value))
+            for value in edges
+        )
+        and all(float(edges[index]) < float(edges[index + 1]) for index in range(len(edges) - 1))
+        for edges in (t_edges, delta_edges)
+    )
+    expected_keys = {
+        (t_index, delta_index)
+        for t_index in range(len(t_edges) - 1)
+        for delta_index in range(len(delta_edges) - 1)
+    } if geometry_valid else set()
+    observed_keys: set[tuple[int, int]] = set()
+    cells_valid = isinstance(cells, list) and bool(cells) and geometry_valid
+    if cells_valid:
+        for cell in cells:
+            if not isinstance(cell, Mapping):
+                cells_valid = False
+                break
+            t_index = cell.get("t_index")
+            delta_index = cell.get("delta_index")
+            if (
+                isinstance(t_index, bool) or not isinstance(t_index, int)
+                or isinstance(delta_index, bool) or not isinstance(delta_index, int)
+                or (t_index, delta_index) in observed_keys
+            ):
+                cells_valid = False
+                break
+            observed_keys.add((t_index, delta_index))
+        cells_valid = cells_valid and observed_keys == expected_keys
+    correction_valid = (
+        correction_flags
+        and correction.get("schema_version") == "pion_hgcer_parent_preserving_correction/v1"
+        and correction.get("status") == "available"
+        and isinstance(correction.get("fingerprint"), str)
+        and bool(correction["fingerprint"])
+        and parents_valid
+        and cells_valid
+    )
+    metadata.update({
+        "schema_version": payload.get("schema_version"),
+        "setting": payload.get("setting"),
+        "correction_fingerprint": correction.get("fingerprint") if isinstance(correction, Mapping) else None,
+        "parent_statuses": [parent.get("status") for parent in parents] if isinstance(parents, list) else [],
+        "parent_closure_passed": [parent.get("closure_passed") for parent in parents] if isinstance(parents, list) else [],
+        "refinable_cell_counts": [parent.get("refinable_cell_count") for parent in parents] if isinstance(parents, list) else [],
+    })
+    if (
+        payload.get("schema_version") != "pion_hgcer_parent_preserving_correction_artifact/v1"
+        or not wrapper_flags
+        or mismatches
+        or not correction_valid
+    ):
+        metadata["metadata_status"] = "mismatch"
+        if mismatches:
+            metadata["mismatches"] = mismatches
+        return metadata, [{"code": "checkpoint_metadata_mismatch", "detail": "parent_preserving_correction_contract_invalid"}]
+    metadata["metadata_status"] = "match"
+    return metadata, []
+
+
+_E72_PAGE_IDS = (
+    "full_background.e72.meeting_overview",
+    "full_background.e72.ab_evidence_summary",
+    "full_background.e72.parent_preserving_map_summary",
+    "full_background.e72.parent_closure_summary",
+)
+
+
+def _page_manifest_metadata(
+    path: Path, setting: Mapping[str, str], pdf_basename: str,
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Validate the renderer-owned sidecar before accepting final-page extraction."""
+    metadata: dict[str, Any] = {"metadata_status": "invalid"}
+    try:
+        payload = _strict_json_payload(path)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        return metadata, [{"code": "checkpoint_json_invalid", "detail": "{}: {}".format(type(exc).__name__, exc)}]
+    pages = payload.get("pages")
+    failures = payload.get("renderer_failures")
+    mismatches = _setting_mismatches(payload.get("setting"), setting)
+    terminal = pages[-4:] if isinstance(pages, list) else []
+    terminal_valid = len(terminal) == 4 and all(
+        isinstance(entry, Mapping)
+        and entry.get("page_id") == page_id
+        and entry.get("scope") == "setting"
+        and entry.get("authoritative") is False
+        for entry, page_id in zip(terminal, _E72_PAGE_IDS)
+    )
+    e72_failure = isinstance(failures, list) and any(
+        str(failure).startswith("E.7.2:") for failure in failures
+    )
+    valid = (
+        payload.get("schema_version") == "full_background_subtraction_page_manifest/v1"
+        and not mismatches
+        and payload.get("pdf_basename") == pdf_basename
+        and isinstance(pages, list)
+        and isinstance(failures, list)
+        and terminal_valid
+        and not e72_failure
+    )
+    metadata.update({
+        "schema_version": payload.get("schema_version"),
+        "setting": payload.get("setting"),
+        "pdf_basename": payload.get("pdf_basename"),
+        "page_count": len(pages) if isinstance(pages, list) else None,
+        "renderer_failures": failures if isinstance(failures, list) else None,
+        "metadata_status": "match" if valid else "mismatch",
+    })
+    if not valid:
+        return metadata, [{"code": "checkpoint_metadata_mismatch", "detail": "full_background_page_manifest_contract_invalid"}]
+    return metadata, []
 
 
 def _format_command_records(records: Sequence[Mapping[str, Any]]) -> str:
@@ -650,9 +901,9 @@ def collect_source_checks(
     repo_root: Path,
     command_runner: CommandRunner = run_command,
     *,
-    required_analysis_commit: str = E3_FIX2_REQUIRED_COMMIT,
+    required_analysis_commit: str = REQUIRED_ANALYSIS_COMMIT,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Run the required E.3.Fix.2 source and committed-identity checks."""
+    """Run the detached E.7.2 farm-gate source and identity checks."""
     checks = (
         (
             "required_analysis_commit_ancestor",
@@ -673,7 +924,11 @@ def collect_source_checks(
             [
                 sys.executable, "-m", "py_compile",
                 "src/cuts/full_background_subtraction_plots.py",
+                "src/cuts/rand_sub.py",
+                "src/cuts/pion_hgcer_parent_preserving_correction.py",
                 "testing/test_full_background_subtraction_plots.py",
+                "testing/test_pion_hgcer_parent_preserving_correction.py",
+                "testing/test_pion_hgcer_phase_e_runtime_contract.py",
                 "testing/collect_pion_hgcer_validation_bundle.py",
                 "testing/test_collect_pion_hgcer_validation_bundle.py",
             ],
@@ -683,8 +938,20 @@ def collect_source_checks(
             [sys.executable, "-m", "unittest", "testing.test_full_background_subtraction_plots"],
         ),
         (
-            "hgcer_refinement_plots_unittest",
-            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_refinement_plots"],
+            "parent_preserving_correction_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_parent_preserving_correction"],
+        ),
+        (
+            "phase_e_runtime_contract_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_phase_e_runtime_contract"],
+        ),
+        (
+            "ab_combination_prototype_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_ab_combination_prototype"],
+        ),
+        (
+            "pion_hgcer_event_contract_unittest",
+            [sys.executable, "-m", "unittest", "testing.test_pion_hgcer_event_contract"],
         ),
         (
             "validation_bundle_collector_unittest",
@@ -694,6 +961,10 @@ def collect_source_checks(
             ],
         ),
         ("git_diff_check", ["git", "diff", "--check"]),
+        (
+            "git_diff_check_required_analysis_commit_range",
+            ["git", "diff", "--check", "{}..HEAD".format(required_analysis_commit)],
+        ),
     )
     records: list[dict[str, Any]] = []
     for name, command in checks:
@@ -705,7 +976,7 @@ def collect_source_checks(
 
 def _committed_identity(
     source_checks: Sequence[Mapping[str, Any]],
-    allowed_committed_files: Iterable[str] = E3_FIX2_ALLOWED_COMMITTED_FILES,
+    allowed_committed_files: Iterable[str] = ALLOWED_COMMITTED_FILES,
 ) -> tuple[bool, list[str], list[str]]:
     """Return the frozen-base ancestry result and committed post-base paths."""
     by_name = {str(record.get("name")): record for record in source_checks}
@@ -770,7 +1041,16 @@ def collect_validation_bundle(
             source_root / checkpoint_basename(
                 selected_phi, kinematic, selected_epsilon, profile
             ),
+            source_root / phase_d_checkpoint_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            ),
+            source_root / parent_preserving_correction_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            ),
             source_root / full_background_subtraction_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            ),
+            source_root / full_background_page_manifest_basename(
                 selected_phi, kinematic, selected_epsilon, profile
             ),
         ))
@@ -833,7 +1113,7 @@ def collect_validation_bundle(
     }
 
     staging_descriptor, staging_name = tempfile.mkstemp(
-        prefix=".kaonlt-e3-validation-", suffix=".zip", dir=output_path.parent
+        prefix=".kaonlt-e7-review-", suffix=".zip", dir=output_path.parent
     )
     os.close(staging_descriptor)
     staging_path = Path(staging_name)
@@ -841,6 +1121,27 @@ def collect_validation_bundle(
         cleanup.callback(staging_path.unlink, missing_ok=True)
         archive = zipfile.ZipFile(staging_path, "w", compression=zipfile.ZIP_DEFLATED)
         cleanup.callback(archive.close)
+        def record_json_artifact(
+            setting_manifest: dict[str, Any], setting: Mapping[str, str],
+            key: str, path: Path, validator: Callable[[Path, Mapping[str, str]], tuple[dict[str, Any], list[dict[str, str]]]],
+            directory: str,
+        ) -> bool:
+            archive_path = "{}/{}".format(directory, path.name)
+            record = _source_artifact(path, archive_path, key)
+            setting_manifest["artifacts"][key] = record
+            if record["status"] != "exists":
+                code = "missing_source_artifact" if record["status"] == "missing" else "source_artifact_unreadable"
+                _issue(issues, code, setting=setting, artifact=key, detail=record.get("error"))
+                setting_manifest["errors"].append(code)
+                return False
+            archive.writestr(archive_path, path.read_bytes())
+            metadata, metadata_errors = validator(path, setting)
+            record["metadata"] = metadata
+            for error in metadata_errors:
+                _issue(issues, error["code"], setting=setting, artifact=key, detail=error["detail"])
+                setting_manifest["errors"].append(error["code"])
+            return not metadata_errors
+
         for selected_phi, selected_epsilon in selected:
             setting = {"phi": selected_phi, "epsilon": selected_epsilon, "kinematic": kinematic}
             directory = "{}_{}".format(selected_phi, selected_epsilon)
@@ -848,12 +1149,20 @@ def collect_validation_bundle(
             checkpoint_path = source_root / checkpoint_basename(
                 selected_phi, kinematic, selected_epsilon, profile
             )
+            phase_d_path = source_root / phase_d_checkpoint_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            )
+            correction_path = source_root / parent_preserving_correction_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            )
             full_background_path = source_root / full_background_subtraction_basename(
                 selected_phi, kinematic, selected_epsilon, profile
             )
-            checkpoint_archive = "{}/{}".format(directory, checkpoint_path.name)
+            page_manifest_path = source_root / full_background_page_manifest_basename(
+                selected_phi, kinematic, selected_epsilon, profile
+            )
             slim_archive = "{}/{}".format(
-                directory, e3_validation_basename(
+                directory, meeting_summary_basename(
                     selected_phi, kinematic, selected_epsilon, profile
                 )
             )
@@ -865,24 +1174,37 @@ def collect_validation_bundle(
                 "errors": [],
             }
 
-            checkpoint = _source_artifact(checkpoint_path, checkpoint_archive, "phase_c_checkpoint")
-            setting_manifest["artifacts"]["phase_c_checkpoint"] = checkpoint
-            if checkpoint["status"] != "exists":
-                code = "missing_source_artifact" if checkpoint["status"] == "missing" else "source_artifact_unreadable"
-                _issue(issues, code, setting=setting, artifact="phase_c_checkpoint", detail=checkpoint.get("error"))
-                setting_manifest["errors"].append(code)
-            else:
-                archive.writestr(checkpoint_archive, checkpoint_path.read_bytes())
-                metadata, metadata_errors = _checkpoint_metadata(checkpoint_path, setting)
-                checkpoint["checkpoint_metadata"] = metadata
-                for error in metadata_errors:
-                    _issue(issues, error["code"], setting=setting, artifact="phase_c_checkpoint", detail=error["detail"])
-                    setting_manifest["errors"].append(error["code"])
+            record_json_artifact(
+                setting_manifest, setting, "phase_c_checkpoint", checkpoint_path,
+                _checkpoint_metadata, directory,
+            )
+            record_json_artifact(
+                setting_manifest, setting, "phase_d_checkpoint", phase_d_path,
+                _phase_d_metadata, directory,
+            )
+            record_json_artifact(
+                setting_manifest, setting, "parent_preserving_correction", correction_path,
+                _parent_preserving_metadata, directory,
+            )
+            page_manifest_valid = record_json_artifact(
+                setting_manifest, setting, "full_background_page_manifest", page_manifest_path,
+                lambda path, selected_setting: _page_manifest_metadata(
+                    path, selected_setting, full_background_path.name,
+                ), directory,
+            )
 
             full_background = _source_artifact(
                 full_background_path, None, "full_background_subtraction_pdf"
             )
             setting_manifest["artifacts"]["full_background_subtraction_pdf"] = full_background
+            meeting_summary: dict[str, Any] = {
+                "artifact": "meeting_summary_pdf",
+                "archive_path": slim_archive,
+                "status": "unavailable",
+                "byte_size": None,
+                "sha256": None,
+            }
+            setting_manifest["artifacts"]["meeting_summary_pdf"] = meeting_summary
             if full_background["status"] != "exists":
                 code = (
                     "missing_source_artifact"
@@ -895,6 +1217,8 @@ def collect_validation_bundle(
                     detail=full_background.get("error"),
                 )
                 setting_manifest["errors"].append(code)
+            elif not page_manifest_valid:
+                meeting_summary["error"] = "full_background_page_manifest_invalid"
             else:
                 extraction = extract_pdf_pages(
                     full_background_path,
@@ -907,27 +1231,40 @@ def collect_validation_bundle(
                     full_background["original_page_count"] = extraction["page_count"]
                 if "pages" in extraction:
                     full_background["extracted_pages"] = extraction["pages"]
+                page_manifest_record = setting_manifest["artifacts"]["full_background_page_manifest"]
+                expected_page_count = page_manifest_record["metadata"]["page_count"]
+                if extraction["available"] and extraction["page_count"] != expected_page_count:
+                    extraction["available"] = False
+                    extraction["error_code"] = "checkpoint_metadata_mismatch"
+                    extraction.pop("payload", None)
+                    _issue(
+                        issues, "checkpoint_metadata_mismatch", setting=setting,
+                        artifact="full_background_subtraction_pdf",
+                        detail="source PDF page count does not match renderer page manifest",
+                    )
+                    setting_manifest["errors"].append("checkpoint_metadata_mismatch")
                 if extraction["available"]:
                     slim_payload = extraction["payload"]
                     archive.writestr(slim_archive, slim_payload)
                     full_background.update({
                         "original_page_count": extraction["page_count"],
                         "extracted_pages": extraction["pages"],
-                        "slim_pdf": {
-                            "archive_path": slim_archive,
-                            "byte_size": len(slim_payload),
-                            "sha256": sha256_bytes(slim_payload),
-                            "backend": extraction["backend"],
-                            "backend_identity": extraction["backend_identity"],
-                        },
+                    })
+                    meeting_summary.update({
+                        "status": "exists",
+                        "byte_size": len(slim_payload),
+                        "sha256": sha256_bytes(slim_payload),
+                        "backend": extraction["backend"],
+                        "backend_identity": extraction["backend_identity"],
                     })
                 else:
                     full_background["extraction_error"] = extraction["error_code"]
-                    _issue(
-                        issues, extraction["error_code"], setting=setting,
-                        artifact="full_background_subtraction_pdf",
-                    )
-                    setting_manifest["errors"].append(extraction["error_code"])
+                    if extraction["error_code"] != "checkpoint_metadata_mismatch":
+                        _issue(
+                            issues, extraction["error_code"], setting=setting,
+                            artifact="full_background_subtraction_pdf",
+                        )
+                        setting_manifest["errors"].append(extraction["error_code"])
             manifest["settings"].append(setting_manifest)
 
         manifest["complete"] = not issues

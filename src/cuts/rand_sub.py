@@ -206,10 +206,14 @@ from full_background_subtraction_plots import (
     build_full_background_subtraction_e4_payload,
     build_full_background_subtraction_e6_payload,
     build_full_background_subtraction_e7_payload,
+    build_full_background_subtraction_e72_payload,
+    build_full_background_subtraction_page_manifest_artifact,
     close_full_background_subtraction_pdf,
+    full_background_subtraction_page_manifest_filename,
     full_background_subtraction_pdf_path,
     open_full_background_subtraction_pdf,
     render_full_background_subtraction_procedure_pages,
+    write_full_background_subtraction_page_manifest_json,
 )
 from pion_hgcer_refinement_plots import (
     build_pdf_destinations,
@@ -7494,6 +7498,9 @@ def rand_sub(
         # diagnostic/presentation work.  E.7 additionally builds a detached,
         # non-authoritative numerical A/B prototype; E.7.1 derives a detached
         # same-t parent-preserving map from that frozen prototype and Phase A.
+        # E.7.2 only presents those frozen E.7/E.7.1 values and persists the
+        # renderer-owned page manifest after the procedure PDF is closed.
+        # E.7.2 appends a detached meeting summary and page-provenance sidecar.
         # None of these products feed production subtraction, yields, or
         # ROOT-bearing downstream physics objects.
         full_background_subtraction_manifest = []
@@ -7646,6 +7653,19 @@ def rand_sub(
                 )
             )
             if (
+                full_background_subtraction_e7_payload is None
+            ):
+                full_background_subtraction_e7_payload = {
+                    "available": False,
+                    "reason": "e7_presentation_payload_missing",
+                }
+            full_background_subtraction_e72_payload = (
+                build_full_background_subtraction_e72_payload(
+                    full_background_subtraction_e7_payload,
+                    pion_hgcer_parent_preserving_correction,
+                )
+            )
+            if (
                 not full_background_subtraction_d6_payload.get("available")
                 and not full_background_subtraction_d7_payload.get("available")
                 and not full_background_subtraction_d8_payload.get("available")
@@ -7657,6 +7677,7 @@ def rand_sub(
                 and not full_background_subtraction_e4_payload.get("available")
                 and not full_background_subtraction_e6_payload.get("available")
                 and not full_background_subtraction_e7_payload.get("available")
+                and not full_background_subtraction_e72_payload.get("available")
             ):
                 full_background_subtraction_failures.extend((
                     "D.6 procedure input unavailable: {}".format(
@@ -7692,6 +7713,9 @@ def rand_sub(
                     "E.7 procedure input unavailable: {}".format(
                         full_background_subtraction_e7_payload.get("reason")
                     ),
+                    "E.7.2: procedure input unavailable: {}".format(
+                        full_background_subtraction_e72_payload.get("reason")
+                    ),
                 ))
             else:
                 full_background_subtraction_open = (
@@ -7718,6 +7742,7 @@ def rand_sub(
                             e4_payload=full_background_subtraction_e4_payload,
                             e6_payload=full_background_subtraction_e6_payload,
                             e7_payload=full_background_subtraction_e7_payload,
+                            e72_payload=full_background_subtraction_e72_payload,
                             page_manifest=full_background_subtraction_manifest,
                         )
                     )
@@ -7731,7 +7756,7 @@ def rand_sub(
                 )
             )
             _print_rand_debug(
-                "detached full background-subtraction D.6 through D.11 and E.2 through E.7 pages unavailable",
+                "detached full background-subtraction D.6 through D.11 and E.2 through E.7.2 pages unavailable",
                 renderer="full_background_subtraction_plots",
                 exception_type=type(exc).__name__,
                 exception=str(exc),
@@ -7748,6 +7773,40 @@ def rand_sub(
                             type(exc).__name__, exc
                         )
                     )
+        try:
+            full_background_page_manifest_setting = (
+                (histDict.get("pion_hgcer_refinement_checkpoint") or {}).get(
+                    "setting"
+                )
+            )
+            full_background_page_manifest_artifact = (
+                build_full_background_subtraction_page_manifest_artifact(
+                    setting=full_background_page_manifest_setting,
+                    pdf_basename=os.path.basename(full_background_subtraction_pdf),
+                    pages=full_background_subtraction_manifest,
+                    renderer_failures=full_background_subtraction_failures,
+                )
+            )
+            full_background_page_manifest_path = os.path.join(
+                OUTPATH,
+                full_background_subtraction_page_manifest_filename(
+                    full_background_page_manifest_artifact["setting"]["phi_setting"],
+                    full_background_page_manifest_artifact["setting"]["kinematic_token"],
+                    full_background_page_manifest_artifact["setting"][
+                        "epsilon_filename_token"
+                    ],
+                ),
+            )
+            write_full_background_subtraction_page_manifest_json(
+                full_background_page_manifest_path,
+                full_background_page_manifest_artifact,
+            )
+        except Exception as exc:
+            full_background_subtraction_failures.append(
+                "full background-subtraction page manifest sidecar: {}: {}".format(
+                    type(exc).__name__, exc
+                )
+            )
         histDict["full_background_subtraction_page_manifest"] = [
             dict(page) for page in full_background_subtraction_manifest
         ]

@@ -1,6 +1,6 @@
 {
-  "schema_version": "pion_hgcer_validation_bundle_profile/v1",
-  "validation_profile": "phase_e3_fix2_full_five_setting_farm_review/v1",
+  "schema_version": "pion_hgcer_validation_bundle_profile/v2",
+  "validation_profile": "phase_e7_1_batched_farm_meeting_review/v1",
   "settings": [
     {
       "phi": "Left",
@@ -27,18 +27,28 @@
     "phase_c_checkpoint": {
       "basename_template": "{phi}_kaon_pion-background_hgcer_refinement_checkpoint_{kinematic}_{epsilon}.json"
     },
+    "phase_d_checkpoint": {
+      "basename_template": "{phi}_kaon_pion-background_hgcer_ab_comparison_{kinematic}_{epsilon}.json"
+    },
+    "parent_preserving_correction": {
+      "basename_template": "{phi}_kaon_pion-background_hgcer_parent-preserving-correction_{kinematic}_{epsilon}.json"
+    },
     "procedure_pdf": {
       "source_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction.pdf",
-      "slim_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_E3-validation.pdf",
+      "page_manifest_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction-manifest.json",
+      "slim_basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_meeting-summary.pdf",
       "page_selection": {
         "kind": "final_pages",
-        "count": 3
+        "count": 4
       }
     }
   },
   "source_identity": {
-    "required_analysis_commit": "eb1710f4739ba6ef14f51419806e9fc5bd53c175",
+    "required_analysis_commit": "5795b73bb97c73379948efe6c03ea8ee2a5cabd4",
     "allowed_committed_files": [
+      "src/cuts/full_background_subtraction_plots.py",
+      "src/cuts/rand_sub.py",
+      "testing/test_full_background_subtraction_plots.py",
       "testing/collect_pion_hgcer_validation_bundle.py",
       "testing/test_collect_pion_hgcer_validation_bundle.py",
       "testing/pion_hgcer_validation_bundle_profile.json"

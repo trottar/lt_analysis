@@ -14,6 +14,7 @@ import json
 import math
 import os
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 
 from canonical_binning import find_canonical_bin
 from pion_component_subtraction import simc_shape_pion_weight_from_value
@@ -30,6 +31,10 @@ E3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e3/v1"
 E4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e4/v1"
 E6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e6/v1"
 E7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e7/v1"
+E72_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e72/v1"
+FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION = (
+    "full_background_subtraction_page_manifest/v1"
+)
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
 _TIMING_T_METHOD = "timing_t_event_weight"
@@ -4054,10 +4059,10 @@ def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
-    e7_payload=None,
+    e7_payload=None, e72_payload=None,
     page_manifest=None,
 ):
-    """Append D.6-E.2 groups, then final E.3, E.4, E.6, and E.7 groups."""
+    """Append D.6-E.2 groups, then final E.3, E.4, E.6, E.7, and E.7.2 pages."""
     manifest = page_manifest if isinstance(page_manifest, list) else []
     result = {"manifest": manifest, "failures": []}
     d6 = _mapping(d6_payload)
@@ -4071,6 +4076,7 @@ def render_full_background_subtraction_procedure_pages(
     e4 = _mapping(e4_payload)
     e6 = _mapping(e6_payload)
     e7 = _mapping(e7_payload)
+    e72 = _mapping(e72_payload)
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_requested = d8_payload is not None
@@ -4091,7 +4097,9 @@ def render_full_background_subtraction_procedure_pages(
     e6_available = bool(e6.get("available"))
     e7_requested = e7_payload is not None
     e7_available = bool(e7.get("available"))
-    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available and not e7_available:
+    e72_requested = e72_payload is not None
+    e72_available = bool(e72.get("available"))
+    if not d6_available and not d7_available and not d8_available and not d9_available and not d10_available and not d11_available and not e2_available and not e3_available and not e4_available and not e6_available and not e7_available and not e72_available:
         if d6_payload is not None:
             result["failures"].append(
                 "D.6 procedure input unavailable: {}".format(d6.get("reason"))
@@ -4135,6 +4143,10 @@ def render_full_background_subtraction_procedure_pages(
         if e7_requested:
             result["failures"].append(
                 "E.7 procedure input unavailable: {}".format(e7.get("reason"))
+            )
+        if e72_requested:
+            result["failures"].append(
+                "E.7.2: procedure input unavailable: {}".format(e72.get("reason"))
             )
         return result
     if not d6_available:
@@ -4180,6 +4192,10 @@ def render_full_background_subtraction_procedure_pages(
     if e7_requested and not e7_available:
         result["failures"].append(
             "E.7 procedure input unavailable: {}".format(e7.get("reason"))
+        )
+    if e72_requested and not e72_available:
+        result["failures"].append(
+            "E.7.2: procedure input unavailable: {}".format(e72.get("reason"))
         )
     if d6_available and d7_available and list(d6.get("t_edges") or ()) != list(d7.get("t_edges") or ()):
         result["failures"].append("D.6/D.7 canonical t geometry mismatch")
@@ -4326,6 +4342,18 @@ def render_full_background_subtraction_procedure_pages(
     ):
         result["failures"].append("E.7 frozen procedure geometry mismatch")
         e7_available = False
+    if e72_available and not e7_available:
+        result["failures"].append(
+            "E.7.2: frozen E.7 parent unavailable after procedure validation"
+        )
+        e72_available = False
+    e72_geometry_reference = geometry_owner if geometry_owner is not None else e7
+    if e72_available and e72_geometry_reference is not None and (
+        list(e72_geometry_reference.get("t_edges") or ()) != list(e72.get("t_edges") or ())
+        or list(e72_geometry_reference.get("delta_edges") or ()) != list(e72.get("delta_edges") or ())
+    ):
+        result["failures"].append("E.7.2: frozen procedure geometry mismatch")
+        e72_available = False
     ROOT = _import_root()
     if ROOT is None:
         result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
@@ -4550,6 +4578,8 @@ def render_full_background_subtraction_procedure_pages(
         e7_edges = list(e7.get("t_edges") or ())
         for t_index in range(max(0, len(e7_edges) - 1)):
             render_e7_group(t_index)
+    if e72_available:
+        _render_e72_setting_pages(ROOT, pdf_name, e72, manifest, result["failures"])
     return result
 
 
@@ -6493,6 +6523,782 @@ def _render_e7_t_pages(ROOT, pdf_name, presentation, group, manifest, failures):
         failures.append("E.7 equal-log prototype page unavailable for t{}".format(t_number))
 
 
+def _e72_unavailable(reason):
+    """Return an E.7.2-local unavailable payload without source aliases."""
+    return {
+        "schema_version": E72_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "prototype_fingerprint": None,
+        "phase_a_contract_fingerprint": None,
+        "coordinate_fingerprint": None,
+        "host_state": None,
+        "source_target_state": None,
+        "t_edges": [],
+        "delta_edges": [],
+        "per_t": (),
+    }
+
+
+def _e72_json_copy(value):
+    """Detach JSON-safe presentation data while rejecting non-frozen values."""
+    try:
+        return json.loads(json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+            allow_nan=False,
+        ))
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _e72_parent_status_label(status):
+    return {
+        "available_parent_preserved": "parent-preserved map",
+        "identity_no_refinable_cells": "identity: no refinable cells",
+        "identity_single_refinable_cell": "identity: only one refinable cell",
+        "identity_parent_normalization_unavailable": "identity: normalization unavailable",
+    }.get(status, "stored parent status: {}".format(status))
+
+
+def _e72_parent_record(value, t_edges, t_index):
+    parent = _mapping(value)
+    required = (
+        "t_index", "t_low", "t_high", "refinable_cell_count",
+        "normalization_divisor", "canonical_baseline_before",
+        "canonical_baseline_after", "outside_delta_baseline",
+        "closure_difference", "closure_tolerance", "closure_passed",
+        "parent_status", "parent_reason",
+    )
+    if not parent or any(key not in parent for key in required):
+        return None
+    if (
+        _d11_integer(parent["t_index"]) != t_index
+        or not _d11_serialized_equal(parent["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(parent["t_high"], t_edges[t_index + 1])
+        or _d11_integer(parent["refinable_cell_count"]) is None
+        or _d11_integer(parent["refinable_cell_count"]) < 0
+        or parent["closure_passed"] is not True
+        or not isinstance(parent["parent_status"], str)
+        or not parent["parent_status"]
+    ):
+        return None
+    for field in (
+        "canonical_baseline_before", "canonical_baseline_after",
+        "outside_delta_baseline", "closure_difference", "closure_tolerance",
+    ):
+        if _d11_finite(parent[field]) is None:
+            return None
+    if parent["normalization_divisor"] is not None and _d11_finite(
+        parent["normalization_divisor"]
+    ) is None:
+        return None
+    copied = _e72_json_copy({key: parent[key] for key in required})
+    return copied
+
+
+def _e72_e7_cell(value, t_edges, delta_edges):
+    cell = _mapping(value)
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "method_a", "method_b", "comparison", "prototype_status",
+        "prototype_reason", "prototype_relative_scale",
+    )
+    if not cell or any(key not in cell for key in required):
+        return None
+    t_index = _d11_integer(cell["t_index"])
+    delta_index = _d11_integer(cell["delta_index"])
+    if (
+        t_index is None or delta_index is None
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _d11_serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+    ):
+        return None
+    method_a = _mapping(cell["method_a"])
+    method_b = _mapping(cell["method_b"])
+    comparison = _mapping(cell["comparison"])
+    if any(key not in method_a for key in ("present", "candidate", "low", "high", "status")) or any(
+        key not in method_b for key in ("present", "candidate", "uncertainty", "status")
+    ) or any(key not in comparison for key in (
+        "availability", "ratio_B_over_A", "log_ratio_B_over_A",
+        "diagnostic_interval_relation",
+    )):
+        return None
+    if (
+        method_a.get("present") is True
+        and any(_d11_finite(method_a.get(key)) is None for key in ("candidate", "low", "high"))
+    ):
+        return None
+    if method_b.get("present") is True and any(
+        _d11_finite(method_b.get(key)) is None for key in ("candidate", "uncertainty")
+    ):
+        return None
+    if comparison.get("availability") not in _D11_AVAILABILITY_LABELS:
+        return None
+    status = cell["prototype_status"]
+    scale = cell["prototype_relative_scale"]
+    if status == "available":
+        if _d11_finite(scale) is None or _d11_finite(scale) <= 0.0:
+            return None
+    elif status == "unavailable":
+        if scale is not None:
+            return None
+    else:
+        return None
+    copied = _e72_json_copy({key: cell[key] for key in required})
+    return copied
+
+
+def _e72_correction_cell(value, t_edges, delta_edges):
+    cell = _mapping(value)
+    required = (
+        "t_index", "t_low", "t_high", "delta_index", "delta_low", "delta_high",
+        "e7_prototype_status", "e7_prototype_reason", "e7_raw_relative_scale",
+        "e7_comparison_availability", "refinable", "baseline_record_count",
+        "baseline_signed_sum", "baseline_absolute_support", "baseline_sumw2",
+        "baseline_neff", "parent_normalization_divisor", "C_final",
+        "C_final_status", "C_final_reason", "uncertainty",
+    )
+    if not cell or any(key not in cell for key in required):
+        return None
+    t_index = _d11_integer(cell["t_index"])
+    delta_index = _d11_integer(cell["delta_index"])
+    if (
+        t_index is None or delta_index is None
+        or not 0 <= t_index < len(t_edges) - 1
+        or not 0 <= delta_index < len(delta_edges) - 1
+        or not _d11_serialized_equal(cell["t_low"], t_edges[t_index])
+        or not _d11_serialized_equal(cell["t_high"], t_edges[t_index + 1])
+        or not _d11_serialized_equal(cell["delta_low"], delta_edges[delta_index])
+        or not _d11_serialized_equal(cell["delta_high"], delta_edges[delta_index + 1])
+        or not isinstance(cell["refinable"], bool)
+        or cell["uncertainty"] is not None
+        or _d11_finite(cell["C_final"]) is None
+    ):
+        return None
+    for field in (
+        "baseline_signed_sum", "baseline_absolute_support", "baseline_sumw2",
+        "baseline_neff",
+    ):
+        if _d11_finite(cell[field]) is None:
+            return None
+    if _d11_integer(cell["baseline_record_count"]) is None:
+        return None
+    raw_scale = cell["e7_raw_relative_scale"]
+    if cell["e7_prototype_status"] == "available":
+        if _d11_finite(raw_scale) is None or _d11_finite(raw_scale) <= 0.0:
+            return None
+    elif cell["e7_prototype_status"] == "unavailable":
+        if raw_scale is not None:
+            return None
+    else:
+        return None
+    if cell["parent_normalization_divisor"] is not None and _d11_finite(
+        cell["parent_normalization_divisor"]
+    ) is None:
+        return None
+    return _e72_json_copy({key: cell[key] for key in required})
+
+
+def build_full_background_subtraction_e72_payload(e7_payload, parent_preserving_correction):
+    """Create a detached E.7.2 meeting summary from stored E.7/E.7.1 values."""
+    e7 = _mapping(e7_payload)
+    correction = _mapping(parent_preserving_correction)
+    e7_required = (
+        "schema_version", "available", "reason", "non_authoritative",
+        "production_objects_mutated", "prototype_fingerprint",
+        "phase_a_contract_fingerprint", "coordinate_fingerprint", "host_state",
+        "source_target_state", "t_edges", "delta_edges", "per_t",
+    )
+    correction_required = (
+        "schema_version", "status", "available", "reason", "non_authoritative",
+        "production_objects_mutated", "refinement_applied",
+        "production_application_performed", "event_application_performed",
+        "source_ab_combination_prototype_fingerprint", "phase_a_contract_fingerprint",
+        "coordinate_fingerprint", "host_state", "source_target_state", "t_edges",
+        "delta_edges", "parents", "cells",
+    )
+    if (
+        not e7 or any(key not in e7 for key in e7_required)
+        or not correction or any(key not in correction for key in correction_required)
+    ):
+        return _e72_unavailable("e72_parent_contract_invalid")
+    t_edges = _strict_edges(e7["t_edges"])
+    delta_edges = _strict_edges(e7["delta_edges"])
+    if (
+        e7["schema_version"] != E7_PRESENTATION_SCHEMA_VERSION
+        or e7["available"] is not True or e7["reason"] is not None
+        or e7["non_authoritative"] is not True
+        or e7["production_objects_mutated"] is not False
+        or correction["schema_version"] != "pion_hgcer_parent_preserving_correction/v1"
+        or correction["status"] != "available" or correction["available"] is not True
+        or correction["reason"] is not None
+        or correction["non_authoritative"] is not True
+        or correction["production_objects_mutated"] is not False
+        or correction["refinement_applied"] is not False
+        or correction["production_application_performed"] is not False
+        or correction["event_application_performed"] is not False
+        or t_edges is None or delta_edges is None
+        or not isinstance(e7["per_t"], Sequence)
+        or isinstance(e7["per_t"], (str, bytes))
+        or not isinstance(correction["parents"], Sequence)
+        or isinstance(correction["parents"], (str, bytes))
+        or not isinstance(correction["cells"], Sequence)
+        or isinstance(correction["cells"], (str, bytes))
+    ):
+        return _e72_unavailable("e72_parent_contract_invalid")
+    for e7_field, correction_field in (
+        ("prototype_fingerprint", "source_ab_combination_prototype_fingerprint"),
+        ("phase_a_contract_fingerprint", "phase_a_contract_fingerprint"),
+        ("coordinate_fingerprint", "coordinate_fingerprint"),
+        ("host_state", "host_state"),
+        ("source_target_state", "source_target_state"),
+    ):
+        if (
+            not isinstance(e7[e7_field], str) or not e7[e7_field]
+            or e7[e7_field] != correction[correction_field]
+        ):
+            return _e72_unavailable("e72_parent_provenance_mismatch")
+    if (
+        not _d11_serialized_equal(e7["t_edges"], correction["t_edges"])
+        or not _d11_serialized_equal(e7["delta_edges"], correction["delta_edges"])
+    ):
+        return _e72_unavailable("e72_parent_geometry_mismatch")
+    t_count = len(t_edges) - 1
+    delta_count = len(delta_edges) - 1
+    expected_count = t_count * delta_count
+    if (
+        len(e7["per_t"]) != t_count or len(correction["parents"]) != t_count
+        or len(correction["cells"]) != expected_count
+    ):
+        return _e72_unavailable("e72_parent_grid_invalid")
+    e7_cells = {}
+    for group in e7["per_t"]:
+        source_group = _mapping(group)
+        t_index = _d11_integer(source_group.get("t_index"))
+        if (
+            t_index is None or not 0 <= t_index < t_count
+            or not _d11_serialized_equal(source_group.get("t_low"), t_edges[t_index])
+            or not _d11_serialized_equal(source_group.get("t_high"), t_edges[t_index + 1])
+            or not isinstance(source_group.get("cells"), Sequence)
+            or isinstance(source_group.get("cells"), (str, bytes))
+            or len(source_group["cells"]) != delta_count
+        ):
+            return _e72_unavailable("e72_parent_grid_invalid")
+        for source_cell in source_group["cells"]:
+            cell = _e72_e7_cell(source_cell, t_edges, delta_edges)
+            if cell is None:
+                return _e72_unavailable("e72_e7_cell_contract_invalid")
+            coordinate = (cell["t_index"], cell["delta_index"])
+            if coordinate in e7_cells:
+                return _e72_unavailable("e72_parent_grid_invalid")
+            e7_cells[coordinate] = cell
+    correction_cells = {}
+    for source_cell in correction["cells"]:
+        cell = _e72_correction_cell(source_cell, t_edges, delta_edges)
+        if cell is None:
+            return _e72_unavailable("e72_correction_cell_contract_invalid")
+        coordinate = (cell["t_index"], cell["delta_index"])
+        if coordinate in correction_cells:
+            return _e72_unavailable("e72_parent_grid_invalid")
+        correction_cells[coordinate] = cell
+    parents = {}
+    for source_parent in correction["parents"]:
+        source_mapping = _mapping(source_parent)
+        t_index = _d11_integer(source_mapping.get("t_index"))
+        if t_index is None or t_index in parents or not 0 <= t_index < t_count:
+            return _e72_unavailable("e72_parent_grid_invalid")
+        parent = _e72_parent_record(source_parent, t_edges, t_index)
+        if parent is None:
+            return _e72_unavailable("e72_correction_parent_contract_invalid")
+        parents[t_index] = parent
+    expected_coordinates = {
+        (t_index, delta_index)
+        for t_index in range(t_count) for delta_index in range(delta_count)
+    }
+    if set(e7_cells) != expected_coordinates or set(correction_cells) != expected_coordinates or set(parents) != set(range(t_count)):
+        return _e72_unavailable("e72_parent_grid_invalid")
+    per_t = []
+    for t_index in range(t_count):
+        cells = []
+        for delta_index in range(delta_count):
+            coordinate = (t_index, delta_index)
+            e7_cell = e7_cells[coordinate]
+            correction_cell = correction_cells[coordinate]
+            if (
+                e7_cell["prototype_status"] != correction_cell["e7_prototype_status"]
+                or e7_cell["prototype_reason"] != correction_cell["e7_prototype_reason"]
+                or not _d11_serialized_equal(
+                    e7_cell["prototype_relative_scale"],
+                    correction_cell["e7_raw_relative_scale"],
+                )
+                or e7_cell["comparison"]["availability"] != correction_cell[
+                    "e7_comparison_availability"
+                ]
+            ):
+                return _e72_unavailable("e72_e7_correction_cell_linkage_mismatch")
+            cells.append({
+                "t_index": t_index,
+                "t_low": float(t_edges[t_index]),
+                "t_high": float(t_edges[t_index + 1]),
+                "delta_index": delta_index,
+                "delta_low": float(delta_edges[delta_index]),
+                "delta_high": float(delta_edges[delta_index + 1]),
+                "method_a": _e72_json_copy(e7_cell["method_a"]),
+                "method_b": _e72_json_copy(e7_cell["method_b"]),
+                "comparison": _e72_json_copy(e7_cell["comparison"]),
+                "prototype_status": e7_cell["prototype_status"],
+                "prototype_reason": e7_cell["prototype_reason"],
+                "prototype_relative_scale": e7_cell["prototype_relative_scale"],
+                "C_final": correction_cell["C_final"],
+                "C_final_status": correction_cell["C_final_status"],
+                "C_final_reason": correction_cell["C_final_reason"],
+                "refinable": correction_cell["refinable"],
+                "baseline_record_count": correction_cell["baseline_record_count"],
+                "baseline_signed_sum": correction_cell["baseline_signed_sum"],
+                "baseline_absolute_support": correction_cell["baseline_absolute_support"],
+                "baseline_sumw2": correction_cell["baseline_sumw2"],
+                "baseline_neff": correction_cell["baseline_neff"],
+                "parent_normalization_divisor": correction_cell[
+                    "parent_normalization_divisor"
+                ],
+            })
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "parent": _e72_json_copy(parents[t_index]),
+            "cells": tuple(cells),
+        })
+    return {
+        "schema_version": E72_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "prototype_fingerprint": str(e7["prototype_fingerprint"]),
+        "phase_a_contract_fingerprint": str(e7["phase_a_contract_fingerprint"]),
+        "coordinate_fingerprint": str(e7["coordinate_fingerprint"]),
+        "host_state": str(e7["host_state"]),
+        "source_target_state": str(e7["source_target_state"]),
+        "t_edges": list(t_edges),
+        "delta_edges": list(delta_edges),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e72_display_bounds(cells, *, include_final=False):
+    values = [1.0]
+    for cell in tuple(cells or ()):
+        method_a = _mapping(cell.get("method_a"))
+        method_b = _mapping(cell.get("method_b"))
+        if method_a.get("present") is True:
+            values.extend(value for value in (
+                _d11_finite(method_a.get("low")), _d11_finite(method_a.get("high")),
+            ) if value is not None)
+        if method_b.get("present") is True:
+            value = _d11_finite(method_b.get("candidate"))
+            error = _d11_finite(method_b.get("uncertainty"))
+            if value is not None and error is not None:
+                values.extend((value - error, value + error))
+        scale = _d11_finite(cell.get("prototype_relative_scale"))
+        if scale is not None:
+            values.append(scale)
+        if include_final:
+            final = _d11_finite(cell.get("C_final"))
+            if final is not None:
+                values.append(final)
+    low, high = min(values), max(values)
+    if high <= low:
+        return low - 0.1, high + 0.1
+    padding = 0.10 * (high - low)
+    return low - padding, high + padding
+
+
+def _e72_plain_graph(ROOT, cells, field, *, color, marker_style):
+    selected = [
+        cell for cell in cells
+        if _d11_finite(cell.get(field)) is not None
+    ]
+    if not selected or not hasattr(ROOT, "TGraph"):
+        return None
+    graph = ROOT.TGraph(len(selected))
+    for index, cell in enumerate(selected):
+        center = 0.5 * (float(cell["delta_low"]) + float(cell["delta_high"]))
+        graph.SetPoint(index, center, float(cell[field]))
+    graph.SetMarkerColor(color)
+    graph.SetMarkerStyle(marker_style)
+    return graph
+
+
+def _e72_add_text(ROOT, coordinates, lines, *, size=0.042, align=12):
+    text = ROOT.TPaveText(*coordinates, "NDC")
+    text.SetFillStyle(0)
+    text.SetBorderSize(0)
+    text.SetTextAlign(align)
+    text.SetTextSize(size)
+    for line in lines:
+        text.AddText(str(line))
+    text.Draw()
+    return text
+
+
+def _e72_header(ROOT, title, subtitle):
+    return _e72_add_text(
+        ROOT, (0.03, 0.16, 0.97, 0.90), (title, subtitle), size=0.070,
+    )
+
+
+def _e72_draw_unity(ROOT, delta_edges):
+    line = ROOT.TLine(float(delta_edges[0]), 1.0, float(delta_edges[-1]), 1.0)
+    line.SetLineStyle(2)
+    line.Draw()
+    return line
+
+
+def _e72_three_panel_canvas(ROOT, name, title):
+    if not hasattr(ROOT, "TPad"):
+        return None
+    canvas = ROOT.TCanvas(name, title, 1800, 1200)
+    header = ROOT.TPad(name + "_header", "header", 0.0, 0.87, 1.0, 1.0)
+    grid = ROOT.TPad(name + "_grid", "three t panels", 0.0, 0.0, 1.0, 0.87)
+    canvas.cd()
+    header.Draw()
+    grid.Draw()
+    grid.Divide(3, 1)
+    return canvas, header, grid
+
+
+def _render_e72_overview_page(ROOT, pdf_name, presentation):
+    canvas = ROOT.TCanvas(
+        "C_full_background_e72_overview", "Pion-background refinement progress", 1800, 1200,
+    )
+    draw_objects = []
+    try:
+        canvas.cd()
+        draw_objects.append(_e72_header(
+            ROOT, "Pion-background refinement progress",
+            "Detached scientific review only - No event application or production change",
+        ))
+        stages = (
+            (0.05, "Established baseline pion subtraction", "w_pi^0(MM; t)"),
+            (0.26, "Two independent local diagnostics", "Method A: HGCer response   |   Method B: missing-mass closure"),
+            (0.48, "E.7 raw A/B scale", "S(t,delta) = sqrt(A B)"),
+            (0.69, "E.7.1 parent-preserving map", "C_final(t,delta)"),
+            (0.86, "CURRENT STATUS", "Detached map only - No event application / no production change"),
+        )
+        for index, (x_low, title, detail) in enumerate(stages):
+            x_high = min(0.98, x_low + (0.18 if index != 1 else 0.20))
+            if hasattr(ROOT, "TBox"):
+                box = ROOT.TBox(x_low, 0.48, x_high, 0.70)
+                if hasattr(box, "SetFillStyle"):
+                    box.SetFillStyle(0)
+                box.Draw()
+                draw_objects.append(box)
+            draw_objects.append(_e72_add_text(
+                ROOT, (x_low + 0.01, 0.52, x_high - 0.01, 0.66), (title, detail), size=0.030,
+            ))
+            if index < len(stages) - 1:
+                if hasattr(ROOT, "TArrow"):
+                    arrow = ROOT.TArrow(x_high, 0.59, stages[index + 1][0], 0.59, 0.025, "|>")
+                else:
+                    arrow = ROOT.TLine(x_high, 0.59, stages[index + 1][0], 0.59)
+                arrow.Draw()
+                draw_objects.append(arrow)
+        draw_objects.append(_e72_add_text(
+            ROOT, (0.09, 0.16, 0.91, 0.36), (
+                "• unsupported cells remain C_final = 1",
+                "• each valid t parent preserves its signed baseline pion total",
+                "• event-by-event application has not begun",
+            ), size=0.045,
+        ))
+        canvas._full_background_e72_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e72_ab_evidence_page(ROOT, pdf_name, presentation):
+    if len(presentation.get("per_t") or ()) != 3:
+        return False
+    layout = _e72_three_panel_canvas(
+        ROOT, "C_full_background_e72_ab_evidence", "Stored A/B evidence summary",
+    )
+    if layout is None:
+        return False
+    canvas, header, grid = layout
+    draw_objects = [header, grid]
+    try:
+        header.cd()
+        draw_objects.append(_e72_header(
+            ROOT, "Stored local A/B evidence", "Method A — HGCer response; Legacy Method B — MM closure; E.7 raw equal-log scale",
+        ))
+        for panel_index, group in enumerate(presentation["per_t"], start=1):
+            grid.cd(panel_index)
+            cells = tuple(group["cells"])
+            frame = _e7_frame(
+                ROOT, "H_full_background_e72_ab_t{}".format(panel_index),
+                "{};delta [%];Relative scale".format(_t_context(group)),
+                presentation["delta_edges"], _e72_display_bounds(cells),
+            )
+            if frame is None:
+                return False
+            frame.Draw("AXIS")
+            draw_objects.append(frame)
+            draw_objects.append(_e72_draw_unity(ROOT, presentation["delta_edges"]))
+            method_a = _e7_method_a_graph(ROOT, cells)
+            method_b = _e7_method_b_graph(ROOT, cells)
+            prototype = _e72_plain_graph(
+                ROOT, [cell for cell in cells if cell["prototype_status"] == "available"],
+                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=33,
+            )
+            for graph in (method_a, method_b, prototype):
+                if graph is not None:
+                    graph.Draw("P SAME")
+                    draw_objects.append(graph)
+            counts = {label: 0 for label in _D11_AVAILABILITY_LABELS}
+            for cell in cells:
+                counts[cell["comparison"]["availability"]] += 1
+            draw_objects.append(_e72_add_text(
+                ROOT, (0.12, 0.68, 0.89, 0.88), (
+                    "both comparable: {}".format(counts["both_comparable"]),
+                    "A only: {}   B only: {}".format(counts["a_only"], counts["b_only"]),
+                    "not comparable / unavailable: {}".format(
+                        counts["both_present_not_comparable"] + counts["neither_available"]
+                    ),
+                ), size=0.040,
+            ))
+        grid.cd(1)
+        legend = ROOT.TLegend(0.12, 0.08, 0.87, 0.20)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        legend.AddEntry(None, "Method A — HGCer response", "p")
+        legend.AddEntry(None, "Legacy Method B — MM closure", "p")
+        legend.AddEntry(None, "E.7 raw equal-log scale", "p")
+        legend.AddEntry(None, "Baseline = 1", "l")
+        legend.Draw()
+        draw_objects.append(legend)
+        canvas._full_background_e72_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e72_parent_map_page(ROOT, pdf_name, presentation):
+    if len(presentation.get("per_t") or ()) != 3:
+        return False
+    layout = _e72_three_panel_canvas(
+        ROOT, "C_full_background_e72_parent_map", "Raw E.7 to parent-preserving map",
+    )
+    if layout is None:
+        return False
+    canvas, header, grid = layout
+    draw_objects = [header, grid]
+    try:
+        header.cd()
+        draw_objects.append(_e72_header(
+            ROOT, "Raw E.7 shape to parent-preserving C_final",
+            "Raw A/B shape is rescaled only within each t parent; unsupported cells stay at unity.",
+        ))
+        for panel_index, group in enumerate(presentation["per_t"], start=1):
+            grid.cd(panel_index)
+            cells = tuple(group["cells"])
+            frame = _e7_frame(
+                ROOT, "H_full_background_e72_map_t{}".format(panel_index),
+                "{};delta [%];Detached relative map".format(_t_context(group)),
+                presentation["delta_edges"], _e72_display_bounds(cells, include_final=True),
+            )
+            if frame is None:
+                return False
+            frame.Draw("AXIS")
+            draw_objects.append(frame)
+            draw_objects.append(_e72_draw_unity(ROOT, presentation["delta_edges"]))
+            raw = _e72_plain_graph(
+                ROOT, [cell for cell in cells if cell["prototype_status"] == "available"],
+                "prototype_relative_scale", color=getattr(ROOT, "kGray", 920), marker_style=33,
+            )
+            final = _e72_plain_graph(
+                ROOT, cells, "C_final", color=getattr(ROOT, "kGreen", 3), marker_style=20,
+            )
+            for graph in (raw, final):
+                if graph is not None:
+                    graph.Draw("P SAME")
+                    draw_objects.append(graph)
+            parent = group["parent"]
+            normalization = parent["normalization_divisor"]
+            draw_objects.append(_e72_add_text(
+                ROOT, (0.11, 0.67, 0.89, 0.88), (
+                    "refinable cells: {}".format(parent["refinable_cell_count"]),
+                    "parent status: {}".format(_e72_parent_status_label(parent["parent_status"])),
+                    "normalization N_t: {}".format(
+                        "identity" if normalization is None else "{:.8g}".format(normalization)
+                    ),
+                ), size=0.038,
+            ))
+        grid.cd(1)
+        draw_objects.append(_e72_add_text(
+            ROOT, (0.12, 0.06, 0.88, 0.16),
+            ("Detached scientific map only — not applied to events or production yields.",), size=0.032,
+        ))
+        canvas._full_background_e72_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e72_parent_closure_page(ROOT, pdf_name, presentation):
+    if len(presentation.get("per_t") or ()) != 3 or not hasattr(ROOT, "TPad"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e72_parent_closure", "Parent-preservation closure", 1800, 1200,
+    )
+    header = ROOT.TPad("P_full_background_e72_closure_header", "header", 0.0, 0.86, 1.0, 1.0)
+    grid = ROOT.TPad("P_full_background_e72_closure_grid", "closure panels", 0.0, 0.0, 1.0, 0.86)
+    draw_objects = [header, grid]
+    try:
+        canvas.cd()
+        header.Draw()
+        grid.Draw()
+        grid.Divide(3, 1)
+        header.cd()
+        draw_objects.append(_e72_header(
+            ROOT, "Parent-preservation closure: sum_j B^0_ij C_ij = sum_j B^0_ij",
+            "The local map redistributes pion strength across delta without changing the established pion total in that t parent.",
+        ))
+        for panel_index, group in enumerate(presentation["per_t"], start=1):
+            grid.cd(panel_index)
+            parent = group["parent"]
+            before = float(parent["canonical_baseline_before"])
+            after = float(parent["canonical_baseline_after"])
+            low, high = min(0.0, before, after), max(0.0, before, after)
+            padding = max(1.0, 0.12 * (high - low if high > low else 1.0))
+            frame = ROOT.TH1D(
+                "H_full_background_e72_closure_t{}".format(panel_index),
+                "{};Stored baseline;Signed baseline pion total".format(_t_context(group)),
+                2, array("d", (0.0, 1.0, 2.0)),
+            )
+            frame.SetDirectory(0)
+            frame.SetStats(0)
+            axis = frame.GetXaxis()
+            if hasattr(axis, "SetBinLabel"):
+                axis.SetBinLabel(1, "Baseline before")
+                axis.SetBinLabel(2, "Baseline after C_final")
+            frame.SetMinimum(low - padding)
+            frame.SetMaximum(high + padding)
+            frame.SetBinContent(1, before)
+            frame.SetBinContent(2, after)
+            frame.Draw("HIST")
+            draw_objects.append(frame)
+            draw_objects.append(_e72_add_text(
+                ROOT, (0.11, 0.56, 0.89, 0.88), (
+                    "Baseline before: {:.10g}".format(before),
+                    "Baseline after C_final: {:.10g}".format(after),
+                    "closure difference: {:.4g}; tolerance: {:.4g}".format(
+                        parent["closure_difference"], parent["closure_tolerance"]
+                    ),
+                    "outside-delta signed baseline: {:.10g}".format(parent["outside_delta_baseline"]),
+                    "refinable cells: {}; normalization divisor: {}".format(
+                        parent["refinable_cell_count"],
+                        "identity" if parent["normalization_divisor"] is None else "{:.8g}".format(parent["normalization_divisor"]),
+                    ),
+                    "parent status: {}".format(_e72_parent_status_label(parent["parent_status"])),
+                ), size=0.034,
+            ))
+        canvas._full_background_e72_draw_objects = tuple(draw_objects)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    return True
+
+
+def _render_e72_setting_pages(ROOT, pdf_name, presentation, manifest, failures):
+    """Append the four setting-level E.7.2 meeting pages after all E.7 pages."""
+    renderers = (
+        ("full_background.e72.meeting_overview", _render_e72_overview_page),
+        ("full_background.e72.ab_evidence_summary", _render_e72_ab_evidence_page),
+        ("full_background.e72.parent_preserving_map_summary", _render_e72_parent_map_page),
+        ("full_background.e72.parent_closure_summary", _render_e72_parent_closure_page),
+    )
+    for page_id, renderer in renderers:
+        if renderer(ROOT, pdf_name, presentation):
+            manifest.append({
+                "page_id": page_id,
+                "scope": "setting",
+                "authoritative": False,
+            })
+        else:
+            failures.append("E.7.2: {} unavailable".format(page_id))
+            return
+
+
+def _full_background_manifest_setting(setting):
+    source = _mapping(setting)
+    required = (
+        "kinematic_token", "epsilon_filename_token", "phi_setting", "particle_type",
+    )
+    if not source or any(key not in source for key in required):
+        raise ValueError("full_background_page_manifest_setting_invalid")
+    copied = _e72_json_copy(source)
+    if (
+        copied is None
+        or not all(isinstance(copied[key], str) and copied[key] for key in required)
+        or copied["particle_type"].lower() != "kaon"
+        or copied["epsilon_filename_token"].lower() not in {"lowe", "highe"}
+    ):
+        raise ValueError("full_background_page_manifest_setting_invalid")
+    return copied
+
+
+def full_background_subtraction_page_manifest_filename(
+    phi_setting, kinematic_token, epsilon_filename_token,
+):
+    """Return the deterministic full-background rendered-page sidecar basename."""
+    values = (phi_setting, kinematic_token, epsilon_filename_token)
+    if not all(isinstance(value, str) and value and Path(value).name == value for value in values):
+        raise ValueError("full_background_page_manifest_filename_invalid")
+    return "{}_kaon_rand_sub_{}_{}_full-background-subtraction-manifest.json".format(
+        phi_setting, kinematic_token, epsilon_filename_token,
+    )
+
+
+def build_full_background_subtraction_page_manifest_artifact(
+    *, setting, pdf_basename, pages, renderer_failures,
+):
+    """Detach the renderer-owned page identity record after PDF close."""
+    setting_copy = _full_background_manifest_setting(setting)
+    if not isinstance(pdf_basename, str) or Path(pdf_basename).name != pdf_basename:
+        raise ValueError("full_background_page_manifest_pdf_basename_invalid")
+    pages_copy = _e72_json_copy(pages)
+    failures_copy = _e72_json_copy(renderer_failures)
+    if not isinstance(pages_copy, list) or not isinstance(failures_copy, list):
+        raise ValueError("full_background_page_manifest_json_invalid")
+    return {
+        "schema_version": FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION,
+        "setting": setting_copy,
+        "pdf_basename": pdf_basename,
+        "pages": pages_copy,
+        "renderer_failures": failures_copy,
+    }
+
+
+def write_full_background_subtraction_page_manifest_json(path, payload):
+    """Write one deterministic JSON sidecar with a trailing newline."""
+    serialized = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        allow_nan=False,
+    ) + "\n"
+    with open(os.fspath(path), "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(serialized)
+
+
 def _e3_integer(value):
     return isinstance(value, int) and not isinstance(value, bool)
 
@@ -6979,6 +7785,8 @@ __all__ = (
     "E4_PRESENTATION_SCHEMA_VERSION",
     "E6_PRESENTATION_SCHEMA_VERSION",
     "E7_PRESENTATION_SCHEMA_VERSION",
+    "E72_PRESENTATION_SCHEMA_VERSION",
+    "FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
     "build_full_background_subtraction_d7_payload",
@@ -6991,8 +7799,11 @@ __all__ = (
     "build_full_background_subtraction_e4_payload",
     "build_full_background_subtraction_e6_payload",
     "build_full_background_subtraction_e7_payload",
+    "build_full_background_subtraction_e72_payload",
+    "build_full_background_subtraction_page_manifest_artifact",
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
+    "full_background_subtraction_page_manifest_filename",
     "open_full_background_subtraction_pdf",
     "render_full_background_subtraction_d6_pages",
     "render_full_background_subtraction_d7_pages",
@@ -7001,4 +7812,5 @@ __all__ = (
     "render_full_background_subtraction_d10_pages",
     "render_full_background_subtraction_d11_pages",
     "render_full_background_subtraction_procedure_pages",
+    "write_full_background_subtraction_page_manifest_json",
 )
