@@ -5,7 +5,7 @@
 SOURCE REVIEWED — the relevant F.1.Fix.5 analysis-source commit is
 dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed at the
 last active-memory reconciliation (2026-09-11) was
-23bcbd2f8db05f0a2e6cf399557c70df44326121; it is a timestamped observation, not
+47723e02af03b3844dfb0323560ce39f7dfebe1a; it is a timestamped observation, not
 the permanent source-review identity. Later documentation/memory-only commits
 do not by themselves invalidate the source review. No F.1.Fix.5
 farm-evaluated commit is recorded.
@@ -39,10 +39,14 @@ render, artifact generation, farm run, or runtime claim.
 
 ## Farm status and source-identity gate
 
-ACTIVE — No fresh F.1.Fix.5 farm evidence was supplied. The current validation
-profile requires analysis commit d656e15761970d7d612bb028d2746d077795e9ad and
-permits only detached collector/profile changes after it. It therefore rejects
-the later Fix.5 analysis source. See
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — No fresh F.1.Fix.5 farm
+evidence was supplied. The detached profile/bundle v4 requires reviewed source
+commit dc4fc6283001739a487ec80068f951b0e388cae6. It permits exactly its
+collector/profile/test files and docs/memory/ after that commit; tracked root
+AGENTS.md, unexpected analysis, and unrelated test changes remain identity errors. The
+collector now accepts only the actual v2 dual-population artifact and verifies
+separate training/application ownership, summaries, and fingerprints. Local
+checks passed; no F.1.Fix.5 farm artifact is present. See
 investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
 
 ## Boundaries
@@ -51,3 +55,10 @@ F.1 is a detached diagnostic event contract. It must not alter random
 subtraction, slow-proton treatment, pion subtraction, Method B, yields, or
 final analysis. Method B stays diagnostic-only; F.1 does not license a future
 production correction. Any F.2-F.6 work requires its own narrow contract.
+
+## Immediate gate
+
+NEXT — The user runs one fresh v2 gate for Left lowe, Left highe, Center lowe,
+Center highe, and Right highe. The gate requires fresh declared artifacts, v4
+collector manifest/provenance inspection, and review of all five F.1 pages; it
+does not authorize a correction, production mutation, or F.2 work.

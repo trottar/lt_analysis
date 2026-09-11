@@ -1,14 +1,14 @@
 # Current KaonLT development state
 
-Last source-identity reconciliation: 2026-09-11, historical-memory migration
-and Fix.5 source review. Repository HEAD values in this record are timestamped
+Last source-identity reconciliation: 2026-09-11, F.1.Fix.5 validation-gate
+reconciliation. Repository HEAD values in this record are timestamped
 observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
 
 - Repository: trottar/lt_analysis; branch: test.
 - Repository HEAD observed at the last reconciliation:
-  23bcbd2f8db05f0a2e6cf399557c70df44326121.
+  47723e02af03b3844dfb0323560ce39f7dfebe1a.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
 - F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
@@ -44,9 +44,14 @@ Pages 1-4 consume training; page 5 consumes application. The path is detached,
 has no Method-B numerical dependency, and makes no correction, estimator, or
 production mutation. See phases/phase-f1-method-a-acceptance-farm-gate.md.
 
-ACTIVE — F.1.Fix.5 requires source-identity reconciliation before farm review.
-The checked-in profile pins d656e15761970d7d612bb028d2746d077795e9ad and
-rejects later Fix.5 analysis files. No F.1.Fix.5 farm artifact is present.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The detached F.1.Fix.5
+collector/profile gate now pins reviewed analysis commit
+dc4fc6283001739a487ec80068f951b0e388cae6. It accepts only its three exact
+validation files and docs/memory/ after that commit; unexpected analysis,
+unrelated test changes, and tracked root AGENTS.md still fail source identity. The v4 bundle
+validates the actual v2 dual-population artifact, including separate summaries
+and fingerprints. Local detached checks passed; no F.1.Fix.5 farm artifact is
+present.
 
 ## Frozen architecture
 
@@ -74,8 +79,7 @@ investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Create and review one narrow F.1.Fix.5 source-identity reconciliation
-contract that selects the reviewed Fix.5 analysis commit and makes the
-collector/profile identity rule agree with it. Only then have the user run one
-fresh targeted F.1 v2 farm gate with the declared five settings, fresh
-artifacts, provenance/checker inspection, and review of all five F.1 pages.
+NEXT — The user runs one fresh targeted F.1.Fix.5 v2 farm gate for Left lowe,
+Left highe, Center lowe, Center highe, and Right highe. Require fresh
+artifacts, v4 collector/profile provenance and checker inspection, and review
+of all five F.1 pages before any farm-acceptance claim.

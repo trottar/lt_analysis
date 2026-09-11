@@ -58,6 +58,9 @@ def _setting(phi="Left", epsilon="lowe", kinematic="Q4p4W2p74"):
         "epsilon_filename_token": epsilon,
         "kinematic_token": kinematic,
         "particle_type": "kaon",
+        "epsilon_setting": epsilon,
+        "Q2": 4.4,
+        "W": 2.74,
     }
 
 
@@ -118,8 +121,37 @@ def _correction(phi="Left", epsilon="lowe"):
     }
 
 
-def _acceptance(phi="Left", epsilon="lowe"):
-    record = {
+def _acceptance(phi="Left", epsilon="lowe", *, application_outside_delta=False):
+    feature_metadata = json.loads(json.dumps(collector._F1_FEATURE_METADATA))
+    training_records = [
+        {
+            "source_label": "prompt", "entry_index": 1,
+            "coordinate_fingerprint": "coordinates", "t_index": 0,
+            "t_low": 0.0, "t_high": 1.0, "SHMS_delta": 0.0,
+            "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
+            "P_hgcer_npeSum": 1.0, "response_class": "low",
+            "P_hgcer_xAtCer": 0.1, "P_hgcer_yAtCer": -0.1,
+            "SHMS_xptar": 0.01, "SHMS_yptar": -0.02,
+            "allcuts": True, "nommcuts": True,
+            "analysis_t": 0.4, "analysis_MM": 1.1,
+            "diagnostic_weight": 1.0, "Q2": None, "W": None,
+            "epsilon": None, "phi": None,
+        },
+        {
+            "source_label": "prompt", "entry_index": 2,
+            "coordinate_fingerprint": "coordinates", "t_index": 0,
+            "t_low": 0.0, "t_high": 1.0, "SHMS_delta": 0.1,
+            "delta_index": 0, "delta_low": -10.0, "delta_high": 10.0,
+            "P_hgcer_npeSum": 3.0, "response_class": "control",
+            "P_hgcer_xAtCer": 0.2, "P_hgcer_yAtCer": -0.2,
+            "SHMS_xptar": 0.02, "SHMS_yptar": -0.01,
+            "allcuts": True, "nommcuts": True,
+            "analysis_t": 0.5, "analysis_MM": 1.2,
+            "diagnostic_weight": 1.0, "Q2": None, "W": None,
+            "epsilon": None, "phi": None,
+        },
+    ]
+    application_records = [{
         "source_label": "prompt", "entry_index": 4,
         "coordinate_fingerprint": "coordinates", "t_index": 0,
         "t_low": 0.0, "t_high": 1.0,
@@ -133,79 +165,86 @@ def _acceptance(phi="Left", epsilon="lowe"):
         "signed_source_coefficient": 1.0, "baseline_pion_weight_w0": 2.0,
         "signed_baseline_event_contribution": 2.0,
         "allcuts": True, "nommcuts": True,
-        "prompt_response_class": "control",
+        "analysis_t": 0.4, "analysis_MM": 1.1,
+        "Q2": None, "W": None, "epsilon": None, "theta_cm_deg": None,
+    }]
+    if application_outside_delta:
+        application_records[0].update(
+            delta_index=None, delta_low=None, delta_high=None,
+        )
+    audit = {
+        "observed_nonpositive_response_record_count": 0,
+        "observed_prompt_nommcuts_nonpositive_response_count": 0,
+        "zero_or_nonpositive_included_in_training": False,
+        "absolute_leakage_probability_claimed": False,
     }
-    feature_metadata = dict(collector._F1_FEATURE_METADATA)
-    feature_metadata["primary_acceptance_features"] = list(
-        collector._F1_FEATURE_METADATA["primary_acceptance_features"]
+    training_summary = collector._f1_training_summary(
+        training_records, [0.0, 1.0], [-10.0, 10.0], audit,
     )
-    feature_metadata["downstream_yield_coordinates"] = list(
-        collector._F1_FEATURE_METADATA["downstream_yield_coordinates"]
-    )
-    feature_metadata["response_definitions"] = dict(
-        collector._F1_FEATURE_METADATA["response_definitions"]
+    application_summary = collector._f1_application_summary(
+        application_records, 1, 1, [], [],
     )
     child_projection = [{
-        "source_label": record["source_label"], "entry_index": record["entry_index"],
-        "t_index": record["t_index"], "phi_index": record["phi_index"],
-        "phi_low": record["phi_low"], "phi_high": record["phi_high"],
-        "phi_status": record["phi_status"],
+        "source_label": application_records[0]["source_label"],
+        "entry_index": application_records[0]["entry_index"],
+        "t_index": application_records[0]["t_index"],
+        "phi_index": application_records[0]["phi_index"],
+        "phi_low": application_records[0]["phi_low"],
+        "phi_high": application_records[0]["phi_high"],
+        "phi_status": application_records[0]["phi_status"],
     }]
-    summary = {
-        "phase_a_record_count": 1, "matched_parent_record_count": 1,
-        "unmatched_parent_cache_record_count": 0,
-        "unmatched_child_cache_record_count": 0,
-        "inside_phi_count": 1, "outside_phi_count": 0,
-        "prompt_low_count": 0, "prompt_control_count": 1,
-        "nonfinite_primary_feature_counts": {
-            name: 0 for name in feature_metadata["primary_acceptance_features"]
-        },
-        "by_t": [{
-            "t_index": 0, "record_count": 1, "inside_phi_count": 1,
-            "outside_phi_count": 0, "prompt_low_count": 0,
-            "prompt_control_count": 1,
-        }],
-        "by_t_phi": [{
-            "t_index": 0, "phi_index": 0, "record_count": 1,
-            "prompt_low_count": 0, "prompt_control_count": 1,
-        }],
-    }
     inputs = {
+        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v2",
+        "fingerprint_schema_version": "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v2",
         "phase_a_contract_fingerprint": "phase-a",
         "phase_a_pion_event_population_fingerprint": "phase-a-pions",
+        "method_a_fingerprint": "method-a",
+        "method_a_event_population_fingerprint": "method-a-events",
+        "part1_config_fingerprint": "part1-config",
         "coordinate_fingerprint": "coordinates", "host_state": "approved",
         "source_target_state": "post_proton_noRF",
         "t_edges": [0.0, 1.0], "delta_edges": [-10.0, 10.0],
         "phi_edges": [-5.0, 5.0],
-        "event_population_fingerprint": collector._canonical_sha256([record]),
+        "method_a_training_population_fingerprint": collector._canonical_sha256(training_records),
+        "application_population_fingerprint": collector._canonical_sha256(application_records),
         "acceptance_feature_metadata_fingerprint": collector._canonical_sha256(feature_metadata),
-        "child_assignment_projection_fingerprint": collector._canonical_sha256(child_projection),
+        "application_child_assignment_projection_fingerprint": collector._canonical_sha256(child_projection),
+        "method_a_closure": training_summary["by_t_delta"],
         "feature_metadata": feature_metadata,
     }
     contract = {
-        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v1",
-        "fingerprint_schema_version": "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1",
-        "status": "available", "available": True,
+        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v2",
+        "fingerprint_schema_version": "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v2",
+        "status": "available", "available": True, "reason": None,
+        "diagnostic_stage": "complete",
         "non_authoritative": True, "production_objects_mutated": False,
         "refinement_applied": False, "production_application_performed": False,
         "event_application_performed": False, "method_b_numerical_dependency": False,
         "future_weight_adjustment_constructed": False,
         "phase_a_contract_fingerprint": "phase-a",
-        "pion_event_population_fingerprint": "phase-a-pions",
+        "phase_a_pion_event_population_fingerprint": "phase-a-pions",
+        "method_a_fingerprint": "method-a",
+        "method_a_event_population_fingerprint": "method-a-events",
+        "part1_config_fingerprint": "part1-config",
         "coordinate_fingerprint": "coordinates", "host_state": "approved",
         "source_target_state": "post_proton_noRF",
         "t_edges": [0.0, 1.0], "delta_edges": [-10.0, 10.0],
         "phi_edges": [-5.0, 5.0], "feature_metadata": feature_metadata,
-        "records": [record], "unmatched_parent_cache_identities": [],
-        "unmatched_child_cache_identities": [], "summary": summary,
-        "event_population_fingerprint": inputs["event_population_fingerprint"],
+        "method_a_training_records": training_records,
+        "application_records": application_records,
+        "method_a_training_summary": training_summary,
+        "application_summary": application_summary,
+        "unmatched_parent_cache_identities": [],
+        "unmatched_child_cache_identities": [],
+        "method_a_training_population_fingerprint": inputs["method_a_training_population_fingerprint"],
+        "application_population_fingerprint": inputs["application_population_fingerprint"],
         "acceptance_feature_metadata_fingerprint": inputs["acceptance_feature_metadata_fingerprint"],
-        "child_assignment_projection_fingerprint": inputs["child_assignment_projection_fingerprint"],
+        "application_child_assignment_projection_fingerprint": inputs["application_child_assignment_projection_fingerprint"],
         "fingerprint_inputs": inputs,
         "fingerprint": collector._canonical_sha256(inputs),
     }
     return {
-        "schema_version": "pion_hgcer_method_a_acceptance_event_contract_artifact/v1",
+        "schema_version": "pion_hgcer_method_a_acceptance_event_contract_artifact/v2",
         "setting": _setting(phi, epsilon), "contract": contract,
         "non_authoritative": True, "production_objects_mutated": False,
         "refinement_applied": False, "production_application_performed": False,
@@ -284,10 +323,10 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         )
         return result, output, source
 
-    def test_profile_v3_and_five_setting_selection(self):
+    def test_profile_v4_and_five_setting_selection(self):
         profile = collector.load_validation_profile(PROFILE_PATH)
         self.assertEqual(profile["schema_version"], collector.PROFILE_SCHEMA_VERSION)
-        self.assertEqual(profile["validation_profile"], "phase_f1_batched_farm_acceptance_review/v1")
+        self.assertEqual(profile["validation_profile"], "phase_f1_batched_farm_acceptance_review/v2")
         self.assertEqual(collector.resolve_settings(), (
             ("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"),
             ("Center", "highe"), ("Right", "highe"),
@@ -363,7 +402,15 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 ["identity_no_refinable_cells"],
             )
             self.assertEqual(
-                artifacts["method_a_acceptance_contract"]["metadata"]["summary"]["prompt_control_count"],
+                artifacts["method_a_acceptance_contract"]["metadata"]["training_summary"]["prompt_control_count"],
+                1,
+            )
+            self.assertEqual(
+                artifacts["method_a_acceptance_contract"]["metadata"]["training_summary"]["prompt_low_count"],
+                1,
+            )
+            self.assertEqual(
+                artifacts["method_a_acceptance_contract"]["metadata"]["application_summary"]["phase_a_record_count"],
                 1,
             )
 
@@ -395,7 +442,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
     def test_f1_contract_and_manifest_page_identities_are_strict(self):
         with tempfile.TemporaryDirectory() as temporary:
             bad_acceptance = _acceptance()
-            bad_acceptance["contract"]["records"][0]["prompt_response_class"] = "low"
+            bad_acceptance["contract"]["method_a_training_records"][1]["response_class"] = "low"
             result, output, _source = self._collect(temporary, acceptance=bad_acceptance)
             self.assertEqual(result["returncode"], 1)
             self.assertTrue(output.exists())
@@ -413,7 +460,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             artifacts = result["manifest"]["settings"][0]["artifacts"]
             self.assertEqual(artifacts["f1_acceptance_summary_pdf"]["status"], "unavailable")
 
-    def test_f1_fingerprint_and_summary_are_archived_without_recomputation(self):
+    def test_f1_dual_population_fingerprints_and_summaries_are_archived(self):
         with tempfile.TemporaryDirectory() as temporary:
             result, output, _source = self._collect(temporary)
             self.assertEqual(result["returncode"], 0)
@@ -421,10 +468,116 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 manifest = json.loads(archive.read("manifest.json"))
             f1 = manifest["settings"][0]["artifacts"]["method_a_acceptance_contract"]["metadata"]
             self.assertEqual(f1["contract_fingerprint"], _acceptance()["contract"]["fingerprint"])
-            self.assertEqual(f1["summary"]["by_t_phi"][0]["prompt_control_count"], 1)
+            self.assertEqual(f1["training_summary"]["by_t_delta"][0]["control_count"], 1)
+            self.assertEqual(f1["application_summary"]["by_t_phi"][0]["prompt_record_count"], 1)
             self.assertEqual(
-                manifest["f1_aggregate_summary"][0]["summary"]["phase_a_record_count"], 1
+                manifest["f1_aggregate_summary"][0]["application_summary"]["phase_a_record_count"], 1
             )
+
+    def test_f1_application_delta_geometry_preserves_phase_a_outside_lattice(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            acceptance = _acceptance(application_outside_delta=True)
+            application = acceptance["contract"]["application_records"][0]
+            self.assertEqual(
+                (application["delta_index"], application["delta_low"], application["delta_high"]),
+                (None, None, None),
+            )
+            result, output, _source = self._collect(temporary, acceptance=acceptance)
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.exists())
+            metadata = result["manifest"]["settings"][0]["artifacts"]["method_a_acceptance_contract"]["metadata"]
+            self.assertEqual(metadata["metadata_status"], "match")
+
+        mutations = (
+            ("application_none_with_edge", _acceptance(application_outside_delta=True),
+             lambda payload: payload["contract"]["application_records"][0].update(delta_low=-10.0)),
+            ("application_integer_wrong_edges", _acceptance(),
+             lambda payload: payload["contract"]["application_records"][0].update(delta_high=9.0)),
+            ("training_none_delta", _acceptance(),
+             lambda payload: payload["contract"]["method_a_training_records"][0].update(
+                 delta_index=None, delta_low=None, delta_high=None,
+             )),
+        )
+        for label, acceptance, mutation in mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                mutation(acceptance)
+                result, output, _source = self._collect(temporary, acceptance=acceptance)
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                metadata = result["manifest"]["settings"][0]["artifacts"]["method_a_acceptance_contract"]["metadata"]
+                self.assertEqual(metadata["metadata_status"], "mismatch")
+
+    def test_f1_v2_rejects_stale_schemas_flags_and_population_contract_breaks(self):
+        mutations = (
+            ("v1_artifact", lambda payload: payload.update(
+                schema_version="pion_hgcer_method_a_acceptance_event_contract_artifact/v1"
+            )),
+            ("wrong_contract_schema", lambda payload: payload["contract"].update(
+                schema_version="pion_hgcer_method_a_acceptance_event_contract/v1"
+            )),
+            ("wrong_fingerprint_schema", lambda payload: payload["contract"].update(
+                fingerprint_schema_version="pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1"
+            )),
+            ("production_mutation", lambda payload: payload["contract"].update(
+                production_objects_mutated=True
+            )),
+            ("refinement", lambda payload: payload["contract"].update(refinement_applied=True)),
+            ("application", lambda payload: payload["contract"].update(
+                production_application_performed=True
+            )),
+            ("event_application", lambda payload: payload["contract"].update(
+                event_application_performed=True
+            )),
+            ("method_b_dependency", lambda payload: payload["contract"].update(
+                method_b_numerical_dependency=True
+            )),
+            ("future_weight", lambda payload: payload["contract"].update(
+                future_weight_adjustment_constructed=True
+            )),
+            ("training_nonpositive", lambda payload: payload["contract"][
+                "method_a_training_records"][0].update(P_hgcer_npeSum=0.0)
+            ),
+            ("training_class", lambda payload: payload["contract"][
+                "method_a_training_records"][0].update(response_class="control")
+            ),
+            ("application_not_control", lambda payload: payload["contract"][
+                "application_records"][0].update(P_hgcer_npeSum=2.0)
+            ),
+            ("training_summary", lambda payload: payload["contract"][
+                "method_a_training_summary"].update(training_record_count=7)
+            ),
+            ("application_summary", lambda payload: payload["contract"][
+                "application_summary"].update(phase_a_record_count=7)
+            ),
+            ("training_fingerprint", lambda payload: payload["contract"].update(
+                method_a_training_population_fingerprint="not-a-fingerprint"
+            )),
+            ("application_fingerprint", lambda payload: payload["contract"].update(
+                application_population_fingerprint="not-a-fingerprint"
+            )),
+            ("feature_fingerprint", lambda payload: payload["contract"].update(
+                acceptance_feature_metadata_fingerprint="not-a-fingerprint"
+            )),
+            ("child_assignment_fingerprint", lambda payload: payload["contract"].update(
+                application_child_assignment_projection_fingerprint="not-a-fingerprint"
+            )),
+            ("contract_fingerprint", lambda payload: payload["contract"].update(
+                fingerprint="not-a-fingerprint"
+            )),
+            ("setting", lambda payload: payload["setting"].update(phi_setting="Right")),
+        )
+        for label, mutation in mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                bad_acceptance = _acceptance()
+                mutation(bad_acceptance)
+                result, output, _source = self._collect(temporary, acceptance=bad_acceptance)
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                self.assertEqual(
+                    result["manifest"]["settings"][0]["artifacts"]
+                    ["method_a_acceptance_contract"]["metadata"]["metadata_status"],
+                    "mismatch",
+                )
 
     def test_pdf_page_count_mismatch_and_backend_failure_are_explicit(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -546,6 +699,41 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 "unexpected_committed_files_after_required_analysis_commit",
                 {entry["code"] for entry in result["manifest"]["errors"]},
             )
+        def unrelated_test_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if list(command)[:3] == ["git", "diff", "--name-only"]:
+                result = dict(result)
+                result["stdout"] = "testing/test_unrelated_analysis_behavior.py\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=unrelated_test_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            self.assertIn(
+                "unexpected_committed_files_after_required_analysis_commit",
+                {entry["code"] for entry in result["manifest"]["errors"]},
+            )
+
+        def agents_file_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if list(command)[:3] == ["git", "diff", "--name-only"]:
+                result = dict(result)
+                result["stdout"] = "AGENTS.md\n"
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=agents_file_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            self.assertIn(
+                "unexpected_committed_files_after_required_analysis_commit",
+                {entry["code"] for entry in result["manifest"]["errors"]},
+            )
         with tempfile.TemporaryDirectory() as temporary:
             bad_correction = _correction()
             bad_correction["correction"]["parents"][0]["closure_passed"] = False
@@ -566,16 +754,42 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
 
     def test_source_identity_profile_and_collector_are_runtime_detached(self):
         profile = collector.load_validation_profile()
-        self.assertEqual(profile["source_identity"]["required_analysis_commit"], "d656e15761970d7d612bb028d2746d077795e9ad")
+        self.assertEqual(profile["source_identity"]["required_analysis_commit"], "dc4fc6283001739a487ec80068f951b0e388cae6")
         self.assertEqual(set(profile["source_identity"]["allowed_committed_files"]), {
             "testing/collect_pion_hgcer_validation_bundle.py",
             "testing/test_collect_pion_hgcer_validation_bundle.py",
             "testing/pion_hgcer_validation_bundle_profile.json",
         })
+        self.assertEqual(profile["source_identity"]["allowed_non_analysis_path_prefixes"], ["docs/memory/"])
         source = COLLECTOR_PATH.read_text(encoding="utf-8")
         self.assertNotIn("import rand_sub", source)
         self.assertNotIn("build_pion_hgcer", source)
         self.assertIn("git_diff_check_required_analysis_commit_range", source)
+
+    def test_reviewed_fix5_ancestry_allows_only_validation_and_memory_followups(self):
+        def reviewed_followup_runner(command, cwd):
+            result = _clean_command_runner(command, cwd)
+            if list(command)[:3] == ["git", "diff", "--name-only"]:
+                result = dict(result)
+                result["stdout"] = "\n".join((
+                    "docs/memory/CURRENT.md",
+                    "docs/memory/handoffs/CURRENT_HANDOFF.md",
+                    "testing/collect_pion_hgcer_validation_bundle.py",
+                    "testing/pion_hgcer_validation_bundle_profile.json",
+                    "testing/test_collect_pion_hgcer_validation_bundle.py",
+                    "",
+                ))
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=reviewed_followup_runner,
+            )
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.exists())
+            self.assertEqual(
+                result["manifest"]["unexpected_committed_files_after_required_analysis_commit"], []
+            )
 
 
 if __name__ == "__main__":

@@ -28,6 +28,13 @@ work-state claims.
 - Documentation/memory-only commits after a reviewed analysis-source commit do
   not by themselves invalidate that source review. Reconcile the intervening
   diff and re-review only if the relevant analysis source or test scope changed.
+- F.1.Fix.5 validation profile/bundle schema v4 pins
+  dc4fc6283001739a487ec80068f951b0e388cae6. Its source-identity exception is
+  deliberately narrow: three exact collector/profile/test files and the
+  docs/memory/ prefix only. It must continue to reject tracked AGENTS.md and
+  all other src/ and testing/ paths. The v4 collector validates the producer's v2 training and
+  application populations separately; local collector checks are not farm
+  evidence.
 
 ## Production and scientific boundaries
 
@@ -71,3 +78,7 @@ Phase C five-setting closure and E.3.Fix.2 Left-low are the only recovered
 phase-level CLOSED / RUNTIME VALIDATED results. F.1 Fix.3/Fix.4 evidence closes
 mechanical regressions only. Live F.1.Fix.5 is SOURCE REVIEWED, not farm
 validated. See evidence/VALIDATION_HISTORY.md and investigations/KNOWN_GAPS.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.1.Fix.5 validation-gate
+reconciliation updated only detached collector/profile/test infrastructure.
+The five-setting v2 farm gate remains a user-run evidence step.

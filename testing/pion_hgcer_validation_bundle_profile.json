@@ -1,6 +1,6 @@
 {
-  "schema_version": "pion_hgcer_validation_bundle_profile/v3",
-  "validation_profile": "phase_f1_batched_farm_acceptance_review/v1",
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_f1_batched_farm_acceptance_review/v2",
   "settings": [
     {
       "phi": "Left",
@@ -61,11 +61,14 @@
     }
   },
   "source_identity": {
-    "required_analysis_commit": "d656e15761970d7d612bb028d2746d077795e9ad",
+    "required_analysis_commit": "dc4fc6283001739a487ec80068f951b0e388cae6",
     "allowed_committed_files": [
       "testing/collect_pion_hgcer_validation_bundle.py",
       "testing/test_collect_pion_hgcer_validation_bundle.py",
       "testing/pion_hgcer_validation_bundle_profile.json"
+    ],
+    "allowed_non_analysis_path_prefixes": [
+      "docs/memory/"
     ]
   }
 }

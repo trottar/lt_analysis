@@ -1,8 +1,7 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-11 after historical-memory migration and F.1.Fix.5 source
-review. This record distinguishes recovered farm evidence from live source
-state.
+Prepared: 2026-09-11 after F.1.Fix.5 validation-gate reconciliation. This
+record distinguishes recovered farm evidence from live source state.
 
 ## Resume identity
 
@@ -10,7 +9,7 @@ state.
 - Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
   origin/test before work.
 - Repository HEAD observed at the last reconciliation (2026-09-11):
-  23bcbd2f8db05f0a2e6cf399557c70df44326121. This is a timestamped observation,
+  47723e02af03b3844dfb0323560ce39f7dfebe1a. This is a timestamped observation,
   not a permanent live-HEAD claim.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
@@ -44,12 +43,17 @@ SOURCE REVIEWED:
   It is non-authoritative, Method-B independent, and production-side-effect
   free. Read phases/phase-f1-method-a-acceptance-farm-gate.md.
 
-## Current blocker and boundaries
+## Current gate and boundaries
 
-ACTIVE — Existing F.1 collector/profile identity policy requires
-d656e15761970d7d612bb028d2746d077795e9ad and rejects later Fix.5 analysis
-files. This is a static source-identity mismatch, not a failed farm run or
-physics defect. Read investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The F.1 collector/profile v4
+identity policy requires reviewed Fix.5 source commit
+dc4fc6283001739a487ec80068f951b0e388cae6. After it, only the three detached
+collector/profile/test files and docs/memory/ are allowed; tracked root
+AGENTS.md plus all other analysis and test changes are identity errors. Its artifact validator
+requires the F.1 v2 dual-population contract, preserving separate positive-NPE
+Method-A training and physical NPE>2 application records, summaries, and
+fingerprints. Local detached checks passed; this is not a farm run or physics
+claim. Read investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
 
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
@@ -63,7 +67,7 @@ DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 raw historical bundle paths/hashes, and all F.1.Fix.5 farm evidence. Read
 investigations/KNOWN_GAPS.md.
 
-NEXT — Write/review a narrow F.1.Fix.5 source-identity reconciliation contract
-that selects the reviewed Fix.5 analysis commit and aligns the profile/collector
-rule. Only after that, the user performs one fresh five-setting F.1 v2 farm
-gate with declared artifact, checker/provenance, and rendered-five-page review.
+NEXT — The user performs one fresh five-setting F.1.Fix.5 v2 farm gate: Left
+lowe, Left highe, Center lowe, Center highe, and Right highe. Collect fresh
+artifacts with the v4 profile, inspect provenance/checker output, and review
+the five rendered F.1 pages before recording any farm result.

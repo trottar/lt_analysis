@@ -27,8 +27,8 @@ from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Union
 import zipfile
 
 
-COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v3"
-PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v3"
+COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v4"
+PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v4"
 DEFAULT_PROFILE_PATH = Path(__file__).with_name(
     "pion_hgcer_validation_bundle_profile.json"
 )
@@ -135,11 +135,16 @@ def load_validation_profile(
         raise ValueError("validation_bundle_profile_invalid")
     required_commit = source_identity.get("required_analysis_commit")
     allowed_files = source_identity.get("allowed_committed_files")
+    allowed_non_analysis_prefixes = source_identity.get("allowed_non_analysis_path_prefixes")
     if (
         not isinstance(required_commit, str)
         or re.fullmatch(r"[0-9a-f]{40}", required_commit) is None
         or not isinstance(allowed_files, list)
         or not all(isinstance(path, str) and path for path in allowed_files)
+        or len(set(allowed_files)) != len(allowed_files)
+        or not isinstance(allowed_non_analysis_prefixes, list)
+        or not all(prefix == "docs/memory/" for prefix in allowed_non_analysis_prefixes)
+        or len(set(allowed_non_analysis_prefixes)) != len(allowed_non_analysis_prefixes)
     ):
         raise ValueError("validation_bundle_profile_invalid")
     return json.loads(json.dumps(payload, ensure_ascii=True, allow_nan=False))
@@ -154,6 +159,9 @@ AUTHORIZED_SETTINGS = tuple(
 )
 ALLOWED_COMMITTED_FILES = frozenset(
     _DEFAULT_PROFILE["source_identity"]["allowed_committed_files"]
+)
+ALLOWED_NON_ANALYSIS_PATH_PREFIXES = tuple(
+    _DEFAULT_PROFILE["source_identity"]["allowed_non_analysis_path_prefixes"]
 )
 
 
@@ -902,18 +910,18 @@ _F1_FEATURE_METADATA = {
         "SHMS_delta", "SHMS_xptar", "SHMS_yptar",
         "P_hgcer_xAtCer", "P_hgcer_yAtCer",
     ],
+    "training_population": "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0",
+    "training_low_definition": "0_lt_P_hgcer_npeSum_le_2",
+    "training_control_definition": "P_hgcer_npeSum_gt_2",
+    "application_population": "authoritative_physical_pion_control_P_hgcer_npeSum_gt_2",
     "parent_coordinate": "canonical_t",
     "downstream_yield_coordinates": ["canonical_t", "canonical_phi"],
-    "phi_model_constructed": False,
+    "phi_is_training_feature": False,
     "method_b_numerical_dependency": False,
     "probability_map_constructed": False,
     "weight_adjustment_constructed": False,
     "future_normalization_policy": "future_parent_t_only_no_tphi_child_renormalization",
-    "response_definitions": {
-        "positive": "P_hgcer_npeSum_gt_0",
-        "low": "0_lt_P_hgcer_npeSum_le_2",
-        "control": "P_hgcer_npeSum_gt_2",
-    },
+    "absolute_leakage_probability_claimed": False,
 }
 
 
@@ -947,32 +955,71 @@ def _strict_edges(value: object) -> bool:
     )
 
 
-def _f1_summary(
+def _f1_training_summary(
+    records: Sequence[Mapping[str, Any]], t_edges: Sequence[object],
+    delta_edges: Sequence[object], audit: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Mirror the producer's serialized Method-A training summary."""
+    closure_cells = []
+    for t_index in range(len(t_edges) - 1):
+        for delta_index in range(len(delta_edges) - 1):
+            local = [
+                record for record in records
+                if (record["t_index"], record["delta_index"]) == (t_index, delta_index)
+            ]
+            positive = len(local)
+            low = sum(record["response_class"] == "low" for record in local)
+            control = sum(record["response_class"] == "control" for record in local)
+            closure_cells.append({
+                "t_index": t_index, "t_low": t_edges[t_index],
+                "t_high": t_edges[t_index + 1], "delta_index": delta_index,
+                "delta_low": delta_edges[delta_index],
+                "delta_high": delta_edges[delta_index + 1],
+                "positive_count": positive, "low_count": low,
+                "control_count": control,
+                "method_a_partition_closure_passed": True,
+                "method_a_closure_passed": True,
+            })
+    positive = sum(entry["positive_count"] for entry in closure_cells)
+    low = sum(entry["low_count"] for entry in closure_cells)
+    control = sum(entry["control_count"] for entry in closure_cells)
+    return {
+        "training_record_count": len(records),
+        "prompt_positive_count": positive,
+        "prompt_low_count": low,
+        "prompt_control_count": control,
+        "partition_closure_passed": True,
+        "method_a_closure_passed": True,
+        "by_t_delta": closure_cells,
+        "response_threshold_audit": dict(audit),
+    }
+
+
+def _f1_application_summary(
     records: Sequence[Mapping[str, Any]], t_count: int, phi_count: int,
     unmatched_parent: Sequence[object], unmatched_child: Sequence[object],
 ) -> dict[str, Any]:
+    """Mirror the producer's serialized physical-control summary."""
     per_t = [{
         "t_index": index, "record_count": 0, "inside_phi_count": 0,
-        "outside_phi_count": 0, "prompt_low_count": 0,
-        "prompt_control_count": 0,
+        "outside_phi_count": 0, "prompt_record_count": 0,
+        "non_prompt_record_count": 0,
     } for index in range(t_count)]
     per_t_phi = [{
         "t_index": t_index, "phi_index": phi_index, "record_count": 0,
-        "prompt_low_count": 0, "prompt_control_count": 0,
+        "prompt_record_count": 0, "non_prompt_record_count": 0,
     } for t_index in range(t_count) for phi_index in range(phi_count)]
     grouped = {(entry["t_index"], entry["phi_index"]): entry for entry in per_t_phi}
     for record in records:
         t_entry = per_t[record["t_index"]]
         t_entry["record_count"] += 1
         t_entry["{}_count".format(record["phi_status"])] += 1
-        prompt_class = record["prompt_response_class"]
-        if prompt_class is not None:
-            t_entry["prompt_{}_count".format(prompt_class)] += 1
+        source_kind = "prompt" if record["source_label"] == "prompt" else "non_prompt"
+        t_entry["{}_record_count".format(source_kind)] += 1
         if record["phi_index"] is not None:
             phi_entry = grouped[(record["t_index"], record["phi_index"])]
             phi_entry["record_count"] += 1
-            if prompt_class is not None:
-                phi_entry["prompt_{}_count".format(prompt_class)] += 1
+            phi_entry["{}_record_count".format(source_kind)] += 1
     return {
         "phase_a_record_count": len(records),
         "matched_parent_record_count": len(records),
@@ -980,11 +1027,8 @@ def _f1_summary(
         "unmatched_child_cache_record_count": len(unmatched_child),
         "inside_phi_count": sum(entry["inside_phi_count"] for entry in per_t),
         "outside_phi_count": sum(entry["outside_phi_count"] for entry in per_t),
-        "prompt_low_count": sum(entry["prompt_low_count"] for entry in per_t),
-        "prompt_control_count": sum(entry["prompt_control_count"] for entry in per_t),
-        "nonfinite_primary_feature_counts": {
-            name: 0 for name in _F1_FEATURE_METADATA["primary_acceptance_features"]
-        },
+        "prompt_record_count": sum(entry["prompt_record_count"] for entry in per_t),
+        "non_prompt_record_count": sum(entry["non_prompt_record_count"] for entry in per_t),
         "by_t": per_t,
         "by_t_phi": per_t_phi,
     }
@@ -1003,10 +1047,209 @@ def _f1_identity_list(value: object) -> bool:
     )
 
 
+def _f1_text(value: object) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def _f1_required_finite(record: Mapping[str, Any], fields: Iterable[str]) -> bool:
+    return all(_finite_scalar(record.get(field)) for field in fields)
+
+
+def _f1_optional_finite(record: Mapping[str, Any], fields: Iterable[str]) -> bool:
+    return all(
+        record.get(field) is None or _finite_scalar(record.get(field))
+        for field in fields
+    )
+
+
+def _f1_record_identity(
+    record: Mapping[str, Any], observed: set[tuple[str, int]],
+) -> Optional[str]:
+    source_label, entry_index = record.get("source_label"), record.get("entry_index")
+    identity = (source_label, entry_index)
+    if (
+        not _f1_text(source_label)
+        or not isinstance(entry_index, int) or isinstance(entry_index, bool)
+        or entry_index < 0 or identity in observed
+    ):
+        return "record_identity_invalid"
+    observed.add(identity)
+    return None
+
+
+def _f1_t_delta_geometry(
+    record: Mapping[str, Any], contract: Mapping[str, Any],
+    t_edges: Sequence[object], delta_edges: Sequence[object], *,
+    allow_outside_delta: bool = False,
+) -> Optional[str]:
+    if record.get("coordinate_fingerprint") != contract.get("coordinate_fingerprint"):
+        return "record_coordinate_fingerprint_mismatch"
+    t_index = record.get("t_index")
+    if not _integer_index(t_index, len(t_edges) - 1) or (
+        record.get("t_low") != t_edges[t_index]
+        or record.get("t_high") != t_edges[t_index + 1]
+    ):
+        return "record_t_geometry_invalid"
+    delta_index = record.get("delta_index")
+    if delta_index is None:
+        if (
+            allow_outside_delta
+            and record.get("delta_low") is None
+            and record.get("delta_high") is None
+        ):
+            return None
+        return "record_delta_geometry_invalid"
+    if not _integer_index(delta_index, len(delta_edges) - 1) or (
+        record.get("delta_low") != delta_edges[delta_index]
+        or record.get("delta_high") != delta_edges[delta_index + 1]
+    ):
+        return "record_delta_geometry_invalid"
+    return None
+
+
+def _f1_phi_geometry(
+    record: Mapping[str, Any], phi_edges: Sequence[object],
+) -> Optional[str]:
+    phi_index, phi_status, phi_degrees = (
+        record.get("phi_index"), record.get("phi_status"), record.get("phi_degrees")
+    )
+    if not _finite_scalar(phi_degrees):
+        return "record_phi_coordinate_invalid"
+    if phi_index is None:
+        if (
+            phi_status != "outside_phi" or record.get("phi_low") is not None
+            or record.get("phi_high") is not None
+        ):
+            return "record_phi_geometry_invalid"
+        return None
+    if not _integer_index(phi_index, len(phi_edges) - 1) or (
+        phi_status != "inside_phi"
+        or record.get("phi_low") != phi_edges[phi_index]
+        or record.get("phi_high") != phi_edges[phi_index + 1]
+        or not (
+            phi_edges[phi_index] <= phi_degrees < phi_edges[phi_index + 1]
+            or (
+                phi_index == len(phi_edges) - 2
+                and phi_degrees == phi_edges[phi_index + 1]
+            )
+        )
+    ):
+        return "record_phi_geometry_invalid"
+    return None
+
+
+def _f1_training_records_valid(
+    records: object, contract: Mapping[str, Any], t_edges: Sequence[object],
+    delta_edges: Sequence[object],
+) -> tuple[bool, Optional[str]]:
+    if not isinstance(records, list):
+        return False, "training_records_not_list"
+    observed: set[tuple[str, int]] = set()
+    for record in records:
+        if not isinstance(record, Mapping):
+            return False, "training_record_not_mapping"
+        error = _f1_record_identity(record, observed) or _f1_t_delta_geometry(
+            record, contract, t_edges, delta_edges,
+        )
+        if error:
+            return False, error
+        if record.get("source_label") != "prompt" or record.get("nommcuts") is not True:
+            return False, "training_population_ownership_invalid"
+        npe = record.get("P_hgcer_npeSum")
+        if not _finite_scalar(npe) or float(npe) <= 0.0:
+            return False, "training_npe_not_positive"
+        expected_class = "low" if float(npe) <= 2.0 else "control"
+        if record.get("response_class") != expected_class:
+            return False, "training_response_class_invalid"
+        if not isinstance(record.get("allcuts"), bool):
+            return False, "training_cut_flags_invalid"
+        if not _f1_required_finite(record, (
+            "SHMS_delta", "P_hgcer_xAtCer", "P_hgcer_yAtCer",
+            "SHMS_xptar", "SHMS_yptar", "analysis_t", "analysis_MM",
+            "diagnostic_weight",
+        )) or not _f1_optional_finite(record, ("Q2", "W", "epsilon", "phi")):
+            return False, "training_feature_invalid"
+    return True, None
+
+
+def _f1_application_records_valid(
+    records: object, contract: Mapping[str, Any], t_edges: Sequence[object],
+    delta_edges: Sequence[object], phi_edges: Sequence[object],
+) -> tuple[bool, Optional[str]]:
+    if not isinstance(records, list):
+        return False, "application_records_not_list"
+    observed: set[tuple[str, int]] = set()
+    for record in records:
+        if not isinstance(record, Mapping):
+            return False, "application_record_not_mapping"
+        error = _f1_record_identity(record, observed) or _f1_t_delta_geometry(
+            record, contract, t_edges, delta_edges, allow_outside_delta=True,
+        ) or _f1_phi_geometry(record, phi_edges)
+        if error:
+            return False, error
+        npe = record.get("P_hgcer_npeSum")
+        if not _finite_scalar(npe) or float(npe) <= 2.0:
+            return False, "application_npe_not_physical_control"
+        if not isinstance(record.get("allcuts"), bool) or not isinstance(record.get("nommcuts"), bool):
+            return False, "application_cut_flags_invalid"
+        if not _f1_required_finite(record, (
+            "SHMS_delta", "P_hgcer_xAtCer", "P_hgcer_yAtCer",
+            "SHMS_xptar", "SHMS_yptar", "signed_source_coefficient",
+            "baseline_pion_weight_w0", "signed_baseline_event_contribution",
+            "analysis_t", "analysis_MM",
+        )) or not _f1_optional_finite(record, (
+            "HMS_xptar", "HMS_yptar", "Q2", "W", "epsilon", "theta_cm_deg",
+        )):
+            return False, "application_feature_invalid"
+    return True, None
+
+
+def _f1_training_audit_valid(value: object) -> bool:
+    if not isinstance(value, Mapping) or set(value) != {
+        "observed_nonpositive_response_record_count",
+        "observed_prompt_nommcuts_nonpositive_response_count",
+        "zero_or_nonpositive_included_in_training",
+        "absolute_leakage_probability_claimed",
+    }:
+        return False
+    return (
+        all(
+            isinstance(value.get(name), int) and not isinstance(value.get(name), bool)
+            and value[name] >= 0
+            for name in (
+                "observed_nonpositive_response_record_count",
+                "observed_prompt_nommcuts_nonpositive_response_count",
+            )
+        )
+        and value.get("zero_or_nonpositive_included_in_training") is False
+        and value.get("absolute_leakage_probability_claimed") is False
+    )
+
+
+def _f1_artifact_setting_valid(value: object) -> bool:
+    """Match the producer's resolved v2 artifact-setting surface."""
+    if not isinstance(value, Mapping) or any(field not in value for field in (
+        "kinematic_token", "Q2", "W", "epsilon_setting",
+        "epsilon_filename_token", "phi_setting", "particle_type",
+    )):
+        return False
+    try:
+        epsilon_filename = _safe_token(
+            value["epsilon_filename_token"], "artifact_epsilon"
+        ).lower()
+        particle_type = _safe_token(value["particle_type"], "artifact_particle").lower()
+        _safe_token(value["kinematic_token"], "artifact_kinematic")
+        _safe_token(value["epsilon_setting"], "artifact_epsilon_setting")
+        _safe_token(value["phi_setting"], "artifact_phi")
+    except ValueError:
+        return False
+    return particle_type == "kaon" and epsilon_filename in {"lowe", "highe"}
+
+
 def _method_a_acceptance_contract_metadata(
     path: Path, setting: Mapping[str, str],
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
-    """Validate the serialized F.1 contract without importing its builder."""
+    """Validate the frozen F.1.Fix.5 v2 artifact without importing its builder."""
     metadata: dict[str, Any] = {"metadata_status": "invalid"}
     try:
         payload = _strict_json_payload(path)
@@ -1014,14 +1257,17 @@ def _method_a_acceptance_contract_metadata(
         return metadata, [{"code": "checkpoint_json_invalid", "detail": "{}: {}".format(type(exc).__name__, exc)}]
     contract = payload.get("contract")
     mismatches = _setting_mismatches(payload.get("setting"), setting)
+    artifact_setting_valid = _f1_artifact_setting_valid(payload.get("setting"))
     wrapper_flags = all(payload.get(key) is expected for key, expected in (
         ("non_authoritative", True), ("production_objects_mutated", False),
         ("refinement_applied", False), ("production_application_performed", False),
         ("event_application_performed", False),
     ))
     valid = isinstance(contract, Mapping)
-    records = contract.get("records") if valid else None
-    summary = contract.get("summary") if valid else None
+    training_records = contract.get("method_a_training_records") if valid else None
+    application_records = contract.get("application_records") if valid else None
+    training_summary = contract.get("method_a_training_summary") if valid else None
+    application_summary = contract.get("application_summary") if valid else None
     t_edges = contract.get("t_edges") if valid else None
     delta_edges = contract.get("delta_edges") if valid else None
     phi_edges = contract.get("phi_edges") if valid else None
@@ -1034,159 +1280,110 @@ def _method_a_acceptance_contract_metadata(
         ("method_b_numerical_dependency", False),
         ("future_weight_adjustment_constructed", False),
     )) if isinstance(contract, Mapping) else False
-    records_valid = isinstance(records, list) and geometry_valid
-    observed: set[tuple[str, int]] = set()
-    record_error = None
-    if records_valid:
-        for record in records:
-            if not isinstance(record, Mapping):
-                records_valid, record_error = False, "record_not_mapping"
-                break
-            source_label, entry_index = record.get("source_label"), record.get("entry_index")
-            identity = (source_label, entry_index)
-            if (
-                not isinstance(source_label, str) or not source_label
-                or not isinstance(entry_index, int) or isinstance(entry_index, bool)
-                or entry_index < 0 or identity in observed
-            ):
-                records_valid, record_error = False, "record_identity_invalid"
-                break
-            observed.add(identity)
-            if record.get("coordinate_fingerprint") != contract.get("coordinate_fingerprint"):
-                records_valid, record_error = False, "record_coordinate_fingerprint_mismatch"
-                break
-            t_index = record.get("t_index")
-            if not _integer_index(t_index, len(t_edges) - 1) or (
-                record.get("t_low") != t_edges[t_index]
-                or record.get("t_high") != t_edges[t_index + 1]
-            ):
-                records_valid, record_error = False, "record_t_geometry_invalid"
-                break
-            delta_index = record.get("delta_index")
-            if delta_index is None:
-                if record.get("delta_low") is not None or record.get("delta_high") is not None:
-                    records_valid, record_error = False, "record_delta_geometry_invalid"
-                    break
-            elif not _integer_index(delta_index, len(delta_edges) - 1) or (
-                record.get("delta_low") != delta_edges[delta_index]
-                or record.get("delta_high") != delta_edges[delta_index + 1]
-            ):
-                records_valid, record_error = False, "record_delta_geometry_invalid"
-                break
-            phi_index = record.get("phi_index")
-            phi_status = record.get("phi_status")
-            phi_degrees = record.get("phi_degrees")
-            if not _finite_scalar(phi_degrees):
-                records_valid, record_error = False, "record_phi_coordinate_invalid"
-                break
-            if phi_index is None:
-                if (
-                    phi_status != "outside_phi" or record.get("phi_low") is not None
-                    or record.get("phi_high") is not None
-                ):
-                    records_valid, record_error = False, "record_phi_geometry_invalid"
-                    break
-            elif not _integer_index(phi_index, len(phi_edges) - 1) or (
-                phi_status != "inside_phi"
-                or record.get("phi_low") != phi_edges[phi_index]
-                or record.get("phi_high") != phi_edges[phi_index + 1]
-                or not (
-                    phi_edges[phi_index] <= phi_degrees < phi_edges[phi_index + 1]
-                    or (
-                        phi_index == len(phi_edges) - 2
-                        and phi_degrees == phi_edges[phi_index + 1]
-                    )
-                )
-            ):
-                records_valid, record_error = False, "record_phi_geometry_invalid"
-                break
-            required_numeric = (
-                "SHMS_delta", "P_hgcer_npeSum", "P_hgcer_xAtCer", "P_hgcer_yAtCer",
-                "SHMS_xptar", "SHMS_yptar", "signed_source_coefficient",
-                "baseline_pion_weight_w0", "signed_baseline_event_contribution",
-            )
-            if not all(_finite_scalar(record.get(field)) for field in required_numeric):
-                records_valid, record_error = False, "record_feature_invalid"
-                break
-            if any(record.get(field) is not None and not _finite_scalar(record.get(field)) for field in ("HMS_xptar", "HMS_yptar")):
-                records_valid, record_error = False, "record_optional_feature_invalid"
-                break
-            if not isinstance(record.get("allcuts"), bool) or not isinstance(record.get("nommcuts"), bool):
-                records_valid, record_error = False, "record_cut_flags_invalid"
-                break
-            npe = float(record["P_hgcer_npeSum"])
-            expected_prompt = (
-                "low" if source_label == "prompt" and record["nommcuts"] is True and 0.0 < npe <= 2.0
-                else "control" if source_label == "prompt" and record["nommcuts"] is True and npe > 2.0
-                else None
-            )
-            if record.get("prompt_response_class") != expected_prompt:
-                records_valid, record_error = False, "record_prompt_response_class_invalid"
-                break
+    training_records_valid, training_error = (
+        _f1_training_records_valid(training_records, contract, t_edges, delta_edges)
+        if geometry_valid and isinstance(contract, Mapping) else (False, "training_geometry_invalid")
+    )
+    application_records_valid, application_error = (
+        _f1_application_records_valid(
+            application_records, contract, t_edges, delta_edges, phi_edges,
+        ) if geometry_valid and isinstance(contract, Mapping)
+        else (False, "application_geometry_invalid")
+    )
     unmatched_parent = contract.get("unmatched_parent_cache_identities") if isinstance(contract, Mapping) else None
     unmatched_child = contract.get("unmatched_child_cache_identities") if isinstance(contract, Mapping) else None
     audits_valid = _f1_identity_list(unmatched_parent) and _f1_identity_list(unmatched_child)
+    response_audit = training_summary.get("response_threshold_audit") if isinstance(training_summary, Mapping) else None
+    training_summary_valid = (
+        training_records_valid and _f1_training_audit_valid(response_audit)
+        and isinstance(training_summary, Mapping)
+        and training_summary == _f1_training_summary(
+            training_records, t_edges, delta_edges, response_audit,
+        )
+    )
+    application_summary_valid = (
+        application_records_valid and audits_valid and isinstance(application_summary, Mapping)
+        and application_summary == _f1_application_summary(
+            application_records, len(t_edges) - 1, len(phi_edges) - 1,
+            unmatched_parent, unmatched_child,
+        )
+    )
     fingerprints_valid = False
-    if records_valid and isinstance(contract, Mapping):
+    if training_records_valid and application_records_valid and isinstance(contract, Mapping):
         child_projection = [{
             "source_label": record["source_label"], "entry_index": record["entry_index"],
             "t_index": record["t_index"], "phi_index": record["phi_index"],
             "phi_low": record["phi_low"], "phi_high": record["phi_high"],
             "phi_status": record["phi_status"],
-        } for record in records]
+        } for record in application_records]
         reconstructed_inputs = {
+            "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v2",
+            "fingerprint_schema_version": "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v2",
             "phase_a_contract_fingerprint": contract.get("phase_a_contract_fingerprint"),
-            "phase_a_pion_event_population_fingerprint": contract.get("pion_event_population_fingerprint"),
+            "phase_a_pion_event_population_fingerprint": contract.get("phase_a_pion_event_population_fingerprint"),
+            "method_a_fingerprint": contract.get("method_a_fingerprint"),
+            "method_a_event_population_fingerprint": contract.get("method_a_event_population_fingerprint"),
+            "part1_config_fingerprint": contract.get("part1_config_fingerprint"),
             "coordinate_fingerprint": contract.get("coordinate_fingerprint"),
             "host_state": contract.get("host_state"),
             "source_target_state": contract.get("source_target_state"),
             "t_edges": t_edges, "delta_edges": delta_edges, "phi_edges": phi_edges,
-            "event_population_fingerprint": _canonical_sha256(records),
+            "method_a_training_population_fingerprint": _canonical_sha256(training_records),
+            "application_population_fingerprint": _canonical_sha256(application_records),
             "acceptance_feature_metadata_fingerprint": _canonical_sha256(_F1_FEATURE_METADATA),
-            "child_assignment_projection_fingerprint": _canonical_sha256(child_projection),
+            "application_child_assignment_projection_fingerprint": _canonical_sha256(child_projection),
+            "method_a_closure": training_summary.get("by_t_delta") if isinstance(training_summary, Mapping) else None,
             "feature_metadata": _F1_FEATURE_METADATA,
         }
         fingerprints_valid = (
-            contract.get("event_population_fingerprint") == reconstructed_inputs["event_population_fingerprint"]
+            contract.get("method_a_training_population_fingerprint") == reconstructed_inputs["method_a_training_population_fingerprint"]
+            and contract.get("application_population_fingerprint") == reconstructed_inputs["application_population_fingerprint"]
             and contract.get("acceptance_feature_metadata_fingerprint") == reconstructed_inputs["acceptance_feature_metadata_fingerprint"]
-            and contract.get("child_assignment_projection_fingerprint") == reconstructed_inputs["child_assignment_projection_fingerprint"]
+            and contract.get("application_child_assignment_projection_fingerprint") == reconstructed_inputs["application_child_assignment_projection_fingerprint"]
             and contract.get("fingerprint_inputs") == reconstructed_inputs
             and contract.get("fingerprint") == _canonical_sha256(reconstructed_inputs)
         )
-    summary_valid = (
-        records_valid and audits_valid and isinstance(summary, Mapping)
-        and summary == _f1_summary(
-            records, len(t_edges) - 1, len(phi_edges) - 1,
-            unmatched_parent, unmatched_child,
-        )
+    provenance_valid = (
+        isinstance(contract, Mapping)
+        and all(_f1_text(contract.get(field)) for field in (
+            "phase_a_contract_fingerprint", "phase_a_pion_event_population_fingerprint",
+            "method_a_fingerprint", "method_a_event_population_fingerprint",
+            "part1_config_fingerprint", "coordinate_fingerprint", "host_state",
+        ))
+        and contract.get("source_target_state") == "post_proton_noRF"
     )
     contract_valid = (
         isinstance(contract, Mapping)
-        and contract.get("schema_version") == "pion_hgcer_method_a_acceptance_event_contract/v1"
-        and contract.get("fingerprint_schema_version") == "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1"
+        and contract.get("schema_version") == "pion_hgcer_method_a_acceptance_event_contract/v2"
+        and contract.get("fingerprint_schema_version") == "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v2"
         and contract.get("status") == "available"
+        and contract.get("diagnostic_stage") == "complete"
+        and contract.get("reason") is None
         and required_contract_flags
-        and contract.get("source_target_state") == "post_proton_noRF"
         and contract.get("feature_metadata") == _F1_FEATURE_METADATA
-        and records_valid and audits_valid and summary_valid and fingerprints_valid
+        and provenance_valid and training_records_valid and application_records_valid
+        and audits_valid and training_summary_valid and application_summary_valid
+        and fingerprints_valid
     )
     metadata.update({
         "schema_version": payload.get("schema_version"),
         "setting": payload.get("setting"),
         "contract_fingerprint": contract.get("fingerprint") if isinstance(contract, Mapping) else None,
-        "event_population_fingerprint": contract.get("event_population_fingerprint") if isinstance(contract, Mapping) else None,
+        "method_a_training_population_fingerprint": contract.get("method_a_training_population_fingerprint") if isinstance(contract, Mapping) else None,
+        "application_population_fingerprint": contract.get("application_population_fingerprint") if isinstance(contract, Mapping) else None,
         "acceptance_feature_metadata_fingerprint": contract.get("acceptance_feature_metadata_fingerprint") if isinstance(contract, Mapping) else None,
-        "child_assignment_projection_fingerprint": contract.get("child_assignment_projection_fingerprint") if isinstance(contract, Mapping) else None,
-        "summary": summary if isinstance(summary, Mapping) else None,
+        "application_child_assignment_projection_fingerprint": contract.get("application_child_assignment_projection_fingerprint") if isinstance(contract, Mapping) else None,
+        "training_summary": training_summary if isinstance(training_summary, Mapping) else None,
+        "application_summary": application_summary if isinstance(application_summary, Mapping) else None,
     })
     if (
-        payload.get("schema_version") != "pion_hgcer_method_a_acceptance_event_contract_artifact/v1"
-        or not wrapper_flags or mismatches or not contract_valid
+        payload.get("schema_version") != "pion_hgcer_method_a_acceptance_event_contract_artifact/v2"
+        or not wrapper_flags or mismatches or not artifact_setting_valid or not contract_valid
     ):
         metadata["metadata_status"] = "mismatch"
         if mismatches:
             metadata["mismatches"] = mismatches
-        detail = record_error or "method_a_acceptance_contract_invalid"
+        detail = training_error or application_error or "method_a_acceptance_contract_invalid"
         return metadata, [{"code": "checkpoint_metadata_mismatch", "detail": detail}]
     metadata["metadata_status"] = "match"
     return metadata, []
@@ -1373,8 +1570,9 @@ def collect_source_checks(
 def _committed_identity(
     source_checks: Sequence[Mapping[str, Any]],
     allowed_committed_files: Iterable[str] = ALLOWED_COMMITTED_FILES,
+    allowed_non_analysis_path_prefixes: Iterable[str] = ALLOWED_NON_ANALYSIS_PATH_PREFIXES,
 ) -> tuple[bool, list[str], list[str]]:
-    """Return the frozen-base ancestry result and committed post-base paths."""
+    """Return frozen-base ancestry plus paths outside the narrow review rule."""
     by_name = {str(record.get("name")): record for record in source_checks}
     ancestry = by_name.get("required_analysis_commit_ancestor", {})
     diff = by_name.get("committed_files_after_required_analysis_commit", {})
@@ -1386,9 +1584,13 @@ def _committed_identity(
         if line.strip()
     })
     allowed = frozenset(allowed_committed_files)
+    allowed_prefixes = tuple(allowed_non_analysis_path_prefixes)
     unexpected = [
         path for path in committed_files
-        if path not in allowed
+        if (
+            path not in allowed
+            and not any(path.startswith(prefix) for prefix in allowed_prefixes)
+        )
     ]
     return is_ancestor, committed_files, unexpected
 
@@ -1461,6 +1663,7 @@ def collect_validation_bundle(
     source_identity = profile["source_identity"]
     required_analysis_commit = source_identity["required_analysis_commit"]
     allowed_committed_files = source_identity["allowed_committed_files"]
+    allowed_non_analysis_path_prefixes = source_identity["allowed_non_analysis_path_prefixes"]
     source_checks_text, source_checks = collect_source_checks(
         repository,
         command_runner,
@@ -1471,7 +1674,11 @@ def collect_validation_bundle(
         if check["returncode"] != 0:
             _issue(issues, "source_check_failed", artifact=check["name"], detail="returncode={}".format(check["returncode"]))
     required_analysis_commit_is_ancestor, committed_files, unexpected_committed_files = (
-        _committed_identity(source_checks, allowed_committed_files)
+        _committed_identity(
+            source_checks,
+            allowed_committed_files,
+            allowed_non_analysis_path_prefixes,
+        )
     )
     if not required_analysis_commit_is_ancestor:
         _issue(
@@ -1498,6 +1705,8 @@ def collect_validation_bundle(
         "git_head": git_head,
         "required_analysis_commit": required_analysis_commit,
         "required_analysis_commit_is_ancestor": required_analysis_commit_is_ancestor,
+        "allowed_committed_files": sorted(allowed_committed_files),
+        "allowed_non_analysis_path_prefixes": sorted(allowed_non_analysis_path_prefixes),
         "committed_files_after_required_analysis_commit": committed_files,
         "unexpected_committed_files_after_required_analysis_commit": unexpected_committed_files,
         "requested_kinematic": kinematic,
@@ -1599,11 +1808,15 @@ def collect_validation_bundle(
                 _method_a_acceptance_contract_metadata, directory,
             )
             f1_metadata = setting_manifest["artifacts"]["method_a_acceptance_contract"].get("metadata", {})
-            if isinstance(f1_metadata.get("summary"), Mapping):
+            if (
+                isinstance(f1_metadata.get("training_summary"), Mapping)
+                and isinstance(f1_metadata.get("application_summary"), Mapping)
+            ):
                 manifest["f1_aggregate_summary"].append({
                     "phi": selected_phi,
                     "epsilon": selected_epsilon,
-                    "summary": f1_metadata["summary"],
+                    "training_summary": f1_metadata["training_summary"],
+                    "application_summary": f1_metadata["application_summary"],
                 })
             page_manifest_valid = record_json_artifact(
                 setting_manifest, setting, "full_background_page_manifest", page_manifest_path,
@@ -1758,8 +1971,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     summaries = result["manifest"].get("f1_aggregate_summary", [])
     if summaries:
         total_records = sum(
-            int(entry["summary"].get("phase_a_record_count", 0))
-            for entry in summaries if isinstance(entry.get("summary"), Mapping)
+            int(entry["application_summary"].get("phase_a_record_count", 0))
+            for entry in summaries if isinstance(entry.get("application_summary"), Mapping)
         )
         print(
             "F.1 acceptance review: {} setting(s), {} frozen pion records".format(
