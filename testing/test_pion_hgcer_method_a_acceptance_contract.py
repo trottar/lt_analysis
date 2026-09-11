@@ -39,6 +39,21 @@ class _AmbiguousTruthArray:
         )
 
 
+class _ArrayScalar:
+    """Test-only NumPy-like scalar that requires explicit .item() detachment."""
+
+    def __init__(self, value):
+        self._value = value
+
+    def item(self):
+        return self._value
+
+
+class _BrokenArrayScalar:
+    def item(self):
+        raise RuntimeError("synthetic child scalar failure")
+
+
 def _phase_record(source, entry, t_index, delta_index, delta, npe, *, nommcuts=True):
     return {
         "source_label": source,
@@ -157,7 +172,65 @@ def _fixture():
     return phase, cache
 
 
+def _runtime_like_child_scalars(cache):
+    for section in cache["child_event_cache"].values():
+        for field, values in section.items():
+            section[field] = [_ArrayScalar(value) for value in values]
+
+
 class MethodAAcceptanceContractTests(unittest.TestCase):
+    def test_runtime_like_child_scalars_preserve_parity_and_fingerprints(self):
+        baseline_phase, baseline_cache = _fixture()
+        baseline = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            baseline_phase, baseline_cache, phi_edges=PHI_EDGES
+        )
+        phase, cache = _fixture()
+        _runtime_like_child_scalars(cache)
+        runtime_like = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=PHI_EDGES
+        )
+        self.assertTrue(runtime_like["available"], runtime_like.get("reason"))
+        self.assertEqual(runtime_like["status"], "available")
+        self.assertEqual(runtime_like["diagnostic_stage"], "complete")
+        for field in (
+            "records", "summary", "feature_metadata",
+            "event_population_fingerprint",
+            "acceptance_feature_metadata_fingerprint",
+            "child_assignment_projection_fingerprint", "fingerprint_inputs", "fingerprint",
+        ):
+            self.assertEqual(runtime_like[field], baseline[field])
+
+    def test_runtime_like_boolean_parity_remains_exact(self):
+        phase, cache = _fixture()
+        _runtime_like_child_scalars(cache)
+        self.assertTrue(acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=PHI_EDGES
+        )["available"])
+        for field, reason in (
+            ("allcuts", "parent_child_parity_mismatch:allcuts"),
+            ("nommcuts", "parent_child_parity_mismatch:nommcuts"),
+        ):
+            with self.subTest(field=field):
+                candidate_phase, candidate_cache = _fixture()
+                _runtime_like_child_scalars(candidate_cache)
+                candidate_cache["child_event_cache"]["prompt"][field][0] = _ArrayScalar(False)
+                result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+                    candidate_phase, candidate_cache, phi_edges=PHI_EDGES
+                )
+                self.assertFalse(result["available"])
+                self.assertEqual(result["reason"], reason)
+
+    def test_malformed_runtime_like_child_scalar_fails_locally(self):
+        phase, cache = _fixture()
+        _runtime_like_child_scalars(cache)
+        cache["child_event_cache"]["prompt"]["entry_index"][0] = _BrokenArrayScalar()
+        result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=PHI_EDGES
+        )
+        self.assertFalse(result["available"])
+        self.assertEqual(result["status"], "unavailable")
+        self.assertEqual(result["reason"], "pion_cache_child_scalar_invalid")
+
     def test_ambiguous_truth_edge_arrays_preserve_geometry_and_fingerprints(self):
         baseline_phase, baseline_cache = _fixture()
         baseline = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(

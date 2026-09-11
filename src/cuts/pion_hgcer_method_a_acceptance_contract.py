@@ -243,9 +243,29 @@ def _cache_parent_rows(cache):
 
 def _column_values(value):
     try:
-        return [value[index] for index in range(len(value))]
+        return [_detach_child_scalar(value[index]) for index in range(len(value))]
+    except MethodAAcceptanceContractUnavailable:
+        raise
     except (TypeError, KeyError, IndexError):
         raise MethodAAcceptanceContractUnavailable("pion_cache_child_columns_invalid")
+
+
+def _detach_child_scalar(value):
+    """Detach one child-cache scalar from an optional NumPy-like wrapper."""
+    if value is None or type(value) in (str, bool, int, float):
+        return value
+    item = getattr(value, "item", None)
+    if not callable(item):
+        raise MethodAAcceptanceContractUnavailable("pion_cache_child_scalar_invalid")
+    try:
+        detached = item()
+    except Exception as exc:
+        raise MethodAAcceptanceContractUnavailable(
+            "pion_cache_child_scalar_invalid"
+        ) from exc
+    if detached is None or type(detached) in (str, bool, int, float):
+        return detached
+    raise MethodAAcceptanceContractUnavailable("pion_cache_child_scalar_invalid")
 
 
 def _cache_child_rows(cache):
