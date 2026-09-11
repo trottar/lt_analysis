@@ -57,6 +57,32 @@ def _sequence(value):
     return isinstance(value, Sequence) and not isinstance(value, (str, bytes))
 
 
+def _materialize_edge_values(value, label, *, allow_none=False):
+    """Detach an ordinary or indexable one-dimensional edge collection."""
+    if value is None:
+        if allow_none:
+            return []
+        raise MethodAAcceptanceContractUnavailable("{}_edges_invalid".format(label))
+    if isinstance(value, (str, bytes, bytearray, bool)):
+        raise MethodAAcceptanceContractUnavailable("{}_edges_invalid".format(label))
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    try:
+        length = len(value)
+    except (TypeError, ValueError) as exc:
+        raise MethodAAcceptanceContractUnavailable(
+            "{}_edges_invalid".format(label)
+        ) from exc
+    if isinstance(length, bool) or not isinstance(length, int) or length < 0:
+        raise MethodAAcceptanceContractUnavailable("{}_edges_invalid".format(label))
+    try:
+        return [value[index] for index in range(length)]
+    except (TypeError, KeyError, IndexError, AttributeError, ValueError) as exc:
+        raise MethodAAcceptanceContractUnavailable(
+            "{}_edges_invalid".format(label)
+        ) from exc
+
+
 def _finite(value):
     if isinstance(value, bool):
         return None
@@ -109,10 +135,11 @@ def _hash(value):
 
 
 def _strict_edges(value, label):
-    if not _sequence(value) or len(value) < 2:
+    raw_edges = _materialize_edge_values(value, label)
+    if len(raw_edges) < 2:
         raise MethodAAcceptanceContractUnavailable("{}_edges_invalid".format(label))
     edges = []
-    for item in value:
+    for item in raw_edges:
         scalar = _finite(item)
         if scalar is None:
             raise MethodAAcceptanceContractUnavailable(
@@ -436,6 +463,18 @@ def _summary(records, t_count, phi_count, unmatched_parent, unmatched_child):
 
 def _unavailable(reason, *, stage="validation", phase=None, phi_edges=None):
     source = _mapping(phase)
+    def unavailable_edges(value, label):
+        try:
+            raw_edges = _materialize_edge_values(value, label, allow_none=True)
+            edges = []
+            for item in raw_edges:
+                scalar = _finite(item)
+                if scalar is None:
+                    return []
+                edges.append(scalar)
+            return edges
+        except MethodAAcceptanceContractUnavailable:
+            return []
     return {
         "schema_version": METHOD_A_ACCEPTANCE_EVENT_CONTRACT_SCHEMA_VERSION,
         "fingerprint_schema_version": METHOD_A_ACCEPTANCE_EVENT_CONTRACT_FINGERPRINT_SCHEMA_VERSION,
@@ -455,9 +494,9 @@ def _unavailable(reason, *, stage="validation", phase=None, phi_edges=None):
         "coordinate_fingerprint": source.get("coordinate_fingerprint"),
         "host_state": source.get("host_state"),
         "source_target_state": source.get("source_target_state"),
-        "t_edges": list(source.get("canonical_t_edges") or ()),
-        "delta_edges": list(source.get("delta_edges") or ()),
-        "phi_edges": list(phi_edges or ()),
+        "t_edges": unavailable_edges(source.get("canonical_t_edges"), "canonical_t"),
+        "delta_edges": unavailable_edges(source.get("delta_edges"), "delta"),
+        "phi_edges": unavailable_edges(phi_edges, "phi"),
         "records": [],
         "summary": {"by_t": [], "by_t_phi": []},
         "event_population_fingerprint": None,
@@ -483,7 +522,8 @@ def build_pion_hgcer_method_a_acceptance_event_contract(
             raise MethodAAcceptanceContractUnavailable("pion_cache_invalid")
         if str(cache.get("coordinate_fingerprint") or "") != phase["coordinate_fingerprint"]:
             raise MethodAAcceptanceContractUnavailable("pion_cache_coordinate_fingerprint_mismatch")
-        if list(cache.get("delta_edges") or ()) != delta_edges:
+        cache_delta_edges = _strict_edges(cache.get("delta_edges"), "pion_cache_delta")
+        if cache_delta_edges != delta_edges:
             raise MethodAAcceptanceContractUnavailable("pion_cache_delta_geometry_mismatch")
         parent_index = _cache_parent_rows(cache)
         child_index = _cache_child_rows(cache)

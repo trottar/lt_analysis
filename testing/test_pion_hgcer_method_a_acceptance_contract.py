@@ -21,6 +21,24 @@ DELTA_EDGES = [-10.0, 0.0, 10.0]
 PHI_EDGES = [-20.0, 0.0, 20.0]
 
 
+class _AmbiguousTruthArray:
+    """Indexable test stand-in for NumPy's ambiguous array truth value."""
+
+    def __init__(self, values):
+        self._values = list(values)
+
+    def __len__(self):
+        return len(self._values)
+
+    def __getitem__(self, index):
+        return self._values[index]
+
+    def __bool__(self):
+        raise ValueError(
+            "The truth value of an array with more than one element is ambiguous."
+        )
+
+
 def _phase_record(source, entry, t_index, delta_index, delta, npe, *, nommcuts=True):
     return {
         "source_label": source,
@@ -140,6 +158,66 @@ def _fixture():
 
 
 class MethodAAcceptanceContractTests(unittest.TestCase):
+    def test_ambiguous_truth_edge_arrays_preserve_geometry_and_fingerprints(self):
+        baseline_phase, baseline_cache = _fixture()
+        baseline = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            baseline_phase, baseline_cache, phi_edges=PHI_EDGES
+        )
+        phase, cache = _fixture()
+        phase["canonical_t_edges"] = _AmbiguousTruthArray(T_EDGES)
+        phase["delta_edges"] = _AmbiguousTruthArray(DELTA_EDGES)
+        cache["delta_edges"] = _AmbiguousTruthArray(DELTA_EDGES)
+        runtime_like = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=_AmbiguousTruthArray(PHI_EDGES)
+        )
+        self.assertTrue(runtime_like["available"], runtime_like.get("reason"))
+        self.assertEqual(runtime_like["status"], "available")
+        self.assertEqual(runtime_like["diagnostic_stage"], "complete")
+        for field in (
+            "records", "summary", "feature_metadata", "t_edges", "delta_edges",
+            "phi_edges", "event_population_fingerprint",
+            "acceptance_feature_metadata_fingerprint",
+            "child_assignment_projection_fingerprint", "fingerprint_inputs", "fingerprint",
+        ):
+            self.assertEqual(runtime_like[field], baseline[field])
+
+    def test_array_like_geometry_validation_and_unavailable_path_are_safe(self):
+        cases = (
+            ("canonical_t_edges", [0.0, 1.0, 1.0], "canonical_t_edges_not_strictly_increasing"),
+            ("delta_edges", [-10.0, float("nan"), 10.0], "delta_edges_nonfinite"),
+            ("canonical_t_edges", [2.0, 1.0, 0.0], "canonical_t_edges_not_strictly_increasing"),
+        )
+        for field, edges, reason in cases:
+            with self.subTest(field=field, reason=reason):
+                phase, cache = _fixture()
+                phase[field] = _AmbiguousTruthArray(edges)
+                result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+                    phase, cache, phi_edges=_AmbiguousTruthArray(PHI_EDGES)
+                )
+                self.assertFalse(result["available"])
+                self.assertEqual(result["status"], "unavailable")
+                self.assertEqual(result["reason"], reason)
+        phase, cache = _fixture()
+        cache["coordinate_fingerprint"] = "bad-coordinates"
+        result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=_AmbiguousTruthArray(PHI_EDGES)
+        )
+        self.assertFalse(result["available"])
+        self.assertEqual(result["reason"], "pion_cache_coordinate_fingerprint_mismatch")
+        self.assertEqual(result["phi_edges"], PHI_EDGES)
+
+    def test_early_unavailable_preserves_array_like_phi_geometry(self):
+        phase, cache = _fixture()
+        phase["schema_version"] = "wrong"
+        result = acceptance.build_pion_hgcer_method_a_acceptance_event_contract(
+            phase, cache, phi_edges=_AmbiguousTruthArray(PHI_EDGES)
+        )
+        self.assertFalse(result["available"])
+        self.assertEqual(result["status"], "unavailable")
+        self.assertEqual(result["reason"], "phase_a_contract_unavailable")
+        self.assertEqual(result["diagnostic_stage"], "validation")
+        self.assertEqual(result["phi_edges"], PHI_EDGES)
+
     def test_complete_join_outside_phi_and_deterministic_fingerprints(self):
         phase, cache = _fixture()
         before = deepcopy((phase, cache))
