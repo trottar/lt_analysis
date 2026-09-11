@@ -118,11 +118,110 @@ def _correction(phi="Left", epsilon="lowe"):
     }
 
 
+def _acceptance(phi="Left", epsilon="lowe"):
+    record = {
+        "source_label": "prompt", "entry_index": 4,
+        "coordinate_fingerprint": "coordinates", "t_index": 0,
+        "t_low": 0.0, "t_high": 1.0,
+        "phi_degrees": 0.0, "phi_index": 0,
+        "phi_low": -5.0, "phi_high": 5.0, "phi_status": "inside_phi",
+        "SHMS_delta": 0.0, "delta_index": 0,
+        "delta_low": -10.0, "delta_high": 10.0,
+        "P_hgcer_npeSum": 3.0, "P_hgcer_xAtCer": 0.1,
+        "P_hgcer_yAtCer": -0.1, "SHMS_xptar": 0.01,
+        "SHMS_yptar": -0.02, "HMS_xptar": None, "HMS_yptar": None,
+        "signed_source_coefficient": 1.0, "baseline_pion_weight_w0": 2.0,
+        "signed_baseline_event_contribution": 2.0,
+        "allcuts": True, "nommcuts": True,
+        "prompt_response_class": "control",
+    }
+    feature_metadata = dict(collector._F1_FEATURE_METADATA)
+    feature_metadata["primary_acceptance_features"] = list(
+        collector._F1_FEATURE_METADATA["primary_acceptance_features"]
+    )
+    feature_metadata["downstream_yield_coordinates"] = list(
+        collector._F1_FEATURE_METADATA["downstream_yield_coordinates"]
+    )
+    feature_metadata["response_definitions"] = dict(
+        collector._F1_FEATURE_METADATA["response_definitions"]
+    )
+    child_projection = [{
+        "source_label": record["source_label"], "entry_index": record["entry_index"],
+        "t_index": record["t_index"], "phi_index": record["phi_index"],
+        "phi_low": record["phi_low"], "phi_high": record["phi_high"],
+        "phi_status": record["phi_status"],
+    }]
+    summary = {
+        "phase_a_record_count": 1, "matched_parent_record_count": 1,
+        "unmatched_parent_cache_record_count": 0,
+        "unmatched_child_cache_record_count": 0,
+        "inside_phi_count": 1, "outside_phi_count": 0,
+        "prompt_low_count": 0, "prompt_control_count": 1,
+        "nonfinite_primary_feature_counts": {
+            name: 0 for name in feature_metadata["primary_acceptance_features"]
+        },
+        "by_t": [{
+            "t_index": 0, "record_count": 1, "inside_phi_count": 1,
+            "outside_phi_count": 0, "prompt_low_count": 0,
+            "prompt_control_count": 1,
+        }],
+        "by_t_phi": [{
+            "t_index": 0, "phi_index": 0, "record_count": 1,
+            "prompt_low_count": 0, "prompt_control_count": 1,
+        }],
+    }
+    inputs = {
+        "phase_a_contract_fingerprint": "phase-a",
+        "phase_a_pion_event_population_fingerprint": "phase-a-pions",
+        "coordinate_fingerprint": "coordinates", "host_state": "approved",
+        "source_target_state": "post_proton_noRF",
+        "t_edges": [0.0, 1.0], "delta_edges": [-10.0, 10.0],
+        "phi_edges": [-5.0, 5.0],
+        "event_population_fingerprint": collector._canonical_sha256([record]),
+        "acceptance_feature_metadata_fingerprint": collector._canonical_sha256(feature_metadata),
+        "child_assignment_projection_fingerprint": collector._canonical_sha256(child_projection),
+        "feature_metadata": feature_metadata,
+    }
+    contract = {
+        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v1",
+        "fingerprint_schema_version": "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1",
+        "status": "available", "available": True,
+        "non_authoritative": True, "production_objects_mutated": False,
+        "refinement_applied": False, "production_application_performed": False,
+        "event_application_performed": False, "method_b_numerical_dependency": False,
+        "future_weight_adjustment_constructed": False,
+        "phase_a_contract_fingerprint": "phase-a",
+        "pion_event_population_fingerprint": "phase-a-pions",
+        "coordinate_fingerprint": "coordinates", "host_state": "approved",
+        "source_target_state": "post_proton_noRF",
+        "t_edges": [0.0, 1.0], "delta_edges": [-10.0, 10.0],
+        "phi_edges": [-5.0, 5.0], "feature_metadata": feature_metadata,
+        "records": [record], "unmatched_parent_cache_identities": [],
+        "unmatched_child_cache_identities": [], "summary": summary,
+        "event_population_fingerprint": inputs["event_population_fingerprint"],
+        "acceptance_feature_metadata_fingerprint": inputs["acceptance_feature_metadata_fingerprint"],
+        "child_assignment_projection_fingerprint": inputs["child_assignment_projection_fingerprint"],
+        "fingerprint_inputs": inputs,
+        "fingerprint": collector._canonical_sha256(inputs),
+    }
+    return {
+        "schema_version": "pion_hgcer_method_a_acceptance_event_contract_artifact/v1",
+        "setting": _setting(phi, epsilon), "contract": contract,
+        "non_authoritative": True, "production_objects_mutated": False,
+        "refinement_applied": False, "production_application_performed": False,
+        "event_application_performed": False,
+    }
+
+
 def _sidecar(phi="Left", epsilon="lowe", page_count=12, failures=None):
     pages = [
         {"page_id": "full_background.fixture.{}".format(index), "scope": "t1", "authoritative": False}
-        for index in range(max(0, page_count - 4))
+        for index in range(max(0, page_count - 9))
     ]
+    pages.extend(
+        {"page_id": page_id, "scope": "setting", "authoritative": False}
+        for page_id in collector._F1_PAGE_IDS
+    )
     pages.extend(
         {"page_id": page_id, "scope": "setting", "authoritative": False}
         for page_id in collector._E72_PAGE_IDS
@@ -154,12 +253,13 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         _FakePdfReader.fail = False
 
     def _write_setting(self, outdir, *, phi="Left", epsilon="lowe", phase_c=None,
-                       phase_d=None, correction=None, sidecar=None, pdf=True):
+                       phase_d=None, correction=None, acceptance=None, sidecar=None, pdf=True):
         outdir = Path(outdir)
         artifacts = {
             collector.checkpoint_basename(phi, "Q4p4W2p74", epsilon): _phase_c(phi, epsilon) if phase_c is None else phase_c,
             collector.phase_d_checkpoint_basename(phi, "Q4p4W2p74", epsilon): _phase_d(phi, epsilon) if phase_d is None else phase_d,
             collector.parent_preserving_correction_basename(phi, "Q4p4W2p74", epsilon): _correction(phi, epsilon) if correction is None else correction,
+            collector.method_a_acceptance_contract_basename(phi, "Q4p4W2p74", epsilon): _acceptance(phi, epsilon) if acceptance is None else acceptance,
             collector.full_background_page_manifest_basename(phi, "Q4p4W2p74", epsilon): _sidecar(phi, epsilon, _FakePdfReader.page_count) if sidecar is None else sidecar,
         }
         for basename, payload in artifacts.items():
@@ -184,10 +284,10 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         )
         return result, output, source
 
-    def test_profile_v2_and_five_setting_selection(self):
+    def test_profile_v3_and_five_setting_selection(self):
         profile = collector.load_validation_profile(PROFILE_PATH)
         self.assertEqual(profile["schema_version"], collector.PROFILE_SCHEMA_VERSION)
-        self.assertEqual(profile["validation_profile"], "phase_e7_1_batched_farm_meeting_review/v1")
+        self.assertEqual(profile["validation_profile"], "phase_f1_batched_farm_acceptance_review/v1")
         self.assertEqual(collector.resolve_settings(), (
             ("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"),
             ("Center", "highe"), ("Right", "highe"),
@@ -197,7 +297,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "supplied_together"):
             collector.resolve_settings("Left", None)
 
-    def test_deterministic_artifact_names_and_final_four_selection(self):
+    def test_deterministic_artifact_names_and_manifest_selected_pages(self):
         self.assertEqual(
             collector.phase_d_checkpoint_basename("Left", "Q4p4W2p74", "lowe"),
             "Left_kaon_pion-background_hgcer_ab_comparison_Q4p4W2p74_lowe.json",
@@ -207,6 +307,10 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             "Left_kaon_pion-background_hgcer_parent-preserving-correction_Q4p4W2p74_lowe.json",
         )
         self.assertEqual(
+            collector.method_a_acceptance_contract_basename("Left", "Q4p4W2p74", "lowe"),
+            "Left_kaon_pion-background_hgcer_method-a-acceptance-contract_Q4p4W2p74_lowe.json",
+        )
+        self.assertEqual(
             collector.full_background_page_manifest_basename("Left", "Q4p4W2p74", "lowe"),
             "Left_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction-manifest.json",
         )
@@ -214,10 +318,18 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             collector.meeting_summary_basename("Left", "Q4p4W2p74", "lowe"),
             "Left_kaon_rand_sub_Q4p4W2p74_lowe_meeting-summary.pdf",
         )
+        self.assertEqual(
+            collector.f1_acceptance_summary_basename("Left", "Q4p4W2p74", "lowe"),
+            "Left_kaon_rand_sub_Q4p4W2p74_lowe_f1-acceptance-summary.pdf",
+        )
         self.assertEqual(collector.select_validation_pages(112), [109, 110, 111, 112])
         self.assertEqual(collector.select_validation_pages(4), [1, 2, 3, 4])
-        with self.assertRaisesRegex(ValueError, "too_short_for_meeting_summary"):
+        with self.assertRaisesRegex(ValueError, "too_short_for_requested_summary"):
             collector.select_validation_pages(3)
+        self.assertEqual(
+            collector.select_validation_pages(12, {"kind": "explicit_pages", "pages": [4, 5, 6, 7, 8]}),
+            [4, 5, 6, 7, 8],
+        )
 
     def test_complete_bundle_archives_all_json_and_only_slim_pdf(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -232,17 +344,27 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 self.assertIn("Left_lowe/" + collector.checkpoint_basename("Left", "Q4p4W2p74", "lowe"), names)
                 self.assertIn("Left_lowe/" + collector.phase_d_checkpoint_basename("Left", "Q4p4W2p74", "lowe"), names)
                 self.assertIn("Left_lowe/" + collector.parent_preserving_correction_basename("Left", "Q4p4W2p74", "lowe"), names)
+                self.assertIn("Left_lowe/" + collector.method_a_acceptance_contract_basename("Left", "Q4p4W2p74", "lowe"), names)
                 self.assertIn("Left_lowe/" + collector.full_background_page_manifest_basename("Left", "Q4p4W2p74", "lowe"), names)
                 self.assertIn("Left_lowe/" + collector.meeting_summary_basename("Left", "Q4p4W2p74", "lowe"), names)
+                self.assertIn("Left_lowe/" + collector.f1_acceptance_summary_basename("Left", "Q4p4W2p74", "lowe"), names)
                 self.assertNotIn("Left_lowe/" + collector.full_background_subtraction_basename("Left", "Q4p4W2p74", "lowe"), names)
                 manifest = json.loads(archive.read("manifest.json"))
             artifacts = manifest["settings"][0]["artifacts"]
             self.assertEqual(artifacts["full_background_subtraction_pdf"]["original_page_count"], 12)
-            self.assertEqual(artifacts["full_background_subtraction_pdf"]["extracted_pages"], [9, 10, 11, 12])
+            self.assertEqual(artifacts["full_background_subtraction_pdf"]["extracted_pages"], {
+                "meeting_summary_pdf": [9, 10, 11, 12],
+                "f1_acceptance_summary_pdf": [4, 5, 6, 7, 8],
+            })
             self.assertEqual(artifacts["meeting_summary_pdf"]["backend_identity"], "pypdf fake-1")
+            self.assertEqual(artifacts["f1_acceptance_summary_pdf"]["backend_identity"], "pypdf fake-1")
             self.assertEqual(
                 artifacts["parent_preserving_correction"]["metadata"]["parent_statuses"],
                 ["identity_no_refinable_cells"],
+            )
+            self.assertEqual(
+                artifacts["method_a_acceptance_contract"]["metadata"]["summary"]["prompt_control_count"],
+                1,
             )
 
     def test_strict_setting_and_json_failures_remain_best_effort(self):
@@ -269,6 +391,40 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             artifacts = result["manifest"]["settings"][0]["artifacts"]
             self.assertEqual(artifacts["meeting_summary_pdf"]["status"], "unavailable")
             self.assertEqual(artifacts["full_background_page_manifest"]["metadata"]["metadata_status"], "mismatch")
+
+    def test_f1_contract_and_manifest_page_identities_are_strict(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            bad_acceptance = _acceptance()
+            bad_acceptance["contract"]["records"][0]["prompt_response_class"] = "low"
+            result, output, _source = self._collect(temporary, acceptance=bad_acceptance)
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            metadata = result["manifest"]["settings"][0]["artifacts"]["method_a_acceptance_contract"]["metadata"]
+            self.assertEqual(metadata["metadata_status"], "mismatch")
+        with tempfile.TemporaryDirectory() as temporary:
+            bad_sidecar = _sidecar()
+            bad_sidecar["pages"] = [
+                page for page in bad_sidecar["pages"]
+                if page["page_id"] != collector._F1_PAGE_IDS[2]
+            ]
+            result, output, _source = self._collect(temporary, sidecar=bad_sidecar)
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            artifacts = result["manifest"]["settings"][0]["artifacts"]
+            self.assertEqual(artifacts["f1_acceptance_summary_pdf"]["status"], "unavailable")
+
+    def test_f1_fingerprint_and_summary_are_archived_without_recomputation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(temporary)
+            self.assertEqual(result["returncode"], 0)
+            with zipfile.ZipFile(output) as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+            f1 = manifest["settings"][0]["artifacts"]["method_a_acceptance_contract"]["metadata"]
+            self.assertEqual(f1["contract_fingerprint"], _acceptance()["contract"]["fingerprint"])
+            self.assertEqual(f1["summary"]["by_t_phi"][0]["prompt_control_count"], 1)
+            self.assertEqual(
+                manifest["f1_aggregate_summary"][0]["summary"]["phase_a_record_count"], 1
+            )
 
     def test_pdf_page_count_mismatch_and_backend_failure_are_explicit(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -410,10 +566,8 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
 
     def test_source_identity_profile_and_collector_are_runtime_detached(self):
         profile = collector.load_validation_profile()
-        self.assertEqual(profile["source_identity"]["required_analysis_commit"], "5795b73bb97c73379948efe6c03ea8ee2a5cabd4")
+        self.assertEqual(profile["source_identity"]["required_analysis_commit"], "d656e15761970d7d612bb028d2746d077795e9ad")
         self.assertEqual(set(profile["source_identity"]["allowed_committed_files"]), {
-            "src/cuts/full_background_subtraction_plots.py", "src/cuts/rand_sub.py",
-            "testing/test_full_background_subtraction_plots.py",
             "testing/collect_pion_hgcer_validation_bundle.py",
             "testing/test_collect_pion_hgcer_validation_bundle.py",
             "testing/pion_hgcer_validation_bundle_profile.json",
