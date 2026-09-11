@@ -5414,41 +5414,6 @@ def rand_sub(
                         pion_hgcer_event_contract
                     )
                 )
-                # Phase F.1 is a detached scalar acceptance contract.  It
-                # observes the frozen Phase-A/cache rows only and cannot
-                # alter the Method-A/B or production paths below.
-                try:
-                    pion_hgcer_method_a_acceptance_contract = (
-                        build_pion_hgcer_method_a_acceptance_event_contract(
-                            pion_hgcer_event_contract,
-                            pion_control_cache,
-                            phi_edges=frozen_phi_bins,
-                        )
-                    )
-                except Exception as exc:
-                    pion_hgcer_method_a_acceptance_contract = {
-                        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v1",
-                        "status": "unavailable",
-                        "available": False,
-                        "reason": "runtime_method_a_acceptance_contract_exception",
-                        "diagnostic_stage": "runtime_build_exception",
-                        "exception_type": type(exc).__name__,
-                        "exception_message": str(exc),
-                        "non_authoritative": True,
-                        "production_objects_mutated": False,
-                        "refinement_applied": False,
-                        "production_application_performed": False,
-                        "event_application_performed": False,
-                        "method_b_numerical_dependency": False,
-                    }
-                histDict["pion_hgcer_method_a_acceptance_contract_summary"] = {
-                    key: pion_hgcer_method_a_acceptance_contract.get(key)
-                    for key in (
-                        "schema_version", "status", "available", "reason",
-                        "fingerprint", "phase_a_contract_fingerprint",
-                        "coordinate_fingerprint", "method_b_numerical_dependency",
-                    )
-                }
                 try:
                     pion_hgcer_method_a = build_pion_hgcer_method_a(
                         pion_hgcer_tdelta_diagnostic,
@@ -5482,6 +5447,43 @@ def rand_sub(
                 histDict["pion_hgcer_method_a_summary"] = (
                     summarize_pion_hgcer_method_a(pion_hgcer_method_a)
                 )
+                # Phase F.1 observes two frozen, detached populations after
+                # Method A: uncensored Part-1 response rows for training and
+                # the physical NPE > 2 cache population for downstream audit.
+                try:
+                    pion_hgcer_method_a_acceptance_contract = (
+                        build_pion_hgcer_method_a_acceptance_event_contract(
+                            pion_hgcer_tdelta_diagnostic,
+                            pion_hgcer_method_a,
+                            pion_hgcer_event_contract,
+                            pion_control_cache,
+                            phi_edges=frozen_phi_bins,
+                        )
+                    )
+                except Exception as exc:
+                    pion_hgcer_method_a_acceptance_contract = {
+                        "schema_version": "pion_hgcer_method_a_acceptance_event_contract/v2",
+                        "status": "unavailable",
+                        "available": False,
+                        "reason": "runtime_method_a_acceptance_contract_exception",
+                        "diagnostic_stage": "runtime_build_exception",
+                        "exception_type": type(exc).__name__,
+                        "exception_message": str(exc),
+                        "non_authoritative": True,
+                        "production_objects_mutated": False,
+                        "refinement_applied": False,
+                        "production_application_performed": False,
+                        "event_application_performed": False,
+                        "method_b_numerical_dependency": False,
+                    }
+                histDict["pion_hgcer_method_a_acceptance_contract_summary"] = {
+                    key: pion_hgcer_method_a_acceptance_contract.get(key)
+                    for key in (
+                        "schema_version", "status", "available", "reason",
+                        "fingerprint", "phase_a_contract_fingerprint",
+                        "coordinate_fingerprint", "method_b_numerical_dependency",
+                    )
+                }
                 try:
                     pion_hgcer_method_b_config = (
                         resolve_pion_hgcer_method_b_config(

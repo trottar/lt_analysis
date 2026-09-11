@@ -6484,164 +6484,67 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
 
 class FullBackgroundSubtractionF1Tests(unittest.TestCase):
     def _payload(self):
-        phase, cache = _f1_contract_fixture()
+        diagnostic, method, phase, cache = _f1_contract_fixture()
         contract = _f1_contract_module.build_pion_hgcer_method_a_acceptance_event_contract(
-            phase, cache, phi_edges=_f1_phi_edges
+            diagnostic, method, phase, cache, phi_edges=_f1_phi_edges
         )
         payload = plots.build_full_background_subtraction_f1_payload(contract)
         self.assertTrue(payload["available"], payload.get("reason"))
         return contract, payload
 
-    def test_f1_payload_copies_stored_rows_and_selects_exact_prompt_response_classes(self):
+    def test_f1_payload_keeps_training_and_application_rows_separate(self):
         contract, payload = self._payload()
         before = deepcopy(contract)
         self.assertEqual(payload["schema_version"], plots.F1_PRESENTATION_SCHEMA_VERSION)
         self.assertFalse(payload["method_b_numerical_dependency"])
         self.assertEqual(
-            len(payload["per_t"][0]["prompt_low_rows"]), 3
+            len(payload["per_t"][0]["training_low_rows"]), 1
         )
         self.assertEqual(
-            len(payload["per_t"][1]["prompt_control_rows"]), 1
+            len(payload["per_t"][0]["training_control_rows"]), 1
         )
         self.assertTrue(all(
             row["P_hgcer_npeSum"] > 0.0
             and row["nommcuts"] is True
             and row["source_label"] == "prompt"
             for group in payload["per_t"]
-            for rows in (group["prompt_low_rows"], group["prompt_control_rows"])
+            for rows in (group["training_low_rows"], group["training_control_rows"])
             for row in rows
         ))
-        payload["per_t"][0]["rows"][0]["SHMS_xptar"] = 99.0
+        payload["per_t"][0]["training_rows"][0]["SHMS_xptar"] = 99.0
         self.assertEqual(contract, before)
 
-    def test_f1_page5_summaries_remain_separate_for_each_t_phi_child(self):
-        _contract, payload = self._payload()
-        children = payload["per_t"][0]["phi_children"]
+    def test_f1_page5_uses_application_rows_only_and_short_application_header(self):
+        contract, payload = self._payload()
+        children = payload["per_t"][0]["application_phi_children"]
         self.assertEqual(len(children), 2)
-        first, second = children
+        self.assertEqual(children[0]["linked_record_count"], 1)
+        self.assertEqual(children[0]["prompt_application_record_count"], 1)
+        self.assertEqual(children[0]["non_prompt_application_record_count"], 0)
+        self.assertEqual(children[1]["linked_record_count"], 0)
+        changed_training = deepcopy(contract)
+        changed_training["method_a_training_records"][0]["SHMS_xptar"] = 99.0
+        changed_payload = plots.build_full_background_subtraction_f1_payload(changed_training)
+        self.assertTrue(changed_payload["available"])
         self.assertEqual(
-            (
-                first["linked_record_count"],
-                first["prompt_low_response_count"],
-                first["prompt_control_response_count"],
-            ),
-            (1, 1, 0),
+            changed_payload["per_t"][0]["application_phi_children"],
+            payload["per_t"][0]["application_phi_children"],
         )
-        self.assertEqual(
-            (
-                second["linked_record_count"],
-                second["prompt_low_response_count"],
-                second["prompt_control_response_count"],
-            ),
-            (3, 2, 1),
-        )
-        for feature in ("SHMS_delta", "SHMS_xptar", "SHMS_yptar"):
-            self.assertNotEqual(
-                first["acceptance_summaries"][feature]["median"],
-                second["acceptance_summaries"][feature]["median"],
-            )
-
-        class _Graph:
-            def __init__(self, graph_type, count):
-                self.graph_type = graph_type
-                self.count = count
-                self.points = []
-                self.errors = []
-                self.marker_style = None
-                self.marker_color = None
-
-            def SetPoint(self, index, x_value, y_value):
-                self.points.append((index, x_value, y_value))
-
-            def SetPointError(self, index, ex_low, ex_high, ey_low, ey_high):
-                self.errors.append((index, ex_low, ex_high, ey_low, ey_high))
-
-            def SetMarkerColor(self, value):
-                self.marker_color = value
-
-            def SetLineColor(self, _value):
-                pass
-
-            def SetMarkerStyle(self, value):
-                self.marker_style = value
-
-            def SetMarkerSize(self, _value):
-                pass
-
-            def Draw(self, _option):
-                pass
-
-        root = MagicMock()
-        root.kBlack, root.kBlue, root.kRed = 1, 4, 2
-        graphs = []
-
-        def graph_factory(graph_type):
-            def build(count):
-                graph = _Graph(graph_type, count)
-                graphs.append(graph)
-                return graph
-            return build
-
-        root.TGraph.side_effect = graph_factory("occupancy")
-        root.TGraphAsymmErrors.side_effect = graph_factory("summary")
-        lines = []
-        with patch.object(
-            plots, "_f1_text",
-            side_effect=lambda _root, _coordinates, value, _size=0.040: (
-                lines.extend(value), MagicMock()
-            )[1],
-        ):
-            self.assertTrue(plots._f1_mapping_page(root, "f1.pdf", payload))
-        root.TCanvas.return_value.Divide.assert_called_once_with(
-            4, len(payload["per_t"])
-        )
-
-        occupancy = [graph for graph in graphs if graph.graph_type == "occupancy"]
-        summaries = [graph for graph in graphs if graph.graph_type == "summary"]
-        self.assertEqual(len(occupancy), 3 * len(payload["per_t"]))
-        self.assertTrue(all(graph.count == len(children) for graph in occupancy[:3]))
-        self.assertEqual(
-            sorted(graph.marker_style for graph in occupancy[:3]), [21, 24, 25]
-        )
-
-        delta_graph = summaries[0]
-        self.assertEqual(delta_graph.count, len(children))
-        for index, child in enumerate(children):
-            summary = child["acceptance_summaries"]["SHMS_delta"]
-            self.assertEqual(
-                delta_graph.points[index],
-                (index, 0.5 * (child["phi_low"] + child["phi_high"]), summary["median"]),
-            )
-            self.assertEqual(
-                delta_graph.errors[index],
-                (
-                    index, 0.0, 0.0,
-                    summary["median"] - summary["q1"],
-                    summary["q3"] - summary["median"],
-                ),
-            )
-
-        empty_children = deepcopy(children)
-        empty_children[1]["acceptance_summaries"]["SHMS_xptar"] = {
-            "median": None, "q1": None, "q3": None,
-        }
-        empty_graph = plots._f1_summary_graph(
-            root, empty_children, "SHMS_xptar", root.kBlue, 20
-        )
-        self.assertEqual(empty_graph.count, 1)
-        self.assertEqual(len(empty_graph.points), 1)
-
-        rendered = "\n".join(str(line) for line in lines)
-        self.assertIn("black open circle = all linked", rendered)
-        self.assertIn("phi is downstream only; no child renormalization", rendered)
+        source = Path(plots.__file__).read_text(encoding="utf-8")
+        f1_source = source.split("def _f1_unavailable", 1)[1].split(
+            "def _full_background_manifest_setting", 1
+        )[0]
+        self.assertIn("Stored downstream application population", f1_source)
+        self.assertIn("non-prompt signed sources", f1_source)
+        self.assertNotIn("prompt low", f1_source.lower())
 
     def test_f1_payload_rejects_contract_and_geometry_failures_locally(self):
         contract, _payload = self._payload()
         cases = (
             (lambda value: value.update(schema_version="wrong"), "f1_contract_unavailable"),
             (lambda value: value.update(method_b_numerical_dependency=True), "f1_contract_authority_invalid"),
-            (lambda value: value["records"][0].update(t_high=999.0), "f1_record_t_geometry_mismatch"),
-            (lambda value: value["records"][0].update(phi_status="unknown"), "f1_record_phi_status_invalid"),
+            (lambda value: value["method_a_training_records"][0].update(t_high=999.0), "f1_training_record_t_geometry_mismatch"),
+            (lambda value: value["application_records"][0].update(phi_status="unknown"), "f1_application_record_phi_status_invalid"),
         )
         for mutate, reason in cases:
             with self.subTest(reason=reason):

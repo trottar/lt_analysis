@@ -17,14 +17,16 @@ class PionHGCerPhaseFRuntimeContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.source = RAND_SUB.read_text(encoding="utf-8")
 
-    def test_f1_is_built_after_phase_a_from_only_frozen_phase_a_cache_and_phi_edges(self):
+    def test_f1_is_built_after_method_a_from_frozen_part1_phase_a_cache_and_phi_edges(self):
         source = self.source
         phase_a = source.index("pion_hgcer_event_contract = build_pion_hgcer_event_contract(\n")
         f1 = source.index("pion_hgcer_method_a_acceptance_contract = (\n")
         method_a = source.index("pion_hgcer_method_a = build_pion_hgcer_method_a(\n")
-        self.assertLess(phase_a, f1)
-        self.assertLess(f1, method_a)
+        self.assertLess(phase_a, method_a)
+        self.assertLess(method_a, f1)
         call = source[f1:source.index('                histDict["pion_hgcer_method_a_acceptance_contract_summary"]', f1)]
+        self.assertIn("pion_hgcer_tdelta_diagnostic", call)
+        self.assertIn("pion_hgcer_method_a", call)
         self.assertIn("pion_hgcer_event_contract", call)
         self.assertIn("pion_control_cache", call)
         self.assertIn("phi_edges=frozen_phi_bins", call)

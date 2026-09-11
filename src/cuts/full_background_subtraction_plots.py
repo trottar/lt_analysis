@@ -32,7 +32,7 @@ E4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e4/v1"
 E6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e6/v1"
 E7_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e7/v1"
 E72_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e72/v1"
-F1_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_f1/v1"
+F1_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_f1/v2"
 FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION = (
     "full_background_subtraction_page_manifest/v1"
 )
@@ -7520,15 +7520,17 @@ def _f1_contract(value):
         "production_application_performed", "event_application_performed",
         "method_b_numerical_dependency", "phase_a_contract_fingerprint",
         "coordinate_fingerprint", "host_state", "source_target_state", "t_edges",
-        "delta_edges", "phi_edges", "records", "feature_metadata",
-        "event_population_fingerprint", "acceptance_feature_metadata_fingerprint",
-        "child_assignment_projection_fingerprint", "fingerprint",
+        "delta_edges", "phi_edges", "method_a_training_records",
+        "application_records", "method_a_training_summary", "application_summary",
+        "feature_metadata", "method_a_training_population_fingerprint",
+        "application_population_fingerprint", "acceptance_feature_metadata_fingerprint",
+        "application_child_assignment_projection_fingerprint", "fingerprint",
     )
     if any(name not in contract for name in required):
         return None, None, None, None, "f1_contract_invalid"
     if (
-        contract.get("schema_version") != "pion_hgcer_method_a_acceptance_event_contract/v1"
-        or contract.get("fingerprint_schema_version") != "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v1"
+        contract.get("schema_version") != "pion_hgcer_method_a_acceptance_event_contract/v2"
+        or contract.get("fingerprint_schema_version") != "pion_hgcer_method_a_acceptance_event_contract_fingerprint/v2"
         or contract.get("status") != "available" or contract.get("available") is not True
     ):
         return None, None, None, None, "f1_contract_unavailable"
@@ -7547,77 +7549,112 @@ def _f1_contract(value):
     phi_edges = _strict_edges(contract.get("phi_edges"))
     if t_edges is None or delta_edges is None or phi_edges is None:
         return None, None, None, None, "f1_contract_geometry_invalid"
-    if not isinstance(contract.get("records"), Sequence) or isinstance(
-        contract.get("records"), (str, bytes)
-    ):
-        return None, None, None, None, "f1_contract_records_invalid"
+    for name in ("method_a_training_records", "application_records"):
+        if not isinstance(contract.get(name), Sequence) or isinstance(
+            contract.get(name), (str, bytes)
+        ):
+            return None, None, None, None, "f1_contract_{}_invalid".format(name)
     for name in (
         "phase_a_contract_fingerprint", "coordinate_fingerprint", "host_state",
-        "event_population_fingerprint", "acceptance_feature_metadata_fingerprint",
-        "child_assignment_projection_fingerprint", "fingerprint",
+        "method_a_training_population_fingerprint",
+        "application_population_fingerprint", "acceptance_feature_metadata_fingerprint",
+        "application_child_assignment_projection_fingerprint", "fingerprint",
     ):
         if not isinstance(contract.get(name), str) or not contract.get(name):
             return None, None, None, None, "f1_contract_provenance_invalid"
     return contract, t_edges, delta_edges, phi_edges, None
 
 
-def _f1_row(value, t_edges, delta_edges, phi_edges):
+def _f1_training_row(value, t_edges, delta_edges):
+    row = _mapping(value)
+    required = (
+        "source_label", "entry_index", "coordinate_fingerprint", "t_index", "t_low",
+        "t_high", "SHMS_delta", "delta_index", "delta_low", "delta_high",
+        "P_hgcer_npeSum", "response_class", "P_hgcer_xAtCer",
+        "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar", "allcuts", "nommcuts",
+    )
+    if any(name not in row for name in required):
+        return None, "f1_training_record_fields_missing"
+    t_index = _f1_integer(row["t_index"])
+    if t_index is None or not 0 <= t_index < len(t_edges) - 1:
+        return None, "f1_training_record_t_index_invalid"
+    if row["t_low"] != t_edges[t_index] or row["t_high"] != t_edges[t_index + 1]:
+        return None, "f1_training_record_t_geometry_mismatch"
+    delta_index = row["delta_index"]
+    delta_index = _f1_integer(delta_index)
+    if delta_index is None or not 0 <= delta_index < len(delta_edges) - 1:
+        return None, "f1_training_record_delta_index_invalid"
+    if row["delta_low"] != delta_edges[delta_index] or row["delta_high"] != delta_edges[delta_index + 1]:
+        return None, "f1_training_record_delta_geometry_mismatch"
+    for name in (
+        "SHMS_delta", "P_hgcer_npeSum", "P_hgcer_xAtCer",
+        "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar",
+    ):
+        if _f1_finite(row[name]) is None:
+            return None, "f1_training_record_{}_nonfinite".format(name)
+    if not isinstance(row["source_label"], str) or not row["source_label"] or _f1_integer(row["entry_index"]) is None:
+        return None, "f1_training_record_identity_invalid"
+    if (
+        row["source_label"] != "prompt" or row["nommcuts"] is not True
+        or float(row["P_hgcer_npeSum"]) <= 0.0
+        or row["response_class"] not in {"low", "control"}
+    ):
+        return None, "f1_training_record_population_invalid"
+    expected_class = "low" if float(row["P_hgcer_npeSum"]) <= 2.0 else "control"
+    if row["response_class"] != expected_class:
+        return None, "f1_training_record_response_class_invalid"
+    return _f1_json_copy(row), None
+
+
+def _f1_application_row(value, t_edges, delta_edges, phi_edges):
     row = _mapping(value)
     required = (
         "source_label", "entry_index", "coordinate_fingerprint", "t_index", "t_low",
         "t_high", "phi_degrees", "phi_index", "phi_low", "phi_high", "phi_status",
         "SHMS_delta", "delta_index", "delta_low", "delta_high", "P_hgcer_npeSum",
         "P_hgcer_xAtCer", "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar",
-        "allcuts", "nommcuts", "prompt_response_class",
+        "allcuts", "nommcuts",
     )
     if any(name not in row for name in required):
-        return None, "f1_record_fields_missing"
+        return None, "f1_application_record_fields_missing"
     t_index = _f1_integer(row["t_index"])
     if t_index is None or not 0 <= t_index < len(t_edges) - 1:
-        return None, "f1_record_t_index_invalid"
+        return None, "f1_application_record_t_index_invalid"
     if row["t_low"] != t_edges[t_index] or row["t_high"] != t_edges[t_index + 1]:
-        return None, "f1_record_t_geometry_mismatch"
+        return None, "f1_application_record_t_geometry_mismatch"
     delta_index = row["delta_index"]
     if delta_index is None:
         if row["delta_low"] is not None or row["delta_high"] is not None:
-            return None, "f1_record_outside_delta_geometry_invalid"
+            return None, "f1_application_record_outside_delta_geometry_invalid"
     else:
         delta_index = _f1_integer(delta_index)
         if delta_index is None or not 0 <= delta_index < len(delta_edges) - 1:
-            return None, "f1_record_delta_index_invalid"
+            return None, "f1_application_record_delta_index_invalid"
         if row["delta_low"] != delta_edges[delta_index] or row["delta_high"] != delta_edges[delta_index + 1]:
-            return None, "f1_record_delta_geometry_mismatch"
+            return None, "f1_application_record_delta_geometry_mismatch"
     phi_index = row["phi_index"]
     if row["phi_status"] == "outside_phi":
         if phi_index is not None or row["phi_low"] is not None or row["phi_high"] is not None:
-            return None, "f1_record_outside_phi_geometry_invalid"
+            return None, "f1_application_record_outside_phi_geometry_invalid"
     elif row["phi_status"] == "inside_phi":
         phi_index = _f1_integer(phi_index)
         if phi_index is None or not 0 <= phi_index < len(phi_edges) - 1:
-            return None, "f1_record_phi_index_invalid"
+            return None, "f1_application_record_phi_index_invalid"
         if row["phi_low"] != phi_edges[phi_index] or row["phi_high"] != phi_edges[phi_index + 1]:
-            return None, "f1_record_phi_geometry_mismatch"
+            return None, "f1_application_record_phi_geometry_mismatch"
     else:
-        return None, "f1_record_phi_status_invalid"
+        return None, "f1_application_record_phi_status_invalid"
     for name in (
         "phi_degrees", "SHMS_delta", "P_hgcer_npeSum", "P_hgcer_xAtCer",
         "P_hgcer_yAtCer", "SHMS_xptar", "SHMS_yptar",
     ):
         if _f1_finite(row[name]) is None:
-            return None, "f1_record_{}_nonfinite".format(name)
+            return None, "f1_application_record_{}_nonfinite".format(name)
+    if float(row["P_hgcer_npeSum"]) <= 2.0:
+        return None, "f1_application_record_npe_not_physical_control"
     if not isinstance(row["source_label"], str) or not row["source_label"] or _f1_integer(row["entry_index"]) is None:
-        return None, "f1_record_identity_invalid"
+        return None, "f1_application_record_identity_invalid"
     return _f1_json_copy(row), None
-
-
-def _f1_prompt_rows(rows):
-    result = {"low": [], "control": []}
-    for row in rows:
-        if row["source_label"] != "prompt" or row["nommcuts"] is not True or float(row["P_hgcer_npeSum"]) <= 0.0:
-            continue
-        if row["prompt_response_class"] in result:
-            result[row["prompt_response_class"]].append(row)
-    return result
 
 
 def _f1_distribution_summary(rows, feature_name):
@@ -7636,14 +7673,14 @@ def _f1_phi_children(rows, phi_edges):
         child_rows = tuple(
             row for row in rows if row.get("phi_index") == phi_index
         )
-        prompt = _f1_prompt_rows(child_rows)
+        prompt_count = sum(row["source_label"] == "prompt" for row in child_rows)
         children.append({
             "phi_index": phi_index,
             "phi_low": phi_edges[phi_index],
             "phi_high": phi_edges[phi_index + 1],
             "linked_record_count": len(child_rows),
-            "prompt_low_response_count": len(prompt["low"]),
-            "prompt_control_response_count": len(prompt["control"]),
+            "prompt_application_record_count": prompt_count,
+            "non_prompt_application_record_count": len(child_rows) - prompt_count,
             "acceptance_summaries": {
                 "SHMS_delta": _f1_distribution_summary(
                     child_rows, "SHMS_delta"
@@ -7664,29 +7701,43 @@ def build_full_background_subtraction_f1_payload(acceptance_contract):
     contract, t_edges, delta_edges, phi_edges, reason = _f1_contract(acceptance_contract)
     if reason is not None:
         return _f1_unavailable(reason)
-    groups = [[] for _unused in range(len(t_edges) - 1)]
-    identities = set()
-    for source in contract["records"]:
-        row, reason = _f1_row(source, t_edges, delta_edges, phi_edges)
+    training_groups = [[] for _unused in range(len(t_edges) - 1)]
+    application_groups = [[] for _unused in range(len(t_edges) - 1)]
+    training_identities, application_identities = set(), set()
+    for source in contract["method_a_training_records"]:
+        row, reason = _f1_training_row(source, t_edges, delta_edges)
         if reason is not None:
             return _f1_unavailable(reason)
         identity = (row["source_label"], row["entry_index"])
-        if identity in identities:
-            return _f1_unavailable("f1_record_identity_duplicate")
-        identities.add(identity)
-        groups[row["t_index"]].append(row)
+        if identity in training_identities:
+            return _f1_unavailable("f1_training_record_identity_duplicate")
+        training_identities.add(identity)
+        training_groups[row["t_index"]].append(row)
+    for source in contract["application_records"]:
+        row, reason = _f1_application_row(source, t_edges, delta_edges, phi_edges)
+        if reason is not None:
+            return _f1_unavailable(reason)
+        identity = (row["source_label"], row["entry_index"])
+        if identity in application_identities:
+            return _f1_unavailable("f1_application_record_identity_duplicate")
+        application_identities.add(identity)
+        application_groups[row["t_index"]].append(row)
     per_t = []
-    for t_index, rows in enumerate(groups):
-        rows.sort(key=lambda row: (row["source_label"], row["entry_index"]))
-        prompt_rows = _f1_prompt_rows(rows)
+    for t_index, training_rows in enumerate(training_groups):
+        application_rows = application_groups[t_index]
+        training_rows.sort(key=lambda row: (row["source_label"], row["entry_index"]))
+        application_rows.sort(key=lambda row: (row["source_label"], row["entry_index"]))
+        low_rows = tuple(row for row in training_rows if row["response_class"] == "low")
+        control_rows = tuple(row for row in training_rows if row["response_class"] == "control")
         per_t.append({
             "t_index": t_index,
             "t_low": t_edges[t_index],
             "t_high": t_edges[t_index + 1],
-            "rows": tuple(rows),
-            "prompt_low_rows": tuple(prompt_rows["low"]),
-            "prompt_control_rows": tuple(prompt_rows["control"]),
-            "phi_children": _f1_phi_children(rows, phi_edges),
+            "training_rows": tuple(training_rows),
+            "training_low_rows": low_rows,
+            "training_control_rows": control_rows,
+            "application_rows": tuple(application_rows),
+            "application_phi_children": _f1_phi_children(application_rows, phi_edges),
         })
     return {
         "schema_version": F1_PRESENTATION_SCHEMA_VERSION,
@@ -7700,7 +7751,8 @@ def build_full_background_subtraction_f1_payload(acceptance_contract):
         "host_state": contract["host_state"],
         "source_target_state": contract["source_target_state"],
         "acceptance_contract_fingerprint": contract["fingerprint"],
-        "event_population_fingerprint": contract["event_population_fingerprint"],
+        "method_a_training_population_fingerprint": contract["method_a_training_population_fingerprint"],
+        "application_population_fingerprint": contract["application_population_fingerprint"],
         "feature_metadata": _f1_json_copy(contract["feature_metadata"]),
         "t_edges": list(t_edges),
         "delta_edges": list(delta_edges),
@@ -7754,8 +7806,8 @@ def _f1_scatter_page(ROOT, pdf_name, presentation, page_id, title, x_name, x_lab
             canvas.Divide(len(groups), 1)
         for panel, group in enumerate(groups, 1):
             canvas.cd(panel)
-            low_rows = tuple(group.get("prompt_low_rows") or ())
-            control_rows = tuple(group.get("prompt_control_rows") or ())
+            low_rows = tuple(group.get("training_low_rows") or ())
+            control_rows = tuple(group.get("training_control_rows") or ())
             rows = low_rows + control_rows
             x_low, x_high = _f1_range(row[x_name] for row in rows)
             y_low, y_high = _f1_range(row[y_name] for row in rows)
@@ -7778,17 +7830,17 @@ def _f1_scatter_page(ROOT, pdf_name, presentation, page_id, title, x_name, x_lab
                     graph.Draw("P SAME")
                     retained.append(graph)
             lines = [
-                "Stored prompt/no-MM-cut observations",
+                "Stored Method-A training observations",
                 "blue open: low; red filled: control",
                 "low: {}   control: {}".format(len(low_rows), len(control_rows)),
             ]
             if not rows:
-                lines.append("No stored positive-NPE observation in this t parent.")
+                lines.append("No stored positive-NPE training observation in this t parent.")
             retained.append(_f1_text(ROOT, (0.12, 0.74, 0.88, 0.91), lines, 0.040))
         canvas.cd()
         retained.append(_f1_text(
             ROOT, (0.03, 0.935, 0.97, 0.995),
-            (title, "Stored direct observations only; low: 0 < HGCer NPE <= 2, control: HGCer NPE > 2. No fit or weight adjustment."), 0.036,
+            (title, "Stored Method-A training observations only; low: 0 < HGCer NPE <= 2, control: HGCer NPE > 2. No fit or weight adjustment."), 0.036,
         ))
         canvas._full_background_f1_draw_objects = tuple(retained)
         canvas.Print(pdf_name)
@@ -7897,14 +7949,14 @@ def _f1_mapping_page(ROOT, pdf_name, presentation):
         if hasattr(canvas, "Divide"):
             canvas.Divide(4, len(groups))
         for row_index, group in enumerate(groups):
-            children = tuple(group.get("phi_children") or ())
+            children = tuple(group.get("application_phi_children") or ())
             if len(children) != len(phi_edges) - 1:
                 return False
             canvas.cd(4 * row_index + 1)
             series = (
                 ("linked_record_count", getattr(ROOT, "kBlack", 1), 24, -0.16),
-                ("prompt_low_response_count", getattr(ROOT, "kBlue", 4), 25, 0.0),
-                ("prompt_control_response_count", getattr(ROOT, "kRed", 2), 21, 0.16),
+                ("prompt_application_record_count", getattr(ROOT, "kBlue", 4), 25, 0.0),
+                ("non_prompt_application_record_count", getattr(ROOT, "kRed", 2), 21, 0.16),
             )
             maximum = max(
                 [
@@ -7947,9 +7999,9 @@ def _f1_mapping_page(ROOT, pdf_name, presentation):
         retained.append(_f1_text(
             ROOT, (0.03, 0.935, 0.97, 0.995),
             (
-                "Stored canonical t -> (t, phi) yield-child mapping",
-                "Occupancy: black open circle = all linked; blue open square = prompt low; red filled square = prompt control.",
-                "Stored descriptive observations only; medians/IQR are not fitted uncertainties. phi is downstream only; no child renormalization, correction, or weight adjustment.",
+                "Stored downstream application population (physical pion control, NPE > 2)",
+                "Counts: black all; blue prompt; red non-prompt signed sources.",
+                "Phi is downstream only. No child renormalization or weight adjustment.",
             ), 0.030,
         ))
         canvas._full_background_f1_draw_objects = tuple(retained)
