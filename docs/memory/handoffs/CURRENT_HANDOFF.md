@@ -1,25 +1,27 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-11 after F.1.Fix.5 validation-gate reconciliation. This
-record distinguishes recovered farm evidence from live source state.
+Prepared: 2026-09-11 after F.1.Fix.5 narrow-first farm-gate workflow
+correction. This record distinguishes recovered farm evidence from live source
+state.
 
 ## Resume identity
 
 - Repository: trottar/lt_analysis; branch: test.
 - Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
   origin/test before work.
-- Repository HEAD observed at the last reconciliation (2026-09-11):
-  47723e02af03b3844dfb0323560ce39f7dfebe1a. This is a timestamped observation,
+- Repository HEAD observed at the start of this reconciliation (2026-09-11):
+  7f8fcc02cde86f93e4e99042ba10c621f89dd159. This is a timestamped observation,
   not a permanent live-HEAD claim.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
 - F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
   is present.
-- At the last reconciliation, later commits through the observed HEAD contained
-  documentation/memory, repository-guidance, or archived-memory material only;
-  they did not change the reviewed F.1 analysis source or tests. Those commits
-  do not by themselves invalidate the source review, but the actual live test
-  HEAD and working tree must still be established before work.
+- At this reconciliation, later commits through the observed HEAD contain
+  documentation/memory/repository guidance or the three exact detached F.1
+  collector/profile/test validation files; they contain no F.1 analysis-source
+  changes. Those commits do not by themselves invalidate the source review, but
+  the actual live test HEAD and working tree must still be established before
+  work.
 
 ## Established evidence
 
@@ -67,7 +69,11 @@ DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 raw historical bundle paths/hashes, and all F.1.Fix.5 farm evidence. Read
 investigations/KNOWN_GAPS.md.
 
-NEXT — The user performs one fresh five-setting F.1.Fix.5 v2 farm gate: Left
-lowe, Left highe, Center lowe, Center highe, and Right highe. Collect fresh
-artifacts with the v4 profile, inspect provenance/checker output, and review
-the five rendered F.1 pages before recording any farm result.
+NEXT — The user performs one fresh targeted single-setting F.1.Fix.5 v2 farm
+gate for Q4p4W2p74 Left lowe, using the completed v4 collector/profile
+infrastructure. Collect fresh checker/validation JSON and bundle provenance;
+inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages; inspect
+traceback/log if anything fails; then establish PASS or one coherent repair.
+Only if this targeted Left-lowe gate passes may validation broaden to Left lowe,
+Left highe, Center lowe, Center highe, and Right highe. No farm result is
+currently recorded.

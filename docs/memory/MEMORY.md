@@ -81,4 +81,10 @@ validated. See evidence/VALIDATION_HISTORY.md and investigations/KNOWN_GAPS.md.
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.1.Fix.5 validation-gate
 reconciliation updated only detached collector/profile/test infrastructure.
-The five-setting v2 farm gate remains a user-run evidence step.
+The immediate user-run evidence step is one targeted F.1.Fix.5 v2 farm gate
+for Q4p4W2p74 Left lowe, using the completed v4 collector/profile
+infrastructure. Collect fresh checker/validation JSON and bundle provenance,
+inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages, inspect
+traceback/log if anything fails, then establish PASS or one coherent repair.
+Broaden to Left lowe, Left highe, Center lowe, Center highe, and Right highe
+only after that targeted gate passes.

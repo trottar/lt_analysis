@@ -5,9 +5,9 @@
 Can the detached F.1 validation collector validly evaluate the reviewed
 F.1.Fix.5 analysis-source commit
 dc4fc6283001739a487ec80068f951b0e388cae6 while allowing only later
-non-analysis maintenance? The live test HEAD observed at reconciliation was
-47723e02af03b3844dfb0323560ce39f7dfebe1a; it is a timestamped observation,
-not a permanent live-HEAD claim.
+non-analysis maintenance? The live test HEAD observed at the start of this
+reconciliation was 7f8fcc02cde86f93e4e99042ba10c621f89dd159; it is a
+timestamped observation, not a permanent live-HEAD claim.
 
 ## Source evidence reviewed
 
@@ -42,6 +42,10 @@ The collector remains detached: it collects declared artifacts and
 source/checker evidence; it does not create physics or certify runtime
 acceptance.
 
-NEXT — The user runs one fresh targeted F.1.Fix.5 v2 gate for all five declared
-settings with fresh artifacts, then inspects the collector manifest, provenance,
-checker output, and five F.1 pages before recording a farm conclusion.
+NEXT — The user first runs one fresh targeted F.1.Fix.5 v2 gate for
+Q4p4W2p74 Left lowe with the completed v4 collector/profile infrastructure.
+Collect fresh checker/validation JSON and bundle provenance; inspect the F.1 v2
+acceptance artifact, relevant rendered F.1 pages, and traceback/log if anything
+fails; then establish PASS or one coherent repair. Only after a targeted
+Left-lowe PASS may validation broaden to Left lowe, Left highe, Center lowe,
+Center highe, and Right highe.

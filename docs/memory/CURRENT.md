@@ -1,14 +1,15 @@
 # Current KaonLT development state
 
-Last source-identity reconciliation: 2026-09-11, F.1.Fix.5 validation-gate
-reconciliation. Repository HEAD values in this record are timestamped
-observations, not permanent claims about the live checkout.
+Last source-identity and workflow-memory reconciliation: 2026-09-11,
+F.1.Fix.5 narrow-first farm-gate correction. Repository HEAD values in this
+record are timestamped observations, not permanent claims about the live
+checkout.
 
 ## Repository identity at last reconciliation
 
 - Repository: trottar/lt_analysis; branch: test.
-- Repository HEAD observed at the last reconciliation:
-  47723e02af03b3844dfb0323560ce39f7dfebe1a.
+- Repository HEAD observed at the start of this reconciliation:
+  7f8fcc02cde86f93e4e99042ba10c621f89dd159.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
 - F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
@@ -17,11 +18,11 @@ observations, not permanent claims about the live checkout.
   It is an ancestor of the observed repository HEAD, not the reviewed analysis
   source commit.
 - At this reconciliation, commits after the reviewed analysis-source commit
-  through the observed HEAD are documentation/memory-only for the F.1 review:
-  they contain repository guidance or memory/archive material, not F.1 analysis
-  source or test changes. Such commits do not by themselves invalidate the
-  source review; every substantial task must still establish the actual live
-  test HEAD before work.
+  through the observed HEAD are documentation/memory/repository guidance or the
+  three exact detached F.1 collector/profile/test validation files; they
+  contain no F.1 analysis-source changes. Such commits do not by themselves
+  invalidate the source review; every substantial task must still establish the
+  actual live test HEAD before work.
 
 ## Supported state
 
@@ -79,7 +80,11 @@ investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — The user runs one fresh targeted F.1.Fix.5 v2 farm gate for Left lowe,
-Left highe, Center lowe, Center highe, and Right highe. Require fresh
-artifacts, v4 collector/profile provenance and checker inspection, and review
-of all five F.1 pages before any farm-acceptance claim.
+NEXT — The user runs one fresh targeted single-setting F.1.Fix.5 v2 farm gate
+for Q4p4W2p74 Left lowe, using the completed v4 collector/profile validation
+infrastructure. Collect fresh checker/validation JSON and bundle provenance;
+inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages; inspect
+traceback/log if anything fails; then establish PASS or one coherent repair.
+Only if this targeted Left-lowe gate passes may validation broaden to Left lowe,
+Left highe, Center lowe, Center highe, and Right highe. No F.1.Fix.5 farm
+outcome is currently recorded.

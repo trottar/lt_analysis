@@ -4,11 +4,11 @@
 
 SOURCE REVIEWED — the relevant F.1.Fix.5 analysis-source commit is
 dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed at the
-last active-memory reconciliation (2026-09-11) was
-47723e02af03b3844dfb0323560ce39f7dfebe1a; it is a timestamped observation, not
-the permanent source-review identity. Later documentation/memory-only commits
-do not by themselves invalidate the source review. No F.1.Fix.5
-farm-evaluated commit is recorded.
+start of this workflow-memory reconciliation (2026-09-11) was
+7f8fcc02cde86f93e4e99042ba10c621f89dd159; it is a timestamped observation, not
+the permanent source-review identity. Later documentation/memory commits and
+the detached validation infrastructure do not by themselves invalidate the
+source review. No F.1.Fix.5 farm-evaluated commit is recorded.
 
 The reviewed path is:
 
@@ -58,7 +58,11 @@ production correction. Any F.2-F.6 work requires its own narrow contract.
 
 ## Immediate gate
 
-NEXT — The user runs one fresh v2 gate for Left lowe, Left highe, Center lowe,
-Center highe, and Right highe. The gate requires fresh declared artifacts, v4
-collector manifest/provenance inspection, and review of all five F.1 pages; it
-does not authorize a correction, production mutation, or F.2 work.
+NEXT — The user first runs one fresh targeted v2 gate for Q4p4W2p74 Left lowe,
+using the completed v4 collector/profile infrastructure. Collect fresh
+checker/validation JSON and bundle provenance; inspect the F.1 v2 acceptance
+artifact, relevant rendered F.1 pages, and traceback/log if anything fails;
+then establish PASS or one coherent repair. Only after a targeted Left-lowe
+PASS may validation broaden to Left lowe, Left highe, Center lowe, Center highe,
+and Right highe. This gate does not authorize a correction, production mutation,
+or F.2 work.
