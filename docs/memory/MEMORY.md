@@ -1,90 +1,58 @@
 # Durable KaonLT project knowledge
 
-This is curated project knowledge, not a chronological log. It records source,
-history, and runtime evidence separately so that future work cannot turn an
-implementation or a checker into an unsupported physics claim.
+## Authority and status
 
-## Authority and status semantics
+docs/memory is the authoritative project development record; native Codex
+memory is supplemental only. Start substantial work by reading CURRENT.md,
+this file, and handoffs/CURRENT_HANDOFF.md; inspect relevant deep records; then
+compare their source identity with live test.
 
-- `docs/memory/` is the authoritative development-state record. Native Codex
-  memory is supplemental context only and never overrides current source,
-  repository memory, or newer farm evidence.
-- Begin substantial work by reading `CURRENT.md`, this file, and
-  `handoffs/CURRENT_HANDOFF.md`, then compare their recorded source identity
-  with live `test`.
-- Use only these work-state labels: `CLOSED / RUNTIME VALIDATED`, `SOURCE
-  REVIEWED`, `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, `ACTIVE`,
-  `DEFERRED`, `BLOCKED`, and `NEXT`.
-- Current source decides implementation state. Fresh farm artifacts decide
-  runtime state. Commit messages, a clean tree, tests, a profile, or a bundle
-  with `complete=true` do not by themselves decide either acceptance or
-  runtime validity.
+For implementation: current source > exact newer source/diff > newest
+authoritative handoff > older history > inference. For runtime: fresh farm
+evidence > reviewed authoritative farm handoff > source evidence > history >
+inference. Use only CLOSED / RUNTIME VALIDATED, SOURCE REVIEWED, DEVELOPMENT
+COMPLETE, FARM VALIDATION PENDING, ACTIVE, DEFERRED, BLOCKED, and NEXT for
+work-state claims.
 
-## Scientific ownership boundaries
+## Production and scientific boundaries
 
-- Preserve the separation of random subtraction, slow-proton contamination
-  treatment, pion-background treatment, HGCer diagnostics, SIMC comparison,
-  yield extraction, and final cross-section analysis. The slow-proton and pion
-  paths address distinct physical backgrounds.
-- Preserve existing cuts, normalizations, templates, priors, fit windows,
-  component definitions, binning, production corrections, efficiencies,
-  acceptance, L/T separation, and uncertainty propagation unless an explicit
-  narrow contract owns the change.
-- Diagnostics, checkers, and presentation pages are non-authoritative unless
-  a reviewed contract explicitly says otherwise. They must not silently become
-  a production correction or subtraction.
+- Preserve the separate scientific owners for random subtraction, slow-proton
+  PID contamination, pion-production background, HGCer diagnostics, SIMC,
+  yields, and cross sections.
+- Preserve random/dummy -> frozen binning -> slow proton -> pion subtraction.
+  A setting-wide K Lambda gate controls whether proposed proton weights become
+  applied; do not partially commit per-t results.
+- Pion alignment comparisons use fixed evaluation envelopes. HGCer diagnostics
+  consume the frozen baseline rather than redefine it.
+- Preserve cuts, templates, priors, component definitions, normalizations,
+  binning, efficiencies, acceptance, L/T separation, and uncertainties unless
+  a narrow approved contract owns the change.
 
-## HGCer architecture
+## HGCer boundaries
 
-- Method A and Method B are independent local pion-background diagnostics.
-  Keep their inputs, calculations, and conclusions independent; never tune one
-  to agree with the other. Their comparison is diagnostic evidence, not a
-  production-normalization loop.
-- Existing staged pion components/refinement machinery remains separate from
-  slow-proton subtraction. Retain provenance, unavailable states, and frozen
-  upstream records rather than rebuilding results in a later consumer.
-- Phase-D work is comparison/closure/validation infrastructure. Phase-E
-  presentation consumes frozen diagnostic records and remains
-  presentation-only. In particular, a Method-A presentation page must not
-  acquire a Method-B or production-correction dependency.
-- The current Phase-F.1 source builds a non-authoritative Method-A acceptance
-  event/artifact contract after Method A, renders five setting-scope acceptance
-  pages, and explicitly declares no production mutation or Method-B numerical
-  dependency. Its source record is
-  `phases/phase-f1-method-a-acceptance-farm-gate.md`.
+- Method A and Method B remain independent. Method B uses frozen Phase-A
+  records and same-canonical-t relative closure: no Method-A numbers, cross-t
+  pooling/interpolation, or absolute neutron normalization.
+- Adaptive Method B is DO NOT PROMOTE: legacy Method B remains Phase-D context;
+  neither changes production pion subtraction.
+- Persisted diagnostics require producer -> serializer/checkpoint ->
+  checkpoint-first payload -> consumer -> renderer review.
+- Phase D compares frozen A/B states. Phase E is presentation-only and cannot
+  recompute a diagnostic or construct a correction.
+- Method B is diagnostic/cross-check/historical comparison only. Method A,
+  which excludes NPE=0, is merely the future candidate numerical HGCer input
+  and remains a positive-response relative diagnostic.
+- Method-A response training and downstream application are separate
+  populations. Train from prompt/noRF/nommcuts NPE>0 records; application uses
+  the authoritative physical NPE>2 cache. Keep separate provenance and
+  fingerprints. Future response application is event-level and parent-t
+  normalized; never renormalize (t,phi) children separately.
+- F.1-F.5 are detached. No production promotion before a separately validated
+  and explicitly approved F.6 decision.
 
-## Implementation and source-review discipline
+## Current evidence boundary
 
-- Make source changes through one narrow phase/fix contract at a time. State
-  the starting `test` HEAD, allowed and frozen files/interfaces, scientific
-  owner, before/after behavior, preserved runtime path, tests, forbidden
-  shortcuts, validation commands, diff audit, acceptance criteria, and stop
-  boundary.
-- An implementation summary is not proof. Inspect the actual diff and trace
-  the applicable producer -> serializer/checkpoint -> checkpoint-first payload
-  -> consumer -> renderer path before recording `SOURCE REVIEWED`.
-- Keep only the artifacts needed for the current validation gate. Never mix
-  artifacts from different commits or settings without identifying the
-  mismatch.
-
-## Farm-validation discipline
-
-- The real KaonLT runtime exists only on the Jefferson Lab farm. ROOT/PyROOT,
-  full-analysis, checkpoint/runtime integration, PDFs, and production behavior
-  require supplied farm evidence; the user performs those runs.
-- Validate one narrow gate at a time: targeted farm run, fresh artifacts,
-  source/provenance and checker inspection, rendered PDF-page inspection, then
-  `PASS` or one coherent repair. Broaden only after that gate passes.
-- Each runtime record must identify evaluated commit, setting/gate, fresh
-  artifact paths and hashes where available, inspections, and conclusion.
-  `complete=true` is insufficient without this review.
-
-## Current Phase-F.1 gate trap
-
-The checked-in Phase-F.1 profile pins required analysis commit
-`d656e15761970d7d612bb028d2746d077795e9ad` and permits only detached
-collector/profile files after it. Do not use that profile to bless a later
-analysis commit containing other source changes: its collector intentionally
-reports an identity error. Reconcile the identity rule and the reviewed
-analysis commit first; this is a source-gate issue, not farm evidence. See
-`investigations/2026-09-11-phase-f1-source-identity-reconciliation.md`.
+Phase C five-setting closure and E.3.Fix.2 Left-low are the only recovered
+phase-level CLOSED / RUNTIME VALIDATED results. F.1 Fix.3/Fix.4 evidence closes
+mechanical regressions only. Live F.1.Fix.5 is SOURCE REVIEWED, not farm
+validated. See evidence/VALIDATION_HISTORY.md and investigations/KNOWN_GAPS.md.

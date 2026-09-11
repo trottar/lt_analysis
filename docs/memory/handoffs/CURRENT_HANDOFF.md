@@ -1,69 +1,61 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-11 after durable-memory initialization and current-source
-review. This handoff makes no farm-validation claim.
+Prepared: 2026-09-11 after historical-memory migration and F.1.Fix.5 source
+review. This record distinguishes recovered farm evidence from live source
+state.
 
-## Resume from this checkout
+## Resume identity
 
-- Repository: `trottar/lt_analysis`
-- Branch: `test`
-- Live `HEAD` / `test` / `origin/test` at review:
-  `cf9c804b55a501af6839b8fb3b0358c56853c276`
-- Worktree was clean before the documentation-only memory update.
-- The earlier memory bootstrap recorded `dc4fc6283001739a487ec80068f951b0e388cae6`.
-  It is an ancestor, not the current head. Re-run `git status --short --branch`
-  and `git rev-parse HEAD` before any work.
+- Repository: trottar/lt_analysis; branch: test.
+- Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
+  origin/test before work.
+- Migration live HEAD: b02316f83bf8ef18641fa7217b90c04bcdca10e3.
+- F.1.Fix.5 analysis source is introduced by
+  dc4fc6283001739a487ec80068f951b0e388cae6; later commits through live HEAD
+  carry memory/import material.
 
-## Source-established architecture
+## Established evidence
 
-- Preserve the independent random, slow-proton, pion-background, HGCer,
-  SIMC, yield, and cross-section paths. Diagnostics/presentation do not own
-  production correction.
-- Preserve Method-A / Method-B independence. Phase-D is comparison/closure
-  infrastructure; Phase-E is frozen-record presentation-only work.
-- `SOURCE REVIEWED` — Phase F.1 is a non-authoritative Method-A acceptance
-  diagnostic. `rand_sub.py` creates and serializes its acceptance contract
-  after Method A, then routes a display payload to the full-background
-  renderer. Its fallback reports unavailable state without production mutation,
-  refinement, or Method-B numerical dependency. The renderer appends five
-  setting-scope pages. Details are in
-  `phases/phase-f1-method-a-acceptance-farm-gate.md`.
+CLOSED / RUNTIME VALIDATED:
 
-## Current active gate
+- Phase-C five-setting Method-B diagnostic closure: C.Fix.2.3
+  9a66bc62d20a99172e326e915866877b65ae1e5d, later accepted pre-E.3
+  e3853655db0809923cbf2326e2f779219128eda9; adaptive B is DO NOT PROMOTE.
+  Read evidence/phase-c-five-setting-closure.md.
+- E.3.Fix.2 Q4p4W2p74 Left-low presentation: implementation
+  eb1710f4739ba6ef14f51419806e9fc5bd53c175, runtime/bundle
+  bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. Read
+  evidence/e3-fix2-left-low-runtime.md. Do not extrapolate it to four other
+  settings.
 
-`ACTIVE` — Reconcile the Phase-F.1 validation-profile source identity with the
-live source before asking for a farm run.
+SOURCE REVIEWED:
 
-`BLOCKED` — The profile requires analysis commit
-`d656e15761970d7d612bb028d2746d077795e9ad` and allows only three detached
-collector/profile files after it. The current branch has subsequent changes to
-`src/cuts/full_background_subtraction_plots.py`,
-`src/cuts/pion_hgcer_method_a_acceptance_contract.py`, and `src/cuts/rand_sub.py`.
-The collector is designed to reject this committed range. This is an
-intentional source-identity guard, not an indication that a farm run failed.
+- F.1.Fix.5 has separate Part-1 prompt/noRF/nommcuts NPE>0 Method-A training
+  and physical NPE>2 application populations. It maintains independent
+  summaries/fingerprints; pages 1-4 are training and page 5 application.
+  It is non-authoritative, Method-B independent, and production-side-effect
+  free. Read phases/phase-f1-method-a-acceptance-farm-gate.md.
 
-The existing profile expects five declared settings and these frozen artifact
-classes: Phase-C checkpoint, Phase-D checkpoint, parent-preserving correction,
-Method-A acceptance artifact, procedure PDF, and page manifest. A valid later
-farm review must inspect provenance/checker gates and the selected rendered
-pages; a collector archive alone is insufficient.
+## Current blocker and boundaries
 
-## Runtime evidence and historical status
+ACTIVE — Existing F.1 collector/profile identity policy requires
+d656e15761970d7d612bb028d2746d077795e9ad and rejects later Fix.5 analysis
+files. This is a static source-identity mismatch, not a failed farm run or
+physics defect. Read investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
 
-No completed farm artifact record is present locally or supplied for this
-initialization. Therefore no phase is recorded as `CLOSED / RUNTIME VALIDATED`,
-including Phase F.1. Do not backfill older phase status from Git subjects,
-source, tests, or this handoff.
+Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
+cross-section ownership separate. Keep proton before pion, Method-A/B
+independence, same-t Method B, Phase-E presentation-only ownership, and
+parent-only normalization. Method B is diagnostic only. F.1-F.5 are detached;
+no production promotion before F.6.
 
-`DEFERRED` — Import the authoritative history for previously completed farm
-gates, if any. Each imported record needs the evaluated commit, setting, fresh
-artifact paths/hashes, inspection, and conclusion.
+## Gaps and exact next action
 
-## Exact next action
+DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
+raw historical bundle paths/hashes, and all F.1.Fix.5 farm evidence. Read
+investigations/KNOWN_GAPS.md.
 
-`NEXT` — Write one narrow Phase-F.1 source-identity reconciliation contract:
-select the reviewed analysis commit to evaluate and make the profile/collector
-identity rule agree with it. Only then perform one targeted farm gate using
-fresh declared artifacts and PDF-page inspection. Do not modify Method A,
-Method B, or production subtraction as part of that reconciliation unless a
-separate approved contract explicitly requires it.
+NEXT — Write/review a narrow F.1.Fix.5 source-identity reconciliation contract
+that selects the reviewed Fix.5 analysis commit and aligns the profile/collector
+rule. Only after that, the user performs one fresh five-setting F.1 v2 farm
+gate with declared artifact, checker/provenance, and rendered-five-page review.

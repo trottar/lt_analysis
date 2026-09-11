@@ -1,81 +1,71 @@
 # Current KaonLT development state
 
-Last reconciled: 2026-09-11, durable-memory initialization and current-source
-review only.
+Last reconciled: 2026-09-11, historical-memory migration and live Fix.5
+source review.
 
-## Observed repository identity
+## Live repository identity
 
-- Repository: `trottar/lt_analysis`
-- Branch: `test`
-- Observed `HEAD` and `test` HEAD:
-  `cf9c804b55a501af6839b8fb3b0358c56853c276`
-- Observed upstream tracking point: `origin/test` at the same commit.
-- Observed worktree: clean before this documentation-only change.
+- Repository: trottar/lt_analysis; branch: test.
+- Live HEAD and origin/test:
+  b02316f83bf8ef18641fa7217b90c04bcdca10e3.
+- Fix.5 analysis-source commit:
+  dc4fc6283001739a487ec80068f951b0e388cae6.
+- The import was prepared at 7cdb7847d72501cd3dc504565fafc604e22a6132.
+  It is an ancestor of live test, not the current HEAD.
 
-The previous bootstrap record named
-`dc4fc6283001739a487ec80068f951b0e388cae6`. It is an ancestor of the live
-checkout, not the current `test` HEAD. The `cf9c804...` commit adds the memory
-infrastructure; the current Phase-F.1 analysis source is the source reviewed
-in the ancestor range through `dc4fc628...`.
+## Supported state
 
-## Reconciliation baseline
+CLOSED / RUNTIME VALIDATED — Phase-C Method-B diagnostic closure for Left
+lowe, Left highe, Center lowe, Center highe, and Right highe, at C.Fix.2.3
+9a66bc62d20a99172e326e915866877b65ae1e5d and later accepted pre-E.3
+e3853655db0809923cbf2326e2f779219128eda9. Adaptive Method B is DO NOT
+PROMOTE. See evidence/phase-c-five-setting-closure.md.
 
-`cf9c804b55a501af6839b8fb3b0358c56853c276` is the current repository
-reconciliation baseline. It records source identity only. It is not an
-acceptance, phase-closure, or farm-validation claim.
+CLOSED / RUNTIME VALIDATED — E.3.Fix.2 independent Method-A presentation for
+Q4p4W2p74 Left-low only: implementation
+eb1710f4739ba6ef14f51419806e9fc5bd53c175 and runtime/bundle HEAD
+bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. See
+evidence/e3-fix2-left-low-runtime.md.
 
-## Current source-established state
+SOURCE REVIEWED — F.1.Fix.5 source at the live checkout uses separate
+prompt/noRF/nommcuts NPE>0 Method-A training records and authoritative
+physical NPE>2 application records, with independent summaries/fingerprints.
+Pages 1-4 consume training; page 5 consumes application. The path is detached,
+has no Method-B numerical dependency, and makes no correction, estimator, or
+production mutation. See phases/phase-f1-method-a-acceptance-farm-gate.md.
 
-`SOURCE REVIEWED` — The current source implements a Phase-F.1 Method-A
-acceptance diagnostic and its presentation/checker path. After Method A,
-`rand_sub.py` builds a frozen acceptance event contract, serializes a
-non-authoritative acceptance artifact, and sends its display payload to the
-full-background renderer. The runtime fallback remains explicitly
-non-authoritative and declares no production-object mutation, refinement, or
-Method-B numerical dependency. The renderer appends five setting-scope
-acceptance pages; it does not alter the subtraction.
+ACTIVE — F.1.Fix.5 requires source-identity reconciliation before farm review.
+The checked-in profile pins d656e15761970d7d612bb028d2746d077795e9ad and
+rejects later Fix.5 analysis files. No F.1.Fix.5 farm artifact is present.
 
-`ACTIVE` — The Phase-F.1 farm-review gate needs source-identity reconciliation
-before it can validly evaluate the live checkout. The declarative profile
-requires analysis commit `d656e15761970d7d612bb028d2746d077795e9ad` and
-permits only collector/profile files after it. Live `test` also contains later
-changes to `src/cuts/full_background_subtraction_plots.py`,
-`src/cuts/pion_hgcer_method_a_acceptance_contract.py`, and
-`src/cuts/rand_sub.py`; the collector is designed to reject those as
-unexpected committed files. See
-`investigations/2026-09-11-phase-f1-source-identity-reconciliation.md`.
+## Frozen architecture
 
-## Runtime-established state
+- Random subtraction, slow-proton treatment, pion subtraction, HGCer Method A,
+  HGCer Method B, SIMC comparison, yields, cross sections, diagnostics/checkers,
+  and presentation retain separate ownership.
+- Proton cleaning precedes pion subtraction; K Lambda preservation remains a
+  setting-wide production gate. Proposed proton quantities never become applied
+  quantities without gate acceptance.
+- Method A and Method B are independent. Method B is same-canonical-t relative
+  closure and remains diagnostic/cross-check only; it never adjusts pion
+  weights. Method A is positive-response relative leakage only, not absolute
+  zero-NPE probability.
+- Phase E presentation uses frozen upstream records and has no physics
+  ownership. F.1 through F.5 remain detached; only an explicit validated F.6
+  may promote a production change. Parent-level normalization forbids
+  independent (t,phi)-child renormalization.
 
-No farm artifact record is present in `docs/memory/evidence/` and none was
-supplied for this initialization. There is therefore no locally supported
-`CLOSED / RUNTIME VALIDATED` phase, no runtime acceptance of Phase-F.1, and no
-basis to classify older phases by farm result. The collector/profile and source
-tests are tooling/source evidence only.
+## Explicit gaps
 
-## Frozen architecture to preserve
+DEFERRED — final Phase-D farm provenance; final four-setting E.3 closure;
+detailed older proton farm artifacts; exact raw paths/hashes for recovered
+historical bundles. F.1.Fix.5 farm status remains unresolved. See
+investigations/KNOWN_GAPS.md.
 
-- Random subtraction, slow-proton subtraction, pion-background treatment,
-  HGCer diagnostics, SIMC comparison, yield extraction, and final
-  cross-section analysis have separate scientific ownership.
-- HGCer Method A and Method B are independent diagnostic/cross-check paths.
-  Neither is a permission to tune the other or to alter production pion
-  subtraction.
-- Phase-D comparison/closure records and Phase-E presentation consume stored
-  upstream diagnostics. Presentation is non-authoritative and must not
-  recompute or mutate production physics.
-- A persisted diagnostic must retain its producer, serializer/checkpoint,
-  checkpoint-first payload, consumer, and renderer provenance.
+## NEXT
 
-## Deferred history and exact next step
-
-`DEFERRED` — Import authoritative historical farm evidence before assigning
-runtime status to the broad background program or named earlier phases.
-
-`NEXT` — Create one narrow Phase-F.1 source-identity reconciliation contract:
-choose and review the analysis commit that the farm profile will evaluate, then
-make the profile/collector identity rule agree with that commit before a
-targeted farm run. Keep the required Phase-C/Phase-D/correction/Method-A
-artifacts and rendered PDF-page inspection in that later gate. Independently
-import any authoritative historical farm records with their evaluated commit,
-setting, fresh artifact paths, inspection, and conclusion.
+NEXT — Create and review one narrow F.1.Fix.5 source-identity reconciliation
+contract that selects the reviewed Fix.5 analysis commit and makes the
+collector/profile identity rule agree with it. Only then have the user run one
+fresh targeted F.1 v2 farm gate with the declared five settings, fresh
+artifacts, provenance/checker inspection, and review of all five F.1 pages.

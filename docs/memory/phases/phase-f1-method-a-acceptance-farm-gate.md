@@ -1,53 +1,49 @@
 # Phase F.1 Method-A acceptance farm gate
 
-## Scope and ownership
+## Current source review
 
-`SOURCE REVIEWED` — Current source provides a Method-A acceptance diagnostic
-after Method A in `src/cuts/rand_sub.py`. It uses the frozen HGCer diagnostic,
-Method-A result, Phase-A event contract, and pion-control cache to build a
-separate acceptance event contract. The artifact is written with a
-deterministic Method-A acceptance filename and its display payload is passed to
-`src/cuts/full_background_subtraction_plots.py` for five setting-scope pages.
+SOURCE REVIEWED at live test
+b02316f83bf8ef18641fa7217b90c04bcdca10e3. The relevant Fix.5 analysis source
+was introduced by dc4fc6283001739a487ec80068f951b0e388cae6.
 
-The source declares this path non-authoritative. Its unavailable fallback keeps
-`production_objects_mutated`, `refinement_applied`,
-`production_application_performed`, and `event_application_performed` false,
-and declares no Method-B numerical dependency. This diagnostic must not change
-random subtraction, slow-proton subtraction, pion subtraction, Method B, or
-final analysis products.
+The reviewed path is:
 
-## Evidence reviewed
+    Part-1 pion response records + Phase-E acceptance records
+    exact join by (source_label, entry_index)
+    -> prompt/noRF/nommcuts and NPE>0 Method-A training records
+    -> separate training summary and fingerprint
+    Phase-A pion records + authoritative parent/child physical cache
+    -> NPE>2 application records
+    -> separate application summary and fingerprint
+    -> F.1 artifact and presentation payload
 
-- Current imports and post-Method-A invocation in `src/cuts/rand_sub.py`.
-- Artifact construction/serialization in `src/cuts/rand_sub.py`.
-- F.1 payload and terminal five-page renderer entries in
-  `src/cuts/full_background_subtraction_plots.py`.
-- Current contract implementation and focused source tests in
-  `src/cuts/pion_hgcer_method_a_acceptance_contract.py`,
-  `testing/test_pion_hgcer_method_a_acceptance_contract.py`, and
-  `testing/test_pion_hgcer_phase_f_runtime_contract.py`.
-- The detached profile/collector in `testing/pion_hgcer_validation_bundle_profile.json`
-  and `testing/collect_pion_hgcer_validation_bundle.py`.
+Source inspection confirmed:
 
-This review establishes source-path understanding only. It does not record a
-test execution, a generated artifact, ROOT/PyROOT behavior, a rendered PDF, or
-a farm outcome.
+- training is selected from prompt noRF/nommcuts positive-response Part-1 rows,
+  with low 0<NPE<=2 and control NPE>2;
+- application is restricted to authoritative physical NPE>2 records;
+- source verifies exact paired identities, geometry/provenance, Method-A
+  cell/setting closure, and separate training/application fingerprints;
+- F.1 pages 1-4 use training rows, while page 5 uses only application rows;
+- the F.1 builder occurs after Method A and takes no Method-B numerical input;
+- unavailable and available contracts declare non-authoritative state, no
+  correction/estimator/weight adjustment, and no production/event mutation;
+- the renderer and static runtime contract preserve this detached boundary.
 
-## Farm-gate boundary
+The current review is source inspection only. It is not a test execution, ROOT
+render, artifact generation, farm run, or runtime claim.
 
-`BLOCKED` — The checked-in profile requires analysis commit
-`d656e15761970d7d612bb028d2746d077795e9ad` and allows only three detached
-collector/profile paths after it. Live `test` contains later changes to F.1
-analysis files, so its own identity guard rejects the current committed range.
-See `../investigations/2026-09-11-phase-f1-source-identity-reconciliation.md`.
+## Farm status and source-identity gate
 
-No `CLOSED / RUNTIME VALIDATED` claim is supported. A later narrow gate must
-use fresh Phase-C and Phase-D checkpoints, parent-preserving correction,
-Method-A acceptance artifact, procedure PDF/page manifest, and review of the
-checker/provenance plus selected rendered PDF pages.
+ACTIVE — No fresh F.1.Fix.5 farm evidence was supplied. The current validation
+profile requires analysis commit d656e15761970d7d612bb028d2746d077795e9ad and
+permits only detached collector/profile changes after it. It therefore rejects
+the later Fix.5 analysis source. See
+investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
 
-## Follow-up boundary
+## Boundaries
 
-`NEXT` — Reconcile the reviewed analysis commit and the profile identity rule
-in a narrow contract before any farm run. Do not use a profile archive or a
-`complete=true` field as a substitute for raw-artifact and page review.
+F.1 is a detached diagnostic event contract. It must not alter random
+subtraction, slow-proton treatment, pion subtraction, Method B, yields, or
+final analysis. Method B stays diagnostic-only; F.1 does not license a future
+production correction. Any F.2-F.6 work requires its own narrow contract.

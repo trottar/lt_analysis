@@ -2,43 +2,35 @@
 
 ## Question
 
-Can the checked-in Phase-F.1 validation collector validly evaluate the live
-`test` checkout at `cf9c804b55a501af6839b8fb3b0358c56853c276`?
+Can the checked-in F.1 validation collector validly evaluate live test at
+b02316f83bf8ef18641fa7217b90c04bcdca10e3?
 
-## Evidence reviewed
+## Source evidence reviewed
 
-- `testing/pion_hgcer_validation_bundle_profile.json` names required analysis
-  commit `d656e15761970d7d612bb028d2746d077795e9ad` and permits only
-  `testing/collect_pion_hgcer_validation_bundle.py`,
-  `testing/test_collect_pion_hgcer_validation_bundle.py`, and the profile
-  itself after that commit.
-- `testing/collect_pion_hgcer_validation_bundle.py` checks that the required
-  commit is an ancestor, lists committed files in `required_commit..HEAD`, and
-  reports non-allowlisted paths as an identity error.
-- The live range `d656e15761970d7d612bb028d2746d077795e9ad..HEAD` contains
-  later changes to `src/cuts/full_background_subtraction_plots.py`,
-  `src/cuts/pion_hgcer_method_a_acceptance_contract.py`, and
-  `src/cuts/rand_sub.py`, in addition to collector/profile and durable-memory
-  files.
+- The profile requires analysis commit
+  d656e15761970d7d612bb028d2746d077795e9ad.
+- The collector allows only its detached collector/profile test paths after that
+  commit and reports non-allowlisted files as an identity error.
+- The range from the required commit to live head contains later F.1 analysis
+  changes in src/cuts/full_background_subtraction_plots.py,
+  src/cuts/pion_hgcer_method_a_acceptance_contract.py, and src/cuts/rand_sub.py,
+  introduced by the Fix.5 source change
+  dc4fc6283001739a487ec80068f951b0e388cae6, as well as validation/memory
+  material.
 
 ## Conclusion
 
-`BLOCKED` — The current profile/collector will reject the live committed range
-as containing unexpected files after its frozen analysis commit. The profile
-therefore cannot provide a valid Phase-F.1 farm-review bundle for the current
-source identity. This conclusion is a static source review; it is not an
-attempted farm run and it does not say that the current analysis behavior is
-incorrect.
+BLOCKED — The current profile cannot provide a valid farm-review bundle for
+live F.1.Fix.5 because it intentionally rejects that source identity. This is
+a static source review, not an attempted farm run and not a claim that the
+current analysis behavior is incorrect.
 
-## Constraints preserved
+## Preserved boundary and next action
 
-The collector stays detached from the analysis runtime. Its purpose is to
-collect declared artifacts and source/checker evidence, not to create physics,
-modify the production workflow, or assert runtime acceptance.
+The collector remains detached: it collects declared artifacts and
+source/checker evidence; it does not create physics or certify runtime
+acceptance.
 
-## Exact next action
-
-`NEXT` — Before farm validation, establish a narrow reviewed contract that
-selects the analysis commit to evaluate and updates/reissues the identity rule
-for exactly that source. Review its diff and only then run one fresh targeted
-gate. Keep import of older farm evidence separate from this repair.
+NEXT — Establish a narrow reviewed source-identity contract selecting the
+Fix.5 analysis commit and revise/reissue the identity rule for exactly that
+source. Review that diff before the user runs a fresh targeted farm gate.

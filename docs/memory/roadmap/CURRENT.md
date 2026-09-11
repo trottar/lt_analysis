@@ -1,56 +1,51 @@
 # Approved KaonLT roadmap
 
-This roadmap separates implemented scope from acceptance status. It is based
-on the supplied project history and the reviewed current source; it does not
-promote a phase because a commit or test exists.
+This roadmap records approved Phase-F structure. It does not make a runtime
+claim, authorize source changes, or promote a diagnostic into production.
 
-## Implemented scope recorded by history/source
+## Frozen upstream program
 
-The established background program includes random subtraction, pion-background
-handling, slow-proton contamination treatment, HGCer diagnostics, Method-A /
-Method-B comparison infrastructure, validation/checker infrastructure, and
-later presentation of frozen diagnostics. These are architecture facts, not
-runtime-status claims. Slow-proton and pion-background work remain separate.
+Random subtraction, slow-proton PID cleaning, pion component subtraction,
+Method-A diagnostics, Method-B closure, Phase-D comparison, and Phase-E
+presentation retain separate ownership. Phase E consumes frozen records only.
+Method B remains diagnostic/cross-check/historical comparison only; it never
+numerically adjusts pion event weights.
 
-The source also identifies the HGCer sequence: independent Method A and Method
-B diagnostics; Phase-D comparison/closure infrastructure; Phase-E
-presentation-only work; and a Phase-F.1 Method-A acceptance diagnostic/farm
-review path. Earlier phase acceptance is intentionally unclassified pending
-farm evidence.
+## Phase F
 
-## `CLOSED / RUNTIME VALIDATED`
+### F.1 — detached Method-A acceptance event contract
 
-No phase is recorded in this category. No farm evidence was supplied or found
-in repository-owned durable memory during initialization.
+SOURCE REVIEWED at live test. It preserves separate Method-A training and
+physical application populations; no estimator, correction, event adjustment,
+or production mutation. Fresh F.1.Fix.5 farm evidence is ACTIVE pending
+source-identity reconciliation.
 
-## `SOURCE REVIEWED`
+### F.2 — freeze probability-map representation
 
-Phase F.1 Method-A acceptance diagnostic and its renderer/collector path are
-source reviewed at live `test` head
-`cf9c804b55a501af6839b8fb3b0358c56853c276`. It is non-authoritative and does
-not license a production correction. See
-`../phases/phase-f1-method-a-acceptance-farm-gate.md`.
+After F.1 support review, choose a supported representation; candidate reduced
+bases may include (delta,xptar,yptar) or (delta,HGCer x,HGCer y). Do not
+blindly choose a 5D histogram.
 
-## `ACTIVE`
+### F.3 — detached Method-A map
 
-Phase-F.1 source-identity reconciliation for the farm-review profile. Its
-present profile pins `d656e15761970d7d612bb028d2746d077795e9ad`, while the
-live source contains later non-allowlisted analysis changes. The current
-collector therefore cannot constitute a valid gate for live `test` until that
-identity rule is reconciled.
+Requires support and out-of-domain handling. No Method-B numerical input.
 
-## `DEFERRED`
+### F.4 — detached parent-preserving A-only correction
 
-Import authoritative farm history before assigning runtime status to the broad
-background program, Method-A/Method-B work, Phase D, or Phase E. This record
-does not invent future scientific phases.
+Construct an A-only candidate while preserving canonical-t parent
+normalization. Remain detached from production.
 
-## Future scope
+### F.5 — detached event-level (t,phi) propagation
 
-No future phase is approved in this record. Add one only through an explicit
-project decision or authoritative handoff; do not infer it from source history.
+Build parallel baseline and A-adjusted templates. Do not renormalize child
+bins independently and do not promote to production.
 
-## `NEXT`
+### F.6 — explicit production promotion
 
-Establish one narrow Phase-F.1 source-identity reconciliation contract, then
-run one targeted farm gate with fresh artifacts and rendered-page inspection.
+Only after F.5 scientific validation and a separate explicit promotion
+decision.
+
+## NEXT
+
+NEXT — Resolve F.1.Fix.5 source identity for the farm profile, then perform its
+single fresh targeted farm gate before considering F.2.
