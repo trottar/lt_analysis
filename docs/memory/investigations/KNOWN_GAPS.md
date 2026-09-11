@@ -22,14 +22,24 @@ existence, source tests, a collector archive, or phase sequence.
 7. F.1.Fix.5 has no fresh farm artifact, ROOT rendering result, or five-setting
    closure in the recovered evidence.
 
-## ACTIVE source/runtime boundary
+## Current source/runtime boundary
 
-The live F.1.Fix.5 source was reviewed and matches the dual-population
-contract, but the checked-in F.1 validation profile still pins
-d656e15761970d7d612bb028d2746d077795e9ad and allowlists only detached
-collector/profile files after it. It will reject the later Fix.5 source range.
-A narrow source-identity reconciliation is required before a fresh F.1.Fix.5
-farm gate can be meaningful.
+SOURCE REVIEWED — F.1.Fix.5 analysis source at
+dc4fc6283001739a487ec80068f951b0e388cae6 matches the detached v2
+dual-population Method-A acceptance contract.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The v4 validation
+infrastructure reconciliation is complete. The collector/profile pins the
+reviewed Fix.5 analysis source, permits only its three exact validation files
+and docs/memory/ after that commit, and validates the actual F.1 v2
+dual-population artifact. No source-identity blocker remains; local detached
+validation is complete. No F.1.Fix.5 farm-evaluated commit or fresh runtime
+artifact is recorded.
+
+NEXT — Run the targeted Q4p4W2p74 Left lowe F.1.Fix.5 v2 farm gate first and
+inspect its fresh artifacts. Broaden to Left highe, Center lowe, Center highe,
+and Right highe only after a targeted Left-lowe PASS. Do not claim a farm PASS
+until fresh farm evidence is inspected.
 
 ## Evidence hygiene
 
@@ -37,4 +47,3 @@ Exact recovered artifact paths and hashes are absent for the imported Phase-C,
 E.3, and F.1 farm records. Each evidence record identifies the available
 identity and review details; retain that limitation until original artifacts
 are supplied or found.
-
