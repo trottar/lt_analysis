@@ -1,17 +1,27 @@
 # Current KaonLT development state
 
-Last reconciled: 2026-09-11, historical-memory migration and live Fix.5
-source review.
+Last source-identity reconciliation: 2026-09-11, historical-memory migration
+and Fix.5 source review. Repository HEAD values in this record are timestamped
+observations, not permanent claims about the live checkout.
 
-## Live repository identity
+## Repository identity at last reconciliation
 
 - Repository: trottar/lt_analysis; branch: test.
-- Live HEAD and origin/test:
-  b02316f83bf8ef18641fa7217b90c04bcdca10e3.
-- Fix.5 analysis-source commit:
+- Repository HEAD observed at the last reconciliation:
+  23bcbd2f8db05f0a2e6cf399557c70df44326121.
+- Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
+- F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
+  is present.
 - The import was prepared at 7cdb7847d72501cd3dc504565fafc604e22a6132.
-  It is an ancestor of live test, not the current HEAD.
+  It is an ancestor of the observed repository HEAD, not the reviewed analysis
+  source commit.
+- At this reconciliation, commits after the reviewed analysis-source commit
+  through the observed HEAD are documentation/memory-only for the F.1 review:
+  they contain repository guidance or memory/archive material, not F.1 analysis
+  source or test changes. Such commits do not by themselves invalidate the
+  source review; every substantial task must still establish the actual live
+  test HEAD before work.
 
 ## Supported state
 
@@ -27,7 +37,7 @@ eb1710f4739ba6ef14f51419806e9fc5bd53c175 and runtime/bundle HEAD
 bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. See
 evidence/e3-fix2-left-low-runtime.md.
 
-SOURCE REVIEWED — F.1.Fix.5 source at the live checkout uses separate
+SOURCE REVIEWED — F.1.Fix.5 reviewed analysis source uses separate
 prompt/noRF/nommcuts NPE>0 Method-A training records and authoritative
 physical NPE>2 application records, with independent summaries/fingerprints.
 Pages 1-4 consume training; page 5 consumes application. The path is detached,

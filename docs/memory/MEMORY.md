@@ -14,6 +14,21 @@ inference. Use only CLOSED / RUNTIME VALIDATED, SOURCE REVIEWED, DEVELOPMENT
 COMPLETE, FARM VALIDATION PENDING, ACTIVE, DEFERRED, BLOCKED, and NEXT for
 work-state claims.
 
+## Source-identity semantics
+
+- Record the reviewed analysis-source commit, the repository HEAD observed at
+  the last reconciliation, and the farm-evaluated commit as separate values.
+  A source review may be anchored to an analysis-source commit older than the
+  observed repository HEAD.
+- An observed repository HEAD is a timestamped checkout observation, never a
+  permanent assertion that the same commit remains live. Every substantial task
+  must establish the actual live `test` HEAD and working-tree state before work.
+- Record a farm-evaluated commit only when the applicable farm artifact/evidence
+  identifies it; otherwise state that no farm-evaluated commit is recorded.
+- Documentation/memory-only commits after a reviewed analysis-source commit do
+  not by themselves invalidate that source review. Reconcile the intervening
+  diff and re-review only if the relevant analysis source or test scope changed.
+
 ## Production and scientific boundaries
 
 - Preserve the separate scientific owners for random subtraction, slow-proton

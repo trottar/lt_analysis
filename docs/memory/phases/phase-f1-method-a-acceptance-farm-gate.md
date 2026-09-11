@@ -2,9 +2,13 @@
 
 ## Current source review
 
-SOURCE REVIEWED at live test
-b02316f83bf8ef18641fa7217b90c04bcdca10e3. The relevant Fix.5 analysis source
-was introduced by dc4fc6283001739a487ec80068f951b0e388cae6.
+SOURCE REVIEWED — the relevant F.1.Fix.5 analysis-source commit is
+dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed at the
+last active-memory reconciliation (2026-09-11) was
+23bcbd2f8db05f0a2e6cf399557c70df44326121; it is a timestamped observation, not
+the permanent source-review identity. Later documentation/memory-only commits
+do not by themselves invalidate the source review. No F.1.Fix.5
+farm-evaluated commit is recorded.
 
 The reviewed path is:
 

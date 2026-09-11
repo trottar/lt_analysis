@@ -9,10 +9,18 @@ state.
 - Repository: trottar/lt_analysis; branch: test.
 - Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
   origin/test before work.
-- Migration live HEAD: b02316f83bf8ef18641fa7217b90c04bcdca10e3.
-- F.1.Fix.5 analysis source is introduced by
-  dc4fc6283001739a487ec80068f951b0e388cae6; later commits through live HEAD
-  carry memory/import material.
+- Repository HEAD observed at the last reconciliation (2026-09-11):
+  23bcbd2f8db05f0a2e6cf399557c70df44326121. This is a timestamped observation,
+  not a permanent live-HEAD claim.
+- Reviewed F.1.Fix.5 analysis-source commit:
+  dc4fc6283001739a487ec80068f951b0e388cae6.
+- F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
+  is present.
+- At the last reconciliation, later commits through the observed HEAD contained
+  documentation/memory, repository-guidance, or archived-memory material only;
+  they did not change the reviewed F.1 analysis source or tests. Those commits
+  do not by themselves invalidate the source review, but the actual live test
+  HEAD and working tree must still be established before work.
 
 ## Established evidence
 
