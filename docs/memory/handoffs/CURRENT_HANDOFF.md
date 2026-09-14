@@ -1,21 +1,22 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-11 after F.1.Fix.5 narrow-first farm-gate workflow
-correction. This record distinguishes recovered farm evidence from live source
-state.
+Prepared: 2026-09-14 after F.1.Fix.5 v4 bundle inspection. This record
+distinguishes serialized-artifact closure from accepted clean-source farm
+validation.
 
 ## Resume identity
 
 - Repository: trottar/lt_analysis; branch: test.
 - Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
   origin/test before work.
-- Repository HEAD observed at the start of this reconciliation (2026-09-11):
-  7f8fcc02cde86f93e4e99042ba10c621f89dd159. This is a timestamped observation,
+- Repository HEAD observed during this evidence inspection (2026-09-14):
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6. This is a timestamped observation,
   not a permanent live-HEAD claim.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
-  is present.
+- F.1.Fix.5 candidate farm HEAD recorded in the supplied v4 archive:
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6. It is not accepted closure; read
+  evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 - At this reconciliation, later commits through the observed HEAD contain
   documentation/memory/repository guidance or the three exact detached F.1
   collector/profile/test validation files; they contain no F.1 analysis-source
@@ -47,15 +48,16 @@ SOURCE REVIEWED:
 
 ## Current gate and boundaries
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The F.1 collector/profile v4
-identity policy requires reviewed Fix.5 source commit
-dc4fc6283001739a487ec80068f951b0e388cae6. After it, only the three detached
-collector/profile/test files and docs/memory/ are allowed; tracked root
-AGENTS.md plus all other analysis and test changes are identity errors. Its artifact validator
-requires the F.1 v2 dual-population contract, preserving separate positive-NPE
-Method-A training and physical NPE>2 application records, summaries, and
-fingerprints. Local detached checks passed; this is not a farm run or physics
-claim. Read investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The supplied five-setting v4
+archive directly validates each F.1 v2 artifact's hash, schema, detached flags,
+dual-population selection, prompt identity closure, fingerprints, and 30
+canonical `(t, delta)` closures. The collector repair excludes only allowed
+`docs/memory/**` from its historical range whitespace check while retaining
+strict analysis and path identity gates; local collector and frozen F.1 tests
+pass. Per user direction, re-run only the collector from a clean farm checkout
+against the existing outputs. Do not call F.1 closed or start F.2 until its
+complete manifest is inspected. Read
+evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
@@ -66,14 +68,9 @@ no production promotion before F.6.
 ## Gaps and exact next action
 
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
-raw historical bundle paths/hashes, and all F.1.Fix.5 farm evidence. Read
-investigations/KNOWN_GAPS.md.
+and raw historical bundle paths/hashes. F.1 clean-source runtime provenance is
+unresolved. Read investigations/KNOWN_GAPS.md.
 
-NEXT — The user performs one fresh targeted single-setting F.1.Fix.5 v2 farm
-gate for Q4p4W2p74 Left lowe, using the completed v4 collector/profile
-infrastructure. Collect fresh checker/validation JSON and bundle provenance;
-inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages; inspect
-traceback/log if anything fails; then establish PASS or one coherent repair.
-Only if this targeted Left-lowe gate passes may validation broaden to Left lowe,
-Left highe, Center lowe, Center highe, and Right highe. No farm result is
-currently recorded.
+NEXT — Run the repaired F.1 collector only from a clean farm checkout against
+the existing five `Q4p4W2p74` outputs. Inspect its complete manifest and
+provenance, then close F.1 or make one coherent repair before F.2.

@@ -79,12 +79,13 @@ phase-level CLOSED / RUNTIME VALIDATED results. F.1 Fix.3/Fix.4 evidence closes
 mechanical regressions only. Live F.1.Fix.5 is SOURCE REVIEWED, not farm
 validated. See evidence/VALIDATION_HISTORY.md and investigations/KNOWN_GAPS.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.1.Fix.5 validation-gate
-reconciliation updated only detached collector/profile/test infrastructure.
-The immediate user-run evidence step is one targeted F.1.Fix.5 v2 farm gate
-for Q4p4W2p74 Left lowe, using the completed v4 collector/profile
-infrastructure. Collect fresh checker/validation JSON and bundle provenance,
-inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages, inspect
-traceback/log if anything fails, then establish PASS or one coherent repair.
-Broaden to Left lowe, Left highe, Center lowe, Center highe, and Right highe
-only after that targeted gate passes.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — A supplied five-setting
+F.1.Fix.5 v4 archive records candidate farm HEAD
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6` and directly validates every
+serialized v2 artifact's hash, detached flags, population selection,
+fingerprints, and stored canonical-cell closure. The collector repair excludes
+only allowed `docs/memory/**` paths from its historical range whitespace check;
+all analysis and non-allowlisted paths remain checked. Local collector and
+frozen F.1 tests pass. Per user direction, re-run only the collector from a
+clean farm checkout against the existing outputs before F.1 closure or F.2.
+See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.

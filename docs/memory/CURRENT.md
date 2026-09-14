@@ -1,19 +1,21 @@
 # Current KaonLT development state
 
-Last source-identity and workflow-memory reconciliation: 2026-09-11,
-F.1.Fix.5 narrow-first farm-gate correction. Repository HEAD values in this
+Last source-identity and workflow-memory reconciliation: 2026-09-14,
+F.1.Fix.5 v4 bundle inspection. Repository HEAD values in this
 record are timestamped observations, not permanent claims about the live
 checkout.
 
 ## Repository identity at last reconciliation
 
 - Repository: trottar/lt_analysis; branch: test.
-- Repository HEAD observed at the start of this reconciliation:
-  7f8fcc02cde86f93e4e99042ba10c621f89dd159.
+- Repository HEAD observed during this evidence inspection:
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1.Fix.5 farm-evaluated commit: none recorded; no F.1.Fix.5 farm artifact
-  is present.
+- F.1.Fix.5 candidate farm HEAD recorded by the supplied v4 archive:
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6. It is not accepted runtime
+  closure: the archive is incomplete and its captured farm worktree was dirty.
+  See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 - The import was prepared at 7cdb7847d72501cd3dc504565fafc604e22a6132.
   It is an ancestor of the observed repository HEAD, not the reviewed analysis
   source commit.
@@ -45,14 +47,17 @@ Pages 1-4 consume training; page 5 consumes application. The path is detached,
 has no Method-B numerical dependency, and makes no correction, estimator, or
 production mutation. See phases/phase-f1-method-a-acceptance-farm-gate.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The detached F.1.Fix.5
-collector/profile gate now pins reviewed analysis commit
-dc4fc6283001739a487ec80068f951b0e388cae6. It accepts only its three exact
-validation files and docs/memory/ after that commit; unexpected analysis,
-unrelated test changes, and tracked root AGENTS.md still fail source identity. The v4 bundle
-validates the actual v2 dual-population artifact, including separate summaries
-and fingerprints. Local detached checks passed; no F.1.Fix.5 farm artifact is
-present.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The supplied five-setting
+F.1.Fix.5 v4 archive at recorded HEAD
+126fa22c19bd29b9952f55b33ab43d59f9727ef6 directly closes its serialized v2
+dual-population artifacts: hashes, schemas, detached flags, row selection,
+prompt/application identity, fingerprints, and every stored canonical
+`(t, delta)` closure pass. The collector repair excludes only already-allowed
+`docs/memory/**` paths from the historical range whitespace check; all analysis
+and non-allowlisted paths remain protected. Local collector and frozen F.1
+tests pass. Per user direction, run only the repaired collector from a clean
+farm checkout against existing artifacts; do not rerun physics. See
+evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 ## Frozen architecture
 
@@ -75,16 +80,11 @@ present.
 
 DEFERRED — final Phase-D farm provenance; final four-setting E.3 closure;
 detailed older proton farm artifacts; exact raw paths/hashes for recovered
-historical bundles. F.1.Fix.5 farm status remains unresolved. See
-investigations/KNOWN_GAPS.md.
+historical bundles. F.1.Fix.5 clean-source runtime provenance remains
+unresolved. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — The user runs one fresh targeted single-setting F.1.Fix.5 v2 farm gate
-for Q4p4W2p74 Left lowe, using the completed v4 collector/profile validation
-infrastructure. Collect fresh checker/validation JSON and bundle provenance;
-inspect the F.1 v2 acceptance artifact and relevant rendered F.1 pages; inspect
-traceback/log if anything fails; then establish PASS or one coherent repair.
-Only if this targeted Left-lowe gate passes may validation broaden to Left lowe,
-Left highe, Center lowe, Center highe, and Right highe. No F.1.Fix.5 farm
-outcome is currently recorded.
+NEXT — Run the repaired F.1 collector only from a clean farm checkout against
+the existing five `Q4p4W2p74` outputs. Inspect its complete manifest and
+provenance, then close F.1 or make one coherent repair before F.2.

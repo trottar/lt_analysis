@@ -3,12 +3,13 @@
 ## Current source review
 
 SOURCE REVIEWED — the relevant F.1.Fix.5 analysis-source commit is
-dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed at the
-start of this workflow-memory reconciliation (2026-09-11) was
-7f8fcc02cde86f93e4e99042ba10c621f89dd159; it is a timestamped observation, not
-the permanent source-review identity. Later documentation/memory commits and
-the detached validation infrastructure do not by themselves invalidate the
-source review. No F.1.Fix.5 farm-evaluated commit is recorded.
+dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed during
+the 2026-09-14 archive inspection was
+126fa22c19bd29b9952f55b33ab43d59f9727ef6; it is a timestamped observation, not
+the permanent source-review identity. The supplied archive records that same
+candidate farm HEAD, but not accepted clean-source closure. Later
+documentation/memory commits and detached validation infrastructure do not by
+themselves invalidate the source review.
 
 The reviewed path is:
 
@@ -39,15 +40,17 @@ render, artifact generation, farm run, or runtime claim.
 
 ## Farm status and source-identity gate
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — No fresh F.1.Fix.5 farm
-evidence was supplied. The detached profile/bundle v4 requires reviewed source
-commit dc4fc6283001739a487ec80068f951b0e388cae6. It permits exactly its
-collector/profile/test files and docs/memory/ after that commit; tracked root
-AGENTS.md, unexpected analysis, and unrelated test changes remain identity errors. The
-collector now accepts only the actual v2 dual-population artifact and verifies
-separate training/application ownership, summaries, and fingerprints. Local
-checks passed; no F.1.Fix.5 farm artifact is present. See
-investigations/2026-09-11-phase-f1-source-identity-reconciliation.md.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — A supplied five-setting v4
+farm archive records candidate HEAD
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6` and directly validates every F.1
+v2 artifact's hash, detached state, training/application population ownership,
+fingerprints, and stored canonical-cell closure. The collector repair excludes
+only allowed `docs/memory/**` paths from the historical range whitespace check
+while retaining strict analysis-source and path identity gates. Local collector
+and frozen F.1 tests pass. Per user direction, re-run the collector only from a
+clean farm checkout against the existing outputs; do not mark F.1 runtime
+validated until its complete manifest is inspected. See
+evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 ## Boundaries
 
@@ -58,11 +61,6 @@ production correction. Any F.2-F.6 work requires its own narrow contract.
 
 ## Immediate gate
 
-NEXT — The user first runs one fresh targeted v2 gate for Q4p4W2p74 Left lowe,
-using the completed v4 collector/profile infrastructure. Collect fresh
-checker/validation JSON and bundle provenance; inspect the F.1 v2 acceptance
-artifact, relevant rendered F.1 pages, and traceback/log if anything fails;
-then establish PASS or one coherent repair. Only after a targeted Left-lowe
-PASS may validation broaden to Left lowe, Left highe, Center lowe, Center highe,
-and Right highe. This gate does not authorize a correction, production mutation,
-or F.2 work.
+NEXT — Run the repaired collector only from a clean farm checkout against the
+existing five `Q4p4W2p74` outputs, then inspect its complete manifest. This
+does not authorize a correction, production mutation, or F.2 work.
