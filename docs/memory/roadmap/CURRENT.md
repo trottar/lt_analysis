@@ -15,10 +15,11 @@ numerically adjusts pion event weights.
 
 ### F.1 — detached Method-A acceptance event contract
 
-SOURCE REVIEWED at live test. It preserves separate Method-A training and
-physical application populations; no estimator, correction, event adjustment,
-or production mutation. Fresh F.1.Fix.5 farm evidence is ACTIVE pending
-source-identity reconciliation.
+CLOSED / RUNTIME VALIDATED for all five canonical Q4p4W2p74 settings. It
+preserves separate Method-A training and physical application populations; no
+estimator, correction, event adjustment, or production mutation. Runtime is
+anchored to `126fa22c19bd29b9952f55b33ab43d59f9727ef6`; the later collector
+reconciliation does not replace that runtime identity.
 
 ### F.2 — freeze probability-map representation
 
@@ -47,5 +48,6 @@ decision.
 
 ## NEXT
 
-NEXT — Resolve F.1.Fix.5 source identity for the farm profile, then perform its
-single fresh targeted farm gate before considering F.2.
+NEXT — Implement F.2 only from this closure-memory baseline, then run its one
+detached farm analyzer gate. Do not begin F.3 before explicit acceptance of one
+F.2 reduced basis.

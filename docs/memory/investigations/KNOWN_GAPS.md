@@ -19,29 +19,18 @@ existence, source tests, a collector archive, or phase sequence.
 5. Generic June commit subjects are chronology only.
 6. Historic procedure language proposing an A+B correction is SUPERSEDED by
    the Method-B-diagnostic-only decision.
-7. F.1.Fix.5 has a supplied five-setting v4 candidate archive whose direct F.1
-   v2 artifact audit passes. Its original manifest is incomplete only on
-   allowed `docs/memory/` whitespace; the collector repair is locally tested.
-   Per user direction, clean collector-only revalidation of existing outputs is
-   pending before closure. See
-   `evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md`.
 
 ## Current source/runtime boundary
 
-SOURCE REVIEWED — F.1.Fix.5 analysis source at
-dc4fc6283001739a487ec80068f951b0e388cae6 matches the detached v2
-dual-population Method-A acceptance contract.
+CLOSED / RUNTIME VALIDATED — F.1.Fix.5 analysis source at
+`dc4fc6283001739a487ec80068f951b0e388cae6`, runtime at
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6`, and clean collector
+reconciliation at `31dd034d8404e317863bf0933c51253e1d3deeb8` are distinct.
+The owner accepted the post-hoc clean collector gate and continuity of the
+existing artifact hashes with the supplied v4 runtime bundle. See
+evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The v4 archive identifies
-candidate farm HEAD `126fa22c19bd29b9952f55b33ab43d59f9727ef6` and validates
-the F.1 v2 dual-population artifacts. The collector repair is locally tested
-and excludes only allowed documentation paths from the historical range
-whitespace check. Clean collector-only revalidation of existing outputs is
-pending. See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
-
-NEXT — Run the repaired F.1 collector from a clean farm checkout against the
-existing outputs; inspect the complete manifest before claiming F.1 PASS or
-beginning F.2.
+NEXT — Begin detached F.2 from the closure-memory baseline only.
 
 ## Evidence hygiene
 

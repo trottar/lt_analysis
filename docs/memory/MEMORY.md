@@ -74,18 +74,18 @@ work-state claims.
 
 ## Current evidence boundary
 
-Phase C five-setting closure and E.3.Fix.2 Left-low are the only recovered
-phase-level CLOSED / RUNTIME VALIDATED results. F.1 Fix.3/Fix.4 evidence closes
-mechanical regressions only. Live F.1.Fix.5 is SOURCE REVIEWED, not farm
-validated. See evidence/VALIDATION_HISTORY.md and investigations/KNOWN_GAPS.md.
+Phase C five-setting closure, E.3.Fix.2 Left-low, and F.1.Fix.5 are the
+recovered phase-level CLOSED / RUNTIME VALIDATED results.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — A supplied five-setting
-F.1.Fix.5 v4 archive records candidate farm HEAD
-`126fa22c19bd29b9952f55b33ab43d59f9727ef6` and directly validates every
-serialized v2 artifact's hash, detached flags, population selection,
-fingerprints, and stored canonical-cell closure. The collector repair excludes
-only allowed `docs/memory/**` paths from its historical range whitespace check;
-all analysis and non-allowlisted paths remain checked. Local collector and
-frozen F.1 tests pass. Per user direction, re-run only the collector from a
-clean farm checkout against the existing outputs before F.1 closure or F.2.
-See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
+CLOSED / RUNTIME VALIDATED — F.1.Fix.5 validates the detached v2
+dual-population artifacts for all five canonical Q4p4W2p74 settings. Preserve
+four identities: reviewed analysis source
+`dc4fc6283001739a487ec80068f951b0e388cae6`; runtime-evaluated analysis HEAD
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6`; collector reconciliation commit
+`31dd034d8404e317863bf0933c51253e1d3deeb8`; and this docs/memory-only
+closure commit, which is the F.2 baseline. The owner accepted the C1 clean
+collector gate and continuity of the existing JSON/PDF/page-manifest evidence
+with the supplied v4 runtime bundle. The C1 range whitespace check covers only
+the profile's three explicit validation files; the global worktree check and
+independent committed-file identity audit remain strict. F.1 remains detached;
+F.2-F.5 remain detached and F.6 is the only possible production promotion.

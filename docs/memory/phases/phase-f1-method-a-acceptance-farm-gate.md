@@ -2,14 +2,13 @@
 
 ## Current source review
 
-SOURCE REVIEWED — the relevant F.1.Fix.5 analysis-source commit is
-dc4fc6283001739a487ec80068f951b0e388cae6. The repository HEAD observed during
-the 2026-09-14 archive inspection was
-126fa22c19bd29b9952f55b33ab43d59f9727ef6; it is a timestamped observation, not
-the permanent source-review identity. The supplied archive records that same
-candidate farm HEAD, but not accepted clean-source closure. Later
-documentation/memory commits and detached validation infrastructure do not by
-themselves invalidate the source review.
+CLOSED / RUNTIME VALIDATED — the relevant F.1.Fix.5 analysis-source commit is
+`dc4fc6283001739a487ec80068f951b0e388cae6`; the KaonLT runtime-evaluated
+analysis HEAD is `126fa22c19bd29b9952f55b33ab43d59f9727ef6`; and the narrow
+collector reconciliation commit is `31dd034d8404e317863bf0933c51253e1d3deeb8`.
+The owner accepted the clean C1 collector result and artifact-hash continuity
+with the supplied v4 runtime bundle. The later closure-memory commit is the
+F.2 baseline only; it is not an F.1 runtime commit.
 
 The reviewed path is:
 
@@ -35,21 +34,18 @@ Source inspection confirmed:
   correction/estimator/weight adjustment, and no production/event mutation;
 - the renderer and static runtime contract preserve this detached boundary.
 
-The current review is source inspection only. It is not a test execution, ROOT
-render, artifact generation, farm run, or runtime claim.
+The source inspection above is distinct from the accepted farm/runtime closure.
 
 ## Farm status and source-identity gate
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — A supplied five-setting v4
-farm archive records candidate HEAD
-`126fa22c19bd29b9952f55b33ab43d59f9727ef6` and directly validates every F.1
-v2 artifact's hash, detached state, training/application population ownership,
-fingerprints, and stored canonical-cell closure. The collector repair excludes
-only allowed `docs/memory/**` paths from the historical range whitespace check
-while retaining strict analysis-source and path identity gates. Local collector
-and frozen F.1 tests pass. Per user direction, re-run the collector only from a
-clean farm checkout against the existing outputs; do not mark F.1 runtime
-validated until its complete manifest is inspected. See
+CLOSED / RUNTIME VALIDATED — The supplied five-setting v4 archive directly
+validated every F.1 v2 artifact's hash, detached state, training/application
+population ownership, fingerprints, and stored canonical-cell closure at
+runtime HEAD `126fa22c19bd29b9952f55b33ab43d59f9727ef6`. C1 changed only the
+committed-range whitespace check to the three explicit profile-owned
+validation files; the global worktree check and committed-file identity audit
+remain strict. The accepted clean C1 collector gate reconciled provenance
+without a KaonLT/ROOT rerun. See
 evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 ## Boundaries
@@ -59,8 +55,8 @@ subtraction, slow-proton treatment, pion subtraction, Method B, yields, or
 final analysis. Method B stays diagnostic-only; F.1 does not license a future
 production correction. Any F.2-F.6 work requires its own narrow contract.
 
-## Immediate gate
+## Next phase boundary
 
-NEXT — Run the repaired collector only from a clean farm checkout against the
-existing five `Q4p4W2p74` outputs, then inspect its complete manifest. This
-does not authorize a correction, production mutation, or F.2 work.
+NEXT — F.2 may begin from the closure-memory baseline as a detached global
+representation audit only. This closure does not authorize a map, correction,
+event application, production mutation, or F.3 work.

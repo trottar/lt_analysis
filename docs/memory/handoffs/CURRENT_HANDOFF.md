@@ -1,28 +1,21 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-14 after F.1.Fix.5 v4 bundle inspection. This record
-distinguishes serialized-artifact closure from accepted clean-source farm
-validation.
+Prepared: 2026-09-14 after accepted F.1.Fix.5 closure. This record
+distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 
 ## Resume identity
 
 - Repository: trottar/lt_analysis; branch: test.
 - Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
   origin/test before work.
-- Repository HEAD observed during this evidence inspection (2026-09-14):
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6. This is a timestamped observation,
-  not a permanent live-HEAD claim.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1.Fix.5 candidate farm HEAD recorded in the supplied v4 archive:
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6. It is not accepted closure; read
-  evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
-- At this reconciliation, later commits through the observed HEAD contain
-  documentation/memory/repository guidance or the three exact detached F.1
-  collector/profile/test validation files; they contain no F.1 analysis-source
-  changes. Those commits do not by themselves invalidate the source review, but
-  the actual live test HEAD and working tree must still be established before
-  work.
+- F.1 runtime-evaluated analysis HEAD:
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
+- F.1.Validation.Fix.1 collector reconciliation commit:
+  31dd034d8404e317863bf0933c51253e1d3deeb8.
+- This docs/memory-only closure commit is the exact F.2 baseline. It does not
+  alter or replace the F.1 runtime identity.
 
 ## Established evidence
 
@@ -38,26 +31,19 @@ CLOSED / RUNTIME VALIDATED:
   evidence/e3-fix2-left-low-runtime.md. Do not extrapolate it to four other
   settings.
 
-SOURCE REVIEWED:
+CLOSED / RUNTIME VALIDATED:
 
-- F.1.Fix.5 has separate Part-1 prompt/noRF/nommcuts NPE>0 Method-A training
-  and physical NPE>2 application populations. It maintains independent
-  summaries/fingerprints; pages 1-4 are training and page 5 application.
-  It is non-authoritative, Method-B independent, and production-side-effect
-  free. Read phases/phase-f1-method-a-acceptance-farm-gate.md.
+- F.1.Fix.5 for all five canonical Q4p4W2p74 settings. The runtime remains
+  anchored to `126fa22c19bd29b9952f55b33ab43d59f9727ef6`; C1 reconciled its
+  clean collector provenance without rerunning KaonLT. The owner accepted the
+  complete gate and artifact-hash continuity with the supplied v4 bundle.
 
 ## Current gate and boundaries
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The supplied five-setting v4
-archive directly validates each F.1 v2 artifact's hash, schema, detached flags,
-dual-population selection, prompt identity closure, fingerprints, and 30
-canonical `(t, delta)` closures. The collector repair excludes only allowed
-`docs/memory/**` from its historical range whitespace check while retaining
-strict analysis and path identity gates; local collector and frozen F.1 tests
-pass. Per user direction, re-run only the collector from a clean farm checkout
-against the existing outputs. Do not call F.1 closed or start F.2 until its
-complete manifest is inspected. Read
-evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
+CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
+range whitespace check to the three profile-owned validation files; the global
+worktree check and committed-file identity audit remain unchanged. The F.1
+artifact, PDF, and page-manifest evidence remains detached and source-owned.
 
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
@@ -68,9 +54,9 @@ no production promotion before F.6.
 ## Gaps and exact next action
 
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
-and raw historical bundle paths/hashes. F.1 clean-source runtime provenance is
-unresolved. Read investigations/KNOWN_GAPS.md.
+and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Run the repaired F.1 collector only from a clean farm checkout against
-the existing five `Q4p4W2p74` outputs. Inspect its complete manifest and
-provenance, then close F.1 or make one coherent repair before F.2.
+NEXT — From this clean F.2 baseline, implement only the detached global
+representation audit. Do not construct a map, correction, event probability,
+weight adjustment, or production application; F.3 requires explicit F.2 basis
+acceptance.

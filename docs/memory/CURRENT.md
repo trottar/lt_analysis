@@ -1,30 +1,22 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-14,
-F.1.Fix.5 v4 bundle inspection. Repository HEAD values in this
-record are timestamped observations, not permanent claims about the live
-checkout.
+accepted F.1.Fix.5 closure. Repository HEAD values in this record are
+timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
 
 - Repository: trottar/lt_analysis; branch: test.
-- Repository HEAD observed during this evidence inspection:
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
+- Repository HEAD observed immediately before this closure-memory commit:
+  116fb7cf7f038a1706a279e7082a73da6f1f26b5.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1.Fix.5 candidate farm HEAD recorded by the supplied v4 archive:
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6. It is not accepted runtime
-  closure: the archive is incomplete and its captured farm worktree was dirty.
-  See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
-- The import was prepared at 7cdb7847d72501cd3dc504565fafc604e22a6132.
-  It is an ancestor of the observed repository HEAD, not the reviewed analysis
-  source commit.
-- At this reconciliation, commits after the reviewed analysis-source commit
-  through the observed HEAD are documentation/memory/repository guidance or the
-  three exact detached F.1 collector/profile/test validation files; they
-  contain no F.1 analysis-source changes. Such commits do not by themselves
-  invalidate the source review; every substantial task must still establish the
-  actual live test HEAD before work.
+- F.1 runtime-evaluated analysis HEAD:
+  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
+- F.1.Validation.Fix.1 collector commit:
+  31dd034d8404e317863bf0933c51253e1d3deeb8.
+- This docs/memory-only closure commit is the F.2 starting baseline. It is
+  neither the F.1 analysis-source commit nor a KaonLT runtime commit.
 
 ## Supported state
 
@@ -40,24 +32,15 @@ eb1710f4739ba6ef14f51419806e9fc5bd53c175 and runtime/bundle HEAD
 bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. See
 evidence/e3-fix2-left-low-runtime.md.
 
-SOURCE REVIEWED — F.1.Fix.5 reviewed analysis source uses separate
-prompt/noRF/nommcuts NPE>0 Method-A training records and authoritative
-physical NPE>2 application records, with independent summaries/fingerprints.
-Pages 1-4 consume training; page 5 consumes application. The path is detached,
-has no Method-B numerical dependency, and makes no correction, estimator, or
-production mutation. See phases/phase-f1-method-a-acceptance-farm-gate.md.
-
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The supplied five-setting
-F.1.Fix.5 v4 archive at recorded HEAD
-126fa22c19bd29b9952f55b33ab43d59f9727ef6 directly closes its serialized v2
-dual-population artifacts: hashes, schemas, detached flags, row selection,
-prompt/application identity, fingerprints, and every stored canonical
-`(t, delta)` closure pass. The collector repair excludes only already-allowed
-`docs/memory/**` paths from the historical range whitespace check; all analysis
-and non-allowlisted paths remain protected. Local collector and frozen F.1
-tests pass. Per user direction, run only the repaired collector from a clean
-farm checkout against existing artifacts; do not rerun physics. See
-evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
+CLOSED / RUNTIME VALIDATED — F.1.Fix.5 for Left-lowe, Left-highe,
+Center-lowe, Center-highe, and Right-highe. The reviewed analysis source is
+`dc4fc6283001739a487ec80068f951b0e388cae6`; runtime remains anchored to
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6`. The accepted clean post-hoc
+collector reconciliation ran from C1 `31dd034d8404e317863bf0933c51253e1d3deeb8`
+against the existing artifacts. The owner accepted the required complete source
+gate and artifact-hash continuity with the supplied v4 runtime bundle. F.1 is
+detached, Method-B independent, and makes no correction, estimator, or
+production mutation. See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 ## Frozen architecture
 
@@ -80,11 +63,11 @@ evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 DEFERRED — final Phase-D farm provenance; final four-setting E.3 closure;
 detailed older proton farm artifacts; exact raw paths/hashes for recovered
-historical bundles. F.1.Fix.5 clean-source runtime provenance remains
-unresolved. See investigations/KNOWN_GAPS.md.
+historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Run the repaired F.1 collector only from a clean farm checkout against
-the existing five `Q4p4W2p74` outputs. Inspect its complete manifest and
-provenance, then close F.1 or make one coherent repair before F.2.
+NEXT — Start detached F.2 from this closure-memory commit after verifying the
+live clean `test` HEAD. Implement only the approved representation audit; do
+not construct a map, correction, event probability, weight, or production
+application. F.3 remains blocked pending explicit F.2 basis acceptance.

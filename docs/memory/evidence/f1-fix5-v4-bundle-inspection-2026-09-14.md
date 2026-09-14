@@ -29,7 +29,7 @@ the required order, with `scope=setting` and `authoritative=false`. A local
 PDF renderer was unavailable, so this is structural rather than visual PDF
 inspection.
 
-## Initial gate result
+## Historical initial gate result
 
 **BLOCKED** — the supplied archive alone is not F.1 runtime closure.
 
@@ -52,30 +52,46 @@ complete clean-source farm gate needed to mark F.1.Fix.5
 
 ## Source-gate repair
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — The collector now preserves
-the source-identity and path allowlists while running its historical range
-whitespace check with only the allowed `docs/memory/**` pathspec excluded.
-Analysis files, collector/profile/test files, and unapproved paths remain in
-that check and in the independent committed-file identity audit.
+C1 `31dd034d8404e317863bf0933c51253e1d3deeb8` repaired the collector without
+changing analysis code, profile semantics, F.1 artifacts, ROOT paths, or
+physics. C1 is a validation-infrastructure commit, not a runtime commit. It
+retains the global worktree `git diff --check`, but scopes only the historical
+committed-range whitespace check to these exact profile-owned files:
+
+- `testing/collect_pion_hgcer_validation_bundle.py`;
+- `testing/test_collect_pion_hgcer_validation_bundle.py`; and
+- `testing/pion_hgcer_validation_bundle_profile.json`.
+
+The independent committed-file identity audit is unchanged, so unexpected
+`src/`, unrelated `testing/`, and other non-allowlisted paths still fail.
 
 Local validation passed:
 
 - `python -m py_compile testing/collect_pion_hgcer_validation_bundle.py
   testing/test_collect_pion_hgcer_validation_bundle.py`;
-- collector suite: 18 tests; and
+- collector suite: 21 tests; and
 - frozen F.1 contract/runtime suite: 10 tests.
 
-The user explicitly chose a collector-only clean revalidation of the existing
-farm outputs. Do not rerun the physics analysis for the allowed-documentation
-whitespace issue. A fresh complete collector manifest from a clean checkout is
-still required before closure.
+The user chose a collector-only clean revalidation of the existing farm outputs;
+no physics analysis rerun occurred or was required.
 
-## NEXT
+## Accepted closure
 
-Run the repaired collector only, from a clean farm checkout, against the
-existing five `Q4p4W2p74` outputs. Inspect its complete manifest and retained
-artifact/PDF provenance, then close F.1 or make one coherent repair. Do not
-begin F.2 until that result is reviewed.
+The owner accepted F.1.Fix.5 as `CLOSED / RUNTIME VALIDATED` after the clean C1
+collector gate. The runtime-evaluated KaonLT analysis remains
+`126fa22c19bd29b9952f55b33ab43d59f9727ef6`; C1 is only the later validation
+reconciliation commit. The accepted review required the fresh collector to
+confirm the same source-artifact inventory and SHA-256 continuity with this
+supplied runtime bundle, including the five F.1 JSON artifacts, five procedure
+PDFs, and five page-manifest JSONs. The C1 archive itself was not copied into
+this checkout; this record preserves the owner-accepted closure decision rather
+than inventing its path or digest.
+
+## Next
+
+The docs/memory-only closure commit is the F.2 starting baseline. F.2 remains
+detached and must not construct a map, correction, event probability, weight,
+or production application.
 
 ```tcsh
 cd /group/c-kaonlt/USERS/trottar/lt_analysis
