@@ -23,9 +23,11 @@ reconciliation does not replace that runtime identity.
 
 ### F.2 — freeze probability-map representation
 
-After F.1 support review, choose a supported representation; candidate reduced
-bases may include (delta,xptar,yptar) or (delta,HGCer x,HGCer y). Do not
-blindly choose a 5D histogram.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — detached global representation
+audit at C2. It compares only `delta_only`, `track3`, `hgcer3`, and diagnostic
+`full5_reference`; it neither chooses a five-dimensional estimator nor freezes
+a basis. Farm review and explicit human basis acceptance are required before
+F.3.
 
 ### F.3 — detached Method-A map
 
@@ -48,6 +50,5 @@ decision.
 
 ## NEXT
 
-NEXT — Implement F.2 only from this closure-memory baseline, then run its one
-detached farm analyzer gate. Do not begin F.3 before explicit acceptance of one
-F.2 reduced basis.
+NEXT — Run F.2's one detached farm analyzer gate and explicitly accept or
+reject its reduced-basis recommendation. Do not begin F.3 before acceptance.

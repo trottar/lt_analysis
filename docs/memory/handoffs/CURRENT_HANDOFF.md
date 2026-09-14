@@ -16,6 +16,8 @@ distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
   31dd034d8404e317863bf0933c51253e1d3deeb8.
 - This docs/memory-only closure commit is the exact F.2 baseline. It does not
   alter or replace the F.1 runtime identity.
+- F.2 source implementation started at and is pinned to
+  `02f21886cff8a721df46ebf673594856583fc3c5`.
 
 ## Established evidence
 
@@ -45,6 +47,13 @@ range whitespace check to the three profile-owned validation files; the global
 worktree check and committed-file identity audit remain unchanged. The F.1
 artifact, PDF, and page-manifest evidence remains detached and source-owned.
 
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 adds only a detached
+representation-audit module, CLI, and focused tests. It uses fixed candidate
+bases; strict F.1 v2 validation; canonical-t-local deterministic response
+probes; and cKDTree non-prompt application support. It creates no map,
+correction, event score/probability, weight, normalization, or production
+object. Read phases/phase-f2-method-a-acceptance-representation.md.
+
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
 independence, same-t Method B, Phase-E presentation-only ownership, and
@@ -56,7 +65,7 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — From this clean F.2 baseline, implement only the detached global
-representation audit. Do not construct a map, correction, event probability,
-weight adjustment, or production application; F.3 requires explicit F.2 basis
-acceptance.
+NEXT — Run only the detached F.2 analyzer on the farm against the accepted five
+F.1 artifacts. Inspect its JSON, four-page PDF, source hashes, per-group
+response/support/OOD evidence, and recommendation. Accept a basis or make one
+coherent F.2 repair; F.3 remains blocked until acceptance.

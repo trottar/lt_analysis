@@ -89,3 +89,12 @@ with the supplied v4 runtime bundle. The C1 range whitespace check covers only
 the profile's three explicit validation files; the global worktree check and
 independent committed-file identity audit remain strict. F.1 remains detached;
 F.2-F.5 remain detached and F.6 is the only possible production promotion.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 was implemented from C2
+`02f21886cff8a721df46ebf673594856583fc3c5` as a pure Python/numpy/scipy
+five-artifact representation audit. Its fixed candidates are `delta_only`,
+`track3`, `hgcer3`, and non-promotable `full5_reference`; response probes are
+canonical-t local, deterministic five-fold class-balanced L-BFGS-B diagnostics.
+Application support uses same-parent robust-scaled cKDTree distances. The
+output is aggregate-only JSON plus a four-page matplotlib PDF; `basis_frozen`
+is always false and F.3 requires explicit human acceptance after farm review.
