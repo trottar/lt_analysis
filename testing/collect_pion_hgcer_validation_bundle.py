@@ -160,6 +160,9 @@ AUTHORIZED_SETTINGS = tuple(
 ALLOWED_COMMITTED_FILES = frozenset(
     _DEFAULT_PROFILE["source_identity"]["allowed_committed_files"]
 )
+COMMITTED_RANGE_WHITESPACE_CHECK_FILES = tuple(
+    _DEFAULT_PROFILE["source_identity"]["allowed_committed_files"]
+)
 ALLOWED_NON_ANALYSIS_PATH_PREFIXES = tuple(
     _DEFAULT_PROFILE["source_identity"]["allowed_non_analysis_path_prefixes"]
 )
@@ -1503,8 +1506,13 @@ def collect_source_checks(
     command_runner: CommandRunner = run_command,
     *,
     required_analysis_commit: str = REQUIRED_ANALYSIS_COMMIT,
+    allowed_committed_files: Iterable[str] = COMMITTED_RANGE_WHITESPACE_CHECK_FILES,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Run the detached F.1 farm-gate source and identity checks."""
+    """Run detached F.1 checks with a narrow committed-range whitespace scope."""
+    range_diff_check_command = [
+        "git", "diff", "--check", "{}..HEAD".format(required_analysis_commit),
+        "--", *tuple(allowed_committed_files),
+    ]
     checks = (
         (
             "required_analysis_commit_ancestor",
@@ -1556,7 +1564,7 @@ def collect_source_checks(
         ("git_diff_check", ["git", "diff", "--check"]),
         (
             "git_diff_check_required_analysis_commit_range",
-            ["git", "diff", "--check", "{}..HEAD".format(required_analysis_commit)],
+            range_diff_check_command,
         ),
     )
     records: list[dict[str, Any]] = []
@@ -1668,6 +1676,7 @@ def collect_validation_bundle(
         repository,
         command_runner,
         required_analysis_commit=required_analysis_commit,
+        allowed_committed_files=allowed_committed_files,
     )
     issues: list[dict[str, Any]] = []
     for check in source_checks:

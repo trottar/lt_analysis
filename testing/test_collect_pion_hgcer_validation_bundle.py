@@ -766,6 +766,98 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         self.assertNotIn("build_pion_hgcer", source)
         self.assertIn("git_diff_check_required_analysis_commit_range", source)
 
+    def test_source_range_whitespace_check_is_limited_to_explicit_validation_files(self):
+        _text, checks = collector.collect_source_checks(
+            REPO_ROOT,
+            _clean_command_runner,
+            required_analysis_commit="a" * 40,
+            allowed_committed_files=collector.COMMITTED_RANGE_WHITESPACE_CHECK_FILES,
+        )
+        range_check = next(
+            record for record in checks
+            if record["name"] == "git_diff_check_required_analysis_commit_range"
+        )
+        self.assertEqual(
+            range_check["command"],
+            [
+                "git", "diff", "--check", "{}..HEAD".format("a" * 40),
+                "--",
+                "testing/collect_pion_hgcer_validation_bundle.py",
+                "testing/test_collect_pion_hgcer_validation_bundle.py",
+                "testing/pion_hgcer_validation_bundle_profile.json",
+            ],
+        )
+
+    def test_committed_memory_whitespace_does_not_fail_narrow_range_check(self):
+        def memory_only_runner(command, cwd):
+            command = list(command)
+            result = _clean_command_runner(command, cwd)
+            if command[:3] == ["git", "diff", "--name-only"]:
+                result = dict(result)
+                result["stdout"] = "docs/memory/CURRENT.md\n"
+            if len(command) > 3 and command[:3] == ["git", "diff", "--check"] and "..HEAD" in command[3]:
+                self.assertNotIn("docs/memory/CURRENT.md", command)
+            return result
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=memory_only_runner,
+            )
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.exists())
+
+    def test_committed_validation_file_whitespace_fails_narrow_range_check(self):
+        for path in sorted(collector.ALLOWED_COMMITTED_FILES):
+            with self.subTest(path=path):
+                def validation_whitespace_runner(command, cwd):
+                    command = list(command)
+                    result = _clean_command_runner(command, cwd)
+                    if len(command) > 3 and command[:3] == ["git", "diff", "--check"] and "..HEAD" in command[3]:
+                        self.assertIn(path, command)
+                        return {
+                            "command": command,
+                            "returncode": 2,
+                            "stdout": "{}:1: trailing whitespace\n".format(path),
+                            "stderr": "",
+                        }
+                    return result
+
+                with tempfile.TemporaryDirectory() as temporary:
+                    result, output, _source = self._collect(
+                        temporary, command_runner=validation_whitespace_runner,
+                    )
+                    self.assertEqual(result["returncode"], 1)
+                    self.assertTrue(output.exists())
+                    range_check = next(
+                        record for record in result["manifest"]["source_checks"]
+                        if record["name"] == "git_diff_check_required_analysis_commit_range"
+                    )
+                    self.assertEqual(range_check["returncode"], 2)
+
+    def test_dirty_worktree_whitespace_still_fails_global_check(self):
+        def dirty_worktree_runner(command, cwd):
+            command = list(command)
+            if command == ["git", "diff", "--check"]:
+                return {
+                    "command": command,
+                    "returncode": 2,
+                    "stdout": "docs/memory/CURRENT.md:1: trailing whitespace\n",
+                    "stderr": "",
+                }
+            return _clean_command_runner(command, cwd)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source = self._collect(
+                temporary, command_runner=dirty_worktree_runner,
+            )
+            self.assertEqual(result["returncode"], 1)
+            self.assertTrue(output.exists())
+            global_check = next(
+                record for record in result["manifest"]["source_checks"]
+                if record["name"] == "git_diff_check"
+            )
+            self.assertEqual(global_check["returncode"], 2)
+
     def test_reviewed_fix5_ancestry_allows_only_validation_and_memory_followups(self):
         def reviewed_followup_runner(command, cwd):
             result = _clean_command_runner(command, cwd)
