@@ -20,6 +20,11 @@ import pion_hgcer_method_a_tphi_propagation as propagation  # noqa: E402
 
 
 CANONICAL_SETTINGS = (("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"), ("Center", "highe"), ("Right", "highe"))
+BASELINE_PION_BACKGROUND_LABEL = "Baseline pion background"
+METHOD_A_PION_BACKGROUND_LABEL = "Method-A pion background"
+PION_BACKGROUND_YIELD_LABEL = "Pion-background yield [weighted events]"
+METHOD_A_CHANGE_LABEL = "Method-A change / t-bin baseline"
+FRACTIONAL_T_BIN_CHANGE_LABEL = "Fraction of baseline t-bin pion background"
 
 
 def _f1_filename(phi: str, kinematic: str, epsilon: str) -> str:
@@ -106,6 +111,10 @@ def _setting_rows(result: Mapping[str, object], setting_id: str) -> Mapping[str,
     return matches[0]
 
 
+def _t_bin_label(edges: np.ndarray, index: int) -> str:
+    return "{:.3f} < t < {:.3f}: pion-background yield".format(float(edges[index]), float(edges[index + 1]))
+
+
 def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
     """Render the fixed twelve-page, aggregate-only F.5 review package."""
     import matplotlib
@@ -116,30 +125,30 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
     if not isinstance(result, Mapping) or result.get("available") is not True:
         raise ValueError("f5_pdf_propagation_unavailable")
     with PdfPages(path) as pdf:
-        lines = ["Detached F.5 signed (t,phi) propagation", "F4 correction is consumed unmodified through its public shared calculator.", "cell baseline = sum(b); adjusted = sum(b*C); delta = adjusted - baseline.", "27 cells/setting, 135 cells globally; empty canonical phi children are explicit zeros.", "F4 source SHA-256 = {}".format(result["f4_source_file_sha256"]), "F4 correction fingerprint = {}".format(result["f4_correction_fingerprint"]), "No child renormalization, smoothing, interpolation, Method B, ROOT, yield, or production application."]
-        pdf.savefig(_text_page(lines, "F5.1 — authority and detached contract")); plt.close()
+        lines = ["F.5 Method-A pion-background redistribution in (t,phi)", "", "Baseline pion background: sum of the signed pion-background event weights before Method A in each (t,phi) bin.", "Method-A pion background: the same contribution after the validated F.4 Method-A event correction.", "Method-A change: (Method-A pion background - baseline pion background) / total baseline pion background in the parent t bin.", "The total pion-background yield in each t bin is preserved by construction.", "Weighted yields may be negative because the established subtraction chain is signed.", "", "F4 source SHA-256 = {}".format(result["f4_source_file_sha256"]), "F4 correction fingerprint = {}".format(result["f4_correction_fingerprint"]), "Detached review only: no child renormalization, smoothing, interpolation, Method B, ROOT, yield, or production application."]
+        pdf.savefig(_text_page(lines, "F5.1 — authority and physical interpretation")); plt.close()
         for phi, epsilon in CANONICAL_SETTINGS:
-            setting_id = "{}-{}".format(phi, epsilon); row = _setting_rows(result, setting_id); edges = np.asarray(row["phi_edges"], dtype=float)
+            setting_id = "{}-{}".format(phi, epsilon); row = _setting_rows(result, setting_id); edges = np.asarray(row["phi_edges"], dtype=float); t_edges = np.asarray(row["t_edges"], dtype=float)
             baseline = np.asarray(row["baseline_signed_contents"], dtype=float); adjusted = np.asarray(row["adjusted_signed_contents"], dtype=float); redistribution = np.asarray(row["redistribution_fraction_of_parent"], dtype=float)
-            figure, axes = plt.subplots(3, 2, figsize=(12, 9)); figure.suptitle("F5 — {} signed template propagation".format(setting_id), fontsize=14, fontweight="bold")
+            figure, axes = plt.subplots(3, 2, figsize=(12, 9)); figure.suptitle("F5 — {} pion-background yield vs phi".format(setting_id), fontsize=14, fontweight="bold")
             for index in range(3):
-                axes[index, 0].stairs(baseline[index], edges, label="baseline", color="tab:blue"); axes[index, 0].stairs(adjusted[index], edges, label="F4 adjusted", color="tab:orange")
-                axes[index, 0].axhline(0.0, color="black", linewidth=0.6); axes[index, 0].set_title("t{} signed contents".format(index)); axes[index, 0].set_xlabel("phi [degrees]"); axes[index, 0].legend(fontsize=7)
-                axes[index, 1].stairs(redistribution[index], edges, color="tab:purple"); axes[index, 1].axhline(0.0, color="black", linewidth=0.6); axes[index, 1].set_title("t{} delta / B parent".format(index)); axes[index, 1].set_xlabel("phi [degrees]")
+                axes[index, 0].stairs(baseline[index], edges, label=BASELINE_PION_BACKGROUND_LABEL, color="tab:blue"); axes[index, 0].stairs(adjusted[index], edges, label=METHOD_A_PION_BACKGROUND_LABEL, color="tab:orange")
+                axes[index, 0].axhline(0.0, color="black", linewidth=0.6); axes[index, 0].set_title(_t_bin_label(t_edges, index)); axes[index, 0].set_xlabel("phi [degrees]"); axes[index, 0].set_ylabel(PION_BACKGROUND_YIELD_LABEL); axes[index, 0].legend(fontsize=7)
+                axes[index, 1].stairs(redistribution[index], edges, color="tab:purple"); axes[index, 1].axhline(0.0, color="black", linewidth=0.6); axes[index, 1].set_title(METHOD_A_CHANGE_LABEL); axes[index, 1].set_xlabel("phi [degrees]"); axes[index, 1].set_ylabel(FRACTIONAL_T_BIN_CHANGE_LABEL)
             figure.tight_layout(rect=(0, 0, 1, 0.95)); pdf.savefig(figure); plt.close(figure)
         for phi, epsilon in CANONICAL_SETTINGS:
             setting_id = "{}-{}".format(phi, epsilon); row = _setting_rows(result, setting_id); t_edges = np.asarray(row["t_edges"], dtype=float); phi_edges = np.asarray(row["phi_edges"], dtype=float)
             baseline = np.asarray(row["baseline_signed_contents"], dtype=float); adjusted = np.asarray(row["adjusted_signed_contents"], dtype=float); redistribution = np.asarray(row["redistribution_fraction_of_parent"], dtype=float)
             scale = max(float(np.max(np.abs(baseline))), float(np.max(np.abs(adjusted))), 1.0e-300); rscale = max(float(np.max(np.abs(redistribution))), 1.0e-300)
-            figure, axes = plt.subplots(1, 3, figsize=(15, 5)); figure.suptitle("F5 — {} physical-edge maps".format(setting_id), fontsize=14, fontweight="bold")
-            for axis, values, title, cmap, low, high in ((axes[0], baseline, "signed baseline", "coolwarm", -scale, scale), (axes[1], adjusted, "signed adjusted", "coolwarm", -scale, scale), (axes[2], redistribution, "redistribution fraction", "PiYG", -rscale, rscale)):
-                mesh = axis.pcolormesh(phi_edges, t_edges, values, shading="flat", cmap=cmap, vmin=low, vmax=high); figure.colorbar(mesh, ax=axis); axis.set_title(title); axis.set_xlabel("phi [degrees]"); axis.set_ylabel("t")
+            figure, axes = plt.subplots(1, 3, figsize=(15, 5)); figure.suptitle("F5 — {} pion-background yield and Method-A redistribution".format(setting_id), fontsize=14, fontweight="bold")
+            for axis, values, title, colorbar_label, cmap, low, high in ((axes[0], baseline, BASELINE_PION_BACKGROUND_LABEL, PION_BACKGROUND_YIELD_LABEL, "coolwarm", -scale, scale), (axes[1], adjusted, METHOD_A_PION_BACKGROUND_LABEL, PION_BACKGROUND_YIELD_LABEL, "coolwarm", -scale, scale), (axes[2], redistribution, METHOD_A_CHANGE_LABEL, FRACTIONAL_T_BIN_CHANGE_LABEL, "PiYG", -rscale, rscale)):
+                mesh = axis.pcolormesh(phi_edges, t_edges, values, shading="flat", cmap=cmap, vmin=low, vmax=high); figure.colorbar(mesh, ax=axis).set_label(colorbar_label); axis.set_title(title); axis.set_xlabel("phi [degrees]"); axis.set_ylabel("t")
             figure.tight_layout(rect=(0, 0, 1, 0.93)); pdf.savefig(figure); plt.close(figure)
-        closure = ["setting/t                 B          adjusted       residual     max|R|      sum|R|  max phi", "------------------------------------------------------------------------------------------"]
+        closure = ["setting / t             baseline pion yield  Method-A pion yield  Method-A - baseline", "setting / t             max |change / t-bin baseline|  sum |change / t-bin baseline|  phi bin of max change", "---------------------------------------------------------------------------------------------------------------"]
         for row in result.get("parent_closure", []):
             if not isinstance(row, Mapping):
                 raise ValueError("f5_pdf_parent_inventory_invalid")
-            closure.append("{:<23} {:>11.5g} {:>11.5g} {:>11.3g} {:>10.3g} {:>10.3g} {:>7}".format("{} t{}".format(row["setting_id"], row["canonical_t_index"]), row["baseline_parent_sum"], row["adjusted_parent_sum"], row["closure_residual"], row["max_abs_redistribution"], row["sum_abs_redistribution"], row["max_abs_redistribution_phi_index"]))
+            closure.append("{:<23} {:>11.5g} {:>11.5g} {:>11.3g} {:>12.3g} {:>12.3g} {:>7}".format("{} t bin {}".format(row["setting_id"], int(row["canonical_t_index"]) + 1), row["baseline_parent_sum"], row["adjusted_parent_sum"], row["closure_residual"], row["max_abs_redistribution"], row["sum_abs_redistribution"], row["max_abs_redistribution_phi_index"]))
         closure.extend(("", "Detached review only. No production template, correction application, Method B, ROOT, yield, or cross section exists."))
         pdf.savefig(_text_page(closure, "F5.12 — fifteen-parent closure")); plt.close()
 

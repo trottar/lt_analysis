@@ -123,19 +123,23 @@ canonical-t parent normalization. All 15 parents passed support and closure;
 no event-level correction, template, yield, normal-analysis, or production
 behavior exists. See evidence/f4-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 is a detached signed
-`(t,phi)` propagation review of accepted F.4. It reuses the F.4 public
-calculator, verifies occupied canonical-phi children against F.4, and emits
-only explicit aggregate `3 x 9` baseline/adjusted/delta matrices. Empty F.4
-children are expected only when the corresponding F.1 cell has zero events.
-No child normalization, event output, ROOT object, Method-B input, yield,
-cross section, or production behavior is permitted. SOURCE REVIEWED —
-F.5 implementation is `f9ce5aadbebc31f5163a093ab32244644ad2a088` and
-F.5.Fix.1 starts from that HEAD. F.5.Fix.1 is implemented/reviewed at
-`46598878c102a67275b1600e73cba3b2f166dc26` and repairs only farm Python
-compatibility: it removes redundant `zip(strict=True)` after the unchanged
-exact row/factor length gate. Neither F.5 identity is a farm-evaluated F.5
-runtime identity. F.6 remains BLOCKED.
+CLOSED / RUNTIME VALIDATED — F.5 is a detached signed `(t,phi)` propagation
+review of accepted F.4. Its accepted bundle ran at
+`3c6a66b7df9bf17e5a428458a2281a80831f001a`: 135 canonical cells (115
+occupied, 20 explicit empty), exact F.1 baseline/F.4 child propagation, and
+all parent/setting closures passed. Its scientific fingerprint is
+`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`; see
+evidence/f5-runtime-closure.md. SOURCE REVIEWED — F.5.Fix.1 began from F.5
+implementation `f9ce5aadbebc31f5163a093ab32244644ad2a088` and was implemented/
+reviewed at `46598878c102a67275b1600e73cba3b2f166dc26`; it repaired only
+farm-Python `zip(strict=True)` compatibility after the unchanged exact
+row/factor-length gate.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 is a presentation-only
+rerender using physics-readable PDF terminology. It must preserve the accepted
+F.5 scientific fingerprint, payload arrays, authority, formulas, geometry,
+normalization, and detached/non-production boundary. F.6 remains BLOCKED until
+the F.5.2 farm rerender is visually accepted.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and

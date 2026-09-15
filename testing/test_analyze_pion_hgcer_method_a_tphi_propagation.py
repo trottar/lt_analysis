@@ -9,6 +9,7 @@ import re
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -53,10 +54,46 @@ class AnalyzeTphiPropagationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary); _, output_pdf, f4_authority, f3_authority = self._write_inputs(directory)
             output_json = directory / "{}_kaon_pion-background_hgcer_method-a-tphi-propagation.json".format(KINEMATIC)
-            self.assertEqual(self._run(directory, output_json, output_pdf, f4_authority, f3_authority), 0)
+            from matplotlib.axes import Axes
+            from matplotlib.colorbar import Colorbar
+            from matplotlib.figure import Figure
+            visible: list[str] = []
+            original_stairs, original_title, original_ylabel = Axes.stairs, Axes.set_title, Axes.set_ylabel
+            original_label, original_suptitle, original_text = Colorbar.set_label, Figure.suptitle, Figure.text
+
+            def stairs(axis, *args, **kwargs):
+                if kwargs.get("label") is not None: visible.append(str(kwargs["label"]))
+                return original_stairs(axis, *args, **kwargs)
+
+            def title(axis, label, *args, **kwargs):
+                visible.append(str(label)); return original_title(axis, label, *args, **kwargs)
+
+            def ylabel(axis, label, *args, **kwargs):
+                visible.append(str(label)); return original_ylabel(axis, label, *args, **kwargs)
+
+            def colorbar_label(colorbar, label, *args, **kwargs):
+                visible.append(str(label)); return original_label(colorbar, label, *args, **kwargs)
+
+            def suptitle(figure, label, *args, **kwargs):
+                visible.append(str(label)); return original_suptitle(figure, label, *args, **kwargs)
+
+            def text(figure, *args, **kwargs):
+                if len(args) >= 3: visible.append(str(args[2]))
+                return original_text(figure, *args, **kwargs)
+
+            with mock.patch.object(Axes, "stairs", autospec=True, side_effect=stairs), mock.patch.object(Axes, "set_title", autospec=True, side_effect=title), mock.patch.object(Axes, "set_ylabel", autospec=True, side_effect=ylabel), mock.patch.object(Colorbar, "set_label", autospec=True, side_effect=colorbar_label), mock.patch.object(Figure, "suptitle", autospec=True, side_effect=suptitle), mock.patch.object(Figure, "text", autospec=True, side_effect=text):
+                self.assertEqual(self._run(directory, output_json, output_pdf, f4_authority, f3_authority), 0)
             self.assertTrue(output_json.is_file()); self.assertTrue(output_pdf.is_file())
             payload = json.loads(output_json.read_text(encoding="utf-8")); self.assertTrue(payload["propagation"]["available"])
             self.assertEqual(len(re.findall(rb"/Type /Page(?!s)", output_pdf.read_bytes())), 12)
+            rendered = "\n".join(visible)
+            for label in (analyzer.BASELINE_PION_BACKGROUND_LABEL, analyzer.METHOD_A_PION_BACKGROUND_LABEL, analyzer.PION_BACKGROUND_YIELD_LABEL, analyzer.FRACTIONAL_T_BIN_CHANGE_LABEL):
+                self.assertIn(label, rendered)
+            for obsolete in ("signed baseline", "signed adjusted", "redistribution fraction", "delta / B parent"):
+                self.assertNotIn(obsolete, rendered)
+            f1, hashes, _paths, f3, f3_sha, _f3_path, f4_artifact, f4_sha, _f4_path = analyzer.load_inputs(directory, KINEMATIC)
+            expected = analyzer.propagation.build_pion_hgcer_method_a_tphi_propagation(f1, f3, f4_artifact, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, f4_input_file_sha256=f4_sha, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority)
+            self.assertEqual(payload["propagation"], expected)
 
     def test_cli_requires_exact_paths_and_rejects_collision(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -28,6 +28,9 @@ distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 - F.5.Fix.1 implementation/source-reviewed HEAD:
   `46598878c102a67275b1600e73cba3b2f166dc26`. This is the farm-Python
   compatibility repair only; it is not a F.5 farm-evaluated identity.
+- Accepted F.5 farm/bundle HEAD and F.5.2 starting source HEAD:
+  `3c6a66b7df9bf17e5a428458a2281a80831f001a`. F.5 scientific fingerprint:
+  `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`.
 
 ## Established evidence
 
@@ -75,15 +78,14 @@ JSON/PDF hashes, and correction/artifact fingerprints are in
 evidence/f4-runtime-closure.md. It preserves full signed canonical-t sums with
 one common parent normalization and has no template or production ownership.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 consumes accepted
-F.4/F.3/F.1 artifacts only and builds detached signed canonical `(t,phi)`
-aggregate templates. It must use the F.4 shared calculator, retain explicit
-zero cells, and never normalize children or create event/production output.
-SOURCE REVIEWED — F.5.Fix.1 starts from the F.5 implementation
-`f9ce5aadbebc31f5163a093ab32244644ad2a088` and is implemented/reviewed at
-`46598878c102a67275b1600e73cba3b2f166dc26`. It removes only redundant
-`zip(strict=True)` after the exact existing row/factor length guard so the
-detached analyzer is compatible with farm Python.
+CLOSED / RUNTIME VALIDATED — F.5 is accepted from the supplied bundle at
+`3c6a66b7df9bf17e5a428458a2281a80831f001a`; its exact bundle/provenance and
+scientific fingerprint are in evidence/f5-runtime-closure.md. It remains
+detached: no child normalization or event/production output exists.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 changes only PDF
+terminology to make the accepted F.5 quantities physics-readable. The F.5 JSON
+payload, fingerprint, calculation, and authority are frozen.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
@@ -103,6 +105,6 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Run F.5's single detached analyzer/unchanged generic collector gate
-against accepted F.1/F.3/F.4 artifacts. F.6 remains BLOCKED pending explicit
-F.5 review.
+NEXT — Preserve accepted F.5 v1 evidence, then run only the detached F.5.2
+PDF rerender against accepted F.1/F.3/F.4 inputs. The unchanged collector is
+optional for a new review bundle. F.6 remains BLOCKED pending F.5.2 review.

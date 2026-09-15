@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.4 farm-bundle closure and F.5 source implementation. Repository HEAD values in this record are
+accepted F.5 farm-bundle closure and F.5.2 presentation implementation. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -71,16 +71,19 @@ F.3 support continuity, and retains parent-only signed normalization. It has
 no template, yield, production, or Method-B ownership. See
 evidence/f4-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 detached signed `(t,phi)`
-propagation consumes accepted F.4/F.3/F.1 evidence and produces only parallel
-aggregate canonical `3 x 9` baseline/adjusted templates with explicit zero
-cells. It does not alter the F.4 correction, independently normalize children,
-or create a production object. F.5 implementation is
-`f9ce5aadbebc31f5163a093ab32244644ad2a088`. SOURCE REVIEWED — F.5.Fix.1
-starts from that F.5 implementation and is implemented/reviewed at
-`46598878c102a67275b1600e73cba3b2f166dc26`; it removes only the farm-Python-
-incompatible `zip(strict=True)` after F.5's existing exact row/factor-length
-gate. See phases/phase-f5-method-a-tphi-propagation.md.
+CLOSED / RUNTIME VALIDATED — F.5 detached signed `(t,phi)` propagation. The
+accepted bundle ran at `3c6a66b7df9bf17e5a428458a2281a80831f001a` with 135
+canonical cells (115 occupied, 20 explicit empty), exact F.1/F.4 propagation,
+and all 15 parent/five-setting closures passing. Its scientific fingerprint is
+`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`. See
+evidence/f5-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 is a presentation-only
+PDF terminology rerender from accepted F.5 evidence. It changes no F.5 JSON,
+scientific fingerprint, template arrays, authority, calculation, or production
+behavior. SOURCE REVIEWED — F.5.Fix.1 identities remain distinct: F.5
+implementation/Fix.1 start `f9ce5aadbebc31f5163a093ab32244644ad2a088`; Fix.1
+implementation/source review `46598878c102a67275b1600e73cba3b2f166dc26`.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized
@@ -115,6 +118,7 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Run only the detached F.5 analyzer against accepted F.1/F.3/F.4 JSON
-artifacts, then the unchanged generic collector with the F.5 profile. F.6
-remains BLOCKED pending F.5 evidence review.
+NEXT — Preserve the accepted F.5 v1 evidence, then rerun only the detached
+F.5 analyzer for F.5.2 presentation review against the accepted F.1/F.3/F.4
+inputs. Run the unchanged generic collector only if a new review bundle is
+needed. F.6 remains BLOCKED pending F.5.2 visual acceptance.
