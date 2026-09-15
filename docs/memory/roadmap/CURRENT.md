@@ -23,20 +23,18 @@ reconciliation does not replace that runtime identity.
 
 ### F.2 — freeze probability-map representation
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — detached global representation
-audit. F.2.Fix.1 starts from implementation commit
-`5549098d2552b9c092b65e31aeb77edc0807ddda` and hardens only its F.1 v2
-authority/provenance boundary; it does not change the audit science. F.2
-compares only `delta_only`, `track3`, `hgcer3`, and diagnostic
-`full5_reference`; it neither chooses a five-dimensional estimator nor freezes
-a basis. The profile-driven collector repair starts at
-`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c` and packages only the F.2 gate
-evidence; it does not run the audit. Farm review and explicit human basis
-acceptance are required before F.3.
+CLOSED / RUNTIME VALIDATED — detached global representation audit. The
+accepted F.2 farm bundle ran at `8e919fc618cea900227db5090d65da728c3aa555`.
+The owner accepted `hgcer3` as the unique supported reduced basis after all 15
+groups passed its frozen information and support gates. `full5_reference`
+remains diagnostic-only. See evidence/f2-fix1-runtime-closure.md.
 
 ### F.3 — detached Method-A map
 
-Requires support and out-of-domain handling. No Method-B numerical input.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — construct only the
+support-aware, relative `hgcer3` map with exact
+F.2 support/OOD continuity. No absolute probability, correction, event output,
+normalization, Method-B numerical input, or production behavior.
 
 ### F.4 — detached parent-preserving A-only correction
 
@@ -55,5 +53,5 @@ decision.
 
 ## NEXT
 
-NEXT — Run F.2's one detached farm analyzer gate and explicitly accept or
-reject its reduced-basis recommendation. Do not begin F.3 before acceptance.
+NEXT — Run F.3's single detached farm analyzer/collector gate. F.4 remains
+BLOCKED pending explicit F.3 review.

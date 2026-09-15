@@ -1,5 +1,25 @@
 # Phase F.2 Method-A acceptance representation audit
 
+## Accepted farm closure
+
+CLOSED / RUNTIME VALIDATED — The accepted F.2 bundle is
+`KaonLT_PhaseF2v1_validation_Q4p4W2p74.zip`, with manifest `complete = true`,
+no unexpected committed files, and source HEAD
+`8e919fc618cea900227db5090d65da728c3aa555`. The required collector source
+`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c` is an ancestor. The owner accepted
+the unique supported reduced basis:
+
+```text
+hgcer3 = (SHMS_delta, P_hgcer_xAtCer, P_hgcer_yAtCer)
+```
+
+All 15 groups have valid, non-sparse `hgcer3` information/support results.
+`delta_only` and `track3` fail the frozen information gate; `full5_reference`
+remains diagnostic-only. The artifact itself correctly retains
+`basis_frozen = false`; the explicit owner decision freezes `hgcer3` only for
+the detached F.3 contract. Full bundle identity, hashes, source-state caveat,
+and metrics are in `evidence/f2-fix1-runtime-closure.md`.
+
 ## Source implementation
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 started from the exact C2
@@ -69,11 +89,10 @@ extracted F.1/E.7.2 PDFs.
 - Profile-driven collector `py_compile` and 23 focused tests passed; the frozen
   F.2 suite still passed 19 tests.
 
-## Farm gate
+## Historical farm gate
 
-NEXT — After the profile-driven collector repair is reviewed and pushed, run
-only the detached analyzer from a clean checkout containing the F.2
-implementation:
+The following was the executed detached analyzer gate. It is retained as the
+runtime procedure record; F.2 is closed and it must not be rerun for F.3:
 
 ```tcsh
 cd /group/c-kaonlt/USERS/trottar/lt_analysis
@@ -84,10 +103,6 @@ python3 testing/analyze_pion_hgcer_method_a_acceptance_representation.py \
   --output-pdf Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-representation.pdf
 ```
 
-Collect JSON, PDF, stdout/stderr, `git rev-parse HEAD`, and `git status
---short`. Then run the standard collector with
-`testing/pion_hgcer_validation_bundle_profile_f2.json` to archive exactly that
-JSON/PDF and the five F.1 JSON inputs. Inspect all per-group gates, source
-hashes, and the recommendation.
-F.2 cannot become `CLOSED / RUNTIME VALIDATED` and F.3 cannot begin until one
-reduced basis is explicitly accepted.
+The standard collector then packaged the F.2 JSON/PDF and five F.1 JSON inputs.
+The evidence has been accepted; F.3 may consume those exact artifacts, while
+F.4 remains BLOCKED pending independent F.3 review.

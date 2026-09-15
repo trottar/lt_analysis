@@ -52,15 +52,19 @@ range whitespace check to the three profile-owned validation files; the global
 worktree check and committed-file identity audit remain unchanged. The F.1
 artifact, PDF, and page-manifest evidence remains detached and source-owned.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2.Fix.1 tightens only the
-detached audit's F.1 authority boundary: serialized v2 fingerprints are
-reconstructed before metrics; exact authority metadata, no-RF source state,
-feature metadata, and edge geometry are required; deterministic filenames are
-bound to payload identity before source hashes; zero non-prompt rows are
-sparse; and output paths cannot collide. Fixed candidates, probe numerics,
-cKDTree support, and non-production ownership remain unchanged. It creates no
-map, correction, event score/probability, weight, normalization, or production
-object. Read phases/phase-f2-method-a-acceptance-representation.md.
+CLOSED / RUNTIME VALIDATED — F.2.Fix.1 is accepted from the supplied complete
+F.2 farm bundle at `8e919fc618cea900227db5090d65da728c3aa555`. The owner
+accepted `hgcer3 = (SHMS_delta, P_hgcer_xAtCer, P_hgcer_yAtCer)` after all 15
+groups passed frozen `hgcer3` information and support gates. The F.2 artifact
+remains historically `basis_frozen = false`; this is an external human
+acceptance, not a rewrite of F.2. Read evidence/f2-fix1-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 constructs only the
+detached, relative `hgcer3` response map. It revalidates exact F.1/F.2
+provenance and reproduces every F.2
+same-parent cKDTree support result before making a map available. It may not
+create an absolute probability, correction, weight, normalization, event
+output, Method-B numerical input, or production object.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
@@ -80,9 +84,7 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — After this collector repair is reviewed and pushed, run only the
-detached F.2 analyzer on the farm against the accepted five F.1 artifacts.
-Then use the F.2 collector profile to ZIP the new JSON/PDF and those five F.1
-inputs. Inspect source hashes, per-group response/support/OOD evidence, and
-recommendation. Accept a basis or make one coherent F.2 repair; F.3 remains
-blocked until acceptance.
+NEXT — Run only the detached F.3 analyzer against the accepted five F.1 JSON
+artifacts and accepted F.2 representation. Run the unchanged collector with
+the F.3 profile and review all 15 models, provenance, exact support continuity,
+OOD masks, and detached flags. F.4 is BLOCKED until F.3 evidence is accepted.

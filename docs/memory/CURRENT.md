@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
-Last source-identity and workflow-memory reconciliation: 2026-09-14,
-F.2 profile-driven collector source implementation. Repository HEAD values in this record are
+Last source-identity and workflow-memory reconciliation: 2026-09-15,
+accepted F.2 farm-bundle closure and F.3 source implementation. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -49,18 +49,21 @@ gate and artifact-hash continuity with the supplied v4 runtime bundle. F.1 is
 detached, Method-B independent, and makes no correction, estimator, or
 production mutation. See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 is a detached global
-five-setting Method-A acceptance-representation audit. Its F.2.Fix.1 source
-repair starts at `5549098d2552b9c092b65e31aeb77edc0807ddda` and reconstructs
-the frozen F.1 v2 population/metadata/child/full fingerprints before any
-metric, requires exact F.1 authority metadata and geometry, binds deterministic
-filenames to payload identity before source hashes, and fails safely for output
-path collisions and sparse zero-row non-prompt groups. The fixed probe,
-candidates, thresholds, cKDTree criterion, and recommendation policy remain
-unchanged. It writes one aggregate JSON plus one four-page matplotlib PDF, with
-no ROOT import, map, correction, event probability, weight, normalization,
-Method-B numerical input, or production side effect. Local F.2 and frozen F.1
-tests pass. See phases/phase-f2-method-a-acceptance-representation.md.
+CLOSED / RUNTIME VALIDATED — F.2.Fix.1 detached global five-setting Method-A
+acceptance-representation audit. The accepted farm bundle ran at
+`8e919fc618cea900227db5090d65da728c3aa555`, is complete with no unexpected
+committed files, and preserves the five F.1 source hashes. The owner accepted
+the unique supported reduced basis `hgcer3 = (SHMS_delta,
+P_hgcer_xAtCer, P_hgcer_yAtCer)`. The F.2 historical artifact remains
+`basis_frozen = false`; the human decision freezes this basis only for F.3.
+See evidence/f2-fix1-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 is the detached,
+support-aware relative `hgcer3` response map.
+It rechecks F.1/F.2 authority, fits exactly 15 canonical-t parents, and requires
+exact F.2 cKDTree support continuity. It creates no absolute probability,
+correction, weight, normalization, event output, Method-B numerical input, or
+production mutation. See phases/phase-f3-method-a-support-aware-acceptance-map.md.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized
@@ -95,10 +98,7 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — After the profile-driven collector repair is reviewed and pushed, run
-the detached F.2 analyzer once on the farm against the accepted five
-Q4p4W2p74 F.1 v2 artifacts. Then run the same collector with
-`testing/pion_hgcer_validation_bundle_profile_f2.json` to package exactly that
-F.2 JSON/PDF and five F.1 JSON inputs. Inspect the ZIP, analyzer evidence, all
-per-group response/support gates, OOD metrics, and recommendation. Do not
-begin F.3 without explicit reduced-basis acceptance.
+NEXT — Run only the detached F.3 analyzer on the farm against the accepted five
+F.1 v2 JSON inputs and accepted F.2 representation, followed by the unchanged
+collector using the F.3 profile. F.4 remains BLOCKED until F.3 evidence is
+reviewed and accepted.

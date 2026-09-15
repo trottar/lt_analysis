@@ -90,14 +90,27 @@ the profile's three explicit validation files; the global worktree check and
 independent committed-file identity audit remain strict. F.1 remains detached;
 F.2-F.5 remain detached and F.6 is the only possible production promotion.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 was implemented from C2
+CLOSED / RUNTIME VALIDATED — F.2 was implemented from C2
 `02f21886cff8a721df46ebf673594856583fc3c5` as a pure Python/numpy/scipy
 five-artifact representation audit. Its fixed candidates are `delta_only`,
 `track3`, `hgcer3`, and non-promotable `full5_reference`; response probes are
 canonical-t local, deterministic five-fold class-balanced L-BFGS-B diagnostics.
-Application support uses same-parent robust-scaled cKDTree distances. The
-output is aggregate-only JSON plus a four-page matplotlib PDF; `basis_frozen`
-is always false and F.3 requires explicit human acceptance after farm review.
+The accepted farm bundle ran at `8e919fc618cea900227db5090d65da728c3aa555`;
+all 15 `hgcer3` parents passed fixed information/support gates and the owner
+accepted `hgcer3 = (SHMS_delta, P_hgcer_xAtCer, P_hgcer_yAtCer)` for F.3.
+The historical F.2 artifact remains `basis_frozen = false`; F.3 freezes its
+own basis only from the explicit acceptance. See evidence/f2-fix1-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 is a detached,
+aggregate-only support-aware relative response map over the accepted ordered
+`hgcer3` basis. It locally repeats strict F.1 v2 authority validation, verifies
+the F.2 wrapper/representation fingerprints and accepted recommendation, then
+fits one robust-scaled class-balanced L-BFGS-B model per setting × canonical-t
+parent. Its support/OOD calculation must reproduce every F.2 `hgcer3` result
+within `1e-12`; a single invalid parent makes the global map unavailable. It
+persists coefficients/scalers/support aggregates only, while review grids are
+transient cKDTree-masked PDF rendering. No absolute probability, correction,
+event output, normalization, Method-B input, or production behavior exists.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and
