@@ -1,6 +1,6 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-14 after accepted F.1.Fix.5 closure. This record
+Prepared: 2026-09-15 after F.4 source development completion. This record
 distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 
 ## Resume identity
@@ -59,12 +59,16 @@ groups passed frozen `hgcer3` information and support gates. The F.2 artifact
 remains historically `basis_frozen = false`; this is an external human
 acceptance, not a rewrite of F.2. Read evidence/f2-fix1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 constructs only the
-detached, relative `hgcer3` response map. It revalidates exact F.1/F.2
-provenance and reproduces every F.2
-same-parent cKDTree support result before making a map available. It may not
-create an absolute probability, correction, weight, normalization, event
-output, Method-B numerical input, or production object.
+CLOSED / RUNTIME VALIDATED — F.3 is accepted at farm/source HEAD
+`5382cfc1994b078c620b32c043938134c33ffa39`; its 15 parent maps have exact
+F.2 support continuity and no correction or production behavior. Read
+evidence/f3-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 constructs only the detached parent-preserving Method-A
+correction candidate. It must preserve each full signed canonical-t application
+sum with one common parent normalization, retain neutral raw OOD shape one, and
+persist aggregate diagnostics only. It may not create templates, yields,
+Method-B input, or production objects.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
@@ -84,7 +88,6 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Run only the detached F.3 analyzer against the accepted five F.1 JSON
-artifacts and accepted F.2 representation. Run the unchanged collector with
-the F.3 profile and review all 15 models, provenance, exact support continuity,
-OOD masks, and detached flags. F.4 is BLOCKED until F.3 evidence is accepted.
+NEXT — Run only the detached F.4 analyzer and unchanged F.4 collector profile
+over the accepted F.1/F.3 artifacts. F.5 is BLOCKED until F.4 evidence is
+accepted.

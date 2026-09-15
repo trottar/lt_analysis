@@ -1,6 +1,6 @@
 # Phase F.3 Method-A support-aware acceptance map
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 started from clean source baseline
+CLOSED / RUNTIME VALIDATED — F.3 started from clean source baseline
 `8e919fc618cea900227db5090d65da728c3aa555`, after the accepted F.2 bundle
 recorded in `evidence/f2-fix1-runtime-closure.md`.
 
@@ -19,10 +19,13 @@ or production application is persisted or constructed.
 
 Local focused F.3 module/CLI tests, frozen F.2/F.1 tests, collector tests,
 `py_compile`, profile JSON parsing, and `git diff --check` pass. Farm validation
-must run only the detached F.3 analyzer and unchanged generic collector profile.
+ran only the detached F.3 analyzer and unchanged generic collector profile.
+The accepted runtime bundle is recorded in evidence/f3-runtime-closure.md; F.4
+may consume its frozen `hgcer3` map without retuning it.
 
 F.3 can become available only if all 15 parents satisfy response support,
 scaling, optimizer, finite-parameter, non-sparse support, and F.2 continuity
 requirements. No pooling, fallback basis, threshold relaxation, or partial map
 is allowed. The output is one deterministic JSON plus one seven-page matplotlib
-review PDF. F.4 remains BLOCKED pending detached F.3 farm evidence and review.
+review PDF. F.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING; it may
+consume the accepted F.3 map without retuning it.

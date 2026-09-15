@@ -101,7 +101,7 @@ accepted `hgcer3 = (SHMS_delta, P_hgcer_xAtCer, P_hgcer_yAtCer)` for F.3.
 The historical F.2 artifact remains `basis_frozen = false`; F.3 freezes its
 own basis only from the explicit acceptance. See evidence/f2-fix1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 is a detached,
+CLOSED / RUNTIME VALIDATED — F.3 is a detached,
 aggregate-only support-aware relative response map over the accepted ordered
 `hgcer3` basis. It locally repeats strict F.1 v2 authority validation, verifies
 the F.2 wrapper/representation fingerprints and accepted recommendation, then
@@ -111,6 +111,18 @@ within `1e-12`; a single invalid parent makes the global map unavailable. It
 persists coefficients/scalers/support aggregates only, while review grids are
 transient cKDTree-masked PDF rendering. No absolute probability, correction,
 event output, normalization, Method-B input, or production behavior exists.
+The accepted F.3 bundle ran at `5382cfc1994b078c620b32c043938134c33ffa39`;
+all 15 parents had exact F.2 continuity and the accepted map is frozen for
+F.4. See evidence/f3-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 is the only owner of the
+detached parent-preserving Method-A correction candidate. It consumes F.3
+relative response and the F.1 physical application population, uses raw `A=1`
+outside the frozen support, and applies one full signed canonical-t parent
+normalization. It persists aggregate parent, source, and canonical-phi
+diagnostics only; no event-level correction, template, yield, normal-analysis,
+or production behavior exists. Its sole remaining gate is one detached farm
+analyzer run and unchanged generic collector review; F.5 is BLOCKED.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and

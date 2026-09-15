@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.2 farm-bundle closure and F.3 source implementation. Repository HEAD values in this record are
+accepted F.3 farm-bundle closure and F.4 source development completion. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -58,12 +58,17 @@ P_hgcer_xAtCer, P_hgcer_yAtCer)`. The F.2 historical artifact remains
 `basis_frozen = false`; the human decision freezes this basis only for F.3.
 See evidence/f2-fix1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.3 is the detached,
-support-aware relative `hgcer3` response map.
-It rechecks F.1/F.2 authority, fits exactly 15 canonical-t parents, and requires
-exact F.2 cKDTree support continuity. It creates no absolute probability,
-correction, weight, normalization, event output, Method-B numerical input, or
-production mutation. See phases/phase-f3-method-a-support-aware-acceptance-map.md.
+CLOSED / RUNTIME VALIDATED — F.3 detached support-aware relative `hgcer3`
+response map. The accepted farm bundle at
+`5382cfc1994b078c620b32c043938134c33ffa39` has 15 valid parents, exact F.2
+support continuity, no sparse/support failures, and no correction/production
+behavior. See evidence/f3-runtime-closure.md.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 detached parent-preserving Method-A correction candidate. It
+consumes accepted F.3/F.1 JSON only, uses neutral `A = 1` outside F.3 support,
+and applies exactly one signed normalization per canonical-t parent. It has no
+template, yield, production, or Method-B ownership. See
+phases/phase-f4-method-a-parent-preserving-correction.md.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized
@@ -98,7 +103,6 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Run only the detached F.3 analyzer on the farm against the accepted five
-F.1 v2 JSON inputs and accepted F.2 representation, followed by the unchanged
-collector using the F.3 profile. F.4 remains BLOCKED until F.3 evidence is
-reviewed and accepted.
+NEXT — Run only the detached F.4 analyzer against accepted F.1/F.3 JSON
+artifacts, then the unchanged collector with the F.4 profile. F.5 remains
+BLOCKED pending F.4 evidence review.

@@ -31,20 +31,20 @@ remains diagnostic-only. See evidence/f2-fix1-runtime-closure.md.
 
 ### F.3 — detached Method-A map
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — construct only the
-support-aware, relative `hgcer3` map with exact
-F.2 support/OOD continuity. No absolute probability, correction, event output,
-normalization, Method-B numerical input, or production behavior.
+CLOSED / RUNTIME VALIDATED — detached support-aware relative `hgcer3` map,
+accepted at `5382cfc1994b078c620b32c043938134c33ffa39` with all 15 support
+continuity gates passing. See evidence/f3-runtime-closure.md.
 
 ### F.4 — detached parent-preserving A-only correction
 
-Construct an A-only candidate while preserving canonical-t parent
-normalization. Remain detached from production.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — construct one A-only candidate
+per canonical-t parent, preserve the full signed parent sum, and remain
+detached from templates and production.
 
 ### F.5 — detached event-level (t,phi) propagation
 
-Build parallel baseline and A-adjusted templates. Do not renormalize child
-bins independently and do not promote to production.
+BLOCKED — build parallel baseline and A-adjusted templates only after F.4 is
+accepted. Do not renormalize child bins independently or promote to production.
 
 ### F.6 — explicit production promotion
 
@@ -53,5 +53,5 @@ decision.
 
 ## NEXT
 
-NEXT — Run F.3's single detached farm analyzer/collector gate. F.4 remains
-BLOCKED pending explicit F.3 review.
+NEXT — Run F.4's single detached farm analyzer/collector gate. F.5 remains
+BLOCKED pending explicit F.4 review.
