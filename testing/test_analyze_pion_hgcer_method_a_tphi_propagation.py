@@ -29,6 +29,14 @@ def _sha256(path: Path) -> str:
 
 
 class AnalyzeTphiPropagationTests(unittest.TestCase):
+    def test_phi_bin_interval_label_uses_persisted_geometry(self):
+        self.assertEqual(
+            analyzer._phi_bin_interval_label([-180.0, -140.0, -100.0, -60.0], 2),
+            "[-100, -60] deg",
+        )
+        with self.assertRaisesRegex(ValueError, "f5_pdf_phi_index_invalid"):
+            analyzer._phi_bin_interval_label([-180.0, -140.0], 1)
+
     def _write_inputs(self, directory: Path) -> tuple[Path, Path, dict[str, object], dict[str, object]]:
         artifacts = fixtures._artifacts(); hashes: dict[str, str] = {}; paths: dict[str, str] = {}
         for artifact in artifacts:
@@ -91,6 +99,8 @@ class AnalyzeTphiPropagationTests(unittest.TestCase):
                 self.assertIn(label, rendered)
             for obsolete in ("signed baseline", "signed adjusted", "redistribution fraction", "delta / B parent"):
                 self.assertNotIn(obsolete, rendered)
+            self.assertIn("phi interval of max change [deg]", rendered)
+            self.assertNotIn("phi bin of max change", rendered)
             f1, hashes, _paths, f3, f3_sha, _f3_path, f4_artifact, f4_sha, _f4_path = analyzer.load_inputs(directory, KINEMATIC)
             expected = analyzer.propagation.build_pion_hgcer_method_a_tphi_propagation(f1, f3, f4_artifact, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, f4_input_file_sha256=f4_sha, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority)
             self.assertEqual(payload["propagation"], expected)

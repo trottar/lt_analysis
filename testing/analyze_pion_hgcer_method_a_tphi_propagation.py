@@ -115,6 +115,16 @@ def _t_bin_label(edges: np.ndarray, index: int) -> str:
     return "{:.3f} < t < {:.3f}: pion-background yield".format(float(edges[index]), float(edges[index + 1]))
 
 
+def _phi_bin_interval_label(phi_edges: object, index: object) -> str:
+    """Render a physical phi interval from the persisted F.5 geometry."""
+    edges = np.asarray(phi_edges, dtype=float)
+    if edges.ndim != 1 or len(edges) < 2 or not np.all(np.isfinite(edges)) or np.any(edges[1:] <= edges[:-1]):
+        raise ValueError("f5_pdf_phi_edges_invalid")
+    if isinstance(index, bool) or not isinstance(index, (int, np.integer)) or not 0 <= int(index) < len(edges) - 1:
+        raise ValueError("f5_pdf_phi_index_invalid")
+    return "[{:.0f}, {:.0f}] deg".format(float(edges[int(index)]), float(edges[int(index) + 1]))
+
+
 def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
     """Render the fixed twelve-page, aggregate-only F.5 review package."""
     import matplotlib
@@ -144,11 +154,13 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
             for axis, values, title, colorbar_label, cmap, low, high in ((axes[0], baseline, BASELINE_PION_BACKGROUND_LABEL, PION_BACKGROUND_YIELD_LABEL, "coolwarm", -scale, scale), (axes[1], adjusted, METHOD_A_PION_BACKGROUND_LABEL, PION_BACKGROUND_YIELD_LABEL, "coolwarm", -scale, scale), (axes[2], redistribution, METHOD_A_CHANGE_LABEL, FRACTIONAL_T_BIN_CHANGE_LABEL, "PiYG", -rscale, rscale)):
                 mesh = axis.pcolormesh(phi_edges, t_edges, values, shading="flat", cmap=cmap, vmin=low, vmax=high); figure.colorbar(mesh, ax=axis).set_label(colorbar_label); axis.set_title(title); axis.set_xlabel("phi [degrees]"); axis.set_ylabel("t")
             figure.tight_layout(rect=(0, 0, 1, 0.93)); pdf.savefig(figure); plt.close(figure)
-        closure = ["setting / t             baseline pion yield  Method-A pion yield  Method-A - baseline", "setting / t             max |change / t-bin baseline|  sum |change / t-bin baseline|  phi bin of max change", "---------------------------------------------------------------------------------------------------------------"]
+        phi_edges = result.get("phi_edges")
+        closure = ["setting / t             baseline pion yield  Method-A pion yield  Method-A - baseline", "setting / t             max |change / t-bin baseline|  sum |change / t-bin baseline|  phi interval of max change [deg]", "------------------------------------------------------------------------------------------------------------------------"]
         for row in result.get("parent_closure", []):
             if not isinstance(row, Mapping):
                 raise ValueError("f5_pdf_parent_inventory_invalid")
-            closure.append("{:<23} {:>11.5g} {:>11.5g} {:>11.3g} {:>12.3g} {:>12.3g} {:>7}".format("{} t bin {}".format(row["setting_id"], int(row["canonical_t_index"]) + 1), row["baseline_parent_sum"], row["adjusted_parent_sum"], row["closure_residual"], row["max_abs_redistribution"], row["sum_abs_redistribution"], row["max_abs_redistribution_phi_index"]))
+            phi_interval = _phi_bin_interval_label(phi_edges, row["max_abs_redistribution_phi_index"])
+            closure.append("{:<23} {:>11.5g} {:>11.5g} {:>11.3g} {:>12.3g} {:>12.3g} {:>29}".format("{} t bin {}".format(row["setting_id"], int(row["canonical_t_index"]) + 1), row["baseline_parent_sum"], row["adjusted_parent_sum"], row["closure_residual"], row["max_abs_redistribution"], row["sum_abs_redistribution"], phi_interval))
         closure.extend(("", "Detached review only. No production template, correction application, Method B, ROOT, yield, or cross section exists."))
         pdf.savefig(_text_page(closure, "F5.12 — fifteen-parent closure")); plt.close()
 

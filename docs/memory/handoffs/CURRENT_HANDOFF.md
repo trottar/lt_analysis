@@ -1,7 +1,7 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 after accepted F.4 closure and F.5 source implementation. This record
-distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
+Prepared: 2026-09-15 after accepted F.5 closure and F.5.2 presentation work. This record
+distinguishes accepted runtime evidence from source-only presentation work.
 
 ## Resume identity
 

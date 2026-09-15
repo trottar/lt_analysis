@@ -44,16 +44,28 @@ production. See evidence/f4-runtime-closure.md.
 
 ### F.5 — detached event-level (t,phi) propagation
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — build parallel signed aggregate
-baseline and F.4-adjusted templates with explicit zero canonical cells. Do not
-renormalize child bins independently or promote to production.
+CLOSED / RUNTIME VALIDATED — accepted at
+`3c6a66b7df9bf17e5a428458a2281a80831f001a`; the detached signed aggregate
+templates have scientific fingerprint
+`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`. F.5
+does not renormalize child bins independently or promote to production. See
+evidence/f5-runtime-closure.md.
+
+### F.5.2 — detached presentation-only F.5 review rerender
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — preserve the accepted F.5 JSON
+payload, scientific fingerprint, authority, and detached calculation while
+rerendering the review PDF with physical phi-interval labels. F.6 remains
+BLOCKED until this visual acceptance.
 
 ### F.6 — explicit production promotion
 
-Only after F.5 scientific validation and a separate explicit promotion
-decision.
+BLOCKED — only after F.5.2 presentation acceptance and a separate explicit
+promotion decision.
 
 ## NEXT
 
-NEXT — Run F.5's single detached analyzer/collector gate. F.6 remains BLOCKED
-pending explicit F.5 review.
+NEXT — Preserve accepted F.5 evidence, run only the detached F.5.2 PDF
+rerender against the accepted inputs, verify the unchanged scientific
+fingerprint and inspect the twelve-page review. The unchanged collector is
+optional for a new review bundle. F.6 remains BLOCKED pending F.5.2 review.
