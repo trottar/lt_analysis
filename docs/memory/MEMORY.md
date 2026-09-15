@@ -115,11 +115,17 @@ The accepted F.3 bundle ran at `5382cfc1994b078c620b32c043938134c33ffa39`;
 all 15 parents had exact F.2 continuity and the accepted map is frozen for
 F.4. See evidence/f3-runtime-closure.md.
 
+SOURCE REVIEWED — F.4.Fix.1 binds F.4 to the accepted F.3 runtime file hash,
+map/algorithm/wrapper fingerprints, and source head rather than accepting a
+merely self-consistent alternate F.3 artifact. It independently validates F.1
+canonical-phi child edges and assignments; PDF-only correction ECDF values are
+computed by the same transient F.4 evaluation and never enter JSON.
+
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 is the only owner of the
-detached parent-preserving Method-A correction candidate. It consumes F.3
-relative response and the F.1 physical application population, uses raw `A=1`
-outside the frozen support, and applies one full signed canonical-t parent
-normalization. It persists aggregate parent, source, and canonical-phi
+detached parent-preserving Method-A correction candidate. It consumes the
+accepted F.3 relative response and F.1 physical application population, uses
+raw `A=1` outside frozen support, and applies one full signed canonical-t
+parent normalization. It persists aggregate parent, source, and canonical-phi
 diagnostics only; no event-level correction, template, yield, normal-analysis,
 or production behavior exists. Its sole remaining gate is one detached farm
 analyzer run and unchanged generic collector review; F.5 is BLOCKED.

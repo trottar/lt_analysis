@@ -82,7 +82,7 @@ def _text_page(lines: Sequence[str], title: str) -> object:
     return figure
 
 
-def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
+def write_review_pdf(path: Path, artifact: Mapping[str, object], review_data: Sequence[Mapping[str, object]]) -> None:
     """Render aggregate-only seven-page F.4 review PDF."""
     import matplotlib
     matplotlib.use("Agg", force=True)
@@ -92,6 +92,15 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
     if not isinstance(result, Mapping) or result.get("available") is not True: raise ValueError("f4_pdf_correction_unavailable")
     parents = result.get("parents")
     if not isinstance(parents, list) or len(parents) != 15: raise ValueError("f4_pdf_parent_inventory_invalid")
+    review_by_parent: dict[tuple[str, int], Mapping[str, object]] = {}
+    for review in review_data:
+        if not isinstance(review, Mapping): raise ValueError("f4_pdf_review_data_invalid")
+        key = (str(review.get("setting_id")), int(review.get("canonical_t_index")))
+        if key in review_by_parent: raise ValueError("f4_pdf_review_data_duplicate")
+        factors = np.asarray(review.get("correction_factors"), dtype=float)
+        if factors.ndim != 1 or factors.size == 0 or not np.all(np.isfinite(factors)) or np.any(factors <= 0.0): raise ValueError("f4_pdf_review_factors_invalid")
+        review_by_parent[key] = review
+    if len(review_by_parent) != 15: raise ValueError("f4_pdf_review_data_inventory_invalid")
     with PdfPages(path) as pdf:
         lines = ["Detached parent-preserving Method-A-only correction", "basis = hgcer3", "A = exp(beta dot z) in F3 support; A = 1 outside support", "N = sum(b A) / sum(b); C = A / N; sum(b C) = sum(b)", "F3 source SHA-256 = {}".format(result["f3_source_file_sha256"]), "F3 map fingerprint = {}".format(result["f3_map_fingerprint"]), "15/15 parents required; no source or child normalization.", "No Method B, template, yield, probability, or production application."]
         pdf.savefig(_text_page(lines, "F4.1 — authority and frozen correction formula")); plt.close()
@@ -101,12 +110,18 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
             figure, axes = plt.subplots(3, 2, figsize=(12, 10)); figure.suptitle("F4 — {} {} detached parent corrections".format(phi, epsilon), fontsize=14, fontweight="bold")
             for index, row in enumerate(sorted(setting, key=lambda value: int(value["canonical_t_index"]))):
                 summary = row["correction_factor_summary"]; shape = row["raw_shape_factor_summary"]; left, right = axes[index]
+                review = review_by_parent.get((str(row["setting_id"]), int(row["canonical_t_index"])))
+                if review is None: raise ValueError("f4_pdf_review_data_missing")
+                correction_values = np.asarray(review["correction_factors"], dtype=float)
                 child_text = "; ".join("phi {}: {:+.3g}".format(child["phi_index"], child["signed_delta"]) for child in row["canonical_phi_diagnostics"])
                 left.axis("off")
                 left.text(0, 1, "t{t}  B={B:.8g}\nU={U:.8g}\nN={N:.8g}\nin/OOD={inside}/{ood} ({frac:.4f})\nclosure={res:.3g}  PASS={passed}\nA p01/p50/p99={a1:.4g}/{a5:.4g}/{a9:.4g}\nC p01/p50/p99={c1:.4g}/{c5:.4g}/{c9:.4g}\nchild signed deltas: {child}".format(t=row["canonical_t_index"], B=row["baseline_parent_sum"], U=row["raw_shape_parent_sum"], N=row["parent_normalization"], inside=row["in_support_count"], ood=row["ood_count"], frac=row["ood_fraction"], res=row["closure_residual"], passed=row["closure_passed"], a1=shape["p01"], a5=shape["p50"], a9=shape["p99"], c1=summary["p01"], c5=summary["p50"], c9=summary["p99"], child=child_text), va="top", family="monospace", fontsize=8)
-                points = [summary[name] for name in ("min", "p01", "p50", "p99", "max")]
-                right.plot((0, 1, 2, 3, 4), np.log10(points), marker="o")
-                right.set_xticks((0, 1, 2, 3, 4), ("min", "p01", "p50", "p99", "max")); right.set_ylabel("log10(C)"); right.set_title("unclipped correction range / quantiles")
+                log_correction_values = np.sort(np.log10(correction_values))
+                right.step(log_correction_values, np.arange(1, log_correction_values.size + 1, dtype=float) / log_correction_values.size, where="post", color="tab:blue")
+                for name, color in (("p01", "tab:green"), ("p50", "tab:orange"), ("p99", "tab:red"), ("max", "tab:purple")):
+                    right.axvline(np.log10(float(summary[name])), color=color, linewidth=0.8, linestyle="--", label=name)
+                right.set_xlabel("log10(C)"); right.set_ylabel("ECDF"); right.set_title("unclipped transient correction-factor ECDF")
+                right.legend(fontsize=6, loc="lower right")
                 child = row["canonical_phi_diagnostics"]
                 right.text(0.01, 0.02, "child aggregates only; no child normalization\n{} child bins".format(len(child)), transform=right.transAxes, fontsize=7)
             figure.tight_layout(rect=(0, 0.03, 1, 0.95)); pdf.savefig(figure); plt.close(figure)
@@ -125,7 +140,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Sequence[str] | None = None, *, accepted_f3_runtime_authority_by_kinematic: Mapping[str, object] | None = None) -> int:
     arguments = build_argument_parser().parse_args(argv)
     expected_json = (arguments.outdir / correction.pion_hgcer_method_a_parent_preserving_correction_filename(arguments.kinematic)).resolve(); expected_pdf = (arguments.outdir / _pdf_filename(arguments.kinematic)).resolve()
     output_json = expected_json if arguments.output_json is None else arguments.output_json.resolve(); output_pdf = expected_pdf if arguments.output_pdf is None else arguments.output_pdf.resolve()
@@ -134,9 +149,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if output_json.exists() or output_pdf.exists(): print("error: f4_output_path_already_exists", file=sys.stderr); return 2
     try:
         f1, hashes, f1_paths, f3, f3_sha, f3_path = load_inputs(arguments.outdir, arguments.kinematic)
-        artifact = correction.build_pion_hgcer_method_a_parent_preserving_correction_artifact(f1, f3, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, input_paths={"f1": f1_paths, "f3": f3_path}, generated_at_utc=_datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"), git_head=_git_value(("rev-parse", "HEAD")), git_status_short=_git_value(("status", "--short")))
+        artifact, review_data = correction.build_pion_hgcer_method_a_parent_preserving_correction_artifact_with_review_data(f1, f3, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, input_paths={"f1": f1_paths, "f3": f3_path}, generated_at_utc=_datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"), git_head=_git_value(("rev-parse", "HEAD")), git_status_short=_git_value(("status", "--short")), accepted_f3_runtime_authority_by_kinematic=accepted_f3_runtime_authority_by_kinematic)
         if artifact["correction"]["available"] is not True: raise ValueError("f4_correction_unavailable")  # type: ignore[index]
-        correction.write_pion_hgcer_method_a_parent_preserving_correction_json(output_json, artifact); write_review_pdf(output_pdf, artifact)
+        correction.write_pion_hgcer_method_a_parent_preserving_correction_json(output_json, artifact); write_review_pdf(output_pdf, artifact, review_data)
     except (correction.MethodAParentPreservingCorrectionError, OSError, ValueError) as exc:
         print("error: {}".format(exc), file=sys.stderr); return 1
     print("wrote {}".format(output_json)); print("wrote {}".format(output_pdf)); return 0

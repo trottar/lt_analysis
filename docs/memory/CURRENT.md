@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.3 farm-bundle closure and F.4 source development completion. Repository HEAD values in this record are
+accepted F.3 farm-bundle closure and F.4.Fix.1 source review. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -64,11 +64,16 @@ response map. The accepted farm bundle at
 support continuity, no sparse/support failures, and no correction/production
 behavior. See evidence/f3-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 detached parent-preserving Method-A correction candidate. It
-consumes accepted F.3/F.1 JSON only, uses neutral `A = 1` outside F.3 support,
-and applies exactly one signed normalization per canonical-t parent. It has no
-template, yield, production, or Method-B ownership. See
-phases/phase-f4-method-a-parent-preserving-correction.md.
+SOURCE REVIEWED — F.4.Fix.1 pins F.4 to the exact accepted F.3 runtime JSON
+SHA-256, map fingerprint, algorithm fingerprint, and wrapper fingerprint. It
+also revalidates F.1 canonical-phi child geometry and renders transient,
+unclipped correction-factor ECDFs without persisting event-level data.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 detached
+parent-preserving Method-A correction candidate consumes accepted F.3/F.1 JSON
+only, uses neutral `A = 1` outside F.3 support, and applies exactly one signed
+normalization per canonical-t parent. It has no template, yield, production, or
+Method-B ownership. See phases/phase-f4-method-a-parent-preserving-correction.md.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized

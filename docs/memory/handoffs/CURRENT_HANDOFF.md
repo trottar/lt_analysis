@@ -1,6 +1,6 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 after F.4 source development completion. This record
+Prepared: 2026-09-15 after F.4.Fix.1 source review. This record
 distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 
 ## Resume identity
@@ -64,11 +64,16 @@ CLOSED / RUNTIME VALIDATED — F.3 is accepted at farm/source HEAD
 F.2 support continuity and no correction or production behavior. Read
 evidence/f3-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 constructs only the detached parent-preserving Method-A
-correction candidate. It must preserve each full signed canonical-t application
-sum with one common parent normalization, retain neutral raw OOD shape one, and
-persist aggregate diagnostics only. It may not create templates, yields,
-Method-B input, or production objects.
+SOURCE REVIEWED — F.4.Fix.1 permits only the accepted F.3 runtime authority:
+its source JSON hash, map fingerprint, algorithm fingerprint, and wrapper
+fingerprint must all match. It also semantically revalidates each F.1
+canonical-phi assignment and produces PDF-only transient correction ECDFs.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 constructs only the
+detached parent-preserving Method-A correction candidate. It must preserve each
+full signed canonical-t application sum with one common parent normalization,
+retain neutral raw OOD shape one, and persist aggregate diagnostics only. It
+may not create templates, yields, Method-B input, or production objects.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;

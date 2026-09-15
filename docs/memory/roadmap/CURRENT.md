@@ -37,6 +37,9 @@ continuity gates passing. See evidence/f3-runtime-closure.md.
 
 ### F.4 — detached parent-preserving A-only correction
 
+SOURCE REVIEWED — F.4.Fix.1 pins consumption to accepted F.3 runtime authority
+and adds semantic F.1 child-phi review without changing correction mathematics.
+
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — construct one A-only candidate
 per canonical-t parent, preserve the full signed parent sum, and remain
 detached from templates and production.
