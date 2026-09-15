@@ -62,6 +62,23 @@ def _git_value(arguments: Sequence[str]) -> str | None:
     return completed.stdout.strip() if completed.returncode == 0 else None
 
 
+def _validate_filename_payload_identity(
+    payload: Mapping[str, object], *, phi: str, epsilon: str, kinematic: str, setting_id: str,
+) -> None:
+    setting = payload.get("setting")
+    if not isinstance(setting, Mapping):
+        raise ValueError("f2_f1_input_identity_setting_invalid:{}".format(setting_id))
+    expected = {
+        "phi_setting": phi,
+        "epsilon_filename_token": epsilon,
+        "kinematic_token": kinematic,
+        "particle_type": "kaon",
+    }
+    for name, value in expected.items():
+        if setting.get(name) != value:
+            raise ValueError("f2_f1_input_identity_{}:{}".format(name, setting_id))
+
+
 def load_f1_inputs(outdir: Path, kinematic: str) -> tuple[list[dict[str, object]], dict[str, str], dict[str, str]]:
     """Load the exact, non-recursive five-file F.1 input set."""
     if not outdir.is_dir():
@@ -82,6 +99,9 @@ def load_f1_inputs(outdir: Path, kinematic: str) -> tuple[list[dict[str, object]
             raise ValueError("f2_f1_input_json_invalid:{}".format(setting_id)) from exc
         if not isinstance(payload, dict):
             raise ValueError("f2_f1_input_json_invalid:{}".format(setting_id))
+        _validate_filename_payload_identity(
+            payload, phi=phi, epsilon=epsilon, kinematic=kinematic, setting_id=setting_id,
+        )
         artifacts.append(payload)
         hashes[setting_id] = _sha256(path)
         paths[setting_id] = str(path.resolve())
@@ -216,6 +236,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     expected_json_name = pion_hgcer_method_a_acceptance_representation_filename(arguments.kinematic)
     if arguments.output_json.name != expected_json_name:
         print("error: f2_output_json_basename_invalid", file=sys.stderr)
+        return 2
+    if arguments.output_json.resolve() == arguments.output_pdf.resolve():
+        print("error: f2_output_paths_collide", file=sys.stderr)
         return 2
     if arguments.output_json.exists() or arguments.output_pdf.exists():
         print("error: f2_output_path_already_exists", file=sys.stderr)

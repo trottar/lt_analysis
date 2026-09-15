@@ -48,6 +48,33 @@ _CANONICAL_SETTINGS = (
 )
 _PROMPT_SOURCE = "prompt"
 _LOW_NPE_UPPER_BOUND = 2.0
+_F1_FEATURE_METADATA = {
+    "primary_acceptance_features": list(_PRIMARY_FEATURES),
+    "training_population": "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0",
+    "training_low_definition": "0_lt_P_hgcer_npeSum_le_2",
+    "training_control_definition": "P_hgcer_npeSum_gt_2",
+    "application_population": "authoritative_physical_pion_control_P_hgcer_npeSum_gt_2",
+    "parent_coordinate": "canonical_t",
+    "downstream_yield_coordinates": ["canonical_t", "canonical_phi"],
+    "phi_is_training_feature": False,
+    "method_b_numerical_dependency": False,
+    "probability_map_constructed": False,
+    "weight_adjustment_constructed": False,
+    "future_normalization_policy": "future_parent_t_only_no_tphi_child_renormalization",
+    "absolute_leakage_probability_claimed": False,
+}
+_F1_PROVENANCE_FINGERPRINT_NAMES = (
+    "phase_a_contract_fingerprint",
+    "phase_a_pion_event_population_fingerprint",
+    "method_a_fingerprint",
+    "method_a_event_population_fingerprint",
+    "part1_config_fingerprint",
+    "coordinate_fingerprint",
+)
+_F1_CHILD_ASSIGNMENT_FIELDS = (
+    "source_label", "entry_index", "t_index", "phi_index", "phi_low",
+    "phi_high", "phi_status",
+)
 
 CANDIDATE_REPRESENTATIONS = (
     {
@@ -168,7 +195,7 @@ def _string(value: object, label: str) -> str:
 
 
 def _require(value: Mapping[str, object], name: str, expected: object, label: str) -> None:
-    if value.get(name) != expected:
+    if name not in value or value.get(name) != expected:
         raise MethodAAcceptanceRepresentationError("{}_{}".format(label, name))
 
 
@@ -254,24 +281,122 @@ def _validate_setting(value: object) -> dict[str, object]:
 
 def _validate_metadata(value: object) -> None:
     metadata = _mapping(value, "f1_feature_metadata")
-    if list(metadata.get("primary_acceptance_features", [])) != list(_PRIMARY_FEATURES):
-        raise MethodAAcceptanceRepresentationError("f1_primary_acceptance_features_invalid")
-    required_strings = {
-        "training_population": "prompt_noRF_nommcuts_P_hgcer_npeSum_gt_0",
-        "training_low_definition": "0_lt_P_hgcer_npeSum_le_2",
-        "training_control_definition": "P_hgcer_npeSum_gt_2",
-        "application_population": "authoritative_physical_pion_control_P_hgcer_npeSum_gt_2",
-        "parent_coordinate": "canonical_t",
+    if dict(metadata) != _F1_FEATURE_METADATA:
+        raise MethodAAcceptanceRepresentationError("f1_feature_metadata_invalid")
+
+
+def _edge_array(value: object, label: str) -> tuple[float, ...]:
+    raw_edges = _sequence(value, label)
+    if len(raw_edges) < 2:
+        raise MethodAAcceptanceRepresentationError("{}_length_invalid".format(label))
+    edges = tuple(_finite(edge, "{}_{}".format(label, index)) for index, edge in enumerate(raw_edges))
+    if any(right <= left for left, right in zip(edges, edges[1:])):
+        raise MethodAAcceptanceRepresentationError("{}_not_strictly_increasing".format(label))
+    return edges
+
+
+def _validate_t_assignment(record: object, t_edges: Sequence[float], label: str) -> None:
+    value = _mapping(record, label)
+    t_index = _integer(value.get("t_index"), "{}_t_index".format(label))
+    if t_index < 0 or t_index >= len(t_edges) - 1:
+        raise MethodAAcceptanceRepresentationError("{}_t_index_invalid".format(label))
+    t_low = _finite(value.get("t_low"), "{}_t_low".format(label))
+    t_high = _finite(value.get("t_high"), "{}_t_high".format(label))
+    if t_low != t_edges[t_index] or t_high != t_edges[t_index + 1]:
+        raise MethodAAcceptanceRepresentationError("{}_t_geometry_mismatch".format(label))
+
+
+def _reconstruct_f1_fingerprints(
+    contract: Mapping[str, object], raw_training: Sequence[object], raw_application: Sequence[object],
+    feature_metadata: Mapping[str, object], label: str,
+) -> dict[str, str]:
+    """Verify the v2 producer's exact serialized F.1 fingerprint inputs."""
+    provenance = {
+        name: _string(contract.get(name), "{}_{}".format(label, name))
+        for name in _F1_PROVENANCE_FINGERPRINT_NAMES
     }
-    for name, expected in required_strings.items():
-        _require(metadata, name, expected, "f1_feature_metadata")
-    for name in (
-        "phi_is_training_feature", "probability_map_constructed",
-        "absolute_leakage_probability_claimed", "weight_adjustment_constructed",
-        "method_b_numerical_dependency",
-    ):
-        if metadata.get(name) is not False:
-            raise MethodAAcceptanceRepresentationError("f1_feature_metadata_{}".format(name))
+    host_state = _string(contract.get("host_state"), "{}_host_state".format(label))
+    _require(contract, "source_target_state", "post_proton_noRF", label)
+    try:
+        method_a_closure = _mapping(contract.get("method_a_training_summary"), "{}_training_summary".format(label))["by_t_delta"]
+    except KeyError as exc:
+        raise MethodAAcceptanceRepresentationError("{}_method_a_closure_invalid".format(label)) from exc
+    child_projection: list[dict[str, object]] = []
+    for record_index, raw_record in enumerate(raw_application):
+        record = _mapping(raw_record, "{}_application_{}".format(label, record_index))
+        missing = [name for name in _F1_CHILD_ASSIGNMENT_FIELDS if name not in record]
+        if missing:
+            raise MethodAAcceptanceRepresentationError(
+                "{}_application_child_projection_missing:{}".format(label, ",".join(missing))
+            )
+        child_projection.append({name: record[name] for name in _F1_CHILD_ASSIGNMENT_FIELDS})
+    values = {
+        "method_a_training_population_fingerprint": _sha256(raw_training),
+        "application_population_fingerprint": _sha256(raw_application),
+        "acceptance_feature_metadata_fingerprint": _sha256(feature_metadata),
+        "application_child_assignment_projection_fingerprint": _sha256(child_projection),
+    }
+    for name, expected in values.items():
+        if contract.get(name) != expected:
+            raise MethodAAcceptanceRepresentationError("{}_{}_mismatch".format(label, name))
+    fingerprint_inputs = {
+        "schema_version": _F1_CONTRACT_SCHEMA,
+        "fingerprint_schema_version": _F1_FINGERPRINT_SCHEMA,
+        **provenance,
+        "host_state": host_state,
+        "source_target_state": "post_proton_noRF",
+        "t_edges": contract.get("t_edges"),
+        "delta_edges": contract.get("delta_edges"),
+        "phi_edges": contract.get("phi_edges"),
+        **values,
+        "method_a_closure": method_a_closure,
+        "feature_metadata": feature_metadata,
+    }
+    if contract.get("fingerprint_inputs") != fingerprint_inputs:
+        raise MethodAAcceptanceRepresentationError("{}_fingerprint_inputs_mismatch".format(label))
+    if contract.get("fingerprint") != _sha256(fingerprint_inputs):
+        raise MethodAAcceptanceRepresentationError("{}_fingerprint_mismatch".format(label))
+    return {
+        **provenance,
+        **values,
+        "coordinate_fingerprint": provenance["coordinate_fingerprint"],
+        "fingerprint": str(contract["fingerprint"]),
+        "host_state": host_state,
+        "source_target_state": "post_proton_noRF",
+    }
+
+
+def _stable_f1_content_fingerprint(
+    setting: Mapping[str, object], contract: Mapping[str, object],
+    raw_training: Sequence[object], raw_application: Sequence[object],
+) -> str:
+    """Bind F.2's scientific fingerprint to F.1 content, not record order.
+
+    The frozen F.1 producer fingerprints its serialized population order.  F.2
+    verifies those producer fingerprints above, but its own deterministic audit
+    fingerprint must remain invariant if the same valid records are reordered.
+    """
+    authority_names = (
+        "schema_version", "fingerprint_schema_version", "status", "available", "reason",
+        "diagnostic_stage", "non_authoritative", "production_objects_mutated",
+        "refinement_applied", "production_application_performed",
+        "event_application_performed", "method_b_numerical_dependency",
+        "future_weight_adjustment_constructed", "phase_a_contract_fingerprint",
+        "phase_a_pion_event_population_fingerprint", "method_a_fingerprint",
+        "method_a_event_population_fingerprint", "part1_config_fingerprint",
+        "coordinate_fingerprint", "host_state", "source_target_state", "t_edges",
+        "delta_edges", "phi_edges", "method_a_training_summary", "feature_metadata",
+    )
+    return _sha256({
+        "setting": setting,
+        "contract_authority": {name: contract.get(name) for name in authority_names},
+        "method_a_training_records": sorted(
+            (_json_copy(row, "f1_training_record") for row in raw_training), key=_canonical_json,
+        ),
+        "application_records": sorted(
+            (_json_copy(row, "f1_application_record") for row in raw_application), key=_canonical_json,
+        ),
+    })
 
 
 def _sanitize_training_record(value: object, label: str) -> dict[str, object]:
@@ -350,6 +475,7 @@ def _validate_f1_artifacts(f1_artifacts: object) -> list[dict[str, object]]:
         _require(contract, "status", "available", "f1_contract")
         _require(contract, "available", True, "f1_contract")
         _require(contract, "diagnostic_stage", "complete", "f1_contract")
+        _require(contract, "reason", None, "f1_contract")
         for name in (
             "non_authoritative", "method_b_numerical_dependency",
             "event_application_performed", "production_application_performed",
@@ -358,22 +484,26 @@ def _validate_f1_artifacts(f1_artifacts: object) -> list[dict[str, object]]:
         ):
             expected = True if name == "non_authoritative" else False
             _require(contract, name, expected, "f1_contract")
-        _validate_metadata(contract.get("feature_metadata"))
-        fingerprint_names = (
-            "method_a_training_population_fingerprint",
-            "application_population_fingerprint",
-            "acceptance_feature_metadata_fingerprint",
-            "application_child_assignment_projection_fingerprint",
-            "fingerprint", "coordinate_fingerprint",
-        )
-        fingerprints = {
-            name: _string(contract.get(name), "f1_contract_{}".format(name))
-            for name in fingerprint_names
-        }
+        feature_metadata = _mapping(contract.get("feature_metadata"), "f1_feature_metadata")
+        _validate_metadata(feature_metadata)
+        t_edges = _edge_array(contract.get("t_edges"), "f1_t_edges")
+        _edge_array(contract.get("delta_edges"), "f1_delta_edges")
+        _edge_array(contract.get("phi_edges"), "f1_phi_edges")
         raw_training = _sequence(contract.get("method_a_training_records"), "f1_training_records")
         raw_application = _sequence(contract.get("application_records"), "f1_application_records")
         if not raw_training or not raw_application:
             raise MethodAAcceptanceRepresentationError("f1_population_empty")
+        for row_index, row in enumerate(raw_training):
+            _validate_t_assignment(row, t_edges, "f1_training_{}_{}".format(artifact_index, row_index))
+        for row_index, row in enumerate(raw_application):
+            _validate_t_assignment(row, t_edges, "f1_application_{}_{}".format(artifact_index, row_index))
+        fingerprints = _reconstruct_f1_fingerprints(
+            contract, raw_training, raw_application, feature_metadata,
+            "f1_contract_{}".format(artifact_index),
+        )
+        stable_content_fingerprint = _stable_f1_content_fingerprint(
+            setting, contract, raw_training, raw_application,
+        )
         training = [
             _sanitize_training_record(row, "f1_training_{}_{}".format(artifact_index, row_index))
             for row_index, row in enumerate(raw_training)
@@ -397,17 +527,10 @@ def _validate_f1_artifacts(f1_artifacts: object) -> list[dict[str, object]]:
             for row in application if row["source_label"] == _PROMPT_SOURCE
         ):
             raise MethodAAcceptanceRepresentationError("f1_prompt_application_identity_missing_training_control")
-        geometry = {
-            int(row["t_index"]): (float(row["t_low"]), float(row["t_high"]))
-            for row in training
-        }
-        if not geometry:
-            raise MethodAAcceptanceRepresentationError("f1_t_geometry_empty")
-        for row in training + application:
-            t_index = int(row["t_index"])
-            if t_index not in geometry or geometry[t_index] != (float(row["t_low"]), float(row["t_high"])):
-                raise MethodAAcceptanceRepresentationError("f1_t_geometry_mismatch")
-        ordered_geometry = tuple((index, *geometry[index]) for index in sorted(geometry))
+        ordered_geometry = tuple(
+            (index, t_edges[index], t_edges[index + 1])
+            for index in range(len(t_edges) - 1)
+        )
         if geometry_reference is None:
             geometry_reference = ordered_geometry
         elif geometry_reference != ordered_geometry:
@@ -418,6 +541,7 @@ def _validate_f1_artifacts(f1_artifacts: object) -> list[dict[str, object]]:
             "training": training,
             "application": application,
             "fingerprints": fingerprints,
+            "stable_content_fingerprint": stable_content_fingerprint,
             "canonical_t_geometry": ordered_geometry,
         })
     if seen_settings != set(_CANONICAL_SETTINGS):
@@ -595,16 +719,18 @@ def _support_candidate(
     candidate: Mapping[str, object], config: Mapping[str, object],
 ) -> dict[str, object]:
     features = tuple(candidate["ordered_features"])
+    nonprompt_count = sum(row["source_label"] != _PROMPT_SOURCE for row in application)
+    statistically_sparse = nonprompt_count < int(config["support_sparse_nonprompt_count"])
     training_values = _feature_array(training, features)
     scale = _robust_scale(training_values)
     if scale is None:
         return {
             "valid": False, "invalid_reason": "training_scaling_invalid",
-            "nonprompt_application_count": sum(row["source_label"] != _PROMPT_SOURCE for row in application),
+            "nonprompt_application_count": nonprompt_count,
             "training_nn_p50": None, "training_nn_p95": None, "training_nn_p99": None,
             "application_nn_p50": None, "application_nn_p95": None, "application_nn_p99": None,
             "application_nn_max": None, "application_ood_count": None,
-            "application_ood_fraction": None, "statistically_sparse": False,
+            "application_ood_fraction": None, "statistically_sparse": statistically_sparse,
             "support_gate_passed": False,
         }
     median, divisor = scale
@@ -612,11 +738,11 @@ def _support_candidate(
     if scaled_training.shape[0] < 2:
         return {
             "valid": False, "invalid_reason": "training_neighbor_reference_invalid",
-            "nonprompt_application_count": sum(row["source_label"] != _PROMPT_SOURCE for row in application),
+            "nonprompt_application_count": nonprompt_count,
             "training_nn_p50": None, "training_nn_p95": None, "training_nn_p99": None,
             "application_nn_p50": None, "application_nn_p95": None, "application_nn_p99": None,
             "application_nn_max": None, "application_ood_count": None,
-            "application_ood_fraction": None, "statistically_sparse": False,
+            "application_ood_fraction": None, "statistically_sparse": statistically_sparse,
             "support_gate_passed": False,
         }
     tree = cKDTree(scaled_training)
@@ -631,7 +757,6 @@ def _support_candidate(
     application_summary = _percentiles(app_distances)
     ood_count = int(np.sum(app_distances > threshold))
     ood_fraction = float(ood_count / app_distances.size) if app_distances.size else 0.0
-    sparse = 0 < app_distances.size < int(config["support_sparse_nonprompt_count"])
     return {
         "valid": True, "invalid_reason": None,
         "nonprompt_application_count": int(app_distances.size),
@@ -644,7 +769,7 @@ def _support_candidate(
         "application_nn_max": application_summary["max"],
         "application_ood_count": ood_count,
         "application_ood_fraction": ood_fraction,
-        "statistically_sparse": sparse,
+        "statistically_sparse": statistically_sparse,
         "support_gate_passed": bool(ood_fraction <= float(config["support_ood_fraction_max"])),
     }
 
@@ -764,10 +889,14 @@ def _candidate_summary(
 def _recommendation(groups: Sequence[Mapping[str, object]], summaries: Sequence[Mapping[str, object]], support_ok: bool) -> dict[str, object]:
     if not support_ok:
         return {
-            "recommendation_status": "insufficient_response_support",
+            "recommendation_status": "no_supported_reduced_basis",
             "recommended_basis": None, "basis_frozen": False, "manual_review_required": True,
         }
-    passing = [summary for summary in summaries if summary["overall_candidate_passed"]]
+    passing = [
+        summary for summary in summaries
+        if summary.get("automatic_recommendation_eligible") is True
+        and summary["overall_candidate_passed"]
+    ]
     if not passing:
         return {
             "recommendation_status": "no_supported_reduced_basis",
@@ -812,6 +941,17 @@ def build_pion_hgcer_method_a_acceptance_representation(
         and int(group["control_count"]) >= int(config["minimum_control_count"])
         for group in groups
     )
+    insufficient_response_groups = [
+        {
+            "setting_id": group["setting_id"],
+            "canonical_t_index": group["canonical_t_index"],
+            "low_count": group["low_count"],
+            "control_count": group["control_count"],
+        }
+        for group in groups
+        if int(group["low_count"]) < int(config["minimum_low_count"])
+        or int(group["control_count"]) < int(config["minimum_control_count"])
+    ]
     if support_ok:
         for group in groups:
             metrics = _mapping(group["candidate_metrics"], "candidate_metrics")
@@ -839,7 +979,9 @@ def build_pion_hgcer_method_a_acceptance_representation(
                         "training_nn_p50": None, "training_nn_p95": None, "training_nn_p99": None,
                         "application_nn_p50": None, "application_nn_p95": None, "application_nn_p99": None,
                         "application_nn_max": None, "application_ood_count": None,
-                        "application_ood_fraction": None, "statistically_sparse": False,
+                        "application_ood_fraction": None,
+                        "statistically_sparse": int(group["nonprompt_application_count"])
+                        < int(config["support_sparse_nonprompt_count"]),
                         "support_gate_passed": False,
                     },
                 }
@@ -853,6 +995,7 @@ def build_pion_hgcer_method_a_acceptance_representation(
         {
             "setting": _json_copy(item["setting"], "input_setting"),
             "setting_id": item["setting_id"],
+            "stable_f1_content_fingerprint": item["stable_content_fingerprint"],
             **_json_copy(item["fingerprints"], "input_fingerprints"),
             "source_file_sha256": next(entry["sha256"] for entry in hashes if entry["setting_id"] == item["setting_id"]),
         }
@@ -865,6 +1008,33 @@ def build_pion_hgcer_method_a_acceptance_representation(
         "candidate_definitions": candidate_definitions,
         "algorithm_config": config,
     })
+    fingerprint_inputs = {
+        "representation_schema_version": METHOD_A_ACCEPTANCE_REPRESENTATION_SCHEMA_VERSION,
+        "fingerprint_schema_version": METHOD_A_ACCEPTANCE_REPRESENTATION_FINGERPRINT_SCHEMA_VERSION,
+        "candidate_definitions": candidate_definitions,
+        "algorithm_config": config,
+        "algorithm_fingerprint": algorithm_fingerprint,
+        "input_content": [
+            {
+                "setting_id": item["setting_id"],
+                "stable_f1_content_fingerprint": item["stable_content_fingerprint"],
+                "source_file_sha256": next(
+                    entry["sha256"] for entry in hashes if entry["setting_id"] == item["setting_id"]
+                ),
+            }
+            for item in parsed
+        ],
+        "response_support": {
+            "all_groups_satisfy_minimum": support_ok,
+            "minimum_low_count": int(config["minimum_low_count"]),
+            "minimum_control_count": int(config["minimum_control_count"]),
+            "insufficient_group_count": len(insufficient_response_groups),
+            "insufficient_groups": insufficient_response_groups,
+        },
+        "groups": public_groups,
+        "candidate_summaries": summaries,
+        "recommendation": recommendation,
+    }
     result_core = {
         "schema_version": METHOD_A_ACCEPTANCE_REPRESENTATION_SCHEMA_VERSION,
         "fingerprint_schema_version": METHOD_A_ACCEPTANCE_REPRESENTATION_FINGERPRINT_SCHEMA_VERSION,
@@ -879,13 +1049,14 @@ def build_pion_hgcer_method_a_acceptance_representation(
         "algorithm_config": config,
         "algorithm_fingerprint": algorithm_fingerprint,
         "input_fingerprints": input_fingerprints,
+        "response_support": fingerprint_inputs["response_support"],
         "groups": public_groups,
         "candidate_summaries": summaries,
         "recommendation": recommendation,
     }
     result = _json_copy(result_core, "representation_result")
-    result["fingerprint_inputs"] = _json_copy(result_core, "representation_fingerprint_inputs")
-    result["fingerprint"] = _sha256(result_core)
+    result["fingerprint_inputs"] = _json_copy(fingerprint_inputs, "representation_fingerprint_inputs")
+    result["fingerprint"] = _sha256(fingerprint_inputs)
     return result  # type: ignore[return-value]
 
 

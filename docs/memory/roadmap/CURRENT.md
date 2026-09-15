@@ -24,7 +24,10 @@ reconciliation does not replace that runtime identity.
 ### F.2 — freeze probability-map representation
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — detached global representation
-audit at C2. It compares only `delta_only`, `track3`, `hgcer3`, and diagnostic
+audit. F.2.Fix.1 starts from implementation commit
+`5549098d2552b9c092b65e31aeb77edc0807ddda` and hardens only its F.1 v2
+authority/provenance boundary; it does not change the audit science. F.2
+compares only `delta_only`, `track3`, `hgcer3`, and diagnostic
 `full5_reference`; it neither chooses a five-dimensional estimator nor freezes
 a basis. Farm review and explicit human basis acceptance are required before
 F.3.

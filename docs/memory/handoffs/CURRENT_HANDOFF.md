@@ -16,8 +16,10 @@ distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
   31dd034d8404e317863bf0933c51253e1d3deeb8.
 - This docs/memory-only closure commit is the exact F.2 baseline. It does not
   alter or replace the F.1 runtime identity.
-- F.2 source implementation started at and is pinned to
-  `02f21886cff8a721df46ebf673594856583fc3c5`.
+- F.2 baseline is C2 `02f21886cff8a721df46ebf673594856583fc3c5`; its source
+  implementation commit is `5549098d2552b9c092b65e31aeb77edc0807ddda`.
+  F.2.Fix.1 begins exactly at the latter clean checkout and is not a runtime
+  or farm-validation identity.
 
 ## Established evidence
 
@@ -47,11 +49,14 @@ range whitespace check to the three profile-owned validation files; the global
 worktree check and committed-file identity audit remain unchanged. The F.1
 artifact, PDF, and page-manifest evidence remains detached and source-owned.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 adds only a detached
-representation-audit module, CLI, and focused tests. It uses fixed candidate
-bases; strict F.1 v2 validation; canonical-t-local deterministic response
-probes; and cKDTree non-prompt application support. It creates no map,
-correction, event score/probability, weight, normalization, or production
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2.Fix.1 tightens only the
+detached audit's F.1 authority boundary: serialized v2 fingerprints are
+reconstructed before metrics; exact authority metadata, no-RF source state,
+feature metadata, and edge geometry are required; deterministic filenames are
+bound to payload identity before source hashes; zero non-prompt rows are
+sparse; and output paths cannot collide. Fixed candidates, probe numerics,
+cKDTree support, and non-production ownership remain unchanged. It creates no
+map, correction, event score/probability, weight, normalization, or production
 object. Read phases/phase-f2-method-a-acceptance-representation.md.
 
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and

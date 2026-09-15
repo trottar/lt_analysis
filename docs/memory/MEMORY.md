@@ -98,3 +98,14 @@ canonical-t local, deterministic five-fold class-balanced L-BFGS-B diagnostics.
 Application support uses same-parent robust-scaled cKDTree distances. The
 output is aggregate-only JSON plus a four-page matplotlib PDF; `basis_frozen`
 is always false and F.3 requires explicit human acceptance after farm review.
+
+F.2.Fix.1 starts from the clean F.2 implementation commit
+`5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and
+deterministic-failure repair only: independently reconstruct the frozen F.1 v2
+training, application, feature-metadata, child-projection, and full-contract
+fingerprints; require exact F.1 authority metadata, `post_proton_noRF`, and
+finite strictly increasing geometry; bind deterministic filenames to declared
+payload identities before hashing; preserve the four approved recommendation
+states; mark zero non-prompt rows sparse; and reject JSON/PDF path collisions.
+It must not change candidates, probe numerics, information/OOD gates, or any
+production/normal-analysis path.

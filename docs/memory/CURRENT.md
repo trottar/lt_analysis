@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-14,
-F.2 detached source implementation. Repository HEAD values in this record are
+F.2.Fix.1 source implementation. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -9,6 +9,10 @@ timestamped observations, not permanent claims about the live checkout.
 - Repository: trottar/lt_analysis; branch: test.
 - F.2 exact starting HEAD:
   02f21886cff8a721df46ebf673594856583fc3c5.
+- F.2 implementation / F.2.Fix.1 exact source starting HEAD:
+  5549098d2552b9c092b65e31aeb77edc0807ddda. F.2.Fix.1 is a local
+  source-only authority/provenance repair from that clean checkout; it is not
+  a farm-evaluated commit.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
 - F.1 runtime-evaluated analysis HEAD:
@@ -43,13 +47,17 @@ detached, Method-B independent, and makes no correction, estimator, or
 production mutation. See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 is a detached global
-five-setting Method-A acceptance-representation audit, implemented from C2
-`02f21886cff8a721df46ebf673594856583fc3c5`. It consumes only five F.1 v2 JSON
-artifacts; performs fixed-basis response and application-support diagnostics;
-and writes one JSON plus one four-page matplotlib PDF. It has no ROOT import,
-map, correction, event probability, weight, normalization, Method-B numerical
-input, or production side effect. Local F.2 and frozen F.1 tests pass. See
-phases/phase-f2-method-a-acceptance-representation.md.
+five-setting Method-A acceptance-representation audit. Its F.2.Fix.1 source
+repair starts at `5549098d2552b9c092b65e31aeb77edc0807ddda` and reconstructs
+the frozen F.1 v2 population/metadata/child/full fingerprints before any
+metric, requires exact F.1 authority metadata and geometry, binds deterministic
+filenames to payload identity before source hashes, and fails safely for output
+path collisions and sparse zero-row non-prompt groups. The fixed probe,
+candidates, thresholds, cKDTree criterion, and recommendation policy remain
+unchanged. It writes one aggregate JSON plus one four-page matplotlib PDF, with
+no ROOT import, map, correction, event probability, weight, normalization,
+Method-B numerical input, or production side effect. Local F.2 and frozen F.1
+tests pass. See phases/phase-f2-method-a-acceptance-representation.md.
 
 ## Frozen architecture
 

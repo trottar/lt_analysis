@@ -3,7 +3,9 @@
 ## Source implementation
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.2 started from the exact C2
-baseline `02f21886cff8a721df46ebf673594856583fc3c5` after F.1 closure.
+baseline `02f21886cff8a721df46ebf673594856583fc3c5` after F.1 closure. Its
+implementation commit and exact F.2.Fix.1 source starting HEAD is
+`5549098d2552b9c092b65e31aeb77edc0807ddda`.
 
 The implementation changes only:
 
@@ -14,6 +16,17 @@ The implementation changes only:
 It is a JSON/numeric postprocessor with numpy, scipy, and matplotlib only. It
 does not import ROOT or modify `rand_sub.py`, F.1 producers, normal analysis,
 subtraction, correction, yield, or production paths.
+
+F.2.Fix.1 is a strict F.1 authority/provenance boundary repair. Before any
+response or support metric it reconstructs the producer's canonical-JSON
+SHA-256 fingerprints for both serialized populations, exact feature metadata,
+the application child-assignment projection, and the complete v2 fingerprint
+inputs. It requires exact detached flags, `reason = null`, nonempty frozen
+provenance, `source_target_state = post_proton_noRF`, exact frozen metadata,
+and finite strictly increasing t/delta/phi edges with record-to-t-edge
+agreement. The deterministic CLI validates the declared setting, kinematic,
+and particle before associating each source hash, and rejects colliding output
+paths. This repair changes neither F.2 science nor F.1.
 
 ## Frozen audit contract
 
@@ -38,8 +51,10 @@ subtraction, correction, yield, or production paths.
 
 ## Local validation
 
-- F.2 module/CLI/tests `py_compile` passed.
-- F.2 focused suite: 11 tests passed.
+- F.2.Fix.1 module/CLI/tests `py_compile` passed.
+- F.2.Fix.1 focused suite: 19 tests passed, including stale F.1 fingerprint,
+  authority metadata, geometry, deterministic-file identity, sparse zero-row,
+  optimizer failure, and output-safety coverage.
 - Frozen F.1 contract/runtime suite: 10 tests passed.
 - `git diff --check` passed before memory updates.
 
