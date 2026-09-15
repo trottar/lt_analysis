@@ -115,20 +115,21 @@ The accepted F.3 bundle ran at `5382cfc1994b078c620b32c043938134c33ffa39`;
 all 15 parents had exact F.2 continuity and the accepted map is frozen for
 F.4. See evidence/f3-runtime-closure.md.
 
-SOURCE REVIEWED — F.4.Fix.1 binds F.4 to the accepted F.3 runtime file hash,
-map/algorithm/wrapper fingerprints, and source head rather than accepting a
-merely self-consistent alternate F.3 artifact. It independently validates F.1
-canonical-phi child edges and assignments; PDF-only correction ECDF values are
-computed by the same transient F.4 evaluation and never enter JSON.
+CLOSED / RUNTIME VALIDATED — F.4 is the sole owner of the detached
+parent-preserving Method-A correction. Its accepted bundle ran at
+`67e0298c51759c7a5ba693464d2c2655bf39250d`, pins accepted F.3/F.1 evidence,
+uses raw `A=1` outside frozen support, and applies exactly one full signed
+canonical-t parent normalization. All 15 parents passed support and closure;
+no event-level correction, template, yield, normal-analysis, or production
+behavior exists. See evidence/f4-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 is the only owner of the
-detached parent-preserving Method-A correction candidate. It consumes the
-accepted F.3 relative response and F.1 physical application population, uses
-raw `A=1` outside frozen support, and applies one full signed canonical-t
-parent normalization. It persists aggregate parent, source, and canonical-phi
-diagnostics only; no event-level correction, template, yield, normal-analysis,
-or production behavior exists. Its sole remaining gate is one detached farm
-analyzer run and unchanged generic collector review; F.5 is BLOCKED.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 is a detached signed
+`(t,phi)` propagation review of accepted F.4. It reuses the F.4 public
+calculator, verifies occupied canonical-phi children against F.4, and emits
+only explicit aggregate `3 x 9` baseline/adjusted/delta matrices. Empty F.4
+children are expected only when the corresponding F.1 cell has zero events.
+No child normalization, event output, ROOT object, Method-B input, yield,
+cross section, or production behavior is permitted. F.6 remains BLOCKED.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and

@@ -1,6 +1,6 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 after F.4.Fix.1 source review. This record
+Prepared: 2026-09-15 after accepted F.4 closure and F.5 source implementation. This record
 distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 
 ## Resume identity
@@ -64,16 +64,16 @@ CLOSED / RUNTIME VALIDATED — F.3 is accepted at farm/source HEAD
 F.2 support continuity and no correction or production behavior. Read
 evidence/f3-runtime-closure.md.
 
-SOURCE REVIEWED — F.4.Fix.1 permits only the accepted F.3 runtime authority:
-its source JSON hash, map fingerprint, algorithm fingerprint, and wrapper
-fingerprint must all match. It also semantically revalidates each F.1
-canonical-phi assignment and produces PDF-only transient correction ECDFs.
+CLOSED / RUNTIME VALIDATED — F.4 is accepted from the supplied complete F.4
+farm bundle at `67e0298c51759c7a5ba693464d2c2655bf39250d`; the exact bundle,
+JSON/PDF hashes, and correction/artifact fingerprints are in
+evidence/f4-runtime-closure.md. It preserves full signed canonical-t sums with
+one common parent normalization and has no template or production ownership.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 constructs only the
-detached parent-preserving Method-A correction candidate. It must preserve each
-full signed canonical-t application sum with one common parent normalization,
-retain neutral raw OOD shape one, and persist aggregate diagnostics only. It
-may not create templates, yields, Method-B input, or production objects.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 consumes accepted
+F.4/F.3/F.1 artifacts only and builds detached signed canonical `(t,phi)`
+aggregate templates. It must use the F.4 shared calculator, retain explicit
+zero cells, and never normalize children or create event/production output.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
@@ -93,6 +93,6 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Run only the detached F.4 analyzer and unchanged F.4 collector profile
-over the accepted F.1/F.3 artifacts. F.5 is BLOCKED until F.4 evidence is
-accepted.
+NEXT — Run F.5's single detached analyzer/unchanged generic collector gate
+against accepted F.1/F.3/F.4 artifacts. F.6 remains BLOCKED pending explicit
+F.5 review.

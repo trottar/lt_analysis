@@ -37,17 +37,16 @@ continuity gates passing. See evidence/f3-runtime-closure.md.
 
 ### F.4 — detached parent-preserving A-only correction
 
-SOURCE REVIEWED — F.4.Fix.1 pins consumption to accepted F.3 runtime authority
-and adds semantic F.1 child-phi review without changing correction mathematics.
-
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — construct one A-only candidate
-per canonical-t parent, preserve the full signed parent sum, and remain
-detached from templates and production.
+CLOSED / RUNTIME VALIDATED — accepted at
+`67e0298c51759c7a5ba693464d2c2655bf39250d`; all 15 parent corrections passed
+F.3-support and closure review. It remains detached from templates and
+production. See evidence/f4-runtime-closure.md.
 
 ### F.5 — detached event-level (t,phi) propagation
 
-BLOCKED — build parallel baseline and A-adjusted templates only after F.4 is
-accepted. Do not renormalize child bins independently or promote to production.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — build parallel signed aggregate
+baseline and F.4-adjusted templates with explicit zero canonical cells. Do not
+renormalize child bins independently or promote to production.
 
 ### F.6 — explicit production promotion
 
@@ -56,5 +55,5 @@ decision.
 
 ## NEXT
 
-NEXT — Run F.4's single detached farm analyzer/collector gate. F.5 remains
-BLOCKED pending explicit F.4 review.
+NEXT — Run F.5's single detached analyzer/collector gate. F.6 remains BLOCKED
+pending explicit F.5 review.

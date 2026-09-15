@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.3 farm-bundle closure and F.4.Fix.1 source review. Repository HEAD values in this record are
+accepted F.4 farm-bundle closure and F.5 source implementation. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -64,16 +64,18 @@ response map. The accepted farm bundle at
 support continuity, no sparse/support failures, and no correction/production
 behavior. See evidence/f3-runtime-closure.md.
 
-SOURCE REVIEWED — F.4.Fix.1 pins F.4 to the exact accepted F.3 runtime JSON
-SHA-256, map fingerprint, algorithm fingerprint, and wrapper fingerprint. It
-also revalidates F.1 canonical-phi child geometry and renders transient,
-unclipped correction-factor ECDFs without persisting event-level data.
+CLOSED / RUNTIME VALIDATED — F.4 detached parent-preserving Method-A
+correction. The accepted farm bundle ran at
+`67e0298c51759c7a5ba693464d2c2655bf39250d`, has 15 valid parents and exact
+F.3 support continuity, and retains parent-only signed normalization. It has
+no template, yield, production, or Method-B ownership. See
+evidence/f4-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.4 detached
-parent-preserving Method-A correction candidate consumes accepted F.3/F.1 JSON
-only, uses neutral `A = 1` outside F.3 support, and applies exactly one signed
-normalization per canonical-t parent. It has no template, yield, production, or
-Method-B ownership. See phases/phase-f4-method-a-parent-preserving-correction.md.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 detached signed `(t,phi)`
+propagation consumes accepted F.4/F.3/F.1 evidence and produces only parallel
+aggregate canonical `3 x 9` baseline/adjusted templates with explicit zero
+cells. It does not alter the F.4 correction, independently normalize children,
+or create a production object. See phases/phase-f5-method-a-tphi-propagation.md.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized
@@ -108,6 +110,6 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Run only the detached F.4 analyzer against accepted F.1/F.3 JSON
-artifacts, then the unchanged collector with the F.4 profile. F.5 remains
-BLOCKED pending F.4 evidence review.
+NEXT — Run only the detached F.5 analyzer against accepted F.1/F.3/F.4 JSON
+artifacts, then the unchanged generic collector with the F.5 profile. F.6
+remains BLOCKED pending F.5 evidence review.
