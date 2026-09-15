@@ -1,6 +1,7 @@
 {
   "schema_version": "pion_hgcer_validation_bundle_profile/v4",
   "validation_profile": "phase_f1_batched_farm_acceptance_review/v2",
+  "collection_mode": "f1_specialized",
   "settings": [
     {
       "phi": "Left",
@@ -65,7 +66,8 @@
     "allowed_committed_files": [
       "testing/collect_pion_hgcer_validation_bundle.py",
       "testing/test_collect_pion_hgcer_validation_bundle.py",
-      "testing/pion_hgcer_validation_bundle_profile.json"
+      "testing/pion_hgcer_validation_bundle_profile.json",
+      "testing/pion_hgcer_validation_bundle_profile_f2.json"
     ],
     "allowed_non_analysis_path_prefixes": [
       "docs/memory/"

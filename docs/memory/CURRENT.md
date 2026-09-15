@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-14,
-F.2.Fix.1 source implementation. Repository HEAD values in this record are
+F.2 profile-driven collector source implementation. Repository HEAD values in this record are
 timestamped observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -13,6 +13,9 @@ timestamped observations, not permanent claims about the live checkout.
   5549098d2552b9c092b65e31aeb77edc0807ddda. F.2.Fix.1 is a local
   source-only authority/provenance repair from that clean checkout; it is not
   a farm-evaluated commit.
+- F.2 profile-driven collector exact source starting HEAD:
+  170e6fae3d2fed1949fc6932b8eac9ad83e3e01c. This local source-only repair
+  does not alter the F.2 analyzer or establish farm evidence.
 - Reviewed F.1.Fix.5 analysis-source commit:
   dc4fc6283001739a487ec80068f951b0e388cae6.
 - F.1 runtime-evaluated analysis HEAD:
@@ -59,6 +62,14 @@ no ROOT import, map, correction, event probability, weight, normalization,
 Method-B numerical input, or production side effect. Local F.2 and frozen F.1
 tests pass. See phases/phase-f2-method-a-acceptance-representation.md.
 
+SOURCE REVIEWED — The existing validation collector now has a generic
+profile-declared artifact path in addition to its unchanged F.1-specialized
+path. `testing/pion_hgcer_validation_bundle_profile_f2.json` declares only the
+global F.2 JSON/PDF and five setting-scoped frozen F.1 JSON inputs. It pins
+`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`, permits only the four
+collector/profile/test repair files plus `docs/memory/`, and performs no F.2
+analysis or physics work.
+
 ## Frozen architecture
 
 - Random subtraction, slow-proton treatment, pion subtraction, HGCer Method A,
@@ -84,8 +95,10 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Run the detached F.2 analyzer once on the farm against the accepted five
-Q4p4W2p74 F.1 v2 artifacts. Inspect JSON/PDF provenance, every per-group
-response/support gate, OOD metrics, and recommendation. Accept one reduced
-basis or make one coherent F.2 repair; do not begin F.3 without explicit basis
-acceptance.
+NEXT — After the profile-driven collector repair is reviewed and pushed, run
+the detached F.2 analyzer once on the farm against the accepted five
+Q4p4W2p74 F.1 v2 artifacts. Then run the same collector with
+`testing/pion_hgcer_validation_bundle_profile_f2.json` to package exactly that
+F.2 JSON/PDF and five F.1 JSON inputs. Inspect the ZIP, analyzer evidence, all
+per-group response/support gates, OOD metrics, and recommendation. Do not
+begin F.3 without explicit reduced-basis acceptance.

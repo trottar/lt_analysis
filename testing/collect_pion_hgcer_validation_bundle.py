@@ -1,7 +1,7 @@
-"""Collect a narrow, read-only Phase-F.1 farm-review bundle.
+"""Collect a narrow, read-only profile-declared farm-review bundle.
 
 This utility never imports the analysis runtime.  It only locates frozen
-artifacts, validates checkpoint metadata, extracts selected PDF pages, hashes
+artifacts, optionally applies the original F.1 checkpoint/PDF review, hashes
 the source bytes, and writes a new ZIP archive.
 """
 
@@ -29,6 +29,8 @@ import zipfile
 
 COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v4"
 PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v4"
+_F1_SPECIALIZED_COLLECTION_MODE = "f1_specialized"
+_GENERIC_COLLECTION_MODE = "generic_artifacts"
 DEFAULT_PROFILE_PATH = Path(__file__).with_name(
     "pion_hgcer_validation_bundle_profile.json"
 )
@@ -69,6 +71,43 @@ def _safe_token(value: object, field: str) -> str:
     return token
 
 
+def _profile_basename_template_valid(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        basename = value.format(phi="Left", kinematic="Q4p4W2p74", epsilon="lowe")
+    except (KeyError, ValueError):
+        return False
+    return bool(basename) and Path(basename).name == basename
+
+
+def _validate_generic_artifacts(value: object) -> bool:
+    if not isinstance(value, Mapping):
+        return False
+    seen_keys: set[str] = set()
+    for scope in ("global", "settings"):
+        declarations = value.get(scope)
+        if not isinstance(declarations, list) or not declarations:
+            return False
+        for declaration in declarations:
+            if not isinstance(declaration, Mapping):
+                return False
+            try:
+                key = _safe_token(declaration.get("key"), "profile_artifact_key")
+            except ValueError:
+                return False
+            if key in seen_keys:
+                return False
+            seen_keys.add(key)
+            if (
+                not _profile_basename_template_valid(declaration.get("basename_template"))
+                or declaration.get("kind") not in {"json", "file"}
+                or not isinstance(declaration.get("required"), bool)
+            ):
+                return False
+    return True
+
+
 def load_validation_profile(
     profile_path: Optional[Union[Path, str]] = None,
 ) -> dict[str, Any]:
@@ -81,6 +120,9 @@ def load_validation_profile(
     if not isinstance(payload, dict) or payload.get("schema_version") != PROFILE_SCHEMA_VERSION:
         raise ValueError("validation_bundle_profile_invalid")
     if not isinstance(payload.get("validation_profile"), str):
+        raise ValueError("validation_bundle_profile_invalid")
+    collection_mode = payload.get("collection_mode")
+    if collection_mode not in {_F1_SPECIALIZED_COLLECTION_MODE, _GENERIC_COLLECTION_MODE}:
         raise ValueError("validation_bundle_profile_invalid")
     settings = payload.get("settings")
     if not isinstance(settings, list) or not settings:
@@ -95,41 +137,44 @@ def load_validation_profile(
     artifacts = payload.get("artifacts")
     if not isinstance(artifacts, dict):
         raise ValueError("validation_bundle_profile_invalid")
-    checkpoint = artifacts.get("phase_c_checkpoint")
-    phase_d = artifacts.get("phase_d_checkpoint")
-    correction = artifacts.get("parent_preserving_correction")
-    acceptance = artifacts.get("method_a_acceptance_contract")
-    procedure = artifacts.get("procedure_pdf")
-    if (
-        not isinstance(checkpoint, dict)
-        or not isinstance(phase_d, dict)
-        or not isinstance(correction, dict)
-        or not isinstance(acceptance, dict)
-        or not isinstance(procedure, dict)
-    ):
-        raise ValueError("validation_bundle_profile_invalid")
-    for artifact, field in (
-        (checkpoint, "basename_template"),
-        (phase_d, "basename_template"),
-        (correction, "basename_template"),
-        (acceptance, "basename_template"),
-        (procedure, "source_basename_template"),
-        (procedure, "page_manifest_basename_template"),
-    ):
-        if not isinstance(artifact.get(field), str):
-            raise ValueError("validation_bundle_profile_invalid")
-    for summary_name, expected_count in (("e72_summary", 4), ("f1_summary", 5)):
-        summary = procedure.get(summary_name)
-        page_ids = summary.get("page_ids") if isinstance(summary, dict) else None
+    if collection_mode == _F1_SPECIALIZED_COLLECTION_MODE:
+        checkpoint = artifacts.get("phase_c_checkpoint")
+        phase_d = artifacts.get("phase_d_checkpoint")
+        correction = artifacts.get("parent_preserving_correction")
+        acceptance = artifacts.get("method_a_acceptance_contract")
+        procedure = artifacts.get("procedure_pdf")
         if (
-            not isinstance(summary, dict)
-            or not isinstance(summary.get("slim_basename_template"), str)
-            or not isinstance(page_ids, list)
-            or len(page_ids) != expected_count
-            or not all(isinstance(page_id, str) and page_id for page_id in page_ids)
-            or len(set(page_ids)) != len(page_ids)
+            not isinstance(checkpoint, dict)
+            or not isinstance(phase_d, dict)
+            or not isinstance(correction, dict)
+            or not isinstance(acceptance, dict)
+            or not isinstance(procedure, dict)
         ):
             raise ValueError("validation_bundle_profile_invalid")
+        for artifact, field in (
+            (checkpoint, "basename_template"),
+            (phase_d, "basename_template"),
+            (correction, "basename_template"),
+            (acceptance, "basename_template"),
+            (procedure, "source_basename_template"),
+            (procedure, "page_manifest_basename_template"),
+        ):
+            if not isinstance(artifact.get(field), str):
+                raise ValueError("validation_bundle_profile_invalid")
+        for summary_name, expected_count in (("e72_summary", 4), ("f1_summary", 5)):
+            summary = procedure.get(summary_name)
+            page_ids = summary.get("page_ids") if isinstance(summary, dict) else None
+            if (
+                not isinstance(summary, dict)
+                or not isinstance(summary.get("slim_basename_template"), str)
+                or not isinstance(page_ids, list)
+                or len(page_ids) != expected_count
+                or not all(isinstance(page_id, str) and page_id for page_id in page_ids)
+                or len(set(page_ids)) != len(page_ids)
+            ):
+                raise ValueError("validation_bundle_profile_invalid")
+    elif not _validate_generic_artifacts(artifacts):
+        raise ValueError("validation_bundle_profile_invalid")
     source_identity = payload.get("source_identity")
     if not isinstance(source_identity, dict):
         raise ValueError("validation_bundle_profile_invalid")
@@ -1508,7 +1553,7 @@ def collect_source_checks(
     required_analysis_commit: str = REQUIRED_ANALYSIS_COMMIT,
     allowed_committed_files: Iterable[str] = COMMITTED_RANGE_WHITESPACE_CHECK_FILES,
 ) -> tuple[str, list[dict[str, Any]]]:
-    """Run detached F.1 checks with a narrow committed-range whitespace scope."""
+    """Run detached source checks with a narrow committed-range whitespace scope."""
     range_diff_check_command = [
         "git", "diff", "--check", "{}..HEAD".format(required_analysis_commit),
         "--", *tuple(allowed_committed_files),
@@ -1620,6 +1665,186 @@ def _validate_output_path(output_path: Path, source_paths: Sequence[Path]) -> No
         raise ValueError("output_path_is_source_artifact")
 
 
+def _generic_artifact_path(
+    source_root: Path, declaration: Mapping[str, Any], *, phi: str,
+    kinematic: str, epsilon: str,
+) -> Path:
+    return source_root / _format_profile_basename(
+        str(declaration["basename_template"]), phi, kinematic, epsilon,
+    )
+
+
+def _collect_generic_validation_bundle(
+    *, profile: Mapping[str, Any], profile_path: Optional[Union[Path, str]],
+    outdir: Union[Path, str], kinematic: str, output: Union[Path, str],
+    selected: Sequence[tuple[str, str]], repo_root: Optional[Union[Path, str]],
+    command_runner: CommandRunner,
+) -> dict[str, Any]:
+    """Collect profile-declared evidence without phase-specific validation."""
+    source_root = Path(outdir).expanduser()
+    output_path = Path(output).expanduser()
+    if not output_path.is_absolute():
+        output_path = Path.cwd() / output_path
+    output_path = output_path.resolve()
+    artifacts = profile["artifacts"]
+    global_declarations = artifacts["global"]
+    setting_declarations = artifacts["settings"]
+    source_paths = [
+        _generic_artifact_path(
+            source_root, declaration, phi="global", kinematic=kinematic, epsilon="global",
+        )
+        for declaration in global_declarations
+    ]
+    for phi, epsilon in selected:
+        source_paths.extend(
+            _generic_artifact_path(
+                source_root, declaration, phi=phi, kinematic=kinematic, epsilon=epsilon,
+            )
+            for declaration in setting_declarations
+        )
+    _validate_output_path(output_path, source_paths)
+    repository = Path(repo_root) if repo_root is not None else Path(__file__).resolve().parents[1]
+    repository = repository.resolve()
+    source_state_text, git_head = collect_source_state(repository, command_runner)
+    source_identity = profile["source_identity"]
+    required_analysis_commit = source_identity["required_analysis_commit"]
+    allowed_committed_files = source_identity["allowed_committed_files"]
+    allowed_non_analysis_path_prefixes = source_identity["allowed_non_analysis_path_prefixes"]
+    source_checks_text, source_checks = collect_source_checks(
+        repository,
+        command_runner,
+        required_analysis_commit=required_analysis_commit,
+        allowed_committed_files=allowed_committed_files,
+    )
+    issues: list[dict[str, Any]] = []
+    for check in source_checks:
+        if check["returncode"] != 0:
+            _issue(issues, "source_check_failed", artifact=check["name"], detail="returncode={}".format(check["returncode"]))
+    required_analysis_commit_is_ancestor, committed_files, unexpected_committed_files = (
+        _committed_identity(
+            source_checks, allowed_committed_files, allowed_non_analysis_path_prefixes,
+        )
+    )
+    if not required_analysis_commit_is_ancestor:
+        _issue(
+            issues, "required_analysis_commit_not_present",
+            artifact="required_analysis_commit_ancestor", detail=required_analysis_commit,
+        )
+    if unexpected_committed_files:
+        _issue(
+            issues, "unexpected_committed_files_after_required_analysis_commit",
+            artifact="committed_files_after_required_analysis_commit",
+            detail=json.dumps(unexpected_committed_files, sort_keys=True),
+        )
+    manifest: dict[str, Any] = {
+        "schema_version": COLLECTOR_SCHEMA_VERSION,
+        "validation_profile": profile["validation_profile"],
+        "validation_profile_source": os.fspath(
+            (DEFAULT_PROFILE_PATH if profile_path is None else Path(profile_path)).resolve()
+        ),
+        "generated_at_utc": _datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        "git_head": git_head,
+        "required_analysis_commit": required_analysis_commit,
+        "required_analysis_commit_is_ancestor": required_analysis_commit_is_ancestor,
+        "allowed_committed_files": sorted(allowed_committed_files),
+        "allowed_non_analysis_path_prefixes": sorted(allowed_non_analysis_path_prefixes),
+        "committed_files_after_required_analysis_commit": committed_files,
+        "unexpected_committed_files_after_required_analysis_commit": unexpected_committed_files,
+        "requested_kinematic": kinematic,
+        "requested_settings": [{"phi": phi, "epsilon": epsilon} for phi, epsilon in selected],
+        "global_artifacts": {},
+        "settings": [],
+        "source_checks": source_checks,
+        "errors": issues,
+        "complete": False,
+    }
+
+    staging_descriptor, staging_name = tempfile.mkstemp(
+        prefix=".kaonlt-validation-review-", suffix=".zip", dir=output_path.parent,
+    )
+    os.close(staging_descriptor)
+    staging_path = Path(staging_name)
+    with ExitStack() as cleanup:
+        cleanup.callback(staging_path.unlink, missing_ok=True)
+        archive = zipfile.ZipFile(staging_path, "w", compression=zipfile.ZIP_DEFLATED)
+        cleanup.callback(archive.close)
+
+        def record_artifact(
+            container: dict[str, Any], declaration: Mapping[str, Any], path: Path,
+            archive_path: str, setting: Optional[Mapping[str, str]],
+        ) -> None:
+            key = str(declaration["key"])
+            record = _source_artifact(path, archive_path, key)
+            container[key] = record
+            required = bool(declaration["required"])
+            if record["status"] != "exists":
+                if required:
+                    code = "missing_source_artifact" if record["status"] == "missing" else "source_artifact_unreadable"
+                    _issue(issues, code, setting=setting, artifact=key, detail=record.get("error"))
+                return
+            try:
+                source_bytes = path.read_bytes()
+            except OSError as exc:
+                record.update({"status": "unreadable", "error": "{}: {}".format(type(exc).__name__, exc)})
+                if required:
+                    _issue(issues, "source_artifact_unreadable", setting=setting, artifact=key, detail=record["error"])
+                return
+            archive.writestr(archive_path, source_bytes)
+            if declaration["kind"] == "json":
+                try:
+                    _strict_json_payload(path)
+                except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+                    record.update({
+                        "status": "invalid",
+                        "json_status": "invalid",
+                        "error": "{}: {}".format(type(exc).__name__, exc),
+                    })
+                    if required:
+                        _issue(issues, "source_artifact_json_invalid", setting=setting, artifact=key, detail=record["error"])
+                else:
+                    record["json_status"] = "valid"
+
+        archive.writestr("global/", b"")
+        for declaration in global_declarations:
+            path = _generic_artifact_path(
+                source_root, declaration, phi="global", kinematic=kinematic, epsilon="global",
+            )
+            record_artifact(
+                manifest["global_artifacts"], declaration, path, "global/{}".format(path.name), None,
+            )
+        for phi, epsilon in selected:
+            setting = {"phi": phi, "epsilon": epsilon, "kinematic": kinematic}
+            directory = "{}_{}".format(phi, epsilon)
+            archive.writestr(directory + "/", b"")
+            setting_manifest: dict[str, Any] = {
+                "phi": phi, "epsilon": epsilon, "kinematic": kinematic, "artifacts": {},
+            }
+            for declaration in setting_declarations:
+                path = _generic_artifact_path(
+                    source_root, declaration, phi=phi, kinematic=kinematic, epsilon=epsilon,
+                )
+                record_artifact(
+                    setting_manifest["artifacts"], declaration, path,
+                    "{}/{}".format(directory, path.name), setting,
+                )
+            manifest["settings"].append(setting_manifest)
+
+        manifest["complete"] = not issues
+        _archive_json(archive, "manifest.json", manifest)
+        archive.writestr("source_state.txt", source_state_text)
+        archive.writestr("source_checks.txt", source_checks_text)
+        archive.close()
+        if output_path.exists():
+            raise ValueError("output_path_already_exists")
+        os.replace(staging_path, output_path)
+        cleanup.pop_all()
+    return {
+        "output_path": os.fspath(output_path),
+        "returncode": 0 if manifest["complete"] else 1,
+        "manifest": manifest,
+    }
+
+
 def collect_validation_bundle(
     *,
     outdir: Union[Path, str],
@@ -1636,6 +1861,12 @@ def collect_validation_bundle(
     profile = load_validation_profile(profile_path)
     selected = resolve_settings(phi, epsilon, profile)
     kinematic = _safe_token(kinematic, "kinematic")
+    if profile["collection_mode"] == _GENERIC_COLLECTION_MODE:
+        return _collect_generic_validation_bundle(
+            profile=profile, profile_path=profile_path, outdir=outdir,
+            kinematic=kinematic, output=output, selected=selected,
+            repo_root=repo_root, command_runner=command_runner,
+        )
     source_root = Path(outdir).expanduser()
     output_path = Path(output).expanduser()
     if not output_path.is_absolute():

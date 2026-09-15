@@ -109,3 +109,13 @@ payload identities before hashing; preserve the four approved recommendation
 states; mark zero non-prompt rows sparse; and reject JSON/PDF path collisions.
 It must not change candidates, probe numerics, information/OOD gates, or any
 production/normal-analysis path.
+
+SOURCE REVIEWED — The single validation collector is profile-driven for simple
+future evidence packages. The original F.1 profile remains in its specialized
+validation/PDF-extraction mode; generic profiles declare only `global` and
+`settings` artifact lists with a deterministic basename, `json`/`file` kind,
+and required flag. The F.2 profile pins source `170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`
+and packages one global representation JSON, one global four-page PDF, and the
+five setting-scoped F.1 v2 JSON inputs. It never runs the analyzer or imports
+analysis physics. Its source-identity exception is limited to the collector,
+collector test, two collector profiles, and `docs/memory/`.

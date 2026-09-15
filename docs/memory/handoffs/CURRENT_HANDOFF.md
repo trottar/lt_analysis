@@ -20,6 +20,9 @@ distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
   implementation commit is `5549098d2552b9c092b65e31aeb77edc0807ddda`.
   F.2.Fix.1 begins exactly at the latter clean checkout and is not a runtime
   or farm-validation identity.
+- The profile-driven F.2 collector repair begins exactly at
+  `170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`; it is source-only and does not
+  replace either F.2 source identity or any farm identity.
 
 ## Established evidence
 
@@ -59,6 +62,13 @@ cKDTree support, and non-production ownership remain unchanged. It creates no
 map, correction, event score/probability, weight, normalization, or production
 object. Read phases/phase-f2-method-a-acceptance-representation.md.
 
+SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
+the only collector. Its original F.1-specialized profile behavior is preserved;
+the new generic profile mode consumes declared global and setting-scoped files
+without F.1 checkpoint/PDF extraction. The F.2 profile requires only the F.2
+JSON/PDF once and five F.1 v2 JSON inputs. It is read-only with respect to
+analysis artifacts and does not run F.2.
+
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
 independence, same-t Method B, Phase-E presentation-only ownership, and
@@ -70,7 +80,9 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Run only the detached F.2 analyzer on the farm against the accepted five
-F.1 artifacts. Inspect its JSON, four-page PDF, source hashes, per-group
-response/support/OOD evidence, and recommendation. Accept a basis or make one
-coherent F.2 repair; F.3 remains blocked until acceptance.
+NEXT — After this collector repair is reviewed and pushed, run only the
+detached F.2 analyzer on the farm against the accepted five F.1 artifacts.
+Then use the F.2 collector profile to ZIP the new JSON/PDF and those five F.1
+inputs. Inspect source hashes, per-group response/support/OOD evidence, and
+recommendation. Accept a basis or make one coherent F.2 repair; F.3 remains
+blocked until acceptance.

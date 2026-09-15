@@ -1,0 +1,46 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_f2_representation_farm_review/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {"phi": "Left", "epsilon": "lowe"},
+    {"phi": "Left", "epsilon": "highe"},
+    {"phi": "Center", "epsilon": "lowe"},
+    {"phi": "Center", "epsilon": "highe"},
+    {"phi": "Right", "epsilon": "highe"}
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "f2_representation_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-representation.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f2_representation_pdf",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-representation.pdf",
+        "kind": "file",
+        "required": true
+      }
+    ],
+    "settings": [
+      {
+        "key": "method_a_acceptance_contract",
+        "basename_template": "{phi}_kaon_pion-background_hgcer_method-a-acceptance-contract_{kinematic}_{epsilon}.json",
+        "kind": "json",
+        "required": true
+      }
+    ]
+  },
+  "source_identity": {
+    "required_analysis_commit": "170e6fae3d2fed1949fc6932b8eac9ad83e3e01c",
+    "allowed_committed_files": [
+      "testing/collect_pion_hgcer_validation_bundle.py",
+      "testing/test_collect_pion_hgcer_validation_bundle.py",
+      "testing/pion_hgcer_validation_bundle_profile.json",
+      "testing/pion_hgcer_validation_bundle_profile_f2.json"
+    ],
+    "allowed_non_analysis_path_prefixes": ["docs/memory/"]
+  }
+}

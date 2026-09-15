@@ -29,8 +29,10 @@ audit. F.2.Fix.1 starts from implementation commit
 authority/provenance boundary; it does not change the audit science. F.2
 compares only `delta_only`, `track3`, `hgcer3`, and diagnostic
 `full5_reference`; it neither chooses a five-dimensional estimator nor freezes
-a basis. Farm review and explicit human basis acceptance are required before
-F.3.
+a basis. The profile-driven collector repair starts at
+`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c` and packages only the F.2 gate
+evidence; it does not run the audit. Farm review and explicit human basis
+acceptance are required before F.3.
 
 ### F.3 — detached Method-A map
 

@@ -15,6 +15,7 @@ import zipfile
 REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTOR_PATH = REPO_ROOT / "testing" / "collect_pion_hgcer_validation_bundle.py"
 PROFILE_PATH = REPO_ROOT / "testing" / "pion_hgcer_validation_bundle_profile.json"
+F2_PROFILE_PATH = REPO_ROOT / "testing" / "pion_hgcer_validation_bundle_profile_f2.json"
 SPEC = importlib.util.spec_from_file_location("_validation_bundle_collector", COLLECTOR_PATH)
 collector = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = collector
@@ -323,10 +324,60 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         )
         return result, output, source
 
+    def _f2_declaration(self, profile, scope, key):
+        return next(
+            declaration for declaration in profile["artifacts"][scope]
+            if declaration["key"] == key
+        )
+
+    def _f2_path(self, source, declaration, *, phi="global", epsilon="global"):
+        return Path(source) / collector._format_profile_basename(
+            declaration["basename_template"], phi, "Q4p4W2p74", epsilon,
+        )
+
+    def _write_f2_inputs(self, source):
+        source = Path(source)
+        profile = collector.load_validation_profile(F2_PROFILE_PATH)
+        representation_json = self._f2_declaration(profile, "global", "f2_representation_json")
+        representation_pdf = self._f2_declaration(profile, "global", "f2_representation_pdf")
+        acceptance = self._f2_declaration(profile, "settings", "method_a_acceptance_contract")
+        paths = {
+            "f2_representation_json": self._f2_path(source, representation_json),
+            "f2_representation_pdf": self._f2_path(source, representation_pdf),
+        }
+        paths["f2_representation_json"].write_bytes(
+            b'{"schema_version":"pion_hgcer_method_a_acceptance_representation_artifact/v1"}'
+        )
+        paths["f2_representation_pdf"].write_bytes(b"f2-four-page-review-pdf")
+        for phi, epsilon in collector.resolve_settings(profile=profile):
+            path = self._f2_path(source, acceptance, phi=phi, epsilon=epsilon)
+            path.write_bytes(json.dumps({
+                "schema_version": "pion_hgcer_method_a_acceptance_event_contract_artifact/v2",
+                "setting": _setting(phi, epsilon),
+            }, sort_keys=True).encode("utf-8"))
+            paths["{}-{}".format(phi, epsilon)] = path
+        (source / "unrelated-analysis-output.txt").write_text("ignored", encoding="utf-8")
+        return profile, paths
+
+    def _collect_f2(self, temporary, *, mutate=None):
+        source = Path(temporary) / "source"
+        source.mkdir()
+        profile, paths = self._write_f2_inputs(source)
+        if mutate is not None:
+            mutate(paths)
+        output = Path(temporary) / "f2-bundle.zip"
+        result = collector.collect_validation_bundle(
+            outdir=source, kinematic="Q4p4W2p74", output=output,
+            profile_path=F2_PROFILE_PATH, repo_root=REPO_ROOT,
+            command_runner=_clean_command_runner,
+        )
+        return result, output, source, profile, paths
+
     def test_profile_v4_and_five_setting_selection(self):
         profile = collector.load_validation_profile(PROFILE_PATH)
         self.assertEqual(profile["schema_version"], collector.PROFILE_SCHEMA_VERSION)
         self.assertEqual(profile["validation_profile"], "phase_f1_batched_farm_acceptance_review/v2")
+        self.assertEqual(profile["collection_mode"], "f1_specialized")
         self.assertEqual(collector.resolve_settings(), (
             ("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"),
             ("Center", "highe"), ("Right", "highe"),
@@ -335,6 +386,98 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             collector.resolve_settings("Right", "lowe")
         with self.assertRaisesRegex(ValueError, "supplied_together"):
             collector.resolve_settings("Left", None)
+
+    def test_f2_profile_is_generic_and_collects_only_declared_evidence(self):
+        profile = collector.load_validation_profile(F2_PROFILE_PATH)
+        self.assertEqual(profile["validation_profile"], "phase_f2_representation_farm_review/v1")
+        self.assertEqual(profile["collection_mode"], "generic_artifacts")
+        self.assertEqual(
+            profile["source_identity"]["required_analysis_commit"],
+            "170e6fae3d2fed1949fc6932b8eac9ad83e3e01c",
+        )
+        self.assertEqual(set(profile["source_identity"]["allowed_committed_files"]), {
+            "testing/collect_pion_hgcer_validation_bundle.py",
+            "testing/test_collect_pion_hgcer_validation_bundle.py",
+            "testing/pion_hgcer_validation_bundle_profile.json",
+            "testing/pion_hgcer_validation_bundle_profile_f2.json",
+        })
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, source, _profile, paths = self._collect_f2(temporary)
+            self.assertEqual(result["returncode"], 0)
+            manifest = result["manifest"]
+            self.assertTrue(manifest["complete"])
+            self.assertEqual(set(manifest["global_artifacts"]), {
+                "f2_representation_json", "f2_representation_pdf",
+            })
+            self.assertEqual(len(manifest["settings"]), 5)
+            self.assertTrue(all(
+                set(setting["artifacts"]) == {"method_a_acceptance_contract"}
+                for setting in manifest["settings"]
+            ))
+            self.assertNotIn("phase_c_checkpoint", manifest["global_artifacts"])
+            self.assertNotIn("phase_d_checkpoint", manifest["global_artifacts"])
+            self.assertNotIn("parent_preserving_correction", manifest["global_artifacts"])
+            self.assertNotIn("full_background_subtraction_pdf", manifest["global_artifacts"])
+            self.assertEqual(
+                manifest["global_artifacts"]["f2_representation_json"]["sha256"],
+                collector.sha256_file(paths["f2_representation_json"]),
+            )
+            self.assertEqual(
+                manifest["global_artifacts"]["f2_representation_pdf"]["sha256"],
+                collector.sha256_file(paths["f2_representation_pdf"]),
+            )
+            with zipfile.ZipFile(output) as archive:
+                names = archive.namelist()
+                self.assertEqual(sum(name.endswith(paths["f2_representation_json"].name) for name in names), 1)
+                self.assertEqual(sum(name.endswith(paths["f2_representation_pdf"].name) for name in names), 1)
+                self.assertEqual(sum(name.endswith("acceptance-contract_Q4p4W2p74_lowe.json") or name.endswith("acceptance-contract_Q4p4W2p74_highe.json") for name in names), 5)
+                self.assertIn("source_state.txt", names)
+                self.assertIn("source_checks.txt", names)
+                self.assertNotIn("unrelated-analysis-output.txt", names)
+                self.assertEqual(
+                    archive.read(manifest["global_artifacts"]["f2_representation_json"]["archive_path"]),
+                    paths["f2_representation_json"].read_bytes(),
+                )
+
+    def test_f2_declared_artifact_failures_are_best_effort_and_incomplete(self):
+        cases = (
+            (
+                "f2_json_missing",
+                lambda paths: paths["f2_representation_json"].unlink(),
+                "f2_representation_json", "missing",
+            ),
+            (
+                "f2_pdf_missing",
+                lambda paths: paths["f2_representation_pdf"].unlink(),
+                "f2_representation_pdf", "missing",
+            ),
+            (
+                "f1_input_missing",
+                lambda paths: paths["Left-lowe"].unlink(),
+                "method_a_acceptance_contract", "missing",
+            ),
+            (
+                "f2_json_invalid",
+                lambda paths: paths["f2_representation_json"].write_bytes(b"not-json"),
+                "f2_representation_json", "invalid",
+            ),
+        )
+        for label, mutation, artifact, status in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                result, output, _source, _profile, _paths = self._collect_f2(temporary, mutate=mutation)
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                manifest = result["manifest"]
+                self.assertFalse(manifest["complete"])
+                if artifact.startswith("f2_"):
+                    record = manifest["global_artifacts"][artifact]
+                else:
+                    record = manifest["settings"][0]["artifacts"][artifact]
+                self.assertEqual(record["status"], status)
+                self.assertIn(
+                    "missing_source_artifact" if status == "missing" else "source_artifact_json_invalid",
+                    {entry["code"] for entry in manifest["errors"]},
+                )
 
     def test_deterministic_artifact_names_and_manifest_selected_pages(self):
         self.assertEqual(
@@ -759,6 +902,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             "testing/collect_pion_hgcer_validation_bundle.py",
             "testing/test_collect_pion_hgcer_validation_bundle.py",
             "testing/pion_hgcer_validation_bundle_profile.json",
+            "testing/pion_hgcer_validation_bundle_profile_f2.json",
         })
         self.assertEqual(profile["source_identity"]["allowed_non_analysis_path_prefixes"], ["docs/memory/"])
         source = COLLECTOR_PATH.read_text(encoding="utf-8")
@@ -785,6 +929,7 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 "testing/collect_pion_hgcer_validation_bundle.py",
                 "testing/test_collect_pion_hgcer_validation_bundle.py",
                 "testing/pion_hgcer_validation_bundle_profile.json",
+                "testing/pion_hgcer_validation_bundle_profile_f2.json",
             ],
         )
 

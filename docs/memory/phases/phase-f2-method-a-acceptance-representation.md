@@ -28,6 +28,15 @@ agreement. The deterministic CLI validates the declared setting, kinematic,
 and particle before associating each source hash, and rejects colliding output
 paths. This repair changes neither F.2 science nor F.1.
 
+The profile-driven collector repair starts from
+`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`. It keeps the single collector and
+the default F.1 specialized profile unchanged, while adding a generic
+profile-declared artifact path. The F.2 profile collects only one global F.2
+JSON, one global four-page PDF, and the five frozen setting-scoped F.1 v2 JSON
+inputs; it neither runs F.2 nor requires Phase-C/Phase-D checkpoints,
+parent-preserving corrections, full-background PDFs/page manifests, or
+extracted F.1/E.7.2 PDFs.
+
 ## Frozen audit contract
 
 - Input is exactly the five canonical Q4p4W2p74 F.1 v2 artifacts: Left-lowe,
@@ -57,10 +66,13 @@ paths. This repair changes neither F.2 science nor F.1.
   optimizer failure, and output-safety coverage.
 - Frozen F.1 contract/runtime suite: 10 tests passed.
 - `git diff --check` passed before memory updates.
+- Profile-driven collector `py_compile` and 23 focused tests passed; the frozen
+  F.2 suite still passed 19 tests.
 
 ## Farm gate
 
-NEXT — Run only the detached analyzer from a clean checkout containing the F.2
+NEXT — After the profile-driven collector repair is reviewed and pushed, run
+only the detached analyzer from a clean checkout containing the F.2
 implementation:
 
 ```tcsh
@@ -73,6 +85,9 @@ python3 testing/analyze_pion_hgcer_method_a_acceptance_representation.py \
 ```
 
 Collect JSON, PDF, stdout/stderr, `git rev-parse HEAD`, and `git status
---short`. Inspect all per-group gates, source hashes, and the recommendation.
+--short`. Then run the standard collector with
+`testing/pion_hgcer_validation_bundle_profile_f2.json` to archive exactly that
+JSON/PDF and the five F.1 JSON inputs. Inspect all per-group gates, source
+hashes, and the recommendation.
 F.2 cannot become `CLOSED / RUNTIME VALIDATED` and F.3 cannot begin until one
 reduced basis is explicitly accepted.
