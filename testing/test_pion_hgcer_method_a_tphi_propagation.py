@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import sys
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -96,6 +97,19 @@ class TphiPropagationTests(unittest.TestCase):
         tampered = deepcopy(self.f4); tampered["correction"]["parents"][0]["baseline_parent_sum"] += 1.0
         with self.assertRaisesRegex(f5.MethodATPhiPropagationError, "fingerprint|reproduction"):
             self._build(f4_artifact=tampered)
+
+    def test_explicit_prezip_factor_length_gate_fails_closed_without_zip_strict(self):
+        original = f5._f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data
+
+        def shortened_review(*args, **kwargs):
+            correction, review = original(*args, **kwargs)
+            altered = deepcopy(review)
+            altered[0]["correction_factors"] = altered[0]["correction_factors"][:-1]
+            return correction, altered
+
+        with mock.patch.object(f5._f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", side_effect=shortened_review), self.assertRaisesRegex(f5.MethodATPhiPropagationError, "f4_review_factor_alignment_invalid"):
+            self._build()
+        self.assertNotIn("strict=True", (REPO_ROOT / "src" / "cuts" / "pion_hgcer_method_a_tphi_propagation.py").read_text(encoding="utf-8"))
 
     def test_wrong_geometry_and_occupied_f4_child_diagnostic_fail(self):
         wrong = deepcopy(self.artifacts); wrong[0]["contract"]["phi_edges"][1] = -139.0; f1_fixtures._seal_f1_artifact(wrong[0])

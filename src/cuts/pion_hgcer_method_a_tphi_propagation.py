@@ -278,7 +278,10 @@ def _build_propagation(f1_artifacts: Sequence[Mapping[str, object]], f3_artifact
             if factors.ndim != 1 or factors.size != len(rows) or not np.all(np.isfinite(factors)) or np.any(factors <= 0.0):
                 raise MethodATPhiPropagationError("f4_review_factor_alignment_invalid")
             source_values: dict[str, list[tuple[float, float]]] = {}
-            for row, factor in zip(rows, factors, strict=True):
+            # Exact row/factor length equality is enforced immediately above;
+            # plain zip preserves that validated pairing on farm Python versions
+            # without zip(strict=...).
+            for row, factor in zip(rows, factors):
                 phi_index = _integer(row.get("phi_index"), "f1_phi_index")
                 if phi_index < 0 or phi_index >= 9:
                     raise MethodATPhiPropagationError("f1_phi_index_invalid")

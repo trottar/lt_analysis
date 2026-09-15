@@ -20,3 +20,12 @@ ROOT histogram, Method-B input, yield, cross section, or production object.
 Farm validation is one detached F.5 analyzer run plus the unchanged generic
 collector using the F.5 profile. F.6 remains BLOCKED pending explicit F.5
 runtime acceptance and a separate promotion decision.
+
+SOURCE REVIEWED — F.5.Fix.1 begins from
+`f9ce5aadbebc31f5163a093ab32244644ad2a088` after the first F.5 farm run found
+that its Python version rejects `zip(strict=True)`. The repair removes only
+that redundant keyword; the preceding exact row/factor-length, finite, and
+positive-factor gate remains unchanged and is explicitly regression-tested.
+It changes no authority, ordering, geometry, arithmetic, F.4 behavior, or
+detached/production boundary. The required next gate is the same detached F.5
+analyzer command followed by the unchanged F.5 generic collector.

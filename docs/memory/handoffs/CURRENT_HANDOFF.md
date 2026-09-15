@@ -74,6 +74,9 @@ DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 consumes accepted
 F.4/F.3/F.1 artifacts only and builds detached signed canonical `(t,phi)`
 aggregate templates. It must use the F.4 shared calculator, retain explicit
 zero cells, and never normalize children or create event/production output.
+SOURCE REVIEWED — F.5.Fix.1 at `f9ce5aadbebc31f5163a093ab32244644ad2a088`
+removes only redundant `zip(strict=True)` after the exact existing row/factor
+length guard so the detached analyzer is compatible with farm Python.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
