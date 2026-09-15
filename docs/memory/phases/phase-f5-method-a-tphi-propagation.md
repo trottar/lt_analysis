@@ -24,8 +24,10 @@ runtime acceptance and a separate promotion decision.
 SOURCE REVIEWED — F.5.Fix.1 begins from
 `f9ce5aadbebc31f5163a093ab32244644ad2a088` after the first F.5 farm run found
 that its Python version rejects `zip(strict=True)`. The repair removes only
-that redundant keyword; the preceding exact row/factor-length, finite, and
-positive-factor gate remains unchanged and is explicitly regression-tested.
-It changes no authority, ordering, geometry, arithmetic, F.4 behavior, or
-detached/production boundary. The required next gate is the same detached F.5
-analyzer command followed by the unchanged F.5 generic collector.
+that redundant keyword and is implemented/source-reviewed at
+`46598878c102a67275b1600e73cba3b2f166dc26`; the preceding exact
+row/factor-length, finite, and positive-factor gate remains unchanged and is
+explicitly regression-tested. It changes no authority, ordering, geometry,
+arithmetic, F.4 behavior, or detached/production boundary. The required next
+gate is the same detached F.5 analyzer command followed by the unchanged F.5
+generic collector.

@@ -23,6 +23,11 @@ distinguishes the analysis runtime, collector reconciliation, and F.2 baseline.
 - The profile-driven F.2 collector repair begins exactly at
   `170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`; it is source-only and does not
   replace either F.2 source identity or any farm identity.
+- F.5 implementation and F.5.Fix.1 starting HEAD:
+  `f9ce5aadbebc31f5163a093ab32244644ad2a088`.
+- F.5.Fix.1 implementation/source-reviewed HEAD:
+  `46598878c102a67275b1600e73cba3b2f166dc26`. This is the farm-Python
+  compatibility repair only; it is not a F.5 farm-evaluated identity.
 
 ## Established evidence
 
@@ -74,9 +79,11 @@ DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 consumes accepted
 F.4/F.3/F.1 artifacts only and builds detached signed canonical `(t,phi)`
 aggregate templates. It must use the F.4 shared calculator, retain explicit
 zero cells, and never normalize children or create event/production output.
-SOURCE REVIEWED — F.5.Fix.1 at `f9ce5aadbebc31f5163a093ab32244644ad2a088`
-removes only redundant `zip(strict=True)` after the exact existing row/factor
-length guard so the detached analyzer is compatible with farm Python.
+SOURCE REVIEWED — F.5.Fix.1 starts from the F.5 implementation
+`f9ce5aadbebc31f5163a093ab32244644ad2a088` and is implemented/reviewed at
+`46598878c102a67275b1600e73cba3b2f166dc26`. It removes only redundant
+`zip(strict=True)` after the exact existing row/factor length guard so the
+detached analyzer is compatible with farm Python.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;

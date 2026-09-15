@@ -75,8 +75,10 @@ DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5 detached signed `(t,phi)`
 propagation consumes accepted F.4/F.3/F.1 evidence and produces only parallel
 aggregate canonical `3 x 9` baseline/adjusted templates with explicit zero
 cells. It does not alter the F.4 correction, independently normalize children,
-or create a production object. F.5.Fix.1 is SOURCE REVIEWED at
-`f9ce5aadbebc31f5163a093ab32244644ad2a088`: it removes only the farm-Python-
+or create a production object. F.5 implementation is
+`f9ce5aadbebc31f5163a093ab32244644ad2a088`. SOURCE REVIEWED — F.5.Fix.1
+starts from that F.5 implementation and is implemented/reviewed at
+`46598878c102a67275b1600e73cba3b2f166dc26`; it removes only the farm-Python-
 incompatible `zip(strict=True)` after F.5's existing exact row/factor-length
 gate. See phases/phase-f5-method-a-tphi-propagation.md.
 
