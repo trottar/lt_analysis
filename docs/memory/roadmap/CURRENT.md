@@ -53,19 +53,17 @@ evidence/f5-runtime-closure.md.
 
 ### F.5.2 — detached presentation-only F.5 review rerender
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — preserve the accepted F.5 JSON
-payload, scientific fingerprint, authority, and detached calculation while
-rerendering the review PDF with physical phi-interval labels. F.6 remains
-BLOCKED until this visual acceptance.
+CLOSED / RUNTIME VALIDATED — the presentation-only rerender was accepted at
+`6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its 12-page review uses physical
+phi-interval labels while the accepted F.5 payload and scientific fingerprint
+remain exactly unchanged. See evidence/f5-2-runtime-closure.md.
 
 ### F.6 — explicit production promotion
 
-BLOCKED — only after F.5.2 presentation acceptance and a separate explicit
-promotion decision.
+NEXT — explicit production promotion following accepted F.5/F.5.2. Its
+implementation requires a separate narrow contract.
 
 ## NEXT
 
-NEXT — Preserve accepted F.5 evidence, run only the detached F.5.2 PDF
-rerender against the accepted inputs, verify the unchanged scientific
-fingerprint and inspect the twelve-page review. The unchanged collector is
-optional for a new review bundle. F.6 remains BLOCKED pending F.5.2 review.
+NEXT — Define and implement F.6 explicit production promotion under a new
+narrow contract. F.6 has not started.

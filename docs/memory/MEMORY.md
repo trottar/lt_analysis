@@ -135,11 +135,19 @@ reviewed at `46598878c102a67275b1600e73cba3b2f166dc26`; it repaired only
 farm-Python `zip(strict=True)` compatibility after the unchanged exact
 row/factor-length gate.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 is a presentation-only
-rerender using physics-readable PDF terminology. It must preserve the accepted
-F.5 scientific fingerprint, payload arrays, authority, formulas, geometry,
-normalization, and detached/non-production boundary. F.6 remains BLOCKED until
-the F.5.2 farm rerender is visually accepted.
+CLOSED / RUNTIME VALIDATED — F.5.2 is the accepted presentation-only farm
+rerender at `6634e9cb470cf35f21f5d475ec6ce33b524cd233`, packaged as
+`KaonLT_PhaseF5_2_Fix1_validation_Q4p4W2p74.zip` with SHA-256
+`323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`.
+The accepted F.5 scientific fingerprint remains exactly
+`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`; the
+propagation payload was exactly unchanged. The 12-page review passed visual
+acceptance: physics-readable terms and page-12 physical phi intervals replaced
+internal indices. No scientific calculation, payload, authority, geometry,
+normalization, production behavior, or F.5 result changed. F.5.2.Fix.1 at
+`6634e9cb470cf35f21f5d475ec6ce33b524cd233` remains distinct from the earlier
+F.5.Fix.1 source-reviewed compatibility repair. F.6 is now the only NEXT
+production-promotion phase. See evidence/f5-2-runtime-closure.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and

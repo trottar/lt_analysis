@@ -1,7 +1,8 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 after accepted F.5 closure and F.5.2 presentation work. This record
-distinguishes accepted runtime evidence from source-only presentation work.
+Prepared: 2026-09-15 after accepted F.5.2 presentation-only rerender closure.
+This record distinguishes accepted F.5 scientific runtime evidence from its
+later accepted presentation-only rerender.
 
 ## Resume identity
 
@@ -31,6 +32,11 @@ distinguishes accepted runtime evidence from source-only presentation work.
 - Accepted F.5 farm/bundle HEAD and F.5.2 starting source HEAD:
   `3c6a66b7df9bf17e5a428458a2281a80831f001a`. F.5 scientific fingerprint:
   `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`.
+- F.5.2.Fix.1 source-reviewed/farm-rerender HEAD:
+  `6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its accepted presentation-only
+  bundle SHA-256 is
+  `323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`;
+  it does not replace F.5's scientific runtime identity.
 
 ## Established evidence
 
@@ -83,9 +89,13 @@ CLOSED / RUNTIME VALIDATED — F.5 is accepted from the supplied bundle at
 scientific fingerprint are in evidence/f5-runtime-closure.md. It remains
 detached: no child normalization or event/production output exists.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 changes only PDF
-terminology to make the accepted F.5 quantities physics-readable. The F.5 JSON
-payload, fingerprint, calculation, and authority are frozen.
+CLOSED / RUNTIME VALIDATED — F.5.2 is the accepted presentation-only rerender
+at `6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its JSON SHA-256 is
+`143e3af6b1c69560e5bf351155b570d05f19e7e0ceb14665f5448c351ad501be`; its PDF
+SHA-256 is `e71bf819014b7410c8e403c54e5114460626484f21dab763323b13dac0111aa4`.
+The 12-page visual review accepted physical phi intervals in place of internal
+indices, while the F.5 scientific payload and fingerprint remained exactly
+unchanged. Read evidence/f5-2-runtime-closure.md.
 
 SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
 the only collector. Its original F.1-specialized profile behavior is preserved;
@@ -105,6 +115,5 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Preserve accepted F.5 v1 evidence, then run only the detached F.5.2
-PDF rerender against accepted F.1/F.3/F.4 inputs. The unchanged collector is
-optional for a new review bundle. F.6 remains BLOCKED pending F.5.2 review.
+NEXT — Define and implement F.6 explicit production promotion under a new
+narrow contract. F.6 has not started.

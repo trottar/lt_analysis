@@ -1,8 +1,9 @@
 # Current KaonLT development state
 
 Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.5 farm-bundle closure and F.5.2 presentation implementation. Repository HEAD values in this record are
-timestamped observations, not permanent claims about the live checkout.
+accepted F.5.2 presentation-only farm rerender closure. Repository HEAD values
+in this record are timestamped observations, not permanent claims about the
+live checkout.
 
 ## Repository identity at last reconciliation
 
@@ -78,12 +79,20 @@ and all 15 parent/five-setting closures passing. Its scientific fingerprint is
 `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`. See
 evidence/f5-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.5.2 is a presentation-only
-PDF terminology rerender from accepted F.5 evidence. It changes no F.5 JSON,
-scientific fingerprint, template arrays, authority, calculation, or production
-behavior. SOURCE REVIEWED — F.5.Fix.1 identities remain distinct: F.5
+CLOSED / RUNTIME VALIDATED — F.5.2 is the accepted presentation-only farm
+rerender at `6634e9cb470cf35f21f5d475ec6ce33b524cd233`, from bundle
+`KaonLT_PhaseF5_2_Fix1_validation_Q4p4W2p74.zip` with SHA-256
+`323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`.
+The accepted F.5 scientific fingerprint remains exactly
+`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`:
+the propagation payload was exactly unchanged, and only JSON provenance and
+PDF terminology changed. See evidence/f5-2-runtime-closure.md.
+
+SOURCE REVIEWED — F.5.Fix.1 identities remain distinct: F.5
 implementation/Fix.1 start `f9ce5aadbebc31f5163a093ab32244644ad2a088`; Fix.1
 implementation/source review `46598878c102a67275b1600e73cba3b2f166dc26`.
+F.5.2.Fix.1 is the distinct source-reviewed presentation-label repair at
+`6634e9cb470cf35f21f5d475ec6ce33b524cd233`; it did not change F.5 science.
 
 SOURCE REVIEWED — The existing validation collector now has a generic
 profile-declared artifact path in addition to its unchanged F.1-specialized
@@ -118,7 +127,5 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Preserve the accepted F.5 v1 evidence, then rerun only the detached
-F.5 analyzer for F.5.2 presentation review against the accepted F.1/F.3/F.4
-inputs. Run the unchanged generic collector only if a new review bundle is
-needed. F.6 remains BLOCKED pending F.5.2 visual acceptance.
+NEXT — F.6 explicit production promotion under a new narrow contract. F.6 has
+not started; its scientific and production design remain to be defined.
