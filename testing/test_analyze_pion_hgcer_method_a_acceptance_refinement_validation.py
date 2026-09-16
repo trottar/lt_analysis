@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 from pathlib import Path
 import re
@@ -57,7 +58,20 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
         return directory / analyzer.validation.pion_hgcer_method_a_acceptance_refinement_validation_filename(KINEMATIC), directory / analyzer._pdf_filename(KINEMATIC), authority, f4_authority, f3_authority, f6_authority
 
     def _run(self, directory: Path, json_path: Path, pdf_path: Path, authority: dict[str, object], f4_authority: dict[str, object], f3_authority: dict[str, object], f6_authority: dict[str, object]) -> int:
-        return analyzer.main(["--outdir", str(directory), "--kinematic", KINEMATIC, "--output-json", str(json_path), "--output-pdf", str(pdf_path)], accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority, accepted_f6_1_artifact_authority_by_kinematic=f6_authority, bootstrap_test_config={"replicas": 2})
+        real_builder = analyzer.validation.build_pion_hgcer_method_a_acceptance_refinement_validation_artifact
+
+        def build_with_test_bootstrap(*args, **kwargs):
+            self.assertNotIn("bootstrap_test_config", kwargs)
+            kwargs["bootstrap_test_config"] = {"replicas": 2}
+            return real_builder(*args, **kwargs)
+
+        with mock.patch.object(analyzer.validation, "build_pion_hgcer_method_a_acceptance_refinement_validation_artifact", side_effect=build_with_test_bootstrap):
+            return analyzer.main(["--outdir", str(directory), "--kinematic", KINEMATIC, "--output-json", str(json_path), "--output-pdf", str(pdf_path)], accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority, accepted_f6_1_artifact_authority_by_kinematic=f6_authority)
+
+    def test_production_analyzer_has_no_bootstrap_test_override(self):
+        self.assertNotIn("bootstrap_test_config", inspect.signature(analyzer.main).parameters)
+        self.assertNotIn("bootstrap_test_config", inspect.getsource(analyzer.main))
+        self.assertNotIn("bootstrap_test_config", inspect.getsource(analyzer.build_argument_parser))
 
     def test_cli_writes_deterministic_aggregate_artifact_and_review_pdf(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -68,16 +82,24 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
             self.assertEqual(len(re.findall(rb"/Type /Page(?!s)", output_pdf.read_bytes())), 1 + 15 + details + 1)
             serialized = json.dumps(payload, sort_keys=True); self.assertNotIn("correction_factors", serialized); self.assertNotIn("entry_index", serialized)
 
-    def test_cli_rejects_paths_overwrite_and_missing_f6_input(self):
+    def test_cli_rejects_paths_overwrite_and_missing_required_inputs(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
             self.assertEqual(self._run(directory, directory / "wrong.json", output_pdf, authority, f4_authority, f3_authority, f6_authority), 2)
+            self.assertEqual(self._run(directory, output_json, directory / "wrong.pdf", authority, f4_authority, f3_authority, f6_authority), 2)
             output_json.write_text("collision", encoding="utf-8")
             self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 2)
-        with tempfile.TemporaryDirectory() as temporary:
-            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
-            (directory / analyzer._f6_1_filename(KINEMATIC)).unlink()
-            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+            output_json.unlink(); output_pdf.write_text("collision", encoding="utf-8")
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 2)
+        for filename in (
+            analyzer._f1_filename("Left", KINEMATIC, "lowe"),
+            analyzer._f3_filename(KINEMATIC), analyzer._f4_filename(KINEMATIC),
+            analyzer._f5_filename(KINEMATIC), analyzer._f6_1_filename(KINEMATIC),
+        ):
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as temporary:
+                directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+                (directory / filename).unlink()
+                self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
 
     def test_filenames_invalid_inputs_and_f6_authority_are_fail_closed(self):
         self.assertEqual(analyzer._f1_filename("Left", KINEMATIC, "lowe"), "Left_kaon_pion-background_hgcer_method-a-acceptance-contract_Q4p4W2p74_lowe.json")
@@ -94,6 +116,16 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
             (directory / analyzer._f3_filename(KINEMATIC)).write_text("{", encoding="utf-8")
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            f1_path = directory / analyzer._f1_filename("Left", KINEMATIC, "lowe")
+            payload = json.loads(f1_path.read_text(encoding="utf-8")); payload["setting"]["phi_setting"] = "Wrong"
+            f1_path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            (directory / analyzer._f1_filename("Left", KINEMATIC, "lowe")).write_text("{", encoding="utf-8")
             self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
 
     def test_cli_rollback_and_unsupported_kinematic(self):

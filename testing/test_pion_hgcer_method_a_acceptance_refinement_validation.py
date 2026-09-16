@@ -7,6 +7,7 @@ import json
 import math
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -44,6 +45,16 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         }
         values.update(changes)
         return f62.build_pion_hgcer_method_a_acceptance_refinement_validation(**values)
+
+    def _prompt_child_inputs(self):
+        pairs_by_parent, raw, _ = f62._reproduce_and_pair(self.artifacts, self.f3, self.hashes, f61_fixtures.F3_SHA, self.f4["correction"], self.f3_authority)
+        for (setting_id, t_index), pairs in sorted(pairs_by_parent.items()):
+            state = deepcopy(raw[setting_id]); state["setting_id"] = setting_id; _t_geometry, phi_edges, _delta_edges = f62._geometry(state["contract"], setting_id)
+            for phi_index in range(9):
+                low, control, _full = f62._child_rows(state, pairs, t_index, phi_index, phi_edges, "prompt_child")
+                if low and control:
+                    return state, deepcopy(pairs), t_index, phi_index, phi_edges, low, control
+        self.fail("fixture has no populated prompt child")
 
     def test_valid_chain_builds_all_children_and_only_aggregate_content(self):
         result = self._build()
@@ -86,6 +97,87 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
             self._build()
         self.assertIsNotNone(original)
 
+    def test_all_frozen_upstream_authorities_fail_closed(self):
+        changed_hashes = dict(self.hashes); first_hash = next(iter(changed_hashes)); changed_hashes[first_hash] = "f" * 64
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+            self._build(f1_input_file_hashes=changed_hashes)
+        for field in ("f3_source_file_sha256", "f3_map_fingerprint", "f3_algorithm_fingerprint", "f3_artifact_fingerprint", "f4_source_file_sha256", "f4_correction_fingerprint", "f4_artifact_fingerprint", "f5_source_file_sha256", "f5_propagation_fingerprint", "f5_artifact_fingerprint"):
+            wrong = deepcopy(self.authority); wrong[KINEMATIC][field] = "f" * 64
+            with self.subTest(authority=field), self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+                self._build(accepted_runtime_authority_by_kinematic=wrong)
+        for field in ("source_file_sha256", "map_fingerprint", "algorithm_fingerprint", "artifact_fingerprint"):
+            wrong = deepcopy(self.f3_authority); wrong[KINEMATIC][field] = "f" * 64
+            with self.subTest(f3_authority=field), self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+                self._build(accepted_f3_runtime_authority_by_kinematic=wrong)
+        for field in ("source_file_sha256", "correction_fingerprint", "artifact_fingerprint"):
+            wrong = deepcopy(self.f4_authority); wrong[KINEMATIC][field] = "f" * 64
+            with self.subTest(f4_authority=field), self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+                self._build(accepted_f4_runtime_authority_by_kinematic=wrong)
+
+    def test_f4_transient_review_factor_and_support_contract_fail_closed(self):
+        original = f62._f61._f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data
+
+        def broken_review(kind):
+            def wrapped(*args, **kwargs):
+                correction, review = original(*args, **kwargs)
+                review = deepcopy(review)
+                if kind == "factor_length":
+                    review[0]["correction_factors"] = review[0]["correction_factors"][:-1]
+                elif kind == "support_length":
+                    review[0]["in_support_mask"] = review[0]["in_support_mask"][:-1]
+                elif kind == "nonfinite_factor":
+                    review[0]["correction_factors"][0] = float("nan")
+                else:
+                    review[0]["correction_factors"][0] = 0.0
+                return correction, review
+            return wrapped
+
+        for kind in ("factor_length", "support_length", "nonfinite_factor", "nonpositive_factor"):
+            with self.subTest(kind=kind), mock.patch.object(f62._f61._f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", side_effect=broken_review(kind)):
+                with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+                    self._build()
+
+    def test_geometry_identity_and_phi_semantics_are_directly_closed(self):
+        state, pairs, t_index, phi_index, phi_edges, low, control = self._prompt_child_inputs()
+        for row in low:
+            self.assertEqual(f62._phi_index(math.degrees(float(row["phi"])), phi_edges), phi_index)
+        baseline, adjusted = f62._weights(control, "population")
+        self.assertEqual(len(baseline), len(adjusted)); self.assertEqual(len(control), len(f62._values(control, "analysis_MM", training=False, label="population")))
+        self.assertTrue(all(value > 0.0 for value in baseline)); self.assertTrue(all(value > 0.0 for value in adjusted))
+        self.assertEqual(state["contract"]["delta_edges"], self.artifacts[[item["setting"]["phi_setting"] + "-" + item["setting"]["epsilon_filename_token"] for item in self.artifacts].index(state["setting_id"])]["contract"]["delta_edges"])
+        prompt_pair = next(item for item in pairs if item["row"]["source_label"] == "prompt" and item["row"]["t_index"] == t_index and item["row"]["phi_index"] == phi_index)
+        identity = ("prompt", prompt_pair["row"]["entry_index"])
+        missing_training = deepcopy(state); del missing_training["training"][identity]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "prompt_identity_missing_training_control"):
+            f62._child_rows(missing_training, pairs, t_index, phi_index, phi_edges, "missing_training")
+        phi_mismatch = deepcopy(state); phi_mismatch["training"][identity]["phi"] = float(phi_mismatch["training"][identity]["phi"]) + 0.01
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "phi_semantic_parity_mismatch"):
+            f62._child_rows(phi_mismatch, pairs, t_index, phi_index, phi_edges, "phi_mismatch")
+        invalid_geometry_pairs = deepcopy(pairs)
+        for item in invalid_geometry_pairs:
+            if item["row"]["source_label"] == "prompt" and item["row"]["entry_index"] == identity[1]:
+                item["row"]["phi_degrees"] = float(phi_edges[-1]) + 1.0
+                break
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "application_phi_geometry_invalid"):
+            f62._child_rows(state, invalid_geometry_pairs, t_index, phi_index, phi_edges, "invalid_geometry")
+
+    def test_application_identity_and_prompt_training_mismatches_fail_closed(self):
+        duplicate = deepcopy(self.artifacts)
+        records = duplicate[0]["contract"]["application_records"]
+        by_source: dict[str, list[dict[str, object]]] = {}
+        for row in records:
+            by_source.setdefault(str(row["source_label"]), []).append(row)
+        same_source = next(group for group in by_source.values() if len(group) >= 2)
+        same_source[1]["entry_index"] = same_source[0]["entry_index"]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "raw_f1_records_invalid"):
+            f62._raw_state(duplicate)
+        missing = deepcopy(self.artifacts)
+        application = missing[0]["contract"]["application_records"]
+        prompt_index = next(index for index, row in enumerate(application) if row["source_label"] == "prompt")
+        del application[prompt_index]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f4_transient_review_reproduction_failed"):
+            f62._reproduce_and_pair(missing, self.f3, self.hashes, f61_fixtures.F3_SHA, self.f4["correction"], self.f3_authority)
+
     def test_metrics_states_bins_and_signed_window_are_explicit(self):
         shape = f62._one_dimensional_payload([], [], [], [], [0.0, 1.0], "empty")
         self.assertFalse(shape["metrics"]["kappa"]["available"]); self.assertEqual(shape["metrics"]["kappa"]["reason"], "low_population_empty")
@@ -107,6 +199,31 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         self.assertAlmostEqual(f62._effective_sample_size([1.0, 2.0], "neff")["value"], 1.8)
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "baseline_weight_invalid"):
             f62._one_dimensional_payload([0.1], [0.2], [-1.0], [1.0], [0.0, 1.0], "nonpositive")
+
+    def test_frozen_edges_finite_values_and_signed_inputs_fail_closed(self):
+        display = deepcopy(self.f6["validation"])
+        comparison = display["parents"][0]["prompt_shape_comparisons"]["analysis_MM"]
+        comparison["edges"] = comparison["edges"][:-1]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_edges_analysis_MM"):
+            f62._parent_display_edges(display)
+        display = deepcopy(self.f6["validation"])
+        comparison = display["parents"][0]["prompt_shape_comparisons"]["analysis_MM"]
+        comparison["edges"][2] = comparison["edges"][1]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_edges_analysis_MM"):
+            f62._parent_display_edges(display)
+        contract = deepcopy(self.artifacts[0]["contract"]); self.assertEqual(f62._geometry(contract, "frozen")[2], self.artifacts[0]["contract"]["delta_edges"])
+        contract["delta_edges"][1] = contract["delta_edges"][0]
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "frozen_delta_edges"):
+            f62._geometry(contract, "frozen")
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "nonfinite_analysis_MM"):
+            f62._value({"analysis_MM": float("nan")}, "analysis_MM", "nonfinite")
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "signed_source_or_factor_invalid"):
+            f62._signed_payload([{"row": {"source_label": "prompt", "analysis_MM": 1.12, "signed_baseline_event_contribution": 1.0}, "factor": -1.0}], [1.0, 1.2], {"mm_min": 1.10, "mm_max": 1.16}, "signed_factor")
+        changed = deepcopy(self.artifacts)
+        row = next(item for item in changed[0]["contract"]["application_records"] if item["source_label"] == "prompt")
+        row["signed_baseline_event_contribution"] = float(row["signed_baseline_event_contribution"]) + 1.0
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+            self._build(f1_artifacts=changed)
 
     def test_hand_metrics_and_bootstrap_contract_states(self):
         low = {"available": True, "unit_area": [1.0, 0.0], "reason": None}
@@ -142,6 +259,36 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "bootstrap_test_config_invalid"):
             self._build(bootstrap_test_config={"seed": 3})
 
+    def test_bootstrap_uses_separate_low_paired_control_and_source_strata_draws(self):
+        def training(value: float) -> dict[str, object]:
+            return {name: value for name in f62._ONE_DIMENSIONAL_VARIABLES}
+
+        def pair(source: str, value: float, factor: float) -> dict[str, object]:
+            return {"row": {**training(value), "source_label": source, "baseline_pion_weight_w0": value, "signed_baseline_event_contribution": value}, "factor": factor}
+
+        low = [training(1.0), training(2.0)]
+        control = [pair("prompt", 1.0, 1.1), pair("prompt", 2.0, 1.2), pair("prompt", 3.0, 1.3)]
+        full = [pair("prompt", 1.0, 1.1), pair("rand", 2.0, 1.2), pair("rand", 3.0, 1.3)]
+        variable_edges = {name: [float(index) for index in range(41)] for name in f62._ONE_DIMENSIONAL_VARIABLES}
+        policy = f62._bootstrap_policy({"replicas": 1})
+
+        class FakeGenerator:
+            def __init__(self):
+                self.draws: list[tuple[int, int]] = []
+
+            def integers(self, low_bound, high_bound, size):
+                self.draws.append((int(high_bound), int(size)))
+                return np.zeros(int(size), dtype=int)
+
+        fake = FakeGenerator()
+        with mock.patch.object(f62.np.random, "default_rng", return_value=fake):
+            payload = f62._bootstrap_child(low, control, full, variable_edges, variable_edges["SHMS_delta"], policy, "Left-lowe", 0, 0, {"mm_min": 1.10, "mm_max": 1.16})
+        self.assertEqual(fake.draws, [(2, 2), (3, 3), (1, 1), (2, 2)])
+        self.assertEqual(payload["policy"]["replicas"], 1)
+        self.assertEqual(payload["policy"]["global_seed"], 20260916)
+        reordered = self._build(f1_artifacts=list(reversed(self.artifacts)))
+        self.assertEqual(self._build()["fingerprint"], reordered["fingerprint"])
+
     def test_aggregate_guard_and_artifact_fingerprint_are_deterministic(self):
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "forbidden_event_persistence:entry_index"):
             f62._assert_aggregate_only_persistence({"entry_index": 1})
@@ -150,6 +297,10 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         self.assertEqual(first["artifact_fingerprint"], second["artifact_fingerprint"])
         for name, expected in {"non_authoritative": True, "validation_only": True, "manual_review_required": True, "accepted_f6_1_consumed": True, "accepted_f6_1_modified": False, "event_correction_evaluated_for_detached_validation": True, "event_correction_persisted": False, "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False, "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False, "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False, "method_b_numerical_dependency": False, "automatic_case_classification": False, "case_thresholds_defined": False, "final_yield_uncertainty_claimed": False}.items():
             self.assertEqual(first[name], expected)
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "nonfinite.json"
+            with self.assertRaises((ValueError, f62.MethodAAcceptanceRefinementValidationError)):
+                f62.write_pion_hgcer_method_a_acceptance_refinement_validation_json(path, {"value": float("inf")})
 
     def test_module_has_no_production_or_method_b_import(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_method_a_acceptance_refinement_validation.py").read_text(encoding="utf-8")
