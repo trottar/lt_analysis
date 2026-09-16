@@ -149,41 +149,30 @@ normalization, production behavior, or F.5 result changed. F.5.2.Fix.1 at
 F.5.Fix.1 source-reviewed compatibility repair. See
 evidence/f5-2-runtime-closure.md.
 
-F.6 promotion is deliberately staged. DEVELOPMENT COMPLETE, FARM VALIDATION
-PENDING — F.6.1 detached Method-A event-reweighting validation was initially
-implemented at `883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed,
-including F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. It
-consumes frozen F.1/F.3/F.4/F.5.2 artifacts through a pure-Python
-aggregate-only validator; transient F.4 factors are positionally paired with
-F.1 application rows, while event-level values never persist. The frozen
-producer contract is explicit: Part-1/training `evt.ph_q` is radians and
-application `phi_degrees` is `evt.ph_q * 180/pi`; F.6.1 closes that exact
-rad-to-degree relation rather than inferring units. Source review passed on
-2026-09-16: py_compile; F.6.1 validator/analyzer; F.4 correction; F.5
-propagation/analyzer; and available F.1 acceptance-contract tests, plus the
-`4928e145..bfc4fe42` range whitespace check. Farm/runtime validation remains
-unestablished. It has no production application or yield mutation, ROOT or
-cross-section dependency, child-normalization, or Method-B numerical
-dependency. E.8 is BLOCKED until accepted F.6.1 and remains presentation-only,
-consuming frozen reweighting results. F.6.2 is then BLOCKED pending F.6.1/E.8:
-it compares the unchanged full baseline procedure against a parallel full
-Method-A procedure. F.6.3 remains BLOCKED as the only explicit
-production-promotion decision. Current yields stay the accepted baseline; no
-Method-A uncertainty is defined by this roadmap. Read
-phases/phase-f6-method-a-production-promotion.md.
+F.6 promotion is deliberately staged. CLOSED / RUNTIME VALIDATED — F.6.1 and
+F.6.1.Validation.1 are accepted from
+`KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip` (SHA-256
+`22fb594f79a61e5378e76570df46cab9cf5195b6dc0faa04b0238919f66738a3`) at
+farm/bundle HEAD `ffb7d4dc251610f6034eac11038a9841e3ef9f58`, with reviewed
+scientific source pin `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The complete
+bundle has exact accepted F.4/F.5 reproduction, five settings, 15 parents,
+135 cells, all frozen F.1 hashes, and the explicit training-radians to
+application-degrees phi closure. It is aggregate-only and non-production; its
+27-page review was manually inspected. Method A is technically closed but has
+parent-dependent shape effects: the 68/135 toward and 67/135 away comparison
+counts are descriptive only. See evidence/f6-1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is a
-detached generic-artifact farm bundle/profile gate. Its profile is
-`testing/pion_hgcer_validation_bundle_profile_f6_1.json`; it uses the unchanged
-v4 collector and packages only F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
-five F.1 acceptance-contract JSONs, and manifest/source provenance. It pins
-reviewed analysis source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`, permits
-only that profile and `testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`
-after the pin, plus `docs/memory/`, and fails if later F.6.1 science changes
-appear. Local profile, collector, and F.6.1 tests passed on 2026-09-16. The
-gate is evidence packaging only: `complete=true` is not scientific acceptance,
-and no farm bundle or runtime result is yet established. NEXT — one fresh
-detached F.6.1 farm validation for Q4p4W2p74, then inspect complete evidence.
+NEXT — F.6.2 is acceptance-correlated Method-A refinement validation. It will
+assess substantive departures from the baseline using raw discrepancy,
+refinement, alignment, independent acceptance/MM, kaon-window, support, and
+bootstrap evidence without a composite score or frozen numerical thresholds.
+It remains detached: Method B is excluded, no production mutation is
+authorized, and no final-yield uncertainty reduction is claimed. E.8 is
+BLOCKED pending accepted F.6.2; F.6.3 is the later full-procedure comparison,
+BLOCKED pending accepted F.6.2 plus E.8; F.6.4 is the explicit
+production-promotion decision, BLOCKED pending F.6.2/F.6.3 evidence. See
+decisions/f6-2-acceptance-refinement-measurement-contract.md and
+phases/phase-f6-method-a-production-promotion.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and

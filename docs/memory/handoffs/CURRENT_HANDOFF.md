@@ -1,8 +1,8 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-16 during F.6.1 Pass-2 source review. This record
-distinguishes accepted F.5 scientific runtime evidence from its later accepted
-presentation-only rerender and the detached F.6.1 source-reviewed work.
+Prepared: 2026-09-16 during F.6.1 runtime closure. This record distinguishes
+accepted F.5 scientific runtime evidence from its later presentation-only
+rerender and accepted detached F.6.1 validation evidence.
 
 ## Resume identity
 
@@ -40,6 +40,10 @@ presentation-only rerender and the detached F.6.1 source-reviewed work.
 - F.6.1 initial implementation: `883ddf70af9935cd90e85c732c2d42d8765c783d`.
 - F.6.1.Fix.1 source-reviewed source:
   `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`.
+- F.6.1 accepted farm/bundle HEAD:
+  `ffb7d4dc251610f6034eac11038a9841e3ef9f58`; accepted bundle
+  `KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip`, SHA-256
+  `22fb594f79a61e5378e76570df46cab9cf5195b6dc0faa04b0238919f66738a3`.
 
 ## Established evidence
 
@@ -64,27 +68,19 @@ CLOSED / RUNTIME VALIDATED:
 
 ## Current gate and boundaries
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1 detached Method-A
-reweighting validation is source reviewed through F.6.1.Fix.1 at
-`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The frozen producer phi contract
-is explicit: training/Part-1 `evt.ph_q` is radians and application
-`phi_degrees` is `evt.ph_q * 180/pi`; the validator closes that rad-to-degree
-contract. On 2026-09-16, py_compile; the F.6.1 validator/analyzer; F.4;
-F.5 propagation/analyzer; and available F.1 acceptance-contract tests passed,
-as did `git diff --check 4928e145..bfc4fe42`. Farm/runtime validation is not
-established. Production application/yield mutation, ROOT dependency, and
-Method-B numerical dependency remain false.
+CLOSED / RUNTIME VALIDATED — F.6.1 and F.6.1.Validation.1 are accepted from
+the complete F.6.1 bundle at `ffb7d4dc251610f6034eac11038a9841e3ef9f58`. It
+pins reviewed F.6.1 source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`, exactly
+reproduces accepted F.4/F.5 closure across five settings, 15 parents, and 135
+cells, and closes the producer-radians/application-degrees phi contract. It is
+aggregate-only and detached: no production/yield/ROOT/Method-B numerical path
+exists. Its 27-page review was manually accepted. Shape effects are
+parent-dependent; see evidence/f6-1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is
-implemented as a generic v4 collector profile at
-`testing/pion_hgcer_validation_bundle_profile_f6_1.json`, with focused test
-`testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`. The collector is
-unchanged. The package is exactly F.6.1 JSON/PDF, F.5/F.4/F.3 JSONs, five F.1
-acceptance-contract JSONs, manifest, and source provenance. Its required
-analysis source is `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`; only the profile
-and its test are allowed after that source, besides `docs/memory/`. On
-2026-09-16, the profile test, unchanged collector tests, and F.6.1
-validator/analyzer tests passed. No farm artifact or runtime result exists.
+NEXT — F.6.2 is acceptance-correlated Method-A refinement validation. Its
+pre-implementation measurement contract preserves raw shape, acceptance/MM,
+kaon-window, support, and bootstrap evidence without a composite score or
+threshold; see decisions/f6-2-acceptance-refinement-measurement-contract.md.
 
 CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
 range whitespace check to the three profile-owned validation files; the global
@@ -140,8 +136,8 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
-the complete F.6.1 JSON/PDF/bundle evidence. The current yield remains the
-accepted baseline. E.8 is BLOCKED until F.6.1 acceptance and is
-presentation-only; F.6.2 and F.6.3 remain BLOCKED. Read
+NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
+validation. The current yield remains the accepted baseline. E.8 is BLOCKED
+pending accepted F.6.2; F.6.3 is BLOCKED pending accepted F.6.2 plus E.8; and
+F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. Read
 phases/phase-f6-method-a-production-promotion.md.

@@ -60,48 +60,52 @@ remain exactly unchanged. See evidence/f5-2-runtime-closure.md.
 
 ### F.6 — staged Method-A validation and explicit production promotion
 
-ACTIVE — F.6.1 follows accepted F.5/F.5.2 under the detailed contract in
-phases/phase-f6-method-a-production-promotion.md. The current full procedure
-remains the accepted baseline until an explicit later promotion decision.
+ACTIVE — the staged F.6 program follows accepted F.5/F.5.2 under the detailed
+contract in phases/phase-f6-method-a-production-promotion.md. The current full
+procedure remains the accepted baseline until an explicit later promotion
+decision.
 
 #### F.6.1 — detached Method-A reweighting validation
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — the detached validator and
-analyzer are source reviewed through F.6.1.Fix.1 at
-`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`; initial implementation was
-`883ddf70af9935cd90e85c732c2d42d8765c783d`. It validates accepted F.4
-factors against physical pion-control populations without mutating production
-weights or yields. The frozen producer phi contract is training `evt.ph_q` in
-radians and application `phi_degrees = evt.ph_q * 180/pi`; farm/runtime
-validation is not yet established.
+CLOSED / RUNTIME VALIDATED — detached event-reweighting validation closed at
+farm/bundle HEAD `ffb7d4dc251610f6034eac11038a9841e3ef9f58`, with reviewed
+science source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. It exactly
+preserves accepted F.4/F.5 closure and the producer-radians to
+application-degrees phi contract without mutating production weights or yields.
+See evidence/f6-1-runtime-closure.md.
 
 #### F.6.1.Validation.1 — detached farm bundle/profile gate
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — generic v4 profile
-`testing/pion_hgcer_validation_bundle_profile_f6_1.json` reuses the unchanged
-collector to package only F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs, five F.1
-acceptance-contract JSONs, and source provenance. It pins
-`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c` and permits only the profile/test
-after that source, plus `docs/memory/`; it has no F.6.1 semantic or production
-ownership. Farm/runtime validation is not yet established.
+CLOSED / RUNTIME VALIDATED — the generic bundle/profile gate accepted the
+complete F.6.1 evidence package with no unexpected committed files after the
+reviewed source pin. It remains evidence packaging only and has no production
+ownership. See evidence/f6-1-runtime-closure.md.
+
+#### F.6.2 — acceptance-correlated Method-A refinement validation
+
+NEXT — quantify parent/child baseline discrepancy, Method-A refinement size,
+residual-correction alignment, independent acceptance corroboration,
+MM×acceptance localization, fixed-kaon-window pion change, support, and
+diagnostic variance with bootstrap intervals. It is a detached refinement
+validation, not a replacement pion model or production path. See
+decisions/f6-2-acceptance-refinement-measurement-contract.md.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
-BLOCKED — presentation-only update after accepted F.6.1; it consumes frozen
-validated reweighting results and does not recompute Method-A science.
+BLOCKED pending accepted F.6.2 — presentation-only update consuming frozen
+accepted F.6.1/F.6.2 results; it does not recompute Method-A science.
 
-#### F.6.2 — full baseline procedure versus full procedure plus Method A
+#### F.6.3 — full baseline procedure versus full procedure plus Method A
 
-BLOCKED — after F.6.1 and E.8, compare the unchanged full baseline procedure
-with a parallel procedure whose only intended pion-template change is the
-accepted Method-A factor.
+BLOCKED pending accepted F.6.2 + E.8 — compare the unchanged full baseline
+procedure with a parallel procedure whose only intended pion-template change is
+the accepted Method-A factor.
 
-#### F.6.3 — explicit production-promotion decision
+#### F.6.4 — explicit production-promotion decision
 
-BLOCKED — only after accepted F.6.1/F.6.2 evidence; no automatic promotion.
+BLOCKED pending F.6.2/F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
-the complete F.6.1 JSON/PDF/bundle evidence. E.8, F.6.2, and F.6.3 remain
-BLOCKED.
+NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
+validation. E.8, F.6.3, and F.6.4 remain BLOCKED as stated above.

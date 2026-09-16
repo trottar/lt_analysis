@@ -1,7 +1,7 @@
 # Phase F.6 staged Method-A validation and production promotion
 
-F.6.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; no production
-promotion is authorized by this roadmap.
+F.6.1 is `CLOSED / RUNTIME VALIDATED`; no production promotion is authorized
+by this roadmap.
 F.1 through F.5.2 remain `CLOSED / RUNTIME VALIDATED`; in particular, accepted F.5 scientific fingerprint
 `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa` remains
 frozen. Method B is diagnostic/cross-check only and is numerically excluded
@@ -25,17 +25,14 @@ Method B numerically.
 
 ## F.6.1 — detached Method-A reweighting validation
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the detached validator and
-analyzer were initially implemented at
-`883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed, including
-F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. Before any
-production or final-yield mutation, farm evidence must show whether accepted
-Method-A reweighting moves the physical pion-control population toward the
-observed low-response pion population while preserving accepted F.4/F.5
-closure. Source review passed on 2026-09-16: py_compile; the F.6.1
-validator/analyzer; F.4 correction; F.5 propagation/analyzer; and available
-F.1 acceptance-contract tests, plus the `4928e145..bfc4fe42` range whitespace
-check. Farm/runtime validation is not established.
+`CLOSED / RUNTIME VALIDATED` — detached validation closed from accepted bundle
+`KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip` at farm/bundle HEAD
+`ffb7d4dc251610f6034eac11038a9841e3ef9f58`, with reviewed science source
+`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. It exactly reproduces accepted
+F.4/F.5 closure through five settings, 15 parents, and 135 cells. The
+27-page review was manually accepted. Its parent-dependent shape outcome is
+evidence for F.6.2, not a uniform-improvement requirement; see
+evidence/f6-1-runtime-closure.md.
 
 For every canonical setting and canonical-t parent, compare the low-response
 shape reference `0 < P_hgcer_npeSum <= 2`, the baseline physical control
@@ -72,7 +69,7 @@ the later implementation contract.
 
 ### F.6.1.Validation.1 — detached farm bundle/profile gate
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the generic v4 profile
+`CLOSED / RUNTIME VALIDATED` — the generic v4 profile
 `testing/pion_hgcer_validation_bundle_profile_f6_1.json` reuses the unchanged
 collector and packages only the F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
 five F.1 acceptance-contract JSONs, and manifest/source provenance. It pins
@@ -81,29 +78,45 @@ allowed committed files after that source are the profile and
 `testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`, plus the
 `docs/memory/` prefix. Later F.6.1 validator/analyzer/science changes fail this
 source gate until separately reviewed. The profile does not duplicate F.6.1
-physics or make `complete=true` scientific acceptance. Local profile,
-collector, and F.6.1 tests passed on 2026-09-16; no farm bundle or runtime
-result exists.
+physics or make `complete=true` scientific acceptance. The accepted complete
+bundle and runtime closure are recorded in evidence/f6-1-runtime-closure.md.
+
+## F.6.2 — acceptance-correlated Method-A refinement validation
+
+`NEXT` — before any full-procedure comparison, assess whether substantive
+Method-A departures from the baseline are physically explainable and
+statistically supported in each canonical `(setting, t, phi)` child. The
+baseline remains the guide for broad physical missing-mass structure; Method A
+is an acceptance-dependent refinement, not a replacement. This phase treats
+low response as a reference shape, permits pion leakage in kaon-bearing
+regions, and remains detached from production.
+
+Persist raw normalized-shape discrepancy/refinement/alignment measurements,
+independent acceptance and MM×acceptance diagnostics, fixed-kaon-window pion
+change, support and diagnostic variance statistics, and paired bootstrap
+intervals. Do not construct a composite score, freeze numerical case
+thresholds, tune after inspection, introduce Method B numerically, or claim a
+final-yield uncertainty reduction. The complete pre-implementation contract is
+decisions/f6-2-acceptance-refinement-measurement-contract.md.
 
 ## E.8 — streamlined full-background-subtraction presentation
 
-`BLOCKED` until F.6.1 is accepted. E.8 is presentation-only and follows F.6.1
-so the streamlined full-background-subtraction PDF can consume validated
-Method-A reweighting comparisons, rather than only F.5 aggregate
-redistribution. It does not calculate or own Method-A science. It should tell
-the background-subtraction story—random/dummy subtraction, slow-proton
+`BLOCKED` pending accepted F.6.2. E.8 is presentation-only and follows F.6.2
+so the streamlined full-background-subtraction PDF can consume frozen accepted
+F.6.1/F.6.2 results. It does not calculate or own Method-A science. It should
+tell the background-subtraction story—random/dummy subtraction, slow-proton
 removal, baseline pion determination, Method-A motivation, validated
-reweighting, and later F.6.2 impact—while detailed validation and Method-B
+refinement, and later F.6.3 impact—while detailed validation and Method-B
 machinery remain in their dedicated artifacts.
 
-## F.6.2 — full baseline procedure versus full procedure plus Method A
+## F.6.3 — full baseline procedure versus full procedure plus Method A
 
-`BLOCKED` until F.6.1 is accepted and E.8 is updated in this order. Preserve
-the current full yield calculation unchanged as the baseline branch. The
-parallel Method-A branch uses the same random/dummy subtraction, slow-proton
-treatment, pion components/fits/windows/amplitudes, canonical binning, SIMC,
-background-fit algorithms/configuration, efficiencies, and yield extraction.
-Its only intended scientific change is `w0_j -> w0_j * C_j` while filling
+`BLOCKED` pending accepted F.6.2 + E.8. Preserve the current full yield
+calculation unchanged as the baseline branch. The parallel Method-A branch
+uses the same random/dummy subtraction, slow-proton treatment, pion
+components/fits/windows/amplitudes, canonical binning, SIMC, background-fit
+algorithms/configuration, efficiencies, and yield extraction. Its only
+intended scientific change is `w0_j -> w0_j * C_j` while filling
 pion-subtraction templates. Downstream empirical missing-mass background fits
 rerun normally on the altered post-pion spectrum with their algorithms and
 configuration frozen.
@@ -117,14 +130,14 @@ Method A is disabled. Farm progression is narrow: Left-lowe, Left-highe,
 Center-lowe, Center-highe, then Right-highe; do not broaden beyond Left-lowe
 until its complete chain through final yield passes.
 
-## F.6.3 — explicit production-promotion decision
+## F.6.4 — explicit production-promotion decision
 
-`BLOCKED` pending accepted F.6.1 and F.6.2 evidence. This is the only phase
-that may decide whether Method A becomes production pion-background treatment;
-no automatic promotion follows from existing artifacts. A later promotion
-contract must define supported kinematics, enable/disable behavior, fail-closed
-authority, setting-wide atomicity, provenance, uncertainty treatment,
-downstream validation, and regression against the unchanged baseline.
+`BLOCKED` pending F.6.2/F.6.3 evidence. This is the only phase that may decide
+whether Method A becomes production pion-background treatment; no automatic
+promotion follows from existing artifacts. A later promotion contract must
+define supported kinematics, enable/disable behavior, fail-closed authority,
+setting-wide atomicity, provenance, uncertainty treatment, downstream
+validation, and regression against the unchanged baseline.
 
 ## Uncertainty and forbidden shortcuts
 
@@ -133,7 +146,7 @@ This roadmap defines no Method-A systematic uncertainty. In particular,
 its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
-or alteration of accepted F.1-F.5.2 evidence. F.6.1 remains detached. Its
-next authorized step is one fresh F.6.1 farm validation run followed by
-inspection of the complete JSON/PDF/bundle evidence; do not begin E.8 or alter
-ROOT or production behavior.
+or alteration of accepted F.1-F.5.2 evidence. F.6 remains detached. Its next
+authorized step is design and implementation of F.6.2 acceptance-correlated
+Method-A refinement validation; do not begin E.8 or alter ROOT or production
+behavior.

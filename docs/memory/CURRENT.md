@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
-Last source-identity and workflow-memory reconciliation: 2026-09-16 during
-F.6.1 Pass-2 source review. Repository HEAD values in this record are timestamped
+Last evidence and workflow-memory reconciliation: 2026-09-16 during F.6.1
+runtime closure. Repository HEAD values in this record are timestamped
 observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -101,32 +101,21 @@ global F.2 JSON/PDF and five setting-scoped frozen F.1 JSON inputs. It pins
 collector/profile/test repair files plus `docs/memory/`, and performs no F.2
 analysis or physics work.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1 detached Method-A
-reweighting validation was initially implemented at
-`883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed, including
-F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The Fix.1
-contract freezes producer Part-1/training `evt.ph_q` as radians and physical
-application `phi_degrees` as `evt.ph_q * 180/pi`; F.6.1 explicitly closes
-this rad-to-degree source contract. The pure-Python aggregate-only validator
-and 27-page analyzer consume frozen F.1/F.3/F.4/F.5.2 artifacts. Source
-review passed on 2026-09-16: py_compile; the F.6.1 validator/analyzer tests;
-F.4 correction; F.5 propagation/analyzer; and the available F.1 acceptance
-contract tests all passed, as did `git diff --check 4928e145..bfc4fe42`.
-Farm/runtime validation is not yet established. Production application,
-production/yield mutation, ROOT dependency, and Method-B numerical dependency
-are all false.
+CLOSED / RUNTIME VALIDATED — F.6.1 detached Method-A reweighting validation
+and F.6.1.Validation.1 closed from accepted bundle
+`KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip` at farm/bundle HEAD
+`ffb7d4dc251610f6034eac11038a9841e3ef9f58`, pinned to reviewed source
+`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The complete bundle exactly
+reproduces accepted F.4/F.5 closure over five settings, 15 parents, and 135
+cells; it closes training-radians to application-degrees phi semantics and
+retains every detached/non-production boundary. The 27-page PDF was manually
+reviewed. Shape effects are parent-dependent, not a uniform-improvement gate.
+See evidence/f6-1-runtime-closure.md.
 
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is the
-detached farm bundle/profile gate. It adds
-`testing/pion_hgcer_validation_bundle_profile_f6_1.json` and its focused test,
-while reusing `testing/collect_pion_hgcer_validation_bundle.py` unchanged. The
-generic v4 package contains the F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
-five F.1 acceptance-contract JSONs, and collector manifest/source provenance.
-It pins reviewed analysis source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`;
-only the profile and its test may follow that source, plus `docs/memory/`.
-The profile/collector/F.6.1 local tests passed on 2026-09-16. This gate does
-not duplicate F.6.1 semantic checks, mutate analysis, or establish a farm
-bundle or runtime result.
+NEXT — F.6.2 acceptance-correlated Method-A refinement validation will test
+whether substantive local refinements are physically explainable and
+statistically supported. It remains detached; see
+decisions/f6-2-acceptance-refinement-measurement-contract.md.
 
 ## Frozen architecture
 
@@ -153,7 +142,8 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
-the complete F.6.1 JSON/PDF/bundle evidence. The accepted current yield remains
-the baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
+NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
+validation. The accepted current yield remains the baseline; E.8 is BLOCKED
+pending accepted F.6.2, F.6.3 is BLOCKED pending accepted F.6.2 plus E.8, and
+F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. Read
 phases/phase-f6-method-a-production-promotion.md.
