@@ -16,7 +16,7 @@ import io
 import json
 import math
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import shutil
 import subprocess
@@ -31,6 +31,7 @@ COLLECTOR_SCHEMA_VERSION = "pion_hgcer_validation_bundle/v4"
 PROFILE_SCHEMA_VERSION = "pion_hgcer_validation_bundle_profile/v4"
 _F1_SPECIALIZED_COLLECTION_MODE = "f1_specialized"
 _GENERIC_COLLECTION_MODE = "generic_artifacts"
+GLOBUS_TRANSFER_DIRECTORY = "/volatile/hallc/c-kaonlt/trottar/globus"
 DEFAULT_PROFILE_PATH = Path(__file__).with_name(
     "pion_hgcer_validation_bundle_profile.json"
 )
@@ -1665,6 +1666,23 @@ def _validate_output_path(output_path: Path, source_paths: Sequence[Path]) -> No
         raise ValueError("output_path_is_source_artifact")
 
 
+def resolve_cli_output_path(output: Union[Path, str]) -> str:
+    """Resolve a collector CLI ZIP into the fixed Globus transfer directory."""
+    raw = os.fspath(output)
+    if not isinstance(raw, str) or not raw or raw != raw.strip():
+        raise ValueError("cli_output_path_invalid")
+    candidate = PurePosixPath(raw)
+    transfer = PurePosixPath(GLOBUS_TRANSFER_DIRECTORY)
+    if candidate.is_absolute():
+        if candidate.parent != transfer:
+            raise ValueError("cli_output_path_not_in_globus_transfer_directory")
+    elif raw != candidate.name or "/" in raw or "\\" in raw:
+        raise ValueError("cli_output_path_must_be_basename_or_globus_absolute")
+    if candidate.name in {"", ".", ".."} or candidate.suffix != ".zip":
+        raise ValueError("cli_output_path_must_be_zip")
+    return str(transfer / candidate.name)
+
+
 def _generic_artifact_path(
     source_root: Path, declaration: Mapping[str, Any], *, phi: str,
     kinematic: str, epsilon: str,
@@ -2183,7 +2201,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--outdir", required=True, help="directory containing existing analysis artifacts")
     parser.add_argument("--kinematic", required=True, help="kinematic filename token, for example Q4p4W2p74")
-    parser.add_argument("--output", required=True, help="new validation ZIP path")
+    parser.add_argument("--output", required=True, help="new ZIP basename or absolute path in the Globus transfer directory")
     parser.add_argument("--phi", help="optional profile setting override")
     parser.add_argument("--epsilon", help="optional profile epsilon override")
     parser.add_argument(
@@ -2196,10 +2214,11 @@ def build_argument_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     arguments = build_argument_parser().parse_args(argv)
     try:
+        output = resolve_cli_output_path(arguments.output)
         result = collect_validation_bundle(
             outdir=arguments.outdir,
             kinematic=arguments.kinematic,
-            output=arguments.output,
+            output=output,
             phi=arguments.phi,
             epsilon=arguments.epsilon,
             profile_path=arguments.profile,

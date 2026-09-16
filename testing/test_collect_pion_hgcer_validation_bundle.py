@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 
@@ -386,6 +387,32 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
             collector.resolve_settings("Right", "lowe")
         with self.assertRaisesRegex(ValueError, "supplied_together"):
             collector.resolve_settings("Left", None)
+
+    def test_cli_output_path_is_limited_to_the_globus_transfer_directory(self):
+        expected = "/volatile/hallc/c-kaonlt/trottar/globus/KaonLT_PhaseF6_2_validation_Q4p4W2p74.zip"
+        self.assertEqual(
+            collector.resolve_cli_output_path("KaonLT_PhaseF6_2_validation_Q4p4W2p74.zip"),
+            expected,
+        )
+        self.assertEqual(collector.resolve_cli_output_path(expected), expected)
+        for output in (
+            "/volatile/hallc/c-kaonlt/trottar/OUTPUT/KaonLT_PhaseF6_2_validation_Q4p4W2p74.zip",
+            "/tmp/KaonLT_PhaseF6_2_validation_Q4p4W2p74.zip",
+            "/volatile/hallc/c-kaonlt/trottar/globus/subdir/bundle.zip",
+            "../bundle.zip", "some/subdir/bundle.zip", "bundle.tar", "", ".zip",
+        ):
+            with self.subTest(output=output), self.assertRaisesRegex(ValueError, "cli_output_path"):
+                collector.resolve_cli_output_path(output)
+        with mock.patch.object(collector, "collect_validation_bundle", return_value={"output_path": expected, "returncode": 0, "manifest": {}}) as collect:
+            self.assertEqual(collector.main(["--outdir", "artifacts", "--kinematic", "Q4p4W2p74", "--output", "KaonLT_PhaseF6_2_validation_Q4p4W2p74.zip"]), 0)
+        self.assertEqual(collect.call_args.kwargs["output"], expected)
+
+    def test_programmatic_collector_keeps_temporary_output_support(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source, _profile, _paths = self._collect_f2(temporary)
+            self.assertEqual(result["returncode"], 0)
+            self.assertTrue(output.exists())
+            self.assertNotEqual(str(output), collector.resolve_cli_output_path("bundle.zip"))
 
     def test_f2_profile_is_generic_and_collects_only_declared_evidence(self):
         profile = collector.load_validation_profile(F2_PROFILE_PATH)
