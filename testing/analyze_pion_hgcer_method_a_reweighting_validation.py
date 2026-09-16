@@ -209,6 +209,7 @@ def main(argv: Sequence[str] | None = None, *, accepted_runtime_authority_by_kin
     if output_json.exists() or output_pdf.exists():
         print("error: f6_1_output_path_already_exists", file=sys.stderr); return 2
     temporary_json: Path | None = None; temporary_pdf: Path | None = None
+    promoted_json = False; promoted_pdf = False
     try:
         f1, hashes, f1_paths, f3, f3_sha, f3_path, f4, f4_sha, f4_path, f5, f5_sha, f5_path = load_inputs(arguments.outdir, arguments.kinematic)
         artifact = validation.build_pion_hgcer_method_a_reweighting_validation_artifact(f1, f3, f4, f5, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, f4_input_file_sha256=f4_sha, f5_input_file_sha256=f5_sha, input_paths={"f1": f1_paths, "f3": f3_path, "f4": f4_path, "f5": f5_path}, generated_at_utc=_datetime.datetime.now(_datetime.timezone.utc).isoformat().replace("+00:00", "Z"), git_head=_git_value(("rev-parse", "HEAD")), git_status_short=_git_value(("status", "--short")), accepted_runtime_authority_by_kinematic=accepted_runtime_authority_by_kinematic, accepted_f4_runtime_authority_by_kinematic=accepted_f4_runtime_authority_by_kinematic, accepted_f3_runtime_authority_by_kinematic=accepted_f3_runtime_authority_by_kinematic)
@@ -217,11 +218,13 @@ def main(argv: Sequence[str] | None = None, *, accepted_runtime_authority_by_kin
         validation.write_pion_hgcer_method_a_reweighting_validation_json(temporary_json, artifact); write_review_pdf(temporary_pdf, artifact)
         # Promote the PDF first: a late filesystem failure can never leave a
         # final-path JSON claiming success without its required review PDF.
-        os.replace(temporary_pdf, output_pdf); temporary_pdf = None
-        os.replace(temporary_json, output_json); temporary_json = None
+        os.replace(temporary_pdf, output_pdf); temporary_pdf = None; promoted_pdf = True
+        os.replace(temporary_json, output_json); temporary_json = None; promoted_json = True
     except (validation.MethodAReweightingValidationError, OSError, ValueError) as exc:
         for path in (temporary_json, temporary_pdf):
             if path is not None and path.exists(): path.unlink()
+        if promoted_json and output_json.exists(): output_json.unlink()
+        if promoted_pdf and output_pdf.exists(): output_pdf.unlink()
         print("error: {}".format(exc), file=sys.stderr); return 1
     print("wrote {}".format(output_json)); print("wrote {}".format(output_pdf)); return 0
 

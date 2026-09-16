@@ -114,6 +114,14 @@ def _finite(value: object, label: str) -> float:
     return result
 
 
+def _training_phi_degrees(value: object, label: str) -> float:
+    """Convert the frozen F.1 prompt-training ``evt.ph_q`` radians to degrees."""
+    degrees = math.degrees(_finite(value, label))
+    if not math.isfinite(degrees):
+        raise MethodAReweightingValidationError("{}_degrees_nonfinite".format(label))
+    return degrees
+
+
 def _integer(value: object, label: str) -> int:
     if isinstance(value, bool):
         raise MethodAReweightingValidationError("{}_invalid".format(label))
@@ -162,7 +170,10 @@ def _runtime_authority(
     authority_by_kinematic: Mapping[str, object] | None,
 ) -> dict[str, object]:
     records = ACCEPTED_RUNTIME_AUTHORITY_BY_KINEMATIC if authority_by_kinematic is None else _map(authority_by_kinematic, "f6_1_runtime_authority_records")
-    accepted_raw = _map(records.get(kinematic), "f6_1_runtime_authority")
+    raw_authority = records.get(kinematic)
+    if raw_authority is None:
+        raise MethodAReweightingValidationError("f6_1_runtime_authority_kinematic_unsupported")
+    accepted_raw = _map(raw_authority, "f6_1_runtime_authority")
     f3_map = _map(f3_artifact.get("acceptance_map"), "f3_acceptance_map")
     f4_correction = _map(f4_artifact.get("correction"), "f4_correction")
     f5_propagation = _map(f5_artifact.get("propagation"), "f5_propagation")
@@ -306,8 +317,10 @@ def _hellinger(left: Sequence[float], right: Sequence[float]) -> float:
 
 
 def _value(row: Mapping[str, object], variable: str, *, application: bool) -> float:
-    name = "phi_degrees" if application and variable == "phi" else variable
-    return _finite(row.get(name), "f6_1_required_{}_variable_missing:{}".format("application" if application else "training", variable))
+    label = "f6_1_required_{}_variable_missing:{}".format("application" if application else "training", variable)
+    if variable == "phi":
+        return _finite(row.get("phi_degrees"), label) if application else _training_phi_degrees(row.get("phi"), label)
+    return _finite(row.get(variable), label)
 
 
 def _shape_comparisons(low_rows: Sequence[Mapping[str, object]], prompt_pairs: Sequence[Mapping[str, object]], phi_edges: Sequence[float]) -> tuple[dict[str, object], dict[str, object]]:
@@ -363,6 +376,13 @@ def _same(left: object, right: object) -> bool:
     return left == right
 
 
+def _assert_aggregate_only_persistence(value: object) -> None:
+    serialized = _canonical_json(value)
+    for forbidden in ("correction_factors", "raw_shape_factors", "in_support_mask", "event_corrections", "entry_index", "application_records", "method_a_training_records"):
+        if forbidden in serialized:
+            raise MethodAReweightingValidationError("f6_1_forbidden_event_persistence:{}".format(forbidden))
+
+
 def _independent_tphi(
     pairs_by_parent: Mapping[tuple[str, int], Sequence[Mapping[str, object]]],
     persisted_f4: Mapping[str, object],
@@ -416,7 +436,7 @@ def _verify_f5_continuity(
     expected = {str(item["setting_id"]): _map(item, "f5_setting") for item in _seq(persisted_f5.get("setting_templates"), "f5_setting_templates")}
     if set(observed) != set(expected):
         raise MethodAReweightingValidationError("f6_1_f5_setting_inventory_mismatch")
-    names = ("event_counts", "baseline_signed_contents", "adjusted_signed_contents", "signed_delta_contents", "baseline_share_of_parent", "adjusted_share_of_parent", "redistribution_fraction_of_parent", "setting_baseline_sum", "setting_adjusted_sum", "setting_closure_residual")
+    names = ("event_counts", "baseline_signed_contents", "adjusted_signed_contents", "signed_delta_contents", "baseline_share_of_parent", "adjusted_share_of_parent", "redistribution_fraction_of_parent", "setting_baseline_sum", "setting_adjusted_sum", "setting_closure_residual", "setting_max_abs_redistribution")
     for setting_id, item in observed.items():
         for name in names:
             if not _same(item[name], expected[setting_id].get(name)):
@@ -472,7 +492,7 @@ def _validate_and_pair_rows(
 
 
 def _parent_payloads(
-    pairs_by_parent: Mapping[tuple[str, Sequence[Mapping[str, object]]], Sequence[Mapping[str, object]]],
+    pairs_by_parent: Mapping[tuple[str, int], Sequence[Mapping[str, object]]],
     raw: Mapping[str, Mapping[str, object]],
 ) -> list[dict[str, object]]:
     payloads: list[dict[str, object]] = []
@@ -485,11 +505,13 @@ def _parent_payloads(
             pairs = pairs_by_parent.get((setting_id, t_index))
             if pairs is None:
                 raise MethodAReweightingValidationError("f6_1_parent_pairs_missing")
-            controls: list[Mapping[str, object]] = []; low: list[Mapping[str, object]] = []
+            training_control_identities: set[tuple[str, int]] = set(); physical_prompt_identities: set[tuple[str, int]] = set(); low: list[Mapping[str, object]] = []
             for key, row in training.items():
                 if _integer(row.get("t_index"), "f6_1_training_t_index") != t_index or key[0] != "prompt":
                     continue
                 response = row.get("response_class"); npe = _finite(row.get("P_hgcer_npeSum"), "f6_1_training_npe")
+                if response == "control":
+                    training_control_identities.add(key)
                 if response == "low":
                     if row.get("nommcuts") is not True or not (0.0 < npe <= 2.0):
                         raise MethodAReweightingValidationError("f6_1_low_population_invalid")
@@ -506,16 +528,16 @@ def _parent_payloads(
                 if matched is None or matched.get("response_class") != "control":
                     raise MethodAReweightingValidationError("f6_1_prompt_application_identity_missing_training_control")
                 _check_parity(matched, row)
-                training_phi = _finite(matched.get("phi"), "f6_1_training_phi")
+                training_phi = _training_phi_degrees(matched.get("phi"), "f6_1_training_phi")
                 application_phi = _finite(row.get("phi_degrees"), "f6_1_application_phi_degrees")
                 index = _integer(row.get("phi_index"), "f6_1_application_phi_index")
                 if row.get("phi_status") != "inside_phi" or index < 0 or index >= 9 or not _close(training_phi, application_phi) or not _phi_assignment(application_phi, np.asarray(phi_edges, dtype=float), index):
                     raise MethodAReweightingValidationError("f6_1_phi_semantic_parity_mismatch")
                 for variable in _REQUIRED_TRAINING_VARIABLES:
                     _required_training_value(matched, variable); _value(row, variable, application=True)
-                controls.append(matched); prompt_pairs.append(pair)
+                physical_prompt_identities.add(identity); prompt_pairs.append(pair)
             for row in low:
-                value = _finite(row.get("phi"), "f6_1_low_phi")
+                value = _training_phi_degrees(row.get("phi"), "f6_1_low_phi")
                 if not (phi_edges[0] <= value <= phi_edges[-1]):
                     raise MethodAReweightingValidationError("f6_1_low_phi_outside_canonical_domain")
             if not low or not prompt_pairs:
@@ -531,7 +553,9 @@ def _parent_payloads(
                 if label not in source_counts:
                     raise MethodAReweightingValidationError("f6_1_application_source_invalid")
                 source_counts[label] += 1
-            payloads.append({"setting": _copy(state["setting"], "setting"), "setting_id": setting_id, "canonical_t_index": t_index, "population_counts": {"low_response_prompt_training": len(low), "prompt_physical_control": len(prompt_pairs), "full_physical_application": len(pairs), "training_control_not_in_physical_prompt_application": len(controls) - len(prompt_pairs), "full_application_by_source": source_counts}, "identity_and_phi_parity": {"prompt_control_count": len(prompt_pairs), "all_prompt_controls_matched": True, "all_common_fields_matched": True, "phi_semantics_closed_without_conversion": True}, "support": {"in_support_count": sum(bool(pair["in_support"]) for pair in pairs), "ood_count": sum(not bool(pair["in_support"]) for pair in pairs)}, "prompt_shape_comparisons": comparisons, "hgcer_xy": detector_xy, "signed_background": {"analysis_MM": _signed_histogram(full_values, baseline, adjusted, _display_edges(full_values, int(DISPLAY_POLICY["one_dimensional_nonphi_bin_count"]), "f6_1_signed_mm")), "phi": _signed_histogram(phi_values, baseline, adjusted, phi_edges)}})
+            if physical_prompt_identities - training_control_identities:
+                raise MethodAReweightingValidationError("f6_1_prompt_application_identity_missing_training_control")
+            payloads.append({"setting": _copy(state["setting"], "setting"), "setting_id": setting_id, "canonical_t_index": t_index, "population_counts": {"low_response_prompt_training": len(low), "prompt_physical_control": len(prompt_pairs), "full_physical_application": len(pairs), "training_control_not_in_physical_prompt_application": len(training_control_identities - physical_prompt_identities), "physical_prompt_application_not_in_training_control": len(physical_prompt_identities - training_control_identities), "full_application_by_source": source_counts}, "identity_and_phi_parity": {"prompt_control_count": len(prompt_pairs), "all_prompt_controls_matched": True, "all_common_fields_matched": True, "phi_semantics_closed_with_frozen_rad_to_deg_contract": True}, "support": {"in_support_count": sum(bool(pair["in_support"]) for pair in pairs), "ood_count": sum(not bool(pair["in_support"]) for pair in pairs)}, "prompt_shape_comparisons": comparisons, "hgcer_xy": detector_xy, "signed_background": {"analysis_MM": _signed_histogram(full_values, baseline, adjusted, _display_edges(full_values, int(DISPLAY_POLICY["one_dimensional_nonphi_bin_count"]), "f6_1_signed_mm")), "phi": _signed_histogram(phi_values, baseline, adjusted, phi_edges)}})
     return payloads
 
 
@@ -568,10 +592,7 @@ def build_pion_hgcer_method_a_reweighting_validation(
     core: dict[str, object] = {"schema_version": METHOD_A_REWEIGHTING_VALIDATION_SCHEMA_VERSION, "fingerprint_schema_version": METHOD_A_REWEIGHTING_VALIDATION_FINGERPRINT_SCHEMA_VERSION, "status": "available", "available": True, "reason": None, "diagnostic_stage": "complete", "non_authoritative": True, "validation_only": True, "f4_correction_consumed": True, "f4_correction_modified": False, "f5_continuity_checked": True, "event_correction_evaluated_for_detached_validation": True, "event_correction_persisted": False, "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False, "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False, "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False, "method_b_numerical_dependency": False, "shape_improvement_gate_applied": False, "manual_review_required": True, "display_policy": _copy(DISPLAY_POLICY, "display_policy"), "runtime_authority": authority, "input_fingerprints": inputs, "f4_reproduction": {"exact_payload_match": True, "correction_fingerprint": recomputed_f4["fingerprint"]}, "f5_reproduction": {"exact_payload_match": True, "propagation_fingerprint": recomputed_f5["fingerprint"]}, "parents": parent_payloads, "f5_continuity": continuity}
     fingerprint_inputs = {"schema_version": core["schema_version"], "fingerprint_schema_version": core["fingerprint_schema_version"], "display_policy": core["display_policy"], "runtime_authority": core["runtime_authority"], "input_fingerprints": core["input_fingerprints"], "f4_reproduction": core["f4_reproduction"], "f5_reproduction": core["f5_reproduction"], "parents": core["parents"], "f5_continuity": core["f5_continuity"]}
     core["fingerprint_inputs"] = fingerprint_inputs; core["fingerprint"] = _sha256(fingerprint_inputs)
-    serialized = _canonical_json(core)
-    for forbidden in ("correction_factors", "raw_shape_factors", "in_support_mask", "event_corrections", "entry_index", "application_records", "method_a_training_records"):
-        if forbidden in serialized:
-            raise MethodAReweightingValidationError("f6_1_forbidden_event_persistence:{}".format(forbidden))
+    _assert_aggregate_only_persistence(core)
     return _copy(core, "reweighting_validation")  # type: ignore[return-value]
 
 

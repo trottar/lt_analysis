@@ -9,6 +9,7 @@ import re
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -70,6 +71,27 @@ class AnalyzeReweightingValidationTests(unittest.TestCase):
             self.assertEqual(self._run(directory, directory / "wrong.json", output_pdf, authority, f4_authority, f3_authority), 2)
             output_json.write_text("collision", encoding="utf-8")
             self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority), 2)
+
+    def test_cli_rejects_unsupported_kinematic(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority = self._write_inputs(directory)
+            unsupported = "Q9p9W9p99"
+            result = analyzer.main(["--outdir", str(directory), "--kinematic", unsupported, "--output-json", str(directory / analyzer.validation.pion_hgcer_method_a_reweighting_validation_filename(unsupported)), "--output-pdf", str(directory / analyzer._pdf_filename(unsupported))], accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority)
+            self.assertEqual(result, 1)
+            self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists())
+
+    def test_late_json_promotion_failure_rolls_back_already_promoted_pdf(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority = self._write_inputs(directory)
+            original_replace = analyzer.os.replace; calls = 0
+            def fail_second_replace(source, destination):
+                nonlocal calls
+                calls += 1
+                if calls == 2: raise OSError("f6_1_test_second_promotion_failed")
+                return original_replace(source, destination)
+            with mock.patch.object(analyzer, "write_review_pdf", side_effect=lambda path, artifact: path.write_bytes(b"pdf")), mock.patch.object(analyzer.os, "replace", side_effect=fail_second_replace):
+                self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority), 1)
+            self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists())
 
     def test_parser_requires_all_output_arguments(self):
         with self.assertRaises(SystemExit) as captured:
