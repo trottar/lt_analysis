@@ -66,9 +66,14 @@ remains the accepted baseline until an explicit later promotion decision.
 
 #### F.6.1 — detached Method-A reweighting validation
 
-ACTIVE — validate the accepted F.4 Method-A factor against the physical
-pion-control population without mutating production weights or yields. This is
-detached source work only, not source review or runtime validation.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — the detached validator and
+analyzer are source reviewed through F.6.1.Fix.1 at
+`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`; initial implementation was
+`883ddf70af9935cd90e85c732c2d42d8765c783d`. It validates accepted F.4
+factors against physical pion-control populations without mutating production
+weights or yields. The frozen producer phi contract is training `evt.ph_q` in
+radians and application `phi_degrees = evt.ph_q * 180/pi`; farm/runtime
+validation is not yet established.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
@@ -87,6 +92,5 @@ BLOCKED — only after accepted F.6.1/F.6.2 evidence; no automatic promotion.
 
 ## NEXT
 
-NEXT — Complete the F.6.1 Pass-1 allowed-file audit and commit/push its
-detached validator, analyzer, tests, and active memory state. E.8, F.6.2, and
-F.6.3 remain BLOCKED.
+NEXT — Implement the detached F.6.1 validation bundle/profile gate. E.8,
+F.6.2, and F.6.3 remain BLOCKED.

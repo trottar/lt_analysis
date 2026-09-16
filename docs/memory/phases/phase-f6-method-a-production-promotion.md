@@ -1,6 +1,7 @@
 # Phase F.6 staged Method-A validation and production promotion
 
-F.6.1 is `ACTIVE`; no production promotion is authorized by this roadmap.
+F.6.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; no production
+promotion is authorized by this roadmap.
 F.1 through F.5.2 remain `CLOSED / RUNTIME VALIDATED`; in particular, accepted F.5 scientific fingerprint
 `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa` remains
 frozen. Method B is diagnostic/cross-check only and is numerically excluded
@@ -24,10 +25,17 @@ Method B numerically.
 
 ## F.6.1 — detached Method-A reweighting validation
 
-`ACTIVE` — before any production or final-yield mutation, test whether accepted
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the detached validator and
+analyzer were initially implemented at
+`883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed, including
+F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. Before any
+production or final-yield mutation, farm evidence must show whether accepted
 Method-A reweighting moves the physical pion-control population toward the
 observed low-response pion population while preserving accepted F.4/F.5
-closure.
+closure. Source review passed on 2026-09-16: py_compile; the F.6.1
+validator/analyzer; F.4 correction; F.5 propagation/analyzer; and available
+F.1 acceptance-contract tests, plus the `4928e145..bfc4fe42` range whitespace
+check. Farm/runtime validation is not established.
 
 For every canonical setting and canonical-t parent, compare the low-response
 shape reference `0 < P_hgcer_npeSum <= 2`, the baseline physical control
@@ -50,7 +58,10 @@ F.6.1 is detached and shadow-only: production histogram mutation, production
 yield mutation, and production-correction promotion are all false. Application
 identities must exactly match F.4 transient factor identities and, when joined,
 the authoritative child cache. Missing, extra, or duplicate records fail the
-validated population. Aggregate event reweighting must reproduce accepted F.5
+validated population. Training/Part-1 producer `evt.ph_q` is frozen in radians;
+physical application `phi_degrees` is frozen as `evt.ph_q * 180/pi`; F.6.1
+explicitly closes this rad-to-degree source contract without inferring units.
+Aggregate event reweighting must reproduce accepted F.5
 within its existing floating-point closure tolerance. Persist aggregate
 validation summaries and provenance only; obtain factors transiently from the
 accepted F.4 calculation and do not persist a new authoritative event-factor
@@ -107,6 +118,7 @@ This roadmap defines no Method-A systematic uncertainty. In particular,
 its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
-or alteration of accepted F.1-F.5.2 evidence. F.6.1 source work is limited to
-its approved detached validator, analyzer, and focused tests; do not begin
-E.8, add a collector/profile, or alter ROOT or production behavior.
+or alteration of accepted F.1-F.5.2 evidence. F.6.1 remains detached. Its
+next authorized step is a detached validation bundle/profile gate followed by
+one fresh farm validation run; do not begin E.8 or alter ROOT or production
+behavior.

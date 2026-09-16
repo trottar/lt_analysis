@@ -1,8 +1,8 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 during F.6.1 Pass 1. This record distinguishes accepted
-F.5 scientific runtime evidence from its later accepted presentation-only
-rerender and the active detached F.6.1 source work.
+Prepared: 2026-09-16 during F.6.1 Pass-2 source review. This record
+distinguishes accepted F.5 scientific runtime evidence from its later accepted
+presentation-only rerender and the detached F.6.1 source-reviewed work.
 
 ## Resume identity
 
@@ -37,6 +37,9 @@ rerender and the active detached F.6.1 source work.
   bundle SHA-256 is
   `323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`;
   it does not replace F.5's scientific runtime identity.
+- F.6.1 initial implementation: `883ddf70af9935cd90e85c732c2d42d8765c783d`.
+- F.6.1.Fix.1 source-reviewed source:
+  `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`.
 
 ## Established evidence
 
@@ -61,11 +64,16 @@ CLOSED / RUNTIME VALIDATED:
 
 ## Current gate and boundaries
 
-ACTIVE — F.6.1 detached Method-A reweighting validation started at clean
-`test`/cached `origin/test` `4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`.
-It adds only its validator, analyzer, and focused tests, consuming frozen
-F.1/F.3/F.4/F.5.2 inputs without a production/yield/ROOT/Method-B path. This
-is not source review or farm validation.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1 detached Method-A
+reweighting validation is source reviewed through F.6.1.Fix.1 at
+`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The frozen producer phi contract
+is explicit: training/Part-1 `evt.ph_q` is radians and application
+`phi_degrees` is `evt.ph_q * 180/pi`; the validator closes that rad-to-degree
+contract. On 2026-09-16, py_compile; the F.6.1 validator/analyzer; F.4;
+F.5 propagation/analyzer; and available F.1 acceptance-contract tests passed,
+as did `git diff --check 4928e145..bfc4fe42`. Farm/runtime validation is not
+established. Production application/yield mutation, ROOT dependency, and
+Method-B numerical dependency remain false.
 
 CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
 range whitespace check to the three profile-owned validation files; the global
@@ -121,7 +129,8 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Finish the F.6.1 Pass-1 allowed-file audit and commit/push its active
-detached source/test work. The current yield remains the accepted baseline.
-E.8 is BLOCKED until F.6.1 acceptance and is presentation-only; F.6.2 and
-F.6.3 remain BLOCKED. Read phases/phase-f6-method-a-production-promotion.md.
+NEXT — Implement the detached F.6.1 validation bundle/profile gate. Do not
+claim that a farm bundle exists. The current yield remains the accepted
+baseline. E.8 is BLOCKED until F.6.1 acceptance and is presentation-only;
+F.6.2 and F.6.3 remain BLOCKED. Read
+phases/phase-f6-method-a-production-promotion.md.

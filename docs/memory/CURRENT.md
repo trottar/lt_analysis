@@ -1,7 +1,7 @@
 # Current KaonLT development state
 
-Last source-identity and workflow-memory reconciliation: 2026-09-15 during
-F.6.1 Pass 1. Repository HEAD values in this record are timestamped
+Last source-identity and workflow-memory reconciliation: 2026-09-16 during
+F.6.1 Pass-2 source review. Repository HEAD values in this record are timestamped
 observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
@@ -101,13 +101,20 @@ global F.2 JSON/PDF and five setting-scoped frozen F.1 JSON inputs. It pins
 collector/profile/test repair files plus `docs/memory/`, and performs no F.2
 analysis or physics work.
 
-ACTIVE — F.6.1 detached Method-A reweighting validation began from clean
-`test`/cached `origin/test` `4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`.
-It consumes frozen F.1/F.3/F.4/F.5.2 artifacts through a new pure-Python,
-aggregate-only validator and 27-page review analyzer. It is shadow-only: no
-production weight, yield, ROOT, cross-section, or Method-B numerical path
-exists. This is local source work only; it is not source reviewed or farm
-validated.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1 detached Method-A
+reweighting validation was initially implemented at
+`883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed, including
+F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The Fix.1
+contract freezes producer Part-1/training `evt.ph_q` as radians and physical
+application `phi_degrees` as `evt.ph_q * 180/pi`; F.6.1 explicitly closes
+this rad-to-degree source contract. The pure-Python aggregate-only validator
+and 27-page analyzer consume frozen F.1/F.3/F.4/F.5.2 artifacts. Source
+review passed on 2026-09-16: py_compile; the F.6.1 validator/analyzer tests;
+F.4 correction; F.5 propagation/analyzer; and the available F.1 acceptance
+contract tests all passed, as did `git diff --check 4928e145..bfc4fe42`.
+Farm/runtime validation is not yet established. Production application,
+production/yield mutation, ROOT dependency, and Method-B numerical dependency
+are all false.
 
 ## Frozen architecture
 
@@ -134,7 +141,7 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Complete the F.6.1 Pass-1 allowed-file audit and commit/push its
-detached source/tests and `ACTIVE` memory state. The accepted current yield
-remains the baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
+NEXT — Implement the detached F.6.1 validation bundle/profile gate. Do not
+claim that a farm bundle exists. The accepted current yield remains the
+baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
 phases/phase-f6-method-a-production-promotion.md.

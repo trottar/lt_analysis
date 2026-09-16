@@ -149,20 +149,28 @@ normalization, production behavior, or F.5 result changed. F.5.2.Fix.1 at
 F.5.Fix.1 source-reviewed compatibility repair. See
 evidence/f5-2-runtime-closure.md.
 
-F.6 promotion is deliberately staged. ACTIVE — F.6.1 detached Method-A
-event-reweighting validation began from clean `test`/cached `origin/test`
-`4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`. It consumes frozen F.1/F.3/F.4/
-F.5.2 artifacts through a pure-Python aggregate-only validator; transient F.4
-factors are positionally paired with F.1 application rows, while event-level
-values never persist. It is source work only and makes no production/yield,
-ROOT, cross-section, child-normalization, or Method-B numerical mutation.
-E.8 is BLOCKED until accepted F.6.1 and remains presentation-only, consuming
-frozen reweighting results. F.6.2 is then BLOCKED pending F.6.1/E.8: it
-compares the unchanged full baseline procedure against a parallel full
+F.6 promotion is deliberately staged. DEVELOPMENT COMPLETE, FARM VALIDATION
+PENDING — F.6.1 detached Method-A event-reweighting validation was initially
+implemented at `883ddf70af9935cd90e85c732c2d42d8765c783d` and source reviewed,
+including F.6.1.Fix.1, at `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. It
+consumes frozen F.1/F.3/F.4/F.5.2 artifacts through a pure-Python
+aggregate-only validator; transient F.4 factors are positionally paired with
+F.1 application rows, while event-level values never persist. The frozen
+producer contract is explicit: Part-1/training `evt.ph_q` is radians and
+application `phi_degrees` is `evt.ph_q * 180/pi`; F.6.1 closes that exact
+rad-to-degree relation rather than inferring units. Source review passed on
+2026-09-16: py_compile; F.6.1 validator/analyzer; F.4 correction; F.5
+propagation/analyzer; and available F.1 acceptance-contract tests, plus the
+`4928e145..bfc4fe42` range whitespace check. Farm/runtime validation remains
+unestablished. It has no production application or yield mutation, ROOT or
+cross-section dependency, child-normalization, or Method-B numerical
+dependency. E.8 is BLOCKED until accepted F.6.1 and remains presentation-only,
+consuming frozen reweighting results. F.6.2 is then BLOCKED pending F.6.1/E.8:
+it compares the unchanged full baseline procedure against a parallel full
 Method-A procedure. F.6.3 remains BLOCKED as the only explicit
-production-promotion decision. Method B remains numerically excluded; current
-yields stay the accepted baseline; no Method-A uncertainty is defined by this
-roadmap. Read phases/phase-f6-method-a-production-promotion.md.
+production-promotion decision. Current yields stay the accepted baseline; no
+Method-A uncertainty is defined by this roadmap. Read
+phases/phase-f6-method-a-production-promotion.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and
