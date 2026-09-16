@@ -127,5 +127,8 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — F.6 explicit production promotion under a new narrow contract. F.6 has
-not started; its scientific and production design remain to be defined.
+NEXT — F.6 begins with F.6.1 detached Method-A reweighting validation. The
+accepted current yield remains the baseline: F.6.1 is shadow-only and cannot
+mutate production weights or yields. E.8 follows only after F.6.1 acceptance
+so its streamlined presentation can consume validated reweighting plots; F.6.2
+and F.6.3 remain BLOCKED. Read phases/phase-f6-method-a-production-promotion.md.

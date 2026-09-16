@@ -115,5 +115,9 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Define and implement F.6 explicit production promotion under a new
-narrow contract. F.6 has not started.
+NEXT — F.6 begins with F.6.1 detached Method-A reweighting validation under a
+new narrow contract. The current yield remains the accepted baseline. E.8 is
+BLOCKED until F.6.1 acceptance and is presentation-only; F.6.2 is BLOCKED as
+the parallel full-procedure baseline-versus-Method-A comparison; F.6.3 is
+BLOCKED as the sole explicit production-promotion decision. Read
+phases/phase-f6-method-a-production-promotion.md.

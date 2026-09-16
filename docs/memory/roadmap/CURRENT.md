@@ -58,12 +58,33 @@ CLOSED / RUNTIME VALIDATED — the presentation-only rerender was accepted at
 phi-interval labels while the accepted F.5 payload and scientific fingerprint
 remain exactly unchanged. See evidence/f5-2-runtime-closure.md.
 
-### F.6 — explicit production promotion
+### F.6 — staged Method-A validation and explicit production promotion
 
-NEXT — explicit production promotion following accepted F.5/F.5.2. Its
-implementation requires a separate narrow contract.
+NEXT — F.6 follows accepted F.5/F.5.2 under the detailed contract in
+phases/phase-f6-method-a-production-promotion.md. The current full procedure
+remains the accepted baseline until an explicit later promotion decision.
+
+#### F.6.1 — detached Method-A reweighting validation
+
+NEXT — validate the accepted F.4 Method-A factor against the physical
+pion-control population without mutating production weights or yields.
+
+#### E.8 — streamlined full-background-subtraction presentation
+
+BLOCKED — presentation-only update after accepted F.6.1; it consumes frozen
+validated reweighting results and does not recompute Method-A science.
+
+#### F.6.2 — full baseline procedure versus full procedure plus Method A
+
+BLOCKED — after F.6.1 and E.8, compare the unchanged full baseline procedure
+with a parallel procedure whose only intended pion-template change is the
+accepted Method-A factor.
+
+#### F.6.3 — explicit production-promotion decision
+
+BLOCKED — only after accepted F.6.1/F.6.2 evidence; no automatic promotion.
 
 ## NEXT
 
-NEXT — Define and implement F.6 explicit production promotion under a new
-narrow contract. F.6 has not started.
+NEXT — Define and implement F.6.1 detached Method-A reweighting validation
+under a new narrow contract. E.8, F.6.2, and F.6.3 remain BLOCKED.

@@ -146,8 +146,20 @@ acceptance: physics-readable terms and page-12 physical phi intervals replaced
 internal indices. No scientific calculation, payload, authority, geometry,
 normalization, production behavior, or F.5 result changed. F.5.2.Fix.1 at
 `6634e9cb470cf35f21f5d475ec6ce33b524cd233` remains distinct from the earlier
-F.5.Fix.1 source-reviewed compatibility repair. F.6 is now the only NEXT
-production-promotion phase. See evidence/f5-2-runtime-closure.md.
+F.5.Fix.1 source-reviewed compatibility repair. See
+evidence/f5-2-runtime-closure.md.
+
+F.6 is NEXT and promotion is deliberately staged. F.6.1 is its NEXT detached
+Method-A event-reweighting validation; it first tests the accepted F.4 factor
+against the physical pion-control population without a production or yield
+mutation.
+E.8 is BLOCKED until accepted F.6.1 and remains presentation-only, consuming
+frozen reweighting results. F.6.2 is then BLOCKED pending F.6.1/E.8: it
+compares the unchanged full baseline procedure against a parallel full
+Method-A procedure. F.6.3 remains BLOCKED as the only explicit
+production-promotion decision. Method B remains numerically excluded; current
+yields stay the accepted baseline; no Method-A uncertainty is defined by this
+roadmap. Read phases/phase-f6-method-a-production-promotion.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and
