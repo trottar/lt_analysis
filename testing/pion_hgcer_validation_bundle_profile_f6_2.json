@@ -58,7 +58,7 @@
     ]
   },
   "source_identity": {
-    "required_analysis_commit": "9b4579c266b331141cc4ef2827030b1b7ba63bbe",
+    "required_analysis_commit": "0b37af2a2927b08bdeaf897c545f290b55329cea",
     "allowed_committed_files": [
       "testing/collect_pion_hgcer_validation_bundle.py",
       "testing/test_collect_pion_hgcer_validation_bundle.py",
