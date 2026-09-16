@@ -268,9 +268,9 @@ def _one_dimensional_payload(low_values: Sequence[float], control_values: Sequen
     if control.size != baseline.size or control.size != adjusted.size:
         raise MethodAAcceptanceRefinementValidationError("{}_control_weight_alignment_invalid".format(label))
     _require_within_edges(low, edges, "{}_low".format(label)); _require_within_edges(control, edges, "{}_control".format(label))
-    if baseline.size and (not np.all(np.isfinite(baseline)) or np.any(baseline <= 0.0)):
+    if baseline.size and (not np.all(np.isfinite(baseline)) or np.any(baseline < 0.0)):
         raise MethodAAcceptanceRefinementValidationError("{}_baseline_weight_invalid".format(label))
-    if adjusted.size and (not np.all(np.isfinite(adjusted)) or np.any(adjusted <= 0.0)):
+    if adjusted.size and (not np.all(np.isfinite(adjusted)) or np.any(adjusted < 0.0)):
         raise MethodAAcceptanceRefinementValidationError("{}_method_a_weight_invalid".format(label))
     l_contents = np.histogram(low, bins=np.asarray(edges, dtype=float))[0].astype(float)
     b_contents = np.histogram(control, bins=np.asarray(edges, dtype=float), weights=baseline)[0].astype(float)
@@ -289,9 +289,9 @@ def _two_dimensional_payload(low_x: Sequence[float], low_y: Sequence[float], con
         raise MethodAAcceptanceRefinementValidationError("{}_shape_alignment_invalid".format(label))
     _require_within_edges(lx, x_edges, "{}_low_x".format(label)); _require_within_edges(ly, y_edges, "{}_low_y".format(label))
     _require_within_edges(cx, x_edges, "{}_control_x".format(label)); _require_within_edges(cy, y_edges, "{}_control_y".format(label))
-    if baseline.size and (not np.all(np.isfinite(baseline)) or np.any(baseline <= 0.0)):
+    if baseline.size and (not np.all(np.isfinite(baseline)) or np.any(baseline < 0.0)):
         raise MethodAAcceptanceRefinementValidationError("{}_baseline_weight_invalid".format(label))
-    if adjusted.size and (not np.all(np.isfinite(adjusted)) or np.any(adjusted <= 0.0)):
+    if adjusted.size and (not np.all(np.isfinite(adjusted)) or np.any(adjusted < 0.0)):
         raise MethodAAcceptanceRefinementValidationError("{}_method_a_weight_invalid".format(label))
     x_bins, y_bins = np.asarray(x_edges, dtype=float), np.asarray(y_edges, dtype=float)
     l_contents = np.histogram2d(lx, ly, bins=(x_bins, y_bins))[0].astype(float)
@@ -403,7 +403,7 @@ def _effective_sample_size(weights: Sequence[float], label: str) -> dict[str, ob
     values = np.asarray(weights, dtype=float)
     if values.size == 0:
         return _metric(reason="control_population_empty")
-    if not np.all(np.isfinite(values)) or np.any(values <= 0.0):
+    if not np.all(np.isfinite(values)) or np.any(values < 0.0):
         raise MethodAAcceptanceRefinementValidationError("{}_invalid".format(label))
     denominator = float(np.sum(values * values)); numerator = float(np.sum(values)) ** 2
     return _metric(numerator / denominator) if denominator > 0.0 else _metric(reason="normalization_invalid")
@@ -524,7 +524,7 @@ def _child_rows(
                 if not math.isclose(_value(matched, name, "{}_training_control".format(label)), _value(row, name, "{}_application_control".format(label)), rel_tol=0.0, abs_tol=_TOLERANCE):
                     raise MethodAAcceptanceRefinementValidationError("{}_prompt_parity_mismatch:{}".format(label, name))
             w0 = _value(row, "baseline_pion_weight_w0", "{}_control".format(label))
-            if w0 <= 0.0:
+            if w0 < 0.0:
                 raise MethodAAcceptanceRefinementValidationError("{}_baseline_weight_invalid".format(label))
             controls.append(pair)
     return low, controls, full
@@ -542,9 +542,10 @@ def _weights(control: Sequence[Mapping[str, object]], label: str) -> tuple[list[
     baseline, adjusted = [], []
     for item in control:
         row = _map(item.get("row"), "{}_row".format(label)); w0 = _value(row, "baseline_pion_weight_w0", label); factor = _finite(item.get("factor"), "{}_factor".format(label))
-        if w0 <= 0.0 or factor <= 0.0:
+        adjusted_weight = w0 * factor
+        if w0 < 0.0 or factor <= 0.0 or not math.isfinite(adjusted_weight) or adjusted_weight < 0.0:
             raise MethodAAcceptanceRefinementValidationError("{}_weight_invalid".format(label))
-        baseline.append(w0); adjusted.append(w0 * factor)
+        baseline.append(w0); adjusted.append(adjusted_weight)
     return baseline, adjusted
 
 

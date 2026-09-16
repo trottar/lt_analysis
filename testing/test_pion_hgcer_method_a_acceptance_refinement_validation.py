@@ -200,6 +200,58 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "baseline_weight_invalid"):
             f62._one_dimensional_payload([0.1], [0.2], [-1.0], [1.0], [0.0, 1.0], "nonpositive")
 
+    def test_zero_control_weights_are_valid_but_negative_or_nonpositive_factors_are_not(self):
+        one_dimensional = f62._one_dimensional_payload([0.1, 0.8], [0.2, 0.8], [0.0, 1.0], [0.0, 1.5], [0.0, 0.5, 1.0], "zero_weight_1d")
+        for population in ("B", "A"):
+            self.assertTrue(one_dimensional[population]["available"])
+            self.assertAlmostEqual(sum(one_dimensional[population]["unit_area"]), 1.0)
+        two_dimensional = f62._two_dimensional_payload([0.1, 0.8], [0.1, 0.8], [0.2, 0.8], [0.2, 0.8], [0.0, 1.0], [0.0, 1.5], [0.0, 0.5, 1.0], [0.0, 0.5, 1.0], "zero_weight_2d")
+        for population in ("B", "A"):
+            self.assertTrue(two_dimensional[population]["available"])
+            self.assertAlmostEqual(sum(sum(row) for row in two_dimensional[population]["unit_area"]), 1.0)
+        all_zero = f62._one_dimensional_payload([0.1], [0.2, 0.8], [0.0, 0.0], [0.0, 0.0], [0.0, 0.5, 1.0], "all_zero_weight")
+        self.assertFalse(all_zero["B"]["available"]); self.assertFalse(all_zero["A"]["available"])
+        self.assertEqual(all_zero["B"]["reason"], "normalization_invalid")
+        self.assertEqual(all_zero["A"]["reason"], "normalization_invalid")
+        control = [{"row": {"baseline_pion_weight_w0": 0.0}, "factor": 1.5}]
+        self.assertEqual(f62._weights(control, "zero_weight"), ([0.0], [0.0]))
+        for bad_control in (
+            [{"row": {"baseline_pion_weight_w0": -1.0}, "factor": 1.5}],
+            [{"row": {"baseline_pion_weight_w0": 1.0}, "factor": 0.0}],
+            [{"row": {"baseline_pion_weight_w0": 1.0}, "factor": -1.0}],
+        ):
+            with self.subTest(control=bad_control), self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "weight_invalid"):
+                f62._weights(bad_control, "invalid_weight")
+        self.assertEqual(f62._effective_sample_size([0.0, 1.0, 1.0], "mixed_zero") ["value"], 2.0)
+        self.assertEqual(f62._effective_sample_size([0.0, 0.0], "all_zero_neff"), {"available": False, "value": None, "reason": "normalization_invalid"})
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "negative_neff_invalid"):
+            f62._effective_sample_size([-1.0, 1.0], "negative_neff")
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "baseline_weight_invalid"):
+            f62._two_dimensional_payload([0.1], [0.1], [0.2], [0.2], [-1.0], [1.0], [0.0, 1.0], [0.0, 1.0], "negative_2d")
+
+    def test_zero_weight_prompt_control_is_retained_through_the_child_payload(self):
+        state, pairs, t_index, phi_index, phi_edges, _low, original_control = self._prompt_child_inputs()
+        zero_pairs = deepcopy(pairs)
+        target = next(item for item in zero_pairs if item["row"]["source_label"] == "prompt" and item["row"]["t_index"] == t_index and item["row"]["phi_index"] == phi_index)
+        target["row"]["baseline_pion_weight_w0"] = 0.0
+        target["row"]["signed_baseline_event_contribution"] = 0.0
+        low, controls, _full = f62._child_rows(state, zero_pairs, t_index, phi_index, phi_edges, "zero_weight_child")
+        self.assertTrue(low); self.assertEqual(len(controls), len(original_control))
+        baseline, adjusted = f62._weights(controls, "zero_weight_child")
+        zero_index = next(index for index, item in enumerate(controls) if item["row"]["entry_index"] == target["row"]["entry_index"])
+        self.assertEqual(baseline[zero_index], 0.0); self.assertEqual(adjusted[zero_index], 0.0)
+        t_geometry, _phi_geometry, delta_edges = f62._geometry(state["contract"], state["setting_id"])
+        parent_edges = f62._parent_display_edges(self.f6["validation"])[(state["setting_id"], t_index)]
+        child = f62._child_payload(state, zero_pairs, parent_edges, t_index, phi_index, t_geometry[t_index], phi_edges, delta_edges, f62._bootstrap_policy({"replicas": 2}), f62._runtime_kaon_window())
+        self.assertEqual(child["population_counts"]["N_control"], len(original_control))
+        self.assertTrue(any(value == 0.0 for value in baseline))
+        self.assertTrue(all(child["one_dimensional"][name]["B"]["available"] for name in f62._ONE_DIMENSIONAL_VARIABLES))
+        self.assertTrue(all(child["one_dimensional"][name]["A"]["available"] for name in f62._ONE_DIMENSIONAL_VARIABLES))
+        negative_pairs = deepcopy(zero_pairs); negative_target = next(item for item in negative_pairs if item["row"]["entry_index"] == target["row"]["entry_index"])
+        negative_target["row"]["baseline_pion_weight_w0"] = -1.0
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "baseline_weight_invalid"):
+            f62._child_rows(state, negative_pairs, t_index, phi_index, phi_edges, "negative_weight_child")
+
     def test_frozen_edges_finite_values_and_signed_inputs_fail_closed(self):
         display = deepcopy(self.f6["validation"])
         comparison = display["parents"][0]["prompt_shape_comparisons"]["analysis_MM"]
