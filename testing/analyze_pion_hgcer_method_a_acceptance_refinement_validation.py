@@ -101,14 +101,34 @@ def _text_page(pdf: object, title: str, lines: Sequence[str]) -> None:
 
 def _metric_text(value: object) -> str:
     if not isinstance(value, Mapping):
-        return "unavailable: malformed"
+        return "unavailable:malformed"
     if value.get("available") is True:
         if "value" in value:
             return "{:.4g}".format(float(value["value"]))
-        if "ci_low" in value and "ci_high" in value:
-            return "CI [{:.4g}, {:.4g}]".format(float(value["ci_low"]), float(value["ci_high"]))
         return "available"
-    return "unavailable: {}".format(value.get("reason"))
+    return "unavailable:{}".format(value.get("reason"))
+
+
+def _interval_text(value: object) -> str:
+    if not isinstance(value, Mapping):
+        return "unavailable:malformed"
+    if value.get("interval_available") is True:
+        return "95% CI [{:.4g}, {:.4g}]".format(float(value["ci_low"]), float(value["ci_high"]))
+    return "unavailable:{}".format(value.get("reason"))
+
+
+def _metric_with_interval(metric: object, interval: object) -> str:
+    return "{}; {}".format(_metric_text(metric), _interval_text(interval))
+
+
+def _fraction_text(value: object) -> str:
+    if value is None:
+        return "unavailable:empty_population"
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "unavailable:malformed"
+    return "{:.4g}".format(numeric) if np.isfinite(numeric) else "unavailable:nonfinite_input"
 
 
 def _overlay(axis: object, payload: Mapping[str, object], title: str) -> None:
@@ -129,8 +149,11 @@ def _matrix(axis: object, payload: Mapping[str, object], population_name: str, t
     x_edges, y_edges = np.asarray(payload.get("x_edges"), dtype=float), np.asarray(payload.get("y_edges"), dtype=float)
     population = payload.get(population_name)
     contents = np.asarray(population.get("unit_area"), dtype=float) if isinstance(population, Mapping) else np.asarray([])
-    if x_edges.ndim == y_edges.ndim == 1 and contents.shape == (x_edges.size - 1, y_edges.size - 1):
+    if x_edges.ndim == y_edges.ndim == 1 and contents.shape == (x_edges.size - 1, y_edges.size - 1) and isinstance(population, Mapping) and population.get("available") is True:
         axis.pcolormesh(x_edges, y_edges, contents.T, shading="auto", cmap="viridis", vmin=0.0, vmax=vmax)
+    else:
+        reason = population.get("reason") if isinstance(population, Mapping) else "malformed"
+        axis.text(0.5, 0.5, "unavailable:{}".format(reason), transform=axis.transAxes, ha="center", va="center", fontsize=8, wrap=True)
     axis.set_title(title, fontsize=8); axis.set_xlabel("{}".format(payload.get("x_variable", "x"))); axis.set_ylabel("{}".format(payload.get("y_variable", "y")))
 
 
@@ -139,13 +162,17 @@ def _parent_overview_page(pdf: object, parent: Mapping[str, object]) -> None:
 
     figure, axis = plt.subplots(figsize=(14, 8.5)); axis.axis("off")
     title = "F.6.2 {} t{} — canonical-phi overview".format(parent.get("setting_id"), parent.get("canonical_t_index")); figure.suptitle(title, fontsize=14, fontweight="bold")
-    headings = ("phi", "N low/control/full", "N_eff B/A", "OOD ctrl/full", "DeltaH MM", "R MM", "kappa MM", "MM×xptar", "MM×yptar", "DeltaP K", "RV")
+    headings = ("phi", "N low/control/full", "N_eff B/A", "OOD frac ctrl/full", "DeltaH MM", "R MM", "kappa MM", "kappa MM×xptar", "kappa MM×yptar", "DeltaP K; 95% CI", "RV")
     rows: list[list[str]] = []
     for child in parent.get("children", []):
         counts = child.get("population_counts", {}); support = child.get("support", {}); neff = child.get("effective_sample_size", {}); shapes = child.get("one_dimensional", {}); mm = shapes.get("analysis_MM", {}) if isinstance(shapes, Mapping) else {}; metrics = mm.get("metrics", {}) if isinstance(mm, Mapping) else {}; joint = child.get("joint_distributions", {}); signed = child.get("signed_background", {}); window = signed.get("kaon_window", {}) if isinstance(signed, Mapping) else {}; variance = signed.get("variance_proxy", {}) if isinstance(signed, Mapping) else {}
-        x_kappa = ((joint.get("analysis_MM__SHMS_xptar", {}) if isinstance(joint, Mapping) else {}).get("metrics", {}) if isinstance(joint, Mapping) else {}).get("kappa", {})
-        y_kappa = ((joint.get("analysis_MM__SHMS_yptar", {}) if isinstance(joint, Mapping) else {}).get("metrics", {}) if isinstance(joint, Mapping) else {}).get("kappa", {})
-        rows.append(["{} [{:.0f},{:.0f})".format(child.get("phi_index"), float(child.get("phi_low", 0.0)), float(child.get("phi_high", 0.0))), "{}/{}/{}".format(counts.get("N_low"), counts.get("N_control"), counts.get("N_full")), "{}/{}".format(_metric_text(neff.get("baseline_w0")), _metric_text(neff.get("method_a_w0_times_C"))), "{}/{}".format((support.get("prompt_control", {}) or {}).get("ood_count"), (support.get("full_physical_application", {}) or {}).get("ood_count")), _metric_text(metrics.get("DeltaH")), _metric_text(metrics.get("R")), _metric_text(metrics.get("kappa")), _metric_text(x_kappa), _metric_text(y_kappa), _metric_text(window.get("DeltaP_K")), _metric_text(variance.get("R_V"))])
+        x_joint = joint.get("analysis_MM__SHMS_xptar", {}) if isinstance(joint, Mapping) else {}; y_joint = joint.get("analysis_MM__SHMS_yptar", {}) if isinstance(joint, Mapping) else {}
+        x_kappa = (x_joint.get("metrics", {}) if isinstance(x_joint, Mapping) else {}).get("kappa", {})
+        y_kappa = (y_joint.get("metrics", {}) if isinstance(y_joint, Mapping) else {}).get("kappa", {})
+        bootstrap = child.get("bootstrap", {}); one_dimensional_bootstrap = bootstrap.get("one_dimensional", {}) if isinstance(bootstrap, Mapping) else {}; joint_bootstrap = bootstrap.get("joint_missing_mass_acceptance", {}) if isinstance(bootstrap, Mapping) else {}; window_bootstrap = bootstrap.get("kaon_window", {}) if isinstance(bootstrap, Mapping) else {}
+        mm_bootstrap = one_dimensional_bootstrap.get("analysis_MM", {}) if isinstance(one_dimensional_bootstrap, Mapping) else {}
+        x_bootstrap = joint_bootstrap.get("analysis_MM__SHMS_xptar", {}) if isinstance(joint_bootstrap, Mapping) else {}; y_bootstrap = joint_bootstrap.get("analysis_MM__SHMS_yptar", {}) if isinstance(joint_bootstrap, Mapping) else {}
+        rows.append(["{} [{:.0f},{:.0f})".format(child.get("phi_index"), float(child.get("phi_low", 0.0)), float(child.get("phi_high", 0.0))), "{}/{}/{}".format(counts.get("N_low"), counts.get("N_control"), counts.get("N_full_application")), "{}/{}".format(_metric_text(neff.get("baseline_w0")), _metric_text(neff.get("method_a_w0_times_C"))), "{}/{}".format(_fraction_text((support.get("prompt_control", {}) or {}).get("ood_fraction")), _fraction_text((support.get("full_physical_application", {}) or {}).get("ood_fraction"))), _metric_with_interval(metrics.get("DeltaH"), (mm_bootstrap.get("DeltaH", {}) if isinstance(mm_bootstrap, Mapping) else {})), _metric_text(metrics.get("R")), _metric_with_interval(metrics.get("kappa"), (mm_bootstrap.get("kappa", {}) if isinstance(mm_bootstrap, Mapping) else {})), _metric_with_interval(x_kappa, (x_bootstrap.get("kappa", {}) if isinstance(x_bootstrap, Mapping) else {})), _metric_with_interval(y_kappa, (y_bootstrap.get("kappa", {}) if isinstance(y_bootstrap, Mapping) else {})), _metric_with_interval(window.get("DeltaP_K"), (window_bootstrap.get("DeltaP_K", {}) if isinstance(window_bootstrap, Mapping) else {})), _metric_text(variance.get("R_V"))])
     table = axis.table(cellText=rows, colLabels=headings, loc="center", cellLoc="center")
     table.auto_set_font_size(False); table.set_fontsize(6.5); table.scale(1.0, 1.55)
     axis.text(0.01, 0.03, "Descriptive diagnostics only. No automatic case or acceptance classification is assigned.", transform=axis.transAxes, fontsize=8)
@@ -161,6 +188,7 @@ def _detail_page(pdf: object, child: Mapping[str, object], window: Mapping[str, 
         payload = shapes.get(variable, {}) if isinstance(shapes, Mapping) else {}; _overlay(axis, payload if isinstance(payload, Mapping) else {}, variable)
         if variable == "analysis_MM":
             axis.axvspan(float(window["mm_min"]), float(window["mm_max"]), color="#d9d9d9", alpha=0.6, label="frozen K window")
+            axis.legend(fontsize=7)
     joint = child.get("joint_distributions", {}); map_keys = ("SHMS_delta__SHMS_xptar", "SHMS_delta__SHMS_yptar")
     for row_axes, map_key in zip(axes[1:], map_keys):
         payload = joint.get(map_key, {}) if isinstance(joint, Mapping) else {}; payload = payload if isinstance(payload, Mapping) else {}
@@ -175,13 +203,18 @@ def _detail_page(pdf: object, child: Mapping[str, object], window: Mapping[str, 
     bootstrap = child.get("bootstrap", {})
     bootstrap_one_dimensional = bootstrap.get("one_dimensional", {}) if isinstance(bootstrap, Mapping) else {}
     bootstrap_mm = bootstrap_one_dimensional.get("analysis_MM", {}) if isinstance(bootstrap_one_dimensional, Mapping) else {}
-    diagnostics = "MM: DeltaH={} R={} kappa={} rho={}; K window: {}; bootstrap kappa: {}".format(
-        _metric_text(metrics.get("DeltaH")), _metric_text(metrics.get("R")), _metric_text(metrics.get("kappa")), _metric_text(metrics.get("rho")),
-        _metric_text((signed.get("kaon_window", {}) if isinstance(signed, Mapping) else {}).get("DeltaP_K")),
-        _metric_text(bootstrap_mm.get("kappa", {}) if isinstance(bootstrap_mm, Mapping) else {}),
-    )
-    figure.text(0.02, 0.015, diagnostics, fontsize=7.5)
-    figure.tight_layout(rect=(0, 0.04, 1, 0.94)); pdf.savefig(figure); plt.close(figure)
+    joint_bootstrap = bootstrap.get("joint_missing_mass_acceptance", {}) if isinstance(bootstrap, Mapping) else {}; window_bootstrap = bootstrap.get("kaon_window", {}) if isinstance(bootstrap, Mapping) else {}
+    x_joint = joint.get("analysis_MM__SHMS_xptar", {}) if isinstance(joint, Mapping) else {}; y_joint = joint.get("analysis_MM__SHMS_yptar", {}) if isinstance(joint, Mapping) else {}
+    x_metrics = x_joint.get("metrics", {}) if isinstance(x_joint, Mapping) else {}; y_metrics = y_joint.get("metrics", {}) if isinstance(y_joint, Mapping) else {}
+    x_bootstrap = joint_bootstrap.get("analysis_MM__SHMS_xptar", {}) if isinstance(joint_bootstrap, Mapping) else {}; y_bootstrap = joint_bootstrap.get("analysis_MM__SHMS_yptar", {}) if isinstance(joint_bootstrap, Mapping) else {}
+    counts = child.get("population_counts", {}); support = child.get("support", {}); neff = child.get("effective_sample_size", {}); window_values = signed.get("kaon_window", {}) if isinstance(signed, Mapping) else {}; variance = signed.get("variance_proxy", {}) if isinstance(signed, Mapping) else {}
+    detail_lines = [
+        "N_low/N_control/N_full_application={}/{}/{}; N_eff_B/N_eff_A={}/{}; OOD(prompt/full)={}/{}".format(counts.get("N_low"), counts.get("N_control"), counts.get("N_full_application"), _metric_text(neff.get("baseline_w0")), _metric_text(neff.get("method_a_w0_times_C")), _fraction_text((support.get("prompt_control", {}) or {}).get("ood_fraction")), _fraction_text((support.get("full_physical_application", {}) or {}).get("ood_fraction"))),
+        "MM: DeltaH {}; R {}; kappa {}; rho {}".format(_metric_with_interval(metrics.get("DeltaH"), (bootstrap_mm.get("DeltaH", {}) if isinstance(bootstrap_mm, Mapping) else {})), _metric_text(metrics.get("R")), _metric_with_interval(metrics.get("kappa"), (bootstrap_mm.get("kappa", {}) if isinstance(bootstrap_mm, Mapping) else {})), _metric_with_interval(metrics.get("rho"), (bootstrap_mm.get("rho", {}) if isinstance(bootstrap_mm, Mapping) else {}))),
+        "MM×xptar kappa {}; MM×yptar kappa {}; P_B^K {}; P_A^K {}; DeltaP^K {}; f_refine^K {}; R_V {}".format(_metric_with_interval(x_metrics.get("kappa"), (x_bootstrap.get("kappa", {}) if isinstance(x_bootstrap, Mapping) else {})), _metric_with_interval(y_metrics.get("kappa"), (y_bootstrap.get("kappa", {}) if isinstance(y_bootstrap, Mapping) else {})), _metric_text(window_values.get("P_B_K")), _metric_text(window_values.get("P_A_K")), _metric_with_interval(window_values.get("DeltaP_K"), (window_bootstrap.get("DeltaP_K", {}) if isinstance(window_bootstrap, Mapping) else {})), _metric_text(window_values.get("f_refine_K")), _metric_text(variance.get("R_V"))),
+    ]
+    figure.text(0.02, 0.012, "\n".join(detail_lines), fontsize=6.7)
+    figure.tight_layout(rect=(0, 0.10, 1, 0.94)); pdf.savefig(figure); plt.close(figure)
 
 
 def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
@@ -208,8 +241,12 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
             "F.6.1 source SHA: {}".format(((f6_authority.get("accepted", {}) if isinstance(f6_authority, Mapping) else {}).get("source_file_sha256"))),
             "F.6.1 validation/artifact fingerprints: {} / {}".format(((f6_authority.get("accepted", {}) if isinstance(f6_authority, Mapping) else {}).get("validation_fingerprint")), ((f6_authority.get("accepted", {}) if isinstance(f6_authority, Mapping) else {}).get("artifact_fingerprint"))),
             "Upstream authority: {}".format(authority),
-            "Bootstrap policy: {}".format(policy),
-            "Fixed kaon window: [{}, {})".format(window.get("mm_min"), window.get("mm_max")),
+            "1D binning: accepted F.6.1 parent edges, exactly 40 bins.",
+            "MM×acceptance 2D binning: accepted parent edges indices 0,4,...,40 => 10 bins/axis.",
+            "delta×acceptance: exact frozen F.1 delta edges × 10-bin coarsened xptar/yptar.",
+            "Kaon window: [1.10,1.16), source resolve_analysis_runtime_config(\"4p4\", \"2p74\").",
+            "Bootstrap: 2000, seed 20260916, paired B/A, independent L, source-stratified signed, ordinary 95% linear percentile, 90% kappa/rho validity rule.",
+            "Resolved bootstrap policy: {}".format(policy),
             "Method B is not a numerical input; no production object, yield, or threshold gate is constructed.",
         ])
         for parent in parents:
@@ -222,11 +259,26 @@ def write_review_pdf(path: Path, artifact: Mapping[str, object]) -> None:
             for child in parent.get("children", []):
                 if isinstance(child, Mapping):
                     counts = child.get("population_counts", {})
-                    if isinstance(counts, Mapping) and any(int(counts.get(name, 0)) > 0 for name in ("N_low", "N_control", "N_full")):
+                    if isinstance(counts, Mapping) and any(int(counts.get(name, 0)) > 0 for name in ("N_low", "N_control", "N_full_application")):
                         _detail_page(pdf, child, window); detail_count += 1
-        empty = sum(1 for parent in parents if isinstance(parent, Mapping) for child in parent.get("children", []) if isinstance(child, Mapping) and not any(int((child.get("population_counts", {}) or {}).get(name, 0)) > 0 for name in ("N_low", "N_control", "N_full")))
+        children = [child for parent in parents if isinstance(parent, Mapping) for child in parent.get("children", []) if isinstance(child, Mapping)]
+        empty = sum(1 for child in children if bool((child.get("availability", {}) or {}).get("completely_empty")))
+        unavailable_low_control = sum(1 for child in children if not bool((child.get("availability", {}) or {}).get("has_low_response")) or not bool((child.get("availability", {}) or {}).get("has_prompt_control")))
+        def interval_count(items: Sequence[object]) -> int:
+            return sum(1 for item in items if isinstance(item, Mapping) and item.get("interval_available") is True)
+        one_dimensional_intervals = [((child.get("bootstrap", {}) or {}).get("one_dimensional", {}) or {}) for child in children]
+        delta_h_count = interval_count([metrics.get("DeltaH", {}) for group in one_dimensional_intervals if isinstance(group, Mapping) for metrics in group.values() if isinstance(metrics, Mapping)])
+        kappa_count = interval_count([metrics.get("kappa", {}) for group in one_dimensional_intervals if isinstance(group, Mapping) for metrics in group.values() if isinstance(metrics, Mapping)])
+        rho_count = interval_count([metrics.get("rho", {}) for group in one_dimensional_intervals if isinstance(group, Mapping) for metrics in group.values() if isinstance(metrics, Mapping)])
+        joint_groups = [((child.get("bootstrap", {}) or {}).get("joint_missing_mass_acceptance", {}) or {}) for child in children]
+        x_kappa_count = interval_count([((group.get("analysis_MM__SHMS_xptar", {}) if isinstance(group, Mapping) else {}).get("kappa", {})) for group in joint_groups])
+        y_kappa_count = interval_count([((group.get("analysis_MM__SHMS_yptar", {}) if isinstance(group, Mapping) else {}).get("kappa", {})) for group in joint_groups])
+        delta_p_count = interval_count([(((child.get("bootstrap", {}) or {}).get("kaon_window", {}) or {}).get("DeltaP_K", {})) for child in children])
         _text_page(pdf, "F.6.2 — policy and availability summary", [
-            "Canonical children: 135; detail pages: {}; empty children: {}.".format(detail_count, empty),
+            "135 canonical children total; detail_page_count={}; completely_empty_child_count={}.".format(detail_count, empty),
+            "child count with unavailable low/control shape comparison={}.".format(unavailable_low_control),
+            "available bootstrap interval count: DeltaH={}, kappa={}, rho={}.".format(delta_h_count, kappa_count, rho_count),
+            "available MM×xptar kappa interval count={}; MM×yptar kappa interval count={}; DeltaP^K interval count={}.".format(x_kappa_count, y_kappa_count, delta_p_count),
             "No composite score, automatic case assignment, numerical threshold, or post-hoc tuning is present.",
             "Unavailable metrics retain their literal reason in JSON and detail-page footer diagnostics.",
             "F.6.2 is detached evidence only; it neither mutates production nor claims final-yield uncertainty reduction.",

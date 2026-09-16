@@ -64,7 +64,7 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
             directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
             self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 0)
             payload = json.loads(output_json.read_text(encoding="utf-8")); self.assertTrue(payload["validation"]["available"])
-            details = sum(1 for parent in payload["validation"]["parents"] for child in parent["children"] if any(child["population_counts"][name] > 0 for name in ("N_low", "N_control", "N_full")))
+            details = sum(1 for parent in payload["validation"]["parents"] for child in parent["children"] if any(child["population_counts"][name] > 0 for name in ("N_low", "N_control", "N_full_application")))
             self.assertEqual(len(re.findall(rb"/Type /Page(?!s)", output_pdf.read_bytes())), 1 + 15 + details + 1)
             serialized = json.dumps(payload, sort_keys=True); self.assertNotIn("correction_factors", serialized); self.assertNotIn("entry_index", serialized)
 
@@ -77,6 +77,23 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
             (directory / analyzer._f6_1_filename(KINEMATIC)).unlink()
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+
+    def test_filenames_invalid_inputs_and_f6_authority_are_fail_closed(self):
+        self.assertEqual(analyzer._f1_filename("Left", KINEMATIC, "lowe"), "Left_kaon_pion-background_hgcer_method-a-acceptance-contract_Q4p4W2p74_lowe.json")
+        self.assertEqual(analyzer.validation.pion_hgcer_method_a_acceptance_refinement_validation_filename(KINEMATIC), "Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json")
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            wrong = {KINEMATIC: dict(f6_authority[KINEMATIC])}; wrong[KINEMATIC]["source_file_sha256"] = "f" * 64
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, wrong), 1)
+            self.assertFalse(any(path.name.startswith(".f6_2_") for path in directory.iterdir()))
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            missing = directory / "missing"
+            self.assertEqual(analyzer.main(["--outdir", str(missing), "--kinematic", KINEMATIC, "--output-json", str(missing / analyzer.validation.pion_hgcer_method_a_acceptance_refinement_validation_filename(KINEMATIC)), "--output-pdf", str(missing / analyzer._pdf_filename(KINEMATIC))]), 1)
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            (directory / analyzer._f3_filename(KINEMATIC)).write_text("{", encoding="utf-8")
             self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
 
     def test_cli_rollback_and_unsupported_kinematic(self):
@@ -92,6 +109,18 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
                 self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
             self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists())
             self.assertEqual(analyzer.main(["--outdir", str(directory), "--kinematic", "Q9p9W9p99", "--output-json", str(directory / "x.json"), "--output-pdf", str(directory / "x.pdf")]), 1)
+
+    def test_pdf_generation_and_first_promotion_failures_roll_back(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            with mock.patch.object(analyzer, "write_review_pdf", side_effect=OSError("f6_2_pdf_generation_failure")):
+                self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+            self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists()); self.assertFalse(any(path.name.startswith(".f6_2_") for path in directory.iterdir()))
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            with mock.patch.object(analyzer, "write_review_pdf", side_effect=lambda path, artifact: path.write_bytes(b"pdf")), mock.patch.object(analyzer.os, "replace", side_effect=OSError("f6_2_first_promotion_failure")):
+                self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+            self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists())
 
 
 if __name__ == "__main__":

@@ -386,11 +386,11 @@ def _bootstrap_summary(values: Sequence[float], requested: int, name: str, polic
     invalid = requested - len(valid)
     needs_ninety_percent = name in {"kappa", "rho"}
     if not valid:
-        return {"requested_replicas": requested, "valid_replicas": 0, "invalid_replicas": invalid, "available": False, "reason": "no_valid_bootstrap_replicas", "ci_low": None, "ci_high": None}
+        return {"requested_replica_count": requested, "valid_replica_count": 0, "invalid_replica_count": invalid, "interval_available": False, "reason": "no_valid_bootstrap_replicas", "ci_low": None, "ci_high": None}
     if needs_ninety_percent and len(valid) < math.ceil(float(policy["minimum_valid_fraction_for_kappa_and_rho"]) * requested):
-        return {"requested_replicas": requested, "valid_replicas": len(valid), "invalid_replicas": invalid, "available": False, "reason": "insufficient_valid_bootstrap_replicas", "ci_low": None, "ci_high": None}
+        return {"requested_replica_count": requested, "valid_replica_count": len(valid), "invalid_replica_count": invalid, "interval_available": False, "reason": "insufficient_valid_bootstrap_replicas", "ci_low": None, "ci_high": None}
     interval = _map(policy["confidence_interval"], "bootstrap_confidence_interval")
-    return {"requested_replicas": requested, "valid_replicas": len(valid), "invalid_replicas": invalid, "available": True, "reason": None, "ci_low": _linear_percentile(valid, _finite(interval.get("low_percent"), "bootstrap_ci_low")), "ci_high": _linear_percentile(valid, _finite(interval.get("high_percent"), "bootstrap_ci_high"))}
+    return {"requested_replica_count": requested, "valid_replica_count": len(valid), "invalid_replica_count": invalid, "interval_available": True, "reason": None, "ci_low": _linear_percentile(valid, _finite(interval.get("low_percent"), "bootstrap_ci_low")), "ci_high": _linear_percentile(valid, _finite(interval.get("high_percent"), "bootstrap_ci_high"))}
 
 
 def _metric_value(shape: Mapping[str, object], name: str) -> float | None:
@@ -640,7 +640,7 @@ def _child_payload(state: Mapping[str, object], pairs: Sequence[Mapping[str, obj
         payload["x_variable"] = x_name; payload["y_variable"] = y_name
         joint["{}__{}".format(x_name, y_name)] = payload
     signed, _transient = _signed_payload(full, parent_edges["signed_analysis_MM"], window, label)
-    return {"setting_id": setting_id, "canonical_t_index": t_index, "canonical_t_low": t_bounds[0], "canonical_t_high": t_bounds[1], "phi_index": phi_index, "phi_low": phi_edges[phi_index], "phi_high": phi_edges[phi_index + 1], "population_counts": {"N_low": len(low), "N_control": len(controls), "N_full": len(full), "full_by_source": {source: sum(1 for item in full if _map(item.get("row"), "full_row").get("source_label") == source) for source in _SOURCE_LABELS}}, "support": _support_summary(controls, full), "effective_sample_size": {"baseline_w0": _effective_sample_size(baseline, "{}_baseline_neff".format(label)), "method_a_w0_times_C": _effective_sample_size(adjusted, "{}_method_a_neff".format(label))}, "one_dimensional": one_dimensional, "joint_distributions": joint, "signed_background": signed, "bootstrap": _bootstrap_child(low, controls, full, parent_edges, delta_edges, policy, setting_id, t_index, phi_index, window), "automatic_case_assignment": False, "numerical_case_thresholds_applied": False, "manual_physics_review_required": True}
+    return {"setting_id": setting_id, "canonical_t_index": t_index, "canonical_t_low": t_bounds[0], "canonical_t_high": t_bounds[1], "phi_index": phi_index, "phi_low": phi_edges[phi_index], "phi_high": phi_edges[phi_index + 1], "population_counts": {"N_low": len(low), "N_control": len(controls), "N_full_application": len(full), "full_by_source": {source: sum(1 for item in full if _map(item.get("row"), "full_row").get("source_label") == source) for source in _SOURCE_LABELS}}, "availability": {"has_low_response": bool(low), "has_prompt_control": bool(controls), "has_full_application": bool(full), "completely_empty": not (bool(low) or bool(controls) or bool(full))}, "support": _support_summary(controls, full), "effective_sample_size": {"baseline_w0": _effective_sample_size(baseline, "{}_baseline_neff".format(label)), "method_a_w0_times_C": _effective_sample_size(adjusted, "{}_method_a_neff".format(label))}, "one_dimensional": one_dimensional, "joint_distributions": joint, "signed_background": signed, "bootstrap": _bootstrap_child(low, controls, full, parent_edges, delta_edges, policy, setting_id, t_index, phi_index, window), "automatic_case_classification": False, "case_thresholds_defined": False, "manual_review_required": True}
 
 
 def _assert_aggregate_only_persistence(value: object) -> None:
@@ -700,13 +700,13 @@ def build_pion_hgcer_method_a_acceptance_refinement_validation(
         "fingerprint_schema_version": METHOD_A_ACCEPTANCE_REFINEMENT_VALIDATION_FINGERPRINT_SCHEMA_VERSION,
         "status": "available", "available": True, "reason": None, "diagnostic_stage": "complete",
         "non_authoritative": True, "validation_only": True,
-        "f6_1_consumed": True, "f6_1_modified": False, "f4_correction_consumed": True, "f4_correction_modified": False,
+        "accepted_f6_1_consumed": True, "accepted_f6_1_modified": False, "f4_correction_consumed": True, "f4_correction_modified": False,
         "event_correction_evaluated_for_detached_validation": True, "event_correction_persisted": False,
         "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False,
         "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False,
         "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False,
-        "method_b_numerical_dependency": False, "automatic_case_assignment": False,
-        "numerical_case_thresholds_applied": False, "final_yield_uncertainty_claimed": False,
+        "method_b_numerical_dependency": False, "automatic_case_classification": False,
+        "case_thresholds_defined": False, "final_yield_uncertainty_claimed": False,
         "manual_review_required": True, "baseline_disagreement_is_not_automatic_failure": True,
         "kaon_region_leakage_is_permitted": True, "low_response_is_reference_shape_not_absolute_probability": True,
         "bootstrap_policy": policy, "kaon_window": window,
@@ -736,7 +736,7 @@ def build_pion_hgcer_method_a_acceptance_refinement_validation_artifact(
 ) -> dict[str, object]:
     validation = build_pion_hgcer_method_a_acceptance_refinement_validation(f1_artifacts, f3_artifact, f4_artifact, f5_artifact, f6_1_artifact, f1_input_file_hashes=f1_input_file_hashes, f3_input_file_sha256=f3_input_file_sha256, f4_input_file_sha256=f4_input_file_sha256, f5_input_file_sha256=f5_input_file_sha256, f6_1_input_file_sha256=f6_1_input_file_sha256, accepted_runtime_authority_by_kinematic=accepted_runtime_authority_by_kinematic, accepted_f4_runtime_authority_by_kinematic=accepted_f4_runtime_authority_by_kinematic, accepted_f3_runtime_authority_by_kinematic=accepted_f3_runtime_authority_by_kinematic, accepted_f6_1_artifact_authority_by_kinematic=accepted_f6_1_artifact_authority_by_kinematic, bootstrap_test_config=bootstrap_test_config)
     provenance = {"generated_at_utc": generated_at_utc, "input_paths": _copy({} if input_paths is None else input_paths, "input_paths")}
-    artifact: dict[str, object] = {"schema_version": METHOD_A_ACCEPTANCE_REFINEMENT_VALIDATION_ARTIFACT_SCHEMA_VERSION, "validation": validation, "non_authoritative": True, "validation_only": True, "f6_1_consumed": True, "f6_1_modified": False, "event_correction_persisted": False, "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False, "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False, "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False, "method_b_numerical_dependency": False, "automatic_case_assignment": False, "numerical_case_thresholds_applied": False, "final_yield_uncertainty_claimed": False, "provenance": provenance}
+    artifact: dict[str, object] = {"schema_version": METHOD_A_ACCEPTANCE_REFINEMENT_VALIDATION_ARTIFACT_SCHEMA_VERSION, "validation": validation, "non_authoritative": True, "validation_only": True, "manual_review_required": True, "accepted_f6_1_consumed": True, "accepted_f6_1_modified": False, "event_correction_evaluated_for_detached_validation": True, "event_correction_persisted": False, "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False, "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False, "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False, "method_b_numerical_dependency": False, "automatic_case_classification": False, "case_thresholds_defined": False, "final_yield_uncertainty_claimed": False, "provenance": provenance}
     artifact["artifact_fingerprint"] = _sha256({"schema_version": artifact["schema_version"], "validation_fingerprint": validation["fingerprint"], "input_paths": provenance["input_paths"]})
     return _copy(artifact, "acceptance_refinement_validation_artifact")  # type: ignore[return-value]
 

@@ -53,9 +53,13 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         self.assertTrue(result["f6_1_reproduction"]["exact_payload_match"])
         self.assertTrue(result["f4_reproduction"]["exact_payload_match"])
         self.assertTrue(result["f5_reproduction"]["exact_payload_match"])
+        self.assertEqual(result["f6_1_authority"]["accepted"]["source_file_sha256"], "e" * 64)
+        self.assertEqual(result["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["x_edges"], self.artifacts[0]["contract"]["delta_edges"])
         for child in children:
+            self.assertEqual(set(child["availability"]), {"has_low_response", "has_prompt_control", "has_full_application", "completely_empty"})
             self.assertEqual(len(child["one_dimensional"]), 6)
             self.assertEqual(set(child["joint_distributions"]), {"analysis_MM__SHMS_xptar", "analysis_MM__SHMS_yptar", "SHMS_delta__SHMS_xptar", "SHMS_delta__SHMS_yptar"})
+            self.assertEqual(set(child["population_counts"]["full_by_source"]), {"prompt", "rand", "dummy", "dummy_rand"})
             for shape in child["one_dimensional"].values():
                 self.assertEqual(len(shape["edges"]), 41)
                 for population in ("L", "B", "A"):
@@ -67,9 +71,13 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         self.assertFalse(result["production_application_performed"]); self.assertFalse(result["method_b_numerical_dependency"])
 
     def test_authority_f6_reproduction_and_transient_factor_alignment_fail_closed(self):
-        wrong = deepcopy(self.f6_authority); wrong[KINEMATIC]["source_file_sha256"] = "f" * 64
-        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_authority_source_file_sha256_mismatch"):
-            self._build(accepted_f6_1_artifact_authority_by_kinematic=wrong)
+        for field in ("source_file_sha256", "validation_fingerprint", "artifact_fingerprint"):
+            wrong = deepcopy(self.f6_authority); wrong[KINEMATIC][field] = "f" * 64
+            with self.subTest(field=field), self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_authority_{}_mismatch".format(field)):
+                self._build(accepted_f6_1_artifact_authority_by_kinematic=wrong)
+        changed_upstream = deepcopy(self.authority); changed_upstream[KINEMATIC]["f3_source_file_sha256"] = "f" * 64
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_reproduction_failed"):
+            self._build(accepted_runtime_authority_by_kinematic=changed_upstream)
         corrupt = deepcopy(self.f6); corrupt["validation"]["parents"] = []
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "f6_1_validation_fingerprint_invalid|f6_1_exact"):
             self._build(f6_1_artifact=corrupt)
@@ -89,7 +97,38 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         signed, _ = f62._signed_payload(rows, [1.0, 1.2], window, "window")
         self.assertEqual(signed["kaon_window"]["P_B_K"]["value"], 2.0)
         self.assertEqual(signed["kaon_window"]["P_A_K"]["value"], 3.0)
+        self.assertEqual(signed["kaon_window"]["DeltaP_K"]["value"], 1.0)
+        self.assertEqual(signed["variance_proxy"]["V_B"]["value"], 13.0)
+        self.assertEqual(signed["variance_proxy"]["V_A"]["value"], 45.0)
+        self.assertAlmostEqual(signed["variance_proxy"]["R_V"]["value"], 45.0 / 13.0)
         self.assertTrue(any(value < 0.0 for value in signed["analysis_MM"]["baseline_signed_contents"]))
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "signed_source"):
+            f62._signed_payload([{"row": {"source_label": "unknown", "analysis_MM": 1.12, "signed_baseline_event_contribution": 1.0}, "factor": 1.0}], [1.0, 1.2], window, "unknown")
+        self.assertAlmostEqual(f62._effective_sample_size([1.0, 2.0], "neff")["value"], 1.8)
+        with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "baseline_weight_invalid"):
+            f62._one_dimensional_payload([0.1], [0.2], [-1.0], [1.0], [0.0, 1.0], "nonpositive")
+
+    def test_hand_metrics_and_bootstrap_contract_states(self):
+        low = {"available": True, "unit_area": [1.0, 0.0], "reason": None}
+        baseline = {"available": True, "unit_area": [0.0, 1.0], "reason": None}
+        method_a = {"available": True, "unit_area": [0.5, 0.5], "reason": None}
+        metrics = f62._comparison_metrics(low, baseline, method_a)
+        self.assertAlmostEqual(metrics["H_B"]["value"], 1.0)
+        self.assertAlmostEqual(metrics["TV_LB"]["value"], 1.0)
+        self.assertAlmostEqual(metrics["R"]["value"], 0.5)
+        self.assertAlmostEqual(metrics["kappa"]["value"], 1.0)
+        self.assertAlmostEqual(metrics["rho"]["value"], 0.5)
+        self.assertLess(metrics["DeltaH"]["value"], 0.0)
+        zero_residual = f62._comparison_metrics(low, low, method_a)
+        self.assertEqual(zero_residual["kappa"]["reason"], "residual_norm_zero")
+        matrix_low = {"available": True, "unit_area": [[1.0, 0.0], [0.0, 0.0]], "reason": None}
+        matrix_baseline = {"available": True, "unit_area": [[0.0, 1.0], [0.0, 0.0]], "reason": None}
+        matrix_a = {"available": True, "unit_area": [[0.5, 0.5], [0.0, 0.0]], "reason": None}
+        self.assertAlmostEqual(f62._joint_metrics(matrix_low, matrix_baseline, matrix_a)["kappa"]["value"], 1.0)
+        policy = dict(f62._BOOTSTRAP_POLICY)
+        insufficient = f62._bootstrap_summary([1.0] * 8, 10, "kappa", policy)
+        self.assertFalse(insufficient["interval_available"]); self.assertEqual(insufficient["reason"], "insufficient_valid_bootstrap_replicas")
+        self.assertEqual(set(insufficient), {"requested_replica_count", "valid_replica_count", "invalid_replica_count", "interval_available", "reason", "ci_low", "ci_high"})
 
     def test_bootstrap_seed_percentile_and_pairing_are_deterministic(self):
         self.assertEqual(f62._linear_percentile([0.0, 10.0], 25.0), 2.5)
@@ -99,7 +138,7 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         child = first["parents"][0]["children"][0]
         bootstrap = child["bootstrap"]
         self.assertEqual(bootstrap["policy"]["replicas"], 4)
-        self.assertEqual(bootstrap["kaon_window"]["DeltaP_K"]["requested_replicas"], 4)
+        self.assertEqual(bootstrap["kaon_window"]["DeltaP_K"]["requested_replica_count"], 4)
         with self.assertRaisesRegex(f62.MethodAAcceptanceRefinementValidationError, "bootstrap_test_config_invalid"):
             self._build(bootstrap_test_config={"seed": 3})
 
@@ -109,6 +148,8 @@ class AcceptanceRefinementValidationTests(unittest.TestCase):
         first = f62.build_pion_hgcer_method_a_acceptance_refinement_validation_artifact(self.artifacts, self.f3, self.f4, self.f5, self.f6, f1_input_file_hashes=self.hashes, f3_input_file_sha256=f61_fixtures.F3_SHA, f4_input_file_sha256=f61_fixtures.F4_SHA, f5_input_file_sha256=f61_fixtures.F5_SHA, f6_1_input_file_sha256="e" * 64, input_paths={"f1": {}, "f3": "3", "f4": "4", "f5": "5", "f6_1": "6"}, accepted_runtime_authority_by_kinematic=self.authority, accepted_f4_runtime_authority_by_kinematic=self.f4_authority, accepted_f3_runtime_authority_by_kinematic=self.f3_authority, accepted_f6_1_artifact_authority_by_kinematic=self.f6_authority, bootstrap_test_config={"replicas": 3})
         second = f62.build_pion_hgcer_method_a_acceptance_refinement_validation_artifact(deepcopy(self.artifacts), deepcopy(self.f3), deepcopy(self.f4), deepcopy(self.f5), deepcopy(self.f6), f1_input_file_hashes=self.hashes, f3_input_file_sha256=f61_fixtures.F3_SHA, f4_input_file_sha256=f61_fixtures.F4_SHA, f5_input_file_sha256=f61_fixtures.F5_SHA, f6_1_input_file_sha256="e" * 64, input_paths={"f1": {}, "f3": "3", "f4": "4", "f5": "5", "f6_1": "6"}, accepted_runtime_authority_by_kinematic=self.authority, accepted_f4_runtime_authority_by_kinematic=self.f4_authority, accepted_f3_runtime_authority_by_kinematic=self.f3_authority, accepted_f6_1_artifact_authority_by_kinematic=self.f6_authority, bootstrap_test_config={"replicas": 3})
         self.assertEqual(first["artifact_fingerprint"], second["artifact_fingerprint"])
+        for name, expected in {"non_authoritative": True, "validation_only": True, "manual_review_required": True, "accepted_f6_1_consumed": True, "accepted_f6_1_modified": False, "event_correction_evaluated_for_detached_validation": True, "event_correction_persisted": False, "production_application_performed": False, "production_objects_mutated": False, "yield_constructed": False, "cross_section_constructed": False, "root_object_constructed": False, "child_renormalization_performed": False, "smoothing_or_interpolation_performed": False, "absolute_probability_constructed": False, "method_b_numerical_dependency": False, "automatic_case_classification": False, "case_thresholds_defined": False, "final_yield_uncertainty_claimed": False}.items():
+            self.assertEqual(first[name], expected)
 
     def test_module_has_no_production_or_method_b_import(self):
         source = (REPO_ROOT / "src" / "cuts" / "pion_hgcer_method_a_acceptance_refinement_validation.py").read_text(encoding="utf-8")
