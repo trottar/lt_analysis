@@ -75,6 +75,17 @@ as did `git diff --check 4928e145..bfc4fe42`. Farm/runtime validation is not
 established. Production application/yield mutation, ROOT dependency, and
 Method-B numerical dependency remain false.
 
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is
+implemented as a generic v4 collector profile at
+`testing/pion_hgcer_validation_bundle_profile_f6_1.json`, with focused test
+`testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`. The collector is
+unchanged. The package is exactly F.6.1 JSON/PDF, F.5/F.4/F.3 JSONs, five F.1
+acceptance-contract JSONs, manifest, and source provenance. Its required
+analysis source is `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`; only the profile
+and its test are allowed after that source, besides `docs/memory/`. On
+2026-09-16, the profile test, unchanged collector tests, and F.6.1
+validator/analyzer tests passed. No farm artifact or runtime result exists.
+
 CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
 range whitespace check to the three profile-owned validation files; the global
 worktree check and committed-file identity audit remain unchanged. The F.1
@@ -129,8 +140,8 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — Implement the detached F.6.1 validation bundle/profile gate. Do not
-claim that a farm bundle exists. The current yield remains the accepted
-baseline. E.8 is BLOCKED until F.6.1 acceptance and is presentation-only;
-F.6.2 and F.6.3 remain BLOCKED. Read
+NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
+the complete F.6.1 JSON/PDF/bundle evidence. The current yield remains the
+accepted baseline. E.8 is BLOCKED until F.6.1 acceptance and is
+presentation-only; F.6.2 and F.6.3 remain BLOCKED. Read
 phases/phase-f6-method-a-production-promotion.md.

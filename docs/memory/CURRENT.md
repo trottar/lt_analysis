@@ -116,6 +116,18 @@ Farm/runtime validation is not yet established. Production application,
 production/yield mutation, ROOT dependency, and Method-B numerical dependency
 are all false.
 
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is the
+detached farm bundle/profile gate. It adds
+`testing/pion_hgcer_validation_bundle_profile_f6_1.json` and its focused test,
+while reusing `testing/collect_pion_hgcer_validation_bundle.py` unchanged. The
+generic v4 package contains the F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
+five F.1 acceptance-contract JSONs, and collector manifest/source provenance.
+It pins reviewed analysis source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`;
+only the profile and its test may follow that source, plus `docs/memory/`.
+The profile/collector/F.6.1 local tests passed on 2026-09-16. This gate does
+not duplicate F.6.1 semantic checks, mutate analysis, or establish a farm
+bundle or runtime result.
+
 ## Frozen architecture
 
 - Random subtraction, slow-proton treatment, pion subtraction, HGCer Method A,
@@ -141,7 +153,7 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — Implement the detached F.6.1 validation bundle/profile gate. Do not
-claim that a farm bundle exists. The accepted current yield remains the
-baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
+NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
+the complete F.6.1 JSON/PDF/bundle evidence. The accepted current yield remains
+the baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
 phases/phase-f6-method-a-production-promotion.md.

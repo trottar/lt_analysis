@@ -1,0 +1,62 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_f6_1_method_a_reweighting_validation_farm_review/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {"phi": "Left", "epsilon": "lowe"},
+    {"phi": "Left", "epsilon": "highe"},
+    {"phi": "Center", "epsilon": "lowe"},
+    {"phi": "Center", "epsilon": "highe"},
+    {"phi": "Right", "epsilon": "highe"}
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "f6_1_reweighting_validation_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-reweighting-validation.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f6_1_reweighting_validation_pdf",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-reweighting-validation.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "f5_tphi_propagation_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-tphi-propagation.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f4_parent_preserving_correction_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-parent-preserving-correction.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f3_acceptance_map_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-map.json",
+        "kind": "json",
+        "required": true
+      }
+    ],
+    "settings": [
+      {
+        "key": "method_a_acceptance_contract",
+        "basename_template": "{phi}_kaon_pion-background_hgcer_method-a-acceptance-contract_{kinematic}_{epsilon}.json",
+        "kind": "json",
+        "required": true
+      }
+    ]
+  },
+  "source_identity": {
+    "required_analysis_commit": "bfc4fe421f9fc9139a1992a0ec92e31aa101b86c",
+    "allowed_committed_files": [
+      "testing/pion_hgcer_validation_bundle_profile_f6_1.json",
+      "testing/test_pion_hgcer_validation_bundle_profile_f6_1.py"
+    ],
+    "allowed_non_analysis_path_prefixes": ["docs/memory/"]
+  }
+}

@@ -172,6 +172,19 @@ production-promotion decision. Current yields stay the accepted baseline; no
 Method-A uncertainty is defined by this roadmap. Read
 phases/phase-f6-method-a-production-promotion.md.
 
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — F.6.1.Validation.1 is a
+detached generic-artifact farm bundle/profile gate. Its profile is
+`testing/pion_hgcer_validation_bundle_profile_f6_1.json`; it uses the unchanged
+v4 collector and packages only F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
+five F.1 acceptance-contract JSONs, and manifest/source provenance. It pins
+reviewed analysis source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`, permits
+only that profile and `testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`
+after the pin, plus `docs/memory/`, and fails if later F.6.1 science changes
+appear. Local profile, collector, and F.6.1 tests passed on 2026-09-16. The
+gate is evidence packaging only: `complete=true` is not scientific acceptance,
+and no farm bundle or runtime result is yet established. NEXT — one fresh
+detached F.6.1 farm validation for Q4p4W2p74, then inspect complete evidence.
+
 F.2.Fix.1 starts from the clean F.2 implementation commit
 `5549098d2552b9c092b65e31aeb77edc0807ddda`. It is an authority/provenance and
 deterministic-failure repair only: independently reconstruct the frozen F.1 v2

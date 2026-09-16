@@ -70,6 +70,21 @@ model variables, independent variables, signed background shapes, F.5
 `(t,phi)` continuity, and closure/provenance. Its exact page layout belongs to
 the later implementation contract.
 
+### F.6.1.Validation.1 — detached farm bundle/profile gate
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the generic v4 profile
+`testing/pion_hgcer_validation_bundle_profile_f6_1.json` reuses the unchanged
+collector and packages only the F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs,
+five F.1 acceptance-contract JSONs, and manifest/source provenance. It pins
+reviewed F.6.1 source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`; the only
+allowed committed files after that source are the profile and
+`testing/test_pion_hgcer_validation_bundle_profile_f6_1.py`, plus the
+`docs/memory/` prefix. Later F.6.1 validator/analyzer/science changes fail this
+source gate until separately reviewed. The profile does not duplicate F.6.1
+physics or make `complete=true` scientific acceptance. Local profile,
+collector, and F.6.1 tests passed on 2026-09-16; no farm bundle or runtime
+result exists.
+
 ## E.8 — streamlined full-background-subtraction presentation
 
 `BLOCKED` until F.6.1 is accepted. E.8 is presentation-only and follows F.6.1
@@ -119,6 +134,6 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.5.2 evidence. F.6.1 remains detached. Its
-next authorized step is a detached validation bundle/profile gate followed by
-one fresh farm validation run; do not begin E.8 or alter ROOT or production
-behavior.
+next authorized step is one fresh F.6.1 farm validation run followed by
+inspection of the complete JSON/PDF/bundle evidence; do not begin E.8 or alter
+ROOT or production behavior.

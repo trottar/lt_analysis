@@ -75,6 +75,16 @@ weights or yields. The frozen producer phi contract is training `evt.ph_q` in
 radians and application `phi_degrees = evt.ph_q * 180/pi`; farm/runtime
 validation is not yet established.
 
+#### F.6.1.Validation.1 — detached farm bundle/profile gate
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — generic v4 profile
+`testing/pion_hgcer_validation_bundle_profile_f6_1.json` reuses the unchanged
+collector to package only F.6.1 JSON/PDF, accepted F.5/F.4/F.3 JSONs, five F.1
+acceptance-contract JSONs, and source provenance. It pins
+`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c` and permits only the profile/test
+after that source, plus `docs/memory/`; it has no F.6.1 semantic or production
+ownership. Farm/runtime validation is not yet established.
+
 #### E.8 — streamlined full-background-subtraction presentation
 
 BLOCKED — presentation-only update after accepted F.6.1; it consumes frozen
@@ -92,5 +102,6 @@ BLOCKED — only after accepted F.6.1/F.6.2 evidence; no automatic promotion.
 
 ## NEXT
 
-NEXT — Implement the detached F.6.1 validation bundle/profile gate. E.8,
-F.6.2, and F.6.3 remain BLOCKED.
+NEXT — One fresh detached F.6.1 farm validation for Q4p4W2p74, then inspect
+the complete F.6.1 JSON/PDF/bundle evidence. E.8, F.6.2, and F.6.3 remain
+BLOCKED.
