@@ -1,9 +1,8 @@
 # Current KaonLT development state
 
-Last source-identity and workflow-memory reconciliation: 2026-09-15,
-accepted F.5.2 presentation-only farm rerender closure. Repository HEAD values
-in this record are timestamped observations, not permanent claims about the
-live checkout.
+Last source-identity and workflow-memory reconciliation: 2026-09-15 during
+F.6.1 Pass 1. Repository HEAD values in this record are timestamped
+observations, not permanent claims about the live checkout.
 
 ## Repository identity at last reconciliation
 
@@ -102,6 +101,14 @@ global F.2 JSON/PDF and five setting-scoped frozen F.1 JSON inputs. It pins
 collector/profile/test repair files plus `docs/memory/`, and performs no F.2
 analysis or physics work.
 
+ACTIVE — F.6.1 detached Method-A reweighting validation began from clean
+`test`/cached `origin/test` `4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`.
+It consumes frozen F.1/F.3/F.4/F.5.2 artifacts through a new pure-Python,
+aggregate-only validator and 27-page review analyzer. It is shadow-only: no
+production weight, yield, ROOT, cross-section, or Method-B numerical path
+exists. This is local source work only; it is not source reviewed or farm
+validated.
+
 ## Frozen architecture
 
 - Random subtraction, slow-proton treatment, pion subtraction, HGCer Method A,
@@ -127,8 +134,7 @@ historical bundles. See investigations/KNOWN_GAPS.md.
 
 ## NEXT
 
-NEXT — F.6 begins with F.6.1 detached Method-A reweighting validation. The
-accepted current yield remains the baseline: F.6.1 is shadow-only and cannot
-mutate production weights or yields. E.8 follows only after F.6.1 acceptance
-so its streamlined presentation can consume validated reweighting plots; F.6.2
-and F.6.3 remain BLOCKED. Read phases/phase-f6-method-a-production-promotion.md.
+NEXT — Complete the F.6.1 Pass-1 allowed-file audit and commit/push its
+detached source/tests and `ACTIVE` memory state. The accepted current yield
+remains the baseline; E.8, F.6.2, and F.6.3 remain BLOCKED. Read
+phases/phase-f6-method-a-production-promotion.md.

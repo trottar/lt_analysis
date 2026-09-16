@@ -60,14 +60,15 @@ remain exactly unchanged. See evidence/f5-2-runtime-closure.md.
 
 ### F.6 — staged Method-A validation and explicit production promotion
 
-NEXT — F.6 follows accepted F.5/F.5.2 under the detailed contract in
+ACTIVE — F.6.1 follows accepted F.5/F.5.2 under the detailed contract in
 phases/phase-f6-method-a-production-promotion.md. The current full procedure
 remains the accepted baseline until an explicit later promotion decision.
 
 #### F.6.1 — detached Method-A reweighting validation
 
-NEXT — validate the accepted F.4 Method-A factor against the physical
-pion-control population without mutating production weights or yields.
+ACTIVE — validate the accepted F.4 Method-A factor against the physical
+pion-control population without mutating production weights or yields. This is
+detached source work only, not source review or runtime validation.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
@@ -86,5 +87,6 @@ BLOCKED — only after accepted F.6.1/F.6.2 evidence; no automatic promotion.
 
 ## NEXT
 
-NEXT — Define and implement F.6.1 detached Method-A reweighting validation
-under a new narrow contract. E.8, F.6.2, and F.6.3 remain BLOCKED.
+NEXT — Complete the F.6.1 Pass-1 allowed-file audit and commit/push its
+detached validator, analyzer, tests, and active memory state. E.8, F.6.2, and
+F.6.3 remain BLOCKED.

@@ -149,10 +149,13 @@ normalization, production behavior, or F.5 result changed. F.5.2.Fix.1 at
 F.5.Fix.1 source-reviewed compatibility repair. See
 evidence/f5-2-runtime-closure.md.
 
-F.6 is NEXT and promotion is deliberately staged. F.6.1 is its NEXT detached
-Method-A event-reweighting validation; it first tests the accepted F.4 factor
-against the physical pion-control population without a production or yield
-mutation.
+F.6 promotion is deliberately staged. ACTIVE — F.6.1 detached Method-A
+event-reweighting validation began from clean `test`/cached `origin/test`
+`4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`. It consumes frozen F.1/F.3/F.4/
+F.5.2 artifacts through a pure-Python aggregate-only validator; transient F.4
+factors are positionally paired with F.1 application rows, while event-level
+values never persist. It is source work only and makes no production/yield,
+ROOT, cross-section, child-normalization, or Method-B numerical mutation.
 E.8 is BLOCKED until accepted F.6.1 and remains presentation-only, consuming
 frozen reweighting results. F.6.2 is then BLOCKED pending F.6.1/E.8: it
 compares the unchanged full baseline procedure against a parallel full

@@ -1,9 +1,7 @@
 # Phase F.6 staged Method-A validation and production promotion
 
-F.6 is `NEXT`; F.6.1 is its sole immediate `NEXT`. F.6 has not started and
-no production promotion is authorized by this roadmap. F.1 through F.5.2
-remain `CLOSED / RUNTIME VALIDATED`; in particular, accepted F.5 scientific
-fingerprint
+F.6.1 is `ACTIVE`; no production promotion is authorized by this roadmap.
+F.1 through F.5.2 remain `CLOSED / RUNTIME VALIDATED`; in particular, accepted F.5 scientific fingerprint
 `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa` remains
 frozen. Method B is diagnostic/cross-check only and is numerically excluded
 from every F.6 correction.
@@ -26,7 +24,7 @@ Method B numerically.
 
 ## F.6.1 — detached Method-A reweighting validation
 
-`NEXT` — before any production or final-yield mutation, test whether accepted
+`ACTIVE` — before any production or final-yield mutation, test whether accepted
 Method-A reweighting moves the physical pion-control population toward the
 observed low-response pion population while preserving accepted F.4/F.5
 closure.
@@ -108,6 +106,7 @@ This roadmap defines no Method-A systematic uncertainty. In particular,
 `|Method-A result - baseline result|` is a correction effect, not automatically
 its uncertainty; later production closure requires separate justification.
 
-Do not implement F.6.1 or E.8 in this roadmap change, mutate production
-weights/yields, promote Method A, alter accepted F.1-F.5.2 evidence, or make
-any source, test, collector, profile, ROOT, plotting, or production change.
+This roadmap does not authorize production weights/yields, Method-A promotion,
+or alteration of accepted F.1-F.5.2 evidence. F.6.1 source work is limited to
+its approved detached validator, analyzer, and focused tests; do not begin
+E.8, add a collector/profile, or alter ROOT or production behavior.

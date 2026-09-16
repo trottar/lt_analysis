@@ -1,8 +1,8 @@
 # Current KaonLT handoff
 
-Prepared: 2026-09-15 after accepted F.5.2 presentation-only rerender closure.
-This record distinguishes accepted F.5 scientific runtime evidence from its
-later accepted presentation-only rerender.
+Prepared: 2026-09-15 during F.6.1 Pass 1. This record distinguishes accepted
+F.5 scientific runtime evidence from its later accepted presentation-only
+rerender and the active detached F.6.1 source work.
 
 ## Resume identity
 
@@ -61,6 +61,12 @@ CLOSED / RUNTIME VALIDATED:
 
 ## Current gate and boundaries
 
+ACTIVE — F.6.1 detached Method-A reweighting validation started at clean
+`test`/cached `origin/test` `4928e145e2808d47c29d8b4e9c75cd7c64c4ef72`.
+It adds only its validator, analyzer, and focused tests, consuming frozen
+F.1/F.3/F.4/F.5.2 inputs without a production/yield/ROOT/Method-B path. This
+is not source review or farm validation.
+
 CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
 range whitespace check to the three profile-owned validation files; the global
 worktree check and committed-file identity audit remain unchanged. The F.1
@@ -115,9 +121,7 @@ no production promotion before F.6.
 DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
 and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
 
-NEXT — F.6 begins with F.6.1 detached Method-A reweighting validation under a
-new narrow contract. The current yield remains the accepted baseline. E.8 is
-BLOCKED until F.6.1 acceptance and is presentation-only; F.6.2 is BLOCKED as
-the parallel full-procedure baseline-versus-Method-A comparison; F.6.3 is
-BLOCKED as the sole explicit production-promotion decision. Read
-phases/phase-f6-method-a-production-promotion.md.
+NEXT — Finish the F.6.1 Pass-1 allowed-file audit and commit/push its active
+detached source/test work. The current yield remains the accepted baseline.
+E.8 is BLOCKED until F.6.1 acceptance and is presentation-only; F.6.2 and
+F.6.3 remain BLOCKED. Read phases/phase-f6-method-a-production-promotion.md.
