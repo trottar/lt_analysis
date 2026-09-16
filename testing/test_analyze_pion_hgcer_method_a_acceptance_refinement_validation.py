@@ -1,0 +1,98 @@
+"""CLI coverage for detached Phase F.6.2 refinement validation."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import re
+import sys
+import tempfile
+import unittest
+from unittest import mock
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path[:0] = [str(REPO_ROOT / "src" / "cuts"), str(REPO_ROOT / "testing")]
+
+import analyze_pion_hgcer_method_a_acceptance_refinement_validation as analyzer
+import pion_hgcer_method_a_parent_preserving_correction as f4
+import pion_hgcer_method_a_reweighting_validation as f61
+import pion_hgcer_method_a_tphi_propagation as f5
+import test_pion_hgcer_method_a_reweighting_validation as fixtures
+
+
+KINEMATIC = fixtures.KINEMATIC
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
+    def _write_inputs(self, directory: Path) -> tuple[Path, Path, dict[str, object], dict[str, object], dict[str, object], dict[str, object]]:
+        artifacts = fixtures._enriched_artifacts(); hashes: dict[str, str] = {}; paths: dict[str, str] = {}
+        for artifact in artifacts:
+            setting = artifact["setting"]; phi, epsilon = setting["phi_setting"], setting["epsilon_filename_token"]
+            path = directory / analyzer._f1_filename(phi, KINEMATIC, epsilon)
+            path.write_text(json.dumps(artifact, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+            key = "{}-{}".format(phi, epsilon); hashes[key] = _sha256(path); paths[key] = str(path.resolve())
+        f3_payload = fixtures.f4_fixtures._f3(artifacts, hashes); f3_path = directory / analyzer._f3_filename(KINEMATIC)
+        f3_path.write_text(json.dumps(f3_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"); f3_sha = _sha256(f3_path)
+        f3_authority = fixtures.f4_fixtures._authority(f3_payload, f3_sha)
+        f4_payload = f4.build_pion_hgcer_method_a_parent_preserving_correction_artifact(artifacts, f3_payload, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, input_paths={"f1": paths, "f3": str(f3_path.resolve())}, accepted_f3_runtime_authority_by_kinematic=f3_authority)
+        f4_path = directory / analyzer._f4_filename(KINEMATIC)
+        f4_path.write_text(json.dumps(f4_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"); f4_sha = _sha256(f4_path)
+        correction = f4_payload["correction"]; assert isinstance(correction, dict)
+        f4_authority = {KINEMATIC: {"source_file_sha256": f4_sha, "correction_fingerprint": correction["fingerprint"], "artifact_fingerprint": f4_payload["artifact_fingerprint"], "farm_source_head": "2" * 40}}
+        f5_payload = f5.build_pion_hgcer_method_a_tphi_propagation_artifact(artifacts, f3_payload, f4_payload, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, f4_input_file_sha256=f4_sha, input_paths={"f1": paths, "f3": str(f3_path.resolve()), "f4": str(f4_path.resolve())}, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority)
+        f5_path = directory / analyzer._f5_filename(KINEMATIC)
+        f5_path.write_text(json.dumps(f5_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"); f5_sha = _sha256(f5_path)
+        propagation = f5_payload["propagation"]; assert isinstance(propagation, dict)
+        authority = {KINEMATIC: {"f1_source_file_sha256": hashes, "f3_source_file_sha256": f3_sha, "f3_map_fingerprint": f3_payload["acceptance_map"]["fingerprint"], "f3_algorithm_fingerprint": f3_payload["acceptance_map"]["algorithm_fingerprint"], "f3_artifact_fingerprint": f3_payload["artifact_fingerprint"], "f4_source_file_sha256": f4_sha, "f4_correction_fingerprint": correction["fingerprint"], "f4_artifact_fingerprint": f4_payload["artifact_fingerprint"], "f5_source_file_sha256": f5_sha, "f5_propagation_fingerprint": propagation["fingerprint"], "f5_artifact_fingerprint": f5_payload["artifact_fingerprint"], "farm_source_head": "3" * 40}}
+        f6_payload = f61.build_pion_hgcer_method_a_reweighting_validation_artifact(artifacts, f3_payload, f4_payload, f5_payload, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha, f4_input_file_sha256=f4_sha, f5_input_file_sha256=f5_sha, input_paths={"f1": paths, "f3": str(f3_path.resolve()), "f4": str(f4_path.resolve()), "f5": str(f5_path.resolve())}, accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority)
+        f6_path = directory / analyzer._f6_1_filename(KINEMATIC)
+        f6_path.write_text(json.dumps(f6_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"); f6_sha = _sha256(f6_path)
+        f6_authority = {KINEMATIC: {"source_file_sha256": f6_sha, "validation_fingerprint": f6_payload["validation"]["fingerprint"], "artifact_fingerprint": f6_payload["artifact_fingerprint"]}}
+        return directory / analyzer.validation.pion_hgcer_method_a_acceptance_refinement_validation_filename(KINEMATIC), directory / analyzer._pdf_filename(KINEMATIC), authority, f4_authority, f3_authority, f6_authority
+
+    def _run(self, directory: Path, json_path: Path, pdf_path: Path, authority: dict[str, object], f4_authority: dict[str, object], f3_authority: dict[str, object], f6_authority: dict[str, object]) -> int:
+        return analyzer.main(["--outdir", str(directory), "--kinematic", KINEMATIC, "--output-json", str(json_path), "--output-pdf", str(pdf_path)], accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority, accepted_f6_1_artifact_authority_by_kinematic=f6_authority, bootstrap_test_config={"replicas": 2})
+
+    def test_cli_writes_deterministic_aggregate_artifact_and_review_pdf(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 0)
+            payload = json.loads(output_json.read_text(encoding="utf-8")); self.assertTrue(payload["validation"]["available"])
+            details = sum(1 for parent in payload["validation"]["parents"] for child in parent["children"] if any(child["population_counts"][name] > 0 for name in ("N_low", "N_control", "N_full")))
+            self.assertEqual(len(re.findall(rb"/Type /Page(?!s)", output_pdf.read_bytes())), 1 + 15 + details + 1)
+            serialized = json.dumps(payload, sort_keys=True); self.assertNotIn("correction_factors", serialized); self.assertNotIn("entry_index", serialized)
+
+    def test_cli_rejects_paths_overwrite_and_missing_f6_input(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            self.assertEqual(self._run(directory, directory / "wrong.json", output_pdf, authority, f4_authority, f3_authority, f6_authority), 2)
+            output_json.write_text("collision", encoding="utf-8")
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 2)
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            (directory / analyzer._f6_1_filename(KINEMATIC)).unlink()
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+
+    def test_cli_rollback_and_unsupported_kinematic(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
+            original_replace, calls = analyzer.os.replace, 0
+            def fail_second(source, destination):
+                nonlocal calls
+                calls += 1
+                if calls == 2: raise OSError("f6_2_test_second_promotion_failure")
+                return original_replace(source, destination)
+            with mock.patch.object(analyzer, "write_review_pdf", side_effect=lambda path, artifact: path.write_bytes(b"pdf")), mock.patch.object(analyzer.os, "replace", side_effect=fail_second):
+                self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 1)
+            self.assertFalse(output_json.exists()); self.assertFalse(output_pdf.exists())
+            self.assertEqual(analyzer.main(["--outdir", str(directory), "--kinematic", "Q9p9W9p99", "--output-json", str(directory / "x.json"), "--output-pdf", str(directory / "x.pdf")]), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
