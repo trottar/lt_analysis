@@ -1,0 +1,292 @@
+{
+  "files": [
+    {
+      "bytes": 1763,
+      "path": "docs/memory/AGENTS.md",
+      "sha256": "e9353783f28f5b526f33d8455daf72c7e53fe1b2c64be732037ab26b8e008813"
+    },
+    {
+      "bytes": 1105,
+      "path": "docs/memory/CODEX.md",
+      "sha256": "197505767661c41a4dade0712db0c7cdd4268eff565d243691df09cb8c209a75"
+    },
+    {
+      "bytes": 1014,
+      "path": "docs/memory/COMMUNICATION.md",
+      "sha256": "2a13e1d9c3a54884c260d876d4639d3844525a6a3fe26e2ff5774c454dd870a2"
+    },
+    {
+      "bytes": 8003,
+      "path": "docs/memory/CURRENT.md",
+      "sha256": "6b47801d72c37f92f0c00e8a27eac046467d852c2ca2efd8d5e4c345b68d0a89"
+    },
+    {
+      "bytes": 1999,
+      "path": "docs/memory/MAINTENANCE.md",
+      "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
+    },
+    {
+      "bytes": 12478,
+      "path": "docs/memory/MEMORY.md",
+      "sha256": "cb07c4cec9970f1cda7ec58a6a6eca2de07db4cf04aaefdee2ea1c6a3aaa882c"
+    },
+    {
+      "bytes": 2349,
+      "path": "docs/memory/README.md",
+      "sha256": "0c8bd31e958c0eeb7f5d9bb76a602256d8ef83334f99b3fcbc91bc2ee451fcd1"
+    },
+    {
+      "bytes": 1037,
+      "path": "docs/memory/chats/CHAT_INDEX.md",
+      "sha256": "63e1b4b8ef8b6a58130f898cd2a35412972493b275635bc220ff43bfbde4fadc"
+    },
+    {
+      "bytes": 1001,
+      "path": "docs/memory/decisions/2026-09-11-repository-memory-authority.md",
+      "sha256": "a6154188c15c66fbec3aa48664e5d85a93f2d7b4dc5a5387edee0fe85d99383e"
+    },
+    {
+      "bytes": 4979,
+      "path": "docs/memory/decisions/DECISION_HISTORY.md",
+      "sha256": "e38f4bf2d9ecaa674908b4970984b0f4d3e447f2c4138a8a5c38ad3479c430b1"
+    },
+    {
+      "bytes": 5969,
+      "path": "docs/memory/decisions/f6-2-acceptance-refinement-measurement-contract.md",
+      "sha256": "9b1503634d8df9853f47118f0a2b684532562aeff3edbd208bb941feb990a683"
+    },
+    {
+      "bytes": 5299,
+      "path": "docs/memory/decisions/farm-validation-bundle-procedure.md",
+      "sha256": "93158c0089a19dad11af28c62014b127ec7bcb2a610e79b456405e26c5b7af67"
+    },
+    {
+      "bytes": 575,
+      "path": "docs/memory/evidence/README.md",
+      "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
+    },
+    {
+      "bytes": 1366,
+      "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
+      "sha256": "40f87399620125469e74024804e82a31cfefc151987d5c5b6f6c40dc3ed8bc1e"
+    },
+    {
+      "bytes": 1300,
+      "path": "docs/memory/evidence/e3-fix2-left-low-runtime.md",
+      "sha256": "282d558384b5bfefc3485fa23a823d871790d09eaf51a83ff8b2f9f5cfe781ba"
+    },
+    {
+      "bytes": 1489,
+      "path": "docs/memory/evidence/f1-fix3-fix4-mechanics.md",
+      "sha256": "00028566133c560364f03f08de3b50d8cdf3f922c290d1c0cf782a3d9ad48f23"
+    },
+    {
+      "bytes": 4856,
+      "path": "docs/memory/evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md",
+      "sha256": "43ae53ca2a76449b3f2bafa67db7969b9b63f98a9f435a049965f471836ac223"
+    },
+    {
+      "bytes": 1330,
+      "path": "docs/memory/evidence/f1-v1-population-ownership-failure.md",
+      "sha256": "21bfb0cc8aee297433744af4c2ef177a93156a23ed4ffe37cf6837ea39f7711e"
+    },
+    {
+      "bytes": 2532,
+      "path": "docs/memory/evidence/f2-fix1-runtime-closure.md",
+      "sha256": "8790d7d37e2467561048e8434def3808d28d33ed22f6e6d964207b26ea3013ef"
+    },
+    {
+      "bytes": 1367,
+      "path": "docs/memory/evidence/f3-runtime-closure.md",
+      "sha256": "e61ed96f5123c2b2875996148fe66df68d024b907e1d9a7577ca209a80c542cd"
+    },
+    {
+      "bytes": 1406,
+      "path": "docs/memory/evidence/f4-runtime-closure.md",
+      "sha256": "1062c9cb8238a99865adff2948f02afe070d7b37fecc3dd39c13b775f389bd8f"
+    },
+    {
+      "bytes": 1813,
+      "path": "docs/memory/evidence/f5-2-runtime-closure.md",
+      "sha256": "21f4735948a53a8bfaebc3b4611db0ce52469dd66df3fe4d6cd29df6c6dc08c8"
+    },
+    {
+      "bytes": 1217,
+      "path": "docs/memory/evidence/f5-runtime-closure.md",
+      "sha256": "7553fde361305b2ef8a7be734df2dbc8270407606d68038c4bed571b329cb2fb"
+    },
+    {
+      "bytes": 3953,
+      "path": "docs/memory/evidence/f6-1-runtime-closure.md",
+      "sha256": "7b5a8c6ee9e10649f4dd38ab874aa0324356dde51d36243d40d0eb4b020032b2"
+    },
+    {
+      "bytes": 1628,
+      "path": "docs/memory/evidence/phase-c-five-setting-closure.md",
+      "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
+    },
+    {
+      "bytes": 7998,
+      "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
+      "sha256": "7db73f689415840e0f4a79dc92d4c1a3461c4df46e356d27f37e1e600ac21cd6"
+    },
+    {
+      "bytes": 1662,
+      "path": "docs/memory/history/CHAT_INDEX.md",
+      "sha256": "fe19617b94f944a047d12a8d873e88190af7e1c613b986ed6a82c101eefd6174"
+    },
+    {
+      "bytes": 4495,
+      "path": "docs/memory/history/PROJECT_HISTORY.md",
+      "sha256": "9735aec581980bd5b4bc3082536db59592c5f747cf12c1250f12d17ff24e49f3"
+    },
+    {
+      "bytes": 1199,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/ARTIFACT_INDEX_SEED.md",
+      "sha256": "32bc4121b1be7e28184a47ecb61066b22b9130d4c0a41497a8ff6d718a380067"
+    },
+    {
+      "bytes": 6100,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/CHAT_INDEX.md",
+      "sha256": "5f13c7d5bf4f6e209e7d6717319986b96814744b030bb08fd2f221d2369ba29c"
+    },
+    {
+      "bytes": 928,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/CHECKSUMS.sha256",
+      "sha256": "e3de12118ed3895bd7fa19bae767ac6a69b0cdaebcaf2fc159e766ed148cc12c"
+    },
+    {
+      "bytes": 8654,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/CODEX_MIGRATION_CONTRACT.md",
+      "sha256": "5723c84ffcb81cf8a6d5df936556c5e7390a2dce0a759fa047ec4a35e6377c51"
+    },
+    {
+      "bytes": 4759,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/DECISION_HISTORY.md",
+      "sha256": "2bd92f8a65ef4799d11dbd667265d22463f3356498bbe8ef5d317710d8621145"
+    },
+    {
+      "bytes": 2635,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/IMPORT_MANIFEST.md",
+      "sha256": "be929252c8dde3e5fb9f8a9fef812dbae21e81a2144feaad0e4e1b393d0c9bae"
+    },
+    {
+      "bytes": 2899,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/KNOWN_GAPS.md",
+      "sha256": "bd17b5d2ea1b2bf1fa484f42f28326952d6d374ae1fc239044c26104a35cbbc4"
+    },
+    {
+      "bytes": 7785,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/PHASE_HISTORY.md",
+      "sha256": "ceb063c9626c01d442a590e43e241ecca93efaf9b73be9f6544c62016cd14aed"
+    },
+    {
+      "bytes": 20470,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/PROJECT_HISTORY.md",
+      "sha256": "800b40bc7686713613273fc38cedeb2ad92ef7521e2340cf04fbfc62823f9be2"
+    },
+    {
+      "bytes": 963,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/README.md",
+      "sha256": "1a86b70d31e6243fb0b9bb1363cd96f15d17fdaf5195984b819572137a6530d4"
+    },
+    {
+      "bytes": 5584,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/SOURCE_INDEX.md",
+      "sha256": "af49919357c10245ab3849e87e735baaea4270160dd5c2fa12a2e8bd500eae5d"
+    },
+    {
+      "bytes": 5814,
+      "path": "docs/memory/import/chatgpt_project_history_2026-09-11/VALIDATION_HISTORY.md",
+      "sha256": "da95b85b871d81cb446fead7f205cfaed45c8956200ee5115ce683177bbac98e"
+    },
+    {
+      "bytes": 2619,
+      "path": "docs/memory/investigations/2026-09-11-phase-f1-source-identity-reconciliation.md",
+      "sha256": "c3e076cb1283661c8aae87616e7a033ac7454fefb8c6cd6e2102672eb59adb12"
+    },
+    {
+      "bytes": 1898,
+      "path": "docs/memory/investigations/KNOWN_GAPS.md",
+      "sha256": "707efacca2396fb0731def11a838ef7da4e6d9603f146830a61e09d6a960c443"
+    },
+    {
+      "bytes": 385,
+      "path": "docs/memory/investigations/README.md",
+      "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
+    },
+    {
+      "bytes": 2187,
+      "path": "docs/memory/phases/PHASE_HISTORY.md",
+      "sha256": "a2df639603db0fab18066043beedec1a200532d9a0aeee3a4915c17f31c71fed"
+    },
+    {
+      "bytes": 462,
+      "path": "docs/memory/phases/README.md",
+      "sha256": "1f715dee22cba79dcadb0382e593977d37500317dea8d2e9965a1b7d37f8e397"
+    },
+    {
+      "bytes": 3052,
+      "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
+      "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
+    },
+    {
+      "bytes": 5486,
+      "path": "docs/memory/phases/phase-f2-method-a-acceptance-representation.md",
+      "sha256": "b2b22cfd92d62bba2a283513ab5100705b5fa436786200ea435e039368f8f1b3"
+    },
+    {
+      "bytes": 1840,
+      "path": "docs/memory/phases/phase-f3-method-a-support-aware-acceptance-map.md",
+      "sha256": "f0f414f1b9f94e1361bb544b36e906fda4fc12a6e95c0429c1f7f91473eea977"
+    },
+    {
+      "bytes": 1442,
+      "path": "docs/memory/phases/phase-f4-method-a-parent-preserving-correction.md",
+      "sha256": "aac939fb405c86a0aa2b2179923bf9f4c51eb463c735b1d600f5571ed381a215"
+    },
+    {
+      "bytes": 3017,
+      "path": "docs/memory/phases/phase-f5-method-a-tphi-propagation.md",
+      "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
+    },
+    {
+      "bytes": 8870,
+      "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
+      "sha256": "ecd67b7ddc8935791a230af2a4727a29033104603f1d29d3c2c4e1c66b89ce38"
+    },
+    {
+      "bytes": 5064,
+      "path": "docs/memory/roadmap/CURRENT.md",
+      "sha256": "e6a1110d1c3ca5e10de144650b0afd94462780fa0cc27336f2472e21dbc68eaf"
+    },
+    {
+      "bytes": 1414,
+      "path": "docs/memory/sources/ARTIFACT_INDEX.md",
+      "sha256": "bbac3fc7dddc39d26c1f1e85bc76f971ca462ae857cb005aadb19b0556969595"
+    },
+    {
+      "bytes": 2218,
+      "path": "docs/memory/sources/SOURCE_INDEX.md",
+      "sha256": "a1d4a0ecee2b0f6c4b1c727e1ae5741679a3aa6cb67a8c2f41de29373b54a3d3"
+    },
+    {
+      "bytes": 404,
+      "path": "docs/memory/templates/CODEX_CONTRACT.md",
+      "sha256": "63d5b310f831d75e4a3d9fc3b68ed43cd2a29369297ec048dc2f3046ac326456"
+    },
+    {
+      "bytes": 387,
+      "path": "docs/memory/templates/MEMORY_UPDATE.md",
+      "sha256": "4defc2be874b8c19093370d37fa6c29441a2bfcc3caa0a753e0b407658f8585e"
+    },
+    {
+      "bytes": 431,
+      "path": "docs/memory/templates/RUNTIME_EVIDENCE.md",
+      "sha256": "a14d4675c1ebd3c6ea40cb4963ab5bbaf65a519a03a322e41b6e9b5f75907e53"
+    }
+  ],
+  "generated_date_utc": "2026-09-17",
+  "observed_git_head": "8306ebe29d7b7b994f5da1a3aa8185b99845758a",
+  "schema_version": 1
+}
