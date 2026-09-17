@@ -36,6 +36,15 @@ work-state claims.
   application populations separately; local collector checks are not farm
   evidence.
 
+## Farm validation-bundle procedure
+
+Use the authoritative [farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)
+for Jefferson Lab `tcsh` packaging. It preserves canonical farm paths,
+provenance-safe temporary detached worktrees when a normal checkout has
+advanced, bundle-only non-rerun behavior, collision handling, and the rule
+that ordinary unrelated farm-local files must not be cleaned merely for a
+detached bundle.
+
 ## Production and scientific boundaries
 
 - Preserve the separate scientific owners for random subtraction, slow-proton

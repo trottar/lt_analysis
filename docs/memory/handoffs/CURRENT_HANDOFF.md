@@ -125,6 +125,11 @@ without F.1 checkpoint/PDF extraction. The F.2 profile requires only the F.2
 JSON/PDF once and five F.1 v2 JSON inputs. It is read-only with respect to
 analysis artifacts and does not run F.2.
 
+For every farm validation-bundle request, use the concise `tcsh`, canonical
+path, temporary-detached-worktree, non-rerun, collision, and provenance rules
+in decisions/farm-validation-bundle-procedure.md. Ordinary unrelated local
+farm files do not justify cleaning the checkout or weakening collector gates.
+
 Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
 cross-section ownership separate. Keep proton before pion, Method-A/B
 independence, same-t Method B, Phase-E presentation-only ownership, and
