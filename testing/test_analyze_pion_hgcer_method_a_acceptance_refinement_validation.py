@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import hashlib
 import inspect
 import json
@@ -57,13 +58,16 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
         f6_authority = {KINEMATIC: {"source_file_sha256": f6_sha, "validation_fingerprint": f6_payload["validation"]["fingerprint"], "artifact_fingerprint": f6_payload["artifact_fingerprint"]}}
         return directory / analyzer.validation.pion_hgcer_method_a_acceptance_refinement_validation_filename(KINEMATIC), directory / analyzer._pdf_filename(KINEMATIC), authority, f4_authority, f3_authority, f6_authority
 
-    def _run(self, directory: Path, json_path: Path, pdf_path: Path, authority: dict[str, object], f4_authority: dict[str, object], f3_authority: dict[str, object], f6_authority: dict[str, object]) -> int:
+    def _run(self, directory: Path, json_path: Path, pdf_path: Path, authority: dict[str, object], f4_authority: dict[str, object], f3_authority: dict[str, object], f6_authority: dict[str, object], captured_artifacts: list[tuple[dict[str, object], dict[str, object]]] | None = None) -> int:
         real_builder = analyzer.validation.build_pion_hgcer_method_a_acceptance_refinement_validation_artifact
 
         def build_with_test_bootstrap(*args, **kwargs):
             self.assertNotIn("bootstrap_test_config", kwargs)
             kwargs["bootstrap_test_config"] = {"replicas": 2}
-            return real_builder(*args, **kwargs)
+            artifact = real_builder(*args, **kwargs)
+            if captured_artifacts is not None:
+                captured_artifacts.append((artifact, deepcopy(artifact)))
+            return artifact
 
         with mock.patch.object(analyzer.validation, "build_pion_hgcer_method_a_acceptance_refinement_validation_artifact", side_effect=build_with_test_bootstrap):
             return analyzer.main(["--outdir", str(directory), "--kinematic", KINEMATIC, "--output-json", str(json_path), "--output-pdf", str(pdf_path)], accepted_runtime_authority_by_kinematic=authority, accepted_f4_runtime_authority_by_kinematic=f4_authority, accepted_f3_runtime_authority_by_kinematic=f3_authority, accepted_f6_1_artifact_authority_by_kinematic=f6_authority)
@@ -76,11 +80,21 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
     def test_cli_writes_deterministic_aggregate_artifact_and_review_pdf(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary); output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority = self._write_inputs(directory)
-            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority), 0)
+            captured: list[tuple[dict[str, object], dict[str, object]]] = []
+            self.assertEqual(self._run(directory, output_json, output_pdf, authority, f4_authority, f3_authority, f6_authority, captured), 0)
             payload = json.loads(output_json.read_text(encoding="utf-8")); self.assertTrue(payload["validation"]["available"])
+            self.assertEqual(len(captured), 1); self.assertEqual(captured[0][0], captured[0][1])
             details = sum(1 for parent in payload["validation"]["parents"] for child in parent["children"] if any(child["population_counts"][name] > 0 for name in ("N_low", "N_control", "N_full_application")))
             self.assertEqual(len(re.findall(rb"/Type /Page(?!s)", output_pdf.read_bytes())), 1 + 15 + details + 1)
             serialized = json.dumps(payload, sort_keys=True); self.assertNotIn("correction_factors", serialized); self.assertNotIn("entry_index", serialized)
+            self.assertEqual(len(analyzer._OVERVIEW_HEADINGS), 11); self.assertEqual(len(analyzer._OVERVIEW_COLUMN_WIDTHS), 11)
+            self.assertEqual(analyzer._OVERVIEW_HEADINGS, ("phi\nrange", "N low/\ncontrol/full", "N_eff\nB/A", "OOD frac\nctrl/full", "DeltaH MM\nvalue / 95% CI", "R MM", "kappa MM\nvalue / 95% CI", "kappa MM×xptar\nvalue / 95% CI", "kappa MM×yptar\nvalue / 95% CI", "DeltaP K\nvalue / 95% CI", "R_V"))
+            self.assertTrue(all(sum(1 for child in parent["children"]) == 9 for parent in payload["validation"]["parents"]))
+            self.assertTrue(all(len(row) == 11 for parent in payload["validation"]["parents"] for row in analyzer._overview_rows(parent)))
+            interval_cell = analyzer._overview_metric_with_interval({"available": True, "value": -0.5258}, {"interval_available": True, "ci_low": -0.6660, "ci_high": -0.42})
+            self.assertEqual(interval_cell, "-0.5258\n[-0.666, -0.42]"); self.assertNotIn("; 95% CI", interval_cell)
+            unavailable_cell = analyzer._overview_metric_with_interval({"available": True, "value": 0.25}, {"interval_available": False, "reason": "insufficient_valid_bootstrap_replicas"})
+            self.assertEqual(unavailable_cell, "0.25\nunavailable:insufficient_valid_bootstrap_replicas")
 
     def test_cli_rejects_paths_overwrite_and_missing_required_inputs(self):
         with tempfile.TemporaryDirectory() as temporary:
