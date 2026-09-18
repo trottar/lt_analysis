@@ -1,12 +1,12 @@
 ---
 memory_schema: 2
-active_objective: Close the F.6.2.Fix.4 presentation-only rerender review
-current_work_item: Obtain and review the fresh F.6.2.Fix.4 rerender bundle
-active_status: ACTIVE
-next_action: User supplies the fresh F.6.2.Fix.4 rerender bundle for review
-baseline_commit: 012954d449735b047f453f288641d26c7cef2f8f
-source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
-bundle_profile_commit: c3252f1ec43dcca0357aebe8c6ca75d7d198f99a
+active_objective: Prepare the E.8 presentation-ready figure-library implementation contract
+current_work_item: User commits and pushes the F.6.2 closure reconciliation, then a new session re-establishes live test HEAD before E.8 contract work
+active_status: NEXT
+next_action: User commits and pushes the accepted F.6.2 closure reconciliation; the next Codex session rechecks live test HEAD before writing the E.8 contract
+baseline_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
+source_commit: c88ed65cb18ba6a37358897292b77696016312d1
+bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
 # Approved KaonLT roadmap
 
@@ -93,29 +93,37 @@ ownership. See evidence/f6-1-runtime-closure.md.
 
 #### F.6.2 — acceptance-correlated Method-A refinement validation
 
-ACTIVE overall. Its scientific validation is CLOSED / RUNTIME VALIDATED from
-the accepted complete farm bundle; see
+CLOSED / RUNTIME VALIDATED overall. Its scientific validation remains anchored
+to reviewed scientific source `0b37af2a2927b08bdeaf897c545f290b55329cea` and
+the frozen accepted JSON/fingerprints in
 [F.6.2 scientific evidence](../evidence/f6-2-scientific-runtime-closure.md).
-F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING for its
-presentation-only rerender. It must preserve the accepted F.6.2 JSON and
-fingerprints unchanged; it is not a scientific rerun or production path.
+F.6.2.Fix.5 is CLOSED / RUNTIME VALIDATED as a presentation-only rerender from
+source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
+`b789d203e11f0927deb59ebcae9dc59fe8add4ae`; see
+[Fix.5 presentation evidence](../evidence/f6-2-fix5-presentation-runtime-closure.md).
+Fix.5 does not replace the scientific source or alter the accepted JSON.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
-BLOCKED pending F.6.2 overall closure — presentation-only update consuming
-frozen accepted F.6.1/F.6.2 results; it does not recompute Method-A science.
+NEXT — after this closure reconciliation is committed/pushed and live Git state
+is re-established, write the E.8 contract for a separate deterministic,
+presentation-ready figure library. It consumes the frozen accepted F.6.2 JSON
+only, renders no new Method-A science, and does not modify `rand_sub.py` or the
+ordinary procedure PDF.
 
 #### F.6.3 — full baseline procedure versus full procedure plus Method A
 
-BLOCKED pending F.6.2 overall closure + E.8 — compare the unchanged full baseline
-procedure with a parallel procedure whose only intended pion-template change is
-the accepted Method-A factor.
+BLOCKED pending E.8 — compare the unchanged full baseline procedure with a
+parallel procedure whose only intended pion-template change is the accepted
+Method-A factor.
 
 #### F.6.4 — explicit production-promotion decision
 
-BLOCKED pending F.6.2/F.6.3 evidence — no automatic promotion.
+BLOCKED pending F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — obtain and review the fresh F.6.2.Fix.4 presentation-only rerender
-bundle. E.8, F.6.3, and F.6.4 remain BLOCKED as stated above.
+NEXT — user commits and pushes this accepted F.6.2 closure reconciliation.
+The next Codex session rechecks live `test` HEAD, then prepares the separate
+E.8 sidecar figure-library contract. F.6.3 and F.6.4 remain BLOCKED as stated
+above.

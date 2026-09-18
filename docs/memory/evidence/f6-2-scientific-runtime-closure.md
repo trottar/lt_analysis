@@ -32,16 +32,20 @@ here. The accepted identities above are also retained in the
 
 ## Later presentation-only provenance
 
-F.6.2.Fix.4 remains pending and is not part of the accepted scientific gate.
-Its reviewed presentation source is
-`b929815517643edaa75949f7e61ce46c6e8f0d63`; its clean Fix.4 bundle/profile
-commit is `c3252f1ec43dcca0357aebe8c6ca75d7d198f99a`.
+F.6.2.Fix.4 source `b929815517643edaa75949f7e61ce46c6e8f0d63` was superseded
+by the accepted Fix.5 presentation rerender. Fix.5 used renderer source
+`c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
+`b789d203e11f0927deb59ebcae9dc59fe8add4ae`; its accepted PDF SHA-256 is
+`f33406927b78a7b27d863c3dce6d967956fcfe1e9326b5bd2f09e3ec5bbda408`.
+These are presentation-artifact provenance only, not replacements for the
+scientific source or scientific bundle identity. See the separate
+[Fix.5 presentation closure](f6-2-fix5-presentation-runtime-closure.md).
 
-## Preserved boundaries and remaining gate
+## Preserved boundaries and downstream state
 
 The accepted scientific validation remains detached and aggregate-only: it
 does not alter production pion weights, yields, ROOT objects, Method-B input,
-or final-yield uncertainty. F.6.2 overall remains ACTIVE because
-F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. The next gate is
-a fresh presentation-only rerender bundle that preserves the accepted F.6.2
-scientific JSON and fingerprints unchanged.
+or final-yield uncertainty. F.6.2 overall is CLOSED / RUNTIME VALIDATED after
+the accepted Fix.5 presentation gate. E.8 is NEXT and must consume the frozen
+scientific JSON/fingerprints without recalculation; F.6.3 remains BLOCKED
+pending E.8, and F.6.4 remains BLOCKED pending F.6.3 evidence.

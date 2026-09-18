@@ -100,27 +100,31 @@ diagnostic variance statistics, and paired bootstrap intervals. It constructs
 no composite score, freezes no numerical case thresholds, introduces no Method
 B numerical dependency, and claims no final-yield uncertainty reduction.
 
-### F.6.2.Fix.4 — presentation-only rerender
+### F.6.2.Fix.5 — presentation-only rerender
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — F.6.2 overall remains
-`ACTIVE` until a fresh Fix.4 rerender bundle is reviewed. This gate may repair
-presentation only and must preserve the accepted F.6.2 scientific JSON SHA-256
-and artifact/validation fingerprints exactly. It has no scientific, yield,
-ROOT, Method-B, or production ownership.
+`CLOSED / RUNTIME VALIDATED` — the accepted Fix.5 presentation bundle closed
+the F.6.2 presentation gate without changing the accepted scientific JSON
+SHA-256 or artifact/validation fingerprints. Its renderer source
+`c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
+`b789d203e11f0927deb59ebcae9dc59fe8add4ae` are presentation-artifact
+provenance only; the scientific source remains distinct. See the
+[Fix.5 closure record](../evidence/f6-2-fix5-presentation-runtime-closure.md).
+F.6.2 overall is therefore `CLOSED / RUNTIME VALIDATED`. This gate has no
+scientific, yield, ROOT, Method-B, or production ownership.
 
 ## E.8 — streamlined full-background-subtraction presentation
 
-`BLOCKED` pending F.6.2 overall closure. E.8 is presentation-only and follows F.6.2
-so the streamlined full-background-subtraction PDF can consume frozen accepted
-F.6.1/F.6.2 results. It does not calculate or own Method-A science. It should
-tell the background-subtraction story—random/dummy subtraction, slow-proton
-removal, baseline pion determination, Method-A motivation, validated
-refinement, and later F.6.3 impact—while detailed validation and Method-B
-machinery remain in their dedicated artifacts.
+`NEXT` — after the user commits/pushes this closure reconciliation and a new
+session re-establishes live Git state, E.8 may receive an implementation
+contract. It is a separate presentation-ready figure library that consumes the
+frozen accepted F.6.2 JSON only; it neither mutates `rand_sub.py` nor inserts
+pages into the ordinary procedure PDF. It does not calculate or own Method-A
+science. Its contract must preserve the background-subtraction story while
+detailed validation and Method-B machinery remain in their dedicated artifacts.
 
 ## F.6.3 — full baseline procedure versus full procedure plus Method A
 
-`BLOCKED` pending F.6.2 overall closure + E.8. Preserve the current full yield
+`BLOCKED` pending E.8. Preserve the current full yield
 calculation unchanged as the baseline branch. The parallel Method-A branch
 uses the same random/dummy subtraction, slow-proton treatment, pion
 components/fits/windows/amplitudes, canonical binning, SIMC, background-fit
@@ -141,7 +145,7 @@ until its complete chain through final yield passes.
 
 ## F.6.4 — explicit production-promotion decision
 
-`BLOCKED` pending F.6.2/F.6.3 evidence. This is the only phase that may decide
+`BLOCKED` pending F.6.3 evidence. This is the only phase that may decide
 whether Method A becomes production pion-background treatment; no automatic
 promotion follows from existing artifacts. A later promotion contract must
 define supported kinematics, enable/disable behavior, fail-closed authority,
@@ -156,5 +160,5 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-Its next authorized step is review of the F.6.2.Fix.4 presentation-only rerender
-bundle; do not begin E.8 or alter ROOT or production behavior.
+Its next authorized step is the user-owned commit/push of this reconciliation,
+then a fresh-head E.8 contract. Do not alter ROOT or production behavior.

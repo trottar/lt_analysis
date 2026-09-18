@@ -123,3 +123,11 @@ independently renormalize (t,phi) children.
 [HANDOFF] F.1-F.5 are detached diagnostic/development stages. Production
 promotion requires a separately validated and explicitly approved F.6 decision.
 
+### D021 — F.6.2 scientific and presentation closure identities remain separate
+
+[FARM_EVIDENCE] F.6.2 scientific closure remains anchored to its reviewed
+scientific source and frozen JSON/fingerprints. The accepted Fix.5 rerender
+closes presentation only; its renderer and bundle/profile commits are upstream
+presentation-artifact provenance, never replacement scientific provenance.
+E.8 must consume the frozen JSON only and requires its own source and bundle
+identities before any later runtime claim.

@@ -4,11 +4,23 @@ F.6.2 scientific validation is CLOSED / RUNTIME VALIDATED from the accepted
 complete farm bundle; see
 [the scientific closure record](../evidence/f6-2-scientific-runtime-closure.md).
 This contract remains the scientific definition for the detached
-acceptance-correlated Method-A refinement validation. F.6.2 overall is ACTIVE
-because F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING for a
-presentation-only rerender. Neither state authorizes production mutation,
+acceptance-correlated Method-A refinement validation. The accepted Fix.5
+presentation-only rerender closed F.6.2 overall; see the separate
+[Fix.5 presentation closure](../evidence/f6-2-fix5-presentation-runtime-closure.md).
+Its source/profile provenance does not replace the scientific source or
+scientific evidence identity. Neither closure authorizes production mutation,
 Method-B numerical input, a new pion model, or a claim about final kaon-yield
 uncertainty.
+
+## Closure provenance boundary
+
+The scientific gate remains anchored to source
+`0b37af2a2927b08bdeaf897c545f290b55329cea` and the frozen scientific JSON and
+fingerprints in its evidence record. Fix.5 renderer source
+`c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
+`b789d203e11f0927deb59ebcae9dc59fe8add4ae` are upstream presentation-artifact
+provenance only. E.8 is NEXT and may consume the frozen JSON only after a
+separate contract; it cannot recalculate this contract's measurements.
 
 ## Physical interpretation
 

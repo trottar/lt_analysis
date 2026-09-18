@@ -43,3 +43,9 @@ Approved later sequence, without implied authorization to start it:
     F.5 detached event-level (t,phi) propagation
     F.6 explicit production promotion after F.5 validation
 
+F.6.1 and F.6.2 scientific validation are CLOSED / RUNTIME VALIDATED. The
+accepted F.6.2.Fix.5 presentation rerender also closed F.6.2 overall while
+preserving the scientific JSON and fingerprints. E.8 is NEXT for a separate
+frozen-payload figure-library contract after the user commits/pushes the
+closure reconciliation and the next session re-establishes live Git state;
+F.6.3 remains BLOCKED pending E.8 and F.6.4 remains BLOCKED pending F.6.3.

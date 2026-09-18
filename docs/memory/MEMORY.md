@@ -180,12 +180,22 @@ is excluded, no production mutation is authorized, and no final-yield
 uncertainty reduction is claimed. See
 evidence/f6-2-scientific-runtime-closure.md.
 
-ACTIVE — F.6.2 overall remains open only for F.6.2.Fix.4, a presentation-only
-rerender that is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. It must
-preserve the accepted scientific JSON and fingerprints exactly. E.8 is BLOCKED
-pending F.6.2 overall closure; F.6.3 is BLOCKED pending F.6.2 overall closure
-plus E.8; F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. See
-decisions/f6-2-acceptance-refinement-measurement-contract.md and
+CLOSED / RUNTIME VALIDATED — F.6.2.Fix.5 accepted the presentation-only
+rerender and closed F.6.2 overall. The frozen scientific JSON SHA-256
+`5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1` and
+artifact/validation fingerprints remain unchanged. Keep the reviewed scientific
+source `0b37af2a2927b08bdeaf897c545f290b55329cea` distinct from Fix.5 renderer
+source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
+`b789d203e11f0927deb59ebcae9dc59fe8add4ae`, which are presentation-artifact
+provenance only. See evidence/f6-2-fix5-presentation-runtime-closure.md.
+
+NEXT — E.8 may receive a separate sidecar figure-library contract only after
+the user commits/pushes this reconciliation and a new session re-establishes
+live Git state. It must read the frozen F.6.2 JSON only, verify its SHA before
+parsing, render persisted quantities only, and never recompute Method-A,
+bootstrap, support/OOD, cuts, weights, binning, yields, or scientific
+acceptance. F.6.3 is BLOCKED pending E.8; F.6.4 is BLOCKED pending F.6.3
+evidence. See decisions/f6-2-acceptance-refinement-measurement-contract.md and
 phases/phase-f6-method-a-production-promotion.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit

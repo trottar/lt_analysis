@@ -16,6 +16,10 @@ provenance review, and rendered-page inspection.
 - CLOSED / RUNTIME VALIDATED — F.1.Fix.3/Fix.4 mechanical regressions only.
   This confirms the listed runtime mechanics, not F.1 v1 physics or F.1.Fix.5.
   See f1-fix3-fix4-mechanics.md.
+- CLOSED / RUNTIME VALIDATED — F.6.2 detached scientific validation and its
+  presentation-only Fix.5 rerender. Scientific and presentation provenance are
+  separate; see f6-2-scientific-runtime-closure.md and
+  f6-2-fix5-presentation-runtime-closure.md.
 
 ## Explicit non-closures
 
@@ -25,5 +29,10 @@ provenance review, and rendered-page inspection.
 - F.1 v1 was not scientifically accepted: the successful mechanical output
   exposed its wrong training population.
 
-See sources/ARTIFACT_INDEX.md for recovered artifact classes and limitations.
+## Current downstream gate
 
+- NEXT — E.8 receives a separate frozen-F.6.2-payload figure-library contract
+  only after the user commits/pushes this closure reconciliation and the next
+  session rechecks live Git identity. It has no runtime acceptance claim yet.
+
+See sources/ARTIFACT_INDEX.md for recovered artifact classes and limitations.
