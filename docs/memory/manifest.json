@@ -61,9 +61,9 @@
       "sha256": "e66d1752dfee8a299f43850d6f2f76176e78a882df5116a355ed97c04eb2909e"
     },
     {
-      "bytes": 8186,
+      "bytes": 10528,
       "path": "docs/memory/decisions/e8-f6-2-figure-library-implementation-contract.md",
-      "sha256": "89dde6153e0bcb6ebe7dfea9222c5c7327656d8002fdd4f256821d9cc966b54d"
+      "sha256": "9d55ba00da1710083d882766427eecf4495d0fb818700473e25ce025e11fd972"
     },
     {
       "bytes": 6910,
@@ -312,6 +312,6 @@
     }
   ],
   "generated_date_utc": "2026-09-18",
-  "observed_git_head": "73bb8c2f9c300890ada23598aeacc8e8df859b26",
+  "observed_git_head": "0a93aaa9fd1d4ba58ec02e03d24e7c59f061044d",
   "schema_version": 2
 }

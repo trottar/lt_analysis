@@ -11,6 +11,13 @@ baseline `b789d203e11f0927deb59ebcae9dc59fe8add4ae`.
 E.8 is `ACTIVE`. It is an implementation task, not a scientific or farm
 closure. F.6.3 remains `BLOCKED` pending accepted E.8 evidence.
 
+This narrow contract repair starts from observed clean `test` HEAD
+`0a93aaa9fd1d4ba58ec02e03d24e7c59f061044d`. After the user reviews, commits,
+and pushes this repair, S1 must start from that newly pushed repair commit only
+after a fresh live-HEAD check. Neither the historical `73bb8c2...` preparation
+commit nor this repair-start observation is a permanent S1 source identity; the
+later user-created S1 commit is the E.8 renderer-source identity.
+
 ## Frozen authority and scientific boundary
 
 The only physics input is the accepted F.6.2 artifact JSON with SHA-256
@@ -97,6 +104,10 @@ The deterministic output basenames are
 `Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-refinement-figure-library.pdf`
 and
 `Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-refinement-figure-library-manifest.json`.
+The resolved output paths may use caller-provided directories, but their
+basenames must be exactly these values; a wrong basename is a nonzero failure
+before rendering. The PDF, manifest, and input paths remain distinct, and the
+two output paths must not pre-exist.
 
 ## Figure-library and page-manifest contract
 
@@ -108,22 +119,36 @@ a populated child. Empty children are listed as omitted in the manifest only.
 Each child page has:
 
 - Row 1: L/B/A normalized overlays for `analysis_MM`, `SHMS_xptar`, and
-  `SHMS_yptar`; the missing-mass panel visibly marks the frozen kaon window.
-- Row 2: L/B/A `analysis_MM × SHMS_xptar` matrices.
-- Row 3: L/B/A `analysis_MM × SHMS_yptar` matrices.
+  `SHMS_yptar`; every overlay y-axis is labeled **Normalized bin fraction**,
+  and the missing-mass panel visibly marks the frozen kaon window.
+- Row 2: L/B/A `SHMS_delta × SHMS_xptar` localization maps read directly from
+  the persisted `SHMS_delta__SHMS_xptar` joint-distribution payloads.
+- Row 3: L/B/A `SHMS_delta × SHMS_yptar` localization maps read directly from
+  the persisted `SHMS_delta__SHMS_yptar` joint-distribution payloads.
 - A compact persisted-metric footer limited to population counts, effective
-  sample sizes, prompt/full OOD fractions, `DeltaH`, one-dimensional `kappa`,
-  MM×acceptance `kappa`, kaon-window `P_B^K`, `P_A^K`, `DeltaP^K`,
-  `f_refine^K`, and `R_V`, including only their persisted values/intervals or
-  literal unavailable states.
+  sample sizes, prompt/full OOD fractions, one-dimensional `analysis_MM`
+  `DeltaH` and `kappa`, persisted `analysis_MM__SHMS_xptar` and
+  `analysis_MM__SHMS_yptar` `kappa`, kaon-window `P_B^K`, `P_A^K`,
+  `DeltaP^K`, `f_refine^K`, and `R_V`, including only their persisted
+  values/intervals or literal unavailable states.
 
-Use the visible y-axis label **Normalized bin fraction**. L is the upstream
-low-HGCer observed reference from accepted upstream experimental events before
-the downstream gate (`0 < NPE <= 2`); B is the physical pion-control population
-(`NPE > 2`) with `w0`; A is that same physical control population with `w0*C`.
-L is neither production kaon nor absolute leakage truth. The page caption must
-state that B-to-A comparison is descriptive acceptance refinement, not a
-uniform-improvement, yield, or promotion claim.
+The displayed localization maps are `SHMS_delta × acceptance`, whereas the
+persisted acceptance-refinement diagnostics in the footer remain
+`analysis_MM × acceptance`; neither replaces or is collapsed into the other.
+For each 2D row, the physical x/y axes remain their named variables and the
+color scale/colorbar is labeled **Normalized bin fraction**. Each row shares
+one color normalization across its available L/B/A matrices, determined from
+the finite persisted values of those matrices; panels must never autoscale
+independently. Unavailable populations remain visibly unavailable with their
+literal persisted reason. This does not renormalize the persisted `unit_area`
+values or introduce a scientific transformation.
+
+L is the upstream low-HGCer observed reference from accepted upstream
+experimental events before the downstream gate (`0 < NPE <= 2`); B is the
+physical pion-control population (`NPE > 2`) with `w0`; A is that same physical
+control population with `w0*C`. L is neither production kaon nor absolute
+leakage truth. The page caption must state that B-to-A comparison is descriptive
+acceptance refinement, not a uniform-improvement, yield, or promotion claim.
 
 The manifest schema is
 `pion_hgcer_f6_2_e8_figure_library_manifest/v1`. It records the accepted input
@@ -143,6 +168,16 @@ bad geometry or matrix dimensions, invalid 15/135/115/20 inventory, and
 literal persisted unavailable rendering. Static tests must also prove no ROOT,
 `rand_sub`, F.6.2 builder, factor, bootstrap, support/OOD, or yield-calculation
 path is imported or called.
+
+Given byte-identical accepted F.6.2 input JSON and identical CLI provenance
+identities, repeated E.8 renders must produce byte-identical PDF and
+page-manifest outputs. S1 must omit any wall-clock timestamp, hostname,
+absolute temporary path, process ID, random UUID, or other run-dependent
+metadata; it must use fixed or omitted Matplotlib/PDF `CreationDate` and
+`ModDate`, stable PDF metadata, deterministic page ordering, and deterministic
+manifest serialization with stable key ordering and formatting. Focused tests
+must render the same fixture twice and assert identical SHA-256 values for both
+PDFs and both manifests.
 
 S2 profile tests require the three declared global artifacts, pin the supplied
 S1 commit, reject missing/invalid E.8 PDF or manifest, and reject unexpected
