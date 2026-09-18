@@ -21,9 +21,9 @@
       "sha256": "4a11badb8fcbabe583d59e97c6d3f44e30aa5809a3ec5c7c5a603db39dc4f32d"
     },
     {
-      "bytes": 1435,
+      "bytes": 1791,
       "path": "docs/memory/COMMUNICATION.md",
-      "sha256": "dfcc56f1ca1c4885d126e3d544491bcb874cc602768b8dd1d322a810f22fbd26"
+      "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
       "bytes": 2887,
@@ -66,9 +66,9 @@
       "sha256": "00d27e51610162ae68875f36a5dfdfb2e81582be63195fcdfc45df62255f1549"
     },
     {
-      "bytes": 5299,
+      "bytes": 10194,
       "path": "docs/memory/decisions/farm-validation-bundle-procedure.md",
-      "sha256": "93158c0089a19dad11af28c62014b127ec7bcb2a610e79b456405e26c5b7af67"
+      "sha256": "9c5d936f0ac1939095454f679706a286442d8684fa6645712f66764ed5090e3a"
     },
     {
       "bytes": 575,
@@ -302,6 +302,6 @@
     }
   ],
   "generated_date_utc": "2026-09-18",
-  "observed_git_head": "30e7b8e4cf6a38eb97e0b18b390191981d9437f0",
+  "observed_git_head": "69629c90929eea95ab7bfa465d44cf423521fcab",
   "schema_version": 2
 }

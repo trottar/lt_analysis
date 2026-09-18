@@ -13,6 +13,11 @@ as the authoritative workflow. This page records the concise delivery rules.
 - For a bundle-only request, do not rerun analysis or regenerate a frozen
   scientific artifact. Use a temporary detached worktree only when source
   provenance requires it.
+- For a presentation-only repair with a frozen accepted scientific payload,
+  verify the frozen payload hash, invoke only the presentation renderer,
+  confirm the scientific payload remains unchanged, then create a fresh
+  provenance-valid bundle. Do not rerun the scientific analyzer unless the
+  requested gate actually requires scientific regeneration.
 - State a simple farm operation as one concise, exact `tcsh` command block.
   Where a name can collide, give the user a unique filename.
 - Never claim farm, ROOT/PyROOT, full-runtime, or production validation without
