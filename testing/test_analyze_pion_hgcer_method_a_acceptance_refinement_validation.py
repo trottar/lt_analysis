@@ -94,7 +94,86 @@ class AnalyzeAcceptanceRefinementValidationTests(unittest.TestCase):
             interval_cell = analyzer._overview_metric_with_interval({"available": True, "value": -0.5258}, {"interval_available": True, "ci_low": -0.6660, "ci_high": -0.42})
             self.assertEqual(interval_cell, "-0.5258\n[-0.666, -0.42]"); self.assertNotIn("; 95% CI", interval_cell)
             unavailable_cell = analyzer._overview_metric_with_interval({"available": True, "value": 0.25}, {"interval_available": False, "reason": "insufficient_valid_bootstrap_replicas"})
-            self.assertEqual(unavailable_cell, "0.25\nunavailable:insufficient_valid_bootstrap_replicas")
+            self.assertEqual(unavailable_cell, "0.25\nn/a:boot")
+
+    def test_overview_unavailable_states_are_compact_and_display_only(self):
+        expected_labels = {
+            "low_population_empty": "n/a:low",
+            "control_population_empty": "n/a:ctrl",
+            "no_valid_bootstrap_replicas": "n/a:boot",
+            "insufficient_valid_bootstrap_replicas": "n/a:boot",
+            "normalization_invalid": "n/a:norm",
+            "baseline_window_sum_zero_or_nonfinite": "n/a:Ksum",
+            "baseline_variance_zero": "n/a:var0",
+            "empty_population": "n/a:empty",
+            "nonfinite_input": "n/a:nonfin",
+            "malformed": "n/a:bad",
+        }
+        for reason, label in expected_labels.items():
+            with self.subTest(reason=reason):
+                self.assertEqual(analyzer._overview_unavailable_text(reason), label)
+        self.assertEqual(analyzer._overview_unavailable_text("future_reason"), "n/a:other")
+        self.assertEqual(analyzer._overview_unavailable_text({"future_reason": True}), "n/a:other")
+        self.assertEqual(analyzer._overview_metric_text({"available": True, "value": -0.5258}), "-0.5258")
+        self.assertEqual(analyzer._overview_interval_text({"interval_available": True, "ci_low": -0.6660, "ci_high": -0.42}), "95% CI [-0.666, -0.42]")
+        self.assertEqual(analyzer._overview_fraction_text(0.125), "0.125")
+
+        self.assertEqual(analyzer._metric_text({"available": False, "reason": "low_population_empty"}), "unavailable:low_population_empty")
+        self.assertEqual(analyzer._interval_text({"interval_available": False, "reason": "no_valid_bootstrap_replicas"}), "unavailable:no_valid_bootstrap_replicas")
+        self.assertEqual(analyzer._fraction_text(None), "unavailable:empty_population")
+        self.assertNotIn("_overview_", inspect.getsource(analyzer._detail_page))
+
+        sparse_parent = {
+            "children": [{
+                "phi_index": 0, "phi_low": -180.0, "phi_high": -140.0,
+                "population_counts": {"N_low": 0, "N_control": 0, "N_full_application": 0},
+                "effective_sample_size": {
+                    "baseline_w0": {"available": False, "reason": "low_population_empty"},
+                    "method_a_w0_times_C": {"available": False, "reason": "control_population_empty"},
+                },
+                "support": {
+                    "prompt_control": {"ood_fraction": None},
+                    "full_physical_application": {"ood_fraction": float("nan")},
+                },
+                "one_dimensional": {"analysis_MM": {"metrics": {
+                    "DeltaH": {"available": False, "reason": "normalization_invalid"},
+                    "R": {"available": False, "reason": "baseline_variance_zero"},
+                    "kappa": {"available": False, "reason": "low_population_empty"},
+                }}},
+                "joint_distributions": {
+                    "analysis_MM__SHMS_xptar": {"metrics": {"kappa": {"available": False, "reason": "control_population_empty"}}},
+                    "analysis_MM__SHMS_yptar": {"metrics": {"kappa": {"available": False, "reason": "normalization_invalid"}}},
+                },
+                "signed_background": {
+                    "kaon_window": {"DeltaP_K": {"available": False, "reason": "baseline_window_sum_zero_or_nonfinite"}},
+                    "variance_proxy": {"R_V": {"available": False, "reason": "baseline_variance_zero"}},
+                },
+                "bootstrap": {
+                    "one_dimensional": {"analysis_MM": {
+                        "DeltaH": {"interval_available": False, "reason": "no_valid_bootstrap_replicas"},
+                        "kappa": {"interval_available": False, "reason": "insufficient_valid_bootstrap_replicas"},
+                    }},
+                    "joint_missing_mass_acceptance": {
+                        "analysis_MM__SHMS_xptar": {"kappa": {"interval_available": False, "reason": "no_valid_bootstrap_replicas"}},
+                        "analysis_MM__SHMS_yptar": {"kappa": {"interval_available": False, "reason": "normalization_invalid"}},
+                    },
+                    "kaon_window": {"DeltaP_K": {"interval_available": False, "reason": "baseline_window_sum_zero_or_nonfinite"}},
+                },
+            }],
+        }
+        original = deepcopy(sparse_parent)
+        rows = analyzer._overview_rows(sparse_parent)
+        self.assertEqual(sparse_parent, original)
+        self.assertEqual(len(rows), 1); self.assertEqual(len(rows[0]), 11)
+        overview_text = "\n".join(rows[0])
+        self.assertNotIn("unavailable:", overview_text)
+        compact_tokens = re.findall(r"n/a:[A-Za-z0-9]+", overview_text)
+        self.assertTrue(compact_tokens); self.assertTrue(all(len(token) <= len("n/a:nonfin") for token in compact_tokens))
+        self.assertIn("n/a:low", overview_text); self.assertIn("n/a:ctrl", overview_text)
+        self.assertIn("n/a:boot", overview_text); self.assertIn("n/a:norm", overview_text)
+        self.assertIn("n/a:Ksum", overview_text); self.assertIn("n/a:var0", overview_text)
+        self.assertIn("low_population_empty", json.dumps(sparse_parent, sort_keys=True))
+        self.assertNotIn("n/a:", json.dumps(sparse_parent, sort_keys=True))
 
     def test_cli_rejects_paths_overwrite_and_missing_required_inputs(self):
         with tempfile.TemporaryDirectory() as temporary:
