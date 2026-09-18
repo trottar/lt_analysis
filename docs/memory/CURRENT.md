@@ -1,10 +1,10 @@
 ---
 memory_schema: 2
-active_objective: Prepare the E.8 presentation-ready figure-library implementation contract
-current_work_item: User commits and pushes the F.6.2 closure reconciliation, then a new session re-establishes live test HEAD before E.8 contract work
-active_status: NEXT
-next_action: User commits and pushes the accepted F.6.2 closure reconciliation; the next Codex session rechecks live test HEAD before writing the E.8 contract
-baseline_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
+active_objective: Implement the E.8 frozen-F.6.2 figure-library renderer and its tests
+current_work_item: Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work
+active_status: ACTIVE
+next_action: Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit
+baseline_commit: 73bb8c2f9c300890ada23598aeacc8e8df859b26
 source_commit: c88ed65cb18ba6a37358897292b77696016312d1
 bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
@@ -12,17 +12,16 @@ bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 
 ## Active Objective
 
-Prepare the E.8 presentation-ready figure-library implementation contract only
-after this closure reconciliation is committed, pushed, and resumed from a
-freshly observed live `test` HEAD.
+Implement the separate E.8 frozen-F.6.2 figure-library renderer and focused
+tests under the approved [E.8 implementation contract](decisions/e8-f6-2-figure-library-implementation-contract.md).
 
 ## Current Work Item
 
 F.6.2 is CLOSED / RUNTIME VALIDATED overall; see the
 [Fix.5 closure record](evidence/f6-2-fix5-presentation-runtime-closure.md).
-The current work item is the user-owned commit/push of this closure-only
-reconciliation; no E.8 source or farm work is authorized until the next session
-re-establishes the resulting live repository identity.
+The closure reconciliation is pushed at observed `test` HEAD
+`73bb8c2f9c300890ada23598aeacc8e8df859b26`. S1 renderer/test work is now
+ACTIVE; S2 profile work waits for the user-created S1 renderer-source commit.
 
 ## Verified State
 
@@ -49,22 +48,22 @@ provenance only; they do not replace the scientific source identity.
 
 ## Blockers
 
-E.8 is NEXT, not yet active implementation work. Its required user-owned
-commit/push and the next session's live-HEAD recheck block E.8 contract work.
-F.6.3 remains BLOCKED pending E.8, and F.6.4 remains BLOCKED pending F.6.3
-evidence.
+E.8 own renderer-source and bundle/profile commits do not yet exist. The
+contract requires a user-created S1 renderer-source commit before S2 profile
+work. F.6.3 remains BLOCKED pending accepted E.8 evidence, and F.6.4 remains
+BLOCKED pending F.6.3 evidence.
 
 ## Next Action
 
-The user commits and pushes this accepted documentation reconciliation. A new
-Codex session must then recheck `test`, HEAD, and worktree before writing the
-separate E.8 sidecar figure-library implementation contract.
+Implement and locally validate S1 only: the explicit-input E.8 renderer and
+its focused tests. Do not create a profile, commit, push, or run the farm.
 
 ## Success Criteria
 
-This reconciliation is accepted after a documentation-only diff audit and the
-user's commit/push. The following session may write the E.8 contract only from
-its freshly observed live `test` identity.
+S1 must fail closed for non-identical frozen JSON, malformed persisted payload,
+unknown commit identity, output collision, or a non-allowlisted diff. After
+independent source/diff review, the user creates the S1 commit; only then may
+S2 profile work begin.
 
 ## Do Not Reopen Without New Evidence
 
@@ -76,6 +75,7 @@ only; it cannot recalculate Method-A science, support/OOD, weights, or yields.
 
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
+- [E.8 figure-library implementation contract](decisions/e8-f6-2-figure-library-implementation-contract.md)
 - [F.6.2 measurement contract](decisions/f6-2-acceptance-refinement-measurement-contract.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
 - [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)

@@ -189,13 +189,15 @@ source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
 `b789d203e11f0927deb59ebcae9dc59fe8add4ae`, which are presentation-artifact
 provenance only. See evidence/f6-2-fix5-presentation-runtime-closure.md.
 
-NEXT — E.8 may receive a separate sidecar figure-library contract only after
-the user commits/pushes this reconciliation and a new session re-establishes
-live Git state. It must read the frozen F.6.2 JSON only, verify its SHA before
-parsing, render persisted quantities only, and never recompute Method-A,
-bootstrap, support/OOD, cuts, weights, binning, yields, or scientific
-acceptance. F.6.3 is BLOCKED pending E.8; F.6.4 is BLOCKED pending F.6.3
-evidence. See decisions/f6-2-acceptance-refinement-measurement-contract.md and
+ACTIVE — E.8 is a separate sidecar figure-library implementation under
+decisions/e8-f6-2-figure-library-implementation-contract.md. S1 creates the
+explicit-input renderer and focused tests; the user then creates its renderer-
+source commit before S2 creates the profile/test commit that pins it. It must
+read the frozen F.6.2 JSON only, verify its SHA before parsing, render persisted
+quantities only, and never recompute Method-A, bootstrap, support/OOD, cuts,
+weights, binning, yields, or scientific acceptance. F.6.3 is BLOCKED pending
+accepted E.8 evidence; F.6.4 is BLOCKED pending F.6.3 evidence. See
+decisions/f6-2-acceptance-refinement-measurement-contract.md and
 phases/phase-f6-method-a-production-promotion.md.
 
 F.2.Fix.1 starts from the clean F.2 implementation commit

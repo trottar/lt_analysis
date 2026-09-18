@@ -131,3 +131,12 @@ closes presentation only; its renderer and bundle/profile commits are upstream
 presentation-artifact provenance, never replacement scientific provenance.
 E.8 must consume the frozen JSON only and requires its own source and bundle
 identities before any later runtime claim.
+
+### D022 — E.8 is a separate frozen-payload figure library
+
+[IMPLEMENTATION_CONTRACT] E.8 is an explicit-input PDF/page-manifest sidecar,
+not a `rand_sub.py` or ordinary procedure-PDF extension. Its S1 renderer/test
+commit and S2 profile/test commit are separate so the latter can pin the former.
+It renders every populated canonical F.6.2 child from the exact accepted JSON
+without recalculation, and its later evidence records both E.8 identities apart
+from upstream Fix.5 provenance.

@@ -45,7 +45,8 @@ Approved later sequence, without implied authorization to start it:
 
 F.6.1 and F.6.2 scientific validation are CLOSED / RUNTIME VALIDATED. The
 accepted F.6.2.Fix.5 presentation rerender also closed F.6.2 overall while
-preserving the scientific JSON and fingerprints. E.8 is NEXT for a separate
-frozen-payload figure-library contract after the user commits/pushes the
-closure reconciliation and the next session re-establishes live Git state;
-F.6.3 remains BLOCKED pending E.8 and F.6.4 remains BLOCKED pending F.6.3.
+preserving the scientific JSON and fingerprints. E.8 is ACTIVE under its
+separate frozen-payload figure-library contract: S1 renderer/test work precedes
+a user-created renderer-source commit, then S2 profile/test work pins it.
+F.6.3 remains BLOCKED pending accepted E.8 evidence and F.6.4 remains BLOCKED
+pending F.6.3.

@@ -31,8 +31,8 @@ provenance review, and rendered-page inspection.
 
 ## Current downstream gate
 
-- NEXT — E.8 receives a separate frozen-F.6.2-payload figure-library contract
-  only after the user commits/pushes this closure reconciliation and the next
-  session rechecks live Git identity. It has no runtime acceptance claim yet.
+- ACTIVE — E.8 S1 implements the separate frozen-F.6.2-payload figure library
+  and tests. It has no runtime acceptance claim; S2 profile work follows only
+  after the user creates the E.8 renderer-source commit.
 
 See sources/ARTIFACT_INDEX.md for recovered artifact classes and limitations.

@@ -1,10 +1,10 @@
 ---
 memory_schema: 2
-active_objective: Prepare the E.8 presentation-ready figure-library implementation contract
-current_work_item: User commits and pushes the F.6.2 closure reconciliation, then a new session re-establishes live test HEAD before E.8 contract work
-active_status: NEXT
-next_action: User commits and pushes the accepted F.6.2 closure reconciliation; the next Codex session rechecks live test HEAD before writing the E.8 contract
-baseline_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
+active_objective: Implement the E.8 frozen-F.6.2 figure-library renderer and its tests
+current_work_item: Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work
+active_status: ACTIVE
+next_action: Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit
+baseline_commit: 73bb8c2f9c300890ada23598aeacc8e8df859b26
 source_commit: c88ed65cb18ba6a37358897292b77696016312d1
 bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
@@ -105,11 +105,12 @@ Fix.5 does not replace the scientific source or alter the accepted JSON.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
-NEXT — after this closure reconciliation is committed/pushed and live Git state
-is re-established, write the E.8 contract for a separate deterministic,
-presentation-ready figure library. It consumes the frozen accepted F.6.2 JSON
-only, renders no new Method-A science, and does not modify `rand_sub.py` or the
-ordinary procedure PDF.
+ACTIVE — implement S1 under the
+[E.8 figure-library contract](../decisions/e8-f6-2-figure-library-implementation-contract.md):
+a separate deterministic, presentation-ready PDF/page-manifest sidecar reading
+the frozen accepted F.6.2 JSON only. S1 must finish and receive its own
+user-created renderer-source commit before S2 creates the separate profile that
+pins it. E.8 does not modify `rand_sub.py` or the ordinary procedure PDF.
 
 #### F.6.3 — full baseline procedure versus full procedure plus Method A
 
@@ -123,7 +124,6 @@ BLOCKED pending F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — user commits and pushes this accepted F.6.2 closure reconciliation.
-The next Codex session rechecks live `test` HEAD, then prepares the separate
-E.8 sidecar figure-library contract. F.6.3 and F.6.4 remain BLOCKED as stated
-above.
+NEXT — implement and locally validate E.8 S1 only. The user must create the S1
+renderer-source commit before the S2 E.8 profile/test step. F.6.3 and F.6.4
+remain BLOCKED as stated above.

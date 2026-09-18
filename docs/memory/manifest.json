@@ -1,12 +1,12 @@
 {
   "active_state": {
-    "active_objective": "Prepare the E.8 presentation-ready figure-library implementation contract",
-    "active_status": "NEXT",
-    "baseline_commit": "b789d203e11f0927deb59ebcae9dc59fe8add4ae",
+    "active_objective": "Implement the E.8 frozen-F.6.2 figure-library renderer and its tests",
+    "active_status": "ACTIVE",
+    "baseline_commit": "73bb8c2f9c300890ada23598aeacc8e8df859b26",
     "bundle_profile_commit": "b789d203e11f0927deb59ebcae9dc59fe8add4ae",
-    "current_work_item": "User commits and pushes the F.6.2 closure reconciliation, then a new session re-establishes live test HEAD before E.8 contract work",
+    "current_work_item": "Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work",
     "memory_schema": 2,
-    "next_action": "User commits and pushes the accepted F.6.2 closure reconciliation; the next Codex session rechecks live test HEAD before writing the E.8 contract",
+    "next_action": "Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit",
     "source_commit": "c88ed65cb18ba6a37358897292b77696016312d1"
   },
   "files": [
@@ -26,9 +26,9 @@
       "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
-      "bytes": 3855,
+      "bytes": 3982,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "da9d56a7b5ac3230f08784fb95bbabe2d8b8fc2cb95993b6101f1e05635f5319"
+      "sha256": "15f55db07ff822c013920f58f7e4fac7d22a93a200624e451181d3daac99ba4f"
     },
     {
       "bytes": 1999,
@@ -36,9 +36,9 @@
       "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
     },
     {
-      "bytes": 13427,
+      "bytes": 13571,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "c9a634eb99a0d90a27c2b3ac16ecba01be11fae920c1a12900a7fe68f0751b32"
+      "sha256": "fd9c1b55afa25403fc2336f4d6cb9811b24ed0ef12e4f4ed333c35c03360bc95"
     },
     {
       "bytes": 2349,
@@ -56,9 +56,14 @@
       "sha256": "a6154188c15c66fbec3aa48664e5d85a93f2d7b4dc5a5387edee0fe85d99383e"
     },
     {
-      "bytes": 5486,
+      "bytes": 5976,
       "path": "docs/memory/decisions/DECISION_HISTORY.md",
-      "sha256": "c50a3a2da6b2739a100111bc20152a0aec800a5fcb0630f9a71692be9dc93e8e"
+      "sha256": "e66d1752dfee8a299f43850d6f2f76176e78a882df5116a355ed97c04eb2909e"
+    },
+    {
+      "bytes": 8186,
+      "path": "docs/memory/decisions/e8-f6-2-figure-library-implementation-contract.md",
+      "sha256": "89dde6153e0bcb6ebe7dfea9222c5c7327656d8002fdd4f256821d9cc966b54d"
     },
     {
       "bytes": 6910,
@@ -76,9 +81,9 @@
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
     },
     {
-      "bytes": 1887,
+      "bytes": 1866,
       "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
-      "sha256": "cd577ff537d39498ed26a908f969156e592a3d15a2cf927500dc9cf5ae65d524"
+      "sha256": "c563621e274b839c2f1f14c4ec99df571c18562da6936c52987c1d4f4e9c2659"
     },
     {
       "bytes": 1300,
@@ -146,9 +151,9 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 2682,
+      "bytes": 2969,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "a8dc25287fa694453ecfea509bb5b720292b68919ecea3ea7e72bfe3419f4e1b"
+      "sha256": "cfed1d154988679678721fb004e47d9c5d74254de62562ea41d9210db1d87235"
     },
     {
       "bytes": 1662,
@@ -236,9 +241,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 2635,
+      "bytes": 2656,
       "path": "docs/memory/phases/PHASE_HISTORY.md",
-      "sha256": "5396d10aee2e2e170e567a4bbb9abe5e2a4f0a2980fefb9739473906cd423290"
+      "sha256": "1752b4327f7d7aca3fd34108cd6b07f6df8788824dd504348955195f075ba5b9"
     },
     {
       "bytes": 462,
@@ -271,14 +276,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 9610,
+      "bytes": 9589,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "bcd4d01bbabd36ecb1aa473f35bbc35d751883c00527e17d52624f7fad7820d8"
+      "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 6164,
+      "bytes": 6209,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "e8f9fa857c80a14fefb44341100f6215d08b08eb8181cf3dcdd15bfb537e55ae"
+      "sha256": "061b8081246c3d41c55b32fe489f7cf92136391d7f558e01d249ce4aa92f66c8"
     },
     {
       "bytes": 1414,
@@ -307,6 +312,6 @@
     }
   ],
   "generated_date_utc": "2026-09-18",
-  "observed_git_head": "b789d203e11f0927deb59ebcae9dc59fe8add4ae",
+  "observed_git_head": "73bb8c2f9c300890ada23598aeacc8e8df859b26",
   "schema_version": 2
 }

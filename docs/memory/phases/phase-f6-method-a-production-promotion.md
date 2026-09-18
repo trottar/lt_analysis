@@ -114,13 +114,14 @@ scientific, yield, ROOT, Method-B, or production ownership.
 
 ## E.8 — streamlined full-background-subtraction presentation
 
-`NEXT` — after the user commits/pushes this closure reconciliation and a new
-session re-establishes live Git state, E.8 may receive an implementation
-contract. It is a separate presentation-ready figure library that consumes the
-frozen accepted F.6.2 JSON only; it neither mutates `rand_sub.py` nor inserts
-pages into the ordinary procedure PDF. It does not calculate or own Method-A
-science. Its contract must preserve the background-subtraction story while
-detailed validation and Method-B machinery remain in their dedicated artifacts.
+`ACTIVE` — implement S1 of the
+[E.8 figure-library contract](../decisions/e8-f6-2-figure-library-implementation-contract.md):
+a separate presentation-ready figure library that consumes the frozen accepted
+F.6.2 JSON only. It neither mutates `rand_sub.py` nor inserts pages into the
+ordinary procedure PDF. The user must create the S1 renderer-source commit
+before S2 creates the separate profile that pins it. E.8 does not calculate or
+own Method-A science; detailed validation and Method-B machinery remain in
+their dedicated artifacts.
 
 ## F.6.3 — full baseline procedure versus full procedure plus Method A
 
@@ -160,5 +161,5 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-Its next authorized step is the user-owned commit/push of this reconciliation,
-then a fresh-head E.8 contract. Do not alter ROOT or production behavior.
+Its next authorized step is E.8 S1 source/test implementation under its
+approved contract. Do not alter ROOT or production behavior.
