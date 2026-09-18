@@ -307,7 +307,8 @@ active_objective: Fixture objective
 current_work_item: Fixture work item
 active_status: ACTIVE
 next_action: Fixture next action
-scientific_source_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ---
 """
@@ -379,10 +380,41 @@ def self_test() -> None:
         assert any("metadata differs" in error for error in errors), errors
         handoff.write_text(fixture_frontmatter() + "# Handoff\n", encoding="utf-8")
 
-        current.write_text(fixture_current().replace("a" * 40, "invalid"), encoding="utf-8")
+        for field in ("baseline_commit", "source_commit"):
+            current.write_text(
+                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40 + "\n", ""),
+                encoding="utf-8",
+            )
+            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+            assert any("invalid active-state frontmatter" in error for error in errors), errors
+        current.write_text(
+            fixture_current().replace("source_commit:", "scientific_source_commit:"),
+            encoding="utf-8",
+        )
         errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("not a 40-character" in error for error in errors), errors
+        assert any("invalid active-state frontmatter" in error for error in errors), errors
+
+        for field in ("baseline_commit", "source_commit", "bundle_profile_commit"):
+            current.write_text(
+                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40, f"{field}: invalid"),
+                encoding="utf-8",
+            )
+            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+            assert any("not a 40-character" in error for error in errors), errors
         current.write_text(fixture_current(), encoding="utf-8")
+
+        for field in ("baseline_commit", "source_commit"):
+            replacement = f"{field}: {'c' * 40}"
+            handoff.write_text(
+                fixture_frontmatter().replace(
+                    f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40,
+                    replacement,
+                ),
+                encoding="utf-8",
+            )
+            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+            assert any("metadata differs" in error for error in errors), errors
+        handoff.write_text(fixture_frontmatter() + "# Handoff\n", encoding="utf-8")
         errors, _ = run_checks(
             root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False,
             commit_resolver=lambda _root, _commit: False,

@@ -23,7 +23,8 @@ ACTIVE_STATE_KEYS = (
     "current_work_item",
     "active_status",
     "next_action",
-    "scientific_source_commit",
+    "baseline_commit",
+    "source_commit",
     "bundle_profile_commit",
 )
 
@@ -190,7 +191,8 @@ active_objective: Fixture objective
 current_work_item: Fixture work item
 active_status: ACTIVE
 next_action: Fixture next action
-scientific_source_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ---
 # Current
@@ -215,6 +217,27 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("missing frontmatter was accepted")
+        for field in ("baseline_commit", "source_commit"):
+            current.write_text(
+                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40 + "\n", ""),
+                encoding="utf-8",
+            )
+            try:
+                parse_active_state(current)
+            except ActiveStateError:
+                pass
+            else:
+                raise AssertionError(f"missing {field} was accepted")
+        current.write_text(
+            fixture_current().replace("source_commit:", "scientific_source_commit:"),
+            encoding="utf-8",
+        )
+        try:
+            parse_active_state(current)
+        except ActiveStateError:
+            pass
+        else:
+            raise AssertionError("obsolete scientific_source_commit was accepted")
 
 
 def parse_args() -> argparse.Namespace:

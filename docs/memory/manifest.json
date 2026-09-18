@@ -2,11 +2,12 @@
   "active_state": {
     "active_objective": "Close the F.6.2.Fix.4 presentation-only rerender review",
     "active_status": "ACTIVE",
+    "baseline_commit": "012954d449735b047f453f288641d26c7cef2f8f",
     "bundle_profile_commit": "c3252f1ec43dcca0357aebe8c6ca75d7d198f99a",
     "current_work_item": "Obtain and review the fresh F.6.2.Fix.4 rerender bundle",
     "memory_schema": 2,
     "next_action": "User supplies the fresh F.6.2.Fix.4 rerender bundle for review",
-    "scientific_source_commit": "b929815517643edaa75949f7e61ce46c6e8f0d63"
+    "source_commit": "b929815517643edaa75949f7e61ce46c6e8f0d63"
   },
   "files": [
     {
@@ -25,9 +26,9 @@
       "sha256": "dfcc56f1ca1c4885d126e3d544491bcb874cc602768b8dd1d322a810f22fbd26"
     },
     {
-      "bytes": 2840,
+      "bytes": 2887,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "2a9c51a733078fb12e3b735448fce7d70164daed10cdf09a95da082e3e1ea7e4"
+      "sha256": "bf3a258fc5ee66eecc1a1bbf08ddfc61cbb5e6ff137661580278546d984be2d9"
     },
     {
       "bytes": 1999,
@@ -130,9 +131,9 @@
       "sha256": "7b5a8c6ee9e10649f4dd38ab874aa0324356dde51d36243d40d0eb4b020032b2"
     },
     {
-      "bytes": 1720,
+      "bytes": 2206,
       "path": "docs/memory/evidence/f6-2-scientific-runtime-closure.md",
-      "sha256": "ab4aaea78f848d9f3cfbfb3096954bdb864ad70fea5e14d7ba7be2a9526e275f"
+      "sha256": "d5059559e2c6289a6be68dfd2ddffe52992859eadce97450755e08f9c9766464"
     },
     {
       "bytes": 1628,
@@ -140,9 +141,9 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 2113,
+      "bytes": 2160,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "7f26dea3bea42af7b799f5de32cc34832b37e3618e7e6c4b57847f9bbd4757b3"
+      "sha256": "6b40a4eb031783af33ac76b01cc9523d2bef81639a62ce6c844fd5f6a09dbefc"
     },
     {
       "bytes": 1662,
@@ -270,9 +271,9 @@
       "sha256": "f3f0f1a430017add5bfd1145abe4599b572dd4f07e8dd8990ca3fa5d743a1bc4"
     },
     {
-      "bytes": 5461,
+      "bytes": 5508,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "6f6e5933b5fd1884f82e83589537c17c27c88936f7516a63d0f02fe6e50f6d60"
+      "sha256": "a261e9d72f5b8c03173b500e414ae4e49a85b850a5ccc7a3641940fd1a50e20f"
     },
     {
       "bytes": 1414,
@@ -300,7 +301,7 @@
       "sha256": "a14d4675c1ebd3c6ea40cb4963ab5bbaf65a519a03a322e41b6e9b5f75907e53"
     }
   ],
-  "generated_date_utc": "2026-09-17",
-  "observed_git_head": "012954d449735b047f453f288641d26c7cef2f8f",
+  "generated_date_utc": "2026-09-18",
+  "observed_git_head": "30e7b8e4cf6a38eb97e0b18b390191981d9437f0",
   "schema_version": 2
 }

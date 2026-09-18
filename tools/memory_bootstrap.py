@@ -131,7 +131,8 @@ active_objective: Fixture objective
 current_work_item: Fixture work item
 active_status: ACTIVE
 next_action: Fixture next action
-scientific_source_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ---
 # Current

@@ -4,7 +4,8 @@ active_objective: Close the F.6.2.Fix.4 presentation-only rerender review
 current_work_item: Obtain and review the fresh F.6.2.Fix.4 rerender bundle
 active_status: ACTIVE
 next_action: User supplies the fresh F.6.2.Fix.4 rerender bundle for review
-scientific_source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
+baseline_commit: 012954d449735b047f453f288641d26c7cef2f8f
+source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
 bundle_profile_commit: c3252f1ec43dcca0357aebe8c6ca75d7d198f99a
 ---
 # Current KaonLT handoff
