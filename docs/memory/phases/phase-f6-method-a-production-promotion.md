@@ -83,25 +83,34 @@ bundle and runtime closure are recorded in evidence/f6-1-runtime-closure.md.
 
 ## F.6.2 — acceptance-correlated Method-A refinement validation
 
-`NEXT` — before any full-procedure comparison, assess whether substantive
-Method-A departures from the baseline are physically explainable and
-statistically supported in each canonical `(setting, t, phi)` child. The
-baseline remains the guide for broad physical missing-mass structure; Method A
-is an acceptance-dependent refinement, not a replacement. This phase treats
-low response as a reference shape, permits pion leakage in kaon-bearing
-regions, and remains detached from production.
+F.6.2 scientific validation is `CLOSED / RUNTIME VALIDATED`; see
+[the scientific closure record](../evidence/f6-2-scientific-runtime-closure.md).
+The accepted detached validation assessed whether substantive Method-A
+departures from the baseline are physically explainable and statistically
+supported in each canonical `(setting, t, phi)` child. The baseline remains the
+guide for broad physical missing-mass structure; Method A is an
+acceptance-dependent refinement, not a replacement. This phase treats low
+response as a reference shape, permits pion leakage in kaon-bearing regions,
+and remains detached from production.
 
-Persist raw normalized-shape discrepancy/refinement/alignment measurements,
-independent acceptance and MM×acceptance diagnostics, fixed-kaon-window pion
-change, support and diagnostic variance statistics, and paired bootstrap
-intervals. Do not construct a composite score, freeze numerical case
-thresholds, tune after inspection, introduce Method B numerically, or claim a
-final-yield uncertainty reduction. The complete pre-implementation contract is
-decisions/f6-2-acceptance-refinement-measurement-contract.md.
+The accepted scientific gate persists raw normalized-shape
+discrepancy/refinement/alignment measurements, independent acceptance and
+MM×acceptance diagnostics, fixed-kaon-window pion change, support and
+diagnostic variance statistics, and paired bootstrap intervals. It constructs
+no composite score, freezes no numerical case thresholds, introduces no Method
+B numerical dependency, and claims no final-yield uncertainty reduction.
+
+### F.6.2.Fix.4 — presentation-only rerender
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — F.6.2 overall remains
+`ACTIVE` until a fresh Fix.4 rerender bundle is reviewed. This gate may repair
+presentation only and must preserve the accepted F.6.2 scientific JSON SHA-256
+and artifact/validation fingerprints exactly. It has no scientific, yield,
+ROOT, Method-B, or production ownership.
 
 ## E.8 — streamlined full-background-subtraction presentation
 
-`BLOCKED` pending accepted F.6.2. E.8 is presentation-only and follows F.6.2
+`BLOCKED` pending F.6.2 overall closure. E.8 is presentation-only and follows F.6.2
 so the streamlined full-background-subtraction PDF can consume frozen accepted
 F.6.1/F.6.2 results. It does not calculate or own Method-A science. It should
 tell the background-subtraction story—random/dummy subtraction, slow-proton
@@ -111,7 +120,7 @@ machinery remain in their dedicated artifacts.
 
 ## F.6.3 — full baseline procedure versus full procedure plus Method A
 
-`BLOCKED` pending accepted F.6.2 + E.8. Preserve the current full yield
+`BLOCKED` pending F.6.2 overall closure + E.8. Preserve the current full yield
 calculation unchanged as the baseline branch. The parallel Method-A branch
 uses the same random/dummy subtraction, slow-proton treatment, pion
 components/fits/windows/amplitudes, canonical binning, SIMC, background-fit
@@ -146,7 +155,6 @@ This roadmap defines no Method-A systematic uncertainty. In particular,
 its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
-or alteration of accepted F.1-F.5.2 evidence. F.6 remains detached. Its next
-authorized step is design and implementation of F.6.2 acceptance-correlated
-Method-A refinement validation; do not begin E.8 or alter ROOT or production
-behavior.
+or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
+Its next authorized step is review of the F.6.2.Fix.4 presentation-only rerender
+bundle; do not begin E.8 or alter ROOT or production behavior.

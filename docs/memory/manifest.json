@@ -1,24 +1,33 @@
 {
+  "active_state": {
+    "active_objective": "Close the F.6.2.Fix.4 presentation-only rerender review",
+    "active_status": "ACTIVE",
+    "bundle_profile_commit": "c3252f1ec43dcca0357aebe8c6ca75d7d198f99a",
+    "current_work_item": "Obtain and review the fresh F.6.2.Fix.4 rerender bundle",
+    "memory_schema": 2,
+    "next_action": "User supplies the fresh F.6.2.Fix.4 rerender bundle for review",
+    "scientific_source_commit": "b929815517643edaa75949f7e61ce46c6e8f0d63"
+  },
   "files": [
     {
-      "bytes": 1763,
+      "bytes": 2218,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "e9353783f28f5b526f33d8455daf72c7e53fe1b2c64be732037ab26b8e008813"
+      "sha256": "32fb6f324c1838bf9536effa2a13f6899cd5d6eada9e86bbf886d4c8f11252e1"
     },
     {
-      "bytes": 1105,
+      "bytes": 1416,
       "path": "docs/memory/CODEX.md",
-      "sha256": "197505767661c41a4dade0712db0c7cdd4268eff565d243691df09cb8c209a75"
+      "sha256": "4a11badb8fcbabe583d59e97c6d3f44e30aa5809a3ec5c7c5a603db39dc4f32d"
     },
     {
-      "bytes": 1014,
+      "bytes": 1435,
       "path": "docs/memory/COMMUNICATION.md",
-      "sha256": "2a13e1d9c3a54884c260d876d4639d3844525a6a3fe26e2ff5774c454dd870a2"
+      "sha256": "dfcc56f1ca1c4885d126e3d544491bcb874cc602768b8dd1d322a810f22fbd26"
     },
     {
-      "bytes": 8003,
+      "bytes": 2840,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "6b47801d72c37f92f0c00e8a27eac046467d852c2ca2efd8d5e4c345b68d0a89"
+      "sha256": "2a9c51a733078fb12e3b735448fce7d70164daed10cdf09a95da082e3e1ea7e4"
     },
     {
       "bytes": 1999,
@@ -26,9 +35,9 @@
       "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
     },
     {
-      "bytes": 12478,
+      "bytes": 12732,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "cb07c4cec9970f1cda7ec58a6a6eca2de07db4cf04aaefdee2ea1c6a3aaa882c"
+      "sha256": "f7b49f225b7bae564500a79862797c8b763df3ef1b57af5f62dc41e7be50dfe9"
     },
     {
       "bytes": 2349,
@@ -51,9 +60,9 @@
       "sha256": "e38f4bf2d9ecaa674908b4970984b0f4d3e447f2c4138a8a5c38ad3479c430b1"
     },
     {
-      "bytes": 5969,
+      "bytes": 6254,
       "path": "docs/memory/decisions/f6-2-acceptance-refinement-measurement-contract.md",
-      "sha256": "9b1503634d8df9853f47118f0a2b684532562aeff3edbd208bb941feb990a683"
+      "sha256": "00d27e51610162ae68875f36a5dfdfb2e81582be63195fcdfc45df62255f1549"
     },
     {
       "bytes": 5299,
@@ -121,14 +130,19 @@
       "sha256": "7b5a8c6ee9e10649f4dd38ab874aa0324356dde51d36243d40d0eb4b020032b2"
     },
     {
+      "bytes": 1720,
+      "path": "docs/memory/evidence/f6-2-scientific-runtime-closure.md",
+      "sha256": "ab4aaea78f848d9f3cfbfb3096954bdb864ad70fea5e14d7ba7be2a9526e275f"
+    },
+    {
       "bytes": 1628,
       "path": "docs/memory/evidence/phase-c-five-setting-closure.md",
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 7998,
+      "bytes": 2113,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "7db73f689415840e0f4a79dc92d4c1a3461c4df46e356d27f37e1e600ac21cd6"
+      "sha256": "7f26dea3bea42af7b799f5de32cc34832b37e3618e7e6c4b57847f9bbd4757b3"
     },
     {
       "bytes": 1662,
@@ -251,14 +265,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 8870,
+      "bytes": 9315,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "ecd67b7ddc8935791a230af2a4727a29033104603f1d29d3c2c4e1c66b89ce38"
+      "sha256": "f3f0f1a430017add5bfd1145abe4599b572dd4f07e8dd8990ca3fa5d743a1bc4"
     },
     {
-      "bytes": 5064,
+      "bytes": 5461,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "e6a1110d1c3ca5e10de144650b0afd94462780fa0cc27336f2472e21dbc68eaf"
+      "sha256": "6f6e5933b5fd1884f82e83589537c17c27c88936f7516a63d0f02fe6e50f6d60"
     },
     {
       "bytes": 1414,
@@ -271,9 +285,9 @@
       "sha256": "a1d4a0ecee2b0f6c4b1c727e1ae5741679a3aa6cb67a8c2f41de29373b54a3d3"
     },
     {
-      "bytes": 404,
+      "bytes": 672,
       "path": "docs/memory/templates/CODEX_CONTRACT.md",
-      "sha256": "63d5b310f831d75e4a3d9fc3b68ed43cd2a29369297ec048dc2f3046ac326456"
+      "sha256": "7d21d8501324b70e301765ba9cb473da9bef8b1276cf59a84d8cdb471a6a2eb0"
     },
     {
       "bytes": 387,
@@ -287,6 +301,6 @@
     }
   ],
   "generated_date_utc": "2026-09-17",
-  "observed_git_head": "8306ebe29d7b7b994f5da1a3aa8185b99845758a",
-  "schema_version": 1
+  "observed_git_head": "012954d449735b047f453f288641d26c7cef2f8f",
+  "schema_version": 2
 }

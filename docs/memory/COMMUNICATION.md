@@ -17,3 +17,12 @@ as the authoritative workflow. This page records the concise delivery rules.
   Where a name can collide, give the user a unique filename.
 - Never claim farm, ROOT/PyROOT, full-runtime, or production validation without
   direct supplied evidence.
+
+## Execution authority
+
+Codex may make allowlisted local changes and run deterministic local checks. It
+must not commit, push, update remote refs, or initiate Jefferson Lab farm
+execution. ChatGPT independently audits the actual diff. The user alone
+commits/pushes accepted changes and runs farm validation. Workflow: Codex local
+changes -> ChatGPT audit -> user commit/push -> user farm run -> ChatGPT
+evidence review.

@@ -14,8 +14,22 @@ import tempfile
 from typing import Any
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 MANIFEST_RELATIVE = Path("docs") / "memory" / "manifest.json"
+CURRENT_RELATIVE = Path("docs") / "memory" / "CURRENT.md"
+ACTIVE_STATE_KEYS = (
+    "memory_schema",
+    "active_objective",
+    "current_work_item",
+    "active_status",
+    "next_action",
+    "scientific_source_commit",
+    "bundle_profile_commit",
+)
+
+
+class ActiveStateError(ValueError):
+    """Raised when the compact CURRENT.md metadata is structurally invalid."""
 
 
 def default_root() -> Path:
@@ -34,6 +48,47 @@ def git_output(root: Path, *arguments: str) -> str | None:
     except (OSError, subprocess.CalledProcessError):
         return None
     return result.stdout.strip()
+
+
+def parse_active_state(path: Path) -> dict[str, str | int]:
+    """Parse the deliberately small, dependency-free YAML-like frontmatter."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise ActiveStateError(f"cannot read {path}: {error}") from error
+    if not lines or lines[0] != "---":
+        raise ActiveStateError(f"{path} must begin with frontmatter")
+    try:
+        closing = lines.index("---", 1)
+    except ValueError as error:
+        raise ActiveStateError(f"{path} frontmatter is not closed") from error
+
+    parsed: dict[str, str] = {}
+    for line in lines[1:closing]:
+        if not line or line.lstrip().startswith("#") or ":" not in line:
+            raise ActiveStateError(f"{path} has invalid frontmatter line: {line!r}")
+        key, value = line.split(":", 1)
+        key, value = key.strip(), value.strip()
+        if not key or not value or key in parsed:
+            raise ActiveStateError(f"{path} has missing, empty, or duplicate frontmatter field: {line!r}")
+        parsed[key] = value
+
+    expected = set(ACTIVE_STATE_KEYS)
+    if set(parsed) != expected:
+        missing = sorted(expected - set(parsed))
+        extra = sorted(set(parsed) - expected)
+        details = []
+        if missing:
+            details.append("missing " + ", ".join(missing))
+        if extra:
+            details.append("unexpected " + ", ".join(extra))
+        raise ActiveStateError(f"{path} frontmatter fields differ: {'; '.join(details)}")
+    if parsed["memory_schema"] != "2":
+        raise ActiveStateError(f"{path} memory_schema must be 2")
+
+    result: dict[str, str | int] = {key: parsed[key] for key in ACTIVE_STATE_KEYS}
+    result["memory_schema"] = 2
+    return result
 
 
 def versionable_memory_paths(root: Path) -> list[Path]:
@@ -73,6 +128,7 @@ def build_manifest(root: Path) -> dict[str, Any]:
             }
         )
     return {
+        "active_state": parse_active_state(root / CURRENT_RELATIVE),
         "files": entries,
         "generated_date_utc": datetime.now(timezone.utc).date().isoformat(),
         "observed_git_head": git_output(root, "rev-parse", "HEAD"),
@@ -108,11 +164,16 @@ def check_manifest(root: Path) -> list[str]:
         actual = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         return [f"cannot read manifest: {error}"]
+    try:
+        expected = build_manifest(root)
+    except ActiveStateError as error:
+        return [f"CURRENT active state is invalid: {error}"]
 
-    expected = build_manifest(root)
     problems: list[str] = []
     if actual.get("schema_version") != SCHEMA_VERSION:
         problems.append("manifest schema_version is unsupported")
+    if actual.get("active_state") != expected["active_state"]:
+        problems.append("manifest active_state differs from CURRENT.md")
     if actual.get("files") != expected["files"]:
         problems.append("memory file inventory, byte count, or SHA-256 differs from manifest")
     if not isinstance(actual.get("generated_date_utc"), str):
@@ -122,17 +183,38 @@ def check_manifest(root: Path) -> list[str]:
     return problems
 
 
+def fixture_current() -> str:
+    return """---
+memory_schema: 2
+active_objective: Fixture objective
+current_work_item: Fixture work item
+active_status: ACTIVE
+next_action: Fixture next action
+scientific_source_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+---
+# Current
+"""
+
+
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         memory = root / "docs" / "memory"
         memory.mkdir(parents=True)
         current = memory / "CURRENT.md"
-        current.write_text("current\n", encoding="utf-8")
+        current.write_text(fixture_current(), encoding="utf-8")
         write_manifest(root)
         assert not check_manifest(root), "fresh manifest did not verify"
-        current.write_text("changed\n", encoding="utf-8")
-        assert check_manifest(root), "changed bytes were not detected"
+        current.write_text(fixture_current().replace("Fixture objective", "Changed objective"), encoding="utf-8")
+        assert check_manifest(root), "changed bytes or active state were not detected"
+        current.write_text("# No frontmatter\n", encoding="utf-8")
+        try:
+            parse_active_state(current)
+        except ActiveStateError:
+            pass
+        else:
+            raise AssertionError("missing frontmatter was accepted")
 
 
 def parse_args() -> argparse.Namespace:
@@ -152,11 +234,15 @@ def main() -> int:
         print("SELF-TEST: PASS")
         return 0
     root = args.root.resolve()
-    if args.write:
-        write_manifest(root)
-        print(f"MANIFEST: WROTE {MANIFEST_RELATIVE.as_posix()}")
-        return 0
-    problems = check_manifest(root)
+    try:
+        if args.write:
+            write_manifest(root)
+            print(f"MANIFEST: WROTE {MANIFEST_RELATIVE.as_posix()}")
+            return 0
+        problems = check_manifest(root)
+    except ActiveStateError as error:
+        print(f"MANIFEST: FAIL: CURRENT active state is invalid: {error}")
+        return 1
     if problems:
         for problem in problems:
             print(f"MANIFEST: FAIL: {problem}")

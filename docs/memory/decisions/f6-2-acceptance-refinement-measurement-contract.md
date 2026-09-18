@@ -1,9 +1,14 @@
 # F.6.2 acceptance-refinement measurement contract
 
-F.6.2 is `NEXT`, not active. This is a pre-implementation scientific contract
-for a detached acceptance-correlated Method-A refinement validation. It does
-not authorize production mutation, Method-B numerical input, a new pion model,
-or a claim about final kaon-yield uncertainty.
+F.6.2 scientific validation is CLOSED / RUNTIME VALIDATED from the accepted
+complete farm bundle; see
+[the scientific closure record](../evidence/f6-2-scientific-runtime-closure.md).
+This contract remains the scientific definition for the detached
+acceptance-correlated Method-A refinement validation. F.6.2 overall is ACTIVE
+because F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING for a
+presentation-only rerender. Neither state authorizes production mutation,
+Method-B numerical input, a new pion model, or a claim about final kaon-yield
+uncertainty.
 
 ## Physical interpretation
 

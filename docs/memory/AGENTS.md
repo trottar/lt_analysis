@@ -31,3 +31,12 @@ the root `AGENTS.md` or machine-local instructions.
 - Do not reopen a closed phase without concrete regression evidence. Do not
   turn a commit message, local test, bundle creation, or documentation update
   into a farm/runtime claim.
+
+## Execution authority
+
+Codex may make allowlisted local changes and run deterministic local checks.
+Codex must not commit, push, update remote refs, initiate Jefferson Lab farm
+execution, or claim farm/runtime validation. ChatGPT independently audits the
+actual diff. The user alone commits/pushes accepted changes and runs farm
+validation. Workflow: Codex local changes -> ChatGPT audit -> user commit/push
+-> user farm run -> ChatGPT evidence review.

@@ -1,148 +1,50 @@
+---
+memory_schema: 2
+active_objective: Close the F.6.2.Fix.4 presentation-only rerender review
+current_work_item: Obtain and review the fresh F.6.2.Fix.4 rerender bundle
+active_status: ACTIVE
+next_action: User supplies the fresh F.6.2.Fix.4 rerender bundle for review
+scientific_source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
+bundle_profile_commit: c3252f1ec43dcca0357aebe8c6ca75d7d198f99a
+---
 # Current KaonLT handoff
 
-Prepared: 2026-09-16 during F.6.1 runtime closure. This record distinguishes
-accepted F.5 scientific runtime evidence from its later presentation-only
-rerender and accepted detached F.6.1 validation evidence.
+## Resume Identity
 
-## Resume identity
+- Repository: `trottar/lt_analysis`; branch: `test`.
+- Recheck `git status --short --branch`, `git rev-parse HEAD`, and the active
+  frontmatter before work. The M.2 source-review baseline is
+  `012954d449735b047f453f288641d26c7cef2f8f`.
+- F.6.2.Fix.4 presentation source:
+  `b929815517643edaa75949f7e61ce46c6e8f0d63`.
+- F.6.2 clean bundle/profile commit:
+  `c3252f1ec43dcca0357aebe8c6ca75d7d198f99a`.
 
-- Repository: trottar/lt_analysis; branch: test.
-- Recheck git status --short --branch, git rev-parse HEAD, and git rev-parse
-  origin/test before work.
-- Reviewed F.1.Fix.5 analysis-source commit:
-  dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1 runtime-evaluated analysis HEAD:
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
-- F.1.Validation.Fix.1 collector reconciliation commit:
-  31dd034d8404e317863bf0933c51253e1d3deeb8.
-- This docs/memory-only closure commit is the exact F.2 baseline. It does not
-  alter or replace the F.1 runtime identity.
-- F.2 baseline is C2 `02f21886cff8a721df46ebf673594856583fc3c5`; its source
-  implementation commit is `5549098d2552b9c092b65e31aeb77edc0807ddda`.
-  F.2.Fix.1 begins exactly at the latter clean checkout and is not a runtime
-  or farm-validation identity.
-- The profile-driven F.2 collector repair begins exactly at
-  `170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`; it is source-only and does not
-  replace either F.2 source identity or any farm identity.
-- F.5 implementation and F.5.Fix.1 starting HEAD:
-  `f9ce5aadbebc31f5163a093ab32244644ad2a088`.
-- F.5.Fix.1 implementation/source-reviewed HEAD:
-  `46598878c102a67275b1600e73cba3b2f166dc26`. This is the farm-Python
-  compatibility repair only; it is not a F.5 farm-evaluated identity.
-- Accepted F.5 farm/bundle HEAD and F.5.2 starting source HEAD:
-  `3c6a66b7df9bf17e5a428458a2281a80831f001a`. F.5 scientific fingerprint:
-  `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`.
-- F.5.2.Fix.1 source-reviewed/farm-rerender HEAD:
-  `6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its accepted presentation-only
-  bundle SHA-256 is
-  `323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`;
-  it does not replace F.5's scientific runtime identity.
-- F.6.1 initial implementation: `883ddf70af9935cd90e85c732c2d42d8765c783d`.
-- F.6.1.Fix.1 source-reviewed source:
-  `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`.
-- F.6.1 accepted farm/bundle HEAD:
-  `ffb7d4dc251610f6034eac11038a9841e3ef9f58`; accepted bundle
-  `KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip`, SHA-256
-  `22fb594f79a61e5378e76570df46cab9cf5195b6dc0faa04b0238919f66738a3`.
+## Current Gate
 
-## Established evidence
+F.6.2 scientific validation is CLOSED / RUNTIME VALIDATED; see the
+[scientific closure record](../evidence/f6-2-scientific-runtime-closure.md).
+F.6.2 overall is ACTIVE because F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM
+VALIDATION PENDING. The accepted F.6.2 scientific JSON and fingerprints are
+frozen for the presentation-only rerender.
 
-CLOSED / RUNTIME VALIDATED:
+## Farm-only Boundary
 
-- Phase-C five-setting Method-B diagnostic closure: C.Fix.2.3
-  9a66bc62d20a99172e326e915866877b65ae1e5d, later accepted pre-E.3
-  e3853655db0809923cbf2326e2f779219128eda9; adaptive B is DO NOT PROMOTE.
-  Read evidence/phase-c-five-setting-closure.md.
-- E.3.Fix.2 Q4p4W2p74 Left-low presentation: implementation
-  eb1710f4739ba6ef14f51419806e9fc5bd53c175, runtime/bundle
-  bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. Read
-  evidence/e3-fix2-left-low-runtime.md. Do not extrapolate it to four other
-  settings.
+The user performs the narrow `tcsh` farm step. Codex does not commit, push,
+initiate farm execution, or claim runtime validation. For a bundle-only step,
+use the [farm procedure](../decisions/farm-validation-bundle-procedure.md),
+the reviewed clean worktree when provenance requires it, and do not regenerate
+the accepted scientific JSON.
 
-CLOSED / RUNTIME VALIDATED:
+## Next Action
 
-- F.1.Fix.5 for all five canonical Q4p4W2p74 settings. The runtime remains
-  anchored to `126fa22c19bd29b9952f55b33ab43d59f9727ef6`; C1 reconciled its
-  clean collector provenance without rerunning KaonLT. The owner accepted the
-  complete gate and artifact-hash continuity with the supplied v4 bundle.
+Obtain and review the fresh F.6.2.Fix.4 rerender bundle. Verify its manifest,
+source provenance, presentation PDF, and exact continuity of the accepted
+F.6.2 JSON SHA-256, artifact fingerprint, and validation fingerprint.
 
-## Current gate and boundaries
+## Downstream State
 
-CLOSED / RUNTIME VALIDATED — F.6.1 and F.6.1.Validation.1 are accepted from
-the complete F.6.1 bundle at `ffb7d4dc251610f6034eac11038a9841e3ef9f58`. It
-pins reviewed F.6.1 source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`, exactly
-reproduces accepted F.4/F.5 closure across five settings, 15 parents, and 135
-cells, and closes the producer-radians/application-degrees phi contract. It is
-aggregate-only and detached: no production/yield/ROOT/Method-B numerical path
-exists. Its 27-page review was manually accepted. Shape effects are
-parent-dependent; see evidence/f6-1-runtime-closure.md.
-
-NEXT — F.6.2 is acceptance-correlated Method-A refinement validation. Its
-pre-implementation measurement contract preserves raw shape, acceptance/MM,
-kaon-window, support, and bootstrap evidence without a composite score or
-threshold; see decisions/f6-2-acceptance-refinement-measurement-contract.md.
-
-CLOSED / RUNTIME VALIDATED — F.1 is accepted. C1 limits only its committed
-range whitespace check to the three profile-owned validation files; the global
-worktree check and committed-file identity audit remain unchanged. The F.1
-artifact, PDF, and page-manifest evidence remains detached and source-owned.
-
-CLOSED / RUNTIME VALIDATED — F.2.Fix.1 is accepted from the supplied complete
-F.2 farm bundle at `8e919fc618cea900227db5090d65da728c3aa555`. The owner
-accepted `hgcer3 = (SHMS_delta, P_hgcer_xAtCer, P_hgcer_yAtCer)` after all 15
-groups passed frozen `hgcer3` information and support gates. The F.2 artifact
-remains historically `basis_frozen = false`; this is an external human
-acceptance, not a rewrite of F.2. Read evidence/f2-fix1-runtime-closure.md.
-
-CLOSED / RUNTIME VALIDATED — F.3 is accepted at farm/source HEAD
-`5382cfc1994b078c620b32c043938134c33ffa39`; its 15 parent maps have exact
-F.2 support continuity and no correction or production behavior. Read
-evidence/f3-runtime-closure.md.
-
-CLOSED / RUNTIME VALIDATED — F.4 is accepted from the supplied complete F.4
-farm bundle at `67e0298c51759c7a5ba693464d2c2655bf39250d`; the exact bundle,
-JSON/PDF hashes, and correction/artifact fingerprints are in
-evidence/f4-runtime-closure.md. It preserves full signed canonical-t sums with
-one common parent normalization and has no template or production ownership.
-
-CLOSED / RUNTIME VALIDATED — F.5 is accepted from the supplied bundle at
-`3c6a66b7df9bf17e5a428458a2281a80831f001a`; its exact bundle/provenance and
-scientific fingerprint are in evidence/f5-runtime-closure.md. It remains
-detached: no child normalization or event/production output exists.
-
-CLOSED / RUNTIME VALIDATED — F.5.2 is the accepted presentation-only rerender
-at `6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its JSON SHA-256 is
-`143e3af6b1c69560e5bf351155b570d05f19e7e0ceb14665f5448c351ad501be`; its PDF
-SHA-256 is `e71bf819014b7410c8e403c54e5114460626484f21dab763323b13dac0111aa4`.
-The 12-page visual review accepted physical phi intervals in place of internal
-indices, while the F.5 scientific payload and fingerprint remained exactly
-unchanged. Read evidence/f5-2-runtime-closure.md.
-
-SOURCE REVIEWED — `testing/collect_pion_hgcer_validation_bundle.py` remains
-the only collector. Its original F.1-specialized profile behavior is preserved;
-the new generic profile mode consumes declared global and setting-scoped files
-without F.1 checkpoint/PDF extraction. The F.2 profile requires only the F.2
-JSON/PDF once and five F.1 v2 JSON inputs. It is read-only with respect to
-analysis artifacts and does not run F.2.
-
-For every farm validation-bundle request, use the concise `tcsh`, canonical
-path, temporary-detached-worktree, non-rerun, collision, and provenance rules
-in decisions/farm-validation-bundle-procedure.md. Ordinary unrelated local
-farm files do not justify cleaning the checkout or weakening collector gates.
-
-Keep random, slow-proton, pion, Method A, Method B, SIMC, yield, and
-cross-section ownership separate. Keep proton before pion, Method-A/B
-independence, same-t Method B, Phase-E presentation-only ownership, and
-parent-only normalization. Method B is diagnostic only. F.1-F.5 are detached;
-no production promotion before F.6.
-
-## Gaps and exact next action
-
-DEFERRED — final Phase-D provenance, four E.3 settings, older proton detail,
-and raw historical bundle paths/hashes. Read investigations/KNOWN_GAPS.md.
-
-NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
-validation. The current yield remains the accepted baseline. E.8 is BLOCKED
-pending accepted F.6.2; F.6.3 is BLOCKED pending accepted F.6.2 plus E.8; and
-F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. Read
-phases/phase-f6-method-a-production-promotion.md.
+E.8 remains BLOCKED until F.6.2 overall closes. F.6.3 remains BLOCKED pending
+accepted F.6.2 plus E.8; F.6.4 remains BLOCKED pending F.6.2/F.6.3 evidence.
+The accepted yield is still the baseline, Method B remains diagnostic only,
+and no Method-A production promotion is authorized.

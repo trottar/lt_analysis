@@ -1,149 +1,65 @@
+---
+memory_schema: 2
+active_objective: Close the F.6.2.Fix.4 presentation-only rerender review
+current_work_item: Obtain and review the fresh F.6.2.Fix.4 rerender bundle
+active_status: ACTIVE
+next_action: User supplies the fresh F.6.2.Fix.4 rerender bundle for review
+scientific_source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
+bundle_profile_commit: c3252f1ec43dcca0357aebe8c6ca75d7d198f99a
+---
 # Current KaonLT development state
 
-Last evidence and workflow-memory reconciliation: 2026-09-16 during F.6.1
-runtime closure. Repository HEAD values in this record are timestamped
-observations, not permanent claims about the live checkout.
+## Active Objective
 
-## Repository identity at last reconciliation
+Close the presentation-only F.6.2.Fix.4 rerender review without changing the
+accepted F.6.2 scientific payload, fingerprints, or detached boundaries.
 
-- Repository: trottar/lt_analysis; branch: test.
-- F.2 exact starting HEAD:
-  02f21886cff8a721df46ebf673594856583fc3c5.
-- F.2 implementation / F.2.Fix.1 exact source starting HEAD:
-  5549098d2552b9c092b65e31aeb77edc0807ddda. F.2.Fix.1 is a local
-  source-only authority/provenance repair from that clean checkout; it is not
-  a farm-evaluated commit.
-- F.2 profile-driven collector exact source starting HEAD:
-  170e6fae3d2fed1949fc6932b8eac9ad83e3e01c. This local source-only repair
-  does not alter the F.2 analyzer or establish farm evidence.
-- Reviewed F.1.Fix.5 analysis-source commit:
-  dc4fc6283001739a487ec80068f951b0e388cae6.
-- F.1 runtime-evaluated analysis HEAD:
-  126fa22c19bd29b9952f55b33ab43d59f9727ef6.
-- F.1.Validation.Fix.1 collector commit:
-  31dd034d8404e317863bf0933c51253e1d3deeb8.
-- This docs/memory-only closure commit is the F.2 starting baseline. It is
-  neither the F.1 analysis-source commit nor a KaonLT runtime commit.
+## Current Work Item
 
-## Supported state
+F.6.2 is ACTIVE overall. F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION
+PENDING; the required work item is review of its fresh rerender bundle.
 
-CLOSED / RUNTIME VALIDATED — Phase-C Method-B diagnostic closure for Left
-lowe, Left highe, Center lowe, Center highe, and Right highe, at C.Fix.2.3
-9a66bc62d20a99172e326e915866877b65ae1e5d and later accepted pre-E.3
-e3853655db0809923cbf2326e2f779219128eda9. Adaptive Method B is DO NOT
-PROMOTE. See evidence/phase-c-five-setting-closure.md.
+## Verified State
 
-CLOSED / RUNTIME VALIDATED — E.3.Fix.2 independent Method-A presentation for
-Q4p4W2p74 Left-low only: implementation
-eb1710f4739ba6ef14f51419806e9fc5bd53c175 and runtime/bundle HEAD
-bf53dac84e1396cfd7e3f4e0234749426bfbdcf4. See
-evidence/e3-fix2-left-low-runtime.md.
+- F.6.2 scientific validation is CLOSED / RUNTIME VALIDATED from the accepted
+  complete farm bundle; see the [scientific closure record](evidence/f6-2-scientific-runtime-closure.md).
+- F.6.1 remains CLOSED / RUNTIME VALIDATED and is the accepted detached
+  reweighting baseline; see [F.6.1 evidence](evidence/f6-1-runtime-closure.md).
+- The accepted yield remains the baseline. Method B remains diagnostic only;
+  Method A remains detached and non-production.
 
-CLOSED / RUNTIME VALIDATED — F.1.Fix.5 for Left-lowe, Left-highe,
-Center-lowe, Center-highe, and Right-highe. The reviewed analysis source is
-`dc4fc6283001739a487ec80068f951b0e388cae6`; runtime remains anchored to
-`126fa22c19bd29b9952f55b33ab43d59f9727ef6`. The accepted clean post-hoc
-collector reconciliation ran from C1 `31dd034d8404e317863bf0933c51253e1d3deeb8`
-against the existing artifacts. The owner accepted the required complete source
-gate and artifact-hash continuity with the supplied v4 runtime bundle. F.1 is
-detached, Method-B independent, and makes no correction, estimator, or
-production mutation. See evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md.
+## Source / Evidence Identity
 
-CLOSED / RUNTIME VALIDATED — F.2.Fix.1 detached global five-setting Method-A
-acceptance-representation audit. The accepted farm bundle ran at
-`8e919fc618cea900227db5090d65da728c3aa555`, is complete with no unexpected
-committed files, and preserves the five F.1 source hashes. The owner accepted
-the unique supported reduced basis `hgcer3 = (SHMS_delta,
-P_hgcer_xAtCer, P_hgcer_yAtCer)`. The F.2 historical artifact remains
-`basis_frozen = false`; the human decision freezes this basis only for F.3.
-See evidence/f2-fix1-runtime-closure.md.
+F.6.2.Fix.4 presentation source is `b929815517643edaa75949f7e61ce46c6e8f0d63`.
+The clean bundle/profile commit is `c3252f1ec43dcca0357aebe8c6ca75d7d198f99a`.
+The accepted F.6.2 JSON SHA-256 and scientific fingerprints are recorded in
+the [scientific closure record](evidence/f6-2-scientific-runtime-closure.md).
 
-CLOSED / RUNTIME VALIDATED — F.3 detached support-aware relative `hgcer3`
-response map. The accepted farm bundle at
-`5382cfc1994b078c620b32c043938134c33ffa39` has 15 valid parents, exact F.2
-support continuity, no sparse/support failures, and no correction/production
-behavior. See evidence/f3-runtime-closure.md.
+## Blockers
 
-CLOSED / RUNTIME VALIDATED — F.4 detached parent-preserving Method-A
-correction. The accepted farm bundle ran at
-`67e0298c51759c7a5ba693464d2c2655bf39250d`, has 15 valid parents and exact
-F.3 support continuity, and retains parent-only signed normalization. It has
-no template, yield, production, or Method-B ownership. See
-evidence/f4-runtime-closure.md.
+No fresh F.6.2.Fix.4 presentation-only rerender bundle has been supplied and
+reviewed. Its absence blocks F.6.2 overall closure, E.8, F.6.3, and F.6.4.
 
-CLOSED / RUNTIME VALIDATED — F.5 detached signed `(t,phi)` propagation. The
-accepted bundle ran at `3c6a66b7df9bf17e5a428458a2281a80831f001a` with 135
-canonical cells (115 occupied, 20 explicit empty), exact F.1/F.4 propagation,
-and all 15 parent/five-setting closures passing. Its scientific fingerprint is
-`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`. See
-evidence/f5-runtime-closure.md.
+## Next Action
 
-CLOSED / RUNTIME VALIDATED — F.5.2 is the accepted presentation-only farm
-rerender at `6634e9cb470cf35f21f5d475ec6ce33b524cd233`, from bundle
-`KaonLT_PhaseF5_2_Fix1_validation_Q4p4W2p74.zip` with SHA-256
-`323d5d50604d846692c2b0bb0d1455c3751b2033601046dfcc3e07ccc3ca3ebd`.
-The accepted F.5 scientific fingerprint remains exactly
-`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`:
-the propagation payload was exactly unchanged, and only JSON provenance and
-PDF terminology changed. See evidence/f5-2-runtime-closure.md.
+Review the supplied Fix.4 rerender bundle against the accepted F.6.2 scientific
+JSON/fingerprints and its required presentation-only provenance. Do not rerun
+or regenerate the accepted scientific artifact for a bundle-only request.
 
-SOURCE REVIEWED — F.5.Fix.1 identities remain distinct: F.5
-implementation/Fix.1 start `f9ce5aadbebc31f5163a093ab32244644ad2a088`; Fix.1
-implementation/source review `46598878c102a67275b1600e73cba3b2f166dc26`.
-F.5.2.Fix.1 is the distinct source-reviewed presentation-label repair at
-`6634e9cb470cf35f21f5d475ec6ce33b524cd233`; it did not change F.5 science.
+## Success Criteria
 
-SOURCE REVIEWED — The existing validation collector now has a generic
-profile-declared artifact path in addition to its unchanged F.1-specialized
-path. `testing/pion_hgcer_validation_bundle_profile_f2.json` declares only the
-global F.2 JSON/PDF and five setting-scoped frozen F.1 JSON inputs. It pins
-`170e6fae3d2fed1949fc6932b8eac9ad83e3e01c`, permits only the four
-collector/profile/test repair files plus `docs/memory/`, and performs no F.2
-analysis or physics work.
+Accept a complete, provenance-valid Fix.4 presentation bundle whose scientific
+JSON and accepted fingerprints are unchanged, then perform a separate
+closure-only reconciliation. Any mismatch remains a presentation gate failure.
 
-CLOSED / RUNTIME VALIDATED — F.6.1 detached Method-A reweighting validation
-and F.6.1.Validation.1 closed from accepted bundle
-`KaonLT_PhaseF6_1_validation_Q4p4W2p74.zip` at farm/bundle HEAD
-`ffb7d4dc251610f6034eac11038a9841e3ef9f58`, pinned to reviewed source
-`bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. The complete bundle exactly
-reproduces accepted F.4/F.5 closure over five settings, 15 parents, and 135
-cells; it closes training-radians to application-degrees phi semantics and
-retains every detached/non-production boundary. The 27-page PDF was manually
-reviewed. Shape effects are parent-dependent, not a uniform-improvement gate.
-See evidence/f6-1-runtime-closure.md.
+## Do Not Reopen Without New Evidence
 
-NEXT — F.6.2 acceptance-correlated Method-A refinement validation will test
-whether substantive local refinements are physically explainable and
-statistically supported. It remains detached; see
-decisions/f6-2-acceptance-refinement-measurement-contract.md.
+Do not reopen accepted F.1 through F.6.2 scientific validation, alter the
+baseline yield, or promote Method A. Fix.4 cannot change scientific results.
 
-## Frozen architecture
+## Relevant References
 
-- Random subtraction, slow-proton treatment, pion subtraction, HGCer Method A,
-  HGCer Method B, SIMC comparison, yields, cross sections, diagnostics/checkers,
-  and presentation retain separate ownership.
-- Proton cleaning precedes pion subtraction; K Lambda preservation remains a
-  setting-wide production gate. Proposed proton quantities never become applied
-  quantities without gate acceptance.
-- Method A and Method B are independent. Method B is same-canonical-t relative
-  closure and remains diagnostic/cross-check only; it never adjusts pion
-  weights. Method A is positive-response relative leakage only, not absolute
-  zero-NPE probability.
-- Phase E presentation uses frozen upstream records and has no physics
-  ownership. F.1 through F.5 remain detached; only an explicit validated F.6
-  may promote a production change. Parent-level normalization forbids
-  independent (t,phi)-child renormalization.
-
-## Explicit gaps
-
-DEFERRED — final Phase-D farm provenance; final four-setting E.3 closure;
-detailed older proton farm artifacts; exact raw paths/hashes for recovered
-historical bundles. See investigations/KNOWN_GAPS.md.
-
-## NEXT
-
-NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
-validation. The accepted current yield remains the baseline; E.8 is BLOCKED
-pending accepted F.6.2, F.6.3 is BLOCKED pending accepted F.6.2 plus E.8, and
-F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. Read
-phases/phase-f6-method-a-production-promotion.md.
+- [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
+- [F.6.2 measurement contract](decisions/f6-2-acceptance-refinement-measurement-contract.md)
+- [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
+- [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)

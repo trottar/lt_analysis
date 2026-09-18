@@ -12,6 +12,8 @@ import sys
 import tempfile
 from typing import Any, Callable
 
+import update_memory_manifest as manifest_tool
+
 
 ACTIVE_FILES = (
     "docs/memory/CURRENT.md",
@@ -74,6 +76,13 @@ def health_status(returncode: int, output: str) -> str:
     return "pass"
 
 
+def active_state(current: Path) -> dict[str, str | int] | None:
+    try:
+        return manifest_tool.parse_active_state(current)
+    except manifest_tool.ActiveStateError:
+        return None
+
+
 def collect_summary(
     root: Path,
     health_runner: Callable[[Path], tuple[int, str]] = run_health,
@@ -86,6 +95,7 @@ def collect_summary(
     returncode, health_output = health_runner(root)
     return {
         "active_records": records,
+        "active_state": active_state(current),
         "current_references": direct_memory_references(root, current),
         "git": {"branch": git_value(root, "branch", "--show-current"), "head": git_value(root, "rev-parse", "HEAD")},
         "memory_health": {"status": health_status(returncode, health_output), "returncode": returncode},
@@ -96,6 +106,12 @@ def print_human(summary: dict[str, Any]) -> None:
     print("KaonLT memory bootstrap")
     print(f"git branch: {summary['git']['branch'] or 'unavailable'}")
     print(f"git HEAD: {summary['git']['head'] or 'unavailable'}")
+    print("active state:")
+    if summary["active_state"] is None:
+        print("  unavailable: CURRENT.md frontmatter is invalid")
+    else:
+        for key, value in summary["active_state"].items():
+            print(f"  {key}: {value}")
     print("active records:")
     for record in summary["active_records"]:
         size = "missing" if record["bytes"] is None else str(record["bytes"])
@@ -108,6 +124,22 @@ def print_human(summary: dict[str, Any]) -> None:
     print(f"memory health: {summary['memory_health']['status'].upper()}")
 
 
+def fixture_current() -> str:
+    return """---
+memory_schema: 2
+active_objective: Fixture objective
+current_work_item: Fixture work item
+active_status: ACTIVE
+next_action: Fixture next action
+scientific_source_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+---
+# Current
+
+See evidence/example.md and nowhere else.
+"""
+
+
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -115,13 +147,15 @@ def self_test() -> None:
         evidence.mkdir(parents=True)
         (evidence / "example.md").write_text("evidence\n", encoding="utf-8")
         current = root / "docs" / "memory" / "CURRENT.md"
-        current.write_text("See evidence/example.md and nowhere else.\n", encoding="utf-8")
+        current.write_text(fixture_current(), encoding="utf-8")
         (root / "docs" / "memory" / "MEMORY.md").write_text("memory\n", encoding="utf-8")
         handoff = root / "docs" / "memory" / "handoffs"
         handoff.mkdir()
         (handoff / "CURRENT_HANDOFF.md").write_text("handoff\n", encoding="utf-8")
         summary = collect_summary(root, lambda _: (0, "MEMORY HEALTH: PASS"))
         assert summary["current_references"] == ["docs/memory/evidence/example.md"], summary
+        assert summary["active_state"] is not None, summary
+        assert summary["active_state"]["active_status"] == "ACTIVE", summary
         assert summary["memory_health"]["status"] == "pass", summary
 
 

@@ -1,3 +1,12 @@
+---
+memory_schema: 2
+active_objective: Close the F.6.2.Fix.4 presentation-only rerender review
+current_work_item: Obtain and review the fresh F.6.2.Fix.4 rerender bundle
+active_status: ACTIVE
+next_action: User supplies the fresh F.6.2.Fix.4 rerender bundle for review
+scientific_source_commit: b929815517643edaa75949f7e61ce46c6e8f0d63
+bundle_profile_commit: c3252f1ec43dcca0357aebe8c6ca75d7d198f99a
+---
 # Approved KaonLT roadmap
 
 This roadmap records approved Phase-F structure. It does not make a runtime
@@ -83,21 +92,21 @@ ownership. See evidence/f6-1-runtime-closure.md.
 
 #### F.6.2 — acceptance-correlated Method-A refinement validation
 
-NEXT — quantify parent/child baseline discrepancy, Method-A refinement size,
-residual-correction alignment, independent acceptance corroboration,
-MM×acceptance localization, fixed-kaon-window pion change, support, and
-diagnostic variance with bootstrap intervals. It is a detached refinement
-validation, not a replacement pion model or production path. See
-decisions/f6-2-acceptance-refinement-measurement-contract.md.
+ACTIVE overall. Its scientific validation is CLOSED / RUNTIME VALIDATED from
+the accepted complete farm bundle; see
+[F.6.2 scientific evidence](../evidence/f6-2-scientific-runtime-closure.md).
+F.6.2.Fix.4 is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING for its
+presentation-only rerender. It must preserve the accepted F.6.2 JSON and
+fingerprints unchanged; it is not a scientific rerun or production path.
 
 #### E.8 — streamlined full-background-subtraction presentation
 
-BLOCKED pending accepted F.6.2 — presentation-only update consuming frozen
-accepted F.6.1/F.6.2 results; it does not recompute Method-A science.
+BLOCKED pending F.6.2 overall closure — presentation-only update consuming
+frozen accepted F.6.1/F.6.2 results; it does not recompute Method-A science.
 
 #### F.6.3 — full baseline procedure versus full procedure plus Method A
 
-BLOCKED pending accepted F.6.2 + E.8 — compare the unchanged full baseline
+BLOCKED pending F.6.2 overall closure + E.8 — compare the unchanged full baseline
 procedure with a parallel procedure whose only intended pion-template change is
 the accepted Method-A factor.
 
@@ -107,5 +116,5 @@ BLOCKED pending F.6.2/F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — Design and implement F.6.2 acceptance-correlated Method-A refinement
-validation. E.8, F.6.3, and F.6.4 remain BLOCKED as stated above.
+NEXT — obtain and review the fresh F.6.2.Fix.4 presentation-only rerender
+bundle. E.8, F.6.3, and F.6.4 remain BLOCKED as stated above.

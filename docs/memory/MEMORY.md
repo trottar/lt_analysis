@@ -171,15 +171,20 @@ application-degrees phi closure. It is aggregate-only and non-production; its
 parent-dependent shape effects: the 68/135 toward and 67/135 away comparison
 counts are descriptive only. See evidence/f6-1-runtime-closure.md.
 
-NEXT — F.6.2 is acceptance-correlated Method-A refinement validation. It will
-assess substantive departures from the baseline using raw discrepancy,
-refinement, alignment, independent acceptance/MM, kaon-window, support, and
-bootstrap evidence without a composite score or frozen numerical thresholds.
-It remains detached: Method B is excluded, no production mutation is
-authorized, and no final-yield uncertainty reduction is claimed. E.8 is
-BLOCKED pending accepted F.6.2; F.6.3 is the later full-procedure comparison,
-BLOCKED pending accepted F.6.2 plus E.8; F.6.4 is the explicit
-production-promotion decision, BLOCKED pending F.6.2/F.6.3 evidence. See
+CLOSED / RUNTIME VALIDATED — F.6.2 is the detached acceptance-correlated
+Method-A refinement scientific validation accepted from the previously reviewed
+complete farm bundle. It persists raw discrepancy, refinement, alignment,
+independent acceptance/MM, kaon-window, support, and bootstrap evidence without
+a composite score or frozen numerical thresholds. It remains detached: Method B
+is excluded, no production mutation is authorized, and no final-yield
+uncertainty reduction is claimed. See
+evidence/f6-2-scientific-runtime-closure.md.
+
+ACTIVE — F.6.2 overall remains open only for F.6.2.Fix.4, a presentation-only
+rerender that is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. It must
+preserve the accepted scientific JSON and fingerprints exactly. E.8 is BLOCKED
+pending F.6.2 overall closure; F.6.3 is BLOCKED pending F.6.2 overall closure
+plus E.8; F.6.4 is BLOCKED pending F.6.2/F.6.3 evidence. See
 decisions/f6-2-acceptance-refinement-measurement-contract.md and
 phases/phase-f6-method-a-production-promotion.md.
 
