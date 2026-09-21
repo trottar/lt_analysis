@@ -189,14 +189,23 @@ source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
 `b789d203e11f0927deb59ebcae9dc59fe8add4ae`, which are presentation-artifact
 provenance only. See evidence/f6-2-fix5-presentation-runtime-closure.md.
 
-ACTIVE — E.8 is a separate sidecar figure-library implementation under
-decisions/e8-f6-2-figure-library-implementation-contract.md. S1 creates the
-explicit-input renderer and focused tests; the user then creates its renderer-
-source commit before S2 creates the profile/test commit that pins it. It must
-read the frozen F.6.2 JSON only, verify its SHA before parsing, render persisted
-quantities only, and never recompute Method-A, bootstrap, support/OOD, cuts,
-weights, binning, yields, or scientific acceptance. F.6.3 is BLOCKED pending
-accepted E.8 evidence; F.6.4 is BLOCKED pending F.6.3 evidence. See
+SOURCE REVIEWED — the standalone E.8 frozen-F.6.2 figure library is an
+intermediate presentation artifact, not the final E.8 objective. The final
+E.8.1 ordinary procedure-PDF integration began at
+`33c114e003421690fa9b15480a4200634accf8c3`, received its semantics repair at
+`b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and its sparse-legend repair at
+the reviewed source `0bf1281ebf44868b68ff808090436653eea6ed60`. It remains
+presentation-only: no Method-A production correction or promotion has occurred.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — E.8.1 requires a
+canonical-five-setting generic evidence bundle containing the accepted frozen
+F.6.2 JSON plus each ordinary procedure PDF/page-manifest pair. Source review
+is not farm readiness: before requesting a farm run, verify that the current
+bundle/profile pins the reviewed source and declares every artifact required for
+the gate. Inspect `Q4p4W2p74 / Left / highe` first, then broaden visual/runtime
+review only after that setting passes. No E.8.1 farm-evaluated commit is
+recorded. F.6.3 remains BLOCKED pending this E.8.1 gate; F.6.4 remains BLOCKED
+pending F.6.3 evidence. See
 decisions/f6-2-acceptance-refinement-measurement-contract.md and
 phases/phase-f6-method-a-production-promotion.md.
 

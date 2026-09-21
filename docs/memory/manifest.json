@@ -1,13 +1,13 @@
 {
   "active_state": {
-    "active_objective": "Implement the E.8 frozen-F.6.2 figure-library renderer and its tests",
-    "active_status": "ACTIVE",
-    "baseline_commit": "73bb8c2f9c300890ada23598aeacc8e8df859b26",
+    "active_objective": "Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF",
+    "active_status": "DEVELOPMENT COMPLETE, FARM VALIDATION PENDING",
+    "baseline_commit": "0bf1281ebf44868b68ff808090436653eea6ed60",
     "bundle_profile_commit": "b789d203e11f0927deb59ebcae9dc59fe8add4ae",
-    "current_work_item": "Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work",
+    "current_work_item": "Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review",
     "memory_schema": 2,
-    "next_action": "Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit",
-    "source_commit": "c88ed65cb18ba6a37358897292b77696016312d1"
+    "next_action": "Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate",
+    "source_commit": "0bf1281ebf44868b68ff808090436653eea6ed60"
   },
   "files": [
     {
@@ -26,9 +26,9 @@
       "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
-      "bytes": 3982,
+      "bytes": 4826,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "15f55db07ff822c013920f58f7e4fac7d22a93a200624e451181d3daac99ba4f"
+      "sha256": "bc940f6165c5fcd5122dbd09b17359973e3c011adb9d7609a2a4894b2d6ee8a0"
     },
     {
       "bytes": 1999,
@@ -36,9 +36,9 @@
       "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
     },
     {
-      "bytes": 13571,
+      "bytes": 14110,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "fd9c1b55afa25403fc2336f4d6cb9811b24ed0ef12e4f4ed333c35c03360bc95"
+      "sha256": "35a617662ec000d1774675846d00da2421922c4f1756d55ba02bedb31ee1dc25"
     },
     {
       "bytes": 2349,
@@ -151,9 +151,9 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 2969,
+      "bytes": 3440,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "cfed1d154988679678721fb004e47d9c5d74254de62562ea41d9210db1d87235"
+      "sha256": "f167a848602e701af5e68328b6504305aaa519c508685c0c9c8df43f4d3bcf8a"
     },
     {
       "bytes": 1662,
@@ -281,9 +281,9 @@
       "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 6209,
+      "bytes": 6890,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "061b8081246c3d41c55b32fe489f7cf92136391d7f558e01d249ce4aa92f66c8"
+      "sha256": "6bdb7e784fd3d48236a5a831f5e260111e467ba30a5d0b4f7ae0f695a85cc73c"
     },
     {
       "bytes": 1414,
@@ -311,7 +311,7 @@
       "sha256": "a14d4675c1ebd3c6ea40cb4963ab5bbaf65a519a03a322e41b6e9b5f75907e53"
     }
   ],
-  "generated_date_utc": "2026-09-18",
-  "observed_git_head": "0a93aaa9fd1d4ba58ec02e03d24e7c59f061044d",
+  "generated_date_utc": "2026-09-21",
+  "observed_git_head": "0bf1281ebf44868b68ff808090436653eea6ed60",
   "schema_version": 2
 }

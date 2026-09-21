@@ -1,11 +1,11 @@
 ---
 memory_schema: 2
-active_objective: Implement the E.8 frozen-F.6.2 figure-library renderer and its tests
-current_work_item: Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work
-active_status: ACTIVE
-next_action: Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit
-baseline_commit: 73bb8c2f9c300890ada23598aeacc8e8df859b26
-source_commit: c88ed65cb18ba6a37358897292b77696016312d1
+active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
+current_work_item: Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review
+active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
+next_action: Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate
+baseline_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
+source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
 bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
 # Approved KaonLT roadmap
@@ -103,14 +103,22 @@ source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
 [Fix.5 presentation evidence](../evidence/f6-2-fix5-presentation-runtime-closure.md).
 Fix.5 does not replace the scientific source or alter the accepted JSON.
 
-#### E.8 — streamlined full-background-subtraction presentation
+#### E.8 — final streamlined full-background-subtraction presentation
 
-ACTIVE — implement S1 under the
-[E.8 figure-library contract](../decisions/e8-f6-2-figure-library-implementation-contract.md):
-a separate deterministic, presentation-ready PDF/page-manifest sidecar reading
-the frozen accepted F.6.2 JSON only. S1 must finish and receive its own
-user-created renderer-source commit before S2 creates the separate profile that
-pins it. E.8 does not modify `rand_sub.py` or the ordinary procedure PDF.
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — the standalone frozen-F.6.2
+figure library is a completed intermediate presentation artifact. E.8.1 makes
+the ordinary procedure PDF the final presentation: integration
+`33c114e003421690fa9b15480a4200634accf8c3`, semantics repair
+`b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and sparse-legend/current reviewed
+source `0bf1281ebf44868b68ff808090436653eea6ed60` are SOURCE REVIEWED. No
+Method-A production correction or promotion, and no E.8.1 farm-evaluated commit,
+exists.
+
+Source review is not farm readiness. The E.8.1 profile must be a canonical
+five-setting package that pins the reviewed source and declares the frozen
+F.6.2 JSON plus every ordinary procedure PDF/page-manifest pair. The first
+detailed inspection is `Q4p4W2p74 / Left / highe`; only after that passes may
+the visual/runtime review broaden to the other settings.
 
 #### F.6.3 — full baseline procedure versus full procedure plus Method A
 
@@ -124,6 +132,9 @@ BLOCKED pending F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — implement and locally validate E.8 S1 only. The user must create the S1
-renderer-source commit before the S2 E.8 profile/test step. F.6.3 and F.6.4
-remain BLOCKED as stated above.
+NEXT — create and review the E.8.1 canonical-five-setting bundle/profile
+commit, then run the established five-setting E.8.1 farm production. Inspect
+`Q4p4W2p74 / Left / highe` first: retained D.6-D.9, compact E.8 pages,
+visible L/B/A key, sparse-state visibility, explicit F.6.3 handoff, and no
+production-promotion claim are required before broadening review. F.6.3 and
+F.6.4 remain BLOCKED as stated above.

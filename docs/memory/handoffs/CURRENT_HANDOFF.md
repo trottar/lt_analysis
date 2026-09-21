@@ -1,11 +1,11 @@
 ---
 memory_schema: 2
-active_objective: Implement the E.8 frozen-F.6.2 figure-library renderer and its tests
-current_work_item: Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work
-active_status: ACTIVE
-next_action: Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit
-baseline_commit: 73bb8c2f9c300890ada23598aeacc8e8df859b26
-source_commit: c88ed65cb18ba6a37358897292b77696016312d1
+active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
+current_work_item: Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review
+active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
+next_action: Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate
+baseline_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
+source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
 bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
 # Current KaonLT handoff
@@ -14,8 +14,8 @@ bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 
 - Repository: `trottar/lt_analysis`; branch: `test`.
 - First recheck `git status --short --branch`, `git rev-parse HEAD`, and the
-  matching active-state frontmatter. The E.8 contract was prepared at observed
-  clean `test` HEAD `73bb8c2f9c300890ada23598aeacc8e8df859b26`; do not call it
+  matching active-state frontmatter. E.8.1 is SOURCE REVIEWED through observed
+  `test` HEAD `0bf1281ebf44868b68ff808090436653eea6ed60`; do not call it
   permanently live after this handoff.
 - Reviewed F.6.2 scientific source:
   `0b37af2a2927b08bdeaf897c545f290b55329cea`.
@@ -35,19 +35,25 @@ artifact and validation fingerprints remain
 See [scientific closure](../evidence/f6-2-scientific-runtime-closure.md) and
 [Fix.5 presentation closure](../evidence/f6-2-fix5-presentation-runtime-closure.md).
 
-## Current E.8 Work
+## Current E.8.1 Work
 
-E.8 is ACTIVE under the
-[figure-library implementation contract](../decisions/e8-f6-2-figure-library-implementation-contract.md).
-Implement S1 only: the standalone explicit-input renderer and its focused
-tests. It reads the exact frozen F.6.2 JSON, writes a separate PDF/page
-manifest, and neither imports nor modifies `rand_sub.py` or the ordinary
-procedure PDF.
+The standalone E.8 frozen-F.6.2 figure library is a completed intermediate
+presentation artifact. E.8.1 is SOURCE REVIEWED: the ordinary procedure-PDF
+integration is `33c114e003421690fa9b15480a4200634accf8c3`, the semantics repair
+is `b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and the sparse-legend/current
+reviewed source is `0bf1281ebf44868b68ff808090436653eea6ed60`.
 
-After independent source/diff review, the user alone creates and pushes S1.
-That commit becomes the E.8 renderer-source identity; S2 then creates the
-separate profile/test commit that pins it. Do not infer either E.8 identity
-from Fix.5 provenance.
+E.8 overall is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. Build and review
+the new canonical-five-setting generic profile before any farm request. Source
+review is not farm readiness: the profile must pin the reviewed source and
+declare every required artifact. No E.8.1 farm-evaluated commit exists; the
+frontmatter bundle-profile field remains historical F.6.2.Fix.5 provenance.
+
+Run the established five-setting `Q4p4W2p74` production, inspect `Left/highe`
+first, and only then broaden visual/runtime review. Its PDF/manifest must show
+retained D.6-D.9, the compact E.8 atlas/handoff, L/B/A legend, sparse-state
+visibility without parent suppression, explicit F.6.3 handoff, and no
+production-promotion claim.
 
 ## Farm-only Boundary
 
@@ -57,6 +63,6 @@ not reinterpret Fix.5 presentation provenance as F.6.2 scientific provenance.
 
 ## Downstream State
 
-F.6.3 remains BLOCKED pending accepted E.8 evidence; F.6.4 remains BLOCKED
+F.6.3 remains BLOCKED pending the E.8.1 farm gate; F.6.4 remains BLOCKED
 pending F.6.3 evidence. The accepted yield is still the baseline, Method B
-remains diagnostic only, and no Method-A production promotion is authorized.
+remains diagnostic only, and no Method-A production promotion has occurred.

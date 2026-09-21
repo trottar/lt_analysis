@@ -1,27 +1,29 @@
 ---
 memory_schema: 2
-active_objective: Implement the E.8 frozen-F.6.2 figure-library renderer and its tests
-current_work_item: Implement S1 of the approved E.8 figure-library contract, then obtain the user-created renderer-source commit before S2 profile work
-active_status: ACTIVE
-next_action: Implement and locally validate the S1 standalone E.8 renderer and focused tests; do not create its profile until the user provides the S1 commit
-baseline_commit: 73bb8c2f9c300890ada23598aeacc8e8df859b26
-source_commit: c88ed65cb18ba6a37358897292b77696016312d1
+active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
+current_work_item: Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review
+active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
+next_action: Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate
+baseline_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
+source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
 bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 ---
 # Current KaonLT development state
 
 ## Active Objective
 
-Implement the separate E.8 frozen-F.6.2 figure-library renderer and focused
-tests under the approved [E.8 implementation contract](decisions/e8-f6-2-figure-library-implementation-contract.md).
+Farm-validate the final E.8.1 streamlined ordinary full-background-subtraction
+procedure PDF, after the canonical-five-setting evidence bundle/profile is
+committed and source reviewed.
 
 ## Current Work Item
 
-F.6.2 is CLOSED / RUNTIME VALIDATED overall; see the
+F.6.2 and F.6.2.Fix.5 are CLOSED / RUNTIME VALIDATED; see the
+[scientific closure record](evidence/f6-2-scientific-runtime-closure.md) and
 [Fix.5 closure record](evidence/f6-2-fix5-presentation-runtime-closure.md).
-The closure reconciliation is pushed at observed `test` HEAD
-`73bb8c2f9c300890ada23598aeacc8e8df859b26`. S1 renderer/test work is now
-ACTIVE; S2 profile work waits for the user-created S1 renderer-source commit.
+The standalone E.8 frozen-F.6.2 figure library was completed as an intermediate
+presentation artifact. The final E.8.1 ordinary procedure-PDF integration is
+SOURCE REVIEWED through `0bf1281ebf44868b68ff808090436653eea6ed60`.
 
 ## Verified State
 
@@ -46,36 +48,48 @@ The accepted Fix.5 presentation source
 `b789d203e11f0927deb59ebcae9dc59fe8add4ae` are upstream presentation-artifact
 provenance only; they do not replace the scientific source identity.
 
+The E.8.1 initial integration source is
+`33c114e003421690fa9b15480a4200634accf8c3`; the semantics repair is
+`b02d939d9187ec656aa629f03e528fde0ca0cc0d`; and the sparse-legend repair is
+the current reviewed source `0bf1281ebf44868b68ff808090436653eea6ed60`.
+No E.8.1 farm-evaluated or bundle/profile commit is recorded. The frontmatter
+`bundle_profile_commit` remains the historical F.6.2.Fix.5 provenance field.
+
 ## Blockers
 
-E.8 own renderer-source and bundle/profile commits do not yet exist. The
-contract requires a user-created S1 renderer-source commit before S2 profile
-work. F.6.3 remains BLOCKED pending accepted E.8 evidence, and F.6.4 remains
-BLOCKED pending F.6.3 evidence.
+E.8 overall is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. Source review is
+not farm readiness: before requesting a farm run, verify that the current
+validation bundle/profile pins the reviewed source and declares every artifact
+required for the gate. F.6.3 remains BLOCKED pending the targeted E.8.1 farm
+gate; F.6.4 remains BLOCKED pending F.6.3 evidence.
 
 ## Next Action
 
-Implement and locally validate S1 only: the explicit-input E.8 renderer and
-its focused tests. Do not create a profile, commit, push, or run the farm.
+NEXT — create and review the E.8.1 canonical-five-setting bundle/profile
+commit, then run the established five-setting `Q4p4W2p74` farm production.
+Inspect `Left / highe` first: its ordinary procedure PDF and page manifest must
+show D.6-D.9, the compact E.8 atlas/handoff, a visible L/B/A key, sparse-state
+pages without parent suppression, and the explicit F.6.3 handoff before review
+broadens to the remaining settings.
 
 ## Success Criteria
 
-S1 must fail closed for non-identical frozen JSON, malformed persisted payload,
-unknown commit identity, output collision, or a non-allowlisted diff. After
-independent source/diff review, the user creates the S1 commit; only then may
-S2 profile work begin.
+The bundle must contain the frozen accepted F.6.2 JSON and ordinary procedure
+PDF/page-manifest pairs for all five canonical settings. The first detailed
+acceptance inspection remains `Q4p4W2p74 / Left / highe`; it does not redefine
+the collector/profile as a one-setting package.
 
 ## Do Not Reopen Without New Evidence
 
 Do not reopen accepted F.1 through F.6.2 scientific validation, alter the
 baseline yield, or promote Method A. E.8 must consume the frozen F.6.2 JSON
 only; it cannot recalculate Method-A science, support/OOD, weights, or yields.
+No Method-A production promotion has occurred.
 
 ## Relevant References
 
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
-- [E.8 figure-library implementation contract](decisions/e8-f6-2-figure-library-implementation-contract.md)
 - [F.6.2 measurement contract](decisions/f6-2-acceptance-refinement-measurement-contract.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
 - [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)
