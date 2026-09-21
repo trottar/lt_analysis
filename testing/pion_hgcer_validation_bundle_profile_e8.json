@@ -1,0 +1,45 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_e8_f6_2_figure_library_farm_review/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {"phi": "Left", "epsilon": "lowe"},
+    {"phi": "Left", "epsilon": "highe"},
+    {"phi": "Center", "epsilon": "lowe"},
+    {"phi": "Center", "epsilon": "highe"},
+    {"phi": "Right", "epsilon": "highe"}
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "f6_2_acceptance_refinement_validation_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "e8_figure_library_pdf",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-refinement-figure-library.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "e8_figure_library_manifest_json",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer_method-a-acceptance-refinement-figure-library-manifest.json",
+        "kind": "json",
+        "required": true
+      }
+    ],
+    "settings": []
+  },
+  "source_identity": {
+    "required_analysis_commit": "921511e1e8ea5350218d7b493a5ea69fa422a3f3",
+    "allowed_committed_files": [
+      "testing/collect_pion_hgcer_validation_bundle.py",
+      "testing/test_collect_pion_hgcer_validation_bundle.py",
+      "testing/pion_hgcer_validation_bundle_profile_e8.json",
+      "testing/test_pion_hgcer_validation_bundle_profile_e8.py"
+    ],
+    "allowed_non_analysis_path_prefixes": ["docs/memory/"]
+  }
+}
