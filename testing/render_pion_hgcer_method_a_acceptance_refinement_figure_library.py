@@ -188,10 +188,17 @@ def _population(value: object, shape: tuple[int, ...], label: str) -> Mapping[st
         contents = np.asarray(population.get("unit_area"), dtype=float)
     except (TypeError, ValueError) as exc:
         raise FigureLibraryError("{}_unit_area_invalid".format(label)) from exc
-    if contents.shape != shape or not np.all(np.isfinite(contents)) or np.any(contents < 0.0):
+    if not np.all(np.isfinite(contents)) or np.any(contents < 0.0):
         raise FigureLibraryError("{}_unit_area_invalid".format(label))
-    if available and not math.isclose(float(np.sum(contents)), 1.0, rel_tol=0.0, abs_tol=1.0e-12):
-        raise FigureLibraryError("{}_unit_area_not_normalized".format(label))
+    if available:
+        if contents.shape != shape:
+            raise FigureLibraryError("{}_unit_area_invalid".format(label))
+        if not math.isclose(float(np.sum(contents)), 1.0, rel_tol=0.0, abs_tol=1.0e-12):
+            raise FigureLibraryError("{}_unit_area_not_normalized".format(label))
+    else:
+        stored_shape = shape if len(shape) == 1 else (math.prod(shape),)
+        if contents.shape != stored_shape or not np.all(contents == 0.0):
+            raise FigureLibraryError("{}_unavailable_placeholder_invalid".format(label))
     return population
 
 

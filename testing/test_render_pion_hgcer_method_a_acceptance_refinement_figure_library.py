@@ -9,7 +9,6 @@ import importlib.util
 import json
 from pathlib import Path
 import re
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -79,7 +78,7 @@ def _one_dimensional(empty: bool) -> dict[str, object]:
 
 def _joint(x_name: str, y_name: str, empty: bool) -> dict[str, object]:
     if empty:
-        population = _population([[0.0, 0.0], [0.0, 0.0]], available=False, reason="control_population_empty")
+        population = _population([0.0, 0.0, 0.0, 0.0], available=False, reason="control_population_empty")
         metric = _unavailable("control_population_empty")
     else:
         population = _population([[0.2, 0.3], [0.1, 0.4]])
@@ -283,6 +282,30 @@ class FigureLibraryRendererTests(unittest.TestCase):
         ):
             self.assertIn(required, source)
 
+    def test_source_owned_unavailable_2d_flat_placeholder_is_displayed_and_strict(self):
+        artifact = _artifact()
+        joint = artifact["validation"]["parents"][14]["children"][8]["joint_distributions"]["SHMS_delta__SHMS_xptar"]
+        self.assertEqual(joint["L"]["unit_area"], [0.0, 0.0, 0.0, 0.0])
+        validation = renderer.validate_artifact(artifact)
+        payload = validation["parents"][14]["children"][8]["joint_distributions"]["SHMS_delta__SHMS_xptar"]
+        figure, axis = renderer.plt.subplots()
+        try:
+            self.assertIsNone(renderer._draw_joint(axis, payload, "L", 1.0))
+            self.assertEqual([item.get_text() for item in axis.texts], ["unavailable:control_population_empty"])
+        finally:
+            renderer.plt.close(figure)
+        cases = {
+            "flat_length": lambda value: value["validation"]["parents"][14]["children"][8]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["L"].__setitem__("unit_area", [0.0, 0.0, 0.0]),
+            "flat_nonzero": lambda value: value["validation"]["parents"][14]["children"][8]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["L"].__setitem__("unit_area", [0.0, 0.0, 0.0, 1.0]),
+            "available_wrong_matrix": lambda value: value["validation"]["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["L"].__setitem__("unit_area", [[1.0]]),
+            "available_not_normalized": lambda value: value["validation"]["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["L"].__setitem__("unit_area", [[0.2, 0.2], [0.2, 0.2]]),
+        }
+        for label, mutate in cases.items():
+            with self.subTest(label=label):
+                value = _artifact(); mutate(value)
+                with self.assertRaises(renderer.FigureLibraryError):
+                    renderer.validate_artifact(value)
+
     def test_validation_rejects_malformed_or_non_authoritative_payloads(self):
         cases = {
             "schema": lambda value: value.__setitem__("schema_version", "wrong"),
@@ -317,12 +340,21 @@ class FigureLibraryRendererTests(unittest.TestCase):
             self.assertEqual(renderer.main(arguments), 1)
             self.assertEqual(input_path.read_bytes(), original); self.assertFalse(pdf.exists()); self.assertFalse(manifest.exists())
             self.assertEqual(renderer.main(arguments[:-4] + ["--renderer-source-commit", "A" * 40, "--bundle-profile-commit", "b" * 40]), 1)
+            self.assertEqual(renderer.main(arguments[:-1] + ["B" * 40]), 1)
             wrong_pdf = root / "wrong.pdf"
             self.assertEqual(renderer.main(["--input-json", str(input_path), "--output-pdf", str(wrong_pdf), "--output-manifest", str(manifest), "--renderer-source-commit", "a" * 40, "--bundle-profile-commit", "b" * 40]), 1)
+            wrong_manifest = root / "wrong.json"
+            self.assertEqual(renderer.main(["--input-json", str(input_path), "--output-pdf", str(pdf), "--output-manifest", str(wrong_manifest), "--renderer-source-commit", "a" * 40, "--bundle-profile-commit", "b" * 40]), 1)
             pdf.write_bytes(b"preexisting")
             self.assertEqual(renderer.main(arguments), 1)
             self.assertEqual(pdf.read_bytes(), b"preexisting")
-            self.assertEqual(renderer.main(["--input-json", str(input_path), "--output-pdf", str(input_path), "--output-manifest", str(manifest), "--renderer-source-commit", "a" * 40, "--bundle-profile-commit", "b" * 40]), 1)
+            pdf.unlink(); manifest.write_bytes(b"preexisting")
+            self.assertEqual(renderer.main(arguments), 1)
+            self.assertEqual(manifest.read_bytes(), b"preexisting")
+            manifest.unlink()
+            collision_input = root / renderer.PDF_BASENAME
+            collision_input.write_bytes(original)
+            self.assertEqual(renderer.main(["--input-json", str(collision_input), "--output-pdf", str(collision_input), "--output-manifest", str(manifest), "--renderer-source-commit", "a" * 40, "--bundle-profile-commit", "b" * 40]), 1)
 
     def test_parser_hashes_before_parsing_and_rejects_malformed_json(self):
         malformed = b"not-json"
@@ -369,12 +401,6 @@ class FigureLibraryRendererTests(unittest.TestCase):
         self.assertFalse(any(name.startswith("pion_hgcer_") for name in imported))
         self.assertNotIn("calculate_yield", source)
         self.assertNotIn("calculate_xsection", source)
-        status = subprocess.run(["git", "status", "--short"], cwd=REPO_ROOT, text=True, capture_output=True, check=True).stdout.splitlines()
-        changed = {line[3:].replace("\\", "/") for line in status if len(line) >= 4}
-        self.assertEqual(changed, {
-            "testing/render_pion_hgcer_method_a_acceptance_refinement_figure_library.py",
-            "testing/test_render_pion_hgcer_method_a_acceptance_refinement_figure_library.py",
-        })
 
 
 if __name__ == "__main__":
