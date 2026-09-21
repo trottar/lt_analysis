@@ -88,7 +88,9 @@ def _validate_generic_artifacts(value: object) -> bool:
     seen_keys: set[str] = set()
     for scope in ("global", "settings"):
         declarations = value.get(scope)
-        if not isinstance(declarations, list) or not declarations:
+        if not isinstance(declarations, list):
+            return False
+        if scope == "global" and not declarations:
             return False
         for declaration in declarations:
             if not isinstance(declaration, Mapping):

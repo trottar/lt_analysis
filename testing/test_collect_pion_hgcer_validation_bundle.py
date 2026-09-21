@@ -374,6 +374,81 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
         )
         return result, output, source, profile, paths
 
+    def _global_only_profile(self):
+        return {
+            "schema_version": collector.PROFILE_SCHEMA_VERSION,
+            "validation_profile": "phase_e8_global_only_fixture/v1",
+            "collection_mode": "generic_artifacts",
+            "settings": [
+                {"phi": phi, "epsilon": epsilon}
+                for phi, epsilon in collector._REQUIRED_SETTINGS
+            ],
+            "artifacts": {
+                "global": [
+                    {
+                        "key": "frozen_validation_json",
+                        "basename_template": "{kinematic}_frozen-validation.json",
+                        "kind": "json",
+                        "required": True,
+                    },
+                    {
+                        "key": "frozen_validation_pdf",
+                        "basename_template": "{kinematic}_frozen-validation.pdf",
+                        "kind": "file",
+                        "required": True,
+                    },
+                    {
+                        "key": "frozen_validation_manifest",
+                        "basename_template": "{kinematic}_frozen-validation-manifest.json",
+                        "kind": "json",
+                        "required": True,
+                    },
+                ],
+                "settings": [],
+            },
+            "source_identity": {
+                "required_analysis_commit": "a" * 40,
+                "allowed_committed_files": [
+                    "testing/collect_pion_hgcer_validation_bundle.py",
+                    "testing/test_collect_pion_hgcer_validation_bundle.py",
+                ],
+                "allowed_non_analysis_path_prefixes": ["docs/memory/"],
+            },
+        }
+
+    def _write_global_only_profile(self, directory, profile=None):
+        path = Path(directory) / "global-only-profile.json"
+        payload = self._global_only_profile() if profile is None else profile
+        path.write_text(
+            json.dumps(payload, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        return path
+
+    def _collect_global_only(self, temporary, *, mutate=None):
+        temporary = Path(temporary)
+        source = temporary / "source"
+        source.mkdir()
+        profile_path = self._write_global_only_profile(temporary)
+        profile = collector.load_validation_profile(profile_path)
+        paths = {}
+        for declaration in profile["artifacts"]["global"]:
+            path = self._f2_path(source, declaration)
+            if declaration["kind"] == "json":
+                path.write_bytes(json.dumps({"artifact": declaration["key"]}).encode("utf-8"))
+            else:
+                path.write_bytes(b"global-only-review-pdf")
+            paths[declaration["key"]] = path
+        if mutate is not None:
+            mutate(paths)
+        output = temporary / "global-only-bundle.zip"
+        result = collector.collect_validation_bundle(
+            outdir=source, kinematic="Q4p4W2p74", output=output,
+            profile_path=profile_path, repo_root=REPO_ROOT,
+            command_runner=_clean_command_runner,
+        )
+        return result, output, source, profile, paths
+
     def test_profile_v4_and_five_setting_selection(self):
         profile = collector.load_validation_profile(PROFILE_PATH)
         self.assertEqual(profile["schema_version"], collector.PROFILE_SCHEMA_VERSION)
@@ -504,6 +579,101 @@ class PionHGCerValidationBundleCollectorTests(unittest.TestCase):
                 self.assertIn(
                     "missing_source_artifact" if status == "missing" else "source_artifact_json_invalid",
                     {entry["code"] for entry in manifest["errors"]},
+                )
+
+    def test_generic_global_only_profile_validation_is_strict_except_for_empty_settings(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            profile_path = self._write_global_only_profile(temporary)
+            profile = collector.load_validation_profile(profile_path)
+            self.assertEqual(profile["artifacts"]["settings"], [])
+            self.assertEqual(len(profile["artifacts"]["global"]), 3)
+
+            invalid_profiles = []
+            profile = self._global_only_profile()
+            profile["artifacts"]["global"] = []
+            invalid_profiles.append(("global_empty", profile))
+            profile = self._global_only_profile()
+            del profile["artifacts"]["global"]
+            invalid_profiles.append(("global_missing", profile))
+            profile = self._global_only_profile()
+            del profile["artifacts"]["settings"]
+            invalid_profiles.append(("settings_missing", profile))
+            profile = self._global_only_profile()
+            profile["artifacts"]["settings"] = None
+            invalid_profiles.append(("settings_none", profile))
+            profile = self._global_only_profile()
+            profile["artifacts"]["settings"] = {}
+            invalid_profiles.append(("settings_nonlist", profile))
+            profile = self._global_only_profile()
+            profile["artifacts"]["settings"] = [dict(profile["artifacts"]["global"][0])]
+            invalid_profiles.append(("duplicate_across_scopes", profile))
+            profile = self._global_only_profile()
+            profile["artifacts"]["global"][0]["basename_template"] = "subdir/{kinematic}.json"
+            invalid_profiles.append(("invalid_global_declaration", profile))
+            profile = self._global_only_profile()
+            profile["artifacts"]["settings"] = [{
+                "key": "invalid_setting", "basename_template": "{phi}_{kinematic}_{epsilon}.json",
+                "kind": "not-json-or-file", "required": True,
+            }]
+            invalid_profiles.append(("invalid_nonempty_setting_declaration", profile))
+
+            for label, invalid_profile in invalid_profiles:
+                with self.subTest(label=label):
+                    profile_path = self._write_global_only_profile(temporary, invalid_profile)
+                    with self.assertRaisesRegex(ValueError, "validation_bundle_profile_invalid"):
+                        collector.load_validation_profile(profile_path)
+
+    def test_generic_global_only_bundle_archives_three_globals_and_empty_setting_records(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            result, output, _source, profile, paths = self._collect_global_only(temporary)
+            self.assertEqual(result["returncode"], 0)
+            manifest = result["manifest"]
+            self.assertTrue(manifest["complete"])
+            self.assertEqual(set(manifest["global_artifacts"]), {
+                declaration["key"] for declaration in profile["artifacts"]["global"]
+            })
+            self.assertEqual(len(manifest["settings"]), 5)
+            self.assertTrue(all(setting["artifacts"] == {} for setting in manifest["settings"]))
+            for declaration in profile["artifacts"]["global"]:
+                record = manifest["global_artifacts"][declaration["key"]]
+                self.assertEqual(record["status"], "exists")
+                if declaration["kind"] == "json":
+                    self.assertEqual(record["json_status"], "valid")
+            with zipfile.ZipFile(output) as archive:
+                names = archive.namelist()
+                self.assertIn("manifest.json", names)
+                self.assertIn("source_state.txt", names)
+                self.assertIn("source_checks.txt", names)
+                setting_payloads = [
+                    name for name in names
+                    if name.split("/", 1)[0] in {
+                        "Left_lowe", "Left_highe", "Center_lowe", "Center_highe", "Right_highe",
+                    } and not name.endswith("/")
+                ]
+                self.assertEqual(setting_payloads, [])
+                for key, path in paths.items():
+                    record = manifest["global_artifacts"][key]
+                    self.assertEqual(sum(name == record["archive_path"] for name in names), 1)
+                    self.assertEqual(archive.read(record["archive_path"]), path.read_bytes())
+
+    def test_generic_global_only_required_artifact_failures_remain_best_effort(self):
+        cases = (
+            ("missing_json", lambda paths: paths["frozen_validation_json"].unlink(), "frozen_validation_json", "missing"),
+            ("invalid_json", lambda paths: paths["frozen_validation_json"].write_bytes(b"not-json"), "frozen_validation_json", "invalid"),
+            ("missing_file", lambda paths: paths["frozen_validation_pdf"].unlink(), "frozen_validation_pdf", "missing"),
+        )
+        for label, mutation, key, status in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                result, output, _source, _profile, _paths = self._collect_global_only(
+                    temporary, mutate=mutation,
+                )
+                self.assertEqual(result["returncode"], 1)
+                self.assertTrue(output.exists())
+                self.assertFalse(result["manifest"]["complete"])
+                self.assertEqual(result["manifest"]["global_artifacts"][key]["status"], status)
+                self.assertIn(
+                    "missing_source_artifact" if status == "missing" else "source_artifact_json_invalid",
+                    {entry["code"] for entry in result["manifest"]["errors"]},
                 )
 
     def test_deterministic_artifact_names_and_manifest_selected_pages(self):
