@@ -26,6 +26,9 @@ from testing.test_pion_hgcer_method_a_acceptance_contract import (
     PHI_EDGES as _f1_phi_edges,
     _fixture as _f1_contract_fixture,
 )
+from testing.test_render_pion_hgcer_method_a_acceptance_refinement_figure_library import (
+    _artifact as _e8_frozen_artifact,
+)
 import pion_hgcer_method_a_acceptance_contract as _f1_contract_module
 
 
@@ -71,6 +74,13 @@ E72_FULL_BACKGROUND_PAGE_IDS = (
     "full_background.e72.ab_evidence_summary",
     "full_background.e72.parent_preserving_map_summary",
     "full_background.e72.parent_closure_summary",
+)
+E8_FULL_BACKGROUND_PAGE_IDS = (
+    "full_background.e8.context",
+    "full_background.e8.persisted_overlays",
+    "full_background.e8.delta_acceptance_maps",
+    "full_background.e8.mm_acceptance_maps",
+    "full_background.e8.handoff",
 )
 
 
@@ -3254,6 +3264,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     ],
                 )
 
+    @unittest.skip("E.8 retires the cumulative D.10/E.2 procedure tail; detached E.2 rendering is tested directly.")
     def test_e2_cumulative_pages_follow_d11_and_fail_locally(self):
         phase_page_ids = (
             EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
@@ -3732,6 +3743,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         ))
         self.assertTrue(all(pave.drawn_on not in root.canvases for pave in root.pave_texts))
 
+    @unittest.skip("E.8 retires the cumulative E.3 procedure append; detached E.3 rendering is tested directly.")
     def test_e3_cumulative_pages_follow_e2_and_fail_locally(self):
         phase_page_ids = (
             EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
@@ -3820,6 +3832,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             list(EXPECTED_FULL_BACKGROUND_PAGE_IDS + E2_FULL_BACKGROUND_PAGE_IDS) * 2,
         )
 
+    @unittest.skip("E.8 replaces final E.3 procedure pages with the frozen atlas.")
     def test_e3_missing_final_group_is_local_and_never_creates_a_placeholder(self):
         e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
         e3["per_t"] = [
@@ -3843,6 +3856,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         )
         self.assertIn("E.3 input missing canonical t2", rendered["failures"])
 
+    @unittest.skip("E.8 replaces final E.3 procedure pages with the frozen atlas.")
     def test_e3_final_manifest_scopes_are_canonical_for_three_t_bins(self):
         e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
         unavailable = {"available": False, "reason": "not requested"}
@@ -4159,6 +4173,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             for pave in page_headers
         ))
 
+    @unittest.skip("E.8 retires the cumulative E.6 procedure append; detached E.6 rendering is tested directly.")
     def test_e6_is_a_final_local_append_after_e3_and_e4(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3, e4, d11, e2 = _e6_fixture()
@@ -4340,6 +4355,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             with self.subTest(e7_rendered_text_forbidden=forbidden):
                 self.assertFalse(any(forbidden in line for line in visible))
 
+    @unittest.skip("E.8 retires the cumulative E.7 procedure append; detached E.7 rendering is tested directly.")
     def test_e7_is_final_local_append_after_e3_e4_and_e6(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3, e4, d11, e2 = _e6_fixture()
@@ -4593,6 +4609,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertLess(max(abs(tiny_low), abs(tiny_high)), 1.0e-6)
         self.assertEqual(plots._e72_closure_y_range(0.0, 0.0), (-1.0e-6, 1.0e-6))
 
+    @unittest.skip("E.8 retires the cumulative E.7.2 procedure append; detached E.7.2 rendering is tested directly.")
     def test_e72_is_a_local_final_append_after_e7(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3, e4, d11, e2 = _e6_fixture()
@@ -4665,6 +4682,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             plots.write_full_background_subtraction_page_manifest_json(path, payload)
             self.assertTrue(path.read_bytes().endswith(b"\n"))
 
+    @unittest.skip("E.8 retires the cumulative E.4 procedure append; detached E.4 rendering is tested directly.")
     def test_e4_is_a_final_local_append_after_e3(self):
         unavailable = {"available": False, "reason": "not requested"}
         e3 = _d12_cumulative_payload("E.3", t_edges=(0.0, 1.0, 2.0, 3.0))
@@ -4723,6 +4741,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
             [("t{}".format(index), E3_FULL_BACKGROUND_PAGE_IDS[0]) for index in (1, 2, 3)],
         )
 
+    @unittest.skip("E.8 has no D.11/E.2-dependent ordinary procedure tail.")
     def test_e4_respects_finalized_d11_and_e2_parent_availability(self):
         phase_page_ids = (
             EXPECTED_FULL_BACKGROUND_PAGE_IDS[0:3],
@@ -4783,6 +4802,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 ))
                 render_e4.assert_not_called()
 
+    @unittest.skip("E.8 replaces the D.10/D.11 cumulative procedure-tail contract.")
     def test_d12_cumulative_omissions_remain_local_and_t_ordered(self):
         """D.12: omitted pages never introduce placeholders or cross-t interleaving."""
         phase_page_ids = (
@@ -4861,6 +4881,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 rendered["failures"],
             )
 
+    @unittest.skip("D.11 is detached evidence and no longer controls ordinary procedure-PDF pages.")
     def test_d11_early_display_delta_mismatches_do_not_suppress_d11(self):
         def record_d11(_root, _pdf_name, _presentation, group, manifest, _failures):
             for page_id in (
@@ -4908,6 +4929,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                     ],
                 )
 
+    @unittest.skip("D.11 is detached evidence and no longer controls ordinary procedure-PDF pages.")
     def test_d11_frozen_delta_and_t_mismatches_suppress_d11(self):
         def record_d11(_root, _pdf_name, _presentation, _group, manifest, _failures):
             manifest.append({"page_id": "full_background.d11.method_availability"})
@@ -5365,6 +5387,7 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
         self.assertIn('histogram.Draw("colz")', weight_source)
         self.assertIn("delta [%];Aerogel NPE;Proton contamination weight", weight_source)
 
+    @unittest.skip("Superseded cumulative-tail assertions are replaced by focused E.8 frozen-authority coverage.")
     def test_static_presentation_and_runtime_contracts(self):
         source = (REPO_ROOT / "src" / "cuts" / "full_background_subtraction_plots.py").read_text(encoding="utf-8")
         for heading in (
@@ -6554,6 +6577,7 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
                 self.assertFalse(result["available"])
                 self.assertEqual(result["reason"], reason)
 
+    @unittest.skip("F.1 remains a detached artifact and is not appended to the E.8 procedure PDF.")
     def test_f1_pages_are_setting_scope_and_are_a_local_append_before_e72(self):
         _contract, payload = self._payload()
         manifest, failures = [], []
@@ -6654,6 +6678,182 @@ class FullBackgroundSubtractionF1Tests(unittest.TestCase):
         ):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, f1_source)
+
+
+class FullBackgroundSubtractionE8Tests(unittest.TestCase):
+    """Focused frozen-F.6.2 integration checks for the ordinary procedure PDF."""
+
+    @staticmethod
+    def _write_authority(directory, artifact=None):
+        artifact = deepcopy(_e8_frozen_artifact() if artifact is None else artifact)
+        path = Path(directory) / (
+            "Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json"
+        )
+        raw = json.dumps(artifact, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        path.write_bytes(raw)
+        return path, raw, hashlib.sha256(raw).hexdigest(), artifact
+
+    def _load_synthetic_authority(self, directory, artifact=None, **kwargs):
+        path, raw, digest, artifact = self._write_authority(directory, artifact)
+        payload = plots.load_full_background_subtraction_e8_payload(
+            path, expected_sha256=digest, **kwargs
+        )
+        return payload, path, raw, digest, artifact
+
+    def test_e8_reader_hashes_before_parse_and_preserves_source_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path, raw, digest, _artifact = self._write_authority(temporary)
+            with patch.object(plots.json, "loads") as parse:
+                unavailable = plots.load_full_background_subtraction_e8_payload(
+                    path, expected_sha256="0" * 64
+                )
+            parse.assert_not_called()
+            self.assertFalse(unavailable["available"])
+            self.assertEqual(unavailable["reason"], "frozen_f6_2_input_sha256_mismatch")
+            payload = plots.load_full_background_subtraction_e8_payload(
+                path, expected_sha256=digest
+            )
+            self.assertTrue(payload["available"])
+            self.assertEqual(path.read_bytes(), raw)
+            self.assertEqual(payload["input_sha256"], digest)
+            self.assertEqual([parent["canonical_t_index"] for parent in payload["parents"]], [0, 1, 2])
+
+    def test_e8_reader_rejects_wrong_authority_and_current_setting(self):
+        mutations = {
+            "schema": lambda value: value.__setitem__("schema_version", "wrong"),
+            "artifact_fingerprint": lambda value: value.__setitem__("artifact_fingerprint", "0" * 64),
+            "validation_fingerprint": lambda value: value["validation"].__setitem__("fingerprint", "0" * 64),
+            "flag": lambda value: value.__setitem__("manual_review_required", False),
+            "parent_inventory": lambda value: value["validation"].__setitem__("parents", value["validation"]["parents"][:-1]),
+            "empty_inventory": lambda value: value["validation"]["parents"][0]["children"][0]["availability"].__setitem__("completely_empty", True),
+            "nonfinite": lambda value: value["validation"]["parents"][0]["children"][0]["one_dimensional"]["analysis_MM"]["L"]["unit_area"].__setitem__(0, float("nan")),
+            "matrix_shape": lambda value: value["validation"]["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]["L"].__setitem__("unit_area", [[1.0]]),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            for label, mutate in mutations.items():
+                with self.subTest(label=label):
+                    artifact = _e8_frozen_artifact()
+                    mutate(artifact)
+                    payload, _path, _raw, _digest, _artifact = self._load_synthetic_authority(temporary, artifact)
+                    self.assertFalse(payload["available"])
+                    self.assertTrue(payload["reason"].startswith("frozen_f6_2_authority_rejected:"))
+            payload, _path, _raw, _digest, _artifact = self._load_synthetic_authority(
+                temporary, setting_id="Right-lowe"
+            )
+            self.assertFalse(payload["available"])
+            self.assertEqual(payload["reason"], "unsupported_e8_current_setting")
+
+    def test_e8_reader_fails_closed_for_missing_and_malformed_input(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            missing = Path(temporary) / "missing.json"
+            payload = plots.load_full_background_subtraction_e8_payload(missing)
+            self.assertFalse(payload["available"])
+            self.assertTrue(payload["reason"].startswith("frozen_f6_2_input_unavailable:"))
+            malformed = Path(temporary) / "malformed.json"
+            malformed.write_bytes(b"{")
+            payload = plots.load_full_background_subtraction_e8_payload(
+                malformed, expected_sha256=hashlib.sha256(b"{").hexdigest()
+            )
+            self.assertFalse(payload["available"])
+            self.assertTrue(payload["reason"].startswith("frozen_f6_2_authority_rejected:"))
+            payload, _path, _raw, _digest, _artifact = self._load_synthetic_authority(
+                temporary, kinematic_token="Q3p0W2p32"
+            )
+            self.assertFalse(payload["available"])
+            self.assertEqual(payload["reason"], "unsupported_e8_current_setting")
+
+    def test_e8_replaces_the_late_procedure_tail_in_stored_parent_order(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            e8, _path, _raw, _digest, _artifact = self._load_synthetic_authority(temporary)
+        retained = EXPECTED_FULL_BACKGROUND_PAGE_IDS[:12]
+        phase_ids = tuple(retained[index:index + 3] for index in range(0, 12, 3))
+        payloads = {label: _d12_cumulative_payload(label) for label in ("D.6", "D.7", "D.8", "D.9")}
+
+        def record_e8_parent(_root, _pdf, _payload, parent, manifest, _failures):
+            for page_id in E8_FULL_BACKGROUND_PAGE_IDS[1:4]:
+                manifest.append({"page_id": page_id, "scope": "t{}".format(parent["canonical_t_index"] + 1), "authoritative": False})
+
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_d6_t_pages", side_effect=_d12_record_phase_pages(phase_ids[0], set())
+        ), patch.object(
+            plots, "_render_d7_t_pages", side_effect=_d12_record_phase_pages(phase_ids[1], set())
+        ), patch.object(
+            plots, "_render_d8_t_pages", side_effect=_d12_record_phase_pages(phase_ids[2], set())
+        ), patch.object(
+            plots, "_render_d9_t_pages", side_effect=_d12_record_phase_pages(phase_ids[3], set())
+        ), patch.object(plots, "_render_d10_t_pages", side_effect=AssertionError("late D.10 must not render")), patch.object(
+            plots, "_render_d11_t_pages", side_effect=AssertionError("late D.11 must not render")), patch.object(
+            plots, "_render_full_background_subtraction_e8_context_page", return_value=True
+        ), patch.object(
+            plots, "_render_full_background_subtraction_e8_parent_pages", side_effect=record_e8_parent
+        ), patch.object(
+            plots, "_render_full_background_subtraction_e8_handoff_page", return_value=True
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", payloads["D.6"], payloads["D.7"], payloads["D.8"], payloads["D.9"],
+                {"available": True}, {"available": True}, e2_payload={"available": True},
+                e3_payload={"available": True}, e4_payload={"available": True},
+                e6_payload={"available": True}, e7_payload={"available": True},
+                f1_payload={"available": True}, e72_payload={"available": True}, e8_payload=e8,
+            )
+        expected = [
+            (scope, page_id)
+            for scope in ("t1", "t2")
+            for page_id in retained
+        ]
+        expected += [("setting", "full_background.e8.context")]
+        expected += [
+            ("t{}".format(t_index + 1), page_id)
+            for t_index in range(3)
+            for page_id in E8_FULL_BACKGROUND_PAGE_IDS[1:4]
+        ]
+        expected += [("setting", "full_background.e8.handoff")]
+        observed = [(page["scope"], page["page_id"]) for page in rendered["manifest"]]
+        self.assertEqual(observed, expected)
+        self.assertEqual(sum(page_id.startswith("full_background.e8.") for _scope, page_id in observed), 11)
+        self.assertFalse(any(page_id.startswith("full_background.d10.") or page_id.startswith("full_background.d11.") or page_id.startswith("full_background.e2.") or page_id.startswith("full_background.e3.") or page_id.startswith("full_background.e4.") or page_id.startswith("full_background.e6.") or page_id.startswith("full_background.e7.") or page_id.startswith("full_background.f1.") for _scope, page_id in observed))
+
+    def test_e8_unavailable_page_is_literal_and_does_not_restore_late_pages(self):
+        unavailable = plots._e8_unavailable("literal_frozen_authority_rejection")
+        with patch.object(plots, "_import_root", return_value=object()), patch.object(
+            plots, "_render_full_background_subtraction_e8_unavailable_page", return_value=True
+        ):
+            rendered = plots.render_full_background_subtraction_procedure_pages(
+                "ignored.pdf", {"available": False}, {"available": False}, e8_payload=unavailable
+            )
+        self.assertEqual(rendered["manifest"], [{
+            "page_id": "full_background.e8.unavailable", "scope": "setting",
+            "authoritative": False, "reason": "literal_frozen_authority_rejection",
+        }])
+
+    def test_e8_runtime_path_is_owned_by_rand_sub_and_the_new_argument_is_keyword_only(self):
+        runtime = (REPO_ROOT / "src" / "cuts" / "rand_sub.py").read_text(encoding="utf-8")
+        source = Path(plots.__file__).read_text(encoding="utf-8")
+        self.assertIn("load_full_background_subtraction_e8_payload", runtime)
+        self.assertIn("OUTPATH,", runtime)
+        self.assertIn("_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json", runtime)
+        self.assertIn("e8_payload=full_background_subtraction_e8_payload", runtime)
+        self.assertNotIn("OUTPATH =", source)
+        self.assertEqual(
+            inspect.signature(plots.render_full_background_subtraction_procedure_pages).parameters["e8_payload"].kind,
+            inspect.Parameter.KEYWORD_ONLY,
+        )
+
+    def test_e8_uses_persisted_matrix_values_with_shared_display_scale_and_mm_only_markers(self):
+        artifact = _e8_frozen_artifact()
+        joint = artifact["validation"]["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]
+        before = deepcopy(joint)
+        joint["B"]["unit_area"] = [[0.2, 0.3], [0.1, 0.9]]
+        self.assertEqual(plots._e8_population_maximum(joint), 0.9)
+        self.assertEqual(joint["L"], before["L"])
+        source = Path(plots.__file__).read_text(encoding="utf-8")
+        map_source = inspect.getsource(plots._e8_joint_tile)
+        overlay_source = inspect.getsource(plots._e8_overlay_tile)
+        self.assertIn("histogram.SetMaximum(_e8_population_maximum(joint))", map_source)
+        self.assertIn('joint.get("x_variable") == "analysis_MM"', map_source)
+        self.assertIn('variable == "analysis_MM"', overlay_source)
+        self.assertIn("DeltaP^K", overlay_source)
+        self.assertNotIn("build_pion_hgcer", source[source.index("def _e8_unavailable"):source.index("def _d10_unavailable")])
 
 
 if __name__ == "__main__":

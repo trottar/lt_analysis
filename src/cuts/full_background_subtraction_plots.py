@@ -38,6 +38,39 @@ FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION = (
 )
 FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 
+# E.8 is deliberately a reader of the accepted F.6.2 artifact, rather than a
+# second calculation of the acceptance-refinement diagnostics.  These values
+# are the approved Q4p4W2p74 authority; a same-schema file is not sufficient.
+E8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8/v1"
+E8_F6_2_INPUT_SHA256 = "5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1"
+E8_F6_2_ARTIFACT_SCHEMA = (
+    "pion_hgcer_method_a_acceptance_refinement_validation_artifact/v1"
+)
+E8_F6_2_ARTIFACT_FINGERPRINT = (
+    "ee713b70de898bad8fa61164cbc8a54886af1ea1eb1e712ed95de17df8890cd0"
+)
+E8_F6_2_VALIDATION_SCHEMA = (
+    "pion_hgcer_method_a_acceptance_refinement_validation/v1"
+)
+E8_F6_2_VALIDATION_FINGERPRINT = (
+    "7edc73fce20ad7dc7622b8c23a7ba7e8986e367ace605884e010945595370b3b"
+)
+E8_F6_2_KINEMATIC_TOKEN = "Q4p4W2p74"
+_E8_SETTING_IDS = (
+    "Left-lowe", "Left-highe", "Center-lowe", "Center-highe", "Right-highe",
+)
+_E8_PARENT_KEYS = frozenset(
+    (setting_id, t_index)
+    for setting_id in _E8_SETTING_IDS
+    for t_index in range(3)
+)
+_E8_ONE_DIMENSIONAL = ("analysis_MM", "SHMS_xptar", "SHMS_yptar")
+_E8_JOINTS = (
+    "analysis_MM__SHMS_xptar", "analysis_MM__SHMS_yptar",
+    "SHMS_delta__SHMS_xptar", "SHMS_delta__SHMS_yptar",
+)
+_E8_POPULATIONS = ("L", "B", "A")
+
 _TIMING_T_METHOD = "timing_t_event_weight"
 _CTIME_AERO_METHOD = "ctime_aero_event_weight"
 _D9_SIDES = ("kaon", "pion")
@@ -84,6 +117,332 @@ def _strict_edges(value):
     if any(right <= left for left, right in zip(edges, edges[1:])):
         return None
     return edges
+
+
+class _E8PayloadError(ValueError):
+    """Internal failure used to keep the E.8 reader fail-closed."""
+
+
+def _e8_unavailable(reason, *, json_path=None, setting_id=None):
+    """Return a display-only unavailable E.8 payload without a source alias."""
+    return {
+        "schema_version": E8_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "json_path": None if json_path is None else os.fspath(json_path),
+        "input_sha256": None,
+        "setting_id": setting_id,
+        "kaon_window": {},
+        "parents": (),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+    }
+
+
+def _e8_require(value, label):
+    if not isinstance(value, Mapping):
+        raise _E8PayloadError("{}_invalid".format(label))
+    return value
+
+
+def _e8_sequence(value, label):
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        raise _E8PayloadError("{}_invalid".format(label))
+    return value
+
+
+def _e8_finite(value, label):
+    if isinstance(value, bool):
+        raise _E8PayloadError("{}_invalid".format(label))
+    try:
+        scalar = float(value)
+    except (TypeError, ValueError) as exc:
+        raise _E8PayloadError("{}_invalid".format(label)) from exc
+    if not math.isfinite(scalar):
+        raise _E8PayloadError("{}_invalid".format(label))
+    return scalar
+
+
+def _e8_integer(value, label):
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise _E8PayloadError("{}_invalid".format(label))
+    return int(value)
+
+
+def _e8_flags(payload, expected, label):
+    for name, required in expected.items():
+        if payload.get(name) is not required:
+            raise _E8PayloadError("{}_{}_invalid".format(label, name))
+
+
+def _e8_metric(metric_value, label):
+    metric = _e8_require(metric_value, label)
+    if metric.get("available") is True:
+        _e8_finite(metric.get("value"), "{}_value".format(label))
+    elif metric.get("available") is False:
+        if not isinstance(metric.get("reason"), str) or not metric.get("reason"):
+            raise _E8PayloadError("{}_reason_invalid".format(label))
+    else:
+        raise _E8PayloadError("{}_availability_invalid".format(label))
+
+
+def _e8_interval(interval_value, label):
+    interval = _e8_require(interval_value, label)
+    for name in ("requested_replica_count", "valid_replica_count", "invalid_replica_count"):
+        if _e8_integer(interval.get(name), "{}_{}".format(label, name)) < 0:
+            raise _E8PayloadError("{}_{}_invalid".format(label, name))
+    if interval.get("interval_available") is True:
+        low = _e8_finite(interval.get("ci_low"), "{}_low".format(label))
+        high = _e8_finite(interval.get("ci_high"), "{}_high".format(label))
+        if high < low:
+            raise _E8PayloadError("{}_bounds_invalid".format(label))
+    elif interval.get("interval_available") is False:
+        if not isinstance(interval.get("reason"), str) or not interval.get("reason"):
+            raise _E8PayloadError("{}_reason_invalid".format(label))
+    else:
+        raise _E8PayloadError("{}_availability_invalid".format(label))
+
+
+def _e8_population(value, shape, label):
+    population = _e8_require(value, label)
+    available = population.get("available")
+    if available is not True and available is not False:
+        raise _E8PayloadError("{}_availability_invalid".format(label))
+    if not available and (not isinstance(population.get("reason"), str) or not population.get("reason")):
+        raise _E8PayloadError("{}_reason_invalid".format(label))
+    values = _e8_sequence(population.get("unit_area"), "{}_unit_area".format(label))
+    flat_values = []
+    if len(shape) == 1:
+        if len(values) != shape[0]:
+            raise _E8PayloadError("{}_shape_invalid".format(label))
+        for item in values:
+            flat_values.append(_e8_finite(item, "{}_unit_area".format(label)))
+    elif available:
+        if len(values) != shape[0]:
+            raise _E8PayloadError("{}_shape_invalid".format(label))
+        for row in values:
+            row_values = _e8_sequence(row, "{}_unit_area".format(label))
+            if len(row_values) != shape[1]:
+                raise _E8PayloadError("{}_shape_invalid".format(label))
+            for item in row_values:
+                flat_values.append(_e8_finite(item, "{}_unit_area".format(label)))
+    else:
+        # The frozen contract stores unavailable 2D populations as one flat,
+        # all-zero array, preserving an explicit reason without inventing a map.
+        if len(values) != shape[0] * shape[1]:
+            raise _E8PayloadError("{}_shape_invalid".format(label))
+        for item in values:
+            flat_values.append(_e8_finite(item, "{}_unit_area".format(label)))
+        if any(item != 0.0 for item in flat_values):
+            raise _E8PayloadError("{}_unavailable_values_invalid".format(label))
+    if any(item < 0.0 for item in flat_values):
+        raise _E8PayloadError("{}_unit_area_invalid".format(label))
+    if available:
+        if not math.isclose(sum(flat_values), 1.0, rel_tol=0.0, abs_tol=1.0e-12):
+            raise _E8PayloadError("{}_unit_area_not_normalized".format(label))
+    elif any(item != 0.0 for item in flat_values):
+        raise _E8PayloadError("{}_unavailable_values_invalid".format(label))
+
+
+def _e8_validate_child(child_value, parent, child_position):
+    child = _e8_require(child_value, "child")
+    if child.get("setting_id") != parent["setting_id"]:
+        raise _E8PayloadError("child_setting_invalid")
+    if _e8_integer(child.get("canonical_t_index"), "child_t_index") != parent["canonical_t_index"]:
+        raise _E8PayloadError("child_t_index_invalid")
+    if _e8_integer(child.get("phi_index"), "child_phi_index") != child_position:
+        raise _E8PayloadError("child_phi_index_invalid")
+    phi_low = _e8_finite(child.get("phi_low"), "child_phi_low")
+    phi_high = _e8_finite(child.get("phi_high"), "child_phi_high")
+    if phi_low != parent["phi_edges"][child_position] or phi_high != parent["phi_edges"][child_position + 1]:
+        raise _E8PayloadError("child_phi_geometry_invalid")
+    availability = _e8_require(child.get("availability"), "child_availability")
+    for name in ("has_low_response", "has_prompt_control", "has_full_application", "completely_empty"):
+        if availability.get(name) is not True and availability.get(name) is not False:
+            raise _E8PayloadError("child_{}_invalid".format(name))
+    counts = _e8_require(child.get("population_counts"), "child_counts")
+    for name in ("N_low", "N_control", "N_full_application"):
+        if _e8_integer(counts.get(name), "child_{}".format(name)) < 0:
+            raise _E8PayloadError("child_{}_invalid".format(name))
+    support = _e8_require(child.get("support"), "child_support")
+    for name in ("prompt_control", "full_physical_application"):
+        fraction = _e8_require(support.get(name), "child_support_{}".format(name)).get("ood_fraction")
+        if fraction is not None:
+            _e8_finite(fraction, "child_support_{}".format(name))
+    effective = _e8_require(child.get("effective_sample_size"), "child_effective_sample_size")
+    _e8_metric(effective.get("baseline_w0"), "child_neff_baseline")
+    _e8_metric(effective.get("method_a_w0_times_C"), "child_neff_method_a")
+    one_dimensional = _e8_require(child.get("one_dimensional"), "child_one_dimensional")
+    for variable in _E8_ONE_DIMENSIONAL:
+        payload = _e8_require(one_dimensional.get(variable), "child_{}".format(variable))
+        edges = _strict_edges(payload.get("edges"))
+        if edges is None:
+            raise _E8PayloadError("child_{}_edges_invalid".format(variable))
+        for population in _E8_POPULATIONS:
+            _e8_population(payload.get(population), (len(edges) - 1,), "child_{}_{}".format(variable, population))
+        metrics = _e8_require(payload.get("metrics"), "child_{}_metrics".format(variable))
+        _e8_metric(metrics.get("DeltaH"), "child_{}_DeltaH".format(variable))
+        _e8_metric(metrics.get("kappa"), "child_{}_kappa".format(variable))
+    joints = _e8_require(child.get("joint_distributions"), "child_joint_distributions")
+    for name in _E8_JOINTS:
+        joint = _e8_require(joints.get(name), "child_{}".format(name))
+        expected_x, expected_y = name.split("__", 1)
+        if joint.get("x_variable") != expected_x or joint.get("y_variable") != expected_y:
+            raise _E8PayloadError("child_{}_coordinates_invalid".format(name))
+        x_edges = _strict_edges(joint.get("x_edges"))
+        y_edges = _strict_edges(joint.get("y_edges"))
+        if x_edges is None or y_edges is None:
+            raise _E8PayloadError("child_{}_edges_invalid".format(name))
+        for population in _E8_POPULATIONS:
+            _e8_population(
+                joint.get(population), (len(x_edges) - 1, len(y_edges) - 1),
+                "child_{}_{}".format(name, population),
+            )
+        _e8_metric(_e8_require(joint.get("metrics"), "child_{}_metrics".format(name)).get("kappa"), "child_{}_kappa".format(name))
+    signed = _e8_require(child.get("signed_background"), "child_signed_background")
+    window = _e8_require(signed.get("kaon_window"), "child_kaon_window")
+    for name in ("P_B_K", "P_A_K", "DeltaP_K", "f_refine_K"):
+        _e8_metric(window.get(name), "child_{}".format(name))
+    _e8_metric(_e8_require(signed.get("variance_proxy"), "child_variance_proxy").get("R_V"), "child_R_V")
+    bootstrap = _e8_require(child.get("bootstrap"), "child_bootstrap")
+    bootstrap_one = _e8_require(bootstrap.get("one_dimensional"), "child_bootstrap_one")
+    bootstrap_mm = _e8_require(bootstrap_one.get("analysis_MM"), "child_bootstrap_mm")
+    _e8_interval(bootstrap_mm.get("DeltaH"), "child_bootstrap_DeltaH")
+    _e8_interval(bootstrap_mm.get("kappa"), "child_bootstrap_kappa")
+    bootstrap_joint = _e8_require(bootstrap.get("joint_missing_mass_acceptance"), "child_bootstrap_joint")
+    for name in ("analysis_MM__SHMS_xptar", "analysis_MM__SHMS_yptar"):
+        _e8_interval(_e8_require(bootstrap_joint.get(name), "child_bootstrap_{}".format(name)).get("kappa"), "child_bootstrap_{}_kappa".format(name))
+    _e8_interval(_e8_require(bootstrap.get("kaon_window"), "child_bootstrap_window").get("DeltaP_K"), "child_bootstrap_DeltaP_K")
+    return child
+
+
+def _e8_validate_artifact(artifact_value):
+    """Validate all persisted display inputs without deriving any replacements."""
+    artifact = _e8_require(artifact_value, "artifact")
+    if artifact.get("schema_version") != E8_F6_2_ARTIFACT_SCHEMA:
+        raise _E8PayloadError("artifact_schema_invalid")
+    if artifact.get("artifact_fingerprint") != E8_F6_2_ARTIFACT_FINGERPRINT:
+        raise _E8PayloadError("artifact_fingerprint_invalid")
+    _e8_flags(artifact, {
+        "non_authoritative": True, "validation_only": True,
+        "manual_review_required": True, "production_application_performed": False,
+        "production_objects_mutated": False, "yield_constructed": False,
+        "cross_section_constructed": False, "method_b_numerical_dependency": False,
+        "automatic_case_classification": False,
+    }, "artifact")
+    validation = _e8_require(artifact.get("validation"), "validation")
+    if validation.get("schema_version") != E8_F6_2_VALIDATION_SCHEMA or validation.get("available") is not True:
+        raise _E8PayloadError("validation_schema_or_availability_invalid")
+    if validation.get("fingerprint") != E8_F6_2_VALIDATION_FINGERPRINT:
+        raise _E8PayloadError("validation_fingerprint_invalid")
+    _e8_flags(validation, {
+        "non_authoritative": True, "validation_only": True,
+        "event_correction_persisted": False, "production_application_performed": False,
+        "production_objects_mutated": False, "yield_constructed": False,
+        "cross_section_constructed": False, "root_object_constructed": False,
+        "child_renormalization_performed": False,
+        "smoothing_or_interpolation_performed": False,
+        "absolute_probability_constructed": False,
+        "method_b_numerical_dependency": False,
+        "automatic_case_classification": False, "case_thresholds_defined": False,
+        "final_yield_uncertainty_claimed": False,
+    }, "validation")
+    kaon_window = _e8_require(validation.get("kaon_window"), "kaon_window")
+    if _e8_finite(kaon_window.get("mm_max"), "kaon_window_high") <= _e8_finite(kaon_window.get("mm_min"), "kaon_window_low"):
+        raise _E8PayloadError("kaon_window_invalid")
+    parents = _e8_sequence(validation.get("parents"), "parents")
+    if len(parents) != 15:
+        raise _E8PayloadError("parent_inventory_invalid")
+    observed = set()
+    child_count = empty_count = 0
+    for parent_value in parents:
+        parent = _e8_require(parent_value, "parent")
+        setting_id = parent.get("setting_id")
+        t_index = _e8_integer(parent.get("canonical_t_index"), "parent_t_index")
+        if (setting_id, t_index) not in _E8_PARENT_KEYS or (setting_id, t_index) in observed:
+            raise _E8PayloadError("parent_geometry_invalid")
+        observed.add((setting_id, t_index))
+        setting = _e8_require(parent.get("setting"), "parent_setting")
+        if "{}-{}".format(setting.get("phi_setting"), setting.get("epsilon_setting")) != setting_id:
+            raise _E8PayloadError("parent_setting_identity_invalid")
+        if _e8_integer(setting.get("ordinal"), "parent_setting_ordinal") != _E8_SETTING_IDS.index(setting_id):
+            raise _E8PayloadError("parent_setting_ordinal_invalid")
+        low = _e8_finite(parent.get("canonical_t_low"), "parent_t_low")
+        high = _e8_finite(parent.get("canonical_t_high"), "parent_t_high")
+        if high <= low:
+            raise _E8PayloadError("parent_t_geometry_invalid")
+        phi_edges = _strict_edges(parent.get("phi_edges"))
+        if phi_edges is None or len(phi_edges) != 10:
+            raise _E8PayloadError("parent_phi_geometry_invalid")
+        parent["phi_edges"] = phi_edges
+        children = _e8_sequence(parent.get("children"), "parent_children")
+        if len(children) != 9:
+            raise _E8PayloadError("parent_child_inventory_invalid")
+        for child_position, child_value in enumerate(children):
+            child = _e8_validate_child(child_value, parent, child_position)
+            child_count += 1
+            empty_count += int(bool(_e8_require(child.get("availability"), "child_availability").get("completely_empty")))
+    if observed != _E8_PARENT_KEYS or child_count != 135:
+        raise _E8PayloadError("canonical_inventory_invalid")
+    if empty_count != 20 or child_count - empty_count != 115:
+        raise _E8PayloadError("rendered_empty_inventory_invalid")
+    return validation
+
+
+def _e8_reject_json_constant(value):
+    raise ValueError("nonfinite_json_constant:{}".format(value))
+
+
+def load_full_background_subtraction_e8_payload(
+    json_path,
+    *,
+    kinematic_token=E8_F6_2_KINEMATIC_TOKEN,
+    setting_id="Left-lowe",
+    expected_sha256=E8_F6_2_INPUT_SHA256,
+):
+    """Read the one approved F.6.2 authority for the E.8 procedure appendix.
+
+    ``expected_sha256`` is keyword-only test plumbing.  Production callers use
+    the frozen default and this module never searches for an analysis OUTPATH.
+    """
+    path = Path(json_path).expanduser().resolve(strict=False)
+    if kinematic_token != E8_F6_2_KINEMATIC_TOKEN or setting_id not in _E8_SETTING_IDS:
+        return _e8_unavailable("unsupported_e8_current_setting", json_path=path, setting_id=setting_id)
+    if not isinstance(expected_sha256, str) or len(expected_sha256) != 64:
+        return _e8_unavailable("expected_input_sha256_invalid", json_path=path, setting_id=setting_id)
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        return _e8_unavailable("frozen_f6_2_input_unavailable:{}".format(type(exc).__name__), json_path=path, setting_id=setting_id)
+    observed_sha256 = hashlib.sha256(raw).hexdigest()
+    if observed_sha256 != expected_sha256:
+        return _e8_unavailable("frozen_f6_2_input_sha256_mismatch", json_path=path, setting_id=setting_id)
+    try:
+        artifact = json.loads(raw.decode("utf-8"), parse_constant=_e8_reject_json_constant)
+        validation = _e8_validate_artifact(artifact)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError, _E8PayloadError) as exc:
+        return _e8_unavailable("frozen_f6_2_authority_rejected:{}".format(str(exc)), json_path=path, setting_id=setting_id)
+    selected = tuple(
+        parent for parent in validation["parents"]
+        if parent["setting_id"] == setting_id
+    )
+    if len(selected) != 3:
+        return _e8_unavailable("frozen_f6_2_current_setting_inventory_invalid", json_path=path, setting_id=setting_id)
+    return {
+        "schema_version": E8_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "json_path": os.fspath(path),
+        "input_sha256": observed_sha256,
+        "setting_id": setting_id,
+        "kinematic_token": kinematic_token,
+        "artifact_fingerprint": artifact["artifact_fingerprint"],
+        "validation_fingerprint": validation["fingerprint"],
+        "kaon_window": dict(validation["kaon_window"]),
+        "parents": selected,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+    }
 
 
 def _unavailable(reason):
@@ -4056,7 +4415,7 @@ def render_full_background_subtraction_d11_pages(pdf_name, payload, *, page_mani
     return result
 
 
-def render_full_background_subtraction_procedure_pages(
+def _render_full_background_subtraction_procedure_pages_legacy(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
@@ -4603,6 +4962,414 @@ def render_full_background_subtraction_procedure_pages(
         _render_f1_setting_pages(ROOT, pdf_name, f1, manifest, result["failures"])
     if e72_available:
         _render_e72_setting_pages(ROOT, pdf_name, e72, manifest, result["failures"])
+    return result
+
+
+def _e8_metric_text(metric_value):
+    metric = _mapping(metric_value)
+    if metric.get("available") is not True:
+        return "unavailable:{}".format(metric.get("reason"))
+    try:
+        return "{:.5g}".format(float(metric.get("value")))
+    except (TypeError, ValueError):
+        return "unavailable:invalid_persisted_metric"
+
+
+def _e8_add_text(ROOT, coordinates, lines, *, size=0.030, align=12):
+    if not hasattr(ROOT, "TPaveText"):
+        return None
+    try:
+        text = ROOT.TPaveText(*coordinates, "NDC")
+        text.SetFillStyle(0)
+        text.SetBorderSize(0)
+        text.SetTextAlign(align)
+        text.SetTextSize(size)
+        for line in lines:
+            text.AddText(str(line))
+        text.Draw()
+        return text
+    except Exception:
+        return None
+
+
+def _e8_text_page(ROOT, pdf_name, name, title, lines):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    canvas = ROOT.TCanvas(str(name), str(title), 1400, 900)
+    try:
+        drawn = _e8_add_text(ROOT, (0.08, 0.10, 0.92, 0.92), (title, "") + tuple(lines), size=0.034)
+        if drawn is None:
+            return False
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_parent_scope(parent):
+    return "t{}".format(int(parent["canonical_t_index"]) + 1)
+
+
+def _e8_child_label(child):
+    return "{} phi{} [{:.0f}, {:.0f})".format(
+        child["setting_id"], int(child["phi_index"]),
+        float(child["phi_low"]), float(child["phi_high"]),
+    )
+
+
+def _e8_population_maximum(payload):
+    maximum = 0.0
+    for population_name in _E8_POPULATIONS:
+        population = _mapping(payload.get(population_name))
+        if population.get("available") is not True:
+            continue
+        values = population.get("unit_area") or ()
+        for row in values:
+            entries = row if isinstance(row, Sequence) and not isinstance(row, (str, bytes)) else (row,)
+            for value in entries:
+                try:
+                    maximum = max(maximum, float(value))
+                except (TypeError, ValueError):
+                    continue
+    return maximum if maximum > 0.0 else 1.0
+
+
+def _e8_overlay_tile(ROOT, canvas, pad_number, child, variable, kaon_window, draw_objects):
+    canvas.cd(int(pad_number))
+    shape = _mapping(_mapping(child.get("one_dimensional")).get(variable))
+    edges = _strict_edges(shape.get("edges"))
+    if edges is None or not hasattr(ROOT, "TH1D"):
+        return False
+    colors = (
+        getattr(ROOT, "kBlue", 4), getattr(ROOT, "kBlack", 1),
+        getattr(ROOT, "kMagenta", 6),
+    )
+    histograms = []
+    try:
+        for population_name, color in zip(_E8_POPULATIONS, colors):
+            population = _mapping(shape.get(population_name))
+            if population.get("available") is not True:
+                continue
+            histogram = ROOT.TH1D(
+                "H_full_background_e8_overlay_{}_t{}_p{}_{}".format(
+                    variable, int(child["canonical_t_index"]) + 1,
+                    int(child["phi_index"]) + 1, population_name,
+                ),
+                "{};{};Persisted normalized-bin fraction".format(_e8_child_label(child), variable),
+                len(edges) - 1, array("d", edges),
+            )
+            if hasattr(histogram, "SetDirectory"):
+                histogram.SetDirectory(0)
+            if hasattr(histogram, "SetStats"):
+                histogram.SetStats(0)
+            for bin_index, value in enumerate(population["unit_area"], 1):
+                histogram.SetBinContent(bin_index, float(value))
+            _style_histogram(histogram, color)
+            histogram.Draw("hist" if not histograms else "hist same")
+            histograms.append(histogram)
+            draw_objects.append(histogram)
+        unavailable = [
+            "{} unavailable:{}".format(name, _mapping(shape.get(name)).get("reason"))
+            for name in _E8_POPULATIONS
+            if _mapping(shape.get(name)).get("available") is not True
+        ]
+        if unavailable:
+            note = _e8_add_text(ROOT, (0.10, 0.70, 0.90, 0.90), unavailable, size=0.034)
+            if note is not None:
+                draw_objects.append(note)
+        if variable == "analysis_MM" and histograms and hasattr(ROOT, "TLine"):
+            y_high = _e8_population_maximum(shape)
+            for value in (kaon_window["mm_min"], kaon_window["mm_max"]):
+                line = ROOT.TLine(float(value), 0.0, float(value), y_high)
+                line.SetLineStyle(2)
+                line.Draw()
+                draw_objects.append(line)
+        signed = _mapping(child.get("signed_background"))
+        kaon = _mapping(signed.get("kaon_window"))
+        metrics = _mapping(shape.get("metrics"))
+        footer = _e8_add_text(
+            ROOT, (0.10, 0.05, 0.90, 0.18),
+            ("Persisted {}: DeltaH {}; kappa {}; DeltaP^K {}; f_refine^K {}".format(
+                variable, _e8_metric_text(metrics.get("DeltaH")),
+                _e8_metric_text(metrics.get("kappa")),
+                _e8_metric_text(kaon.get("DeltaP_K")),
+                _e8_metric_text(kaon.get("f_refine_K")),
+            ),), size=0.025,
+        )
+        if footer is not None:
+            draw_objects.append(footer)
+    except Exception:
+        return False
+    return bool(histograms or unavailable)
+
+
+def _e8_joint_tile(ROOT, canvas, pad_number, child, joint_name, population_name, kaon_window, draw_objects):
+    canvas.cd(int(pad_number))
+    joint = _mapping(_mapping(child.get("joint_distributions")).get(joint_name))
+    population = _mapping(joint.get(population_name))
+    if population.get("available") is not True:
+        note = _e8_add_text(
+            ROOT, (0.08, 0.36, 0.92, 0.64),
+            ("{} {}".format(joint_name, population_name), "unavailable:{}".format(population.get("reason"))),
+            size=0.034, align=22,
+        )
+        return note is not None
+    x_edges = _strict_edges(joint.get("x_edges"))
+    y_edges = _strict_edges(joint.get("y_edges"))
+    if x_edges is None or y_edges is None or not hasattr(ROOT, "TH2D"):
+        return False
+    try:
+        histogram = ROOT.TH2D(
+            "H_full_background_e8_map_{}_{}_t{}_p{}".format(
+                joint_name, population_name, int(child["canonical_t_index"]) + 1,
+                int(child["phi_index"]) + 1,
+            ),
+            "{} {} {}".format(_e8_child_label(child), joint_name, population_name),
+            len(x_edges) - 1, array("d", x_edges), len(y_edges) - 1, array("d", y_edges),
+        )
+        if hasattr(histogram, "SetDirectory"):
+            histogram.SetDirectory(0)
+        if hasattr(histogram, "SetStats"):
+            histogram.SetStats(0)
+        for x_index, row in enumerate(population["unit_area"], 1):
+            for y_index, value in enumerate(row, 1):
+                histogram.SetBinContent(x_index, y_index, float(value))
+        # This is a common display scale only.  The stored L/B/A matrix cells
+        # are copied verbatim and are never combined or renormalized.
+        histogram.SetMinimum(0.0)
+        histogram.SetMaximum(_e8_population_maximum(joint))
+        histogram.Draw("colz")
+        draw_objects.append(histogram)
+        if joint.get("x_variable") == "analysis_MM" and hasattr(ROOT, "TLine"):
+            y_low, y_high = float(y_edges[0]), float(y_edges[-1])
+            for value in (kaon_window["mm_min"], kaon_window["mm_max"]):
+                line = ROOT.TLine(float(value), y_low, float(value), y_high)
+                line.SetLineStyle(2)
+                line.Draw()
+                draw_objects.append(line)
+        signed = _mapping(child.get("signed_background"))
+        persisted_window = _mapping(signed.get("kaon_window"))
+        footer = _e8_add_text(
+            ROOT, (0.06, 0.02, 0.94, 0.13),
+            ("persisted kappa {}; DeltaP^K {}; f_refine^K {}".format(
+                _e8_metric_text(_mapping(joint.get("metrics")).get("kappa")),
+                _e8_metric_text(persisted_window.get("DeltaP_K")),
+                _e8_metric_text(persisted_window.get("f_refine_K")),
+            ),), size=0.021,
+        )
+        if footer is not None:
+            draw_objects.append(footer)
+    except Exception:
+        return False
+    return True
+
+
+def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_overlays_t{}".format(int(parent["canonical_t_index"]) + 1),
+        "E.8 persisted L/B/A overlays", 1800, 3600,
+    )
+    draw_objects = []
+    try:
+        canvas.Divide(3, 9)
+        for row, child in enumerate(parent["children"]):
+            for column, variable in enumerate(_E8_ONE_DIMENSIONAL):
+                if not _e8_overlay_tile(ROOT, canvas, row * 3 + column + 1, child, variable, kaon_window, draw_objects):
+                    return False
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_render_map_page(ROOT, pdf_name, parent, kaon_window, *, joint_names, page_label):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_{}_t{}".format(page_label, int(parent["canonical_t_index"]) + 1),
+        "E.8 persisted {} maps".format(page_label), 3600, 3600,
+    )
+    draw_objects = []
+    try:
+        canvas.Divide(6, 9)
+        for row, child in enumerate(parent["children"]):
+            for joint_offset, joint_name in enumerate(joint_names):
+                for population_offset, population_name in enumerate(_E8_POPULATIONS):
+                    column = joint_offset * 3 + population_offset
+                    if not _e8_joint_tile(
+                        ROOT, canvas, row * 6 + column + 1, child, joint_name,
+                        population_name, kaon_window, draw_objects,
+                    ):
+                        return False
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _render_full_background_subtraction_e8_context_page(ROOT, pdf_name, payload):
+    return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_context", "E.8 — frozen F.6.2 acceptance-refinement atlas", (
+        "Presentation-only final procedure-PDF section; no event correction, yield, or cross section is changed.",
+        "Current setting: {}; frozen input SHA-256: {}".format(payload["setting_id"], payload["input_sha256"]),
+        "Artifact fingerprint: {}; validation fingerprint: {}".format(payload["artifact_fingerprint"], payload["validation_fingerprint"]),
+        "L/B/A are persisted low-response, prompt-control baseline, and full-application populations.",
+        "Frozen kaon missing-mass window: [{:.5g}, {:.5g}] GeV.".format(payload["kaon_window"]["mm_min"], payload["kaon_window"]["mm_max"]),
+        "Maps use one common L/B/A display scale per comparison; values are not renormalized or recomputed.",
+        "The remaining production-impact discussion belongs to the detached review artifacts.",
+    ))
+
+
+def _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, payload, parent, manifest, failures):
+    scope = _e8_parent_scope(parent)
+    window = payload["kaon_window"]
+    for page_id, renderer, arguments in (
+        ("full_background.e8.persisted_overlays", _e8_render_overlay_page, (ROOT, pdf_name, parent, window)),
+        ("full_background.e8.delta_acceptance_maps", _e8_render_map_page, (ROOT, pdf_name, parent, window)),
+        ("full_background.e8.mm_acceptance_maps", _e8_render_map_page, (ROOT, pdf_name, parent, window)),
+    ):
+        if renderer is _e8_render_map_page:
+            if page_id.endswith("delta_acceptance_maps"):
+                rendered = renderer(ROOT, pdf_name, parent, window, joint_names=("SHMS_delta__SHMS_xptar", "SHMS_delta__SHMS_yptar"), page_label="delta_acceptance")
+            else:
+                rendered = renderer(ROOT, pdf_name, parent, window, joint_names=("analysis_MM__SHMS_xptar", "analysis_MM__SHMS_yptar"), page_label="mm_acceptance")
+        else:
+            rendered = renderer(*arguments)
+        if rendered:
+            manifest.append({"page_id": page_id, "scope": scope, "authoritative": False})
+        else:
+            failures.append("E.8 {} page unavailable for {}".format(page_id.rsplit(".", 1)[-1], scope))
+
+
+def _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, payload):
+    return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_handoff", "E.8 handoff", (
+        "The accepted F.6.2 distributions and metrics above are shown exactly as persisted.",
+        "D.10 onward remains built as detached evidence; it is intentionally omitted from this ordinary procedure PDF.",
+        "This appendix is non-authoritative and requires independent farm PDF review before runtime closure.",
+    ))
+
+
+def _render_full_background_subtraction_e8_unavailable_page(ROOT, pdf_name, payload):
+    return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_unavailable", "E.8 frozen F.6.2 input unavailable", (
+        "No replacement, reconstruction, or same-schema substitute was accepted.",
+        "Literal unavailable reason: {}".format(payload.get("reason")),
+    ))
+
+
+def render_full_background_subtraction_procedure_pages(
+    pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
+    d11_payload=None,
+    *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
+    e7_payload=None, f1_payload=None, e72_payload=None, e8_payload=None,
+    page_manifest=None,
+):
+    """Append retained D.6-D.9 pages followed by the frozen E.8 final section.
+
+    The older keyword parameters are intentionally retained so that their
+    detached builders remain compatible.  They no longer control ordinary
+    procedure-PDF pages.
+    """
+    manifest = page_manifest if isinstance(page_manifest, list) else []
+    result = {"manifest": manifest, "failures": []}
+    d6 = _mapping(d6_payload)
+    d7 = _mapping(d7_payload)
+    d8 = _mapping(d8_payload)
+    d9 = _mapping(d9_payload)
+    e8 = _mapping(e8_payload) if e8_payload is not None else _e8_unavailable("frozen_f6_2_payload_not_supplied")
+    d6_available = bool(d6.get("available"))
+    d7_available = bool(d7.get("available"))
+    d8_available = bool(d8.get("available"))
+    d9_available = bool(d9.get("available"))
+    for label, value, supplied in (
+        ("D.6", d6, d6_payload is not None), ("D.7", d7, d7_payload is not None),
+        ("D.8", d8, d8_payload is not None), ("D.9", d9, d9_payload is not None),
+    ):
+        if supplied and not value.get("available"):
+            result["failures"].append("{} procedure input unavailable: {}".format(label, value.get("reason")))
+    geometry_owner = d6 if d6_available else d7 if d7_available else d8 if d8_available else d9 if d9_available else None
+    for label, value in (("D.7", d7), ("D.8", d8), ("D.9", d9)):
+        if bool(value.get("available")) and geometry_owner is not value and list(value.get("t_edges") or ()) != list(geometry_owner.get("t_edges") or ()):
+            result["failures"].append("{} canonical t geometry mismatch".format(label))
+            if label == "D.7":
+                d7_available = False
+            elif label == "D.8":
+                d8_available = False
+            else:
+                d9_available = False
+    ROOT = _import_root()
+    if ROOT is None:
+        result["failures"].append("full background-subtraction rendering unavailable: PyROOT not available")
+        return result
+    if d7_available:
+        _append_d7_exclusion_failure(d7, result["failures"])
+    d7_by_index = {group.get("t_index"): _mapping(group) for group in tuple(d7.get("per_t") or ()) if isinstance(group, Mapping)}
+    d8_by_index = {group.get("t_index"): _mapping(group) for group in tuple(d8.get("per_t") or ()) if isinstance(group, Mapping)}
+    d9_by_index = {group.get("t_index"): _mapping(group) for group in tuple(d9.get("per_t") or ()) if isinstance(group, Mapping)}
+    def render_after_d6(t_index):
+        for label, available, groups, renderer, presentation in (
+            ("D.7", d7_available, d7_by_index, _render_d7_t_pages, d7),
+            ("D.8", d8_available, d8_by_index, _render_d8_t_pages, d8),
+            ("D.9", d9_available, d9_by_index, _render_d9_t_pages, d9),
+        ):
+            if not available:
+                continue
+            group = groups.get(t_index)
+            if group is None:
+                result["failures"].append("{} input missing canonical t{}".format(label, int(t_index) + 1))
+            else:
+                renderer(ROOT, pdf_name, presentation, group, manifest, result["failures"])
+    if d6_available:
+        for group in tuple(d6.get("per_t") or ()):
+            group = _mapping(group)
+            _render_d6_t_pages(ROOT, pdf_name, d6, group, manifest, result["failures"])
+            render_after_d6(group.get("t_index"))
+    elif d7_available:
+        for group in tuple(d7.get("per_t") or ()):
+            group = _mapping(group)
+            _render_d7_t_pages(ROOT, pdf_name, d7, group, manifest, result["failures"])
+            for label, available, groups, renderer, presentation in (("D.8", d8_available, d8_by_index, _render_d8_t_pages, d8), ("D.9", d9_available, d9_by_index, _render_d9_t_pages, d9)):
+                if available and groups.get(group.get("t_index")) is not None:
+                    renderer(ROOT, pdf_name, presentation, groups[group.get("t_index")], manifest, result["failures"])
+    elif d8_available:
+        for group in tuple(d8.get("per_t") or ()):
+            group = _mapping(group)
+            _render_d8_t_pages(ROOT, pdf_name, d8, group, manifest, result["failures"])
+            if d9_available and d9_by_index.get(group.get("t_index")) is not None:
+                _render_d9_t_pages(ROOT, pdf_name, d9, d9_by_index[group.get("t_index")], manifest, result["failures"])
+    elif d9_available:
+        for group in tuple(d9.get("per_t") or ()):
+            _render_d9_t_pages(ROOT, pdf_name, d9, _mapping(group), manifest, result["failures"])
+    if e8.get("available") is True:
+        if _render_full_background_subtraction_e8_context_page(ROOT, pdf_name, e8):
+            manifest.append({"page_id": "full_background.e8.context", "scope": "setting", "authoritative": False})
+        else:
+            result["failures"].append("E.8 context page unavailable")
+        for parent in tuple(e8.get("parents") or ()):
+            _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, e8, _mapping(parent), manifest, result["failures"])
+        if _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, e8):
+            manifest.append({"page_id": "full_background.e8.handoff", "scope": "setting", "authoritative": False})
+        else:
+            result["failures"].append("E.8 handoff page unavailable")
+    elif _render_full_background_subtraction_e8_unavailable_page(ROOT, pdf_name, e8):
+        manifest.append({"page_id": "full_background.e8.unavailable", "scope": "setting", "authoritative": False, "reason": e8.get("reason")})
+    else:
+        result["failures"].append("E.8 unavailable page rendering failed: {}".format(e8.get("reason")))
     return result
 
 
@@ -8579,6 +9346,8 @@ __all__ = (
     "E7_PRESENTATION_SCHEMA_VERSION",
     "E72_PRESENTATION_SCHEMA_VERSION",
     "F1_PRESENTATION_SCHEMA_VERSION",
+    "E8_PRESENTATION_SCHEMA_VERSION",
+    "E8_F6_2_INPUT_SHA256",
     "FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
@@ -8598,6 +9367,7 @@ __all__ = (
     "close_full_background_subtraction_pdf",
     "full_background_subtraction_pdf_path",
     "full_background_subtraction_page_manifest_filename",
+    "load_full_background_subtraction_e8_payload",
     "open_full_background_subtraction_pdf",
     "render_full_background_subtraction_d6_pages",
     "render_full_background_subtraction_d7_pages",

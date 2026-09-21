@@ -218,6 +218,7 @@ from full_background_subtraction_plots import (
     close_full_background_subtraction_pdf,
     full_background_subtraction_page_manifest_filename,
     full_background_subtraction_pdf_path,
+    load_full_background_subtraction_e8_payload,
     open_full_background_subtraction_pdf,
     render_full_background_subtraction_procedure_pages,
     write_full_background_subtraction_page_manifest_json,
@@ -7764,95 +7765,59 @@ def rand_sub(
                     pion_hgcer_parent_preserving_correction,
                 )
             )
-            if (
-                not full_background_subtraction_d6_payload.get("available")
-                and not full_background_subtraction_d7_payload.get("available")
-                and not full_background_subtraction_d8_payload.get("available")
-                and not full_background_subtraction_d9_payload.get("available")
-                and not full_background_subtraction_d10_payload.get("available")
-                and not full_background_subtraction_d11_payload.get("available")
-                and not full_background_subtraction_e2_payload.get("available")
-                and not full_background_subtraction_e3_payload.get("available")
-                and not full_background_subtraction_e4_payload.get("available")
-                and not full_background_subtraction_e6_payload.get("available")
-                and not full_background_subtraction_e7_payload.get("available")
-                and not full_background_subtraction_f1_payload.get("available")
-                and not full_background_subtraction_e72_payload.get("available")
-            ):
-                full_background_subtraction_failures.extend((
-                    "D.6 procedure input unavailable: {}".format(
-                        full_background_subtraction_d6_payload.get("reason")
-                    ),
-                    "D.7 procedure input unavailable: {}".format(
-                        full_background_subtraction_d7_payload.get("reason")
-                    ),
-                    "D.8 procedure input unavailable: {}".format(
-                        full_background_subtraction_d8_payload.get("reason")
-                    ),
-                    "D.9 procedure input unavailable: {}".format(
-                        full_background_subtraction_d9_payload.get("reason")
-                    ),
-                    "D.10 procedure input unavailable: {}".format(
-                        full_background_subtraction_d10_payload.get("reason")
-                    ),
-                    "D.11 procedure input unavailable: {}".format(
-                        full_background_subtraction_d11_payload.get("reason")
-                    ),
-                    "E.2 procedure input unavailable: {}".format(
-                        full_background_subtraction_e2_payload.get("reason")
-                    ),
-                    "E.3 procedure input unavailable: {}".format(
-                        full_background_subtraction_e3_payload.get("reason")
-                    ),
-                    "E.4 procedure input unavailable: {}".format(
-                        full_background_subtraction_e4_payload.get("reason")
-                    ),
-                    "E.6 procedure input unavailable: {}".format(
-                        full_background_subtraction_e6_payload.get("reason")
-                    ),
-                    "E.7 procedure input unavailable: {}".format(
-                        full_background_subtraction_e7_payload.get("reason")
-                    ),
-                    "F.1 procedure input unavailable: {}".format(
-                        full_background_subtraction_f1_payload.get("reason")
-                    ),
-                    "E.7.2: procedure input unavailable: {}".format(
-                        full_background_subtraction_e72_payload.get("reason")
-                    ),
-                ))
-            else:
-                full_background_subtraction_open = (
-                    open_full_background_subtraction_pdf(
-                        full_background_subtraction_pdf
-                    )
+            full_background_subtraction_e8_kinematic = (
+                get_particle_subtraction_setting_key(inpDict)
+            )
+            full_background_subtraction_e8_epsilon = str(EPSSET).strip().lower()
+            if full_background_subtraction_e8_epsilon in {"low", "high"}:
+                full_background_subtraction_e8_epsilon += "e"
+            full_background_subtraction_e8_setting = "{}-{}".format(
+                str(phi_setting).strip(), full_background_subtraction_e8_epsilon
+            )
+            full_background_subtraction_e8_json = os.path.join(
+                OUTPATH,
+                "{}_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json".format(
+                    full_background_subtraction_e8_kinematic
+                ),
+            )
+            full_background_subtraction_e8_payload = (
+                load_full_background_subtraction_e8_payload(
+                    full_background_subtraction_e8_json,
+                    kinematic_token=full_background_subtraction_e8_kinematic,
+                    setting_id=full_background_subtraction_e8_setting,
                 )
-                if not full_background_subtraction_open:
-                    full_background_subtraction_failures.append(
-                        "full background-subtraction rendering unavailable: PyROOT not available"
-                    )
-                else:
-                    rendered_procedure = (
-                        render_full_background_subtraction_procedure_pages(
-                            full_background_subtraction_pdf,
-                            full_background_subtraction_d6_payload,
-                            full_background_subtraction_d7_payload,
-                            full_background_subtraction_d8_payload,
-                            full_background_subtraction_d9_payload,
-                            full_background_subtraction_d10_payload,
-                            full_background_subtraction_d11_payload,
-                            e2_payload=full_background_subtraction_e2_payload,
-                            e3_payload=full_background_subtraction_e3_payload,
-                            e4_payload=full_background_subtraction_e4_payload,
-                            e6_payload=full_background_subtraction_e6_payload,
-                            e7_payload=full_background_subtraction_e7_payload,
-                            f1_payload=full_background_subtraction_f1_payload,
-                            e72_payload=full_background_subtraction_e72_payload,
-                            page_manifest=full_background_subtraction_manifest,
-                        )
-                    )
-                    full_background_subtraction_failures.extend(
-                        rendered_procedure.get("failures") or ()
-                    )
+            )
+            # The E.8 unavailable page is itself a required final procedure
+            # record, so open the detached PDF even if every input is absent.
+            full_background_subtraction_open = open_full_background_subtraction_pdf(
+                full_background_subtraction_pdf
+            )
+            if not full_background_subtraction_open:
+                full_background_subtraction_failures.append(
+                    "full background-subtraction rendering unavailable: PyROOT not available"
+                )
+            else:
+                rendered_procedure = render_full_background_subtraction_procedure_pages(
+                    full_background_subtraction_pdf,
+                    full_background_subtraction_d6_payload,
+                    full_background_subtraction_d7_payload,
+                    full_background_subtraction_d8_payload,
+                    full_background_subtraction_d9_payload,
+                    full_background_subtraction_d10_payload,
+                    full_background_subtraction_d11_payload,
+                    e2_payload=full_background_subtraction_e2_payload,
+                    e3_payload=full_background_subtraction_e3_payload,
+                    e4_payload=full_background_subtraction_e4_payload,
+                    e6_payload=full_background_subtraction_e6_payload,
+                    e7_payload=full_background_subtraction_e7_payload,
+                    f1_payload=full_background_subtraction_f1_payload,
+                    e72_payload=full_background_subtraction_e72_payload,
+                    e8_payload=full_background_subtraction_e8_payload,
+                    page_manifest=full_background_subtraction_manifest,
+                )
+                full_background_subtraction_failures.extend(
+                    rendered_procedure.get("failures") or ()
+                )
         except Exception as exc:
             full_background_subtraction_failures.append(
                 "full background-subtraction procedure pages: {}: {}".format(
@@ -7860,7 +7825,7 @@ def rand_sub(
                 )
             )
             _print_rand_debug(
-                "detached full background-subtraction D.6 through D.11 and E.2 through E.7.2 pages unavailable",
+                "detached full background-subtraction D.6 through D.9 and E.8 pages unavailable",
                 renderer="full_background_subtraction_plots",
                 exception_type=type(exc).__name__,
                 exception=str(exc),
