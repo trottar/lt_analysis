@@ -5039,7 +5039,16 @@ def _e8_population_maximum(payload):
     return maximum if maximum > 0.0 else 1.0
 
 
-def _e8_overlay_tile(ROOT, canvas, pad_number, child, variable, kaon_window, draw_objects):
+def _e8_overlay_tile(
+    ROOT,
+    canvas,
+    pad_number,
+    child,
+    variable,
+    kaon_window,
+    draw_objects,
+    legend_sources=None,
+):
     canvas.cd(int(pad_number))
     shape = _mapping(_mapping(child.get("one_dimensional")).get(variable))
     edges = _strict_edges(shape.get("edges"))
@@ -5073,6 +5082,8 @@ def _e8_overlay_tile(ROOT, canvas, pad_number, child, variable, kaon_window, dra
             histogram.Draw("hist" if not histograms else "hist same")
             histograms.append(histogram)
             draw_objects.append(histogram)
+            if isinstance(legend_sources, dict):
+                legend_sources.setdefault(population_name, histogram)
         unavailable = [
             "{} unavailable:{}".format(name, _mapping(shape.get(name)).get("reason"))
             for name in _E8_POPULATIONS
@@ -5106,6 +5117,43 @@ def _e8_overlay_tile(ROOT, canvas, pad_number, child, variable, kaon_window, dra
     except Exception:
         return False
     return bool(histograms or unavailable)
+
+
+def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
+    """Draw the explicit persisted-population key used by every E.8 overlay page."""
+    if not hasattr(ROOT, "TLegend"):
+        return False
+    if not isinstance(legend_sources, dict) or any(
+        name not in legend_sources for name in _E8_POPULATIONS
+    ):
+        return False
+    try:
+        canvas.cd()
+        legend = ROOT.TLegend(0.03, 0.945, 0.97, 0.995)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        if hasattr(legend, "SetNColumns"):
+            legend.SetNColumns(3)
+        legend.AddEntry(
+            legend_sources["L"],
+            "L: upstream 0 < NPE <= 2 diagnostic reference",
+            "l",
+        )
+        legend.AddEntry(
+            legend_sources["B"],
+            "B: physical pion control, NPE > 2, w0",
+            "l",
+        )
+        legend.AddEntry(
+            legend_sources["A"],
+            "A: same B population, w0*C",
+            "l",
+        )
+        legend.Draw()
+        draw_objects.append(legend)
+    except Exception:
+        return False
+    return True
 
 
 def _e8_joint_tile(ROOT, canvas, pad_number, child, joint_name, population_name, kaon_window, draw_objects):
@@ -5179,10 +5227,16 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
     draw_objects = []
     try:
         canvas.Divide(3, 9)
+        legend_sources = {}
         for row, child in enumerate(parent["children"]):
             for column, variable in enumerate(_E8_ONE_DIMENSIONAL):
-                if not _e8_overlay_tile(ROOT, canvas, row * 3 + column + 1, child, variable, kaon_window, draw_objects):
+                if not _e8_overlay_tile(
+                    ROOT, canvas, row * 3 + column + 1, child, variable,
+                    kaon_window, draw_objects, legend_sources,
+                ):
                     return False
+        if not _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
+            return False
         canvas.Print(pdf_name)
     except Exception:
         return False
@@ -5229,10 +5283,13 @@ def _render_full_background_subtraction_e8_context_page(ROOT, pdf_name, payload)
         "Presentation-only final procedure-PDF section; no event correction, yield, or cross section is changed.",
         "Current setting: {}; frozen input SHA-256: {}".format(payload["setting_id"], payload["input_sha256"]),
         "Artifact fingerprint: {}; validation fingerprint: {}".format(payload["artifact_fingerprint"], payload["validation_fingerprint"]),
-        "L/B/A are persisted low-response, prompt-control baseline, and full-application populations.",
+        "L — observed upstream low-HGCer diagnostic reference before the downstream HGCer gate: 0 < P_hgcer_npeSum <= 2.",
+        "B — physical pion-control population with P_hgcer_npeSum > 2, weighted by baseline pion w0.",
+        "A — the same physical pion-control population as B, weighted by w0*C.",
+        "B-to-A is a persisted acceptance-refinement shape comparison, not an absolute yield comparison, production application, or promotion decision.",
         "Frozen kaon missing-mass window: [{:.5g}, {:.5g}] GeV.".format(payload["kaon_window"]["mm_min"], payload["kaon_window"]["mm_max"]),
         "Maps use one common L/B/A display scale per comparison; values are not renormalized or recomputed.",
-        "The remaining production-impact discussion belongs to the detached review artifacts.",
+        "The full baseline-versus-w0*C production-impact comparison belongs to later F.6.3 work.",
     ))
 
 
@@ -5261,7 +5318,11 @@ def _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, payload)
     return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_handoff", "E.8 handoff", (
         "The accepted F.6.2 distributions and metrics above are shown exactly as persisted.",
         "D.10 onward remains built as detached evidence; it is intentionally omitted from this ordinary procedure PDF.",
-        "This appendix is non-authoritative and requires independent farm PDF review before runtime closure.",
+        "F.6.2 quantities shown here remain non-authoritative and presentation-only.",
+        "No Method-A production correction or promotion occurs in E.8.",
+        "The full baseline-versus-w0*C production-impact comparison belongs to later F.6.3 work.",
+        "Any production promotion remains later work and is not implied by these plots.",
+        "This appendix requires independent farm PDF review before runtime closure.",
     ))
 
 

@@ -6839,6 +6839,60 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             inspect.Parameter.KEYWORD_ONLY,
         )
 
+    def test_e8_presentation_semantics_key_and_f63_handoff_are_explicit(self):
+        root = _FakeROOT()
+        payload = {
+            "setting_id": "Left-lowe",
+            "input_sha256": "a" * 64,
+            "artifact_fingerprint": "b" * 64,
+            "validation_fingerprint": "c" * 64,
+            "kaon_window": {"mm_min": 0.45, "mm_max": 0.55},
+        }
+        self.assertTrue(
+            plots._render_full_background_subtraction_e8_context_page(
+                root, "ignored.pdf", payload
+            )
+        )
+        context = "\n".join(root.drawn_text[-1])
+        self.assertIn("0 < P_hgcer_npeSum <= 2", context)
+        self.assertIn("P_hgcer_npeSum > 2", context)
+        self.assertIn("same physical pion-control population as B", context)
+        self.assertIn("w0*C", context)
+        self.assertIn("shape comparison", context)
+        self.assertIn("not an absolute yield comparison", context)
+
+        sources = {name: object() for name in ("L", "B", "A")}
+        draw_objects = []
+        self.assertTrue(
+            plots._e8_overlay_legend(root, _FakeCanvas(), sources, draw_objects)
+        )
+        legend = root.legends[-1]
+        self.assertEqual(legend.objects, [sources["L"], sources["B"], sources["A"]])
+        self.assertEqual(
+            [entry[0] for entry in legend.entries],
+            [
+                "L: upstream 0 < NPE <= 2 diagnostic reference",
+                "B: physical pion control, NPE > 2, w0",
+                "A: same B population, w0*C",
+            ],
+        )
+        self.assertEqual(draw_objects, [legend])
+        self.assertIn(
+            "_e8_overlay_legend",
+            inspect.getsource(plots._e8_render_overlay_page),
+        )
+
+        self.assertTrue(
+            plots._render_full_background_subtraction_e8_handoff_page(
+                root, "ignored.pdf", payload
+            )
+        )
+        handoff = "\n".join(root.drawn_text[-1])
+        self.assertIn("F.6.2 quantities shown here remain non-authoritative", handoff)
+        self.assertIn("No Method-A production correction or promotion occurs in E.8.", handoff)
+        self.assertIn("F.6.3", handoff)
+        self.assertIn("not implied by these plots", handoff)
+
     def test_e8_uses_persisted_matrix_values_with_shared_display_scale_and_mm_only_markers(self):
         artifact = _e8_frozen_artifact()
         joint = artifact["validation"]["parents"][0]["children"][0]["joint_distributions"]["SHMS_delta__SHMS_xptar"]
