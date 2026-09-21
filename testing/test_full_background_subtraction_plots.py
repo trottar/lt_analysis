@@ -394,6 +394,23 @@ class _FakeLegend:
         return None
 
 
+class _FakeLegendLine:
+    def __init__(self, *coordinates):
+        self.coordinates = tuple(float(value) for value in coordinates)
+        self.line_color = None
+        self.line_style = None
+        self.line_width = None
+
+    def SetLineColor(self, color):
+        self.line_color = color
+
+    def SetLineStyle(self, style):
+        self.line_style = style
+
+    def SetLineWidth(self, width):
+        self.line_width = width
+
+
 class _FakePaveText:
     def __init__(self, root, *coordinates):
         self._root = root
@@ -423,11 +440,13 @@ class _FakePaveText:
 class _FakeROOT:
     kBlack = 1
     kBlue = 4
+    kMagenta = 6
     kRed = 2
 
     def __init__(self):
         self.drawn_text = []
         self.legends = []
+        self.legend_lines = []
         self.pave_texts = []
 
     def TCanvas(self, *_args):
@@ -438,6 +457,11 @@ class _FakeROOT:
         legend._root = self
         self.legends.append(legend)
         return legend
+
+    def TLine(self, *_args):
+        line = _FakeLegendLine(*_args)
+        self.legend_lines.append(line)
+        return line
 
     def TPaveText(self, *_args):
         pave_text = _FakePaveText(self, *_args)
@@ -6892,6 +6916,65 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
         self.assertIn("No Method-A production correction or promotion occurs in E.8.", handoff)
         self.assertIn("F.6.3", handoff)
         self.assertIn("not implied by these plots", handoff)
+
+    def test_e8_sparse_legend_uses_display_proxies_without_rejecting_overlays(self):
+        root = _FakeROOT()
+        real_l_source = object()
+        draw_objects = []
+        self.assertTrue(
+            plots._e8_overlay_legend(
+                root, _FakeCanvas(), {"L": real_l_source}, draw_objects
+            )
+        )
+        legend = root.legends[-1]
+        self.assertIs(legend.objects[0], real_l_source)
+        self.assertEqual(len(root.legend_lines), 2)
+        self.assertEqual(legend.objects[1:], root.legend_lines)
+        self.assertEqual(draw_objects, root.legend_lines + [legend])
+        self.assertEqual(
+            [line.line_color for line in root.legend_lines],
+            [root.kBlack, root.kMagenta],
+        )
+        self.assertEqual([line.line_style for line in root.legend_lines], [1, 1])
+        self.assertEqual([line.line_width for line in root.legend_lines], [2, 2])
+        self.assertTrue(
+            all(not hasattr(line, "SetBinContent") for line in root.legend_lines)
+        )
+        self.assertEqual(
+            [entry[0] for entry in legend.entries],
+            [
+                "L: upstream 0 < NPE <= 2 diagnostic reference",
+                "B: physical pion control, NPE > 2, w0",
+                "A: same B population, w0*C",
+            ],
+        )
+
+        root = _FakeROOT()
+        real_sources = {"L": object(), "B": object()}
+        parent = {
+            "canonical_t_index": 0,
+            "children": ({"persisted_populations": {"A": {"available": False}}},),
+        }
+
+        def sparse_overlay_tile(
+            _root, _canvas, _pad_number, child, _variable, _kaon_window,
+            _draw_objects, legend_sources,
+        ):
+            self.assertFalse(child["persisted_populations"]["A"]["available"])
+            legend_sources.setdefault("L", real_sources["L"])
+            legend_sources.setdefault("B", real_sources["B"])
+            return True
+
+        with patch.object(plots, "_e8_overlay_tile", side_effect=sparse_overlay_tile):
+            self.assertTrue(
+                plots._e8_render_overlay_page(
+                    root, "ignored.pdf", parent, {"mm_min": 0.45, "mm_max": 0.55}
+                )
+            )
+        overlay_legend = root.legends[-1]
+        self.assertIs(overlay_legend.objects[0], real_sources["L"])
+        self.assertIs(overlay_legend.objects[1], real_sources["B"])
+        self.assertIsInstance(overlay_legend.objects[2], _FakeLegendLine)
 
     def test_e8_uses_persisted_matrix_values_with_shared_display_scale_and_mm_only_markers(self):
         artifact = _e8_frozen_artifact()

@@ -5039,6 +5039,14 @@ def _e8_population_maximum(payload):
     return maximum if maximum > 0.0 else 1.0
 
 
+def _e8_population_color(ROOT, population_name):
+    return {
+        "L": getattr(ROOT, "kBlue", 4),
+        "B": getattr(ROOT, "kBlack", 1),
+        "A": getattr(ROOT, "kMagenta", 6),
+    }[population_name]
+
+
 def _e8_overlay_tile(
     ROOT,
     canvas,
@@ -5054,13 +5062,9 @@ def _e8_overlay_tile(
     edges = _strict_edges(shape.get("edges"))
     if edges is None or not hasattr(ROOT, "TH1D"):
         return False
-    colors = (
-        getattr(ROOT, "kBlue", 4), getattr(ROOT, "kBlack", 1),
-        getattr(ROOT, "kMagenta", 6),
-    )
     histograms = []
     try:
-        for population_name, color in zip(_E8_POPULATIONS, colors):
+        for population_name in _E8_POPULATIONS:
             population = _mapping(shape.get(population_name))
             if population.get("available") is not True:
                 continue
@@ -5078,7 +5082,7 @@ def _e8_overlay_tile(
                 histogram.SetStats(0)
             for bin_index, value in enumerate(population["unit_area"], 1):
                 histogram.SetBinContent(bin_index, float(value))
-            _style_histogram(histogram, color)
+            _style_histogram(histogram, _e8_population_color(ROOT, population_name))
             histogram.Draw("hist" if not histograms else "hist same")
             histograms.append(histogram)
             draw_objects.append(histogram)
@@ -5121,13 +5125,21 @@ def _e8_overlay_tile(
 
 def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
     """Draw the explicit persisted-population key used by every E.8 overlay page."""
-    if not hasattr(ROOT, "TLegend"):
-        return False
-    if not isinstance(legend_sources, dict) or any(
-        name not in legend_sources for name in _E8_POPULATIONS
-    ):
+    if not hasattr(ROOT, "TLegend") or not isinstance(legend_sources, dict):
         return False
     try:
+        sources = dict(legend_sources)
+        for population_name in _E8_POPULATIONS:
+            if population_name in sources:
+                continue
+            if not hasattr(ROOT, "TLine"):
+                return False
+            proxy = ROOT.TLine(0.0, 0.0, 1.0, 0.0)
+            _style_histogram(proxy, _e8_population_color(ROOT, population_name))
+            if hasattr(proxy, "SetLineStyle"):
+                proxy.SetLineStyle(1)
+            sources[population_name] = proxy
+            draw_objects.append(proxy)
         canvas.cd()
         legend = ROOT.TLegend(0.03, 0.945, 0.97, 0.995)
         legend.SetBorderSize(0)
@@ -5135,17 +5147,17 @@ def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
         if hasattr(legend, "SetNColumns"):
             legend.SetNColumns(3)
         legend.AddEntry(
-            legend_sources["L"],
+            sources["L"],
             "L: upstream 0 < NPE <= 2 diagnostic reference",
             "l",
         )
         legend.AddEntry(
-            legend_sources["B"],
+            sources["B"],
             "B: physical pion control, NPE > 2, w0",
             "l",
         )
         legend.AddEntry(
-            legend_sources["A"],
+            sources["A"],
             "A: same B population, w0*C",
             "l",
         )
