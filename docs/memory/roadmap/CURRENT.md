@@ -1,12 +1,12 @@
 ---
 memory_schema: 2
 active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
-current_work_item: Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review
+current_work_item: Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first
 active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
-next_action: Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate
-baseline_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
+next_action: Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first
+baseline_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
 source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
-bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
+bundle_profile_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
 ---
 # Approved KaonLT roadmap
 
@@ -110,15 +110,19 @@ figure library is a completed intermediate presentation artifact. E.8.1 makes
 the ordinary procedure PDF the final presentation: integration
 `33c114e003421690fa9b15480a4200634accf8c3`, semantics repair
 `b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and sparse-legend/current reviewed
-source `0bf1281ebf44868b68ff808090436653eea6ed60` are SOURCE REVIEWED. No
-Method-A production correction or promotion, and no E.8.1 farm-evaluated commit,
-exists.
+procedure-PDF source `0bf1281ebf44868b68ff808090436653eea6ed60` are SOURCE
+REVIEWED. The canonical-five-setting bundle/profile infrastructure at
+`c25f9d8248f2acfb8b0443a482fc76781eb405ca` is also SOURCE REVIEWED and retains
+that analysis-source pin. No Method-A production correction or promotion, and
+no E.8.1 farm-evaluated commit, exists.
 
-Source review is not farm readiness. The E.8.1 profile must be a canonical
-five-setting package that pins the reviewed source and declares the frozen
-F.6.2 JSON plus every ordinary procedure PDF/page-manifest pair. The first
-detailed inspection is `Q4p4W2p74 / Left / highe`; only after that passes may
-the visual/runtime review broaden to the other settings.
+Source review is not farm readiness. Before requesting a farm run, verify that
+the E.8.1 profile pins the reviewed source and declares the frozen F.6.2 JSON
+plus every ordinary procedure PDF/page-manifest pair. This requirement is
+satisfied by the canonical-five-setting profile in bundle/profile commit
+`c25f9d8248f2acfb8b0443a482fc76781eb405ca`. The first detailed inspection is
+`Q4p4W2p74 / Left / highe`; only after that passes may the visual/runtime review
+broaden to the other settings.
 
 #### F.6.3 — full baseline procedure versus full procedure plus Method A
 
@@ -132,9 +136,10 @@ BLOCKED pending F.6.3 evidence — no automatic promotion.
 
 ## NEXT
 
-NEXT — create and review the E.8.1 canonical-five-setting bundle/profile
-commit, then run the established five-setting E.8.1 farm production. Inspect
-`Q4p4W2p74 / Left / highe` first: retained D.6-D.9, compact E.8 pages,
-visible L/B/A key, sparse-state visibility, explicit F.6.3 handoff, and no
+NEXT — run the established five-setting `Q4p4W2p74` E.8.1 farm production with
+`testing/pion_hgcer_validation_bundle_profile_e8_1.json`, collect the bundle,
+and inspect `Left / highe` first: retained D.6-D.9, compact E.8 context plus
+three atlas pages per persisted canonical-t parent and handoff, visible L/B/A
+key, sparse-state visibility, explicit F.6.3 handoff, and no
 production-promotion claim are required before broadening review. F.6.3 and
 F.6.4 remain BLOCKED as stated above.

@@ -2,11 +2,11 @@
   "active_state": {
     "active_objective": "Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF",
     "active_status": "DEVELOPMENT COMPLETE, FARM VALIDATION PENDING",
-    "baseline_commit": "0bf1281ebf44868b68ff808090436653eea6ed60",
-    "bundle_profile_commit": "b789d203e11f0927deb59ebcae9dc59fe8add4ae",
-    "current_work_item": "Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review",
+    "baseline_commit": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
+    "bundle_profile_commit": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
+    "current_work_item": "Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first",
     "memory_schema": 2,
-    "next_action": "Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate",
+    "next_action": "Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first",
     "source_commit": "0bf1281ebf44868b68ff808090436653eea6ed60"
   },
   "files": [
@@ -26,9 +26,9 @@
       "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
-      "bytes": 4826,
+      "bytes": 5200,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "bc940f6165c5fcd5122dbd09b17359973e3c011adb9d7609a2a4894b2d6ee8a0"
+      "sha256": "76b8ea0151a2bf5587e8fd2f6d1454524847d1ba7b470003554c44d676ea3c45"
     },
     {
       "bytes": 1999,
@@ -36,9 +36,9 @@
       "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
     },
     {
-      "bytes": 14110,
+      "bytes": 14387,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "35a617662ec000d1774675846d00da2421922c4f1756d55ba02bedb31ee1dc25"
+      "sha256": "64f97d5dffbbcafe7ee12e605002e6470fbe1143dc34a7276256c4952c862af8"
     },
     {
       "bytes": 2349,
@@ -151,9 +151,9 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 3440,
+      "bytes": 3719,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "f167a848602e701af5e68328b6504305aaa519c508685c0c9c8df43f4d3bcf8a"
+      "sha256": "a188a9116f9b2daf5ae9a6260e1d780be9e5668052e9ac133d0bec7423501fd8"
     },
     {
       "bytes": 1662,
@@ -281,9 +281,9 @@
       "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 6890,
+      "bytes": 7246,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "6bdb7e784fd3d48236a5a831f5e260111e467ba30a5d0b4f7ae0f695a85cc73c"
+      "sha256": "f41abc81e6b8da53d15b65dc144c9d42c4696d64d8e06b09633cbf3e95b0cead"
     },
     {
       "bytes": 1414,
@@ -312,6 +312,6 @@
     }
   ],
   "generated_date_utc": "2026-09-21",
-  "observed_git_head": "0bf1281ebf44868b68ff808090436653eea6ed60",
+  "observed_git_head": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
   "schema_version": 2
 }

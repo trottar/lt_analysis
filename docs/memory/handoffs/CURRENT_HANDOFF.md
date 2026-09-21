@@ -1,12 +1,12 @@
 ---
 memory_schema: 2
 active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
-current_work_item: Add the E.8.1 canonical-five-setting bundle profile and reconcile durable memory before farm review
+current_work_item: Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first
 active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
-next_action: Commit and review the E.8.1 canonical-five-setting bundle-profile reconciliation then run the five-setting Q4p4W2p74 farm gate
-baseline_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
+next_action: Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first
+baseline_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
 source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
-bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
+bundle_profile_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
 ---
 # Current KaonLT handoff
 
@@ -14,9 +14,11 @@ bundle_profile_commit: b789d203e11f0927deb59ebcae9dc59fe8add4ae
 
 - Repository: `trottar/lt_analysis`; branch: `test`.
 - First recheck `git status --short --branch`, `git rev-parse HEAD`, and the
-  matching active-state frontmatter. E.8.1 is SOURCE REVIEWED through observed
-  `test` HEAD `0bf1281ebf44868b68ff808090436653eea6ed60`; do not call it
-  permanently live after this handoff.
+  matching active-state frontmatter. Observed `test` HEAD is the E.8.1
+  bundle/profile commit `c25f9d8248f2acfb8b0443a482fc76781eb405ca`; the
+  reviewed E.8.1 procedure-PDF source remains
+  `0bf1281ebf44868b68ff808090436653eea6ed60`. Both are SOURCE REVIEWED; do not
+  call either a farm-evaluated identity.
 - Reviewed F.6.2 scientific source:
   `0b37af2a2927b08bdeaf897c545f290b55329cea`.
 - Accepted Fix.5 presentation source:
@@ -41,13 +43,16 @@ The standalone E.8 frozen-F.6.2 figure library is a completed intermediate
 presentation artifact. E.8.1 is SOURCE REVIEWED: the ordinary procedure-PDF
 integration is `33c114e003421690fa9b15480a4200634accf8c3`, the semantics repair
 is `b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and the sparse-legend/current
-reviewed source is `0bf1281ebf44868b68ff808090436653eea6ed60`.
+reviewed source is `0bf1281ebf44868b68ff808090436653eea6ed60`. The canonical
+five-setting bundle/profile infrastructure is SOURCE REVIEWED at
+`c25f9d8248f2acfb8b0443a482fc76781eb405ca` and preserves that source pin.
 
-E.8 overall is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. Build and review
-the new canonical-five-setting generic profile before any farm request. Source
-review is not farm readiness: the profile must pin the reviewed source and
-declare every required artifact. No E.8.1 farm-evaluated commit exists; the
-frontmatter bundle-profile field remains historical F.6.2.Fix.5 provenance.
+E.8 overall is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. Source review is
+not farm readiness: before requesting a farm run, verify that the current
+profile pins the reviewed source and declares every required artifact. The
+reviewed E.8.1 profile at `c25f9d8248f2acfb8b0443a482fc76781eb405ca` satisfies
+that rule with the frozen F.6.2 JSON and all five procedure PDF/manifest pairs.
+No E.8.1 farm-evaluated commit exists.
 
 Run the established five-setting `Q4p4W2p74` production, inspect `Left/highe`
 first, and only then broaden visual/runtime review. Its PDF/manifest must show

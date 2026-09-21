@@ -194,18 +194,22 @@ intermediate presentation artifact, not the final E.8 objective. The final
 E.8.1 ordinary procedure-PDF integration began at
 `33c114e003421690fa9b15480a4200634accf8c3`, received its semantics repair at
 `b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and its sparse-legend repair at
-the reviewed source `0bf1281ebf44868b68ff808090436653eea6ed60`. It remains
-presentation-only: no Method-A production correction or promotion has occurred.
+the reviewed procedure-PDF source `0bf1281ebf44868b68ff808090436653eea6ed60`.
+The canonical-five-setting E.8.1 bundle/profile infrastructure at
+`c25f9d8248f2acfb8b0443a482fc76781eb405ca` is also SOURCE REVIEWED and retains
+that analysis-source pin. It remains presentation-only: no Method-A production
+correction or promotion has occurred.
 
 DEVELOPMENT COMPLETE, FARM VALIDATION PENDING — E.8.1 requires a
 canonical-five-setting generic evidence bundle containing the accepted frozen
 F.6.2 JSON plus each ordinary procedure PDF/page-manifest pair. Source review
 is not farm readiness: before requesting a farm run, verify that the current
 bundle/profile pins the reviewed source and declares every artifact required for
-the gate. Inspect `Q4p4W2p74 / Left / highe` first, then broaden visual/runtime
-review only after that setting passes. No E.8.1 farm-evaluated commit is
-recorded. F.6.3 remains BLOCKED pending this E.8.1 gate; F.6.4 remains BLOCKED
-pending F.6.3 evidence. See
+the gate. That rule is satisfied by bundle/profile commit
+`c25f9d8248f2acfb8b0443a482fc76781eb405ca`. Inspect `Q4p4W2p74 / Left /
+highe` first, then broaden visual/runtime review only after that setting passes.
+No E.8.1 farm-evaluated commit is recorded. F.6.3 remains BLOCKED pending this
+E.8.1 gate; F.6.4 remains BLOCKED pending F.6.3 evidence. See
 decisions/f6-2-acceptance-refinement-measurement-contract.md and
 phases/phase-f6-method-a-production-promotion.md.
 
