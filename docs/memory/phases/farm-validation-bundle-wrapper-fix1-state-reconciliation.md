@@ -31,6 +31,9 @@ accepted yield, cuts, normalization, templates, or binning.
 
 ## Validation boundary
 
-Only `CURRENT.md`, this reconciliation record, and the integrity-only manifest
-change. No farm run is requested or claimed. Fresh user-supplied farm evidence
-remains required before any E.8.1 runtime conclusion.
+The actual changed-file scope is `CURRENT.md`, this reconciliation record, the
+integrity-only manifest, and `USER.md`. The `USER.md` change is an explicitly
+user-authorized durable collaboration-preference update requiring an exact,
+non-executed user Git handoff with each completed local change set. No farm run
+is requested or claimed. Fresh user-supplied farm evidence remains required
+before any E.8.1 runtime conclusion.
