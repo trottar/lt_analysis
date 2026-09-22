@@ -5,23 +5,23 @@ memory_schema: 3
 
 ## Active Objective
 
-Complete the staged KaonLT repository-memory M0-M9 refinement so a fresh
-ChatGPT/Codex session can recover authoritative state and the exact task
-without a giant continuation prompt, while preserving the accepted scientific
-and runtime frontier.
+Complete the E.8.1 presentation-only farm-validation gate for the frozen
+F.6.2 science across the canonical five `Q4p4W2p74` settings, while preserving
+the accepted baseline yield and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-Memory M9 — fresh-session integration audit. M8 finalized integrity-only
-manifest and dynamic bootstrap semantics without changing scientific/runtime
-state. See the [M8 phase record](phases/memory-m8-manifest-bootstrap-semantics.md).
+E.8.1 — canonical-five-setting ordinary procedure-PDF farm-validation gate.
+The reviewed procedure-PDF source and bundle/profile infrastructure are ready
+for a user-run farm gate; inspect `Q4p4W2p74 / Left / highe` first before
+broader visual/runtime review.
 
 ## Verified State
 
-- M0 through M7 are `SOURCE REVIEWED` repository-memory work.
-- M8 is `SOURCE REVIEWED`, contingent on its local acceptance criteria and the
-  subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
-  validation.
+- M0 through M9 are `SOURCE REVIEWED` repository-memory work. M9 completed the
+  repository-only fresh-session integration audit; it is not farm/runtime
+  validation. See the [M9 audit evidence](evidence/memory-m9-fresh-session-audit.md)
+  and [M9 phase record](phases/memory-m9-fresh-session-integration.md).
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
   [scientific closure evidence](evidence/f6-2-scientific-runtime-closure.md).
 - F.6.2.Fix.5 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -47,33 +47,25 @@ state. See the [M8 phase record](phases/memory-m8-manifest-bootstrap-semantics.m
 
 ## Blockers
 
-No known memory blocker prevents M9 after M8 source acceptance.
-Lifecycle-hook dispatch remains `BLOCKED` / `DEFERRED` and is not a dependency.
-Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
-F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
-F.6.3 evidence. The preserved scientific continuation is the five-setting
-`Q4p4W2p74` E.8.1 farm gate, with `Left / highe` inspected first, but it is
-not the active repository-development action during this migration.
+E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; no E.8.1
+farm-evaluated commit exists. F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4
+remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
+`BLOCKED` / `DEFERRED`, is non-required, and is not a dependency.
 
 ## Next Action
 
-NEXT — Memory M9: perform a genuine fresh-session integration audit using
-repository state only, proving recovery of repository identity requirements,
-active objective/NEXT, scientific frontier/evidence boundaries, Method-A/
-Method-B ownership, actor sequence, Linux/JLab context, and handoff semantics
-without a giant chat-continuation prompt.
+NEXT — E.8.1: perform the canonical-five-setting `Q4p4W2p74` farm-validation
+gate, inspect `Left / highe` first, and broaden to the remaining settings only
+after that detailed visual/runtime review passes.
 
 ## Success Criteria
 
-M9 must use a genuinely fresh ChatGPT/Codex-style session with no giant
-continuation prompt; recover dynamic branch/HEAD/worktree requirements, the
-active objective and exact NEXT from CURRENT, accepted scientific
-frontier/evidence, Method B diagnostic-only and Method A detached boundaries,
-production/diagnostic/presentation separation, source-review versus
-farm-runtime distinction, Codex/ChatGPT/user/farm actor sequence, Linux/JLab
-environment, and exceptional-handoff semantics. It must use task-directed
-expansion rather than whole-tree loading and state NO CHAT CONTINUATION REQUIRED
-only if that audit actually passes.
+E.8.1 requires direct fresh Jefferson Lab farm evidence for the canonical
+five-setting package, with the reviewed source/profile provenance, frozen F.6.2
+JSON identity, checker gates, requested structured artifacts, and readable
+ordinary procedure-PDF/pages independently inspected. `Left / highe` is the
+first detailed gate. A completed ZIP or local source review alone is not farm
+acceptance; do not broaden after a failed or incomplete first gate.
 
 ## Do Not Reopen Without New Evidence
 
@@ -85,9 +77,10 @@ merely for style.
 
 ## Relevant References
 
-- [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
-- [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M8 manifest/bootstrap semantics record](phases/memory-m8-manifest-bootstrap-semantics.md)
+- [M9 fresh-session audit evidence](evidence/memory-m9-fresh-session-audit.md)
+- [M9 fresh-session integration record](phases/memory-m9-fresh-session-integration.md)
+- [Approved dependency/status roadmap](roadmap/STATUS.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
+- [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)

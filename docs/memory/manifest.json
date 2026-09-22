@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4600,
+      "bytes": 4215,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4d96fc21763d38898c575b9ed493bd5bb5786611e46e1d2bbbb30f9fd75bb0a7"
+      "sha256": "996ec6d30d016e847d3bb5bfe961037fd9822e7a40f129577b55dc66230818e9"
     },
     {
       "bytes": 1978,
@@ -164,6 +164,11 @@
       "bytes": 13175,
       "path": "docs/memory/evidence/memory-m0-baseline-audit.md",
       "sha256": "d25cf08a56c6b83e014eee040df2701542126f9777e8f4f5b9767dab8bceeaf4"
+    },
+    {
+      "bytes": 7287,
+      "path": "docs/memory/evidence/memory-m9-fresh-session-audit.md",
+      "sha256": "3aca2567f599d54c7fb4bacd1ef875f0fcad7247c4805fae4b121f17521be46d"
     },
     {
       "bytes": 1628,
@@ -314,6 +319,11 @@
       "bytes": 3461,
       "path": "docs/memory/phases/memory-m8-manifest-bootstrap-semantics.md",
       "sha256": "38f9a0c2b4ae93a3adde05433ceab7856725f0f0967551ba09ae0c3a57ea0f72"
+    },
+    {
+      "bytes": 3712,
+      "path": "docs/memory/phases/memory-m9-fresh-session-integration.md",
+      "sha256": "9bef86e7ee28eb2b64cf2958ce0f51b83f78b7f378f80d05c8e050a9541d8019"
     },
     {
       "bytes": 3052,
