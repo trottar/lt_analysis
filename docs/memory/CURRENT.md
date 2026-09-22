@@ -12,15 +12,15 @@ and runtime frontier.
 
 ## Current Work Item
 
-Memory M5 — Linux/JLab operational-role separation. M4 normalized
-`MEMORY.md` into durable cross-phase knowledge; detailed chronology remains in
-canonical records. See the [M4 phase record](phases/memory-m4-durable-memory-normalization.md).
+Memory M6 — roadmap/source/history normalization. M5 established the
+Linux/JLab operational ownership split among the repository control records.
+See the [M5 phase record](phases/memory-m5-linux-jlab-operational-ownership.md).
 
 ## Verified State
 
-- M0, M1, M2, and M3 are `SOURCE REVIEWED` repository-memory work.
-- M4 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
-  [phase record](phases/memory-m4-durable-memory-normalization.md) and the
+- M0 through M4 are `SOURCE REVIEWED` repository-memory work.
+- M5 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
+  [phase record](phases/memory-m5-linux-jlab-operational-ownership.md) and the
   subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
   validation.
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -42,13 +42,13 @@ canonical records. See the [M4 phase record](phases/memory-m4-durable-memory-nor
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
-  representation ownership; the [M4 phase record](phases/memory-m4-durable-memory-normalization.md)
-  records this normalization. These are role-labeled historical identities, not
-  assertions about the dynamically queried live HEAD.
+  representation ownership; the [M5 phase record](phases/memory-m5-linux-jlab-operational-ownership.md)
+  records the current operational-memory normalization. These are role-labeled
+  historical identities, not assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-No known memory-migration blocker prevents M5 after M4 source acceptance.
+No known memory-migration blocker prevents M6 after M5 source acceptance.
 Lifecycle-hook dispatch remains `BLOCKED / DEFERRED` and is not a dependency.
 Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
 F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
@@ -58,18 +58,17 @@ not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — Memory M5: separate and normalize Linux/JLab operational ownership among
-AGENTS, USER, TOOLS, COMMUNICATION, CODEX, and MAINTENANCE without changing
-scientific/runtime state or introducing Windows transport infrastructure.
+NEXT — Memory M6: normalize roadmap/source/history ownership so roadmap
+records dependencies/status only, source indexes contain stable provenance
+rather than stored "live HEAD" claims, and chat/import/history surfaces remain
+historical navigation rather than active authority.
 
 ## Success Criteria
 
-M5 must establish one canonical owner per operational procedure in a
-Linux/JLab-oriented environment; keep AGENTS behavioral/scientific boundaries
-distinct from USER context; assign concise operational commands to TOOLS,
-farm-delivery communication to COMMUNICATION, source-changing workflow to
-CODEX, and memory maintenance to MAINTENANCE; and change no science or runtime
-behavior.
+M6 must retain roadmap dependency/status structure without a competing exact
+active action; remove static "live HEAD" semantics; use explicit role labels
+for fixed SHAs; keep chat/import/history as historical navigation; and change
+no scientific or runtime status.
 
 ## Do Not Reopen Without New Evidence
 
@@ -83,7 +82,7 @@ merely for style.
 
 - [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
 - [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M4 durable-MEMORY record](phases/memory-m4-durable-memory-normalization.md)
+- [M5 operational-ownership record](phases/memory-m5-linux-jlab-operational-ownership.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)

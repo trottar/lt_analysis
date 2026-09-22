@@ -2,29 +2,30 @@
 
 ## Record roles
 
-- **Active state:** `CURRENT.md` is the concise current state and authoritative
-  immediate next action.
-- **Durable knowledge:** `MEMORY.md` preserves reusable rules, identities, and
-  decisions after evidence is secure.
+- **Active state:** `CURRENT.md` is the concise sole ordinary active-state
+  authority and owns the exact next action.
+- **Durable knowledge:** `MEMORY.md` preserves reusable cross-phase rules,
+  identities, and decisions after evidence is secure.
 - **Exceptional transfer:** `handoffs/CURRENT_HANDOFF.md` records exceptional
   transfer state only and cannot override CURRENT.
 - **Chronology:** historical/chat indexes help a new session navigate; they do
   not outrank source or evidence.
 - **Roadmap:** `roadmap/CURRENT.md` preserves approved dependency/status
   structure and does not own the exact active next action.
-- **Evidence:** `evidence/` contains farm/runtime gate records and is preserved
-  before any related summary is shortened.
-- **User context:** `USER.md` contains stable collaboration preferences and
-  operating context, not active state or scientific evidence.
-- **Operational references:** `TOOLS.md` contains concise Linux/JLab-oriented
-  command conventions, not detailed farm procedure ownership.
+- **Evidence:** `evidence/` contains farm/runtime gate records; `phases/`
+  contains implementation and fix chronology; `decisions/` contains contracts.
+- **User context:** `USER.md` contains stable collaboration context.
+- **Operations:** `TOOLS.md` contains concise Linux/JLab command and path
+  references; `COMMUNICATION.md` owns farm request/return communication.
+- **Codex workflow:** `CODEX.md` owns source-changing workflow and contract
+  policy.
 - **Generalized lessons:** `LEARNINGS.md` contains reusable lessons, not phase
   chronology or current status.
 
 Maintain one active objective and one authoritative next action. Do not create
-competing live-state summaries.
+competing live-state summaries or copy another record's detailed procedure.
 
-## Startup Contract Health
+## Startup contract health
 
 At substantial-work start, establish actual branch, HEAD, and worktree state.
 Then read these five files in full, in this exact order:
@@ -38,36 +39,35 @@ Then read these five files in full, in this exact order:
 Only after the five-file core is read may task-directed expansion use CURRENT
 direct references, the exact active task, and required canonical
 evidence/decision/phase records. Do not eagerly load the whole hierarchy. Keep
-`CURRENT.md` as the concise sole ordinary active-state authority under active
-schema 3. The handoff is exceptional-only, and the roadmap contains no exact
-active next action. Maintain this contract through the control records without
-turning any of them into a duplicate current-state summary.
+`CURRENT.md` as the concise sole ordinary active-state authority under schema
+3. The handoff is exceptional-only, and the roadmap contains no exact active
+next action.
 
 ## Size and semantic triggers
 
 The active files `CURRENT.md`, `MEMORY.md`, and
 `handoffs/CURRENT_HANDOFF.md` have a 16 KiB soft target and 32 KiB hard limit.
 A soft-limit warning calls for focused consolidation; a hard-limit failure
-requires maintenance before further expansion.
+requires maintenance before further expansion. Final role-specific threshold
+redesign belongs to M7.
 
 Perform maintenance after a meaningful implementation or review, accepted farm
 evidence, regression, phase decision, changed blocker, or changed next action.
-Do not summarize a summary recursively: recover the supporting source or
+Do not recursively summarize summaries: recover the supporting source or
 evidence first, retain its identity and path, then write the shortest accurate
 statement needed for future work.
 
-## Required procedure
+## Required maintenance sequence
 
-1. Preserve or link the authoritative evidence, source identity, and relevant
-   diff before compacting prose.
+1. Preserve or link authoritative evidence, source identity, and relevant diff
+   before compacting prose.
 2. Update only the record whose role changed; do not restate scientific status
    in unrelated chronology or chat records.
 3. Keep accepted runtime, source review, active work, deferred work, and next
    actions explicitly distinct.
-4. Run `python tools/update_memory_manifest.py --write`,
-   `python tools/update_memory_manifest.py --check`, and
-   `python tools/check_memory_health.py` after structural memory changes.
+4. Discover `<PYTHON>` as described in [TOOLS.md](TOOLS.md), then regenerate
+   and check the manifest and run memory health.
 5. Inspect the resulting diff and report the exact remaining next action.
 
 The generated manifest is an integrity index, never a scientific, source, or
-runtime authority.
+runtime authority. Manifest semantics remain unchanged until M8.

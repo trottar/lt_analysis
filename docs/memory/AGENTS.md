@@ -63,3 +63,13 @@ execution, or claim farm/runtime validation. ChatGPT independently audits the
 actual diff. The user alone commits/pushes accepted changes and runs farm
 validation. Workflow: Codex local changes -> ChatGPT audit -> user commit/push
 -> user farm run -> ChatGPT evidence review.
+
+## Operational ownership
+
+- [USER.md](USER.md) owns stable collaboration and delivery preferences.
+- [TOOLS.md](TOOLS.md) owns concise Linux/POSIX/JLab commands and path facts.
+- [COMMUNICATION.md](COMMUNICATION.md) owns farm request/return interaction.
+- [CODEX.md](CODEX.md) owns source-changing workflow and contract policy.
+- [MAINTENANCE.md](MAINTENANCE.md) owns repository-memory maintenance.
+
+Use those specialized owners rather than duplicating their procedures here.

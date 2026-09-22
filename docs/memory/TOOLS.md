@@ -1,8 +1,10 @@
 # KaonLT tools and operational commands
 
-## Repository identity
+This concise reference owns generic Linux/POSIX repository operations and
+durable Jefferson Lab environment facts. Command output never replaces reading
+the actual source or diff.
 
-At substantial-work start, establish the actual checkout state:
+## Repository identity
 
 ```sh
 git status --short --branch
@@ -10,21 +12,20 @@ git rev-parse HEAD
 git branch --show-current
 ```
 
-For a diff audit:
+## Diff and source inspection
 
 ```sh
+git diff
 git diff --check
 git diff --name-only
 git diff --stat
+git show --stat --oneline HEAD
 ```
-
-These commands do not replace inspection of the actual diff.
 
 ## Memory controls
 
-Discover a working Python interpreter and represent it as `<PYTHON>`. On the
-intended Linux/JLab environment this will normally be an available interpreter
-such as `python3`, but the executable must be discovered rather than assumed.
+Discover a working interpreter and represent it as `<PYTHON>`; do not assume a
+workstation-specific executable.
 
 ```sh
 <PYTHON> -B tools/check_memory_health.py --root .
@@ -33,33 +34,35 @@ such as `python3`, but the executable must be discovered rather than assumed.
 <PYTHON> -B tools/memory_bootstrap.py --root . --json
 ```
 
-## Local source review
+## JLab environment
 
-Use lightweight repository inspection as appropriate:
+- Farm shell: `tcsh`.
+- Repository and analysis root:
+  `/group/c-kaonlt/USERS/trottar/lt_analysis`.
+- Analysis artifact root:
+  `/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/KaonLT`.
+- Transferable bundle root: `/volatile/hallc/c-kaonlt/trottar/globus`.
+
+Farm runtime remains farm-only; do not represent ROOT/PyROOT or full-analysis
+behavior as locally validated. A project-wide farm Python executable is not
+assumed here.
+
+## Provenance inspection
 
 ```sh
-git diff
-git show --stat --oneline HEAD
 git status --short
+git rev-parse HEAD
+git show --stat --oneline <commit>
+git diff <base>..<head> -- <path>
 ```
 
-Do not represent ROOT or farm runtime commands as locally validated behavior.
+## Procedure ownership
 
-## JLab farm boundary
+- [farm-validation-bundle-procedure.md](decisions/farm-validation-bundle-procedure.md)
+  owns detailed farm packaging.
+- [COMMUNICATION.md](COMMUNICATION.md) owns farm request/return format.
+- [CODEX.md](CODEX.md) owns source-changing workflow.
+- [MAINTENANCE.md](MAINTENANCE.md) owns memory maintenance.
 
-The established farm shell is `tcsh`; actual analysis runtime is farm-only.
-The detailed packaging procedure belongs to
-[farm-validation-bundle-procedure.md](decisions/farm-validation-bundle-procedure.md),
-and farm delivery communication belongs to [COMMUNICATION.md](COMMUNICATION.md).
-
-## Ownership pointers
-
-- [AGENTS.md](AGENTS.md) — behavioral and scientific boundaries.
-- [CURRENT.md](CURRENT.md) — active state.
-- [USER.md](USER.md) — collaboration preferences.
-- [COMMUNICATION.md](COMMUNICATION.md) — farm-delivery communication.
-- [CODEX.md](CODEX.md) — source-changing Codex workflow.
-- [MAINTENANCE.md](MAINTENANCE.md) — memory maintenance.
-
-This is a concise operations reference, not active state, scientific evidence,
-a farm validation-bundle procedure, or Windows transport infrastructure.
+This record does not own scientific status, an active NEXT, delivery style, or
+phase-specific farm commands.

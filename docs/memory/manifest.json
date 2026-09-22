@@ -4,24 +4,24 @@
   },
   "files": [
     {
-      "bytes": 3046,
+      "bytes": 3523,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "64acd29f232524cbeca94bb686d0a1b7b43a984f87319f8e7faa3f9e537681fa"
+      "sha256": "3bebc687a618229f409d7f01a53bf216cb05aec3d4c0117ed082788629bf94a5"
     },
     {
-      "bytes": 1416,
+      "bytes": 1997,
       "path": "docs/memory/CODEX.md",
-      "sha256": "4a11badb8fcbabe583d59e97c6d3f44e30aa5809a3ec5c7c5a603db39dc4f32d"
+      "sha256": "70923a0110b091c0fb9af5e245060523adde24a6584ead225f1d76800a57d863"
     },
     {
-      "bytes": 1791,
+      "bytes": 2218,
       "path": "docs/memory/COMMUNICATION.md",
-      "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
+      "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4284,
+      "bytes": 4239,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "0fd82b9ca0e3e809cc141426786207bd822689b46971e1634dd2edc939eace3c"
+      "sha256": "4b77ca3a5eb3ee2a8e19d5c3115d917d7a806ef05aca9c4a7c9555ac9acf8d20"
     },
     {
       "bytes": 1978,
@@ -29,9 +29,9 @@
       "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
     },
     {
-      "bytes": 3393,
+      "bytes": 3436,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "ef5c3a6d7f85044fb53bc4abe115223f5fc09fcaa867b66fda8d3e6b51d2d920"
+      "sha256": "3cca372ec7896a8f9509ca88d743ed3c11d8462f4cceea3fbcd99a68757f2340"
     },
     {
       "bytes": 5041,
@@ -39,19 +39,19 @@
       "sha256": "cf5a11e8f22e142b3837c47edebd23db267ab9401bbe8ea6478c773fa21f18f3"
     },
     {
-      "bytes": 3154,
+      "bytes": 2752,
       "path": "docs/memory/README.md",
-      "sha256": "85660c2f336d4e925b8731a2f636ae773b64ab419e2c25931d9773469ffc96cf"
+      "sha256": "25d6702d733958b04baefe83cebb8ece615919ab2fd74fa5321387426c6e2152"
     },
     {
-      "bytes": 1921,
+      "bytes": 1878,
       "path": "docs/memory/TOOLS.md",
-      "sha256": "98e4837f7b1dbce65b3602339505370b59707a55da8c8d193846410c47404c98"
+      "sha256": "f9f77d5195dc25f485670d34d841129d2120f2fb170217a6821a166866aab776"
     },
     {
-      "bytes": 1762,
+      "bytes": 1859,
       "path": "docs/memory/USER.md",
-      "sha256": "62663281cb7eb15603b7faab347249db39cde606a07304a93c2b5994bb163df1"
+      "sha256": "43a4cdc33a0cbaba3f1292001754e6d2c9ed082b43d4bd6e25d81e7664a21401"
     },
     {
       "bytes": 1037,
@@ -294,6 +294,11 @@
       "sha256": "d20126a3c53541d43476c1b419723ac6e4e004d73af9d5a30deddba5980d8799"
     },
     {
+      "bytes": 4973,
+      "path": "docs/memory/phases/memory-m5-linux-jlab-operational-ownership.md",
+      "sha256": "4622e8d029b235a4c3c740f0436bb2551e9b3241af280a76b87139ba072f88a6"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -355,6 +360,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "79ab4c7b900c08a0a477e4019e0977f10873a2f9",
+  "observed_git_head": "186998d2dd31c1269c4eff81baa0180f58795bcb",
   "schema_version": 2
 }
