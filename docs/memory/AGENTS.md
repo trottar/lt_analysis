@@ -37,9 +37,10 @@ Only after those five are read in full may a session expand selectively from:
 Do not eagerly load the whole memory hierarchy. Identify the active objective,
 evidence boundary, blockers, and NEXT from the core; inspect current source or
 diff whenever implementation is involved; and distinguish source proof from
-farm/runtime proof. `CURRENT.md` is the sole ordinary active-state authority.
-Schema-2 mirrored metadata remains temporary compatibility representation until
-M3; it does not create independent semantic authority.
+farm/runtime proof. Schema 3 is active: `CURRENT.md` is the sole ordinary
+active-state authority, the handoff is exceptional transfer state only, and the
+roadmap preserves dependency/status structure without owning the exact next
+action.
 
 ## Scientific and validation boundaries
 

@@ -205,6 +205,7 @@ def check_schema3_current(root: Path, text: str) -> list[str]:
         errors.append("schema-3 CURRENT.md NEXT — statement must occur in ## Next Action")
     errors.extend(check_schema3_handoff(root))
     errors.extend(check_schema3_bootstrap(root))
+    errors.extend(check_schema3_roadmap(root))
     return errors
 
 
@@ -238,6 +239,22 @@ def check_schema3_handoff(root: Path) -> list[str]:
         errors.append("schema-3 handoff must state it cannot override CURRENT.md")
     if "CURRENT.md" not in contents.get("Resume", ""):
         errors.append("schema-3 handoff Resume must point to CURRENT.md")
+    return errors
+
+
+def check_schema3_roadmap(root: Path) -> list[str]:
+    """Ensure the schema-3 roadmap preserves dependencies without active state."""
+    roadmap = root / "docs/memory/roadmap/CURRENT.md"
+    if not roadmap.is_file():
+        return ["missing schema-3 roadmap: docs/memory/roadmap/CURRENT.md"]
+    text = roadmap.read_text(encoding="utf-8")
+    errors: list[str] = []
+    if text.startswith("---\n"):
+        errors.append("schema-3 roadmap must not contain active-state frontmatter")
+    if re.search(r"^## NEXT\s*$", text, re.MULTILINE):
+        errors.append("schema-3 roadmap must not contain ## NEXT")
+    if "NEXT —" in text:
+        errors.append("schema-3 roadmap must not contain active NEXT — statement")
     return errors
 
 
@@ -479,6 +496,10 @@ def write_schema3_fixture(root: Path) -> None:
         "Resume from CURRENT.md and then only task-relevant canonical references.\n",
         encoding="utf-8",
     )
+    (memory / "roadmap/CURRENT.md").write_text(
+        "# Fixture roadmap\n\n## Phase F\n\nACTIVE — fixture dependency/status structure.\n",
+        encoding="utf-8",
+    )
     (memory / "USER.md").write_text("fixture user context\n", encoding="utf-8")
     agents = memory / "AGENTS.md"
     agents.write_text(
@@ -575,6 +596,20 @@ def self_test() -> None:
         write_schema3_fixture(root)
         errors, warnings = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
         assert not errors and not warnings, (errors, warnings)
+        roadmap = root / "docs/memory/roadmap/CURRENT.md"
+        roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
+        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert any("roadmap must not contain active-state frontmatter" in error for error in errors), errors
+        roadmap.write_text("# Fixture roadmap\n\n## NEXT\n\nfixture\n", encoding="utf-8")
+        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert any("roadmap must not contain ## NEXT" in error for error in errors), errors
+        roadmap.write_text("# Fixture roadmap\n\nNEXT — fixture\n", encoding="utf-8")
+        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert any("roadmap must not contain active NEXT" in error for error in errors), errors
+        roadmap.write_text(
+            "# Fixture roadmap\n\n## Phase F\n\nACTIVE — fixture dependency/status structure.\n",
+            encoding="utf-8",
+        )
         current = root / "docs/memory/CURRENT.md"
         current.write_text(
             current.read_text(encoding="utf-8").replace("NEXT — Complete the one fixture action.", "fixture"),

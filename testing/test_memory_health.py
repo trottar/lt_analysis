@@ -113,6 +113,30 @@ class MemoryHealthCompatibilityTests(unittest.TestCase):
             self.write_schema3(root)
             self.assertEqual(self.run_checks(root), [])
 
+    def test_schema3_roadmap_frontmatter_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_schema3(root)
+            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
+            self.assert_error(self.run_checks(root), "roadmap must not contain active-state frontmatter")
+
+    def test_schema3_roadmap_next_heading_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_schema3(root)
+            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap.write_text("# Fixture roadmap\n\n## NEXT\n\nfixture\n", encoding="utf-8")
+            self.assert_error(self.run_checks(root), "roadmap must not contain ## NEXT")
+
+    def test_schema3_roadmap_next_statement_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_schema3(root)
+            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap.write_text("# Fixture roadmap\n\nNEXT — fixture\n", encoding="utf-8")
+            self.assert_error(self.run_checks(root), "roadmap must not contain active NEXT")
+
     def test_schema3_extra_frontmatter_field_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -1,19 +1,12 @@
 {
   "active_state": {
-    "active_objective": "Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF",
-    "active_status": "DEVELOPMENT COMPLETE, FARM VALIDATION PENDING",
-    "baseline_commit": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
-    "bundle_profile_commit": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
-    "current_work_item": "Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first",
-    "memory_schema": 2,
-    "next_action": "Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first",
-    "source_commit": "0bf1281ebf44868b68ff808090436653eea6ed60"
+    "memory_schema": 3
   },
   "files": [
     {
-      "bytes": 3021,
+      "bytes": 3046,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "5b80c3dc1dcc47ec6a43797da4eea743014e40a3de598b9b14f58cdd7a03187f"
+      "sha256": "64acd29f232524cbeca94bb686d0a1b7b43a984f87319f8e7faa3f9e537681fa"
     },
     {
       "bytes": 1416,
@@ -26,9 +19,9 @@
       "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
-      "bytes": 5200,
+      "bytes": 4200,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "76b8ea0151a2bf5587e8fd2f6d1454524847d1ba7b470003554c44d676ea3c45"
+      "sha256": "d16dbb36531d4eb70893c7332c8e23144146312b78050edd6ce9920270f26787"
     },
     {
       "bytes": 1978,
@@ -36,9 +29,9 @@
       "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
     },
     {
-      "bytes": 3139,
+      "bytes": 3393,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "ca17f9c862930414aeac8522e364802b7ecbc8f1786c142c30513b97270a503a"
+      "sha256": "ef5c3a6d7f85044fb53bc4abe115223f5fc09fcaa867b66fda8d3e6b51d2d920"
     },
     {
       "bytes": 14387,
@@ -46,9 +39,9 @@
       "sha256": "64f97d5dffbbcafe7ee12e605002e6470fbe1143dc34a7276256c4952c862af8"
     },
     {
-      "bytes": 3139,
+      "bytes": 3154,
       "path": "docs/memory/README.md",
-      "sha256": "416ab0e77ff1f3e02e20062e3fb7420502424987f97fe9453c0b50ab9fa76ddd"
+      "sha256": "85660c2f336d4e925b8731a2f636ae773b64ab419e2c25931d9773469ffc96cf"
     },
     {
       "bytes": 1921,
@@ -181,9 +174,9 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
-      "bytes": 3719,
+      "bytes": 323,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
-      "sha256": "a188a9116f9b2daf5ae9a6260e1d780be9e5668052e9ac133d0bec7423501fd8"
+      "sha256": "c711f801f776042aa3761077658e6cedb0d657c9ef1e151a960631bf0399f14d"
     },
     {
       "bytes": 1662,
@@ -291,6 +284,11 @@
       "sha256": "4dcd374d95f80f06d20dad763e92f9c678edff7905eb1c362d84a85fd3f90624"
     },
     {
+      "bytes": 3442,
+      "path": "docs/memory/phases/memory-m3-single-active-state.md",
+      "sha256": "f2291ffe3b91bc5d92a854dbc556c22d82610333a8573319245af5b273487059"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -321,9 +319,9 @@
       "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 7246,
+      "bytes": 6357,
       "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "f41abc81e6b8da53d15b65dc144c9d42c4696d64d8e06b09633cbf3e95b0cead"
+      "sha256": "18482fd4511363a0c0c148c18e7751268f05fbb1fc7791300669c151930f9c98"
     },
     {
       "bytes": 1414,
@@ -352,6 +350,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "bc02e09728f2decb624e0101b5c53132190981b3",
+  "observed_git_head": "92289ff1dadc294eb42ac52b5e716be67ccadf98",
   "schema_version": 2
 }

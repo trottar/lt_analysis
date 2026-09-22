@@ -1,103 +1,87 @@
 ---
-memory_schema: 2
-active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
-current_work_item: Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first
-active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
-next_action: Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first
-baseline_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
-source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
-bundle_profile_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
+memory_schema: 3
 ---
 # Current KaonLT development state
 
 ## Active Objective
 
-Farm-validate the final E.8.1 streamlined ordinary full-background-subtraction
-procedure PDF through the reviewed canonical-five-setting evidence
-bundle/profile.
+Complete the staged KaonLT repository-memory M0-M9 refinement so a fresh
+ChatGPT/Codex session can recover authoritative state and the exact task
+without a giant continuation prompt, while preserving the accepted scientific
+and runtime frontier.
 
 ## Current Work Item
 
-F.6.2 and F.6.2.Fix.5 are CLOSED / RUNTIME VALIDATED; see the
-[scientific closure record](evidence/f6-2-scientific-runtime-closure.md) and
-[Fix.5 closure record](evidence/f6-2-fix5-presentation-runtime-closure.md).
-The standalone E.8 frozen-F.6.2 figure library was completed as an intermediate
-presentation artifact. The final E.8.1 ordinary procedure-PDF source
-`0bf1281ebf44868b68ff808090436653eea6ed60` and canonical-five-setting
-bundle/profile infrastructure `c25f9d8248f2acfb8b0443a482fc76781eb405ca` are
-SOURCE REVIEWED.
+Memory M4 — durable MEMORY normalization. M3 activated schema 3, made
+`CURRENT.md` the sole ordinary active-state authority, and removed ordinary
+active-state mirroring; see the [M3 phase record](phases/memory-m3-single-active-state.md).
 
 ## Verified State
 
-- F.6.2 scientific validation is CLOSED / RUNTIME VALIDATED from its accepted
-  scientific bundle; see the [scientific closure record](evidence/f6-2-scientific-runtime-closure.md).
-- F.6.2.Fix.5 presentation repair is CLOSED / RUNTIME VALIDATED from the
-  accepted fresh presentation bundle; see the [Fix.5 closure record](evidence/f6-2-fix5-presentation-runtime-closure.md).
-- The accepted yield remains the baseline. Method B remains diagnostic only;
-  Method A remains detached and non-production.
+- M0, M1, and M2 are `SOURCE REVIEWED` repository-memory work.
+- M3 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
+  [phase record](phases/memory-m3-single-active-state.md) and the subsequent
+  ChatGPT actual-diff audit/user push workflow; it is not runtime validation.
+- F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
+  [scientific closure evidence](evidence/f6-2-scientific-runtime-closure.md).
+- F.6.2.Fix.5 is `CLOSED / RUNTIME VALIDATED`; see the direct
+  [presentation closure evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
+- E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
+  remains the baseline; Method B remains diagnostic/cross-check only; Method A
+  remains detached and non-production.
 
 ## Source / Evidence Identity
 
-The reviewed F.6.2 scientific source is
-`0b37af2a2927b08bdeaf897c545f290b55329cea`. The accepted scientific JSON
-SHA-256 is
-`5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1`, with
-artifact/validation fingerprints `ee713b70de898bad8fa61164cbc8a54886af1ea1eb1e712ed95de17df8890cd0` /
-`7edc73fce20ad7dc7622b8c23a7ba7e8986e367ace605884e010945595370b3b`.
-
-The accepted Fix.5 presentation source
-`c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
-`b789d203e11f0927deb59ebcae9dc59fe8add4ae` are upstream presentation-artifact
-provenance only; they do not replace the scientific source identity.
-
-The E.8.1 initial integration source is
-`33c114e003421690fa9b15480a4200634accf8c3`; the semantics repair is
-`b02d939d9187ec656aa629f03e528fde0ca0cc0d`; and the sparse-legend repair is
-the reviewed procedure-PDF source `0bf1281ebf44868b68ff808090436653eea6ed60`.
-The canonical-five-setting E.8.1 bundle/profile commit is
-`c25f9d8248f2acfb8b0443a482fc76781eb405ca`; it is SOURCE REVIEWED
-evidence-packaging infrastructure and does not replace the reviewed analysis
-source. No E.8.1 farm-evaluated commit is recorded.
+- E.8.1 reviewed procedure-PDF source:
+  `0bf1281ebf44868b68ff808090436653eea6ed60`.
+- E.8.1 canonical-five-setting bundle/profile source:
+  `c25f9d8248f2acfb8b0443a482fc76781eb405ca`.
+- F.6.2 reviewed scientific source:
+  `0b37af2a2927b08bdeaf897c545f290b55329cea`; its accepted closure owners are
+  the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
+  [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
+- The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
+  representation ownership; the [M3 phase record](phases/memory-m3-single-active-state.md)
+  records this migration. These are role-labeled historical identities, not
+  assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-E.8 overall is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING. Source review is
-not farm readiness: before requesting a farm run, verify that the current
-validation bundle/profile pins the reviewed source and declares every artifact
-required for the gate. That requirement is satisfied by E.8.1 bundle/profile
-commit `c25f9d8248f2acfb8b0443a482fc76781eb405ca`. F.6.3 remains BLOCKED
-pending the targeted E.8.1 farm gate; F.6.4 remains BLOCKED pending F.6.3
-evidence.
+No known memory-migration blocker prevents M4 after M3 source acceptance.
+Lifecycle-hook dispatch remains `BLOCKED / DEFERRED` and is not a dependency.
+Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
+F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
+F.6.3 evidence. The preserved scientific continuation is the five-setting
+`Q4p4W2p74` E.8.1 farm gate, with `Left / highe` inspected first, but it is
+not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — run the established five-setting `Q4p4W2p74` E.8.1 farm production with
-`testing/pion_hgcer_validation_bundle_profile_e8_1.json`, collect the bundle,
-and inspect `Left / highe` first. Its ordinary procedure PDF and page manifest
-must show D.6-D.9, the compact E.8 context plus three atlas pages per persisted
-canonical-t parent and handoff, a visible L/B/A key, sparse-state pages without
-parent suppression, and the explicit F.6.3 handoff before review broadens to
-the remaining settings.
+NEXT — Memory M4: normalize MEMORY.md into durable cross-phase knowledge only,
+moving detailed chronology/current-gate material to verified canonical
+phase/evidence/decision records without losing unique scientific provenance.
 
 ## Success Criteria
 
-The bundle must contain the frozen accepted F.6.2 JSON and ordinary procedure
-PDF/page-manifest pairs for `Left / lowe`, `Left / highe`, `Center / lowe`,
-`Center / highe`, and `Right / highe`. The first detailed acceptance inspection
-remains `Q4p4W2p74 / Left / highe`; it does not redefine the collector/profile
-as a one-setting package.
+M4 must preserve durable scientific ownership and evidence-precedence rules,
+trace detailed chronology to canonical deep records before removing it from
+MEMORY, preserve every unique provenance hash and identity, avoid changing
+scientific status or production behavior, and leave `CURRENT.md` as the sole
+ordinary active-state authority.
 
 ## Do Not Reopen Without New Evidence
 
-Do not reopen accepted F.1 through F.6.2 scientific validation, alter the
-baseline yield, or promote Method A. E.8 must consume the frozen F.6.2 JSON
-only; it cannot recalculate Method-A science, support/OOD, weights, or yields.
-No Method-A production promotion has occurred.
+Do not reopen accepted F.1 through F.6.2 science without concrete regression
+evidence, alter the accepted baseline yield, promote Method A, or turn Method B
+into production. E.8 remains presentation-only and consumes frozen accepted
+F.6.2 science. Later memory phases must not rewrite canonical runtime evidence
+merely for style.
 
 ## Relevant References
 
+- [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
+- [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
+- [M3 single-active-state record](phases/memory-m3-single-active-state.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
-- [F.6.2 measurement contract](decisions/f6-2-acceptance-refinement-measurement-contract.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
-- [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)

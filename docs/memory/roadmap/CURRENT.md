@@ -1,13 +1,3 @@
----
-memory_schema: 2
-active_objective: Farm-validate the final E.8.1 streamlined full-background-subtraction procedure PDF
-current_work_item: Run the canonical-five-setting E.8.1 farm gate and inspect Left/highe first
-active_status: DEVELOPMENT COMPLETE, FARM VALIDATION PENDING
-next_action: Run the five-setting Q4p4W2p74 E.8.1 farm gate with the new profile, collect the bundle, and inspect Left/highe first
-baseline_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
-source_commit: 0bf1281ebf44868b68ff808090436653eea6ed60
-bundle_profile_commit: c25f9d8248f2acfb8b0443a482fc76781eb405ca
----
 # Approved KaonLT roadmap
 
 This roadmap records approved Phase-F structure. It does not make a runtime
@@ -134,12 +124,8 @@ Method-A factor.
 
 BLOCKED pending F.6.3 evidence — no automatic promotion.
 
-## NEXT
+## Active-state ownership
 
-NEXT — run the established five-setting `Q4p4W2p74` E.8.1 farm production with
-`testing/pion_hgcer_validation_bundle_profile_e8_1.json`, collect the bundle,
-and inspect `Left / highe` first: retained D.6-D.9, compact E.8 context plus
-three atlas pages per persisted canonical-t parent and handoff, visible L/B/A
-key, sparse-state visibility, explicit F.6.3 handoff, and no
-production-promotion claim are required before broadening review. F.6.3 and
-F.6.4 remain BLOCKED as stated above.
+The exact active objective, blockers, and next action are owned by
+[CURRENT.md](../CURRENT.md). This roadmap preserves approved Phase-F
+dependency and status structure only.

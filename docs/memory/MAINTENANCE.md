@@ -6,8 +6,12 @@
   immediate next action.
 - **Durable knowledge:** `MEMORY.md` preserves reusable rules, identities, and
   decisions after evidence is secure.
-- **Chronology and continuation:** handoffs and historical/chat indexes help a
-  new session navigate; they do not outrank source or evidence.
+- **Exceptional transfer:** `handoffs/CURRENT_HANDOFF.md` records exceptional
+  transfer state only and cannot override CURRENT.
+- **Chronology:** historical/chat indexes help a new session navigate; they do
+  not outrank source or evidence.
+- **Roadmap:** `roadmap/CURRENT.md` preserves approved dependency/status
+  structure and does not own the exact active next action.
 - **Evidence:** `evidence/` contains farm/runtime gate records and is preserved
   before any related summary is shortened.
 - **User context:** `USER.md` contains stable collaboration preferences and
@@ -34,10 +38,10 @@ Then read these five files in full, in this exact order:
 Only after the five-file core is read may task-directed expansion use CURRENT
 direct references, the exact active task, and required canonical
 evidence/decision/phase records. Do not eagerly load the whole hierarchy. Keep
-`CURRENT.md` as the concise ordinary active-state authority; schema-2 mirrored
-metadata is transitional compatibility until M3, not a second authority.
-Maintain this contract through the control records without turning any of them
-into a duplicate current-state summary.
+`CURRENT.md` as the concise sole ordinary active-state authority under active
+schema 3. The handoff is exceptional-only, and the roadmap contains no exact
+active next action. Maintain this contract through the control records without
+turning any of them into a duplicate current-state summary.
 
 ## Size and semantic triggers
 
