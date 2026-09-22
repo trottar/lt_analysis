@@ -76,6 +76,11 @@
       "sha256": "9c5d936f0ac1939095454f679706a286442d8684fa6645712f66764ed5090e3a"
     },
     {
+      "bytes": 7648,
+      "path": "docs/memory/decisions/memory-system-refinement-m0-m9-plan.md",
+      "sha256": "f07fbaf5bc6e8f5fb9327479e0a37813a0b6cae32ce506e08a72e15ad988e758"
+    },
+    {
       "bytes": 575,
       "path": "docs/memory/evidence/README.md",
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
@@ -144,6 +149,11 @@
       "bytes": 2566,
       "path": "docs/memory/evidence/f6-2-scientific-runtime-closure.md",
       "sha256": "76e9bd7e684eaf7479ed4a31b4b7061e7fc3d73146a1c00994697692a9ac166a"
+    },
+    {
+      "bytes": 13175,
+      "path": "docs/memory/evidence/memory-m0-baseline-audit.md",
+      "sha256": "d25cf08a56c6b83e014eee040df2701542126f9777e8f4f5b9767dab8bceeaf4"
     },
     {
       "bytes": 1628,
@@ -311,7 +321,7 @@
       "sha256": "a14d4675c1ebd3c6ea40cb4963ab5bbaf65a519a03a322e41b6e9b5f75907e53"
     }
   ],
-  "generated_date_utc": "2026-09-21",
-  "observed_git_head": "c25f9d8248f2acfb8b0443a482fc76781eb405ca",
+  "generated_date_utc": "2026-09-22",
+  "observed_git_head": "d186943ce5aab19dd3de2428c76ba459efb9af9f",
   "schema_version": 2
 }
