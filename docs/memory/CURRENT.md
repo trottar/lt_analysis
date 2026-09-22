@@ -29,11 +29,11 @@ broader visual/runtime review.
 - E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
   remains the baseline; Method B remains diagnostic/cross-check only; Method A
   remains detached and non-production.
-- The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` local
-  / proposed work at observed `45633698d624304005afdf7a9db25cd4d67ec573`; the
-  user must commit and push it before farm use. It changes neither E.8.1's
-  source/profile identity nor any runtime status. See its
-  [phase record](phases/farm-validation-bundle-wrapper.md).
+- The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` at
+  `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`. This is source review only, not
+  farm, ROOT/PyROOT, or E.8.1 runtime validation; it changes neither E.8.1's
+  source/profile identity nor any scientific/runtime status. See the
+  [post-push state reconciliation](phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md).
 
 ## Source / Evidence Identity
 
@@ -41,6 +41,8 @@ broader visual/runtime review.
   `0bf1281ebf44868b68ff808090436653eea6ed60`.
 - E.8.1 canonical-five-setting bundle/profile source:
   `c25f9d8248f2acfb8b0443a482fc76781eb405ca`.
+- Parameterized farm validation-bundle wrapper source (`SOURCE REVIEWED` only):
+  `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`.
 - F.6.2 reviewed scientific source:
   `0b37af2a2927b08bdeaf897c545f290b55329cea`; its accepted closure owners are
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
@@ -59,10 +61,10 @@ remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
 
 ## Next Action
 
-NEXT — User reviews, commits, and pushes the bundle-only wrapper; then E.8.1
-performs the canonical-five-setting `Q4p4W2p74` farm-validation gate, packages
-`Left / highe` first, and broadens to the remaining settings only after that
-detailed visual/runtime review passes.
+NEXT — E.8.1: perform the canonical-five-setting `Q4p4W2p74` farm-validation
+gate using the reviewed wrapper; package and inspect `Left / highe` first, and
+broaden to the remaining settings only after that detailed visual/runtime
+review passes.
 
 ## Success Criteria
 
@@ -91,3 +93,4 @@ merely for style.
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
 - [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)
 - [Parameterized wrapper phase record](phases/farm-validation-bundle-wrapper.md)
+- [Wrapper post-push state reconciliation](phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md)

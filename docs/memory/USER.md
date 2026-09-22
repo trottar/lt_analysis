@@ -33,6 +33,11 @@ state. Do not prescribe privileged, scheduler, service, shared-filesystem, or
 ordinary-checkout cleanup actions; any temporary-worktree cleanup must be
 explicitly path-bounded and limited to the worktree created by the request.
 
+For every completed local change set, include an exact, non-executed,
+user-controlled Git handoff block with the scoped `git add`, `git commit`, and
+`git push origin test` commands. State the exact changed paths and make clear
+that the user reviews and runs those commands; Codex never commits or pushes.
+
 ## Boundaries
 
 This record is stable collaboration context only; it is not a command
