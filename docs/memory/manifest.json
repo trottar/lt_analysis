@@ -19,9 +19,9 @@
       "sha256": "dac6a895bdf75901987e724e22af8d7b0b5e64e60246ca4184471c0e57ce8843"
     },
     {
-      "bytes": 4200,
+      "bytes": 4284,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "d16dbb36531d4eb70893c7332c8e23144146312b78050edd6ce9920270f26787"
+      "sha256": "0fd82b9ca0e3e809cc141426786207bd822689b46971e1634dd2edc939eace3c"
     },
     {
       "bytes": 1978,
@@ -34,9 +34,9 @@
       "sha256": "ef5c3a6d7f85044fb53bc4abe115223f5fc09fcaa867b66fda8d3e6b51d2d920"
     },
     {
-      "bytes": 14387,
+      "bytes": 5041,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "64f97d5dffbbcafe7ee12e605002e6470fbe1143dc34a7276256c4952c862af8"
+      "sha256": "cf5a11e8f22e142b3837c47edebd23db267ab9401bbe8ea6478c773fa21f18f3"
     },
     {
       "bytes": 3154,
@@ -289,6 +289,11 @@
       "sha256": "f2291ffe3b91bc5d92a854dbc556c22d82610333a8573319245af5b273487059"
     },
     {
+      "bytes": 7040,
+      "path": "docs/memory/phases/memory-m4-durable-memory-normalization.md",
+      "sha256": "d20126a3c53541d43476c1b419723ac6e4e004d73af9d5a30deddba5980d8799"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -350,6 +355,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "92289ff1dadc294eb42ac52b5e716be67ccadf98",
+  "observed_git_head": "79ab4c7b900c08a0a477e4019e0977f10873a2f9",
   "schema_version": 2
 }

@@ -12,16 +12,17 @@ and runtime frontier.
 
 ## Current Work Item
 
-Memory M4 — durable MEMORY normalization. M3 activated schema 3, made
-`CURRENT.md` the sole ordinary active-state authority, and removed ordinary
-active-state mirroring; see the [M3 phase record](phases/memory-m3-single-active-state.md).
+Memory M5 — Linux/JLab operational-role separation. M4 normalized
+`MEMORY.md` into durable cross-phase knowledge; detailed chronology remains in
+canonical records. See the [M4 phase record](phases/memory-m4-durable-memory-normalization.md).
 
 ## Verified State
 
-- M0, M1, and M2 are `SOURCE REVIEWED` repository-memory work.
-- M3 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
-  [phase record](phases/memory-m3-single-active-state.md) and the subsequent
-  ChatGPT actual-diff audit/user push workflow; it is not runtime validation.
+- M0, M1, M2, and M3 are `SOURCE REVIEWED` repository-memory work.
+- M4 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
+  [phase record](phases/memory-m4-durable-memory-normalization.md) and the
+  subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
+  validation.
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
   [scientific closure evidence](evidence/f6-2-scientific-runtime-closure.md).
 - F.6.2.Fix.5 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -41,13 +42,13 @@ active-state mirroring; see the [M3 phase record](phases/memory-m3-single-active
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
-  representation ownership; the [M3 phase record](phases/memory-m3-single-active-state.md)
-  records this migration. These are role-labeled historical identities, not
+  representation ownership; the [M4 phase record](phases/memory-m4-durable-memory-normalization.md)
+  records this normalization. These are role-labeled historical identities, not
   assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-No known memory-migration blocker prevents M4 after M3 source acceptance.
+No known memory-migration blocker prevents M5 after M4 source acceptance.
 Lifecycle-hook dispatch remains `BLOCKED / DEFERRED` and is not a dependency.
 Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
 F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
@@ -57,17 +58,18 @@ not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — Memory M4: normalize MEMORY.md into durable cross-phase knowledge only,
-moving detailed chronology/current-gate material to verified canonical
-phase/evidence/decision records without losing unique scientific provenance.
+NEXT — Memory M5: separate and normalize Linux/JLab operational ownership among
+AGENTS, USER, TOOLS, COMMUNICATION, CODEX, and MAINTENANCE without changing
+scientific/runtime state or introducing Windows transport infrastructure.
 
 ## Success Criteria
 
-M4 must preserve durable scientific ownership and evidence-precedence rules,
-trace detailed chronology to canonical deep records before removing it from
-MEMORY, preserve every unique provenance hash and identity, avoid changing
-scientific status or production behavior, and leave `CURRENT.md` as the sole
-ordinary active-state authority.
+M5 must establish one canonical owner per operational procedure in a
+Linux/JLab-oriented environment; keep AGENTS behavioral/scientific boundaries
+distinct from USER context; assign concise operational commands to TOOLS,
+farm-delivery communication to COMMUNICATION, source-changing workflow to
+CODEX, and memory maintenance to MAINTENANCE; and change no science or runtime
+behavior.
 
 ## Do Not Reopen Without New Evidence
 
@@ -81,7 +83,7 @@ merely for style.
 
 - [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
 - [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M3 single-active-state record](phases/memory-m3-single-active-state.md)
+- [M4 durable-MEMORY record](phases/memory-m4-durable-memory-normalization.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
