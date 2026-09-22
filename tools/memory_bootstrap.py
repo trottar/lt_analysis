@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print a narrow, non-authoritative KaonLT memory startup summary."""
+"""Print a narrow KaonLT memory startup observation without active-state synthesis."""
 
 from __future__ import annotations
 
@@ -12,14 +12,15 @@ import sys
 import tempfile
 from typing import Any, Callable
 
-import update_memory_manifest as manifest_tool
 
-
-ACTIVE_FILES = (
+CORE_RECORDS = (
+    "docs/memory/AGENTS.md",
     "docs/memory/CURRENT.md",
     "docs/memory/MEMORY.md",
     "docs/memory/handoffs/CURRENT_HANDOFF.md",
+    "docs/memory/USER.md",
 )
+STABLE_HANDOFF = "No exceptional transfer state is recorded."
 REFERENCE = re.compile(r"(?<![A-Za-z0-9_])(?:(?:docs/memory/)?[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.md")
 
 
@@ -27,14 +28,31 @@ def default_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def git_value(root: Path, *arguments: str) -> str | None:
+def git_command(root: Path, *arguments: str) -> tuple[bool, str | None]:
     try:
         result = subprocess.run(
             ["git", *arguments], cwd=root, check=True, capture_output=True, text=True
         )
     except (OSError, subprocess.CalledProcessError):
-        return None
-    return result.stdout.strip() or None
+        return False, None
+    return True, result.stdout
+
+
+def observe_git(root: Path) -> dict[str, Any]:
+    """Collect runtime Git facts, preserving clean output versus unavailability."""
+    branch_available, branch = git_command(root, "branch", "--show-current")
+    head_available, head = git_command(root, "rev-parse", "HEAD")
+    status_available, status = git_command(root, "status", "--short", "--untracked-files=all")
+    status_short = status.splitlines() if status_available and status is not None else None
+    return {
+        "branch": branch.strip() if branch_available and branch is not None else None,
+        "head": head.strip() if head_available and head is not None else None,
+        "worktree": {
+            "available": status_available,
+            "clean": not status_short if status_short is not None else None,
+            "status_short": status_short,
+        },
+    }
 
 
 def direct_memory_references(root: Path, current: Path) -> list[str]:
@@ -76,44 +94,62 @@ def health_status(returncode: int, output: str) -> str:
     return "pass"
 
 
-def active_state(current: Path) -> dict[str, str | int] | None:
+def exceptional_handoff(path: Path) -> dict[str, bool | str | None]:
+    """Report only whether canonical handoff transfer state is exceptional."""
     try:
-        return manifest_tool.parse_active_state(current)
-    except manifest_tool.ActiveStateError:
-        return None
+        text = path.read_text(encoding="utf-8")
+    except OSError as error:
+        return {"present": None, "error": f"cannot read handoff: {error}"}
+    match = re.search(r"^## Transfer State\s*$\n(?P<body>.*?)(?=^##\s|\Z)", text, re.MULTILINE | re.DOTALL)
+    if match is None:
+        return {"present": None, "error": "cannot locate Transfer State"}
+    transfer = match.group("body").strip()
+    if not transfer:
+        return {"present": None, "error": "Transfer State is empty"}
+    return {"present": transfer != STABLE_HANDOFF}
 
 
 def collect_summary(
     root: Path,
     health_runner: Callable[[Path], tuple[int, str]] = run_health,
+    git_observer: Callable[[Path], dict[str, Any]] = observe_git,
 ) -> dict[str, Any]:
-    records = []
-    for relative in ACTIVE_FILES:
+    core_records = []
+    for relative in CORE_RECORDS:
         path = root / relative
-        records.append({"path": relative, "bytes": path.stat().st_size if path.is_file() else None})
-    current = root / ACTIVE_FILES[0]
+        core_records.append({"path": relative, "bytes": path.stat().st_size if path.is_file() else None})
+    current = root / CORE_RECORDS[1]
     returncode, health_output = health_runner(root)
     return {
-        "active_records": records,
-        "active_state": active_state(current),
+        "core_records": core_records,
         "current_references": direct_memory_references(root, current),
-        "git": {"branch": git_value(root, "branch", "--show-current"), "head": git_value(root, "rev-parse", "HEAD")},
+        "exceptional_handoff": exceptional_handoff(root / CORE_RECORDS[3]),
+        "git": git_observer(root),
         "memory_health": {"status": health_status(returncode, health_output), "returncode": returncode},
     }
 
 
+def worktree_label(worktree: dict[str, Any]) -> str:
+    if not worktree.get("available"):
+        return "UNAVAILABLE"
+    return "CLEAN" if worktree.get("clean") else "DIRTY"
+
+
+def handoff_label(handoff: dict[str, bool | str | None]) -> str:
+    present = handoff.get("present")
+    if present is None:
+        return "UNAVAILABLE"
+    return "YES" if present else "NO"
+
+
 def print_human(summary: dict[str, Any]) -> None:
+    git = summary["git"]
     print("KaonLT memory bootstrap")
-    print(f"git branch: {summary['git']['branch'] or 'unavailable'}")
-    print(f"git HEAD: {summary['git']['head'] or 'unavailable'}")
-    print("active state:")
-    if summary["active_state"] is None:
-        print("  unavailable: CURRENT.md frontmatter is invalid")
-    else:
-        for key, value in summary["active_state"].items():
-            print(f"  {key}: {value}")
-    print("active records:")
-    for record in summary["active_records"]:
+    print(f"git branch: {git['branch'] or 'unavailable'}")
+    print(f"git HEAD: {git['head'] or 'unavailable'}")
+    print(f"worktree: {worktree_label(git['worktree'])}")
+    print("startup core:")
+    for record in summary["core_records"]:
         size = "missing" if record["bytes"] is None else str(record["bytes"])
         print(f"  {record['path']}: {size} bytes")
     print("CURRENT.md references:")
@@ -121,35 +157,68 @@ def print_human(summary: dict[str, Any]) -> None:
         print(f"  {reference}")
     if not summary["current_references"]:
         print("  none resolved")
+    print(f"exceptional handoff: {handoff_label(summary['exceptional_handoff'])}")
     print(f"memory health: {summary['memory_health']['status'].upper()}")
 
 
 def fixture_current() -> str:
-    return """---
-memory_schema: 3
----
-# Current
+    return "# Current\n\nSee evidence/example.md and nowhere else.\n"
 
-See evidence/example.md and nowhere else.
-"""
+
+def fixture_git(*, clean: bool, status_short: list[str] | None = None) -> dict[str, Any]:
+    return {
+        "branch": "fixture",
+        "head": "a" * 40,
+        "worktree": {
+            "available": True,
+            "clean": clean,
+            "status_short": [] if status_short is None else status_short,
+        },
+    }
 
 
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
-        evidence = root / "docs" / "memory" / "evidence"
+        memory = root / "docs" / "memory"
+        evidence = memory / "evidence"
         evidence.mkdir(parents=True)
         (evidence / "example.md").write_text("evidence\n", encoding="utf-8")
-        current = root / "docs" / "memory" / "CURRENT.md"
-        current.write_text(fixture_current(), encoding="utf-8")
-        (root / "docs" / "memory" / "MEMORY.md").write_text("memory\n", encoding="utf-8")
-        handoff = root / "docs" / "memory" / "handoffs"
-        handoff.mkdir()
-        (handoff / "CURRENT_HANDOFF.md").write_text("handoff\n", encoding="utf-8")
-        summary = collect_summary(root, lambda _: (0, "MEMORY HEALTH: PASS"))
+        for relative, text in (
+            ("AGENTS.md", "agents\n"),
+            ("CURRENT.md", fixture_current()),
+            ("MEMORY.md", "memory\n"),
+            ("handoffs/CURRENT_HANDOFF.md", "# Handoff\n\n## Transfer State\n\nNo exceptional transfer state is recorded.\n\n## Resume\n\nCURRENT.md\n"),
+            ("USER.md", "user\n"),
+        ):
+            path = memory / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+        summary = collect_summary(
+            root,
+            lambda _: (0, "MEMORY HEALTH: PASS"),
+            lambda _: fixture_git(clean=True),
+        )
+        assert [record["path"] for record in summary["core_records"]] == list(CORE_RECORDS), summary
+        assert all(isinstance(record["bytes"], int) for record in summary["core_records"]), summary
         assert summary["current_references"] == ["docs/memory/evidence/example.md"], summary
-        assert summary["active_state"] == {"memory_schema": 3}, summary
+        assert summary["exceptional_handoff"] == {"present": False}, summary
+        assert summary["git"]["worktree"] == {"available": True, "clean": True, "status_short": []}, summary
+        assert "active_state" not in summary, summary
         assert summary["memory_health"]["status"] == "pass", summary
+
+        dirty = collect_summary(
+            root,
+            lambda _: (0, "MEMORY HEALTH: WARN: fixture"),
+            lambda _: fixture_git(clean=False, status_short=[" M docs/memory/CURRENT.md", "?? scratch.txt"]),
+        )
+        assert dirty["git"]["worktree"]["clean"] is False, dirty
+        assert dirty["git"]["worktree"]["status_short"] == [" M docs/memory/CURRENT.md", "?? scratch.txt"], dirty
+        assert dirty["memory_health"]["status"] == "warn", dirty
+        (memory / "handoffs/CURRENT_HANDOFF.md").write_text("# Handoff\n\n## Transfer State\n\nExceptional transfer.\n\n## Resume\n\nCURRENT.md\n", encoding="utf-8")
+        exceptional = collect_summary(root, lambda _: (1, "MEMORY HEALTH: FAIL"), lambda _: fixture_git(clean=True))
+        assert exceptional["exceptional_handoff"] == {"present": True}, exceptional
+        assert exceptional["memory_health"]["status"] == "fail", exceptional
 
 
 def parse_args() -> argparse.Namespace:

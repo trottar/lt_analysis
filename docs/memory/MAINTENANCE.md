@@ -78,5 +78,7 @@ statement needed for future work.
    and check the manifest and run memory health.
 5. Inspect the resulting diff and report the exact remaining next action.
 
-The generated manifest is an integrity index, never a scientific, source, or
-runtime authority. Manifest semantics remain unchanged until M8.
+The generated manifest is integrity metadata only: it contains no active-state,
+date, or stored-HEAD authority. Regenerate/check it after versionable memory
+changes. Bootstrap obtains repository identity dynamically; neither manifest
+nor bootstrap can override CURRENT.md.

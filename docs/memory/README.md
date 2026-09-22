@@ -58,7 +58,11 @@ exact active next action.
 Use [MAINTENANCE.md](MAINTENANCE.md) for maintenance, [TOOLS.md](TOOLS.md) for
 commands, [COMMUNICATION.md](COMMUNICATION.md) for farm delivery, and
 [CODEX.md](CODEX.md) for source-changing work. The generated
-[manifest.json](manifest.json) is an integrity index only.
+[manifest.json](manifest.json) is a deterministic file-integrity index only:
+it contains no semantic active state or stored current HEAD. Bootstrap reports
+dynamic Git/worktree facts, five-core sizes, CURRENT direct references, health,
+and exceptional-handoff presence. It does not replace reading the five-file
+core or interpret scientific state.
 
 Bootstrap distinguishes dynamic repository observations from canonical
 repository-memory/evidence facts; the exceptional handoff cannot override

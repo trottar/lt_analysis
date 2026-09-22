@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate and verify the non-authoritative KaonLT memory integrity index."""
+"""Generate and verify the KaonLT memory file-integrity index."""
 
 from __future__ import annotations
 
@@ -7,20 +7,16 @@ import argparse
 import hashlib
 import json
 import os
-from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
 import tempfile
 from typing import Any
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 MANIFEST_RELATIVE = Path("docs") / "memory" / "manifest.json"
-CURRENT_RELATIVE = Path("docs") / "memory" / "CURRENT.md"
-
-
-class ActiveStateError(ValueError):
-    """Raised when the compact CURRENT.md metadata is structurally invalid."""
+MANIFEST_KEYS = {"files", "schema_version"}
+ENTRY_KEYS = {"bytes", "path", "sha256"}
 
 
 def default_root() -> Path:
@@ -30,53 +26,11 @@ def default_root() -> Path:
 def git_output(root: Path, *arguments: str) -> str | None:
     try:
         result = subprocess.run(
-            ["git", *arguments],
-            cwd=root,
-            check=True,
-            capture_output=True,
-            text=True,
+            ["git", *arguments], cwd=root, check=True, capture_output=True, text=True
         )
     except (OSError, subprocess.CalledProcessError):
         return None
     return result.stdout.strip()
-
-
-def parse_active_state(path: Path) -> dict[str, str | int]:
-    """Parse the deliberately small, dependency-free YAML-like frontmatter."""
-    try:
-        lines = path.read_text(encoding="utf-8").splitlines()
-    except OSError as error:
-        raise ActiveStateError(f"cannot read {path}: {error}") from error
-    if not lines or lines[0] != "---":
-        raise ActiveStateError(f"{path} must begin with frontmatter")
-    try:
-        closing = lines.index("---", 1)
-    except ValueError as error:
-        raise ActiveStateError(f"{path} frontmatter is not closed") from error
-
-    parsed: dict[str, str] = {}
-    for line in lines[1:closing]:
-        if not line or line.lstrip().startswith("#") or ":" not in line:
-            raise ActiveStateError(f"{path} has invalid frontmatter line: {line!r}")
-        key, value = line.split(":", 1)
-        key, value = key.strip(), value.strip()
-        if not key or not value or key in parsed:
-            raise ActiveStateError(f"{path} has missing, empty, or duplicate frontmatter field: {line!r}")
-        parsed[key] = value
-
-    expected = {"memory_schema"}
-    if set(parsed) != expected:
-        missing = sorted(expected - set(parsed))
-        extra = sorted(set(parsed) - expected)
-        details = []
-        if missing:
-            details.append("missing " + ", ".join(missing))
-        if extra:
-            details.append("unexpected " + ", ".join(extra))
-        raise ActiveStateError(f"{path} schema-3 frontmatter fields differ: {'; '.join(details)}")
-    if parsed["memory_schema"] != "3":
-        raise ActiveStateError(f"{path} memory_schema must be 3")
-    return {"memory_schema": 3}
 
 
 def versionable_memory_paths(root: Path) -> list[Path]:
@@ -106,20 +60,15 @@ def sha256(path: Path) -> str:
 
 
 def build_manifest(root: Path) -> dict[str, Any]:
-    entries = []
-    for path in versionable_memory_paths(root):
-        entries.append(
+    return {
+        "files": [
             {
                 "bytes": path.stat().st_size,
                 "path": path.relative_to(root).as_posix(),
                 "sha256": sha256(path),
             }
-        )
-    return {
-        "active_state": parse_active_state(root / CURRENT_RELATIVE),
-        "files": entries,
-        "generated_date_utc": datetime.now(timezone.utc).date().isoformat(),
-        "observed_git_head": git_output(root, "rev-parse", "HEAD"),
+            for path in versionable_memory_paths(root)
+        ],
         "schema_version": SCHEMA_VERSION,
     }
 
@@ -152,31 +101,26 @@ def check_manifest(root: Path) -> list[str]:
         actual = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         return [f"cannot read manifest: {error}"]
-    try:
-        expected = build_manifest(root)
-    except ActiveStateError as error:
-        return [f"CURRENT active state is invalid: {error}"]
+    if not isinstance(actual, dict):
+        return ["manifest top level must be an object"]
 
     problems: list[str] = []
-    if actual.get("schema_version") != SCHEMA_VERSION:
+    if set(actual) != MANIFEST_KEYS:
+        problems.append("manifest top-level keys must be exactly files and schema_version")
+        return problems
+    if actual["schema_version"] != SCHEMA_VERSION:
         problems.append("manifest schema_version is unsupported")
-    if actual.get("active_state") != expected["active_state"]:
-        problems.append("manifest active_state differs from CURRENT.md")
-    if actual.get("files") != expected["files"]:
+    if not isinstance(actual["files"], list):
+        problems.append("manifest files must be a list")
+        return problems
+    for entry in actual["files"]:
+        if not isinstance(entry, dict) or set(entry) != ENTRY_KEYS:
+            problems.append("manifest file entry keys must be exactly bytes, path, and sha256")
+            break
+    expected = build_manifest(root)
+    if actual["files"] != expected["files"]:
         problems.append("memory file inventory, byte count, or SHA-256 differs from manifest")
-    if not isinstance(actual.get("generated_date_utc"), str):
-        problems.append("manifest generated_date_utc is missing or invalid")
-    if actual.get("observed_git_head") is not None and not isinstance(actual["observed_git_head"], str):
-        problems.append("manifest observed_git_head is invalid")
     return problems
-
-
-def fixture_current() -> str:
-    return """---
-memory_schema: 3
----
-# Current
-"""
 
 
 def self_test() -> None:
@@ -184,33 +128,41 @@ def self_test() -> None:
         root = Path(directory)
         memory = root / "docs" / "memory"
         memory.mkdir(parents=True)
-        current = memory / "CURRENT.md"
-        current.write_text(fixture_current(), encoding="utf-8")
+        source = memory / "SOURCE.md"
+        source.write_text("source\n", encoding="utf-8")
+
         write_manifest(root)
-        assert not check_manifest(root), "fresh manifest did not verify"
-        current.write_text(fixture_current() + "changed\n", encoding="utf-8")
-        assert check_manifest(root), "changed bytes or active state were not detected"
-        current.write_text("# No frontmatter\n", encoding="utf-8")
-        try:
-            parse_active_state(current)
-        except ActiveStateError:
-            pass
-        else:
-            raise AssertionError("missing frontmatter was accepted")
-        current.write_text("---\nmemory_schema: 2\n---\n# Current\n", encoding="utf-8")
-        try:
-            parse_active_state(current)
-        except ActiveStateError:
-            pass
-        else:
-            raise AssertionError("schema-2 frontmatter was accepted")
-        current.write_text("---\nmemory_schema: 3\nactive_status: forbidden\n---\n", encoding="utf-8")
-        try:
-            parse_active_state(current)
-        except ActiveStateError:
-            pass
-        else:
-            raise AssertionError("schema-3 extra frontmatter was accepted")
+        manifest_path = root / MANIFEST_RELATIVE
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert set(payload) == MANIFEST_KEYS, payload
+        assert payload["schema_version"] == 3, payload
+        assert all(entry["path"] != MANIFEST_RELATIVE.as_posix() for entry in payload["files"]), payload
+        assert not check_manifest(root), "fresh integrity manifest did not verify"
+
+        source.write_text("changed source\n", encoding="utf-8")
+        assert check_manifest(root), "file-byte change was not detected"
+        write_manifest(root)
+        added = memory / "ADDED.md"
+        added.write_text("added\n", encoding="utf-8")
+        assert check_manifest(root), "file addition was not detected"
+        added.unlink()
+        assert not check_manifest(root), "file removal back to indexed inventory was not accepted"
+
+        payload = build_manifest(root)
+        for key, value in (
+            ("active_state", {"memory_schema": 3}),
+            ("generated_date_utc", "2026-09-22"),
+            ("observed_git_head", "a" * 40),
+            ("unexpected", True),
+        ):
+            legacy = dict(payload)
+            legacy[key] = value
+            manifest_path.write_bytes(encoded_manifest(legacy))
+            assert any("top-level keys" in problem for problem in check_manifest(root)), key
+        unsupported = dict(payload)
+        unsupported["schema_version"] = 2
+        manifest_path.write_bytes(encoded_manifest(unsupported))
+        assert any("schema_version" in problem for problem in check_manifest(root))
 
 
 def parse_args() -> argparse.Namespace:
@@ -230,15 +182,11 @@ def main() -> int:
         print("SELF-TEST: PASS")
         return 0
     root = args.root.resolve()
-    try:
-        if args.write:
-            write_manifest(root)
-            print(f"MANIFEST: WROTE {MANIFEST_RELATIVE.as_posix()}")
-            return 0
-        problems = check_manifest(root)
-    except ActiveStateError as error:
-        print(f"MANIFEST: FAIL: CURRENT active state is invalid: {error}")
-        return 1
+    if args.write:
+        write_manifest(root)
+        print(f"MANIFEST: WROTE {MANIFEST_RELATIVE.as_posix()}")
+        return 0
+    problems = check_manifest(root)
     if problems:
         for problem in problems:
             print(f"MANIFEST: FAIL: {problem}")

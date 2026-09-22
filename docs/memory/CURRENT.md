@@ -12,14 +12,14 @@ and runtime frontier.
 
 ## Current Work Item
 
-Memory M8 — manifest and bootstrap identity semantics. M7 established strict
-schema-3 semantic health without changing scientific/runtime state. See the
-[M7 phase record](phases/memory-m7-strict-semantic-health.md).
+Memory M9 — fresh-session integration audit. M8 finalized integrity-only
+manifest and dynamic bootstrap semantics without changing scientific/runtime
+state. See the [M8 phase record](phases/memory-m8-manifest-bootstrap-semantics.md).
 
 ## Verified State
 
-- M0 through M6 are `SOURCE REVIEWED` repository-memory work.
-- M7 is `SOURCE REVIEWED`, contingent on its local acceptance criteria and the
+- M0 through M7 are `SOURCE REVIEWED` repository-memory work.
+- M8 is `SOURCE REVIEWED`, contingent on its local acceptance criteria and the
   subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
   validation.
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -41,13 +41,13 @@ schema-3 semantic health without changing scientific/runtime state. See the
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
-  representation ownership; the [M7 phase record](phases/memory-m7-strict-semantic-health.md)
-  records strict semantic health enforcement. These are role-labeled
+  representation ownership; the [M8 phase record](phases/memory-m8-manifest-bootstrap-semantics.md)
+  records integrity-only manifest and dynamic bootstrap semantics. These are role-labeled
   historical identities, not assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-No known memory blocker prevents M8 after M7 source acceptance.
+No known memory blocker prevents M9 after M8 source acceptance.
 Lifecycle-hook dispatch remains `BLOCKED` / `DEFERRED` and is not a dependency.
 Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
 F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
@@ -57,19 +57,23 @@ not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — Memory M8: make manifest metadata integrity-only and bootstrap report
-dynamic repository facts, five-core sizes, CURRENT references, health, and
-exceptional-handoff presence without copying semantic active state or a stored
-current HEAD.
+NEXT — Memory M9: perform a genuine fresh-session integration audit using
+repository state only, proving recovery of repository identity requirements,
+active objective/NEXT, scientific frontier/evidence boundaries, Method-A/
+Method-B ownership, actor sequence, Linux/JLab context, and handoff semantics
+without a giant chat-continuation prompt.
 
 ## Success Criteria
 
-M8 must remove semantic `active_state` plus generated-date/stored-observed-HEAD
-identity from the manifest while preserving its deterministic file-integrity
-inventory. Bootstrap must query branch/HEAD/worktree dynamically; report
-five-core record sizes, CURRENT direct references, health, and exceptional
-handoff presence; not synthesize scientific state; and preserve the
-scientific/runtime frontier.
+M9 must use a genuinely fresh ChatGPT/Codex-style session with no giant
+continuation prompt; recover dynamic branch/HEAD/worktree requirements, the
+active objective and exact NEXT from CURRENT, accepted scientific
+frontier/evidence, Method B diagnostic-only and Method A detached boundaries,
+production/diagnostic/presentation separation, source-review versus
+farm-runtime distinction, Codex/ChatGPT/user/farm actor sequence, Linux/JLab
+environment, and exceptional-handoff semantics. It must use task-directed
+expansion rather than whole-tree loading and state NO CHAT CONTINUATION REQUIRED
+only if that audit actually passes.
 
 ## Do Not Reopen Without New Evidence
 
@@ -83,7 +87,7 @@ merely for style.
 
 - [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
 - [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M7 strict semantic health record](phases/memory-m7-strict-semantic-health.md)
+- [M8 manifest/bootstrap semantics record](phases/memory-m8-manifest-bootstrap-semantics.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)

@@ -1,7 +1,4 @@
 {
-  "active_state": {
-    "memory_schema": 3
-  },
   "files": [
     {
       "bytes": 3523,
@@ -19,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4217,
+      "bytes": 4600,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "20dbf76dee074a6d6a5dfefd45135ffa90b4c52a4c5e2886963641ba5f4fe9f7"
+      "sha256": "4d96fc21763d38898c575b9ed493bd5bb5786611e46e1d2bbbb30f9fd75bb0a7"
     },
     {
       "bytes": 1978,
@@ -29,9 +26,9 @@
       "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
     },
     {
-      "bytes": 3895,
+      "bytes": 4026,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "b241ec0b8f84d6743401f3b84dee8f3e7b23df66f7a30448b3c758703ba80c9c"
+      "sha256": "a4b98fbfc3ac6ef30c925385fb4ca71eb02950fa14fb543d01d6cd90281f312f"
     },
     {
       "bytes": 5040,
@@ -39,9 +36,9 @@
       "sha256": "a7d1794b33cbb9c1662cc32929960e9b7475ba1bffed3fb3d9e7c5c0edb1441e"
     },
     {
-      "bytes": 3180,
+      "bytes": 3469,
       "path": "docs/memory/README.md",
-      "sha256": "b4b3513119fdcc6b9f4fc90537c4d528d1ba9ad5c23f784b5858fd56ebc6af8a"
+      "sha256": "e0395f612bd4d987a81874b2d6a851885d6b05a912c650eaeec5668bc4e4e6fa"
     },
     {
       "bytes": 1878,
@@ -314,6 +311,11 @@
       "sha256": "0dc932f1603c2592ad23c432ba3b0604407170d5ee7aa153b204b3e1c7098329"
     },
     {
+      "bytes": 3461,
+      "path": "docs/memory/phases/memory-m8-manifest-bootstrap-semantics.md",
+      "sha256": "38f9a0c2b4ae93a3adde05433ceab7856725f0f0967551ba09ae0c3a57ea0f72"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -374,7 +376,5 @@
       "sha256": "a14d4675c1ebd3c6ea40cb4963ab5bbaf65a519a03a322e41b6e9b5f75907e53"
     }
   ],
-  "generated_date_utc": "2026-09-22",
-  "observed_git_head": "c6b7f758a13060a650f036d25758d1ee8049c66f",
-  "schema_version": 2
+  "schema_version": 3
 }

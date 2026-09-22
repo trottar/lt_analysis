@@ -7,6 +7,7 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -17,6 +18,7 @@ if str(TOOLS_DIR) not in sys.path:
 
 health = importlib.import_module("check_memory_health")
 manifest_tool = importlib.import_module("update_memory_manifest")
+bootstrap = importlib.import_module("memory_bootstrap")
 
 
 class StrictMemoryHealthTests(unittest.TestCase):
@@ -71,6 +73,20 @@ class StrictMemoryHealthTests(unittest.TestCase):
             current = root / "docs/memory/CURRENT.md"
             current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3", "memory_schema: 3\nactive_status: forbidden"), encoding="utf-8")
             self.assert_error(self.errors(root), "schema-3 frontmatter fields differ")
+
+    def test_health_owned_frontmatter_parser_rejects_malformed_forms(self):
+        with tempfile.TemporaryDirectory() as directory:
+            current = Path(directory) / "CURRENT.md"
+            for payload in (
+                "# no frontmatter\n",
+                "---\nmemory_schema: 3\n",
+                "---\nmemory_schema:\n---\n",
+                "---\nmemory_schema: 3\nmemory_schema: 3\n---\n",
+            ):
+                with self.subTest(payload=payload):
+                    current.write_text(payload, encoding="utf-8")
+                    with self.assertRaises(health.CurrentFrontmatterError):
+                        health.parse_current_schema3(current)
 
     def test_current_heading_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -336,24 +352,97 @@ class StrictMemoryHealthTests(unittest.TestCase):
                 self.assertEqual(warnings, [])
                 self.assertEqual(len(errors), 1)
 
-    def test_manifest_parser_and_transitional_envelope(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            current = root / "CURRENT.md"
-            current.write_text("---\nmemory_schema: 3\n---\n# Current\n", encoding="utf-8")
-            self.assertEqual(manifest_tool.parse_active_state(current), {"memory_schema": 3})
-            for payload in ("---\nmemory_schema: 2\n---\n", "---\nmemory_schema: 3\nextra: no\n---\n"):
-                current.write_text(payload, encoding="utf-8")
-                with self.assertRaises(manifest_tool.ActiveStateError):
-                    manifest_tool.parse_active_state(current)
+    def test_manifest_integrity_shape_and_drift(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_fixture(root)
             manifest_tool.write_manifest(root)
             payload = json.loads((root / "docs/memory/manifest.json").read_text(encoding="utf-8"))
-            self.assertEqual(payload["schema_version"], 2)
-            self.assertEqual(payload["active_state"], {"memory_schema": 3})
+            self.assertEqual(set(payload), {"files", "schema_version"})
+            self.assertEqual(payload["schema_version"], 3)
+            self.assertNotIn("docs/memory/manifest.json", [entry["path"] for entry in payload["files"]])
             self.assertEqual(manifest_tool.check_manifest(root), [])
+            current = root / "docs/memory/CURRENT.md"
+            current.write_text(current.read_text(encoding="utf-8") + "changed\n", encoding="utf-8")
+            self.assertTrue(manifest_tool.check_manifest(root))
+            manifest_tool.write_manifest(root)
+            extra = root / "docs/memory/EXTRA.md"
+            extra.write_text("extra\n", encoding="utf-8")
+            self.assertTrue(manifest_tool.check_manifest(root))
+            extra.unlink()
+            self.assertEqual(manifest_tool.check_manifest(root), [])
+            for key, value in (
+                ("active_state", {"memory_schema": 3}),
+                ("generated_date_utc", "2026-09-22"),
+                ("observed_git_head", "a" * 40),
+                ("unexpected", True),
+            ):
+                legacy = dict(manifest_tool.build_manifest(root))
+                legacy[key] = value
+                (root / "docs/memory/manifest.json").write_bytes(manifest_tool.encoded_manifest(legacy))
+                self.assertTrue(any("top-level keys" in problem for problem in manifest_tool.check_manifest(root)))
+            unsupported = manifest_tool.build_manifest(root)
+            unsupported["schema_version"] = 2
+            (root / "docs/memory/manifest.json").write_bytes(manifest_tool.encoded_manifest(unsupported))
+            self.assertTrue(any("schema_version" in problem for problem in manifest_tool.check_manifest(root)))
+
+    def test_manifest_does_not_depend_on_current(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "docs/memory/SOURCE.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("source\n", encoding="utf-8")
+            manifest_tool.write_manifest(root)
+            self.assertEqual(manifest_tool.check_manifest(root), [])
+
+    def test_bootstrap_core_git_handoff_and_reference_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            clean_git = {
+                "branch": "fixture",
+                "head": "a" * 40,
+                "worktree": {"available": True, "clean": True, "status_short": []},
+            }
+            summary = bootstrap.collect_summary(
+                root,
+                lambda _: (0, "MEMORY HEALTH: PASS"),
+                lambda _: clean_git,
+            )
+            self.assertNotIn("active_state", summary)
+            self.assertEqual([item["path"] for item in summary["core_records"]], list(bootstrap.CORE_RECORDS))
+            self.assertTrue(all(isinstance(item["bytes"], int) for item in summary["core_records"]))
+            self.assertEqual(summary["current_references"], ["docs/memory/evidence/accepted.md"])
+            self.assertEqual(summary["exceptional_handoff"], {"present": False})
+            self.assertEqual(summary["git"], clean_git)
+            self.assertEqual(summary["memory_health"], {"status": "pass", "returncode": 0})
+
+            dirty_git = {
+                "branch": "fixture",
+                "head": "b" * 40,
+                "worktree": {"available": True, "clean": False, "status_short": [" M docs/memory/CURRENT.md", "?? scratch.txt"]},
+            }
+            dirty = bootstrap.collect_summary(root, lambda _: (0, "MEMORY HEALTH: WARN"), lambda _: dirty_git)
+            self.assertEqual(dirty["git"]["worktree"], dirty_git["worktree"])
+            self.assertEqual(dirty["memory_health"]["status"], "warn")
+            unavailable = {"branch": None, "head": None, "worktree": {"available": False, "clean": None, "status_short": None}}
+            self.assertEqual(bootstrap.worktree_label(unavailable["worktree"]), "UNAVAILABLE")
+            with mock.patch.object(
+                bootstrap,
+                "git_command",
+                side_effect=[(True, "fixture\n"), (True, "c" * 40 + "\n"), (True, " M docs/memory/CURRENT.md\n?? scratch.txt\n")],
+            ):
+                observed = bootstrap.observe_git(root)
+            self.assertEqual(observed["worktree"], {"available": True, "clean": False, "status_short": [" M docs/memory/CURRENT.md", "?? scratch.txt"]})
+            with mock.patch.object(bootstrap, "git_command", return_value=(False, None)):
+                unavailable_observed = bootstrap.observe_git(root)
+            self.assertEqual(unavailable_observed["worktree"], unavailable["worktree"])
+
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text(handoff.read_text(encoding="utf-8").replace("No exceptional transfer state is recorded.", "Exceptional transfer state."), encoding="utf-8")
+            exceptional = bootstrap.collect_summary(root, lambda _: (1, "MEMORY HEALTH: FAIL"), lambda _: clean_git)
+            self.assertEqual(exceptional["exceptional_handoff"], {"present": True})
+            self.assertEqual(exceptional["memory_health"]["status"], "fail")
 
 
 if __name__ == "__main__":

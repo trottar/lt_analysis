@@ -11,8 +11,6 @@ import sys
 import tempfile
 from typing import Iterable
 
-import update_memory_manifest as manifest_tool
-
 
 REQUIRED_FILES = (
     "docs/memory/README.md", "docs/memory/AGENTS.md", "docs/memory/CURRENT.md",
@@ -119,8 +117,46 @@ MAINTENANCE_THRESHOLD_ROWS = (
 )
 
 
+class CurrentFrontmatterError(ValueError):
+    """Raised when CURRENT.md does not use the minimal schema-3 frontmatter."""
+
+
 def default_root() -> Path:
     return Path(__file__).resolve().parents[1]
+
+
+def parse_current_schema3(path: Path) -> dict[str, int]:
+    """Parse the health-owned, deliberately minimal CURRENT frontmatter."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as error:
+        raise CurrentFrontmatterError(f"cannot read {path}: {error}") from error
+    if not lines or lines[0] != "---":
+        raise CurrentFrontmatterError(f"{path} must begin with frontmatter")
+    try:
+        closing = lines.index("---", 1)
+    except ValueError as error:
+        raise CurrentFrontmatterError(f"{path} frontmatter is not closed") from error
+    parsed: dict[str, str] = {}
+    for line in lines[1:closing]:
+        if not line or line.lstrip().startswith("#") or ":" not in line:
+            raise CurrentFrontmatterError(f"{path} has invalid frontmatter line: {line!r}")
+        key, value = (part.strip() for part in line.split(":", 1))
+        if not key or not value or key in parsed:
+            raise CurrentFrontmatterError(f"{path} has missing, empty, or duplicate frontmatter field: {line!r}")
+        parsed[key] = value
+    if set(parsed) != {"memory_schema"}:
+        missing = sorted({"memory_schema"} - set(parsed))
+        extra = sorted(set(parsed) - {"memory_schema"})
+        details = []
+        if missing:
+            details.append("missing " + ", ".join(missing))
+        if extra:
+            details.append("unexpected " + ", ".join(extra))
+        raise CurrentFrontmatterError(f"{path} schema-3 frontmatter fields differ: {'; '.join(details)}")
+    if parsed["memory_schema"] != "3":
+        raise CurrentFrontmatterError(f"{path} memory_schema must be 3")
+    return {"memory_schema": 3}
 
 
 def markdown_links_text(text: str) -> set[str]:
@@ -285,8 +321,8 @@ def check_runtime_evidence_blocks(root: Path, document: Path, text: str, label: 
 def check_current(root: Path, text: str) -> list[str]:
     errors: list[str] = []
     try:
-        parsed = manifest_tool.parse_active_state(root / "docs/memory/CURRENT.md")
-    except manifest_tool.ActiveStateError as error:
+        parsed = parse_current_schema3(root / "docs/memory/CURRENT.md")
+    except CurrentFrontmatterError as error:
         errors.append(f"invalid schema-3 CURRENT frontmatter: {error}")
     else:
         if parsed != {"memory_schema": 3}:
