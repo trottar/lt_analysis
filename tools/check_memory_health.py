@@ -52,6 +52,14 @@ CURRENT_SECTIONS = (
     "Do Not Reopen Without New Evidence",
     "Relevant References",
 )
+SCHEMA3_HANDOFF_SECTIONS = ("Transfer State", "Resume")
+SCHEMA3_BOOTSTRAP_ORDER = (
+    "AGENTS.md",
+    "CURRENT.md",
+    "MEMORY.md",
+    "handoffs/CURRENT_HANDOFF.md",
+    "USER.md",
+)
 REQUIRED_README_LINKS = (
     "AGENTS.md",
     "MAINTENANCE.md",
@@ -186,6 +194,83 @@ def check_current_structure(root: Path, text: str) -> list[str]:
     return errors
 
 
+def check_schema3_current(root: Path, text: str) -> list[str]:
+    """Validate target schema-3 state ownership without legacy surface mirroring."""
+    errors: list[str] = []
+    _, contents = current_sections(text)
+    next_count = text.count("NEXT —")
+    if next_count != 1:
+        errors.append("schema-3 CURRENT.md must contain exactly one active NEXT — statement")
+    elif contents.get("Next Action", "").count("NEXT —") != 1:
+        errors.append("schema-3 CURRENT.md NEXT — statement must occur in ## Next Action")
+    errors.extend(check_schema3_handoff(root))
+    errors.extend(check_schema3_bootstrap(root))
+    return errors
+
+
+def check_schema3_handoff(root: Path) -> list[str]:
+    errors: list[str] = []
+    handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+    if not handoff.is_file():
+        return ["missing schema-3 handoff: docs/memory/handoffs/CURRENT_HANDOFF.md"]
+    text = handoff.read_text(encoding="utf-8")
+    if text.startswith("---\n"):
+        errors.append("schema-3 handoff must not contain active-state frontmatter")
+    h1_headings = re.findall(r"^#\s+(.+?)\s*$", text, re.MULTILINE)
+    headings, contents = current_sections(text)
+    routine_headings = [heading for heading in headings if heading in CURRENT_SECTIONS]
+    if routine_headings:
+        errors.append(
+            "schema-3 handoff must not contain routine CURRENT headings: "
+            + ", ".join(routine_headings)
+        )
+    if h1_headings != ["Current KaonLT handoff"] or headings != list(SCHEMA3_HANDOFF_SECTIONS):
+        errors.append("schema-3 handoff must contain exactly the Transfer State and Resume sections")
+    if not contents.get("Transfer State"):
+        errors.append("schema-3 handoff Transfer State must not be empty")
+    transfer_state = contents.get("Transfer State", "")
+    if "No exceptional transfer state" in transfer_state and transfer_state.strip() != "No exceptional transfer state is recorded.":
+        errors.append("schema-3 stable handoff state must use the exact no-transfer sentence")
+    normalized = text.replace("`", "")
+    if "CURRENT.md is the sole authoritative resumable state." not in normalized:
+        errors.append("schema-3 handoff must state CURRENT.md sole authority")
+    if "handoff cannot override CURRENT.md" not in normalized:
+        errors.append("schema-3 handoff must state it cannot override CURRENT.md")
+    if "CURRENT.md" not in contents.get("Resume", ""):
+        errors.append("schema-3 handoff Resume must point to CURRENT.md")
+    return errors
+
+
+def check_schema3_bootstrap(root: Path) -> list[str]:
+    errors: list[str] = []
+    memory = root / "docs/memory"
+    for relative in SCHEMA3_BOOTSTRAP_ORDER:
+        if not (memory / relative).is_file():
+            errors.append(f"schema-3 five-file bootstrap record is missing: docs/memory/{relative}")
+    agents = memory / "AGENTS.md"
+    if not agents.is_file():
+        return errors
+    text = agents.read_text(encoding="utf-8")
+    core_marker = "Read these five files in full, in this exact order:"
+    expansion_marker = "Only after those five are read in full may a session expand selectively from:"
+    if core_marker not in text or expansion_marker not in text:
+        errors.append("schema-3 bootstrap must require the full five-file core read before expansion")
+    ordered_lines = [f"{index}. `{relative}`" for index, relative in enumerate(SCHEMA3_BOOTSTRAP_ORDER, 1)]
+    positions = [text.find(line) for line in ordered_lines]
+    if any(position < 0 for position in positions) or positions != sorted(positions):
+        errors.append("schema-3 bootstrap order differs from the required five-file order")
+    expansion_sources = (
+        "CURRENT direct references",
+        "exact active task",
+        "required canonical evidence/decision/phase records",
+    )
+    if any(source not in text for source in expansion_sources):
+        errors.append("schema-3 bootstrap selective expansion sources are incomplete")
+    if "Do not eagerly load the whole memory hierarchy." not in text:
+        errors.append("schema-3 bootstrap must prohibit eager/unbounded expansion")
+    return errors
+
+
 def check_active_states(
     root: Path,
     resolver: Callable[[Path, str], bool | None],
@@ -255,8 +340,19 @@ def run_checks(
 
     current = root / "docs" / "memory" / "CURRENT.md"
     if current.is_file():
-        errors.extend(check_current_structure(root, current.read_text(encoding="utf-8")))
-    errors.extend(check_active_states(root, commit_resolver))
+        current_text = current.read_text(encoding="utf-8")
+        try:
+            schema = manifest_tool.parse_active_state(current)["memory_schema"]
+        except manifest_tool.ActiveStateError as error:
+            errors.append(f"invalid active-state frontmatter in docs/memory/CURRENT.md: {error}")
+        else:
+            errors.extend(check_current_structure(root, current_text))
+            if schema == 2:
+                errors.extend(check_active_states(root, commit_resolver))
+            elif schema == 3:
+                errors.extend(check_schema3_current(root, current_text))
+            else:
+                errors.append(f"unsupported CURRENT memory schema: {schema}")
 
     memory_root = root / "docs" / "memory"
     if memory_root.is_dir():
@@ -355,6 +451,52 @@ def write_fixture(root: Path) -> None:
         (root / "tools" / name).write_text("# fixture\n", encoding="utf-8")
 
 
+def fixture_schema3_current() -> str:
+    sections = []
+    for heading in CURRENT_SECTIONS:
+        if heading == "Verified State":
+            body = "CLOSED / RUNTIME VALIDATED — [evidence](evidence/accepted.md)"
+        elif heading == "Next Action":
+            body = "NEXT — Complete the one fixture action."
+        elif heading == "Relevant References":
+            body = "[evidence](evidence/accepted.md)"
+        else:
+            body = "fixture"
+        sections.append(f"## {heading}\n\n{body}")
+    return "---\nmemory_schema: 3\n---\n# Fixture CURRENT\n\n" + "\n\n".join(sections) + "\n"
+
+
+def write_schema3_fixture(root: Path) -> None:
+    write_fixture(root)
+    memory = root / "docs/memory"
+    (memory / "CURRENT.md").write_text(fixture_schema3_current(), encoding="utf-8")
+    (memory / "handoffs/CURRENT_HANDOFF.md").write_text(
+        "# Current KaonLT handoff\n\n"
+        "## Transfer State\n\n"
+        "No exceptional transfer state is recorded.\n\n"
+        "## Resume\n\n"
+        "CURRENT.md is the sole authoritative resumable state. The handoff cannot override CURRENT.md. "
+        "Resume from CURRENT.md and then only task-relevant canonical references.\n",
+        encoding="utf-8",
+    )
+    (memory / "USER.md").write_text("fixture user context\n", encoding="utf-8")
+    agents = memory / "AGENTS.md"
+    agents.write_text(
+        agents.read_text(encoding="utf-8")
+        + "\n## Schema-3 bootstrap\n\n"
+        "Read these five files in full, in this exact order:\n\n"
+        + "\n".join(
+            f"{index}. `{relative}`" for index, relative in enumerate(SCHEMA3_BOOTSTRAP_ORDER, 1)
+        )
+        + "\n\nOnly after those five are read in full may a session expand selectively from:\n\n"
+        "- CURRENT direct references\n"
+        "- exact active task\n"
+        "- required canonical evidence/decision/phase records\n\n"
+        "Do not eagerly load the whole memory hierarchy.\n",
+        encoding="utf-8",
+    )
+
+
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -427,6 +569,19 @@ def self_test() -> None:
         agents.write_text("missing authority boundary\n", encoding="utf-8")
         errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
         assert any("authority boundary marker" in error for error in errors), errors
+
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        write_schema3_fixture(root)
+        errors, warnings = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert not errors and not warnings, (errors, warnings)
+        current = root / "docs/memory/CURRENT.md"
+        current.write_text(
+            current.read_text(encoding="utf-8").replace("NEXT — Complete the one fixture action.", "fixture"),
+            encoding="utf-8",
+        )
+        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert any("exactly one active NEXT" in error for error in errors), errors
 
 
 def parse_args() -> argparse.Namespace:

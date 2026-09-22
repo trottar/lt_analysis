@@ -74,6 +74,23 @@ def parse_active_state(path: Path) -> dict[str, str | int]:
             raise ActiveStateError(f"{path} has missing, empty, or duplicate frontmatter field: {line!r}")
         parsed[key] = value
 
+    schema = parsed.get("memory_schema")
+    if schema == "3":
+        expected = {"memory_schema"}
+        if set(parsed) != expected:
+            missing = sorted(expected - set(parsed))
+            extra = sorted(set(parsed) - expected)
+            details = []
+            if missing:
+                details.append("missing " + ", ".join(missing))
+            if extra:
+                details.append("unexpected " + ", ".join(extra))
+            raise ActiveStateError(f"{path} schema-3 frontmatter fields differ: {'; '.join(details)}")
+        return {"memory_schema": 3}
+
+    if schema is not None and schema != "2":
+        raise ActiveStateError(f"{path} memory_schema must be 2 or 3")
+
     expected = set(ACTIVE_STATE_KEYS)
     if set(parsed) != expected:
         missing = sorted(expected - set(parsed))
@@ -84,9 +101,6 @@ def parse_active_state(path: Path) -> dict[str, str | int]:
         if extra:
             details.append("unexpected " + ", ".join(extra))
         raise ActiveStateError(f"{path} frontmatter fields differ: {'; '.join(details)}")
-    if parsed["memory_schema"] != "2":
-        raise ActiveStateError(f"{path} memory_schema must be 2")
-
     result: dict[str, str | int] = {key: parsed[key] for key in ACTIVE_STATE_KEYS}
     result["memory_schema"] = 2
     return result
@@ -238,6 +252,17 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("obsolete scientific_source_commit was accepted")
+        current.write_text("---\nmemory_schema: 3\n---\n# Current\n", encoding="utf-8")
+        assert parse_active_state(current) == {"memory_schema": 3}
+        write_manifest(root)
+        assert not check_manifest(root), "schema-3 manifest did not verify"
+        current.write_text("---\nmemory_schema: 3\nactive_status: forbidden\n---\n", encoding="utf-8")
+        try:
+            parse_active_state(current)
+        except ActiveStateError:
+            pass
+        else:
+            raise AssertionError("schema-3 extra frontmatter was accepted")
 
 
 def parse_args() -> argparse.Namespace:

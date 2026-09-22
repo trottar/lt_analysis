@@ -76,6 +76,11 @@
       "sha256": "9c5d936f0ac1939095454f679706a286442d8684fa6645712f66764ed5090e3a"
     },
     {
+      "bytes": 5949,
+      "path": "docs/memory/decisions/memory-schema-v3-contract.md",
+      "sha256": "28500a7a8e561f90dfa7f3144c077d64d36e8b3cbae6ce60f38258a684d7ce8a"
+    },
+    {
       "bytes": 7648,
       "path": "docs/memory/decisions/memory-system-refinement-m0-m9-plan.md",
       "sha256": "f07fbaf5bc6e8f5fb9327479e0a37813a0b6cae32ce506e08a72e15ad988e758"
@@ -261,6 +266,11 @@
       "sha256": "1f715dee22cba79dcadb0382e593977d37500317dea8d2e9965a1b7d37f8e397"
     },
     {
+      "bytes": 3006,
+      "path": "docs/memory/phases/memory-m1-schema-v3-compatibility.md",
+      "sha256": "08b55440e3b1309f932aca72a0c051737c1ba39fe08ba203ae4aac5257abccde"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -322,6 +332,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "d186943ce5aab19dd3de2428c76ba459efb9af9f",
+  "observed_git_head": "50858f2b6a85f1c3355569acef555fadfae93e19",
   "schema_version": 2
 }
