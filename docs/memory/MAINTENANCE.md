@@ -10,9 +10,34 @@
   new session navigate; they do not outrank source or evidence.
 - **Evidence:** `evidence/` contains farm/runtime gate records and is preserved
   before any related summary is shortened.
+- **User context:** `USER.md` contains stable collaboration preferences and
+  operating context, not active state or scientific evidence.
+- **Operational references:** `TOOLS.md` contains concise Linux/JLab-oriented
+  command conventions, not detailed farm procedure ownership.
+- **Generalized lessons:** `LEARNINGS.md` contains reusable lessons, not phase
+  chronology or current status.
 
 Maintain one active objective and one authoritative next action. Do not create
 competing live-state summaries.
+
+## Startup Contract Health
+
+At substantial-work start, establish actual branch, HEAD, and worktree state.
+Then read these five files in full, in this exact order:
+
+1. `AGENTS.md`
+2. `CURRENT.md`
+3. `MEMORY.md`
+4. `handoffs/CURRENT_HANDOFF.md`
+5. `USER.md`
+
+Only after the five-file core is read may task-directed expansion use CURRENT
+direct references, the exact active task, and required canonical
+evidence/decision/phase records. Do not eagerly load the whole hierarchy. Keep
+`CURRENT.md` as the concise ordinary active-state authority; schema-2 mirrored
+metadata is transitional compatibility until M3, not a second authority.
+Maintain this contract through the control records without turning any of them
+into a duplicate current-state summary.
 
 ## Size and semantic triggers
 

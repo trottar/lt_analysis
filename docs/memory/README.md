@@ -4,18 +4,37 @@ This directory is the active, repository-owned engineering notebook for KaonLT
 development. It is maintained with the code, not reconstructed from chat or
 commit titles.
 
-For substantial work, establish the live branch, HEAD, and worktree first;
-then read [current state](CURRENT.md), the records it directly links, relevant
-durable guidance in [memory](MEMORY.md), and the
-[current handoff](handoffs/CURRENT_HANDOFF.md). Do not load the whole tree
-without a task-specific reason. The tracked operating rules are in
-[AGENTS.md](AGENTS.md), with [maintenance](MAINTENANCE.md),
-[communication](COMMUNICATION.md), and [Codex workflow](CODEX.md) guidance.
+## Startup Contract
+
+At substantial-work start, establish actual branch, HEAD, and worktree state,
+then read these five files in full and in this exact order:
+
+1. [AGENTS.md](AGENTS.md)
+2. [CURRENT.md](CURRENT.md)
+3. [MEMORY.md](MEMORY.md)
+4. [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md)
+5. [USER.md](USER.md)
+
+Only then expand selectively from CURRENT direct references, the exact active
+task, and required canonical evidence/decision/phase records. Do not load the
+entire hierarchy without task-specific need. `CURRENT.md` owns ordinary active
+state. The handoff moves toward exceptional-transfer-only ownership under M3;
+the current schema-2 duplicated metadata is transitional, not a second
+authority.
+
+After the core read, use [current state](CURRENT.md), its direct references,
+and task-relevant durable guidance in [memory](MEMORY.md) without loading the
+whole tree. The tracked operating rules are in [AGENTS.md](AGENTS.md), with
+[maintenance](MAINTENANCE.md), [communication](COMMUNICATION.md), and
+[Codex workflow](CODEX.md) guidance.
 
 - [CURRENT.md](CURRENT.md) — concise, authoritative live state.
 - [MEMORY.md](MEMORY.md) — curated durable knowledge and recurring rules.
 - [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md) — continuation
   state for a fresh session.
+- [USER.md](USER.md) — stable collaboration and operating context.
+- [TOOLS.md](TOOLS.md) — concise Linux/JLab-oriented operational references.
+- [LEARNINGS.md](LEARNINGS.md) — generalized durable lessons.
 - `evidence/` — farm/runtime validation records only.
 - `decisions/` — significant architectural or scientific decisions.
 - `investigations/` — active, closed, and deferred investigations.

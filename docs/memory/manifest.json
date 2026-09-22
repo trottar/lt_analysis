@@ -11,9 +11,9 @@
   },
   "files": [
     {
-      "bytes": 2218,
+      "bytes": 3021,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "32fb6f324c1838bf9536effa2a13f6899cd5d6eada9e86bbf886d4c8f11252e1"
+      "sha256": "5b80c3dc1dcc47ec6a43797da4eea743014e40a3de598b9b14f58cdd7a03187f"
     },
     {
       "bytes": 1416,
@@ -31,9 +31,14 @@
       "sha256": "76b8ea0151a2bf5587e8fd2f6d1454524847d1ba7b470003554c44d676ea3c45"
     },
     {
-      "bytes": 1999,
+      "bytes": 1978,
+      "path": "docs/memory/LEARNINGS.md",
+      "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
+    },
+    {
+      "bytes": 3139,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "ac7b3812a5f2e4051de4f01483253182b2d30152b8604167a18c15b97d3a358e"
+      "sha256": "ca17f9c862930414aeac8522e364802b7ecbc8f1786c142c30513b97270a503a"
     },
     {
       "bytes": 14387,
@@ -41,9 +46,19 @@
       "sha256": "64f97d5dffbbcafe7ee12e605002e6470fbe1143dc34a7276256c4952c862af8"
     },
     {
-      "bytes": 2349,
+      "bytes": 3139,
       "path": "docs/memory/README.md",
-      "sha256": "0c8bd31e958c0eeb7f5d9bb76a602256d8ef83334f99b3fcbc91bc2ee451fcd1"
+      "sha256": "416ab0e77ff1f3e02e20062e3fb7420502424987f97fe9453c0b50ab9fa76ddd"
+    },
+    {
+      "bytes": 1921,
+      "path": "docs/memory/TOOLS.md",
+      "sha256": "98e4837f7b1dbce65b3602339505370b59707a55da8c8d193846410c47404c98"
+    },
+    {
+      "bytes": 1762,
+      "path": "docs/memory/USER.md",
+      "sha256": "62663281cb7eb15603b7faab347249db39cde606a07304a93c2b5994bb163df1"
     },
     {
       "bytes": 1037,
@@ -271,6 +286,11 @@
       "sha256": "08b55440e3b1309f932aca72a0c051737c1ba39fe08ba203ae4aac5257abccde"
     },
     {
+      "bytes": 2269,
+      "path": "docs/memory/phases/memory-m2-five-file-bootstrap.md",
+      "sha256": "4dcd374d95f80f06d20dad763e92f9c678edff7905eb1c362d84a85fd3f90624"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -332,6 +352,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "50858f2b6a85f1c3355569acef555fadfae93e19",
+  "observed_git_head": "bc02e09728f2decb624e0101b5c53132190981b3",
   "schema_version": 2
 }

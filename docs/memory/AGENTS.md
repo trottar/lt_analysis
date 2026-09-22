@@ -11,13 +11,35 @@ the root `AGENTS.md` or machine-local instructions.
 - When evidence competes, use current source/diff, then newer farm/runtime
   evidence, then newer validation or handoff artifacts, then tracked durable
   memory, then older chat summaries. State any source-versus-runtime distinction.
-- For substantial work, establish live branch, HEAD, and worktree first. Read
-  `CURRENT.md`, its directly linked task records, relevant sections of
-  `MEMORY.md`, and `handoffs/CURRENT_HANDOFF.md`; do not eagerly load the full
-  memory tree.
+- For substantial work, establish live branch, HEAD, and worktree first, then
+  follow the five-file startup contract below before task-directed expansion.
 - Use only these work-state labels: `CLOSED / RUNTIME VALIDATED`, `SOURCE
   REVIEWED`, `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, `ACTIVE`,
   `DEFERRED`, `BLOCKED`, and `NEXT`.
+
+## Five-file startup contract
+
+At substantial-work start, first establish actual branch, HEAD, and worktree
+state. Read these five files in full, in this exact order:
+
+1. `AGENTS.md`
+2. `CURRENT.md`
+3. `MEMORY.md`
+4. `handoffs/CURRENT_HANDOFF.md`
+5. `USER.md`
+
+Only after those five are read in full may a session expand selectively from:
+
+- CURRENT direct references
+- exact active task
+- required canonical evidence/decision/phase records
+
+Do not eagerly load the whole memory hierarchy. Identify the active objective,
+evidence boundary, blockers, and NEXT from the core; inspect current source or
+diff whenever implementation is involved; and distinguish source proof from
+farm/runtime proof. `CURRENT.md` is the sole ordinary active-state authority.
+Schema-2 mirrored metadata remains temporary compatibility representation until
+M3; it does not create independent semantic authority.
 
 ## Scientific and validation boundaries
 
