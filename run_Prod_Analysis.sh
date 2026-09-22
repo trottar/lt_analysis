@@ -253,8 +253,8 @@ SKIM_OUTPUT_DIR="$(normalize_ltsep_dir "${SKIMPATH}")"
 mkdir -p "${SKIM_OUTPUT_DIR}"
 mkdir -p "${OUTPATH}"
 
-# Flag definitions (flags: h, c, i, p, a)
-while getopts 'hci:pa' flag; do
+# Flag definitions (flags: h, c, i, p, a, d)
+while getopts 'hci:pad' flag; do
     case "${flag}" in
         h) 
         echo "--------------------------------------------------------------"
@@ -270,6 +270,7 @@ while getopts 'hci:pa' flag; do
 	echo "    -iN, 'N' iterations of SIMC to find proper weight"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for default (i.e., kaon)."
 	echo "    -a, run automated iteration algorithm (uses -i flag internally)."
+	echo "    -d, fast kaon Left / lowe debug mode; stop before full high-epsilon processing."
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
@@ -286,6 +287,7 @@ while getopts 'hci:pa' flag; do
 	   iterations=${OPTARG} ;;
 	p) p_flag='true' ;;
 	a) a_flag='true' ;;
+	d) d_flag='true' ;;
         *) print_usage
         exit 1 ;;
     esac
@@ -327,6 +329,11 @@ else
     done
 fi
 
+if [[ $d_flag = "true" && $ParticleType != "kaon" ]]; then
+    echo "ERROR: -d debug mode supports only kaon full-analysis execution."
+    exit 1
+fi
+
 
 # Clean all untracked files and recreate symlinks
 if [[ $i_flag != "true" && $a_flag != "true" ]]; then
@@ -354,7 +361,7 @@ declare -a EPS=("low" "high")
 for j in "${EPS[@]}"
 do
     # When any flag is used then the user input changes argument order
-    if [[ $i_flag = "true" || $p_flag = "true" || $c_flag = "true" || $a_flag = "true" ]]; then
+    if [[ $i_flag = "true" || $p_flag = "true" || $c_flag = "true" || $a_flag = "true" || $d_flag = "true" ]]; then
 
 	EPSILON=$j
 	Q2=$2
@@ -1715,6 +1722,13 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 		EPSILON="$j"
 		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
 		if [ "$j" = "low" ]; then
+		    if [[ $d_flag = "true" ]]; then
+			LT_ANALYSIS_DEBUG_LEFT_LOW=1 python3 main.py "${main_args_low[@]}" || exit 1
+			echo
+			echo "Left / lowe debug analysis completed."
+			echo "Full high-epsilon processing is intentionally skipped in -d debug mode."
+			exit 0
+		    fi
 		    python3 main.py "${main_args_low[@]}" || exit 1
 		else
 		    python3 main.py "${main_args_high[@]}" || exit 1

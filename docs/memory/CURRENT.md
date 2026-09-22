@@ -11,10 +11,15 @@ the accepted baseline yield and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-E.8.1 — canonical-five-setting ordinary procedure-PDF farm-validation gate.
-The reviewed procedure-PDF source and bundle/profile infrastructure are ready
-for a user-run farm gate; inspect `Q4p4W2p74 / Left / highe` first before
-broader visual/runtime review.
+E.8.1.Debug.1 is `ACTIVE`: a narrow local `-d` launcher implementation is the
+immediate operational prerequisite before the existing E.8.1 farm gate. It
+preserves paired canonical preflight, performs only the full `Left / lowe`
+debug analysis, and stops before full high epsilon. It awaits independent
+ChatGPT source review and the user-controlled Git handoff; it is not
+`SOURCE REVIEWED` or farm/runtime validated. The scientific E.8.1 gate remains
+unchanged behind this prerequisite; inspect `Q4p4W2p74 / Left / highe` first
+before broader visual/runtime review. See the
+[Debug.1 local phase record](phases/e8-1-debug-1-left-low-debug-mode.md).
 
 ## Verified State
 
@@ -29,6 +34,9 @@ broader visual/runtime review.
 - E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
   remains the baseline; Method B remains diagnostic/cross-check only; Method A
   remains detached and non-production.
+- E.8.1.Debug.1 is `ACTIVE` local-only launcher orchestration work. Its
+  `-d` path has deterministic source-contract coverage only; no ROOT/PyROOT,
+  full-analysis, farm, or runtime evidence exists.
 - The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` at
   `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`. This is source review only, not
   farm, ROOT/PyROOT, or E.8.1 runtime validation; it changes neither E.8.1's
@@ -61,10 +69,13 @@ remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
 
 ## Next Action
 
-NEXT — E.8.1: perform the canonical-five-setting `Q4p4W2p74` farm-validation
-gate using the reviewed wrapper; package and inspect `Left / highe` first, and
-broaden to the remaining settings only after that detailed visual/runtime
-review passes.
+NEXT — E.8.1.Debug.1: obtain independent ChatGPT source review of the narrow
+local `-d` implementation, then complete the user-controlled Git handoff.
+After this operational prerequisite is source-reviewed, pushed, and any
+user-requested debug run has fresh evidence, resume the unchanged E.8.1
+canonical-five-setting `Q4p4W2p74` farm-validation gate using the reviewed
+wrapper; package and inspect `Left / highe` first, and broaden only after that
+detailed visual/runtime review passes.
 
 ## Success Criteria
 
@@ -94,3 +105,4 @@ merely for style.
 - [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)
 - [Parameterized wrapper phase record](phases/farm-validation-bundle-wrapper.md)
 - [Wrapper post-push state reconciliation](phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md)
+- [E.8.1.Debug.1 local debug-mode record](phases/e8-1-debug-1-left-low-debug-mode.md)

@@ -299,6 +299,22 @@ outputpdf  = OUTPATH + "/" + ParticleType + "_" + OutFilename + ".pdf"
 phisetlist = ["Center", "Left", "Right"]
 #phisetlist = ["Center"]
 
+debug_left_low = os.environ.get("LT_ANALYSIS_DEBUG_LEFT_LOW", "").strip().lower()
+if debug_left_low:
+    if debug_left_low not in {"1", "true", "yes"}:
+        raise RuntimeError(
+            "LT_ANALYSIS_DEBUG_LEFT_LOW must be an explicit enabled value for Left / lowe debug execution."
+        )
+    if ParticleType != "kaon" or str(EPSSET).strip().lower() != "low":
+        raise RuntimeError(
+            "LT_ANALYSIS_DEBUG_LEFT_LOW supports only kaon low-epsilon full-analysis execution."
+        )
+    if os.environ.get("LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE"):
+        raise RuntimeError(
+            "LT_ANALYSIS_DEBUG_LEFT_LOW is not allowed during canonical prepass capture."
+        )
+    phisetlist = ["Left"]
+
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
 ###############################################################################################################################################
