@@ -77,13 +77,13 @@ explicitly intended and safe. Do not create multiple user-visible helper files
 with the same name.
 
 For a temporary-worktree collection, use the phase contract's exact collector
-arguments, with this concise `tcsh` sequence: enter the normal repository;
-define timestamp, temporary-worktree, artifact-directory, and unique-ZIP
-variables; add the detached worktree at the reviewed bundle/profile commit;
-run its collector/profile against the existing artifacts; inspect the ZIP
-manifest; remove and prune the worktree; and print the exact ZIP path for
-transfer. Keep the phase-specific invocation in one short command block rather
-than generalizing it into a new script.
+arguments. Repeated **bundle-only** gates may instead use the transparent,
+input-driven `testing/package_pion_hgcer_validation_bundle.tcsh` wrapper under
+its [wrapper contract](farm-validation-bundle-wrapper-contract.md). It accepts
+only explicit bundle inputs, invokes the unchanged generic collector, and
+cannot run an analyzer, renderer, scheduler, or arbitrary command. Full
+scientific reruns and presentation-only rerenders remain phase-specific direct
+operations; do not generalize either into the wrapper.
 
 ## F.6.2.Fix.4 example only
 

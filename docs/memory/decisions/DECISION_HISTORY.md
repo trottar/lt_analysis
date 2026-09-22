@@ -140,3 +140,12 @@ commit and S2 profile/test commit are separate so the latter can pin the former.
 It renders every populated canonical F.6.2 child from the exact accepted JSON
 without recalculation, and its later evidence records both E.8 identities apart
 from upstream Fix.5 provenance.
+
+### D023 — parameterized wrapper is bundle-only orchestration
+
+[IMPLEMENTATION_CONTRACT] Repeated farm packaging may use one explicit-input
+`tcsh` wrapper around the unchanged generic collector. It verifies caller
+supplied immutable hashes before and after collection, uses a detached
+commit-pinned worktree, validates the ZIP/manifest, and removes only that
+created worktree. It cannot invoke analysis, rendering, scheduler, or
+arbitrary commands; phase-owned reruns remain direct operations.

@@ -26,6 +26,13 @@ environment, with reproducible commands and paths. Preserve cumulative context
 in durable repository records rather than relying on giant chat-continuation
 prompts once the memory migration is complete.
 
+Treat farm requests as safety-critical for an ordinary JLab user account, not
+an administrator account. Every farm command must be valid `tcsh`, scoped to
+the user's designated paths and the requested gate, and minimize changed
+state. Do not prescribe privileged, scheduler, service, shared-filesystem, or
+ordinary-checkout cleanup actions; any temporary-worktree cleanup must be
+explicitly path-bounded and limited to the worktree created by the request.
+
 ## Boundaries
 
 This record is stable collaboration context only; it is not a command

@@ -29,6 +29,11 @@ broader visual/runtime review.
 - E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
   remains the baseline; Method B remains diagnostic/cross-check only; Method A
   remains detached and non-production.
+- The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` local
+  / proposed work at observed `45633698d624304005afdf7a9db25cd4d67ec573`; the
+  user must commit and push it before farm use. It changes neither E.8.1's
+  source/profile identity nor any runtime status. See its
+  [phase record](phases/farm-validation-bundle-wrapper.md).
 
 ## Source / Evidence Identity
 
@@ -54,9 +59,10 @@ remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
 
 ## Next Action
 
-NEXT — E.8.1: perform the canonical-five-setting `Q4p4W2p74` farm-validation
-gate, inspect `Left / highe` first, and broaden to the remaining settings only
-after that detailed visual/runtime review passes.
+NEXT — User reviews, commits, and pushes the bundle-only wrapper; then E.8.1
+performs the canonical-five-setting `Q4p4W2p74` farm-validation gate, packages
+`Left / highe` first, and broadens to the remaining settings only after that
+detailed visual/runtime review passes.
 
 ## Success Criteria
 
@@ -84,3 +90,4 @@ merely for style.
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)
 - [Farm validation-bundle procedure](decisions/farm-validation-bundle-procedure.md)
+- [Parameterized wrapper phase record](phases/farm-validation-bundle-wrapper.md)

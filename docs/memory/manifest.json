@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4215,
+      "bytes": 4711,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "996ec6d30d016e847d3bb5bfe961037fd9822e7a40f129577b55dc66230818e9"
+      "sha256": "576529c127cb122e942bc5b355617aac9208e035d1ba92969fbdd3391815ea9d"
     },
     {
       "bytes": 1978,
@@ -46,9 +46,9 @@
       "sha256": "f9f77d5195dc25f485670d34d841129d2120f2fb170217a6821a166866aab776"
     },
     {
-      "bytes": 1859,
+      "bytes": 2316,
       "path": "docs/memory/USER.md",
-      "sha256": "43a4cdc33a0cbaba3f1292001754e6d2c9ed082b43d4bd6e25d81e7664a21401"
+      "sha256": "cbe21b5c721111c49c464b29d504cc2a32f29217a6dc22dbbe2b69475cbc2c8a"
     },
     {
       "bytes": 1157,
@@ -61,9 +61,9 @@
       "sha256": "a6154188c15c66fbec3aa48664e5d85a93f2d7b4dc5a5387edee0fe85d99383e"
     },
     {
-      "bytes": 5976,
+      "bytes": 6473,
       "path": "docs/memory/decisions/DECISION_HISTORY.md",
-      "sha256": "e66d1752dfee8a299f43850d6f2f76176e78a882df5116a355ed97c04eb2909e"
+      "sha256": "f5f137a9fa0ead5086fc6f7ab3ce25a82d1c7816a1d58ec00bfda16adc553af4"
     },
     {
       "bytes": 10528,
@@ -76,9 +76,14 @@
       "sha256": "da59fc64725a0a87c230ff949636421476e1b6a6fc87c8f22a9dc6c4aceb6b79"
     },
     {
-      "bytes": 10194,
+      "bytes": 10216,
       "path": "docs/memory/decisions/farm-validation-bundle-procedure.md",
-      "sha256": "9c5d936f0ac1939095454f679706a286442d8684fa6645712f66764ed5090e3a"
+      "sha256": "9d6d2a62853240de6315c684c2a53209889c3c5b23f4841f5adaa9435d37862a"
+    },
+    {
+      "bytes": 3131,
+      "path": "docs/memory/decisions/farm-validation-bundle-wrapper-contract.md",
+      "sha256": "6194f83e803d5222ae887c4211f75d842e9fe388c4c3d0f8a344fab7a6ed4d07"
     },
     {
       "bytes": 5949,
@@ -279,6 +284,11 @@
       "bytes": 462,
       "path": "docs/memory/phases/README.md",
       "sha256": "1f715dee22cba79dcadb0382e593977d37500317dea8d2e9965a1b7d37f8e397"
+    },
+    {
+      "bytes": 1723,
+      "path": "docs/memory/phases/farm-validation-bundle-wrapper.md",
+      "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
     },
     {
       "bytes": 3006,
