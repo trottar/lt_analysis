@@ -19,9 +19,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4210,
+      "bytes": 4217,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "f9c384cc1f996631c4808f1a82eca0b6da465280ec0e3c3b0c5ab750596318ce"
+      "sha256": "20dbf76dee074a6d6a5dfefd45135ffa90b4c52a4c5e2886963641ba5f4fe9f7"
     },
     {
       "bytes": 1978,
@@ -29,9 +29,9 @@
       "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
     },
     {
-      "bytes": 3646,
+      "bytes": 3895,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "5e48041155677613463027c83aae0e6ebf582e37066240e1a4fd3f0bb7246594"
+      "sha256": "b241ec0b8f84d6743401f3b84dee8f3e7b23df66f7a30448b3c758703ba80c9c"
     },
     {
       "bytes": 5040,
@@ -309,6 +309,11 @@
       "sha256": "8f34ccc2af40a6df677e18afa062f584afa0f003910fed73751542b82bcbc672"
     },
     {
+      "bytes": 3716,
+      "path": "docs/memory/phases/memory-m7-strict-semantic-health.md",
+      "sha256": "0dc932f1603c2592ad23c432ba3b0604407170d5ee7aa153b204b3e1c7098329"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -339,9 +344,9 @@
       "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 6471,
+      "bytes": 6778,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "af5288d1433ce3d67765fcafe0bbe6b0232c5bd74f4125645ef81f3e874fc9de"
+      "sha256": "21d687bc8e9d741b0da89498505c3c4723d3ec071bb98c8473f9402d569cb170"
     },
     {
       "bytes": 1698,
@@ -370,6 +375,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "799416599671ff0bdc3c7d4024fbd1f7f2f456cc",
+  "observed_git_head": "c6b7f758a13060a650f036d25758d1ee8049c66f",
   "schema_version": 2
 }

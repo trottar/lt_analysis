@@ -48,11 +48,17 @@ next action.
 
 ## Size and semantic triggers
 
-The active files `CURRENT.md`, `MEMORY.md`, and
-`handoffs/CURRENT_HANDOFF.md` have a 16 KiB soft target and 32 KiB hard limit.
-A soft-limit warning calls for focused consolidation; a hard-limit failure
-requires maintenance before further expansion. Final role-specific threshold
-redesign belongs to M7.
+| Record | Soft warning | Hard failure |
+| --- | ---: | ---: |
+| `docs/memory/CURRENT.md` | 8 KiB | 16 KiB |
+| `docs/memory/handoffs/CURRENT_HANDOFF.md` | 6 KiB | 10 KiB |
+| `docs/memory/MEMORY.md` | 30 KiB | 50 KiB |
+
+`CURRENT.md` should remain very compact because it is the sole ordinary active
+state. The handoff should remain exceptional and small. `MEMORY.md` may grow
+more because it carries durable cross-phase knowledge. A soft-limit warning
+calls for focused consolidation; a hard-limit failure requires maintenance
+before further expansion.
 
 Perform maintenance after a meaningful implementation or review, accepted farm
 evidence, regression, phase decision, changed blocker, or changed next action.

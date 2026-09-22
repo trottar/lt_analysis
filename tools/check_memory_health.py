@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check deterministic structural and integrity properties of KaonLT memory."""
+"""Check deterministic schema-3 structural and semantic KaonLT memory health."""
 
 from __future__ import annotations
 
@@ -9,77 +9,91 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Callable, Iterable
+from typing import Iterable
 
 import update_memory_manifest as manifest_tool
 
 
-SOFT_LIMIT_BYTES = 16 * 1024
-HARD_LIMIT_BYTES = 32 * 1024
 REQUIRED_FILES = (
-    "docs/memory/README.md",
-    "docs/memory/AGENTS.md",
-    "docs/memory/MAINTENANCE.md",
-    "docs/memory/COMMUNICATION.md",
-    "docs/memory/CODEX.md",
-    "docs/memory/chats/CHAT_INDEX.md",
-    "docs/memory/templates/CODEX_CONTRACT.md",
-    "docs/memory/templates/MEMORY_UPDATE.md",
-    "docs/memory/templates/RUNTIME_EVIDENCE.md",
-    "docs/memory/manifest.json",
-    "tools/check_memory_health.py",
-    "tools/update_memory_manifest.py",
-    "tools/memory_bootstrap.py",
+    "docs/memory/README.md", "docs/memory/AGENTS.md", "docs/memory/CURRENT.md",
+    "docs/memory/MEMORY.md", "docs/memory/handoffs/CURRENT_HANDOFF.md",
+    "docs/memory/USER.md", "docs/memory/TOOLS.md", "docs/memory/COMMUNICATION.md",
+    "docs/memory/CODEX.md", "docs/memory/MAINTENANCE.md", "docs/memory/LEARNINGS.md",
+    "docs/memory/roadmap/STATUS.md", "docs/memory/sources/SOURCE_INDEX.md",
+    "docs/memory/sources/ARTIFACT_INDEX.md", "docs/memory/chats/CHAT_INDEX.md",
+    "docs/memory/history/CHAT_INDEX.md", "docs/memory/history/PROJECT_HISTORY.md",
+    "docs/memory/import/README.md", "docs/memory/templates/CODEX_CONTRACT.md",
+    "docs/memory/templates/MEMORY_UPDATE.md", "docs/memory/templates/RUNTIME_EVIDENCE.md",
+    "docs/memory/manifest.json", "tools/check_memory_health.py",
+    "tools/update_memory_manifest.py", "tools/memory_bootstrap.py",
 )
-ACTIVE_FILES = (
-    "docs/memory/CURRENT.md",
-    "docs/memory/MEMORY.md",
-    "docs/memory/handoffs/CURRENT_HANDOFF.md",
-)
-ACTIVE_SURFACES = (
-    "docs/memory/CURRENT.md",
-    "docs/memory/handoffs/CURRENT_HANDOFF.md",
-    "docs/memory/roadmap/CURRENT.md",
-)
+LIVE_SURFACES = {
+    "docs/memory/README.md": "KaonLT development memory",
+    "docs/memory/AGENTS.md": "KaonLT memory operating rules",
+    "docs/memory/CURRENT.md": "Current KaonLT development state",
+    "docs/memory/MEMORY.md": "Durable KaonLT project knowledge",
+    "docs/memory/handoffs/CURRENT_HANDOFF.md": "Current KaonLT handoff",
+    "docs/memory/USER.md": "KaonLT user collaboration context",
+    "docs/memory/TOOLS.md": "KaonLT tools and operational commands",
+    "docs/memory/COMMUNICATION.md": "KaonLT farm communication",
+    "docs/memory/CODEX.md": "KaonLT Codex workflow",
+    "docs/memory/MAINTENANCE.md": "KaonLT memory maintenance",
+    "docs/memory/LEARNINGS.md": "KaonLT durable learnings",
+    "docs/memory/roadmap/STATUS.md": "Approved KaonLT roadmap status",
+    "docs/memory/sources/SOURCE_INDEX.md": "KaonLT source and evidence index",
+    "docs/memory/sources/ARTIFACT_INDEX.md": "KaonLT artifact index",
+    "docs/memory/chats/CHAT_INDEX.md": "KaonLT chat-era index",
+    "docs/memory/history/CHAT_INDEX.md": "KaonLT chat and handoff index",
+    "docs/memory/history/PROJECT_HISTORY.md": "KaonLT project history",
+    "docs/memory/import/README.md": "KaonLT imported historical provenance",
+}
+NO_NEXT_SURFACES = tuple(relative for relative in LIVE_SURFACES if relative != "docs/memory/CURRENT.md")
+SIZE_LIMITS = {
+    "docs/memory/CURRENT.md": (8 * 1024, 16 * 1024),
+    "docs/memory/handoffs/CURRENT_HANDOFF.md": (6 * 1024, 10 * 1024),
+    "docs/memory/MEMORY.md": (30 * 1024, 50 * 1024),
+}
 CURRENT_SECTIONS = (
-    "Active Objective",
-    "Current Work Item",
-    "Verified State",
-    "Source / Evidence Identity",
-    "Blockers",
-    "Next Action",
-    "Success Criteria",
-    "Do Not Reopen Without New Evidence",
+    "Active Objective", "Current Work Item", "Verified State", "Source / Evidence Identity",
+    "Blockers", "Next Action", "Success Criteria", "Do Not Reopen Without New Evidence",
     "Relevant References",
 )
-SCHEMA3_HANDOFF_SECTIONS = ("Transfer State", "Resume")
-SCHEMA3_BOOTSTRAP_ORDER = (
-    "AGENTS.md",
-    "CURRENT.md",
-    "MEMORY.md",
-    "handoffs/CURRENT_HANDOFF.md",
-    "USER.md",
+MEMORY_SECTIONS = (
+    "Authority and evidence", "Source and provenance semantics",
+    "Scientific ownership and production ordering", "HGCer and Method-A/Method-B boundaries",
+    "Diagnostics and runtime validation", "Canonical record ownership",
 )
+HANDOFF_SECTIONS = ("Transfer State", "Resume")
+BOOTSTRAP_ORDER = ("AGENTS.md", "CURRENT.md", "MEMORY.md", "handoffs/CURRENT_HANDOFF.md", "USER.md")
 REQUIRED_README_LINKS = (
-    "AGENTS.md",
-    "MAINTENANCE.md",
-    "COMMUNICATION.md",
-    "CODEX.md",
-    "chats/CHAT_INDEX.md",
-    "templates/CODEX_CONTRACT.md",
-    "templates/MEMORY_UPDATE.md",
-    "templates/RUNTIME_EVIDENCE.md",
-    "manifest.json",
+    "AGENTS.md", "CURRENT.md", "MEMORY.md", "handoffs/CURRENT_HANDOFF.md", "USER.md",
+    "TOOLS.md", "COMMUNICATION.md", "CODEX.md", "MAINTENANCE.md", "LEARNINGS.md",
+    "chats/CHAT_INDEX.md", "sources/SOURCE_INDEX.md", "sources/ARTIFACT_INDEX.md",
+    "history/PROJECT_HISTORY.md", "import/README.md", "roadmap/STATUS.md",
+    "templates/CODEX_CONTRACT.md", "templates/MEMORY_UPDATE.md",
+    "templates/RUNTIME_EVIDENCE.md", "manifest.json",
 )
-TOP_LEVEL_ROLES = ("README", "CURRENT", "MEMORY", "AGENTS", "MAINTENANCE", "COMMUNICATION", "CODEX")
-MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)#]+)(?:#[^)]*)?\)")
-HEADING = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+TOP_LEVEL_ROLES = (
+    "README", "CURRENT", "MEMORY", "AGENTS", "MAINTENANCE", "COMMUNICATION", "CODEX",
+    "USER", "TOOLS", "LEARNINGS",
+)
+APPROVED_STATUS_LABELS = (
+    "CLOSED / RUNTIME VALIDATED", "SOURCE REVIEWED",
+    "DEVELOPMENT COMPLETE, FARM VALIDATION PENDING", "ACTIVE", "DEFERRED", "BLOCKED", "NEXT",
+)
+RUNTIME_CLOSED = "CLOSED / RUNTIME VALIDATED"
+MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)\s]+)(?:\s+[^)]*)?\)")
+H1 = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
+H2 = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+PHASE_HEADING = re.compile(r"^#{3,4}\s+.+?$", re.MULTILINE)
+FENCE = re.compile(r"^\s*```", re.MULTILINE)
 ROLE_SUFFIX = re.compile(r"(?:[._-](?:copy|backup|old|v\d+))+$", re.IGNORECASE)
-COMMIT = re.compile(r"^[0-9a-f]{40}$")
+LOWER_SHA40 = re.compile(r"(?<![0-9a-f])[0-9a-f]{40}(?![0-9a-f])")
+LOWER_HASH64 = re.compile(r"(?<![0-9a-f])[0-9a-f]{64}(?![0-9a-f])")
+STATUS_CODE = re.compile(r"`([^`\n]+)`")
 AUTHORITY_MARKERS = {
     "docs/memory/AGENTS.md": (
-        "## Execution authority",
-        "Codex must not commit, push, update remote refs",
+        "## Execution authority", "Codex must not commit, push, update remote refs",
         "The user alone commits/pushes accepted changes and runs farm",
         "Workflow: Codex local changes -> ChatGPT audit -> user commit/push",
     ),
@@ -89,17 +103,20 @@ AUTHORITY_MARKERS = {
         "Workflow: Codex local changes -> ChatGPT audit -> user commit/push",
     ),
     "docs/memory/COMMUNICATION.md": (
-        "## Execution authority",
-        "must not commit, push, update remote refs",
+        "## Execution authority", "must not commit, push, update remote refs",
         "commits/pushes accepted changes and runs farm validation.",
         "changes -> ChatGPT audit -> user commit/push",
     ),
     "docs/memory/templates/CODEX_CONTRACT.md": (
-        "**Execution authority:**",
-        "the user alone commits/pushes and runs the farm",
+        "**Execution authority:**", "the user alone commits/pushes and runs the farm",
         "Workflow: Codex local changes -> ChatGPT audit -> user commit/push",
     ),
 }
+MAINTENANCE_THRESHOLD_ROWS = (
+    "| `docs/memory/CURRENT.md` | 8 KiB | 16 KiB |",
+    "| `docs/memory/handoffs/CURRENT_HANDOFF.md` | 6 KiB | 10 KiB |",
+    "| `docs/memory/MEMORY.md` | 30 KiB | 50 KiB |",
+)
 
 
 def default_root() -> Path:
@@ -109,8 +126,8 @@ def default_root() -> Path:
 def markdown_links_text(text: str) -> set[str]:
     links: set[str] = set()
     for target in MARKDOWN_LINK.findall(text):
-        target = target.strip()
-        if "://" not in target and not target.startswith("mailto:"):
+        target = target.strip().split("#", 1)[0]
+        if target and "://" not in target and not target.startswith("mailto:"):
             links.add(target)
     return links
 
@@ -119,43 +136,24 @@ def role_base(stem: str) -> str:
     return ROLE_SUFFIX.sub("", stem).upper()
 
 
-def run_manifest_check(root: Path) -> tuple[bool, str]:
-    script = root / "tools" / "update_memory_manifest.py"
-    if not script.is_file():
-        return False, "manifest checker is missing"
-    result = subprocess.run(
-        [sys.executable, str(script), "--root", str(root), "--check"],
-        cwd=root,
-        capture_output=True,
-        text=True,
-    )
-    message = (result.stdout + result.stderr).strip()
-    return result.returncode == 0, message
-
-
-def git_commit_resolver(root: Path, commit: str) -> bool | None:
+def read_document(path: Path, label: str) -> tuple[str | None, list[str]]:
     try:
-        repository = subprocess.run(
-            ["git", "rev-parse", "--is-inside-work-tree"],
-            cwd=root,
-            capture_output=True,
-            text=True,
-        )
-    except OSError:
-        return None
-    if repository.returncode != 0:
-        return None
-    result = subprocess.run(
-        ["git", "cat-file", "-e", f"{commit}^{{commit}}"],
-        cwd=root,
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0
+        data = path.read_bytes()
+    except OSError as error:
+        return None, [f"cannot read {label}: {error}"]
+    if b"\0" in data:
+        return None, [f"{label} contains a NUL byte"]
+    try:
+        text = data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    except UnicodeDecodeError as error:
+        return None, [f"{label} is not readable UTF-8: {error}"]
+    if not data.endswith(b"\n"):
+        return text, [f"{label} must end with a newline"]
+    return text, []
 
 
 def current_sections(text: str) -> tuple[list[str], dict[str, str]]:
-    matches = list(HEADING.finditer(text))
+    matches = list(H2.finditer(text))
     headings = [match.group(1) for match in matches]
     contents: dict[str, str] = {}
     for index, match in enumerate(matches):
@@ -164,240 +162,316 @@ def current_sections(text: str) -> tuple[list[str], dict[str, str]]:
     return headings, contents
 
 
+def resolve_local_link(document: Path, target: str) -> Path | None:
+    if "://" in target or target.startswith("mailto:"):
+        return None
+    target = target.split("#", 1)[0]
+    return (document.parent / target).resolve() if target else None
+
+
 def check_local_links(root: Path, document: Path, text: str, label: str) -> list[str]:
     errors: list[str] = []
     for target in markdown_links_text(text):
-        target_path = (document.parent / target).resolve()
-        try:
-            target_path.relative_to(root.resolve())
-        except ValueError:
+        resolved = resolve_local_link(document, target)
+        if resolved is None:
             continue
-        if not target_path.exists():
-            errors.append(f"{label} link target does not exist: {target}")
+        try:
+            resolved.relative_to(root.resolve())
+        except ValueError:
+            errors.append(f"{label} link target escapes repository: {target}")
+        else:
+            if not resolved.exists():
+                errors.append(f"{label} link target does not exist: {target}")
     return errors
 
 
-def check_current_structure(root: Path, text: str) -> list[str]:
+def check_representation(root: Path, relative: str, title: str) -> tuple[str | None, list[str]]:
+    text, errors = read_document(root / relative, relative)
+    if text is None:
+        return None, errors
+    if H1.findall(text) != [title]:
+        errors.append(f"{relative} must contain exactly one H1: # {title}")
+    if len(FENCE.findall(text)) % 2:
+        errors.append(f"{relative} has an unbalanced fenced triple-backtick block")
+    errors.extend(check_local_links(root, root / relative, text, relative))
+    return text, errors
+
+
+def check_size_limit(relative: str, size: int, soft_limit: int, hard_limit: int) -> tuple[list[str], list[str]]:
+    if size > hard_limit:
+        return [f"{relative} exceeds hard limit ({size} > {hard_limit})"], []
+    if size > soft_limit:
+        return [], [f"{relative} exceeds soft limit ({size} > {soft_limit})"]
+    return [], []
+
+
+def check_size_limits(root: Path) -> tuple[list[str], list[str]]:
     errors: list[str] = []
+    warnings: list[str] = []
+    for relative, (soft_limit, hard_limit) in SIZE_LIMITS.items():
+        path = root / relative
+        if path.is_file():
+            role_errors, role_warnings = check_size_limit(relative, path.stat().st_size, soft_limit, hard_limit)
+            errors.extend(role_errors)
+            warnings.extend(role_warnings)
+    return errors, warnings
+
+
+def check_startup_contract(text: str, label: str) -> list[str]:
+    start = text.lower().find("read these five files")
+    startup = text[start:] if start >= 0 else text
+    positions = [startup.find(relative) for relative in BOOTSTRAP_ORDER]
+    errors = []
+    if any(position < 0 for position in positions) or positions != sorted(positions):
+        errors.append(f"{label} five-file startup order differs from the required order")
+    normalized_startup = re.sub(r"\s+", " ", startup)
+    for marker in ("CURRENT direct references", "exact active task", "required canonical evidence/decision/phase records"):
+        if marker not in normalized_startup:
+            errors.append(f"{label} selective-expansion sources are incomplete")
+            break
+    return errors
+
+
+def check_bootstrap(texts: dict[str, str]) -> list[str]:
+    errors: list[str] = []
+    agents = texts.get("docs/memory/AGENTS.md", "")
+    if "Read these five files in full, in this exact order:" not in agents:
+        errors.append("AGENTS.md must require the full five-file core read")
+    if "Only after those five are read in full may a session expand selectively from:" not in agents:
+        errors.append("AGENTS.md must require full-read-before-selective-expansion")
+    if "Do not eagerly load the whole memory hierarchy." not in agents:
+        errors.append("AGENTS.md must prohibit eager hierarchy expansion")
+    errors.extend(check_startup_contract(agents, "AGENTS.md"))
+
+    readme = texts.get("docs/memory/README.md", "")
+    if "read these five files in full and in this exact order" not in readme:
+        errors.append("README.md must require the full five-file core read")
+    if "Only then expand selectively" not in readme or "Do not load" not in readme or "whole hierarchy" not in readme:
+        errors.append("README.md must preserve full-read-before-selective-expansion meaning")
+    errors.extend(check_startup_contract(readme, "README.md"))
+
+    maintenance = texts.get("docs/memory/MAINTENANCE.md", "")
+    if "read these five files in full, in this exact order" not in maintenance:
+        errors.append("MAINTENANCE.md must require the full five-file core read")
+    if "Only after the five-file core is read" not in maintenance or "Do not eagerly load" not in maintenance or "whole" not in maintenance or "hierarchy" not in maintenance:
+        errors.append("MAINTENANCE.md must preserve full-read-before-selective-expansion meaning")
+    errors.extend(check_startup_contract(maintenance, "MAINTENANCE.md"))
+    return errors
+
+
+def check_runtime_evidence_blocks(root: Path, document: Path, text: str, label: str) -> list[str]:
+    errors: list[str] = []
+    evidence_root = (root / "docs/memory/evidence").resolve()
+    for block in re.split(r"\n\s*\n", text):
+        if RUNTIME_CLOSED not in block:
+            continue
+        valid = False
+        for target in markdown_links_text(block):
+            resolved = resolve_local_link(document, target)
+            if resolved is None:
+                continue
+            try:
+                resolved.relative_to(evidence_root)
+            except ValueError:
+                continue
+            if resolved.is_file():
+                valid = True
+                break
+        if not valid:
+            errors.append(f"{label} runtime-closed claim lacks a direct canonical evidence link")
+    return errors
+
+
+def check_current(root: Path, text: str) -> list[str]:
+    errors: list[str] = []
+    try:
+        parsed = manifest_tool.parse_active_state(root / "docs/memory/CURRENT.md")
+    except manifest_tool.ActiveStateError as error:
+        errors.append(f"invalid schema-3 CURRENT frontmatter: {error}")
+    else:
+        if parsed != {"memory_schema": 3}:
+            errors.append("CURRENT.md must use only minimal schema-3 frontmatter")
     headings, contents = current_sections(text)
     if headings != list(CURRENT_SECTIONS):
-        errors.append("CURRENT.md must contain exactly the ordered M.2 active-state sections")
+        errors.append("CURRENT.md must contain exactly the ordered active-state sections")
     for heading in CURRENT_SECTIONS:
         if not contents.get(heading):
             errors.append(f"CURRENT.md section is missing or empty: {heading}")
-    errors.extend(check_local_links(root, root / "docs/memory/CURRENT.md", text, "CURRENT.md"))
-    for block in re.split(r"\n\s*\n", text):
-        if "CLOSED / RUNTIME VALIDATED" in block:
-            evidence_links = [target for target in markdown_links_text(block) if target.startswith("evidence/")]
-            if not evidence_links:
-                errors.append("CURRENT.md runtime-closed claim lacks an evidence/ link")
-    return errors
-
-
-def check_schema3_current(root: Path, text: str) -> list[str]:
-    """Validate target schema-3 state ownership without legacy surface mirroring."""
-    errors: list[str] = []
-    _, contents = current_sections(text)
     next_count = text.count("NEXT —")
     if next_count != 1:
-        errors.append("schema-3 CURRENT.md must contain exactly one active NEXT — statement")
+        errors.append("CURRENT.md must contain exactly one active NEXT — statement")
     elif contents.get("Next Action", "").count("NEXT —") != 1:
-        errors.append("schema-3 CURRENT.md NEXT — statement must occur in ## Next Action")
-    errors.extend(check_schema3_handoff(root))
-    errors.extend(check_schema3_bootstrap(root))
-    errors.extend(check_schema3_roadmap(root))
+        errors.append("CURRENT.md NEXT — statement must occur only in ## Next Action")
+    errors.extend(check_runtime_evidence_blocks(root, root / "docs/memory/CURRENT.md", text, "CURRENT.md"))
+    for label in STATUS_CODE.findall(text):
+        if re.fullmatch(r"[A-Z][A-Z ,/]+", label) and label not in APPROVED_STATUS_LABELS:
+            errors.append(f"CURRENT.md has unapproved uppercase status label: {label}")
     return errors
 
 
-def check_schema3_handoff(root: Path) -> list[str]:
+def check_memory(text: str) -> list[str]:
     errors: list[str] = []
-    handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-    if not handoff.is_file():
-        return ["missing schema-3 handoff: docs/memory/handoffs/CURRENT_HANDOFF.md"]
-    text = handoff.read_text(encoding="utf-8")
+    headings, _ = current_sections(text)
+    if headings != list(MEMORY_SECTIONS):
+        errors.append("MEMORY.md must contain exactly the ordered durable-knowledge sections")
     if text.startswith("---\n"):
-        errors.append("schema-3 handoff must not contain active-state frontmatter")
-    h1_headings = re.findall(r"^#\s+(.+?)\s*$", text, re.MULTILINE)
+        errors.append("MEMORY.md must not contain YAML/frontmatter")
+    if "NEXT —" in text:
+        errors.append("MEMORY.md must not contain active NEXT —")
+    if (set(CURRENT_SECTIONS) | set(HANDOFF_SECTIONS)).intersection(headings):
+        errors.append("MEMORY.md must not contain active-state or handoff headings")
+    if LOWER_SHA40.search(text):
+        errors.append("MEMORY.md must not contain a full 40-character lowercase SHA")
+    if LOWER_HASH64.search(text):
+        errors.append("MEMORY.md must not contain a full 64-character lowercase hash")
+    for status in (RUNTIME_CLOSED, "DEVELOPMENT COMPLETE, FARM VALIDATION PENDING", "SOURCE REVIEWED"):
+        if status in text:
+            errors.append(f"MEMORY.md must not contain phase-ledger status label: {status}")
+    return errors
+
+
+def check_handoff(text: str) -> list[str]:
+    errors: list[str] = []
     headings, contents = current_sections(text)
-    routine_headings = [heading for heading in headings if heading in CURRENT_SECTIONS]
-    if routine_headings:
-        errors.append(
-            "schema-3 handoff must not contain routine CURRENT headings: "
-            + ", ".join(routine_headings)
-        )
-    if h1_headings != ["Current KaonLT handoff"] or headings != list(SCHEMA3_HANDOFF_SECTIONS):
-        errors.append("schema-3 handoff must contain exactly the Transfer State and Resume sections")
-    if not contents.get("Transfer State"):
-        errors.append("schema-3 handoff Transfer State must not be empty")
-    transfer_state = contents.get("Transfer State", "")
-    if "No exceptional transfer state" in transfer_state and transfer_state.strip() != "No exceptional transfer state is recorded.":
-        errors.append("schema-3 stable handoff state must use the exact no-transfer sentence")
+    if text.startswith("---\n"):
+        errors.append("handoff must not contain active-state frontmatter")
+    if headings != list(HANDOFF_SECTIONS):
+        errors.append("handoff must contain exactly the Transfer State and Resume sections")
+    transfer = contents.get("Transfer State", "")
+    if not transfer:
+        errors.append("handoff Transfer State must not be empty")
+    if "No exceptional transfer state" in transfer and transfer.strip() != "No exceptional transfer state is recorded.":
+        errors.append("handoff stable Transfer State must use the exact no-transfer sentence")
     normalized = text.replace("`", "")
     if "CURRENT.md is the sole authoritative resumable state." not in normalized:
-        errors.append("schema-3 handoff must state CURRENT.md sole authority")
+        errors.append("handoff must state CURRENT.md sole authority")
     if "handoff cannot override CURRENT.md" not in normalized:
-        errors.append("schema-3 handoff must state it cannot override CURRENT.md")
+        errors.append("handoff must state it cannot override CURRENT.md")
     if "CURRENT.md" not in contents.get("Resume", ""):
-        errors.append("schema-3 handoff Resume must point to CURRENT.md")
-    return errors
-
-
-def check_schema3_roadmap(root: Path) -> list[str]:
-    """Ensure the schema-3 roadmap preserves dependencies without active state."""
-    roadmap = root / "docs/memory/roadmap/STATUS.md"
-    legacy = root / "docs/memory/roadmap/CURRENT.md"
-    errors: list[str] = []
-    if not roadmap.is_file():
-        errors.append("missing schema-3 roadmap STATUS: docs/memory/roadmap/STATUS.md")
-    if legacy.exists():
-        errors.append("schema-3 legacy roadmap must not exist: docs/memory/roadmap/CURRENT.md")
-    if not roadmap.is_file():
-        return errors
-    text = roadmap.read_text(encoding="utf-8")
-    if text.startswith("---\n"):
-        errors.append("schema-3 roadmap must not contain active-state frontmatter")
-    if re.search(r"^## NEXT\s*$", text, re.MULTILINE):
-        errors.append("schema-3 roadmap must not contain ## NEXT")
+        errors.append("handoff Resume must point to CURRENT.md")
     if "NEXT —" in text:
-        errors.append("schema-3 roadmap must not contain active NEXT — statement")
+        errors.append("handoff must not contain active NEXT —")
     return errors
 
 
-def check_schema3_bootstrap(root: Path) -> list[str]:
+def phase_sections(text: str) -> list[str]:
+    matches = list(PHASE_HEADING.finditer(text))
+    sections: list[str] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        sections.append(text[match.end():end].strip())
+    return sections
+
+
+def check_roadmap(root: Path, text: str) -> list[str]:
+    errors: list[str] = []
+    if (root / "docs/memory/roadmap/CURRENT.md").exists():
+        errors.append("legacy roadmap/CURRENT.md must not exist")
+    if text.startswith("---\n"):
+        errors.append("roadmap STATUS must not contain active-state frontmatter")
+    if re.search(r"^## NEXT\s*$", text, re.MULTILINE):
+        errors.append("roadmap STATUS must not contain ## NEXT")
+    if "NEXT —" in text:
+        errors.append("roadmap STATUS must not contain active NEXT —")
+    normalized = text.replace("`", "")
+    if any(marker not in normalized for marker in ("CURRENT.md", "active objective", "blockers", "next action")):
+        errors.append("roadmap STATUS must point active objective, blockers, and next action ownership to CURRENT.md")
+    for section in phase_sections(text):
+        first_line = section.splitlines()[0] if section else ""
+        match = re.match(r"^`([^`]+)`\s+—", first_line)
+        if not match or match.group(1) not in APPROVED_STATUS_LABELS:
+            errors.append("roadmap phase-state claim must begin with an exact backticked approved label")
+            break
+    errors.extend(check_runtime_evidence_blocks(root, root / "docs/memory/roadmap/STATUS.md", text, "roadmap STATUS"))
+    return errors
+
+
+def check_roles(root: Path) -> list[str]:
     errors: list[str] = []
     memory = root / "docs/memory"
-    for relative in SCHEMA3_BOOTSTRAP_ORDER:
-        if not (memory / relative).is_file():
-            errors.append(f"schema-3 five-file bootstrap record is missing: docs/memory/{relative}")
-    agents = memory / "AGENTS.md"
-    if not agents.is_file():
-        return errors
-    text = agents.read_text(encoding="utf-8")
-    core_marker = "Read these five files in full, in this exact order:"
-    expansion_marker = "Only after those five are read in full may a session expand selectively from:"
-    if core_marker not in text or expansion_marker not in text:
-        errors.append("schema-3 bootstrap must require the full five-file core read before expansion")
-    ordered_lines = [f"{index}. `{relative}`" for index, relative in enumerate(SCHEMA3_BOOTSTRAP_ORDER, 1)]
-    positions = [text.find(line) for line in ordered_lines]
-    if any(position < 0 for position in positions) or positions != sorted(positions):
-        errors.append("schema-3 bootstrap order differs from the required five-file order")
-    expansion_sources = (
-        "CURRENT direct references",
-        "exact active task",
-        "required canonical evidence/decision/phase records",
-    )
-    if any(source not in text for source in expansion_sources):
-        errors.append("schema-3 bootstrap selective expansion sources are incomplete")
-    if "Do not eagerly load the whole memory hierarchy." not in text:
-        errors.append("schema-3 bootstrap must prohibit eager/unbounded expansion")
+    roles: dict[str, list[str]] = {role: [] for role in TOP_LEVEL_ROLES}
+    if memory.is_dir():
+        for path in memory.iterdir():
+            if path.is_file() and path.suffix.lower() == ".md" and role_base(path.stem) in roles:
+                roles[role_base(path.stem)].append(path.name)
+    for role, names in roles.items():
+        if names != [f"{role}.md"]:
+            errors.append(f"duplicate or missing top-level {role} role: {', '.join(sorted(names)) or 'none'}")
+    for directory, canonical, label in (
+        (memory / "handoffs", "CURRENT_HANDOFF", "handoff CURRENT_HANDOFF"),
+        (memory / "roadmap", "STATUS", "roadmap STATUS"),
+    ):
+        names = sorted(
+            path.name for path in directory.glob("*.md") if role_base(path.stem) == canonical
+        ) if directory.is_dir() else []
+        if names != [f"{canonical}.md"]:
+            errors.append(f"duplicate or missing {label} role: {', '.join(names) or 'none'}")
     return errors
 
 
-def check_active_states(
-    root: Path,
-    resolver: Callable[[Path, str], bool | None],
-) -> list[str]:
-    errors: list[str] = []
-    states: dict[str, dict[str, str | int]] = {}
-    for relative in ACTIVE_SURFACES:
-        path = root / relative
-        if not path.is_file():
-            continue
-        try:
-            states[relative] = manifest_tool.parse_active_state(path)
-        except manifest_tool.ActiveStateError as error:
-            errors.append(f"invalid active-state frontmatter in {relative}: {error}")
-    if len(states) == len(ACTIVE_SURFACES):
-        canonical = states[ACTIVE_SURFACES[0]]
-        for relative, state in states.items():
-            if state != canonical:
-                errors.append(f"active-state metadata differs from CURRENT.md: {relative}")
-        for key, value in canonical.items():
-            if key.endswith("_commit"):
-                if not isinstance(value, str) or not COMMIT.fullmatch(value):
-                    errors.append(f"active-state {key} is not a 40-character lowercase SHA")
-                    continue
-                resolved = resolver(root, value)
-                if resolved is False:
-                    errors.append(f"active-state {key} does not resolve to a commit: {value}")
-    return errors
+def check_readme_navigation(text: str) -> list[str]:
+    links = markdown_links_text(text)
+    return [f"README missing required control link: {target}" for target in REQUIRED_README_LINKS if target not in links]
 
 
-def run_checks(
-    root: Path,
-    soft_limit: int,
-    hard_limit: int,
-    *,
-    check_manifest: bool = True,
-    commit_resolver: Callable[[Path, str], bool | None] = git_commit_resolver,
-) -> tuple[list[str], list[str]]:
+def check_maintenance_thresholds(text: str) -> list[str]:
+    return [f"MAINTENANCE.md is missing final role-specific threshold row: {row}" for row in MAINTENANCE_THRESHOLD_ROWS if row not in text]
+
+
+def run_manifest_check(root: Path) -> tuple[bool, str]:
+    script = root / "tools/update_memory_manifest.py"
+    if not script.is_file():
+        return False, "manifest checker is missing"
+    result = subprocess.run([sys.executable, str(script), "--root", str(root), "--check"], cwd=root, capture_output=True, text=True)
+    return result.returncode == 0, (result.stdout + result.stderr).strip()
+
+
+def run_checks(root: Path, *, check_manifest: bool = True) -> tuple[list[str], list[str]]:
+    """Return deterministic schema-3 health errors and size-policy warnings."""
     errors: list[str] = []
     warnings: list[str] = []
-    if soft_limit <= 0 or hard_limit < soft_limit:
-        return ["size limits must be positive and hard limit must be at least soft limit"], warnings
-
     for relative in REQUIRED_FILES:
         if not (root / relative).is_file():
             errors.append(f"missing required file: {relative}")
-
-    for relative in ACTIVE_FILES:
-        path = root / relative
-        if not path.is_file():
-            errors.append(f"missing active file: {relative}")
+    texts: dict[str, str] = {}
+    for relative, title in LIVE_SURFACES.items():
+        if not (root / relative).is_file():
             continue
-        size = path.stat().st_size
-        if size > hard_limit:
-            errors.append(f"active file exceeds hard limit ({size} > {hard_limit}): {relative}")
-        elif size > soft_limit:
-            warnings.append(f"active file exceeds soft limit ({size} > {soft_limit}): {relative}")
-
-    readme = root / "docs" / "memory" / "README.md"
-    if readme.is_file():
-        text = readme.read_text(encoding="utf-8")
-        links = markdown_links_text(text)
-        for target in REQUIRED_README_LINKS:
-            if target not in links:
-                errors.append(f"README missing required control link: {target}")
-        errors.extend(check_local_links(root, readme, text, "README"))
-
-    current = root / "docs" / "memory" / "CURRENT.md"
-    if current.is_file():
-        current_text = current.read_text(encoding="utf-8")
-        try:
-            schema = manifest_tool.parse_active_state(current)["memory_schema"]
-        except manifest_tool.ActiveStateError as error:
-            errors.append(f"invalid active-state frontmatter in docs/memory/CURRENT.md: {error}")
-        else:
-            errors.extend(check_current_structure(root, current_text))
-            if schema == 2:
-                errors.extend(check_active_states(root, commit_resolver))
-            elif schema == 3:
-                errors.extend(check_schema3_current(root, current_text))
-            else:
-                errors.append(f"unsupported CURRENT memory schema: {schema}")
-
-    memory_root = root / "docs" / "memory"
-    if memory_root.is_dir():
-        role_files: dict[str, list[str]] = {role: [] for role in TOP_LEVEL_ROLES}
-        for path in memory_root.iterdir():
-            if path.is_file() and path.suffix.lower() == ".md":
-                role = role_base(path.stem)
-                if role in role_files:
-                    role_files[role].append(path.name)
-        for role, names in role_files.items():
-            canonical = f"{role}.md"
-            if names != [canonical]:
-                errors.append(f"duplicate or missing top-level {role} role: {', '.join(sorted(names)) or 'none'}")
-
+        text, representation_errors = check_representation(root, relative, title)
+        errors.extend(representation_errors)
+        if text is not None:
+            texts[relative] = text
+            if relative != "docs/memory/CURRENT.md" and text.startswith("---\n"):
+                errors.append(f"only CURRENT.md may contain active-state frontmatter: {relative}")
+    size_errors, size_warnings = check_size_limits(root)
+    errors.extend(size_errors)
+    warnings.extend(size_warnings)
+    if "docs/memory/CURRENT.md" in texts:
+        errors.extend(check_current(root, texts["docs/memory/CURRENT.md"]))
+    if "docs/memory/MEMORY.md" in texts:
+        errors.extend(check_memory(texts["docs/memory/MEMORY.md"]))
+    if "docs/memory/handoffs/CURRENT_HANDOFF.md" in texts:
+        errors.extend(check_handoff(texts["docs/memory/handoffs/CURRENT_HANDOFF.md"]))
+    if "docs/memory/roadmap/STATUS.md" in texts:
+        errors.extend(check_roadmap(root, texts["docs/memory/roadmap/STATUS.md"]))
+    errors.extend(check_bootstrap(texts))
+    for relative in NO_NEXT_SURFACES:
+        if "NEXT —" in texts.get(relative, ""):
+            errors.append(f"non-CURRENT live/control surface must not contain active NEXT —: {relative}")
+    if "docs/memory/README.md" in texts:
+        errors.extend(check_readme_navigation(texts["docs/memory/README.md"]))
+    if "docs/memory/MAINTENANCE.md" in texts:
+        errors.extend(check_maintenance_thresholds(texts["docs/memory/MAINTENANCE.md"]))
+    errors.extend(check_roles(root))
     for relative, markers in AUTHORITY_MARKERS.items():
-        path = root / relative
-        if not path.is_file():
-            continue
-        text = path.read_text(encoding="utf-8")
-        for marker in markers:
-            if marker not in text:
-                errors.append(f"authority boundary marker is missing from {relative}: {marker}")
-
+        text = texts.get(relative)
+        if text is None:
+            text, read_errors = read_document(root / relative, relative)
+            errors.extend(read_errors)
+        if text is not None:
+            for marker in markers:
+                if marker not in text:
+                    errors.append(f"authority boundary marker is missing from {relative}: {marker}")
     if check_manifest and not errors:
         passed, message = run_manifest_check(root)
         if not passed:
@@ -406,8 +480,7 @@ def run_checks(
 
 
 def print_result(errors: Iterable[str], warnings: Iterable[str]) -> int:
-    errors = list(errors)
-    warnings = list(warnings)
+    errors, warnings = list(errors), list(warnings)
     for warning in warnings:
         print(f"MEMORY HEALTH: WARN: {warning}")
     for error in errors:
@@ -418,223 +491,121 @@ def print_result(errors: Iterable[str], warnings: Iterable[str]) -> int:
     return 0
 
 
-def fixture_frontmatter() -> str:
-    return """---
-memory_schema: 2
-active_objective: Fixture objective
-current_work_item: Fixture work item
-active_status: ACTIVE
-next_action: Fixture next action
-baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
----
-"""
-
-
 def fixture_current() -> str:
     sections = []
     for heading in CURRENT_SECTIONS:
         if heading == "Verified State":
-            body = "CLOSED / RUNTIME VALIDATED — [evidence](evidence/accepted.md)"
-        elif heading == "Relevant References":
-            body = "[evidence](evidence/accepted.md)"
-        else:
-            body = "fixture"
-        sections.append(f"## {heading}\n\n{body}")
-    return fixture_frontmatter() + "# Fixture CURRENT\n\n" + "\n\n".join(sections) + "\n"
-
-
-def write_fixture(root: Path) -> None:
-    memory = root / "docs" / "memory"
-    (memory / "handoffs").mkdir(parents=True)
-    (memory / "roadmap").mkdir()
-    (memory / "evidence").mkdir()
-    (memory / "chats").mkdir()
-    (memory / "templates").mkdir()
-    (root / "tools").mkdir()
-    readme_links = "\n".join(f"[x]({target})" for target in REQUIRED_README_LINKS)
-    (memory / "README.md").write_text(readme_links, encoding="utf-8")
-    (memory / "CURRENT.md").write_text(fixture_current(), encoding="utf-8")
-    for name in ("MEMORY.md", "MAINTENANCE.md"):
-        (memory / name).write_text("ok\n", encoding="utf-8")
-    for relative, markers in AUTHORITY_MARKERS.items():
-        path = root / relative
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("\n".join(markers) + "\n", encoding="utf-8")
-    (memory / "handoffs" / "CURRENT_HANDOFF.md").write_text(fixture_frontmatter() + "# Handoff\n", encoding="utf-8")
-    (memory / "roadmap" / "CURRENT.md").write_text(fixture_frontmatter() + "# Roadmap\n", encoding="utf-8")
-    (memory / "evidence" / "accepted.md").write_text("evidence\n", encoding="utf-8")
-    (memory / "chats" / "CHAT_INDEX.md").write_text("ok\n", encoding="utf-8")
-    for name in ("MEMORY_UPDATE.md", "RUNTIME_EVIDENCE.md"):
-        (memory / "templates" / name).write_text("ok\n", encoding="utf-8")
-    (memory / "manifest.json").write_text("{}\n", encoding="utf-8")
-    for name in ("check_memory_health.py", "update_memory_manifest.py", "memory_bootstrap.py"):
-        (root / "tools" / name).write_text("# fixture\n", encoding="utf-8")
-
-
-def fixture_schema3_current() -> str:
-    sections = []
-    for heading in CURRENT_SECTIONS:
-        if heading == "Verified State":
-            body = "CLOSED / RUNTIME VALIDATED — [evidence](evidence/accepted.md)"
+            body = "`CLOSED / RUNTIME VALIDATED` — [accepted evidence](evidence/accepted.md)"
         elif heading == "Next Action":
             body = "NEXT — Complete the one fixture action."
         elif heading == "Relevant References":
-            body = "[evidence](evidence/accepted.md)"
+            body = "[accepted evidence](evidence/accepted.md)"
         else:
             body = "fixture"
         sections.append(f"## {heading}\n\n{body}")
-    return "---\nmemory_schema: 3\n---\n# Fixture CURRENT\n\n" + "\n\n".join(sections) + "\n"
+    return "---\nmemory_schema: 3\n---\n# Current KaonLT development state\n\n" + "\n\n".join(sections) + "\n"
 
 
-def write_schema3_fixture(root: Path) -> None:
-    write_fixture(root)
+def write_fixture(root: Path) -> None:
+    """Create a complete, valid, schema-3-only fixture tree."""
     memory = root / "docs/memory"
-    (memory / "CURRENT.md").write_text(fixture_schema3_current(), encoding="utf-8")
-    (memory / "handoffs/CURRENT_HANDOFF.md").write_text(
-        "# Current KaonLT handoff\n\n"
-        "## Transfer State\n\n"
-        "No exceptional transfer state is recorded.\n\n"
-        "## Resume\n\n"
-        "CURRENT.md is the sole authoritative resumable state. The handoff cannot override CURRENT.md. "
-        "Resume from CURRENT.md and then only task-relevant canonical references.\n",
-        encoding="utf-8",
+    for directory in (memory / "handoffs", memory / "roadmap", memory / "evidence", memory / "sources", memory / "chats", memory / "history", memory / "import", memory / "templates", root / "tools"):
+        directory.mkdir(parents=True, exist_ok=True)
+    startup = (
+        "Read these five files in full, in this exact order:\n\n1. `AGENTS.md`\n2. `CURRENT.md`\n3. `MEMORY.md`\n4. `handoffs/CURRENT_HANDOFF.md`\n5. `USER.md`\n\n"
+        "Only after those five are read in full may a session expand selectively from:\n\n- CURRENT direct references\n- exact active task\n- required canonical evidence/decision/phase records\n\nDo not eagerly load the whole memory hierarchy.\n"
     )
-    (memory / "roadmap/CURRENT.md").unlink()
-    (memory / "roadmap/STATUS.md").write_text(
-        "# Fixture roadmap\n\n## Phase F\n\nACTIVE — fixture dependency/status structure.\n",
-        encoding="utf-8",
+    readme_startup = (
+        "read these five files in full and in this exact order:\n\n1. [AGENTS.md](AGENTS.md)\n2. [CURRENT.md](CURRENT.md)\n3. [MEMORY.md](MEMORY.md)\n4. [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md)\n5. [USER.md](USER.md)\n\n"
+        "Only then expand selectively from CURRENT direct references, the exact active task, and required canonical evidence/decision/phase records. Do not load the whole hierarchy without task-specific need.\n"
     )
-    (memory / "USER.md").write_text("fixture user context\n", encoding="utf-8")
-    agents = memory / "AGENTS.md"
-    agents.write_text(
-        agents.read_text(encoding="utf-8")
-        + "\n## Schema-3 bootstrap\n\n"
-        "Read these five files in full, in this exact order:\n\n"
-        + "\n".join(
-            f"{index}. `{relative}`" for index, relative in enumerate(SCHEMA3_BOOTSTRAP_ORDER, 1)
-        )
-        + "\n\nOnly after those five are read in full may a session expand selectively from:\n\n"
-        "- CURRENT direct references\n"
-        "- exact active task\n"
-        "- required canonical evidence/decision/phase records\n\n"
-        "Do not eagerly load the whole memory hierarchy.\n",
-        encoding="utf-8",
+    maintenance_startup = (
+        "read these five files in full, in this exact order:\n\n1. `AGENTS.md`\n2. `CURRENT.md`\n3. `MEMORY.md`\n4. `handoffs/CURRENT_HANDOFF.md`\n5. `USER.md`\n\n"
+        "Only after the five-file core is read may task-directed expansion use CURRENT direct references, the exact active task, and required canonical evidence/decision/phase records. Do not eagerly load the whole memory hierarchy.\n"
     )
+    navigation = "\n".join(f"[x]({target})" for target in REQUIRED_README_LINKS)
+    documents = {
+        "README.md": "# KaonLT development memory\n\n" + readme_startup + "\n" + navigation + "\n",
+        "AGENTS.md": "# KaonLT memory operating rules\n\n" + startup + "\n## Execution authority\n\nCodex must not commit, push, update remote refs. The user alone commits/pushes accepted changes and runs farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
+        "CURRENT.md": fixture_current(),
+        "MEMORY.md": "# Durable KaonLT project knowledge\n\n" + "\n\n".join(f"## {heading}\n\nfixture durable knowledge" for heading in MEMORY_SECTIONS) + "\n",
+        "USER.md": "# KaonLT user collaboration context\n\nfixture\n",
+        "TOOLS.md": "# KaonLT tools and operational commands\n\nfixture\n",
+        "COMMUNICATION.md": "# KaonLT farm communication\n\n## Execution authority\n\nCodex must not commit, push, update remote refs; the user commits/pushes accepted changes and runs farm validation.\nCodex local changes -> ChatGPT audit -> user commit/push\n",
+        "CODEX.md": "# KaonLT Codex workflow\n\nCodex must not commit, push, update remote refs. The user alone commits/pushes accepted changes and runs farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
+        "MAINTENANCE.md": "# KaonLT memory maintenance\n\n" + maintenance_startup + "\n" + "\n".join(MAINTENANCE_THRESHOLD_ROWS) + "\n",
+        "LEARNINGS.md": "# KaonLT durable learnings\n\nfixture\n",
+        "handoffs/CURRENT_HANDOFF.md": "# Current KaonLT handoff\n\n## Transfer State\n\nNo exceptional transfer state is recorded.\n\n## Resume\n\nCURRENT.md is the sole authoritative resumable state. The handoff cannot override CURRENT.md.\n",
+        "roadmap/STATUS.md": "# Approved KaonLT roadmap status\n\n### Fixture phase\n\n`ACTIVE` — fixture dependency/status structure.\n\nCURRENT.md owns the active objective, blockers, and next action.\n",
+        "sources/SOURCE_INDEX.md": "# KaonLT source and evidence index\n\nfixture\n",
+        "sources/ARTIFACT_INDEX.md": "# KaonLT artifact index\n\nfixture\n",
+        "chats/CHAT_INDEX.md": "# KaonLT chat-era index\n\nfixture\n",
+        "history/CHAT_INDEX.md": "# KaonLT chat and handoff index\n\nfixture\n",
+        "history/PROJECT_HISTORY.md": "# KaonLT project history\n\nfixture\n",
+        "import/README.md": "# KaonLT imported historical provenance\n\nfixture\n",
+        "templates/CODEX_CONTRACT.md": "# Fixture contract\n\n**Execution authority:** the user alone commits/pushes and runs the farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
+        "templates/MEMORY_UPDATE.md": "# Fixture memory update\n\nfixture\n",
+        "templates/RUNTIME_EVIDENCE.md": "# Fixture runtime evidence\n\nfixture\n",
+    }
+    for relative, text in documents.items():
+        (memory / relative).write_text(text, encoding="utf-8")
+    (memory / "evidence/accepted.md").write_text("# Evidence\n\nfixture\n", encoding="utf-8")
+    (memory / "manifest.json").write_text("{}\n", encoding="utf-8")
+    for name in ("check_memory_health.py", "update_memory_manifest.py", "memory_bootstrap.py"):
+        (root / "tools" / name).write_text("# fixture\n", encoding="utf-8")
 
 
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         write_fixture(root)
-        errors, warnings = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        errors, warnings = run_checks(root, check_manifest=False)
         assert not errors and not warnings, (errors, warnings)
-
         current = root / "docs/memory/CURRENT.md"
         current.write_text(current.read_text(encoding="utf-8") + "\n## Next Action\n\nduplicate\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        errors, _ = run_checks(root, check_manifest=False)
         assert any("exactly the ordered" in error for error in errors), errors
-        current.write_text(fixture_current().replace("evidence/accepted.md", "evidence/missing.md"), encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("link target does not exist" in error for error in errors), errors
-        current.write_text(fixture_current().replace("[evidence](evidence/accepted.md)", "no evidence link"), encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        current.write_text(fixture_current().replace("[accepted evidence](evidence/accepted.md)", "missing evidence"), encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
         assert any("runtime-closed claim lacks" in error for error in errors), errors
-        current.write_text(fixture_current(), encoding="utf-8")
-
+        current.write_text(fixture_current().replace("evidence/accepted.md", "evidence/missing.md"), encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("link target does not exist" in error for error in errors), errors
+        write_fixture(root)
         handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-        handoff.write_text(handoff.read_text(encoding="utf-8").replace("Fixture work item", "different"), encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("metadata differs" in error for error in errors), errors
-        handoff.write_text(fixture_frontmatter() + "# Handoff\n", encoding="utf-8")
-
-        for field in ("baseline_commit", "source_commit"):
-            current.write_text(
-                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40 + "\n", ""),
-                encoding="utf-8",
-            )
-            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-            assert any("invalid active-state frontmatter" in error for error in errors), errors
-        current.write_text(
-            fixture_current().replace("source_commit:", "scientific_source_commit:"),
-            encoding="utf-8",
-        )
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("invalid active-state frontmatter" in error for error in errors), errors
-
-        for field in ("baseline_commit", "source_commit", "bundle_profile_commit"):
-            current.write_text(
-                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40, f"{field}: invalid"),
-                encoding="utf-8",
-            )
-            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-            assert any("not a 40-character" in error for error in errors), errors
-        current.write_text(fixture_current(), encoding="utf-8")
-
-        for field in ("baseline_commit", "source_commit"):
-            replacement = f"{field}: {'c' * 40}"
-            handoff.write_text(
-                fixture_frontmatter().replace(
-                    f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40,
-                    replacement,
-                ),
-                encoding="utf-8",
-            )
-            errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-            assert any("metadata differs" in error for error in errors), errors
-        handoff.write_text(fixture_frontmatter() + "# Handoff\n", encoding="utf-8")
-        errors, _ = run_checks(
-            root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False,
-            commit_resolver=lambda _root, _commit: False,
-        )
-        assert any("does not resolve" in error for error in errors), errors
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert not errors, errors
-
-        agents = root / "docs/memory/AGENTS.md"
-        agents.write_text("missing authority boundary\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("authority boundary marker" in error for error in errors), errors
-
-    with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
-        write_schema3_fixture(root)
-        errors, warnings = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert not errors and not warnings, (errors, warnings)
-        roadmap = root / "docs/memory/roadmap/STATUS.md"
+        handoff.write_text(handoff.read_text(encoding="utf-8").replace("sole authoritative", "ordinary"), encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("sole authority" in error for error in errors), errors
+        write_fixture(root)
+        memory = root / "docs/memory/MEMORY.md"
+        memory.write_text(memory.read_text(encoding="utf-8") + "\n## Next Action\n\nfixture\n", encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("durable-knowledge" in error for error in errors), errors
+        write_fixture(root)
         legacy = root / "docs/memory/roadmap/CURRENT.md"
-        legacy.write_text("# Legacy roadmap\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("legacy roadmap must not exist" in error for error in errors), errors
+        legacy.write_text("# Legacy\n", encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("legacy roadmap" in error for error in errors), errors
         legacy.unlink()
-        roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("roadmap must not contain active-state frontmatter" in error for error in errors), errors
-        roadmap.write_text("# Fixture roadmap\n\n## NEXT\n\nfixture\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("roadmap must not contain ## NEXT" in error for error in errors), errors
-        roadmap.write_text("# Fixture roadmap\n\nNEXT — fixture\n", encoding="utf-8")
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("roadmap must not contain active NEXT" in error for error in errors), errors
-        roadmap.write_text(
-            "# Fixture roadmap\n\n## Phase F\n\nACTIVE — fixture dependency/status structure.\n",
-            encoding="utf-8",
-        )
+        roadmap = root / "docs/memory/roadmap/STATUS.md"
+        roadmap.write_text(roadmap.read_text(encoding="utf-8") + "\nNEXT — fixture\n", encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("must not contain active NEXT" in error for error in errors), errors
+        write_fixture(root)
+        duplicate = root / "docs/memory/CURRENT_copy.md"
+        duplicate.write_text("# Copy\n", encoding="utf-8")
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("duplicate or missing top-level CURRENT role" in error for error in errors), errors
+        duplicate.unlink()
         current = root / "docs/memory/CURRENT.md"
-        current.write_text(
-            current.read_text(encoding="utf-8").replace("NEXT — Complete the one fixture action.", "fixture"),
-            encoding="utf-8",
-        )
-        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
-        assert any("exactly one active NEXT" in error for error in errors), errors
+        current.write_bytes(current.read_bytes() + b"x" * (SIZE_LIMITS["docs/memory/CURRENT.md"][1] + 1))
+        errors, _ = run_checks(root, check_manifest=False)
+        assert any("CURRENT.md exceeds hard limit" in error for error in errors), errors
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=default_root(), help="repository root")
-    parser.add_argument("--soft-limit-bytes", type=int, default=SOFT_LIMIT_BYTES)
-    parser.add_argument("--hard-limit-bytes", type=int, default=HARD_LIMIT_BYTES)
     parser.add_argument("--self-test", action="store_true", help="run deterministic temporary-fixture checks")
     return parser.parse_args()
 
@@ -645,9 +616,7 @@ def main() -> int:
         self_test()
         print("SELF-TEST: PASS")
         return 0
-    errors, warnings = run_checks(
-        args.root.resolve(), args.soft_limit_bytes, args.hard_limit_bytes
-    )
+    errors, warnings = run_checks(args.root.resolve())
     return print_result(errors, warnings)
 
 

@@ -1,4 +1,4 @@
-"""Deterministic schema-2/schema-3 memory-health compatibility coverage."""
+"""Deterministic strict schema-3 memory-health coverage."""
 
 from __future__ import annotations
 
@@ -19,330 +19,336 @@ health = importlib.import_module("check_memory_health")
 manifest_tool = importlib.import_module("update_memory_manifest")
 
 
-class MemoryHealthCompatibilityTests(unittest.TestCase):
+class StrictMemoryHealthTests(unittest.TestCase):
     def assert_error(self, errors: list[str], fragment: str) -> None:
         self.assertTrue(any(fragment in error for error in errors), errors)
 
-    def run_checks(self, root: Path, *, resolver=None) -> list[str]:
-        errors, warnings = health.run_checks(
-            root,
-            health.SOFT_LIMIT_BYTES,
-            health.HARD_LIMIT_BYTES,
-            check_manifest=False,
-            commit_resolver=resolver or (lambda _root, _commit: None),
-        )
+    def write_fixture(self, root: Path) -> None:
+        health.write_fixture(root)
+
+    def run_health(self, root: Path) -> tuple[list[str], list[str]]:
+        return health.run_checks(root, check_manifest=False)
+
+    def errors(self, root: Path) -> list[str]:
+        errors, warnings = self.run_health(root)
         self.assertEqual(warnings, [])
         return errors
 
-    def write_schema2(self, root: Path) -> None:
-        health.write_fixture(root)
-
-    def write_schema3(self, root: Path) -> None:
-        health.write_schema3_fixture(root)
-
-    def test_schema2_healthy_fixture_passes(self):
+    def test_valid_strict_schema3_fixture_passes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema2(root)
-            self.assertEqual(self.run_checks(root), [])
+            self.write_fixture(root)
+            self.assertEqual(self.errors(root), [])
 
-    def test_schema2_mirrored_active_state_mismatch_fails(self):
+    def test_schema2_current_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema2(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(handoff.read_text(encoding="utf-8").replace("Fixture work item", "other"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "active-state metadata differs")
-
-    def test_schema2_malformed_frontmatter_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema2(root)
-            (root / "docs/memory/CURRENT.md").write_text("# no frontmatter\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "invalid active-state frontmatter")
-
-    def test_schema2_missing_commit_field_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema2(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
-            current.write_text(
-                health.fixture_current().replace("source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n", ""),
-                encoding="utf-8",
-            )
-            self.assert_error(self.run_checks(root), "invalid active-state frontmatter")
+            current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3", "memory_schema: 2"), encoding="utf-8")
+            self.assert_error(self.errors(root), "memory_schema must be 3")
 
-    def test_schema2_invalid_commit_syntax_fails(self):
+    def test_missing_schema_marker_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema2(root)
-            current = root / "docs/memory/CURRENT.md"
-            replacement = health.fixture_current().replace("baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "baseline_commit: invalid")
-            current.write_text(replacement, encoding="utf-8")
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(health.fixture_frontmatter().replace("baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "baseline_commit: invalid") + "# Handoff\n", encoding="utf-8")
-            roadmap = root / "docs/memory/roadmap/CURRENT.md"
-            roadmap.write_text(health.fixture_frontmatter().replace("baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "baseline_commit: invalid") + "# Roadmap\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "not a 40-character lowercase SHA")
-
-    def test_schema2_unresolved_commit_fails_when_resolver_reports_false(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema2(root)
-            self.assert_error(self.run_checks(root, resolver=lambda _root, _commit: False), "does not resolve")
-
-    def test_schema2_duplicate_or_out_of_order_current_heading_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema2(root)
-            current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8") + "\n## Next Action\n\nduplicate\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "exactly the ordered")
-
-    def test_schema2_runtime_claim_without_evidence_link_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema2(root)
-            current = root / "docs/memory/CURRENT.md"
-            current.write_text(health.fixture_current().replace("[evidence](evidence/accepted.md)", "no evidence link", 1), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "runtime-closed claim lacks")
-
-    def test_schema3_valid_target_fixture_passes(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            self.assertEqual(self.run_checks(root), [])
-
-    def test_schema3_missing_roadmap_status_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            (root / "docs/memory/roadmap/STATUS.md").unlink()
-            self.assert_error(self.run_checks(root), "missing schema-3 roadmap STATUS")
-
-    def test_schema3_legacy_roadmap_current_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            (root / "docs/memory/roadmap/CURRENT.md").write_text("# legacy\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "legacy roadmap must not exist")
-
-    def test_schema3_roadmap_frontmatter_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/STATUS.md"
-            roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "roadmap must not contain active-state frontmatter")
-
-    def test_schema3_roadmap_next_heading_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/STATUS.md"
-            roadmap.write_text("# Fixture roadmap\n\n## NEXT\n\nfixture\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "roadmap must not contain ## NEXT")
-
-    def test_schema3_roadmap_next_statement_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/STATUS.md"
-            roadmap.write_text("# Fixture roadmap\n\nNEXT — fixture\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "roadmap must not contain active NEXT")
-
-    def test_schema3_extra_frontmatter_field_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3", "memory_schema: 3\nactive_status: forbidden"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "schema-3 frontmatter fields differ")
-
-    def test_schema3_missing_schema_marker_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
             current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3\n", ""), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "invalid active-state frontmatter")
+            self.assert_error(self.errors(root), "schema-3 frontmatter fields differ")
 
-    def test_schema3_unsupported_schema_fails(self):
+    def test_unsupported_schema_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
             current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3", "memory_schema: 4"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "memory_schema must be 2 or 3")
+            self.assert_error(self.errors(root), "memory_schema must be 3")
 
-    def test_schema3_duplicate_heading_fails(self):
+    def test_extra_frontmatter_field_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8") + "\n## Next Action\n\nsecond\n", encoding="utf-8")
-            self.assert_error(self.run_checks(root), "exactly the ordered")
+            current.write_text(current.read_text(encoding="utf-8").replace("memory_schema: 3", "memory_schema: 3\nactive_status: forbidden"), encoding="utf-8")
+            self.assert_error(self.errors(root), "schema-3 frontmatter fields differ")
 
-    def test_schema3_out_of_order_heading_fails(self):
+    def test_current_heading_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
             text = current.read_text(encoding="utf-8")
             text = text.replace("## Active Objective", "## Temporary", 1).replace("## Current Work Item", "## Active Objective", 1).replace("## Temporary", "## Current Work Item", 1)
             current.write_text(text, encoding="utf-8")
-            self.assert_error(self.run_checks(root), "exactly the ordered")
+            self.assert_error(self.errors(root), "exactly the ordered active-state sections")
 
-    def test_schema3_empty_required_section_fails(self):
+    def test_current_empty_section_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
             current.write_text(current.read_text(encoding="utf-8").replace("## Blockers\n\nfixture", "## Blockers\n"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "section is missing or empty: Blockers")
+            self.assert_error(self.errors(root), "section is missing or empty: Blockers")
 
-    def test_schema3_zero_next_fails(self):
+    def test_current_second_next_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8").replace("NEXT — Complete the one fixture action.", "fixture"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "exactly one active NEXT")
+            current.write_text(current.read_text(encoding="utf-8").replace("fixture", "NEXT — duplicate", 1), encoding="utf-8")
+            self.assert_error(self.errors(root), "exactly one active NEXT")
 
-    def test_schema3_two_next_statements_fail(self):
+    def test_current_next_outside_next_action_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8").replace("fixture", "NEXT — another action", 1), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "exactly one active NEXT")
-
-    def test_schema3_next_outside_next_action_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
             text = current.read_text(encoding="utf-8").replace("NEXT — Complete the one fixture action.", "fixture")
             current.write_text(text.replace("## Active Objective\n\nfixture", "## Active Objective\n\nNEXT — misplaced"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "must occur in ## Next Action")
+            self.assert_error(self.errors(root), "must occur only in ## Next Action")
 
-    def test_schema3_runtime_claim_without_evidence_link_fails(self):
+    def test_current_runtime_claim_without_evidence_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             current = root / "docs/memory/CURRENT.md"
-            current.write_text(current.read_text(encoding="utf-8").replace("[evidence](evidence/accepted.md)", "no evidence link", 1), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "runtime-closed claim lacks")
+            current.write_text(current.read_text(encoding="utf-8").replace("[accepted evidence](evidence/accepted.md)", "accepted evidence"), encoding="utf-8")
+            self.assert_error(self.errors(root), "runtime-closed claim lacks")
 
-    def test_schema3_empty_transfer_state_fails(self):
+    def test_current_broken_local_link_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(handoff.read_text(encoding="utf-8").replace("No exceptional transfer state is recorded.\n\n", ""), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "Transfer State must not be empty")
+            self.write_fixture(root)
+            current = root / "docs/memory/CURRENT.md"
+            current.write_text(current.read_text(encoding="utf-8").replace("evidence/accepted.md", "evidence/missing.md"), encoding="utf-8")
+            self.assert_error(self.errors(root), "CURRENT.md link target does not exist")
 
-    def test_schema3_handoff_requires_current_sole_authority(self):
+    def test_current_unapproved_status_label_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(handoff.read_text(encoding="utf-8").replace("CURRENT.md is the sole authoritative resumable state. ", ""), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "must state CURRENT.md sole authority")
+            self.write_fixture(root)
+            current = root / "docs/memory/CURRENT.md"
+            current.write_text(current.read_text(encoding="utf-8").replace("`CLOSED / RUNTIME VALIDATED`", "`BLOCKED / DEFERRED`"), encoding="utf-8")
+            self.assert_error(self.errors(root), "unapproved uppercase status label")
 
-    def test_schema3_handoff_frontmatter_fails(self):
+    def test_missing_core_file_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text("---\nmemory_schema: 3\n---\n" + handoff.read_text(encoding="utf-8"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "must not contain active-state frontmatter")
+            self.write_fixture(root)
+            (root / "docs/memory/USER.md").unlink()
+            self.assert_error(self.errors(root), "missing required file: docs/memory/USER.md")
 
-    def test_schema3_handoff_requires_non_override_statement(self):
+    def test_agents_startup_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(handoff.read_text(encoding="utf-8").replace("The handoff cannot override CURRENT.md. ", ""), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "cannot override CURRENT.md")
-
-    def test_schema3_handoff_resume_must_point_to_current(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            text = handoff.read_text(encoding="utf-8")
-            resume = text.index("## Resume")
-            handoff.write_text(text[:resume] + text[resume:].replace("CURRENT.md", "the state record"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "Resume must point to CURRENT.md")
-
-    def test_schema3_handoff_routine_current_heading_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
-            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
-            handoff.write_text(handoff.read_text(encoding="utf-8").replace("## Transfer State", "## Active Objective"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "must not contain routine CURRENT headings")
-
-    def test_schema3_bootstrap_order_drift_fails(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             agents = root / "docs/memory/AGENTS.md"
             agents.write_text(agents.read_text(encoding="utf-8").replace("1. `AGENTS.md`\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. `AGENTS.md`"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "bootstrap order differs")
+            self.assert_error(self.errors(root), "AGENTS.md five-file startup order")
 
-    def test_schema3_bootstrap_requires_full_core_read(self):
+    def test_agents_incomplete_selective_expansion_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             agents = root / "docs/memory/AGENTS.md"
-            agents.write_text(agents.read_text(encoding="utf-8").replace("Read these five files in full, in this exact order:", "Read these files:"), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "full five-file core read")
+            agents.write_text(agents.read_text(encoding="utf-8").replace("required canonical evidence/decision/phase records", "other records"), encoding="utf-8")
+            self.assert_error(self.errors(root), "AGENTS.md selective-expansion sources")
 
-    def test_schema3_bootstrap_prohibits_eager_expansion(self):
+    def test_readme_startup_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
-            agents = root / "docs/memory/AGENTS.md"
-            agents.write_text(agents.read_text(encoding="utf-8").replace("Do not eagerly load the whole memory hierarchy.", "Expand without restriction."), encoding="utf-8")
-            self.assert_error(self.run_checks(root), "prohibit eager/unbounded expansion")
+            self.write_fixture(root)
+            readme = root / "docs/memory/README.md"
+            readme.write_text(readme.read_text(encoding="utf-8").replace("1. [AGENTS.md](AGENTS.md)\n2. [CURRENT.md](CURRENT.md)", "1. [CURRENT.md](CURRENT.md)\n2. [AGENTS.md](AGENTS.md)"), encoding="utf-8")
+            self.assert_error(self.errors(root), "README.md five-file startup order")
 
-    def test_manifest_parser_preserves_schema2_result(self):
+    def test_maintenance_startup_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
-            current = Path(directory) / "CURRENT.md"
-            current.write_text(manifest_tool.fixture_current(), encoding="utf-8")
-            parsed = manifest_tool.parse_active_state(current)
-            self.assertEqual(parsed["memory_schema"], 2)
-            self.assertEqual(set(parsed), set(manifest_tool.ACTIVE_STATE_KEYS))
+            root = Path(directory)
+            self.write_fixture(root)
+            maintenance = root / "docs/memory/MAINTENANCE.md"
+            maintenance.write_text(maintenance.read_text(encoding="utf-8").replace("1. `AGENTS.md`\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. `AGENTS.md`"), encoding="utf-8")
+            self.assert_error(self.errors(root), "MAINTENANCE.md five-file startup order")
 
-    def test_manifest_parser_accepts_minimal_schema3(self):
+    def test_handoff_frontmatter_fails(self):
         with tempfile.TemporaryDirectory() as directory:
-            current = Path(directory) / "CURRENT.md"
+            root = Path(directory)
+            self.write_fixture(root)
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text("---\nmemory_schema: 3\n---\n" + handoff.read_text(encoding="utf-8"), encoding="utf-8")
+            self.assert_error(self.errors(root), "handoff must not contain active-state frontmatter")
+
+    def test_handoff_structure_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text(handoff.read_text(encoding="utf-8").replace("## Resume", "## Wrong"), encoding="utf-8")
+            self.assert_error(self.errors(root), "handoff must contain exactly")
+
+    def test_handoff_stable_sentence_drift_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text(handoff.read_text(encoding="utf-8").replace("No exceptional transfer state is recorded.", "No exceptional transfer state is recorded today."), encoding="utf-8")
+            self.assert_error(self.errors(root), "stable Transfer State")
+
+    def test_handoff_authority_and_non_override_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text(handoff.read_text(encoding="utf-8").replace("sole authoritative resumable state", "ordinary state").replace("handoff cannot override CURRENT.md", "handoff is supplementary"), encoding="utf-8")
+            errors = self.errors(root)
+            self.assert_error(errors, "sole authority")
+            self.assert_error(errors, "cannot override CURRENT.md")
+
+    def test_handoff_next_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            handoff = root / "docs/memory/handoffs/CURRENT_HANDOFF.md"
+            handoff.write_text(handoff.read_text(encoding="utf-8") + "NEXT — wrong\n", encoding="utf-8")
+            self.assert_error(self.errors(root), "handoff must not contain active NEXT")
+
+    def test_memory_active_heading_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            memory = root / "docs/memory/MEMORY.md"
+            memory.write_text(memory.read_text(encoding="utf-8").replace("## Authority and evidence", "## Active Objective"), encoding="utf-8")
+            self.assert_error(self.errors(root), "durable-knowledge sections")
+
+    def test_memory_next_and_hashes_and_status_fail(self):
+        cases = (
+            ("\nNEXT — bad\n", "MEMORY.md must not contain active NEXT"),
+            ("\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n", "40-character"),
+            ("\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n", "64-character"),
+            ("\nSOURCE REVIEWED\n", "phase-ledger status"),
+        )
+        for extra, expected in cases:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                memory = root / "docs/memory/MEMORY.md"
+                memory.write_text(memory.read_text(encoding="utf-8") + extra, encoding="utf-8")
+                self.assert_error(self.errors(root), expected)
+
+    def test_roadmap_missing_and_legacy_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            (root / "docs/memory/roadmap/STATUS.md").unlink()
+            self.assert_error(self.errors(root), "missing required file: docs/memory/roadmap/STATUS.md")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            (root / "docs/memory/roadmap/CURRENT.md").write_text("# Legacy\n", encoding="utf-8")
+            self.assert_error(self.errors(root), "legacy roadmap/CURRENT.md")
+
+    def test_roadmap_frontmatter_and_next_fail(self):
+        for text, expected in (
+            ("---\nmemory_schema: 3\n---\n# Approved KaonLT roadmap status\n", "roadmap STATUS must not contain active-state frontmatter"),
+            ("# Approved KaonLT roadmap status\n\n## NEXT\n\nfixture\n", "roadmap STATUS must not contain ## NEXT"),
+            ("# Approved KaonLT roadmap status\n\nNEXT — fixture\n", "roadmap STATUS must not contain active NEXT"),
+        ):
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                (root / "docs/memory/roadmap/STATUS.md").write_text(text, encoding="utf-8")
+                self.assert_error(self.errors(root), expected)
+
+    def test_roadmap_runtime_evidence_and_status_presentation_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
+            roadmap.write_text("# Approved KaonLT roadmap status\n\n### F\n\n`CLOSED / RUNTIME VALIDATED` — no evidence.\n\nCURRENT.md owns the active objective, blockers, and next action.\n", encoding="utf-8")
+            self.assert_error(self.errors(root), "runtime-closed claim lacks")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
+            roadmap.write_text("# Approved KaonLT roadmap status\n\n### F\n\n`CLOSED / RUNTIME VALIDATED` — [missing](../evidence/missing.md).\n\nCURRENT.md owns the active objective, blockers, and next action.\n", encoding="utf-8")
+            errors = self.errors(root)
+            self.assert_error(errors, "link target does not exist")
+            self.assert_error(errors, "runtime-closed claim lacks")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
+            roadmap.write_text(roadmap.read_text(encoding="utf-8").replace("`ACTIVE`", "ACTIVE"), encoding="utf-8")
+            self.assert_error(self.errors(root), "phase-state claim")
+
+    def test_duplicate_roles_fail(self):
+        cases = (
+            ("docs/memory/CURRENT_copy.md", "duplicate or missing top-level CURRENT role"),
+            ("docs/memory/handoffs/CURRENT_HANDOFF_old.md", "duplicate or missing handoff CURRENT_HANDOFF role"),
+            ("docs/memory/roadmap/STATUS_v2.md", "duplicate or missing roadmap STATUS role"),
+        )
+        for relative, expected in cases:
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                path = root / relative
+                path.write_text("# Variant\n", encoding="utf-8")
+                self.assert_error(self.errors(root), expected)
+
+    def test_readme_navigation_and_other_control_link_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            readme = root / "docs/memory/README.md"
+            readme.write_text(readme.read_text(encoding="utf-8").replace("[x](manifest.json)\n", ""), encoding="utf-8")
+            self.assert_error(self.errors(root), "README missing required control link: manifest.json")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            tools = root / "docs/memory/TOOLS.md"
+            tools.write_text(tools.read_text(encoding="utf-8") + "[missing](missing.md)\n", encoding="utf-8")
+            self.assert_error(self.errors(root), "TOOLS.md link target does not exist")
+
+    def test_representation_failures(self):
+        cases = (
+            ("# Wrong\n", "must contain exactly one H1"),
+            ("# KaonLT tools and operational commands", "must end with a newline"),
+            ("# KaonLT tools and operational commands\n\n```\n", "unbalanced fenced"),
+        )
+        for text, expected in cases:
+            with self.subTest(expected=expected), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                (root / "docs/memory/TOOLS.md").write_text(text, encoding="utf-8")
+                self.assert_error(self.errors(root), expected)
+
+    def test_each_role_size_threshold(self):
+        for relative, (soft, hard) in health.SIZE_LIMITS.items():
+            with self.subTest(relative=relative, level="at_soft"):
+                errors, warnings = health.check_size_limit(relative, soft, soft, hard)
+                self.assertEqual((errors, warnings), ([], []))
+            with self.subTest(relative=relative, level="warn"):
+                errors, warnings = health.check_size_limit(relative, soft + 1, soft, hard)
+                self.assertEqual(errors, [])
+                self.assertEqual(len(warnings), 1)
+            with self.subTest(relative=relative, level="hard"):
+                errors, warnings = health.check_size_limit(relative, hard + 1, soft, hard)
+                self.assertEqual(warnings, [])
+                self.assertEqual(len(errors), 1)
+
+    def test_manifest_parser_and_transitional_envelope(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            current = root / "CURRENT.md"
             current.write_text("---\nmemory_schema: 3\n---\n# Current\n", encoding="utf-8")
             self.assertEqual(manifest_tool.parse_active_state(current), {"memory_schema": 3})
-
-    def test_manifest_parser_rejects_extra_schema3_field(self):
-        with tempfile.TemporaryDirectory() as directory:
-            current = Path(directory) / "CURRENT.md"
-            current.write_text("---\nmemory_schema: 3\nactive_status: forbidden\n---\n", encoding="utf-8")
-            with self.assertRaisesRegex(manifest_tool.ActiveStateError, "schema-3 frontmatter fields differ"):
-                manifest_tool.parse_active_state(current)
-
-    def test_manifest_parser_rejects_unsupported_and_malformed_frontmatter(self):
-        with tempfile.TemporaryDirectory() as directory:
-            current = Path(directory) / "CURRENT.md"
-            current.write_text("---\nmemory_schema: 4\n---\n", encoding="utf-8")
-            with self.assertRaisesRegex(manifest_tool.ActiveStateError, "memory_schema must be 2 or 3"):
-                manifest_tool.parse_active_state(current)
-            current.write_text("---\nmemory_schema: 3\n", encoding="utf-8")
-            with self.assertRaisesRegex(manifest_tool.ActiveStateError, "frontmatter is not closed"):
-                manifest_tool.parse_active_state(current)
-
-    def test_transitional_manifest_represents_schema3_with_schema_version_two(self):
+            for payload in ("---\nmemory_schema: 2\n---\n", "---\nmemory_schema: 3\nextra: no\n---\n"):
+                current.write_text(payload, encoding="utf-8")
+                with self.assertRaises(manifest_tool.ActiveStateError):
+                    manifest_tool.parse_active_state(current)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.write_schema3(root)
+            self.write_fixture(root)
             manifest_tool.write_manifest(root)
             payload = json.loads((root / "docs/memory/manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(payload["schema_version"], 2)

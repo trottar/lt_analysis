@@ -12,15 +12,14 @@ and runtime frontier.
 
 ## Current Work Item
 
-Memory M7 — strict semantic health enforcement. M6 normalized roadmap,
-source, and history ownership without changing scientific/runtime state. See
-the [M6 phase record](phases/memory-m6-roadmap-source-history-normalization.md).
+Memory M8 — manifest and bootstrap identity semantics. M7 established strict
+schema-3 semantic health without changing scientific/runtime state. See the
+[M7 phase record](phases/memory-m7-strict-semantic-health.md).
 
 ## Verified State
 
-- M0 through M5 are `SOURCE REVIEWED` repository-memory work.
-- M6 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
-  [phase record](phases/memory-m6-roadmap-source-history-normalization.md) and the
+- M0 through M6 are `SOURCE REVIEWED` repository-memory work.
+- M7 is `SOURCE REVIEWED`, contingent on its local acceptance criteria and the
   subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
   validation.
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -42,14 +41,14 @@ the [M6 phase record](phases/memory-m6-roadmap-source-history-normalization.md).
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
-  representation ownership; the [M6 phase record](phases/memory-m6-roadmap-source-history-normalization.md)
-  records the current roadmap/source/history normalization. These are role-labeled
+  representation ownership; the [M7 phase record](phases/memory-m7-strict-semantic-health.md)
+  records strict semantic health enforcement. These are role-labeled
   historical identities, not assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-No known memory-migration blocker prevents M7 after M6 source acceptance.
-Lifecycle-hook dispatch remains `BLOCKED / DEFERRED` and is not a dependency.
+No known memory blocker prevents M8 after M7 source acceptance.
+Lifecycle-hook dispatch remains `BLOCKED` / `DEFERRED` and is not a dependency.
 Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
 F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
 F.6.3 evidence. The preserved scientific continuation is the five-setting
@@ -58,16 +57,19 @@ not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — Memory M7: make schema-3 memory health strict by removing legacy
-schema-2 compatibility and enforcing the final role, status, startup, handoff,
-link, rendering, and size semantics.
+NEXT — Memory M8: make manifest metadata integrity-only and bootstrap report
+dynamic repository facts, five-core sizes, CURRENT references, health, and
+exceptional-handoff presence without copying semantic active state or a stored
+current HEAD.
 
 ## Success Criteria
 
-M7 must remove schema-2 compatibility; enforce one authoritative active-state
-surface; enforce exact startup/handoff/roadmap roles and allowed status
-vocabulary; enforce runtime-evidence links and final role-specific thresholds;
-detect rendering/link/ownership drift; and preserve scientific/runtime state.
+M8 must remove semantic `active_state` plus generated-date/stored-observed-HEAD
+identity from the manifest while preserving its deterministic file-integrity
+inventory. Bootstrap must query branch/HEAD/worktree dynamically; report
+five-core record sizes, CURRENT direct references, health, and exceptional
+handoff presence; not synthesize scientific state; and preserve the
+scientific/runtime frontier.
 
 ## Do Not Reopen Without New Evidence
 
@@ -81,7 +83,7 @@ merely for style.
 
 - [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
 - [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M6 roadmap/source/history record](phases/memory-m6-roadmap-source-history-normalization.md)
+- [M7 strict semantic health record](phases/memory-m7-strict-semantic-health.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)

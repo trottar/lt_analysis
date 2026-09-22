@@ -126,14 +126,7 @@ def print_human(summary: dict[str, Any]) -> None:
 
 def fixture_current() -> str:
     return """---
-memory_schema: 2
-active_objective: Fixture objective
-current_work_item: Fixture work item
-active_status: ACTIVE
-next_action: Fixture next action
-baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+memory_schema: 3
 ---
 # Current
 
@@ -155,8 +148,7 @@ def self_test() -> None:
         (handoff / "CURRENT_HANDOFF.md").write_text("handoff\n", encoding="utf-8")
         summary = collect_summary(root, lambda _: (0, "MEMORY HEALTH: PASS"))
         assert summary["current_references"] == ["docs/memory/evidence/example.md"], summary
-        assert summary["active_state"] is not None, summary
-        assert summary["active_state"]["active_status"] == "ACTIVE", summary
+        assert summary["active_state"] == {"memory_schema": 3}, summary
         assert summary["memory_health"]["status"] == "pass", summary
 
 

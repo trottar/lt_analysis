@@ -17,16 +17,6 @@ from typing import Any
 SCHEMA_VERSION = 2
 MANIFEST_RELATIVE = Path("docs") / "memory" / "manifest.json"
 CURRENT_RELATIVE = Path("docs") / "memory" / "CURRENT.md"
-ACTIVE_STATE_KEYS = (
-    "memory_schema",
-    "active_objective",
-    "current_work_item",
-    "active_status",
-    "next_action",
-    "baseline_commit",
-    "source_commit",
-    "bundle_profile_commit",
-)
 
 
 class ActiveStateError(ValueError):
@@ -74,24 +64,7 @@ def parse_active_state(path: Path) -> dict[str, str | int]:
             raise ActiveStateError(f"{path} has missing, empty, or duplicate frontmatter field: {line!r}")
         parsed[key] = value
 
-    schema = parsed.get("memory_schema")
-    if schema == "3":
-        expected = {"memory_schema"}
-        if set(parsed) != expected:
-            missing = sorted(expected - set(parsed))
-            extra = sorted(set(parsed) - expected)
-            details = []
-            if missing:
-                details.append("missing " + ", ".join(missing))
-            if extra:
-                details.append("unexpected " + ", ".join(extra))
-            raise ActiveStateError(f"{path} schema-3 frontmatter fields differ: {'; '.join(details)}")
-        return {"memory_schema": 3}
-
-    if schema is not None and schema != "2":
-        raise ActiveStateError(f"{path} memory_schema must be 2 or 3")
-
-    expected = set(ACTIVE_STATE_KEYS)
+    expected = {"memory_schema"}
     if set(parsed) != expected:
         missing = sorted(expected - set(parsed))
         extra = sorted(set(parsed) - expected)
@@ -100,10 +73,10 @@ def parse_active_state(path: Path) -> dict[str, str | int]:
             details.append("missing " + ", ".join(missing))
         if extra:
             details.append("unexpected " + ", ".join(extra))
-        raise ActiveStateError(f"{path} frontmatter fields differ: {'; '.join(details)}")
-    result: dict[str, str | int] = {key: parsed[key] for key in ACTIVE_STATE_KEYS}
-    result["memory_schema"] = 2
-    return result
+        raise ActiveStateError(f"{path} schema-3 frontmatter fields differ: {'; '.join(details)}")
+    if parsed["memory_schema"] != "3":
+        raise ActiveStateError(f"{path} memory_schema must be 3")
+    return {"memory_schema": 3}
 
 
 def versionable_memory_paths(root: Path) -> list[Path]:
@@ -200,14 +173,7 @@ def check_manifest(root: Path) -> list[str]:
 
 def fixture_current() -> str:
     return """---
-memory_schema: 2
-active_objective: Fixture objective
-current_work_item: Fixture work item
-active_status: ACTIVE
-next_action: Fixture next action
-baseline_commit: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-source_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-bundle_profile_commit: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+memory_schema: 3
 ---
 # Current
 """
@@ -222,7 +188,7 @@ def self_test() -> None:
         current.write_text(fixture_current(), encoding="utf-8")
         write_manifest(root)
         assert not check_manifest(root), "fresh manifest did not verify"
-        current.write_text(fixture_current().replace("Fixture objective", "Changed objective"), encoding="utf-8")
+        current.write_text(fixture_current() + "changed\n", encoding="utf-8")
         assert check_manifest(root), "changed bytes or active state were not detected"
         current.write_text("# No frontmatter\n", encoding="utf-8")
         try:
@@ -231,31 +197,13 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("missing frontmatter was accepted")
-        for field in ("baseline_commit", "source_commit"):
-            current.write_text(
-                fixture_current().replace(f"{field}: " + ("a" if field == "baseline_commit" else "b") * 40 + "\n", ""),
-                encoding="utf-8",
-            )
-            try:
-                parse_active_state(current)
-            except ActiveStateError:
-                pass
-            else:
-                raise AssertionError(f"missing {field} was accepted")
-        current.write_text(
-            fixture_current().replace("source_commit:", "scientific_source_commit:"),
-            encoding="utf-8",
-        )
+        current.write_text("---\nmemory_schema: 2\n---\n# Current\n", encoding="utf-8")
         try:
             parse_active_state(current)
         except ActiveStateError:
             pass
         else:
-            raise AssertionError("obsolete scientific_source_commit was accepted")
-        current.write_text("---\nmemory_schema: 3\n---\n# Current\n", encoding="utf-8")
-        assert parse_active_state(current) == {"memory_schema": 3}
-        write_manifest(root)
-        assert not check_manifest(root), "schema-3 manifest did not verify"
+            raise AssertionError("schema-2 frontmatter was accepted")
         current.write_text("---\nmemory_schema: 3\nactive_status: forbidden\n---\n", encoding="utf-8")
         try:
             parse_active_state(current)
