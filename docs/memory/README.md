@@ -36,6 +36,12 @@ exact active next action.
 - [MAINTENANCE.md](MAINTENANCE.md) — memory maintenance procedure.
 - [LEARNINGS.md](LEARNINGS.md) — generalized reusable lessons.
 - [chats/CHAT_INDEX.md](chats/CHAT_INDEX.md) — historical chat navigation.
+- [sources/SOURCE_INDEX.md](sources/SOURCE_INDEX.md) — source/provenance
+  navigation.
+- [sources/ARTIFACT_INDEX.md](sources/ARTIFACT_INDEX.md) — historical artifact
+  navigation.
+- [history/PROJECT_HISTORY.md](history/PROJECT_HISTORY.md) — chronology.
+- [import/README.md](import/README.md) — immutable import navigation.
 - [templates/CODEX_CONTRACT.md](templates/CODEX_CONTRACT.md),
   [templates/MEMORY_UPDATE.md](templates/MEMORY_UPDATE.md), and
   [templates/RUNTIME_EVIDENCE.md](templates/RUNTIME_EVIDENCE.md) — concise
@@ -44,7 +50,8 @@ exact active next action.
 - `decisions/` — scientific and architectural contracts.
 - `investigations/` — active, closed, and deferred investigations.
 - `phases/` — phase/fix implementation and validation chronology.
-- `roadmap/CURRENT.md` — approved dependency/status structure only.
+- [roadmap/STATUS.md](roadmap/STATUS.md) — approved dependency/status
+  structure only.
 
 ## Memory controls
 
@@ -55,4 +62,5 @@ commands, [COMMUNICATION.md](COMMUNICATION.md) for farm delivery, and
 
 Bootstrap distinguishes dynamic repository observations from canonical
 repository-memory/evidence facts; the exceptional handoff cannot override
-CURRENT.
+CURRENT. Source indexes and chat/history/import navigation do not own an active
+NEXT.

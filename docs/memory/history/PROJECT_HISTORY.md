@@ -3,8 +3,9 @@
 This is the canonical chronological history reconstructed during the
 2026-09-11 import. The import package remains at
 docs/memory/import/chatgpt_project_history_2026-09-11 as source provenance.
-Current implementation and runtime state are deliberately kept in active
-memory and evidence records rather than inferred from chronology.
+Current implementation and runtime state must be obtained from dynamic Git
+inspection, `CURRENT.md`, and canonical evidence rather than inferred from
+chronology.
 
 ## Analysis foundation and production background work
 
@@ -45,7 +46,7 @@ a setting-wide Lambda-preservation gate. See decisions/DECISION_HISTORY.md.
 Phase A exposed frozen baseline pion prediction and host state without
 production mutation. A.1/A.2/A.3 repaired noRF/frozen-weight provenance and
 identity-host closure. Phase B/B.1 established the independent Method-A
-positive-response diagnostic; its pre-C source anchor is
+positive-response diagnostic; its historical pre-C source anchor is
 18b06ec1aa8ba42859dd0980705ce8374d4720ab.
 
 Phase C implemented independent Method-B local missing-mass closure from frozen
@@ -63,7 +64,7 @@ recovered. Phase E is presentation-only over frozen records; the one recovered
 E.3.Fix.2 Left-low gate is runtime validated, but does not close the other four
 settings. See evidence/e3-fix2-left-low-runtime.md.
 
-## Phase F lineage and current source checkpoint
+## Phase F lineage through the 2026-09-11 import checkpoint
 
 [HANDOFF] [FARM_EVIDENCE] [CURRENT_SOURCE]
 
@@ -84,9 +85,11 @@ F.1 v1 population-ownership error. See evidence/f1-fix3-fix4-mechanics.md and
 evidence/f1-v1-population-ownership-failure.md.
 
 F.1.Fix.5 separates uncensored Method-A response training from the physically
-censored downstream application cache. The actual source change is
-dc4fc6283001739a487ec80068f951b0e388cae6; later commits through live
-b02316f83bf8ef18641fa7217b90c04bcdca10e3 add durable-memory/import material.
-The source review is in phases/phase-f1-method-a-acceptance-farm-gate.md. No
-F.1.Fix.5 farm artifact was supplied in this migration.
-
+censored downstream application cache. The actual historical F.1.Fix.5
+analysis-source change is `dc4fc6283001739a487ec80068f951b0e388cae6`; later
+migration-era commits through the repository observation
+`b02316f83bf8ef18641fa7217b90c04bcdca10e3` recorded during the 2026-09-11
+import add durable-memory/import material. That SHA is a historical repository
+observation, not the live branch identity. The source review is in
+phases/phase-f1-method-a-acceptance-farm-gate.md. No F.1.Fix.5 farm artifact
+was supplied at the import checkpoint.

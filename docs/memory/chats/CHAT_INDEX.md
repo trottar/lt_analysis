@@ -1,7 +1,9 @@
 # KaonLT chat-era index
 
-This is a distilled navigation index, not a transcript archive. Current source,
-evidence, handoffs, and tracked durable records always outrank chat summaries.
+This is distilled historical navigation only, not active authority or a
+transcript archive. `CURRENT.md`, current source/diff, and canonical
+evidence/phase/decision records outrank it; the exceptional handoff cannot
+override CURRENT. Live phase acceptance is never decided here.
 
 - **Proton and pion subtraction architecture:** ownership boundaries, ordering,
   K Lambda protection, and non-promotable diagnostic work.

@@ -1,7 +1,9 @@
-# Approved KaonLT roadmap
+# Approved KaonLT roadmap status
 
-This roadmap records approved Phase-F structure. It does not make a runtime
-claim, authorize source changes, or promote a diagnostic into production.
+This roadmap owns approved Phase-F dependency/status structure only. It does
+not make a runtime claim, authorize source changes, or promote a diagnostic
+into production. `CURRENT.md` owns the active objective, active blockers, and
+exact active next action.
 
 ## Frozen upstream program
 

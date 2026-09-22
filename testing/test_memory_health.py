@@ -113,11 +113,25 @@ class MemoryHealthCompatibilityTests(unittest.TestCase):
             self.write_schema3(root)
             self.assertEqual(self.run_checks(root), [])
 
+    def test_schema3_missing_roadmap_status_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_schema3(root)
+            (root / "docs/memory/roadmap/STATUS.md").unlink()
+            self.assert_error(self.run_checks(root), "missing schema-3 roadmap STATUS")
+
+    def test_schema3_legacy_roadmap_current_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_schema3(root)
+            (root / "docs/memory/roadmap/CURRENT.md").write_text("# legacy\n", encoding="utf-8")
+            self.assert_error(self.run_checks(root), "legacy roadmap must not exist")
+
     def test_schema3_roadmap_frontmatter_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
             roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
             self.assert_error(self.run_checks(root), "roadmap must not contain active-state frontmatter")
 
@@ -125,7 +139,7 @@ class MemoryHealthCompatibilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
             roadmap.write_text("# Fixture roadmap\n\n## NEXT\n\nfixture\n", encoding="utf-8")
             self.assert_error(self.run_checks(root), "roadmap must not contain ## NEXT")
 
@@ -133,7 +147,7 @@ class MemoryHealthCompatibilityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_schema3(root)
-            roadmap = root / "docs/memory/roadmap/CURRENT.md"
+            roadmap = root / "docs/memory/roadmap/STATUS.md"
             roadmap.write_text("# Fixture roadmap\n\nNEXT — fixture\n", encoding="utf-8")
             self.assert_error(self.run_checks(root), "roadmap must not contain active NEXT")
 

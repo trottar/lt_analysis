@@ -1,8 +1,11 @@
 # KaonLT chat and handoff index
 
-This index maps durable conclusions to reconstructed chat/handoff eras. It is
-not a verbatim transcript archive. The import package CHAT_INDEX.md and
-PROJECT_HISTORY.md remain the provenance for this reconstruction.
+This index maps reconstructed 2026 chat/handoff eras. It is not a verbatim
+transcript archive. Its evidence-class tags are historical classification
+labels, not active authority. Current state/status comes from `CURRENT.md` and
+canonical evidence; imported historical plans can be superseded by later
+decisions. The import package CHAT_INDEX.md and PROJECT_HISTORY.md remain the
+provenance for this reconstruction.
 
 | Era | Evidence class | Durable subject | Canonical record |
 |---|---|---|---|
@@ -18,4 +21,3 @@ Historical plans that said an eventual correction could combine A and B are
 retained as superseded context. The current decision is Method B as a
 diagnostic/cross-check only and Method A as the only candidate future numerical
 HGCer input; see D015.
-

@@ -84,7 +84,7 @@ review lessons.
 - `evidence/` owns accepted farm/runtime gate facts and artifacts; `phases/`
   owns implementation and fix chronology; `decisions/` owns scientific and
   architectural contracts.
-- `roadmap/CURRENT.md` owns approved dependency/status structure, not the
+- `roadmap/STATUS.md` owns approved dependency/status structure, not the
   exact active action. `LEARNINGS.md` owns generalized reusable lessons.
 - `TOOLS.md`, `COMMUNICATION.md`, and `CODEX.md` own operational references,
   farm-delivery communication, and source-changing workflow respectively.

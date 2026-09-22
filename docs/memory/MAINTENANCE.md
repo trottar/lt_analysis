@@ -10,7 +10,10 @@
   transfer state only and cannot override CURRENT.
 - **Chronology:** historical/chat indexes help a new session navigate; they do
   not outrank source or evidence.
-- **Roadmap:** `roadmap/CURRENT.md` preserves approved dependency/status
+- **Source and historical navigation:** source indexes retain provenance;
+  history, chats, and import records retain historical/navigation context.
+  None acquires active objective, blocker, or NEXT ownership.
+- **Roadmap:** `roadmap/STATUS.md` preserves approved dependency/status
   structure and does not own the exact active next action.
 - **Evidence:** `evidence/` contains farm/runtime gate records; `phases/`
   contains implementation and fix chronology; `decisions/` contains contracts.

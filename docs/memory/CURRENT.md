@@ -12,15 +12,15 @@ and runtime frontier.
 
 ## Current Work Item
 
-Memory M6 — roadmap/source/history normalization. M5 established the
-Linux/JLab operational ownership split among the repository control records.
-See the [M5 phase record](phases/memory-m5-linux-jlab-operational-ownership.md).
+Memory M7 — strict semantic health enforcement. M6 normalized roadmap,
+source, and history ownership without changing scientific/runtime state. See
+the [M6 phase record](phases/memory-m6-roadmap-source-history-normalization.md).
 
 ## Verified State
 
-- M0 through M4 are `SOURCE REVIEWED` repository-memory work.
-- M5 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
-  [phase record](phases/memory-m5-linux-jlab-operational-ownership.md) and the
+- M0 through M5 are `SOURCE REVIEWED` repository-memory work.
+- M6 is `SOURCE REVIEWED`, contingent on the local acceptance criteria in its
+  [phase record](phases/memory-m6-roadmap-source-history-normalization.md) and the
   subsequent ChatGPT actual-diff audit/user push workflow; it is not runtime
   validation.
 - F.6.2 is `CLOSED / RUNTIME VALIDATED`; see the direct
@@ -42,13 +42,13 @@ See the [M5 phase record](phases/memory-m5-linux-jlab-operational-ownership.md).
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
-  representation ownership; the [M5 phase record](phases/memory-m5-linux-jlab-operational-ownership.md)
-  records the current operational-memory normalization. These are role-labeled
+  representation ownership; the [M6 phase record](phases/memory-m6-roadmap-source-history-normalization.md)
+  records the current roadmap/source/history normalization. These are role-labeled
   historical identities, not assertions about the dynamically queried live HEAD.
 
 ## Blockers
 
-No known memory-migration blocker prevents M6 after M5 source acceptance.
+No known memory-migration blocker prevents M7 after M6 source acceptance.
 Lifecycle-hook dispatch remains `BLOCKED / DEFERRED` and is not a dependency.
 Scientifically, E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
 F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4 remains `BLOCKED` pending
@@ -58,17 +58,16 @@ not the active repository-development action during this migration.
 
 ## Next Action
 
-NEXT — Memory M6: normalize roadmap/source/history ownership so roadmap
-records dependencies/status only, source indexes contain stable provenance
-rather than stored "live HEAD" claims, and chat/import/history surfaces remain
-historical navigation rather than active authority.
+NEXT — Memory M7: make schema-3 memory health strict by removing legacy
+schema-2 compatibility and enforcing the final role, status, startup, handoff,
+link, rendering, and size semantics.
 
 ## Success Criteria
 
-M6 must retain roadmap dependency/status structure without a competing exact
-active action; remove static "live HEAD" semantics; use explicit role labels
-for fixed SHAs; keep chat/import/history as historical navigation; and change
-no scientific or runtime status.
+M7 must remove schema-2 compatibility; enforce one authoritative active-state
+surface; enforce exact startup/handoff/roadmap roles and allowed status
+vocabulary; enforce runtime-evidence links and final role-specific thresholds;
+detect rendering/link/ownership drift; and preserve scientific/runtime state.
 
 ## Do Not Reopen Without New Evidence
 
@@ -82,7 +81,7 @@ merely for style.
 
 - [M0-M9 refinement plan](decisions/memory-system-refinement-m0-m9-plan.md)
 - [Schema-v3 contract](decisions/memory-schema-v3-contract.md)
-- [M5 operational-ownership record](phases/memory-m5-linux-jlab-operational-ownership.md)
+- [M6 roadmap/source/history record](phases/memory-m6-roadmap-source-history-normalization.md)
 - [F.6.2 scientific runtime closure](evidence/f6-2-scientific-runtime-closure.md)
 - [F.6.2.Fix.5 presentation runtime closure](evidence/f6-2-fix5-presentation-runtime-closure.md)
 - [F.6 production-promotion phase record](phases/phase-f6-method-a-production-promotion.md)

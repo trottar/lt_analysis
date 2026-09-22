@@ -244,11 +244,16 @@ def check_schema3_handoff(root: Path) -> list[str]:
 
 def check_schema3_roadmap(root: Path) -> list[str]:
     """Ensure the schema-3 roadmap preserves dependencies without active state."""
-    roadmap = root / "docs/memory/roadmap/CURRENT.md"
-    if not roadmap.is_file():
-        return ["missing schema-3 roadmap: docs/memory/roadmap/CURRENT.md"]
-    text = roadmap.read_text(encoding="utf-8")
+    roadmap = root / "docs/memory/roadmap/STATUS.md"
+    legacy = root / "docs/memory/roadmap/CURRENT.md"
     errors: list[str] = []
+    if not roadmap.is_file():
+        errors.append("missing schema-3 roadmap STATUS: docs/memory/roadmap/STATUS.md")
+    if legacy.exists():
+        errors.append("schema-3 legacy roadmap must not exist: docs/memory/roadmap/CURRENT.md")
+    if not roadmap.is_file():
+        return errors
+    text = roadmap.read_text(encoding="utf-8")
     if text.startswith("---\n"):
         errors.append("schema-3 roadmap must not contain active-state frontmatter")
     if re.search(r"^## NEXT\s*$", text, re.MULTILINE):
@@ -496,7 +501,8 @@ def write_schema3_fixture(root: Path) -> None:
         "Resume from CURRENT.md and then only task-relevant canonical references.\n",
         encoding="utf-8",
     )
-    (memory / "roadmap/CURRENT.md").write_text(
+    (memory / "roadmap/CURRENT.md").unlink()
+    (memory / "roadmap/STATUS.md").write_text(
         "# Fixture roadmap\n\n## Phase F\n\nACTIVE — fixture dependency/status structure.\n",
         encoding="utf-8",
     )
@@ -596,7 +602,12 @@ def self_test() -> None:
         write_schema3_fixture(root)
         errors, warnings = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
         assert not errors and not warnings, (errors, warnings)
-        roadmap = root / "docs/memory/roadmap/CURRENT.md"
+        roadmap = root / "docs/memory/roadmap/STATUS.md"
+        legacy = root / "docs/memory/roadmap/CURRENT.md"
+        legacy.write_text("# Legacy roadmap\n", encoding="utf-8")
+        errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
+        assert any("legacy roadmap must not exist" in error for error in errors), errors
+        legacy.unlink()
         roadmap.write_text("---\nmemory_schema: 3\n---\n# Fixture roadmap\n", encoding="utf-8")
         errors, _ = run_checks(root, SOFT_LIMIT_BYTES, HARD_LIMIT_BYTES, check_manifest=False)
         assert any("roadmap must not contain active-state frontmatter" in error for error in errors), errors

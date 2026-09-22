@@ -1,10 +1,13 @@
 # KaonLT artifact index
 
-This index distinguishes recovered evidence descriptions from locally present
-farm artifacts. No farm bundle was added or run by the 2026-09-11 memory
-migration.
+This index is a historical artifact snapshot recovered during the 2026-09-11
+memory migration. It distinguishes recovered evidence descriptions from
+locally present farm artifacts. Its limitations, including no later Fix.5 farm
+artifact, are historical statements at that checkpoint rather than current
+project status. Current acceptance/status comes from `CURRENT.md` and canonical
+evidence; this index is not farm evidence by itself.
 
-| ID | Gate / purpose | Evidence class | Evaluated identity | Recovered inspection | Limitation |
+| ID | Gate / purpose | Evidence class | Historical evaluated identity | Recovered inspection | Limitation |
 |---|---|---|---|---|---|
 | A-C-PHASEC-5SET | Phase-C final five-setting closure | [FARM_EVIDENCE] [HANDOFF] | C.Fix.2.3 9a66bc62d20a99172e326e915866877b65ae1e5d; later accepted pre-E.3 e3853655db0809923cbf2326e2f779219128eda9 | 30 C.Fix.2 pages and adaptive-support review | raw bundle paths/hashes not recovered |
 | A-E3-LEFTLOW | E.3.Fix.2 Left-low farm gate | [FARM_EVIDENCE] | runtime/bundle bf53dac84e1396cfd7e3f4e0234749426bfbdcf4; implementation eb1710f4739ba6ef14f51419806e9fc5bd53c175 | manifest, source state/checks, checkpoint JSON, E.3 PDF pages 59-61 | original paths/hashes not recovered |
@@ -13,4 +16,3 @@ migration.
 
 See the matching evidence records for conclusions and imported
 ARTIFACT_INDEX_SEED.md for source provenance.
-

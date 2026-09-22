@@ -19,9 +19,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 4239,
+      "bytes": 4210,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4b77ca3a5eb3ee2a8e19d5c3115d917d7a806ef05aca9c4a7c9555ac9acf8d20"
+      "sha256": "f9c384cc1f996631c4808f1a82eca0b6da465280ec0e3c3b0c5ab750596318ce"
     },
     {
       "bytes": 1978,
@@ -29,19 +29,19 @@
       "sha256": "5c8125a611ba43fb83c53e3ad8ca6136723b308c9e9342d06d5335aee2afcc87"
     },
     {
-      "bytes": 3436,
+      "bytes": 3646,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "3cca372ec7896a8f9509ca88d743ed3c11d8462f4cceea3fbcd99a68757f2340"
+      "sha256": "5e48041155677613463027c83aae0e6ebf582e37066240e1a4fd3f0bb7246594"
     },
     {
-      "bytes": 5041,
+      "bytes": 5040,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "cf5a11e8f22e142b3837c47edebd23db267ab9401bbe8ea6478c773fa21f18f3"
+      "sha256": "a7d1794b33cbb9c1662cc32929960e9b7475ba1bffed3fb3d9e7c5c0edb1441e"
     },
     {
-      "bytes": 2752,
+      "bytes": 3180,
       "path": "docs/memory/README.md",
-      "sha256": "25d6702d733958b04baefe83cebb8ece615919ab2fd74fa5321387426c6e2152"
+      "sha256": "b4b3513119fdcc6b9f4fc90537c4d528d1ba9ad5c23f784b5858fd56ebc6af8a"
     },
     {
       "bytes": 1878,
@@ -54,9 +54,9 @@
       "sha256": "43a4cdc33a0cbaba3f1292001754e6d2c9ed082b43d4bd6e25d81e7664a21401"
     },
     {
-      "bytes": 1037,
+      "bytes": 1157,
       "path": "docs/memory/chats/CHAT_INDEX.md",
-      "sha256": "63e1b4b8ef8b6a58130f898cd2a35412972493b275635bc220ff43bfbde4fadc"
+      "sha256": "39a76e0dc99729599ec3deba27e874d219391fe5d84ca6cedf1c5efa0be9e6dd"
     },
     {
       "bytes": 1001,
@@ -179,14 +179,19 @@
       "sha256": "c711f801f776042aa3761077658e6cedb0d657c9ef1e151a960631bf0399f14d"
     },
     {
-      "bytes": 1662,
+      "bytes": 1860,
       "path": "docs/memory/history/CHAT_INDEX.md",
-      "sha256": "fe19617b94f944a047d12a8d873e88190af7e1c613b986ed6a82c101eefd6174"
+      "sha256": "bea26fc8f51b64c729ef994fdb60de2e030688cc99b21ab95c13939efa0c4ff5"
     },
     {
-      "bytes": 4495,
+      "bytes": 4733,
       "path": "docs/memory/history/PROJECT_HISTORY.md",
-      "sha256": "9735aec581980bd5b4bc3082536db59592c5f747cf12c1250f12d17ff24e49f3"
+      "sha256": "70679c45e8cca20203c973895b7f81ac32680e42c7dffe74d72fe404bf70ccf6"
+    },
+    {
+      "bytes": 706,
+      "path": "docs/memory/import/README.md",
+      "sha256": "d8707911c59c09e34507d382e63d385c87fa3484c954ddb552b85962a833b3fc"
     },
     {
       "bytes": 1199,
@@ -299,6 +304,11 @@
       "sha256": "4622e8d029b235a4c3c740f0436bb2551e9b3241af280a76b87139ba072f88a6"
     },
     {
+      "bytes": 5064,
+      "path": "docs/memory/phases/memory-m6-roadmap-source-history-normalization.md",
+      "sha256": "8f34ccc2af40a6df677e18afa062f584afa0f003910fed73751542b82bcbc672"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -329,19 +339,19 @@
       "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
     },
     {
-      "bytes": 6357,
-      "path": "docs/memory/roadmap/CURRENT.md",
-      "sha256": "18482fd4511363a0c0c148c18e7751268f05fbb1fc7791300669c151930f9c98"
+      "bytes": 6471,
+      "path": "docs/memory/roadmap/STATUS.md",
+      "sha256": "af5288d1433ce3d67765fcafe0bbe6b0232c5bd74f4125645ef81f3e874fc9de"
     },
     {
-      "bytes": 1414,
+      "bytes": 1698,
       "path": "docs/memory/sources/ARTIFACT_INDEX.md",
-      "sha256": "bbac3fc7dddc39d26c1f1e85bc76f971ca462ae857cb005aadb19b0556969595"
+      "sha256": "f9ff456ed5c1312267c38f5402aa0218316d6abc346b46be52727aa34b310c5b"
     },
     {
-      "bytes": 2218,
+      "bytes": 2965,
       "path": "docs/memory/sources/SOURCE_INDEX.md",
-      "sha256": "a1d4a0ecee2b0f6c4b1c727e1ae5741679a3aa6cb67a8c2f41de29373b54a3d3"
+      "sha256": "7a313d04f53c410f1b5769902134f5bb6211c84d85ef72ae8c6801babbd618f8"
     },
     {
       "bytes": 672,
@@ -360,6 +370,6 @@
     }
   ],
   "generated_date_utc": "2026-09-22",
-  "observed_git_head": "186998d2dd31c1269c4eff81baa0180f58795bcb",
+  "observed_git_head": "799416599671ff0bdc3c7d4024fbd1f7f2f456cc",
   "schema_version": 2
 }
