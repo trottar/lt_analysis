@@ -175,6 +175,27 @@ def _e8_flags(payload, expected, label):
             raise _E8PayloadError("{}_{}_invalid".format(label, name))
 
 
+def _e8_validate_parent_setting(setting_value, setting_id):
+    """Require the persisted F.6.2 parent-setting identity without aliases."""
+    setting = _e8_require(setting_value, "parent_setting")
+    phi_setting, epsilon_filename_token = setting_id.split("-", 1)
+    semantic_epsilon = {"lowe": "low", "highe": "high"}.get(
+        epsilon_filename_token
+    )
+    if (
+        semantic_epsilon is None
+        or setting.get("Q2") != "4p4"
+        or setting.get("W") != "2p74"
+        or setting.get("kinematic_token") != E8_F6_2_KINEMATIC_TOKEN
+        or setting.get("particle_type") != "kaon"
+        or setting.get("phi_setting") != phi_setting
+        or setting.get("epsilon_filename_token") != epsilon_filename_token
+        or setting.get("epsilon_setting") != semantic_epsilon
+    ):
+        raise _E8PayloadError("parent_setting_identity_invalid")
+    return setting
+
+
 def _e8_metric(metric_value, label):
     metric = _e8_require(metric_value, label)
     if metric.get("available") is True:
@@ -362,11 +383,7 @@ def _e8_validate_artifact(artifact_value):
         if (setting_id, t_index) not in _E8_PARENT_KEYS or (setting_id, t_index) in observed:
             raise _E8PayloadError("parent_geometry_invalid")
         observed.add((setting_id, t_index))
-        setting = _e8_require(parent.get("setting"), "parent_setting")
-        if "{}-{}".format(setting.get("phi_setting"), setting.get("epsilon_setting")) != setting_id:
-            raise _E8PayloadError("parent_setting_identity_invalid")
-        if _e8_integer(setting.get("ordinal"), "parent_setting_ordinal") != _E8_SETTING_IDS.index(setting_id):
-            raise _E8PayloadError("parent_setting_ordinal_invalid")
+        _e8_validate_parent_setting(parent.get("setting"), setting_id)
         low = _e8_finite(parent.get("canonical_t_low"), "parent_t_low")
         high = _e8_finite(parent.get("canonical_t_high"), "parent_t_high")
         if high <= low:

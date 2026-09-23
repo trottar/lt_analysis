@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 6664,
+      "bytes": 7722,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "fa87deaaa8c8d830b4f8bbe0c020e490724ecf218f6a1a9a0e8a597d113ed552"
+      "sha256": "36386e6d2d8ed61b112afc479ec0d2093f5d0a0b7ae9f5f945c7a995ecfcdaea"
     },
     {
       "bytes": 1978,
@@ -309,6 +309,16 @@
       "bytes": 12818,
       "path": "docs/memory/phases/e8-1-debug-1-left-low-task-contract.md",
       "sha256": "f606750025696e77963b09edb8a8a445caab7e9c348302bed9a7e61beaa758cc"
+    },
+    {
+      "bytes": 12347,
+      "path": "docs/memory/phases/e8-1-fix1-frozen-f6-2-setting-reader-task-contract.md",
+      "sha256": "a0ea079479cd753c25708cab3b2a2137da42ef91ecd5126f30ce0233120fd777"
+    },
+    {
+      "bytes": 5123,
+      "path": "docs/memory/phases/e8-1-fix1-frozen-f6-2-setting-reader.md",
+      "sha256": "f0a58e6dbee9fce493ffa94c5a2c5d7b5d2a7dbe44146758ca69fbad3a43fcc8"
     },
     {
       "bytes": 1900,

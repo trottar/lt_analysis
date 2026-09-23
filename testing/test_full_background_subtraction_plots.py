@@ -6475,17 +6475,35 @@ class FullBackgroundSubtractionD6Tests(unittest.TestCase):
                 plots.close_full_background_subtraction_pdf(pdf)
             self.assertTrue(Path(pdf).exists())
             self.assertGreater(Path(pdf).stat().st_size, 0)
+            retained = EXPECTED_FULL_BACKGROUND_PAGE_IDS[:12]
             self.assertEqual(
                 [page["page_id"] for page in rendered["manifest"]],
-                list(EXPECTED_FULL_BACKGROUND_PAGE_IDS) * 2,
+                list(retained) * 2 + ["full_background.e8.unavailable"],
             )
-            self.assertEqual(len(rendered["manifest"]), 36)
+            self.assertEqual(len(rendered["manifest"]), 25)
             self.assertEqual(
                 [page["scope"] for page in rendered["manifest"]],
-                ["t1"] * 18 + ["t2"] * 18,
+                ["t1"] * 12 + ["t2"] * 12 + ["setting"],
             )
             self.assertTrue(all(page["authoritative"] is False for page in rendered["manifest"]))
-            _assert_full_background_manifest_contract(self, rendered["manifest"])
+            self.assertEqual(
+                rendered["manifest"][-1],
+                {
+                    "page_id": "full_background.e8.unavailable",
+                    "scope": "setting",
+                    "authoritative": False,
+                    "reason": "frozen_f6_2_payload_not_supplied",
+                },
+            )
+            self.assertFalse(any(
+                page["page_id"].startswith((
+                    "full_background.d10.", "full_background.d11.",
+                    "full_background.e2.", "full_background.e3.",
+                    "full_background.e4.", "full_background.e6.",
+                    "full_background.e7.", "full_background.f1.",
+                ))
+                for page in rendered["manifest"]
+            ))
             pdfinfo = shutil.which("pdfinfo")
             if pdfinfo is not None:
                 pdfinfo_result = subprocess.run(
@@ -6708,8 +6726,27 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
     """Focused frozen-F.6.2 integration checks for the ordinary procedure PDF."""
 
     @staticmethod
+    def _persisted_authority_artifact():
+        artifact = deepcopy(_e8_frozen_artifact())
+        for parent in artifact["validation"]["parents"]:
+            phi_setting, epsilon_filename_token = parent["setting_id"].split("-", 1)
+            parent["setting"] = {
+                "Q2": "4p4",
+                "W": "2p74",
+                "epsilon_filename_token": epsilon_filename_token,
+                "epsilon_setting": {"lowe": "low", "highe": "high"}[epsilon_filename_token],
+                "kinematic_token": "Q4p4W2p74",
+                "particle_type": "kaon",
+                "phi_setting": phi_setting,
+            }
+        return artifact
+
+    @staticmethod
     def _write_authority(directory, artifact=None):
-        artifact = deepcopy(_e8_frozen_artifact() if artifact is None else artifact)
+        artifact = (
+            FullBackgroundSubtractionE8Tests._persisted_authority_artifact()
+            if artifact is None else deepcopy(artifact)
+        )
         path = Path(directory) / (
             "Q4p4W2p74_kaon_pion-background_hgcer_method-a-acceptance-refinement-validation.json"
         )
@@ -6740,7 +6777,10 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             self.assertTrue(payload["available"])
             self.assertEqual(path.read_bytes(), raw)
             self.assertEqual(payload["input_sha256"], digest)
-            self.assertEqual([parent["canonical_t_index"] for parent in payload["parents"]], [0, 1, 2])
+            self.assertEqual(
+                [(parent["setting_id"], parent["canonical_t_index"]) for parent in payload["parents"]],
+                [("Left-lowe", 0), ("Left-lowe", 1), ("Left-lowe", 2)],
+            )
 
     def test_e8_reader_rejects_wrong_authority_and_current_setting(self):
         mutations = {
@@ -6756,7 +6796,7 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             for label, mutate in mutations.items():
                 with self.subTest(label=label):
-                    artifact = _e8_frozen_artifact()
+                    artifact = self._persisted_authority_artifact()
                     mutate(artifact)
                     payload, _path, _raw, _digest, _artifact = self._load_synthetic_authority(temporary, artifact)
                     self.assertFalse(payload["available"])
@@ -6766,6 +6806,31 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             )
             self.assertFalse(payload["available"])
             self.assertEqual(payload["reason"], "unsupported_e8_current_setting")
+
+    def test_e8_reader_rejects_persisted_parent_setting_identity_mismatches(self):
+        cases = {
+            "phi_setting": lambda parent: parent["setting"].__setitem__("phi_setting", "Center"),
+            "epsilon_filename_token": lambda parent: parent["setting"].__setitem__("epsilon_filename_token", "highe"),
+            "epsilon_setting": lambda parent: parent["setting"].__setitem__("epsilon_setting", "high"),
+            "Q2": lambda parent: parent["setting"].__setitem__("Q2", "3p0"),
+            "W": lambda parent: parent["setting"].__setitem__("W", "2p32"),
+            "kinematic_token": lambda parent: parent["setting"].__setitem__("kinematic_token", "Q3p0W2p32"),
+            "particle_type": lambda parent: parent["setting"].__setitem__("particle_type", "pion"),
+            "missing_setting": lambda parent: parent.pop("setting"),
+            "nonmapping_setting": lambda parent: parent.__setitem__("setting", ()),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            for label, mutate in cases.items():
+                with self.subTest(label=label):
+                    artifact = self._persisted_authority_artifact()
+                    mutate(artifact["validation"]["parents"][0])
+                    payload, _path, _raw, _digest, _artifact = self._load_synthetic_authority(
+                        temporary, artifact
+                    )
+                    self.assertFalse(payload["available"])
+                    self.assertTrue(
+                        payload["reason"].startswith("frozen_f6_2_authority_rejected:")
+                    )
 
     def test_e8_reader_fails_closed_for_missing_and_malformed_input(self):
         with tempfile.TemporaryDirectory() as temporary:

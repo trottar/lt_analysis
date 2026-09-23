@@ -11,19 +11,19 @@ the accepted baseline yield and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-E.8.1.Debug.1 source at `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0` was
-independently reviewed with a concrete Diamond-cut blocker: its pre-Step-2 Left
-selector allowed a Left-low fallback instead of the ordinary Center-produced
-common polygon. That original implementation is superseded by Fix.1, not
-source-review accepted. E.8.1.Debug.1.Fix.1 is `SOURCE REVIEWED` from
-ChatGPT's inspection of the actual local diff: ordinary Center/Left/Right
-Diamond preparation and artifact registration precede the downstream `Left`
-restriction. Codex-reported deterministic checks were `NOT RUN by ChatGPT`.
-No ROOT/PyROOT, farm, or runtime validation exists; user commit/push and the
-targeted `-d` Jefferson Lab debug run remain pending. The scientific E.8.1 gate
-remains unchanged behind this prerequisite; inspect `Q4p4W2p74 / Left / highe`
-first before broader visual/runtime review. See the
-[Fix.1 local phase record](phases/e8-1-debug-1-fix1-preserve-diamond-cut.md).
+E.8.1 is `ACTIVE`: the fresh targeted `Q4p4W2p74 / Left / lowe` debug bundle
+reached downstream ordinary procedure rendering but exposed a fail-closed E.8
+presentation-reader blocker. The frozen accepted F.6.2 JSON SHA-256 remained
+`5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1`, but the
+reader rejected its actual persisted parent-setting schema with
+`frozen_f6_2_authority_rejected:parent_setting_identity_invalid`; its page
+manifest consequently ended at `full_background.e8.unavailable`. The bundle
+was `complete=false` and also exposed a stale ROOT-aware procedure-page test.
+E.8.1.Fix.1 is `SOURCE REVIEWED`: ChatGPT inspected the actual complete diff
+and found the narrow reader/test repair PASS. Codex-reported deterministic
+tests were `NOT RUN by ChatGPT`. No ROOT/PyROOT, farm, or runtime validation is
+claimed for this repair. This is neither F.6.2 science reopening nor E.8.1
+runtime acceptance. See the [E.8.1.Fix.1 reader record](phases/e8-1-fix1-frozen-f6-2-setting-reader.md).
 
 ## Verified State
 
@@ -35,16 +35,23 @@ first before broader visual/runtime review. See the
   [scientific closure evidence](evidence/f6-2-scientific-runtime-closure.md).
 - F.6.2.Fix.5 is `CLOSED / RUNTIME VALIDATED`; see the direct
   [presentation closure evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
-- E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
-  remains the baseline; Method B remains diagnostic/cross-check only; Method A
-  remains detached and non-production.
+- E.8.1 is `ACTIVE`: farm evidence exposed a concrete presentation-reader/test
+  blocker. The accepted yield remains the baseline; Method B remains
+  diagnostic/cross-check only; Method A remains detached and non-production.
+- E.8.1.Fix.1 is `SOURCE REVIEWED`: ChatGPT inspected the actual complete diff
+  and found the frozen-F.6.2 reader/test repair PASS. Codex-reported
+  deterministic tests were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or
+  runtime validation is claimed for the repair.
 - E.8.1.Debug.1 at `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0` was reviewed
   with a Diamond-cut blocker: its pre-Step-2 selector changed the cut owner to
   a Left-low fallback. It is superseded by Fix.1 and has no farm/runtime
   evidence.
 - E.8.1.Debug.1.Fix.1 is `SOURCE REVIEWED` from ChatGPT actual-diff inspection.
-  Codex-reported deterministic checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT,
-  full-analysis, farm, or runtime evidence exists.
+  Codex-reported deterministic checks were `NOT RUN by ChatGPT`. The fresh
+  Left/lowe output is runtime evidence that targeted execution reached
+  downstream procedure rendering, but its incomplete supplied bundle neither
+  establishes full launcher provenance nor proves the intentional full-high
+  epsilon skip.
 - The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` at
   `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`. This is source review only, not
   farm, ROOT/PyROOT, or E.8.1 runtime validation; it changes neither E.8.1's
@@ -66,6 +73,11 @@ first before broader visual/runtime review. See the
   `0b37af2a2927b08bdeaf897c545f290b55329cea`; its accepted closure owners are
   the [scientific evidence](evidence/f6-2-scientific-runtime-closure.md) and
   [Fix.5 presentation evidence](evidence/f6-2-fix5-presentation-runtime-closure.md).
+- Fresh E.8.1.Debug.1.Fix.1 Left/lowe bundle:
+  `KaonLT_E8_1_Debug1_Fix1_Q4p4W2p74_Left_lowe_20260923-012755.zip`, SHA-256
+  `490036e8d6c53d6e025da99a5c6c4ddcd529b6573007534efb7aaceac1acd002`,
+  `complete=false`; it retained the accepted F.6.2 JSON identity but exposed
+  the reader/test blocker recorded in the [E.8.1.Fix.1 reader record](phases/e8-1-fix1-frozen-f6-2-setting-reader.md).
 - The [schema-v3 contract](decisions/memory-schema-v3-contract.md) defines
   representation ownership; the [M8 phase record](phases/memory-m8-manifest-bootstrap-semantics.md)
   records integrity-only manifest and dynamic bootstrap semantics. These are role-labeled
@@ -73,28 +85,30 @@ first before broader visual/runtime review. See the
 
 ## Blockers
 
-E.8.1 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; no E.8.1
-farm-evaluated commit exists. F.6.3 remains `BLOCKED` pending E.8.1, and F.6.4
-remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
-`BLOCKED` / `DEFERRED`, is non-required, and is not a dependency.
+E.8.1 is `ACTIVE` with a concrete frozen-F.6.2 parent-setting reader/test
+blocker; no E.8.1 farm-evaluated commit exists. F.6.3 remains `BLOCKED` pending
+E.8.1, and F.6.4 remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook
+dispatch remains `BLOCKED` / `DEFERRED`, is non-required, and is not a
+dependency.
 
 ## Next Action
 
-NEXT — E.8.1.Debug.1.Fix.1: user review, commit, and push the `SOURCE REVIEWED`
-Diamond-cut-preservation repair, then run the targeted `-d` Jefferson Lab debug
-execution and return fresh evidence. After that debug prerequisite is resolved,
-resume the unchanged E.8.1 canonical-five-setting `Q4p4W2p74` farm-validation
-gate using the reviewed wrapper; package and inspect `Left / highe` first, and
-broaden only after that detailed visual/runtime review passes.
+NEXT — E.8.1.Fix.1: user commit/push the `SOURCE REVIEWED` frozen-F.6.2
+parent-setting reader/test repair. After that push, perform a separate narrow
+E.8.1 bundle-profile re-pin so collector provenance recognizes the repaired E.8
+source commit. Then rerun `Q4p4W2p74 / Left / lowe` first, because it exposed
+this blocker. Only after that narrow gate passes return to detailed
+`Left / highe` review and then broaden.
 
 ## Success Criteria
 
 E.8.1 requires direct fresh Jefferson Lab farm evidence for the canonical
 five-setting package, with the reviewed source/profile provenance, frozen F.6.2
 JSON identity, checker gates, requested structured artifacts, and readable
-ordinary procedure-PDF/pages independently inspected. `Left / highe` is the
-first detailed gate. A completed ZIP or local source review alone is not farm
-acceptance; do not broaden after a failed or incomplete first gate.
+ordinary procedure-PDF/pages independently inspected. Following the required
+profile re-pin, `Left / lowe` is the first rerun gate; `Left / highe` is the
+next detailed gate. A completed ZIP or local source review alone is not farm
+acceptance; do not broaden after a failed or incomplete gate.
 
 ## Do Not Reopen Without New Evidence
 
@@ -117,3 +131,4 @@ merely for style.
 - [Wrapper post-push state reconciliation](phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md)
 - [E.8.1.Debug.1 local debug-mode record](phases/e8-1-debug-1-left-low-debug-mode.md)
 - [E.8.1.Debug.1.Fix.1 local repair record](phases/e8-1-debug-1-fix1-preserve-diamond-cut.md)
+- [E.8.1.Fix.1 frozen-F.6.2 reader record](phases/e8-1-fix1-frozen-f6-2-setting-reader.md)
