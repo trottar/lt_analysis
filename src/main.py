@@ -313,7 +313,6 @@ if debug_left_low:
         raise RuntimeError(
             "LT_ANALYSIS_DEBUG_LEFT_LOW is not allowed during canonical prepass capture."
         )
-    phisetlist = ["Left"]
 
 ###############################################################################################################################################
 ROOT.gROOT.SetBatch(ROOT.kTRUE) # Set ROOT to batch mode explicitly, does not splash anything to screen
@@ -531,6 +530,11 @@ if DEBUG:
         show_pdf_with_evince(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
 for phiset in phisetlist:
     output_file_lst.append(OUTPATH+"/{}_{}_diamond_{}.pdf".format(phiset, ParticleType, 'Q'+Q2+'W'+W))
+
+# Preserve the ordinary Center-produced common Diamond cut before narrowing
+# only the downstream debug analysis population.
+if debug_left_low:
+    phisetlist = ["Left"]
 
 stage_start = perf_counter()
 mm_shift_summary = {}

@@ -20,6 +20,36 @@ Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user farm 
 2. **Closure task:** reconcile documentation, evidence, and status only after
    accepted farm evidence; it must not change scientific source.
 
+## Actual-diff review before user handoff
+
+1. Codex implements locally and stops before commit/push.
+2. ChatGPT reviews the actual diff, not the Codex summary.
+3. For a small diff, terminal output may be pasted directly.
+4. For a large diff, create one review bundle directly in the repository root
+   with a clearly temporary name such as `kaonlt_review.diff`, and have the
+   user upload it to ChatGPT. Remove that review file before commit/push unless
+   it is explicitly intended to be tracked.
+5. Review material must include every tracked file changed by the task contract.
+6. It must also include complete proposed additions for new/untracked
+   implementation or memory files; ordinary `git diff` does not show them.
+7. ChatGPT gives PASS, one narrow repair, or blocker before the user-controlled
+   commit/push.
+8. After push, ChatGPT reviews the pushed repository before farm validation.
+
+Do not require staging merely to review a diff. For each task, enumerate its
+actual scoped paths. A safe generic POSIX/Git-Bash pattern is:
+
+```bash
+git diff -- <tracked paths> > kaonlt_review.diff
+git diff --no-index -- /dev/null <new-file> >> kaonlt_review.diff || true
+```
+
+Here `|| true` is permitted only because `git diff --no-index` returns status 1
+when it displays a difference; it must never suppress an analysis or test
+failure. Repeat the second command for every intended new/untracked file. The
+root-level review bundle is temporary and must be removed before commit/push
+unless it is explicitly intended to be tracked.
+
 ## Contract policy
 
 Each task contract must state:

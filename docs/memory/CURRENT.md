@@ -11,15 +11,19 @@ the accepted baseline yield and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-E.8.1.Debug.1 is `ACTIVE`: a narrow local `-d` launcher implementation is the
-immediate operational prerequisite before the existing E.8.1 farm gate. It
-preserves paired canonical preflight, performs only the full `Left / lowe`
-debug analysis, and stops before full high epsilon. It awaits independent
-ChatGPT source review and the user-controlled Git handoff; it is not
-`SOURCE REVIEWED` or farm/runtime validated. The scientific E.8.1 gate remains
-unchanged behind this prerequisite; inspect `Q4p4W2p74 / Left / highe` first
-before broader visual/runtime review. See the
-[Debug.1 local phase record](phases/e8-1-debug-1-left-low-debug-mode.md).
+E.8.1.Debug.1 source at `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0` was
+independently reviewed with a concrete Diamond-cut blocker: its pre-Step-2 Left
+selector allowed a Left-low fallback instead of the ordinary Center-produced
+common polygon. That original implementation is superseded by Fix.1, not
+source-review accepted. E.8.1.Debug.1.Fix.1 is `SOURCE REVIEWED` from
+ChatGPT's inspection of the actual local diff: ordinary Center/Left/Right
+Diamond preparation and artifact registration precede the downstream `Left`
+restriction. Codex-reported deterministic checks were `NOT RUN by ChatGPT`.
+No ROOT/PyROOT, farm, or runtime validation exists; user commit/push and the
+targeted `-d` Jefferson Lab debug run remain pending. The scientific E.8.1 gate
+remains unchanged behind this prerequisite; inspect `Q4p4W2p74 / Left / highe`
+first before broader visual/runtime review. See the
+[Fix.1 local phase record](phases/e8-1-debug-1-fix1-preserve-diamond-cut.md).
 
 ## Verified State
 
@@ -34,8 +38,12 @@ before broader visual/runtime review. See the
 - E.8.1 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. The accepted yield
   remains the baseline; Method B remains diagnostic/cross-check only; Method A
   remains detached and non-production.
-- E.8.1.Debug.1 is `ACTIVE` local-only launcher orchestration work. Its
-  `-d` path has deterministic source-contract coverage only; no ROOT/PyROOT,
+- E.8.1.Debug.1 at `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0` was reviewed
+  with a Diamond-cut blocker: its pre-Step-2 selector changed the cut owner to
+  a Left-low fallback. It is superseded by Fix.1 and has no farm/runtime
+  evidence.
+- E.8.1.Debug.1.Fix.1 is `SOURCE REVIEWED` from ChatGPT actual-diff inspection.
+  Codex-reported deterministic checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT,
   full-analysis, farm, or runtime evidence exists.
 - The parameterized farm validation-bundle wrapper is `SOURCE REVIEWED` at
   `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`. This is source review only, not
@@ -49,6 +57,9 @@ before broader visual/runtime review. See the
   `0bf1281ebf44868b68ff808090436653eea6ed60`.
 - E.8.1 canonical-five-setting bundle/profile source:
   `c25f9d8248f2acfb8b0443a482fc76781eb405ca`.
+- E.8.1.Debug.1 source (reviewed-with-blocker original implementation,
+  superseded by Fix.1):
+  `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0`.
 - Parameterized farm validation-bundle wrapper source (`SOURCE REVIEWED` only):
   `31abff9b8ab02f715cf7d6285a8dd2f53855a5e4`.
 - F.6.2 reviewed scientific source:
@@ -69,13 +80,12 @@ remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch remains
 
 ## Next Action
 
-NEXT — E.8.1.Debug.1: obtain independent ChatGPT source review of the narrow
-local `-d` implementation, then complete the user-controlled Git handoff.
-After this operational prerequisite is source-reviewed, pushed, and any
-user-requested debug run has fresh evidence, resume the unchanged E.8.1
-canonical-five-setting `Q4p4W2p74` farm-validation gate using the reviewed
-wrapper; package and inspect `Left / highe` first, and broaden only after that
-detailed visual/runtime review passes.
+NEXT — E.8.1.Debug.1.Fix.1: user review, commit, and push the `SOURCE REVIEWED`
+Diamond-cut-preservation repair, then run the targeted `-d` Jefferson Lab debug
+execution and return fresh evidence. After that debug prerequisite is resolved,
+resume the unchanged E.8.1 canonical-five-setting `Q4p4W2p74` farm-validation
+gate using the reviewed wrapper; package and inspect `Left / highe` first, and
+broaden only after that detailed visual/runtime review passes.
 
 ## Success Criteria
 
@@ -106,3 +116,4 @@ merely for style.
 - [Parameterized wrapper phase record](phases/farm-validation-bundle-wrapper.md)
 - [Wrapper post-push state reconciliation](phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md)
 - [E.8.1.Debug.1 local debug-mode record](phases/e8-1-debug-1-left-low-debug-mode.md)
+- [E.8.1.Debug.1.Fix.1 local repair record](phases/e8-1-debug-1-fix1-preserve-diamond-cut.md)

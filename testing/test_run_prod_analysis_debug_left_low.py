@@ -14,6 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LAUNCHER_PATH = REPO_ROOT / "run_Prod_Analysis.sh"
 MAIN_PATH = REPO_ROOT / "src" / "main.py"
+DIAMOND_PATH = REPO_ROOT / "src" / "cuts" / "diamond.py"
 
 
 class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
@@ -108,19 +109,56 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
         )
         self.assertIn('python3 main.py "${main_args_high[@]}" || exit 1', full_loop)
 
-    def test_main_debug_selector_is_left_only_and_leaves_binning_config_untouched(self):
+    def test_main_debug_selector_preserves_diamond_before_left_only_downstream_work(self):
         ast.parse(self.main, filename=str(MAIN_PATH))
-        self.assertIn('phisetlist = ["Center", "Left", "Right"]', self.main)
-        selector_start = self.main.index('debug_left_low = os.environ.get("LT_ANALYSIS_DEBUG_LEFT_LOW"')
-        selector_end = self.main.index("ROOT.gROOT.SetBatch", selector_start)
-        selector = self.main[selector_start:selector_end]
-        self.assertIn('if debug_left_low:', selector)
-        self.assertIn('ParticleType != "kaon"', selector)
-        self.assertIn('str(EPSSET).strip().lower() != "low"', selector)
-        self.assertIn('LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE', selector)
-        self.assertIn('phisetlist = ["Left"]', selector)
-        self.assertNotIn("inpDict", selector)
-        self.assertNotIn("canonical_t_binning", selector)
+        ordinary_settings = self.main.index('phisetlist = ["Center", "Left", "Right"]')
+        validation_start = self.main.index(
+            'debug_left_low = os.environ.get("LT_ANALYSIS_DEBUG_LEFT_LOW"'
+        )
+        diamond_import = self.main.index("from diamond import DiamondPlot")
+        diamond_loop = self.main.index("for phiset in phisetlist:", diamond_import)
+        diamond_call = self.main.index("inpDict.update(DiamondPlot", diamond_loop)
+        diamond_registration = self.main.index(
+            'output_file_lst.append(OUTPATH+"/{}_{}_diamond_{}', diamond_call
+        )
+        debug_restriction = self.main.rindex("if debug_left_low:")
+        shift_import = self.main.index("from shift_prep import shift_prep", debug_restriction)
+        shift_loop = self.main.index("for phiset in phisetlist:", shift_import)
+        early_validation = self.main[validation_start:diamond_import]
+        downstream_selector = self.main[debug_restriction:shift_import]
+
+        self.assertLess(ordinary_settings, validation_start)
+        self.assertIn('if debug_left_low:', early_validation)
+        self.assertIn('ParticleType != "kaon"', early_validation)
+        self.assertIn('str(EPSSET).strip().lower() != "low"', early_validation)
+        self.assertIn('LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE', early_validation)
+        self.assertNotIn('phisetlist = ["Left"]', early_validation)
+        self.assertLess(diamond_loop, diamond_call)
+        self.assertLess(diamond_call, diamond_registration)
+        self.assertLess(diamond_registration, debug_restriction)
+        self.assertLess(debug_restriction, shift_loop)
+        self.assertIn('phisetlist = ["Left"]', downstream_selector)
+        self.assertNotIn("inpDict", downstream_selector)
+        self.assertNotIn("canonical_t_binning", downstream_selector)
+
+    def test_diamond_source_is_unchanged(self):
+        result = subprocess.run(
+            [
+                "git",
+                "-c",
+                "core.autocrlf=false",
+                "-c",
+                "core.safecrlf=false",
+                "diff",
+                "--quiet",
+                "HEAD",
+                "--",
+                str(DIAMOND_PATH.relative_to(REPO_ROOT)),
+            ],
+            cwd=REPO_ROOT,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, "src/cuts/diamond.py must remain unchanged")
 
 
 if __name__ == "__main__":

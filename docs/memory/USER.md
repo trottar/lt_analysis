@@ -18,6 +18,17 @@ in repository memory, supplied artifacts, or current source. Prefer the
 smallest complete validation-artifact package needed for the question, and keep
 source review explicitly distinct from farm validation.
 
+After Codex completes a local source-changing task, ChatGPT must inspect the
+actual diff before the user commits or pushes. If the diff is too large to
+review comfortably in terminal output, Codex must provide an exact command that
+writes one complete review bundle directly in the `lt_analysis` repository
+root, using a clearly temporary filename such as `kaonlt_review.diff`, for the
+user to upload. The review file must be removed before commit/push unless it is
+explicitly intended to be tracked. Do not require manual terminal copy/paste or
+staging merely to make a diff reviewable. A review bundle must include both the
+tracked diff and complete `git diff --no-index /dev/null ...` representations
+for every intended new/untracked file.
+
 ## Delivery preferences
 
 Deliver Codex plans and prompts as standalone Markdown files. For farm work,
