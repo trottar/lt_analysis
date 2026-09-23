@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 6987,
+      "bytes": 8171,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "d2329caa5732f7cff87ce4d493f0fc2a385034985b8d90026d5ca791eb034530"
+      "sha256": "4cba8f80020b8318f2e50db00b60461827587d26471ea0d61da6aedc8ca7a290"
     },
     {
       "bytes": 1978,
@@ -391,9 +391,9 @@
       "sha256": "ffdb0e5b847c524f931197a50b8096af6ec63a67f48b6e975e1550d07c1b5bab"
     },
     {
-      "bytes": 3247,
+      "bytes": 3827,
       "path": "docs/memory/phases/e8-1-fix5-overlay-pdf-geometry.md",
-      "sha256": "c2e037939ba9ce3b1cfdd8b515bec253b46c2e283099ebaa576d7b64a882bd63"
+      "sha256": "63de3d9a6e209b2468065a2110ecd183fdd611b3349e4ffbaf75014218aa7d97"
     },
     {
       "bytes": 8690,
@@ -404,6 +404,21 @@
       "bytes": 4755,
       "path": "docs/memory/phases/e8-1-fix5-stale-first-child-wording-repair-task-contract.md",
       "sha256": "ca4bd56a6ffb2c41b29076afaa7fb7d10d26dcabc06a35a324de14b417afb9c6"
+    },
+    {
+      "bytes": 14914,
+      "path": "docs/memory/phases/e8-1-fix6-bundle-profile-repin-task-contract.md",
+      "sha256": "585659cd3f6130f8f9851fdfa6f3b62a5d3b2cffff0afd77a0e3417fa891eaae"
+    },
+    {
+      "bytes": 3653,
+      "path": "docs/memory/phases/e8-1-fix6-bundle-profile-repin.md",
+      "sha256": "ced529deba31fde54e930697bc9ff21104816741fe6c87502c4d4ac8bbdf9d2f"
+    },
+    {
+      "bytes": 8209,
+      "path": "docs/memory/phases/e8-1-fix6-source-review-reconciliation-task-contract.md",
+      "sha256": "478a2093ec0a4ef8309c0196a8b5073387f74615cb9fbcc81397fb43abbfc1ad"
     },
     {
       "bytes": 1900,

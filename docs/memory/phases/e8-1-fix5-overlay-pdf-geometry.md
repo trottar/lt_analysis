@@ -7,7 +7,18 @@ fdd368f2084c9b9508e7ce679b8f7391f5b556f1. ChatGPT independently inspected
 the complete refreshed actual diff and found the renderer/test repair PASS.
 Codex-reported deterministic checks were NOT RUN by ChatGPT. No ROOT/PyROOT,
 Jefferson Lab farm, or runtime acceptance is claimed for Fix.5, and the user
-has not committed/pushed it.
+has not claimed a Fix.5 farm/runtime result.
+
+## Pushed source identity
+
+The user pushed this independently source-reviewed Fix.5 repair as
+53fd262b730af8f1254e411a38231aebeb6a1da3. Independent ChatGPT pushed-state
+source review passed for that exact source and its parent
+fdd368f2084c9b9508e7ce679b8f7391f5b556f1: the reviewed square 3600 x 3600
+overlay canvas, canonical three-by-nine grid, grid-before-header draw order,
+legend semantics/colors, and pre-Print Modified()/Update() behavior remain
+intact. That source review is distinct from ROOT/PyROOT, Jefferson Lab farm,
+or runtime validation, none of which is claimed for Fix.5.
 
 ## Farm-owned blocker
 
@@ -49,11 +60,11 @@ ChatGPT, and do not replace fresh farm PDF inspection.
 
 ## Next action
 
-NEXT — user-controlled commit/push of reviewed Fix.5, then ChatGPT
-pushed-state review. A separate narrow E.8.1 profile provenance re-pin must
-require that pushed Fix.5 source, receive independent actual-diff review, be
-user-committed/pushed, and receive ChatGPT pushed-state review. Then a fresh
-Q4p4W2p74 / Left / lowe farm/PDF gate must return pages 37--47 for inspection.
-Only after persisted-overlay pages 38/41/44 visibly contain the header, L/B/A
-legend, first canonical child title, and unclipped first row may validation
-return to detailed Left / highe; broader coverage remains gated on that result.
+NEXT — E.8.1.Fix.6 is the separate narrow profile provenance re-pin that must
+require the pushed Fix.5 source 53fd262b730af8f1254e411a38231aebeb6a1da3.
+It requires independent actual-diff review, user-controlled commit/push, and
+ChatGPT pushed-state review before a fresh Q4p4W2p74 / Left / lowe farm/PDF
+gate returns pages 37--47 for inspection. Only after persisted-overlay pages
+38/41/44 visibly contain the header, L/B/A legend, first canonical child
+title, and an unclipped first row may validation return to detailed Left /
+highe; broader coverage remains gated on that result.

@@ -20,11 +20,16 @@ the accepted frozen F.6.2 JSON
 
 Independent PDFium and Poppler inspection still blocks only persisted-overlay
 pages 38/41/44: their header and L/B/A legend are absent and the first plot row
-is clipped. E.8.1.Fix.5 is SOURCE REVIEWED: ChatGPT inspected its complete
-refreshed actual diff and found the narrow renderer/test repair PASS.
+is clipped. E.8.1.Fix.5 is SOURCE REVIEWED and user-pushed at
+53fd262b730af8f1254e411a38231aebeb6a1da3. ChatGPT independently confirmed
+that exact pushed source retains the reviewed narrow renderer/test repair;
 Codex-reported deterministic checks were NOT RUN by ChatGPT. No Fix.5
-ROOT/PyROOT, farm, or runtime result is claimed, and no Fix.5 commit exists
-yet. See the [Fix.4 overlay blocker evidence](evidence/e8-1-fix4-left-lowe-overlay-blocker.md).
+ROOT/PyROOT, farm, or runtime result is claimed. E.8.1.Fix.6 is SOURCE
+REVIEWED: independent ChatGPT actual-diff review found the profile/test
+provenance re-pin PASS. Codex checks were NOT RUN by ChatGPT. No Fix.6
+ROOT/PyROOT/farm/runtime result is claimed; the profile requires the distinct Fix.5 source
+53fd262b730af8f1254e411a38231aebeb6a1da3, and no Fix.6 commit exists yet.
+See the [Fix.4 overlay blocker evidence](evidence/e8-1-fix4-left-lowe-overlay-blocker.md).
 
 ## Verified State
 
@@ -45,10 +50,15 @@ yet. See the [Fix.4 overlay blocker evidence](evidence/e8-1-fix4-left-lowe-overl
 - E.8.1.Fix.4 is CLOSED / RUNTIME VALIDATED only for its narrow profile
   provenance re-pin at fdd368f2084c9b9508e7ce679b8f7391f5b556f1. This is not
   E.8.1 acceptance.
-- E.8.1.Fix.5 is SOURCE REVIEWED. ChatGPT inspected the complete refreshed
-  actual diff and found the narrow renderer/test repair PASS; Codex-reported
+- E.8.1.Fix.5 is SOURCE REVIEWED and user-pushed at
+  53fd262b730af8f1254e411a38231aebeb6a1da3. ChatGPT independently confirmed
+  that exact pushed source retains the reviewed renderer/test repair;
+  Codex-reported deterministic checks were NOT RUN by ChatGPT. No ROOT/PyROOT,
+  farm, or runtime validation is claimed.
+- E.8.1.Fix.6 is SOURCE REVIEWED: ChatGPT independently inspected its complete
+  actual diff and found the profile/test provenance re-pin PASS. Codex-reported
   deterministic checks were NOT RUN by ChatGPT. No ROOT/PyROOT, farm, or
-  runtime validation is claimed, and the user has not committed/pushed Fix.5.
+  runtime validation is claimed; the user has not committed/pushed Fix.6.
 - E.8.1.Debug.1 at 4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0 was reviewed
   with a Diamond-cut blocker and is superseded; E.8.1.Debug.1.Fix.1 remains
   SOURCE REVIEWED. Its earlier incomplete output does not prove launcher
@@ -68,9 +78,13 @@ yet. See the [Fix.4 overlay blocker evidence](evidence/e8-1-fix4-left-lowe-overl
 - E.8.1.Fix.4 pushed profile/bundle source:
   fdd368f2084c9b9508e7ce679b8f7391f5b556f1; it requires the distinct Fix.3
   analysis/procedure source above.
-- E.8.1.Fix.5 is SOURCE REVIEWED, but has no user-pushed source commit yet;
-  no profile re-pin may point to its future source identity until after that
-  commit and pushed-state review.
+- E.8.1.Fix.5 pushed analysis/procedure source:
+  53fd262b730af8f1254e411a38231aebeb6a1da3. It remains SOURCE REVIEWED only;
+  the future Fix.6 profile/bundle commit is unknown and must remain distinct
+  from this required analysis source.
+- The SOURCE REVIEWED E.8.1.Fix.6 profile requires that distinct Fix.5 source
+  53fd262b730af8f1254e411a38231aebeb6a1da3. No Fix.6 commit exists yet, and
+  its future profile/bundle identity remains unknown.
 - E.8.1 canonical-five-setting bundle/profile source:
   c25f9d8248f2acfb8b0443a482fc76781eb405ca.
 - F.6.2 reviewed scientific source: 0b37af2a2927b08bdeaf897c545f290b55329cea.
@@ -90,14 +104,20 @@ BLOCKED / DEFERRED.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of reviewed Fix.5; ChatGPT pushed-state
-review; a separate narrow E.8.1 profile re-pin to the pushed Fix.5 source;
-independent actual-diff review; user commit/push; and ChatGPT pushed-state
-review. Then run the fresh targeted Q4p4W2p74 / Left / lowe farm validation
-bundle and inspect pages 37--47. Pages 38/41/44 must show the header, L/B/A
-legend, first canonical child title, and an unclipped first row. Only after
-Left/lowe visual PASS return to detailed Left / highe; broaden only after that
-gate passes.
+NEXT —
+
+1. User-controlled commit/push of the reviewed Fix.6 profile/test/memory set.
+2. ChatGPT pushed-state review.
+3. Use the resulting pushed Fix.6 commit as the wrapper `--bundle-commit`.
+4. Keep the profile `required_analysis_commit` equal to the distinct Fix.5
+   source 53fd262b730af8f1254e411a38231aebeb6a1da3.
+5. Run fresh targeted Q4p4W2p74 / Left / lowe.
+6. Collect a fresh validation bundle and procedure PDF.
+7. Independently inspect pages 37--47.
+8. Require pages 38/41/44 to show the E.8 header, L/B/A legend, first
+   canonical child title, and unclipped first row.
+9. Only after Left/lowe visual PASS return to detailed Left / highe.
+10. Broaden only after that detailed gate passes.
 
 ## Success Criteria
 
@@ -127,4 +147,5 @@ evidence for style.
 - [E.8.1.Fix.3 layout record](phases/e8-1-fix3-procedure-pdf-layout.md)
 - [E.8.1.Fix.4 profile re-pin record](phases/e8-1-fix4-bundle-profile-repin.md)
 - [E.8.1.Fix.5 overlay geometry record](phases/e8-1-fix5-overlay-pdf-geometry.md)
+- [E.8.1.Fix.6 profile re-pin record](phases/e8-1-fix6-bundle-profile-repin.md)
 - [E.8.1.Fix.4 Left/lowe overlay blocker](evidence/e8-1-fix4-left-lowe-overlay-blocker.md)
