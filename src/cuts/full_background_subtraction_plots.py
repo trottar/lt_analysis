@@ -5261,7 +5261,7 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
         return False
     canvas = ROOT.TCanvas(
         "C_full_background_e8_overlays_t{}".format(int(parent["canonical_t_index"]) + 1),
-        "E.8 persisted L/B/A overlays", 1800, 3600,
+        "E.8 persisted L/B/A overlays", 3600, 3600,
     )
     draw_objects = []
     try:
@@ -5286,10 +5286,19 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
             0.89,
         )
         canvas.cd()
-        header_pad.Draw()
         grid_pad.Draw()
         grid_pad.cd()
         grid_pad.Divide(3, 9)
+        legend_sources = {}
+        for row, child in enumerate(parent["children"]):
+            for column, variable in enumerate(_E8_ONE_DIMENSIONAL):
+                if not _e8_overlay_tile(
+                    ROOT, grid_pad, row * 3 + column + 1, child, variable,
+                    kaon_window, draw_objects, legend_sources,
+                ):
+                    return False
+        canvas.cd()
+        header_pad.Draw()
         header_pad.cd()
         header = _e8_add_text(
             ROOT,
@@ -5303,15 +5312,6 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
         if header is None:
             return False
         draw_objects.append(header)
-        grid_pad.cd()
-        legend_sources = {}
-        for row, child in enumerate(parent["children"]):
-            for column, variable in enumerate(_E8_ONE_DIMENSIONAL):
-                if not _e8_overlay_tile(
-                    ROOT, grid_pad, row * 3 + column + 1, child, variable,
-                    kaon_window, draw_objects, legend_sources,
-                ):
-                    return False
         if not _e8_overlay_legend(
             ROOT,
             header_pad,
@@ -5320,6 +5320,11 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
             coordinates=(0.02, 0.05, 0.98, 0.48),
         ):
             return False
+        canvas.cd()
+        if hasattr(canvas, "Modified"):
+            canvas.Modified()
+        if hasattr(canvas, "Update"):
+            canvas.Update()
         canvas.Print(pdf_name)
     except Exception:
         return False

@@ -357,9 +357,15 @@ class _ProjectionHistogram(_BinnedHistogram):
 
 
 class _FakeCanvas:
-    def __init__(self, root=None, *_args):
+    def __init__(self, root=None, *args):
         self.root = root if isinstance(root, _FakeROOT) else None
         self.divisions = []
+        self.name = str(args[0]) if len(args) > 0 else ""
+        self.title = str(args[1]) if len(args) > 1 else ""
+        self.width = int(args[2]) if len(args) > 2 else None
+        self.height = int(args[3]) if len(args) > 3 else None
+        self.modified = False
+        self.updated = False
 
     def Divide(self, columns, rows):
         self.divisions.append((int(columns), int(rows)))
@@ -371,6 +377,12 @@ class _FakeCanvas:
 
     def Print(self, _name):
         return None
+
+    def Modified(self):
+        self.modified = True
+
+    def Update(self):
+        self.updated = True
 
     def Close(self):
         return None
@@ -489,9 +501,12 @@ class _FakeROOT:
         self.pads = []
         self.drawn_pads = []
         self.active_pad = None
+        self.canvases = []
 
     def TCanvas(self, *_args):
-        return _FakeCanvas(self, *_args)
+        canvas = _FakeCanvas(self, *_args)
+        self.canvases.append(canvas)
+        return canvas
 
     def TPad(self, *args):
         pad = _FakePad(self, *args)
@@ -7125,11 +7140,14 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
                 )
             )
 
+        self.assertEqual(len(root.canvases), 1)
+        canvas = root.canvases[0]
+        self.assertEqual((canvas.width, canvas.height), (3600, 3600))
         header_pad, grid_pad = root.pads
         self.assertEqual(header_pad.coordinates, (0.0, 0.89, 1.0, 1.0))
         self.assertEqual(grid_pad.coordinates, (0.0, 0.0, 1.0, 0.89))
         self.assertLessEqual(grid_pad.coordinates[3], header_pad.coordinates[1])
-        self.assertEqual(root.drawn_pads, [header_pad, grid_pad])
+        self.assertEqual(root.drawn_pads, [grid_pad, header_pad])
         self.assertEqual(grid_pad.divisions, [(3, 9)])
         self.assertEqual(
             [(pad_number, child_index, variable) for _host, pad_number, child_index, variable in observed_tiles],
@@ -7146,6 +7164,77 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             [line.line_color for line in root.legend_lines],
             [root.kBlue, root.kBlack, root.kMagenta],
         )
+        self.assertTrue(canvas.modified)
+        self.assertTrue(canvas.updated)
+
+    def test_e8_real_root_overlay_pdf_emits_header_legend_and_first_child_title(self):
+        root = plots._import_root()
+        extractor = shutil.which("pdftotext")
+        if root is None:
+            self.skipTest("PyROOT unavailable")
+        if extractor is None:
+            self.skipTest("pdftotext unavailable")
+        root.gROOT.SetBatch(True)
+        artifact = self._persisted_authority_artifact()
+        validation = plots._e8_validate_artifact(artifact)
+        parent = deepcopy(next(
+            parent
+            for parent in validation["parents"]
+            if parent["setting_id"] == "Left-lowe"
+            and parent["canonical_t_index"] == 0
+        ))
+        self.assertEqual(
+            [child["phi_index"] for child in parent["children"]],
+            list(range(9)),
+        )
+        first_child_title = plots._e8_child_label(parent["children"][0])
+        self.assertEqual(first_child_title, "Left-lowe phi0 [-180, -140)")
+        payload = {
+            "setting_id": parent["setting_id"],
+            "input_sha256": "a" * 64,
+            "artifact_fingerprint": "b" * 64,
+            "validation_fingerprint": "c" * 64,
+            "kaon_window": validation["kaon_window"],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            pdf_path = Path(temporary) / "e8-overlay-pdf-regression.pdf"
+            boundary = root.TCanvas(
+                "C_full_background_e8_overlay_pdf_regression_boundary",
+                "E.8 overlay PDF regression boundary",
+                1400,
+                900,
+            )
+            try:
+                boundary.Print("{}[".format(pdf_path))
+                self.assertTrue(
+                    plots._render_full_background_subtraction_e8_context_page(
+                        root, str(pdf_path), payload
+                    )
+                )
+                self.assertTrue(
+                    plots._e8_render_overlay_page(
+                        root, str(pdf_path), parent, payload["kaon_window"]
+                    )
+                )
+                boundary.Print("{}]".format(pdf_path))
+            finally:
+                boundary.Close()
+            extracted = subprocess.run(
+                [extractor, "-f", "2", "-l", "2", str(pdf_path), "-"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+        self.assertEqual(extracted.returncode, 0, extracted.stderr)
+        page_text = " ".join(extracted.stdout.split())
+        for expected in (
+            "E.8 persisted L/B/A overlays - t1",
+            "L: upstream 0 < NPE <= 2 diagnostic reference",
+            "B: physical pion control, NPE > 2, baseline w0",
+            "A: same B population, w0*C",
+            first_child_title,
+        ):
+            self.assertIn(expected, page_text)
 
     def test_e8_uses_persisted_matrix_values_with_shared_display_scale_and_mm_only_markers(self):
         artifact = _e8_frozen_artifact()
