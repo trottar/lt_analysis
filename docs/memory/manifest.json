@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 7722,
+      "bytes": 8185,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "36386e6d2d8ed61b112afc479ec0d2093f5d0a0b7ae9f5f945c7a995ecfcdaea"
+      "sha256": "1fd2c8ceb0ed7c947c7d413322e9f7e2eaca102519860c50afb879bcd3655bb6"
     },
     {
       "bytes": 1978,
@@ -316,9 +316,24 @@
       "sha256": "a0ea079479cd753c25708cab3b2a2137da42ef91ecd5126f30ce0233120fd777"
     },
     {
-      "bytes": 5123,
+      "bytes": 5502,
       "path": "docs/memory/phases/e8-1-fix1-frozen-f6-2-setting-reader.md",
-      "sha256": "f0a58e6dbee9fce493ffa94c5a2c5d7b5d2a7dbe44146758ca69fbad3a43fcc8"
+      "sha256": "b59d546902fbb4bae11556d90fb39c137dd262da55ef50927c8f072a8a099d2d"
+    },
+    {
+      "bytes": 11614,
+      "path": "docs/memory/phases/e8-1-fix2-bundle-profile-repin-task-contract.md",
+      "sha256": "dbb866b565bfd22faddbe593275847f8eca9cb2c29da69089e802a86d6220908"
+    },
+    {
+      "bytes": 3544,
+      "path": "docs/memory/phases/e8-1-fix2-bundle-profile-repin.md",
+      "sha256": "87a39fac790e90d5159069de0ce61e27f7e3c3123cb428b4f18a9a05f91e9308"
+    },
+    {
+      "bytes": 5116,
+      "path": "docs/memory/phases/e8-1-fix2-source-review-reconciliation-task-contract.md",
+      "sha256": "8d474de04c61e25971630b277706afab7e90ba75b7ed8c1b3b4ef153f62cbbdc"
     },
     {
       "bytes": 1900,
