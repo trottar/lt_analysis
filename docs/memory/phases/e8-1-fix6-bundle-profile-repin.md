@@ -2,14 +2,14 @@
 
 ## Status and source identity
 
-SOURCE REVIEWED — this narrow validation-profile repair starts from committed
-`test` HEAD 53fd262b730af8f1254e411a38231aebeb6a1da3, the user-pushed,
-independently SOURCE REVIEWED E.8.1.Fix.5 overlay-renderer source. ChatGPT
-independently inspected the complete Fix.6 actual diff and found the
-profile/test provenance re-pin PASS. Codex-reported deterministic checks were
-NOT RUN by ChatGPT. No Fix.6 commit exists yet because the user has not
-committed/pushed it, and no ROOT/PyROOT, Jefferson Lab farm, or runtime
-validation is claimed.
+CLOSED / RUNTIME VALIDATED — this narrow validation-profile repair started
+from committed `test` HEAD 53fd262b730af8f1254e411a38231aebeb6a1da3, the
+distinct Fix.5 analysis/procedure source. The user pushed Fix.6 as
+0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b. Its fresh reviewed `Q4p4W2p74 /
+Left / lowe` farm bundle passed source provenance, frozen-artifact, checker,
+ordinary-PDF/page-manifest, real-PyROOT regression, and pages 37--47 visual
+gates. This closure is limited to Fix.6 profile/provenance; it is not canonical-five
+E.8.1 acceptance or a production change.
 
 The profile and its focused test re-pin the exact required analysis source from
 the pushed Fix.3 procedure renderer
@@ -44,25 +44,19 @@ These Codex-reported local source/provenance checks were NOT RUN by ChatGPT and
 cannot validate ROOT/PyROOT, the Jefferson Lab farm, or the rendered
 persisted-overlay pages.
 
-## Farm boundary and successor
+## Accepted runtime evidence
 
-After user-controlled commit/push and ChatGPT pushed-state review, the future
-pushed Fix.6 commit must be passed to the reviewed wrapper as `--bundle-commit`.
-The wrapper uses its detached worktree with this E.8.1 profile; the generic
-collector then applies exact required-source ancestry and committed-range checks
-against the distinct Fix.5 source above before it collects the existing
-required artifacts.
-
-Only then may a fresh Q4p4W2p74 / Left / lowe gate be run and its bundle/PDF be
-inspected on pages 37--47, especially persisted-overlay pages 38/41/44. A
-Left/lowe visual PASS is required before returning to detailed Left / highe;
-broader coverage remains gated on that later detailed result. No farm evidence
-is created by this task.
+The bundle/profile commit `0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b` was the
+wrapper `--bundle-commit`; its profile required the distinct Fix.5 source
+above. The detached-worktree collector found required-source ancestry, no
+unexpected committed files, a clean captured worktree, and complete artifacts
+with no errors. The accepted frozen F.6.2 JSON SHA-256 and both fingerprints
+were preserved. The procedure PDF has 47 pages with `renderer_failures=[]`.
+Independent inspection accepted context, overlays 38/41/44, all map pages, and
+handoff; details are in the [Fix.6 Left/lowe runtime closure](../evidence/e8-1-fix6-left-lowe-runtime-closure.md).
 
 ## Next action
 
-NEXT — user-controlled commit/push of the reviewed Fix.6 profile/test/memory
-set, then ChatGPT pushed-state review, then the fresh Q4p4W2p74 / Left / lowe
-farm/PDF validation. The future pushed Fix.6 commit must be the wrapper
-`--bundle-commit`, while the profile continues to require the distinct Fix.5
-source 53fd262b730af8f1254e411a38231aebeb6a1da3.
+NEXT — the remaining E.8.1 canonical-five expansion is DEFERRED by user
+decision. E.8.2 baseline full-analysis stage audit is the active successor;
+Fix.6 closure does not authorize broader farm coverage or production changes.

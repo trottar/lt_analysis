@@ -1,27 +1,12 @@
 # Phase F.6 staged Method-A validation and production promotion
 
-F.6.1 is `CLOSED / RUNTIME VALIDATED`; no production promotion is authorized
-by this roadmap.
-F.1 through F.5.2 remain `CLOSED / RUNTIME VALIDATED`; in particular, accepted F.5 scientific fingerprint
-`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa` remains
-frozen. Method B is diagnostic/cross-check only and is numerically excluded
-from every F.6 correction.
+F.1 through F.6.2, including F.6.1 and F.6.2.Fix.5, remain `CLOSED / RUNTIME VALIDATED`. Their accepted evidence, F.5 scientific fingerprint `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`, and frozen F.6.2 JSON/fingerprints remain unchanged. No production promotion is authorized by those closures.
 
 ## Frozen baseline and Method-A boundary
 
-The current accepted pion subtraction remains authoritative. For each
-authoritative pion-control event, its baseline signed contribution is
-`b_j = s_j * w0_j`, where `s_j` is the established signed
-prompt/random/dummy source coefficient and `w0_j` is the accepted
-MM-dependent pion-background weight. F.6 does not replace or refit `w0_j`.
+The accepted full pion-subtraction baseline remains authoritative. For each authoritative pion-control event, `b_j^0 = s_j * w0_j`, where `s_j` is the established signed prompt/random/dummy coefficient and `w0_j` is the accepted missing-mass-dependent pion-background weight. The only Method-A variation is `b_j^A = s_j * w0_j * C_j`, using exactly the accepted F.4 parent-preserving correction.
 
-The only intended Method-A variation is `b_j^A = s_j * w0_j * C_j`, using
-exactly the accepted F.4 parent-preserving correction. F.6 may not redefine
-pion components, fits, windows, random/dummy or proton treatment, canonical
-`(t,phi)` binning, F.3 map mathematics, F.4 parent normalization, SIMC,
-acceptance, efficiencies, L/T separation, or cross-section formulas. It may
-not independently normalize children, clip/cap/winsorize factors, or introduce
-Method B numerically.
+This roadmap cannot redefine pion components, fits, windows, random/dummy subtraction, slow-proton treatment, canonical `(t,phi)` binning, F.3 map mathematics, F.4 parent normalization, SIMC, acceptance, efficiencies, L/T separation, cross sections, or production yields. It cannot independently normalize a child, clip/cap/winsorize factors, or introduce Method B numerically. Method B remains diagnostic/cross-check only; Method A remains detached until the explicit F.6.4 decision.
 
 ## F.6.1 — detached Method-A reweighting validation
 
@@ -112,46 +97,102 @@ provenance only; the scientific source remains distinct. See the
 F.6.2 overall is therefore `CLOSED / RUNTIME VALIDATED`. This gate has no
 scientific, yield, ROOT, Method-B, or production ownership.
 
-## E.8 — streamlined full-background-subtraction presentation
+## Accepted E.8.1 narrow runtime evidence
 
-`ACTIVE` — implement S1 of the
-[E.8 figure-library contract](../decisions/e8-f6-2-figure-library-implementation-contract.md):
-a separate presentation-ready figure library that consumes the frozen accepted
-F.6.2 JSON only. It neither mutates `rand_sub.py` nor inserts pages into the
-ordinary procedure PDF. The user must create the S1 renderer-source commit
-before S2 creates the separate profile that pins it. E.8 does not calculate or
-own Method-A science; detailed validation and Method-B machinery remain in
-their dedicated artifacts.
+E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh `Q4p4W2p74 / Left / lowe` persisted-overlay geometry and profile/provenance gate. The bundle/profile commit is `0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b`, the required distinct Fix.5 analysis/procedure source is `53fd262b730af8f1254e411a38231aebeb6a1da3`, and the frozen F.6.2 authority is unchanged. The remaining E.8.1 canonical-five expansion is `DEFERRED` by user decision, not failed and not full E.8 closure.
 
-## F.6.3 — full baseline procedure versus full procedure plus Method A
+## Approved dependency order
 
-`BLOCKED` pending E.8. Preserve the current full yield
-calculation unchanged as the baseline branch. The parallel Method-A branch
-uses the same random/dummy subtraction, slow-proton treatment, pion
-components/fits/windows/amplitudes, canonical binning, SIMC, background-fit
-algorithms/configuration, efficiencies, and yield extraction. Its only
-intended scientific change is `w0_j -> w0_j * C_j` while filling
-pion-subtraction templates. Downstream empirical missing-mass background fits
-rerun normally on the altered post-pion spectrum with their algorithms and
-configuration frozen.
+    E.8.2 baseline full-analysis audit
+        -> E.8.3 detached Method-A reweighting audit
+        -> F.6.3 parallel full procedure plus Method A
+        -> E.8.4 production-impact audit
+        -> final E.8 closure
+        -> F.6.4 explicit production-promotion decision
 
-For every canonical `(t,phi)` bin compare baseline and Method-A pion background
-removed, kaon yield after pion subtraction, residual-background Fit 1 and Fit 2
-results, final kaon yield, and absolute/fractional final-yield differences.
-Summarize versus phi per t parent, t per setting, and all five canonical
-Q4p4W2p74 settings. The baseline path must be reproducible and unchanged when
-Method A is disabled. Farm progression is narrow: Left-lowe, Left-highe,
-Center-lowe, Center-highe, then Right-highe; do not broaden beyond Left-lowe
-until its complete chain through final yield passes.
+## E.8.2 — baseline full-analysis stage audit
 
-## F.6.4 — explicit production-promotion decision
+`NEXT` — E.8.2 exposes the complete existing baseline analysis as an authoritative before/component/after missing-mass and yield chain. It is presentation-only and does not change physics.
 
-`BLOCKED` pending F.6.3 evidence. This is the only phase that may decide
-whether Method A becomes production pion-background treatment; no automatic
-promotion follows from existing artifacts. A later promotion contract must
-define supported kinematics, enable/disable behavior, fail-closed authority,
-setting-wide atomicity, provenance, uncertainty treatment, downstream
-validation, and regression against the unchanged baseline.
+### E.8.2a — prompt/random subtraction
+
+Show the prompt kaon missing-mass input, random contribution removed, after-random output, and a difference or overlay where useful.
+
+### E.8.2b — dummy subtraction
+
+Show the after-random input, normalized dummy contribution, after-dummy output, and a difference or overlay where useful.
+
+### E.8.2c — slow-proton subtraction
+
+Show the after-random/dummy kaon input, proton contamination estimate, proton-cleaned output, before/after comparison, and existing PID/weight diagnostics. `_process_yield_data_tree()` already applies accepted proton cleaning during initial `(t,phi)` filling; existing raw/random/dummy snapshots must never be relabeled as pre-proton. E.8.2 must persist or consume a true authoritative pre-proton snapshot, not reconstruct or guess one.
+
+### E.8.2d — baseline pion subtraction
+
+Show the proton-cleaned kaon input, baseline pion background actually removed, baseline pion-subtracted kaon output, before/after comparison, and signed difference. The contribution remains `b_j = s_j * w0_j`.
+
+### E.8.2e and E.8.2f — residual backgrounds Fit 1 and Fit 2
+
+For each fit, show its actual production input, actual production background component removed, output, and before/after comparison. Fit 1 output enters Fit 2; Fit 2 output is the final background-subtracted missing mass. Presentation must not refit.
+
+### E.8.2g — final baseline canonical `(t,phi)` missing mass
+
+For every canonical t parent, show all nine canonical phi children with explicit empty/invalid status. Each populated final panel exposes canonical-t identity, phi index/range, the final missing-mass spectrum actually used for yield extraction, Lambda signal/integration window, relevant final fitted/background information, extracted yield, and statistical uncertainty.
+
+### E.8.2h — baseline stage-yield audit
+
+Expose existing authoritative per-cell yield progression: prompt, after random, after dummy, after proton, after pion, after Fit 1, and after Fit 2/final. Summarize final baseline `Y0(t,phi)` versus phi for every canonical t. A renderer never recalculates a yield when its authoritative producer can persist or provide it.
+
+## E.8.3 — detached Method-A reweighting audit
+
+`BLOCKED` pending E.8.2 source-reviewed completion. It is detached/non-production and consumes accepted F.4/F.5/F.6.1/F.6.2 results only.
+
+### E.8.3a — reweighting operation
+
+Show `b_j^0 = s_j * w0_j` to `b_j^A = s_j * w0_j * C_j`. Method A changes only the accepted pion event contribution by the accepted F.4 parent-preserving factor; no child-by-child renormalization is permitted.
+
+### E.8.3b — baseline versus reweighted pion background
+
+For every canonical t parent, show `B_pi^0(MM)`, `B_pi^A(MM)`, their overlay, `Delta B_pi = B_pi^A - B_pi^0`, and `R_pi = B_pi^A / B_pi^0` only where defined and presentation-safe. This direct baseline-versus-reweighted comparison is required, not a legend implication.
+
+### E.8.3c — canonical redistribution and parent closure
+
+For every canonical t, show all nine `B_pi,tphi^0`, `B_pi,tphi^A`, and `Delta B_pi,tphi` children. Explicitly display stored/accepted closure residual and relative residual for `sum_phi B_pi,tphi^A ~= sum_phi B_pi,tphi^0`; never independently normalize a child.
+
+### E.8.3d — F.6.2 acceptance/HGCer explanation
+
+Retain accepted explanatory diagnostics: L/B/A normalized shapes, `delta x xptar`, `delta x yptar`, missing-mass x acceptance maps, support/OOD, effective statistics, and kaon-window refinement metrics. They explain the observed `B_pi^0 -> B_pi^A` redistribution; they do not replace the direct before/after plots.
+
+## F.6.3 — parallel full procedure plus Method A
+
+`BLOCKED` pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. F.6.3 alone constructs the actual parallel Method-A full-analysis branch. It preserves the accepted full yield calculation unchanged as baseline and changes exactly `w0_j -> w0_j * C_j` while filling the pion-subtraction template.
+
+Random/dummy subtraction, slow-proton treatment, pion components/fits/windows/amplitudes except that event-level factor, canonical binning, SIMC, Fit-1/Fit-2 algorithms/configuration, yield extraction, efficiencies, acceptance, L/T separation, and cross-section formulas remain identical between branches. Downstream residual fits rerun normally on the altered Method-A post-pion spectrum with algorithms/configuration frozen. Disabling Method A must reproduce the unchanged baseline branch.
+
+## E.8.4 — baseline-versus-Method-A production-impact audit
+
+`BLOCKED` pending F.6.3. E.8.4 consumes, and never constructs, F.6.3 two-branch outputs.
+
+### E.8.4a — actual pion-subtraction consequence
+
+Using the same proton-cleaned input compare `B_pi^0`, `B_pi^A`, `B_pi^A - B_pi^0`, baseline post-pion kaon `K_pi^0`, Method-A post-pion kaon `K_pi^A`, and `K_pi^A - K_pi^0`.
+
+### E.8.4b and E.8.4c — Fit-1 and Fit-2 consequences
+
+For each residual fit compare baseline and Method-A inputs, fitted background components, outputs, and branch difference. Fit 2 comparison includes the final output.
+
+### E.8.4d — final canonical `(t,phi)` missing-mass comparison
+
+For every populated canonical cell show baseline final missing mass, Method-A final missing mass, overlay, signed difference, and the identical signal/integration window.
+
+### E.8.4e — final yield comparison
+
+For every canonical `(t,phi)` show `Y0(t,phi)`, `YA(t,phi)`, `DeltaY = YA - Y0`, and `DeltaY/Y0` where defined. Summarize versus phi for each t, versus t for each setting, and later across all five canonical Q4p4W2p74 settings. The Method-A minus baseline shift is a correction effect, not automatically a systematic uncertainty.
+
+## Final E.8 closure and F.6.4
+
+Final E.8 is `BLOCKED` pending E.8.4 and later runtime/visual validation. It requires the complete visual chain: prompt, random, dummy, proton, baseline pion, Fit 1, Fit 2, final MM/yields, stage yields, detached reweighting, direct pion-background comparison/difference/ratio, canonical redistribution/parent closure, F.6.2 explanatory diagnostics, and the actual F.6.3 post-pion/Fit-1/Fit-2/final-MM/final-yield branch comparisons including yield shifts.
+
+F.6.4 remains `BLOCKED` pending completed F.6.3/E.8.4 production-impact evidence. It is the only phase that may decide whether Method A becomes production pion-background treatment; no detached validation, visualization, or source review promotes it automatically. A later promotion contract must define supported kinematics, enable/disable behavior, fail-closed authority, setting-wide atomicity, provenance, uncertainty treatment, downstream validation, and regression against the unchanged baseline.
 
 ## Uncertainty and forbidden shortcuts
 
@@ -161,5 +202,9 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-Its next authorized step is E.8 S1 source/test implementation under its
-approved contract. Do not alter ROOT or production behavior.
+Its active successor is the approved E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward
+sequence. Do not alter ROOT or production behavior.
+
+## Farm milestone cadence
+
+Memory reconciliation and coherent E.8.2/E.8.3/F.6.3/E.8.4 implementation may proceed through deterministic local checks and independent source review without a farm run after every edit. Farm validation remains mandatory for ROOT/PyROOT/full-runtime claims. After a coherent F.6.3 plus E.8.4 branch is source-reviewed, run one narrow `Q4p4W2p74 / Left / lowe` end-to-end farm gate, inspect fresh artifacts, then PASS or make one coherent repair; broaden only after that gate passes.

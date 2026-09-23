@@ -1,133 +1,75 @@
 # Approved KaonLT roadmap status
 
-This roadmap owns approved Phase-F dependency/status structure only. It does
-not make a runtime claim, authorize source changes, or promote a diagnostic
-into production. `CURRENT.md` owns the active objective, active blockers, and
-exact active next action.
+This roadmap owns approved dependency/status structure only. `CURRENT.md` owns the active objective, blockers, and exact next action; no entry here alone is a runtime claim or source-change authorization.
 
 ## Frozen upstream program
 
-Random subtraction, slow-proton PID cleaning, pion component subtraction,
-Method-A diagnostics, Method-B closure, Phase-D comparison, and Phase-E
-presentation retain separate ownership. Phase E consumes frozen records only.
-Method B remains diagnostic/cross-check/historical comparison only; it never
-numerically adjusts pion event weights.
+Random subtraction, slow-proton PID cleaning, pion component subtraction, Method-A diagnostics, and Method-B closure retain separate owners. Method B remains diagnostic/cross-check only and never numerically adjusts pion weights.
 
 ## Phase F
 
 ### F.1 — detached Method-A acceptance event contract
 
-`CLOSED / RUNTIME VALIDATED` — [F.1/F.1.Fix.5 runtime evidence](../evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md)
-for all five canonical Q4p4W2p74 settings. It
-preserves separate Method-A training and physical application populations; no
-estimator, correction, event adjustment, or production mutation. Runtime is
-anchored to `126fa22c19bd29b9952f55b33ab43d59f9727ef6`; the later collector
-reconciliation does not replace that runtime identity.
+`CLOSED / RUNTIME VALIDATED` — the five-setting accepted event-contract gate preserves distinct Method-A training and physical application populations. It does not estimate, correct, or mutate production. See [F.1 runtime evidence](../evidence/f1-fix5-v4-bundle-inspection-2026-09-14.md).
 
 ### F.2 — freeze probability-map representation
 
-`CLOSED / RUNTIME VALIDATED` — [F.2 runtime evidence](../evidence/f2-fix1-runtime-closure.md): detached global representation audit. The
-accepted F.2 farm bundle ran at `8e919fc618cea900227db5090d65da728c3aa555`.
-The owner accepted `hgcer3` as the unique supported reduced basis after all 15
-groups passed its frozen information and support gates. `full5_reference`
-remains diagnostic-only.
+`CLOSED / RUNTIME VALIDATED` — the detached global representation audit accepts the supported `hgcer3` reduced basis; `full5_reference` remains diagnostic-only. See [F.2 runtime evidence](../evidence/f2-fix1-runtime-closure.md).
 
 ### F.3 — detached Method-A map
 
-`CLOSED / RUNTIME VALIDATED` — [F.3 runtime evidence](../evidence/f3-runtime-closure.md): detached support-aware relative `hgcer3` map,
-accepted at `5382cfc1994b078c620b32c043938134c33ffa39` with all 15 support
-continuity gates passing.
+`CLOSED / RUNTIME VALIDATED` — the detached support-aware relative `hgcer3` map is accepted with its frozen support-continuity boundary. See [F.3 runtime evidence](../evidence/f3-runtime-closure.md).
 
 ### F.4 — detached parent-preserving A-only correction
 
-`CLOSED / RUNTIME VALIDATED` — [F.4 runtime evidence](../evidence/f4-runtime-closure.md): accepted at
-`67e0298c51759c7a5ba693464d2c2655bf39250d`; all 15 parent corrections passed
-F.3-support and closure review. It remains detached from templates and
-production.
+`CLOSED / RUNTIME VALIDATED` — the accepted correction remains detached, parent-preserving, and non-production. See [F.4 runtime evidence](../evidence/f4-runtime-closure.md).
 
-### F.5 — detached event-level (t,phi) propagation
+### F.5 and F.5.2 — detached propagation and presentation review
 
-`CLOSED / RUNTIME VALIDATED` — [F.5 runtime evidence](../evidence/f5-runtime-closure.md): accepted at
-`3c6a66b7df9bf17e5a428458a2281a80831f001a`; the detached signed aggregate
-templates have scientific fingerprint
-`d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`. F.5
-does not renormalize child bins independently or promote to production.
-
-### F.5.2 — detached presentation-only F.5 review rerender
-
-`CLOSED / RUNTIME VALIDATED` — [F.5.2 runtime evidence](../evidence/f5-2-runtime-closure.md): the presentation-only rerender was accepted at
-`6634e9cb470cf35f21f5d475ec6ce33b524cd233`. Its 12-page review uses physical
-phi-interval labels while the accepted F.5 payload and scientific fingerprint
-remain exactly unchanged.
+`CLOSED / RUNTIME VALIDATED` — accepted event-level `(t,phi)` propagation and its presentation-only rerender retain their frozen scientific fingerprint and never renormalize child bins independently. See [F.5 runtime evidence](../evidence/f5-runtime-closure.md) and [F.5.2 runtime evidence](../evidence/f5-2-runtime-closure.md).
 
 ### F.6 — staged Method-A validation and explicit production promotion
 
-`ACTIVE` — the staged F.6 program follows accepted F.5/F.5.2 under the detailed
-contract in phases/phase-f6-method-a-production-promotion.md. The current full
-procedure remains the accepted baseline until an explicit later promotion
-decision.
+`ACTIVE` — the accepted baseline full procedure remains authoritative until an explicit F.6.4 decision.
 
-#### F.6.1 — detached Method-A reweighting validation
+#### F.6.1 and F.6.1.Validation.1 — detached reweighting validation
 
-`CLOSED / RUNTIME VALIDATED` — [F.6.1 runtime evidence](../evidence/f6-1-runtime-closure.md): detached event-reweighting validation closed at
-farm/bundle HEAD `ffb7d4dc251610f6034eac11038a9841e3ef9f58`, with reviewed
-science source `bfc4fe421f9fc9139a1992a0ec92e31aa101b86c`. It exactly
-preserves accepted F.4/F.5 closure and the producer-radians to
-application-degrees phi contract without mutating production weights or yields.
+`CLOSED / RUNTIME VALIDATED` — the accepted five-setting detached validation and its generic bundle/profile gate preserve F.4/F.5 closure without production weight or yield mutation. See [F.6.1 runtime evidence](../evidence/f6-1-runtime-closure.md).
 
-#### F.6.1.Validation.1 — detached farm bundle/profile gate
+#### F.6.2 and F.6.2.Fix.5 — acceptance-correlated refinement validation
 
-`CLOSED / RUNTIME VALIDATED` — [F.6.1.Validation.1 runtime evidence](../evidence/f6-1-runtime-closure.md): the generic bundle/profile gate accepted the
-complete F.6.1 evidence package with no unexpected committed files after the
-reviewed source pin. It remains evidence packaging only and has no production
-ownership.
+`CLOSED / RUNTIME VALIDATED` — the accepted scientific source and frozen JSON remain authoritative. The accepted Fix.5 rerender is presentation-only and does not replace scientific provenance or promote Method A. See [F.6.2 scientific evidence](../evidence/f6-2-scientific-runtime-closure.md) and [Fix.5 presentation evidence](../evidence/f6-2-fix5-presentation-runtime-closure.md).
 
-#### F.6.2 — acceptance-correlated Method-A refinement validation
+#### E.8 — full-analysis visual audit
 
-`CLOSED / RUNTIME VALIDATED` — overall scientific validation remains anchored
-to reviewed scientific source `0b37af2a2927b08bdeaf897c545f290b55329cea` and
-the frozen accepted JSON/fingerprints in
-[F.6.2 scientific evidence](../evidence/f6-2-scientific-runtime-closure.md).
+`ACTIVE` — E.8 is the presentation-only visual audit of the complete kaon missing-mass and signal-region yield chain. It consumes authoritative upstream objects/snapshots and never recomputes a fit, factor, correction, normalization, or yield. The baseline production branch remains unchanged; Method B remains diagnostic/cross-check only and Method A remains detached until F.6.4.
 
-`CLOSED / RUNTIME VALIDATED` — F.6.2.Fix.5 is a presentation-only rerender from
-source `c88ed65cb18ba6a37358897292b77696016312d1` and bundle/profile commit
-`b789d203e11f0927deb59ebcae9dc59fe8add4ae`; see
-[Fix.5 presentation evidence](../evidence/f6-2-fix5-presentation-runtime-closure.md).
-Fix.5 does not replace the scientific source or alter the accepted JSON.
+E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh `Q4p4W2p74 / Left / lowe` persisted-overlay geometry and profile/provenance gate at bundle/profile commit `0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b`, requiring distinct Fix.5 source `53fd262b730af8f1254e411a38231aebeb6a1da3`. See [Fix.6 Left/lowe runtime evidence](../evidence/e8-1-fix6-left-lowe-runtime-closure.md). The remaining E.8.1 canonical-five expansion is `DEFERRED` by user decision, not failed or closed.
 
-#### E.8 — final streamlined full-background-subtraction presentation
+#### E.8.2 — baseline full-analysis stage audit
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the standalone frozen-F.6.2
-figure library is a completed intermediate presentation artifact. E.8.1 makes
-the ordinary procedure PDF the final presentation: integration
-`33c114e003421690fa9b15480a4200634accf8c3`, semantics repair
-`b02d939d9187ec656aa629f03e528fde0ca0cc0d`, and sparse-legend/current reviewed
-procedure-PDF source `0bf1281ebf44868b68ff808090436653eea6ed60` is `SOURCE REVIEWED`.
-The canonical-five-setting bundle/profile infrastructure at
-`c25f9d8248f2acfb8b0443a482fc76781eb405ca` is also `SOURCE REVIEWED` and retains
-that analysis-source pin. No Method-A production correction or promotion, and
-no E.8.1 farm-evaluated commit, exists.
+`NEXT` — present the existing baseline before/component/after chain through prompt/random, dummy, slow proton, baseline pion, Fit 1, Fit 2, final canonical `(t,phi)` missing mass, and stage/final yields. This has no production-physics ownership.
 
-Source review is not farm readiness. Before requesting a farm run, verify that
-the E.8.1 profile pins the reviewed source and declares the frozen F.6.2 JSON
-plus every ordinary procedure PDF/page-manifest pair. This requirement is
-satisfied by the canonical-five-setting profile in bundle/profile commit
-`c25f9d8248f2acfb8b0443a482fc76781eb405ca`. The first detailed inspection is
-`Q4p4W2p74 / Left / highe`; only after that passes may the visual/runtime review
-broaden to the other settings.
+#### E.8.3 — detached Method-A reweighting audit
 
-#### F.6.3 — full baseline procedure versus full procedure plus Method A
+`BLOCKED` — pending E.8.2 source-reviewed completion. It exposes the accepted parent-preserving `w0 -> w0*C` pion-background redistribution, baseline versus reweighted comparison, signed difference/defined ratio, all canonical children, and parent closure without child renormalization.
 
-`BLOCKED` — pending E.8, compare the unchanged full baseline procedure with a
-parallel procedure whose only intended pion-template change is the accepted
-Method-A factor.
+#### F.6.3 — parallel full procedure plus Method A
+
+`BLOCKED` — pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. It alone constructs the parallel full-analysis branch, changing only `w0_j -> w0_j * C_j` in pion-template filling while retaining the frozen baseline procedure.
+
+#### E.8.4 — baseline-versus-Method-A production-impact audit
+
+`BLOCKED` — pending F.6.3. It consumes authoritative two-branch outputs for post-pion, Fit 1, Fit 2, final canonical MM, final yield, and delta-yield comparisons; it does not construct branch outputs.
+
+#### Final E.8 closure
+
+`BLOCKED` — pending E.8.4 and later runtime/visual validation of the complete full-analysis visual chain.
 
 #### F.6.4 — explicit production-promotion decision
 
-`BLOCKED` — pending F.6.3 evidence; no automatic promotion.
+`BLOCKED` — pending completed F.6.3/E.8.4 production-impact evidence; no automatic promotion.
 
 ## Active-state ownership
 
-The exact active objective, blockers, and next action are owned by
-[CURRENT.md](../CURRENT.md). This roadmap preserves approved Phase-F
-dependency and status structure only.
+The exact active objective, blockers, and next action are owned by [CURRENT.md](../CURRENT.md). This roadmap preserves approved dependency and status structure only.

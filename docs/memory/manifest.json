@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 8171,
+      "bytes": 6324,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4cba8f80020b8318f2e50db00b60461827587d26471ea0d61da6aedc8ca7a290"
+      "sha256": "1e684f78ba497af7e901211e3a7b5fcbc364d0e9b0869565a6c3adf6188a4986"
     },
     {
       "bytes": 1978,
@@ -31,9 +31,9 @@
       "sha256": "a4b98fbfc3ac6ef30c925385fb4ca71eb02950fa14fb543d01d6cd90281f312f"
     },
     {
-      "bytes": 5040,
+      "bytes": 6020,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "a7d1794b33cbb9c1662cc32929960e9b7475ba1bffed3fb3d9e7c5c0edb1441e"
+      "sha256": "1667c0a08ac94892043c9f55dd4463096562c988e8b39d687f563580e80747cd"
     },
     {
       "bytes": 3469,
@@ -66,9 +66,14 @@
       "sha256": "f5f137a9fa0ead5086fc6f7ab3ce25a82d1c7816a1d58ec00bfda16adc553af4"
     },
     {
-      "bytes": 10528,
+      "bytes": 10901,
       "path": "docs/memory/decisions/e8-f6-2-figure-library-implementation-contract.md",
-      "sha256": "9d55ba00da1710083d882766427eecf4495d0fb818700473e25ce025e11fd972"
+      "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
+    },
+    {
+      "bytes": 9339,
+      "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
+      "sha256": "db76752e96c79a6d26641cc79ce866ca09ee4a02c6f15827cd91ee11bc70ee7a"
     },
     {
       "bytes": 6910,
@@ -119,6 +124,11 @@
       "bytes": 2725,
       "path": "docs/memory/evidence/e8-1-fix4-left-lowe-overlay-blocker.md",
       "sha256": "39743b447e1d7189bd32ca976d416650dfa2e3248fae0db6bd000af9a95d6088"
+    },
+    {
+      "bytes": 2912,
+      "path": "docs/memory/evidence/e8-1-fix6-left-lowe-runtime-closure.md",
+      "sha256": "06ef27c2f2e4993c22981a4154974227fbdee57b59e870d061467ac021d1f64f"
     },
     {
       "bytes": 1489,
@@ -286,9 +296,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 2656,
+      "bytes": 2191,
       "path": "docs/memory/phases/PHASE_HISTORY.md",
-      "sha256": "1752b4327f7d7aca3fd34108cd6b07f6df8788824dd504348955195f075ba5b9"
+      "sha256": "08a53d18c108e63fdd5d5e68bf004268280c76a88641d0e994ffad18ead168a8"
     },
     {
       "bytes": 462,
@@ -391,9 +401,9 @@
       "sha256": "ffdb0e5b847c524f931197a50b8096af6ec63a67f48b6e975e1550d07c1b5bab"
     },
     {
-      "bytes": 3827,
+      "bytes": 4104,
       "path": "docs/memory/phases/e8-1-fix5-overlay-pdf-geometry.md",
-      "sha256": "63de3d9a6e209b2468065a2110ecd183fdd611b3349e4ffbaf75014218aa7d97"
+      "sha256": "00831e89bfa0d64af91458a180f85f050b14bdef3118bb8dc1590a18e557bf17"
     },
     {
       "bytes": 8690,
@@ -411,14 +421,24 @@
       "sha256": "585659cd3f6130f8f9851fdfa6f3b62a5d3b2cffff0afd77a0e3417fa891eaae"
     },
     {
-      "bytes": 3653,
+      "bytes": 3460,
       "path": "docs/memory/phases/e8-1-fix6-bundle-profile-repin.md",
-      "sha256": "ced529deba31fde54e930697bc9ff21104816741fe6c87502c4d4ac8bbdf9d2f"
+      "sha256": "221c1f17004305d25f08ef752907703820a8dbed08df86d1f3c3a27b83a6a80e"
     },
     {
       "bytes": 8209,
       "path": "docs/memory/phases/e8-1-fix6-source-review-reconciliation-task-contract.md",
       "sha256": "478a2093ec0a4ef8309c0196a8b5073387f74615cb9fbcc81397fb43abbfc1ad"
+    },
+    {
+      "bytes": 9308,
+      "path": "docs/memory/phases/e8-full-analysis-roadmap-memory-reconciliation-fix1-task-contract.md",
+      "sha256": "d61d176400da118c9a0dbe2c943466e3321f0cd8c5ee078a1a88f77a3fc76a8c"
+    },
+    {
+      "bytes": 23796,
+      "path": "docs/memory/phases/e8-full-analysis-roadmap-memory-reconciliation-task-contract.md",
+      "sha256": "b3fed7f504e63ed15fcc4160b4451f3df60af6220ab05f674eed8b8a0f26de9a"
     },
     {
       "bytes": 1900,
@@ -501,14 +521,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 9589,
+      "bytes": 15546,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "5eec5da74db5021f591938f5a38cbf00ce1710ba5cdcab30cde8320ade96cb8c"
+      "sha256": "988707b1264d19485fc2518fe69855f833ddcac96f432393faf58e7d4b5c58fa"
     },
     {
-      "bytes": 6778,
+      "bytes": 5592,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "21d687bc8e9d741b0da89498505c3c4723d3ec071bb98c8473f9402d569cb170"
+      "sha256": "0595de8e5e8ca63b3c2df47b1f1d2e81d8c633c795c78816c961ec5b457b1284"
     },
     {
       "bytes": 1698,

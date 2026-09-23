@@ -1,5 +1,13 @@
 # E.8 F.6.2 figure-library implementation contract
 
+## Status and supersession
+
+This remains the historical narrow frozen-F.6.2 figure-library implementation
+contract and preserves the completed F.6.2 presentation context. It does not
+own the forward E.8 program. Future E.8 architectural, presentation, and
+dependency ownership is superseded by the
+[full-analysis procedure roadmap](e8-full-analysis-procedure-roadmap.md).
+
 ## Objective and exact starting state
 
 Implement E.8 as a separate, deterministic, presentation-ready PDF figure

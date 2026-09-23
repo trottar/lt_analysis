@@ -2,12 +2,12 @@
 
 ## Status
 
-SOURCE REVIEWED — this narrow source repair starts from committed test HEAD
-fdd368f2084c9b9508e7ce679b8f7391f5b556f1. ChatGPT independently inspected
-the complete refreshed actual diff and found the renderer/test repair PASS.
-Codex-reported deterministic checks were NOT RUN by ChatGPT. No ROOT/PyROOT,
-Jefferson Lab farm, or runtime acceptance is claimed for Fix.5, and the user
-has not claimed a Fix.5 farm/runtime result.
+CLOSED / RUNTIME VALIDATED — this narrow source repair started from committed
+test HEAD fdd368f2084c9b9508e7ce679b8f7391f5b556f1. The fresh reviewed Fix.6
+`Q4p4W2p74 / Left / lowe` farm package ran the real-PyROOT overlay regression
+and passed pages 37--47 visual inspection. This closes Fix.5 only for the
+persisted-overlay geometry repair; it does not close E.8.1 canonical-five
+validation, alter frozen science, or promote Method A.
 
 ## Pushed source identity
 
@@ -17,8 +17,18 @@ source review passed for that exact source and its parent
 fdd368f2084c9b9508e7ce679b8f7391f5b556f1: the reviewed square 3600 x 3600
 overlay canvas, canonical three-by-nine grid, grid-before-header draw order,
 legend semantics/colors, and pre-Print Modified()/Update() behavior remain
-intact. That source review is distinct from ROOT/PyROOT, Jefferson Lab farm,
-or runtime validation, none of which is claimed for Fix.5.
+intact. That source review was distinct from runtime validation; the later
+direct ROOT/PyROOT, Jefferson Lab farm, and visual closure is recorded below.
+
+## Accepted runtime closure
+
+The fresh bundle/profile commit `0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b`
+required this distinct Fix.5 analysis/procedure source
+`53fd262b730af8f1254e411a38231aebeb6a1da3`. Its complete manifest, clean
+captured worktree, source-ancestor check, and ordinary 47-page procedure PDF
+passed. Independent review confirmed the E.8 header, all L/B/A legend entries,
+complete first plot row, no top clipping, and first canonical child title on
+overlay pages 38/41/44. See the [Fix.6 Left/lowe runtime closure](../evidence/e8-1-fix6-left-lowe-runtime-closure.md).
 
 ## Farm-owned blocker
 
@@ -60,11 +70,7 @@ ChatGPT, and do not replace fresh farm PDF inspection.
 
 ## Next action
 
-NEXT — E.8.1.Fix.6 is the separate narrow profile provenance re-pin that must
-require the pushed Fix.5 source 53fd262b730af8f1254e411a38231aebeb6a1da3.
-It requires independent actual-diff review, user-controlled commit/push, and
-ChatGPT pushed-state review before a fresh Q4p4W2p74 / Left / lowe farm/PDF
-gate returns pages 37--47 for inspection. Only after persisted-overlay pages
-38/41/44 visibly contain the header, L/B/A legend, first canonical child
-title, and an unclipped first row may validation return to detailed Left /
-highe; broader coverage remains gated on that result.
+NEXT — the remaining E.8.1 canonical-five expansion is DEFERRED by user
+decision. E.8.2 baseline full-analysis stage audit is the active successor;
+the accepted Fix.5 geometry closure does not authorize broader farm coverage
+or production changes.

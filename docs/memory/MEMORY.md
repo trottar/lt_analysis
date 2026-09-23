@@ -69,6 +69,16 @@ serializer/checkpoint -> checkpoint-first payload -> consumer -> renderer.
 Local deterministic tests do not establish farm integration. Farm, ROOT/PyROOT,
 and full `main.py` behavior require direct farm evidence.
 
+E.8 presentation is the complete visual audit of the kaon missing-mass and
+signal-region yield chain: every substantive stage shows its authoritative
+input spectrum, applied component/treatment, and authoritative output spectrum,
+culminating in canonical `(t,phi)` missing-mass spectra and extracted yields.
+It only consumes authoritative runtime objects, persisted snapshots, accepted
+detached Method-A artifacts, or later branch outputs. It never recomputes a
+fit, factor, correction, normalization, or yield for plotting. Method-A
+reweighting remains parent-preserving (`w0 -> w0*C`) with no independent child
+normalization; Method B remains numerically excluded.
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw
@@ -76,6 +86,11 @@ evidence and implementation rather than forcing data to fit the checker. Use
 one narrow gate -> one targeted farm run -> fresh evidence -> inspect -> one
 coherent repair. See [LEARNINGS.md](LEARNINGS.md) for generalized failure and
 review lessons.
+
+Coherent implementation steps may proceed through deterministic local checks
+and source review without a farm run after every edit. Farm validation remains
+mandatory for ROOT/PyROOT or full-runtime claims and is scheduled at explicit
+milestones; inspect fresh artifacts before broadening a narrow runtime gate.
 
 ## Canonical record ownership
 
