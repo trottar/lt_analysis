@@ -48,7 +48,11 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 #### E.8.2 — baseline full-analysis stage audit
 
-`NEXT` — present the existing baseline before/component/after chain through prompt/random, dummy, slow proton, baseline pion, Fit 1, Fit 2, final canonical `(t,phi)` missing mass, and stage/final yields. This has no production-physics ownership.
+`NEXT` — present the existing baseline before/component/after chain through
+prompt/random, dummy, slow proton, baseline pion, final canonical `(t,phi)`
+missing mass, and stage/final yields. The accepted `no_empirical_residual`
+profile keeps legacy empirical residual Fit 1/Fit 2 disabled. This has no
+production-physics ownership.
 
 #### E.8.3 — detached Method-A reweighting audit
 
@@ -56,11 +60,16 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 #### F.6.3 — parallel full procedure plus Method A
 
-`BLOCKED` — pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. It alone constructs the parallel full-analysis branch, changing only `w0_j -> w0_j * C_j` in pion-template filling while retaining the frozen baseline procedure.
+`BLOCKED` — pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. It
+alone constructs the parallel full-analysis branch, changing only
+`w0_j -> w0_j * C_j` in pion-template filling while retaining the frozen
+baseline procedure. Legacy empirical residual Fit 1/Fit 2 remain disabled.
 
 #### E.8.4 — baseline-versus-Method-A production-impact audit
 
-`BLOCKED` — pending F.6.3. It consumes authoritative two-branch outputs for post-pion, Fit 1, Fit 2, final canonical MM, final yield, and delta-yield comparisons; it does not construct branch outputs.
+`BLOCKED` — pending F.6.3. It consumes authoritative two-branch outputs for
+post-pion, final canonical MM, final yield, and delta-yield comparisons; it
+does not construct branch outputs.
 
 #### Final E.8 closure
 

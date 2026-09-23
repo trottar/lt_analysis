@@ -1,5 +1,12 @@
 # KaonLT E.8 Full-Analysis Roadmap — Memory Reconciliation Task Contract
 
+> **Historical correction.** This document is retained as implementation
+> context. Any requirement that includes empirical residual Fit 1/Fit 2 in the
+> active E.8/F.6.3 chain is superseded. Current authority is the
+> [E.8 full-analysis procedure roadmap](../decisions/e8-full-analysis-procedure-roadmap.md)
+> as corrected by the [no-empirical-residual chain correction](../decisions/e8-no-empirical-residual-chain-correction.md);
+> the accepted active profile is `no_empirical_residual`.
+
 ## Objective
 
 Reconcile tracked repository memory with the newly agreed E.8 program before any further implementation work.

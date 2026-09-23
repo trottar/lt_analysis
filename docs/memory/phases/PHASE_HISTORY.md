@@ -21,3 +21,7 @@ F.1 through F.6.2, including F.6.1 and the accepted F.6.2.Fix.5 rerender, are `C
 E.8.1.Fix.5/Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh Q4p4W2p74 Left/lowe persisted-overlay geometry and profile/provenance gate. The remaining E.8.1 canonical-five expansion is `DEFERRED`, not failed or closed.
 
 E.8 is `ACTIVE` as the complete presentation-only full-analysis audit. Its approved sequence is E.8.2 baseline stage audit, E.8.3 detached Method-A reweighting audit, F.6.3 parallel full procedure plus Method A, E.8.4 production-impact audit, final E.8 closure, and F.6.4 explicit promotion decision. F.6.3 is `BLOCKED` pending E.8.2/E.8.3 source-reviewed prerequisites, E.8.4 is `BLOCKED` pending F.6.3, final E.8 is `BLOCKED` pending E.8.4/runtime evidence, and F.6.4 is `BLOCKED` pending full production-impact evidence.
+
+Legacy empirical residual Fit 1/Fit 2 remain disabled under the accepted
+`no_empirical_residual` profile and are excluded from the E.8/F.6.3 forward
+chain.

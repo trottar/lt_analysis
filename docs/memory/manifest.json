@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 6324,
+      "bytes": 6597,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "1e684f78ba497af7e901211e3a7b5fcbc364d0e9b0869565a6c3adf6188a4986"
+      "sha256": "fdff3dca1e3e03fce539e666f53ad74888e710b2ad6ca58b58860440cdb0e239"
     },
     {
       "bytes": 1978,
@@ -31,9 +31,9 @@
       "sha256": "a4b98fbfc3ac6ef30c925385fb4ca71eb02950fa14fb543d01d6cd90281f312f"
     },
     {
-      "bytes": 6020,
+      "bytes": 6367,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "1667c0a08ac94892043c9f55dd4463096562c988e8b39d687f563580e80747cd"
+      "sha256": "132659717b18a764e80cb32af82bacc3a05618a52cfb407f8ddf5028337ff8f6"
     },
     {
       "bytes": 3469,
@@ -71,9 +71,14 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 9339,
+      "bytes": 9382,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "db76752e96c79a6d26641cc79ce866ca09ee4a02c6f15827cd91ee11bc70ee7a"
+      "sha256": "bda199c0173a4b0673ced21541c79f4cdba39986ddedcde36a9781a122eed48a"
+    },
+    {
+      "bytes": 2363,
+      "path": "docs/memory/decisions/e8-no-empirical-residual-chain-correction.md",
+      "sha256": "c7c87bfbbe0b7c8f6a99cb42c144bdd10baa2cc51855539eeb10796862b62fc5"
     },
     {
       "bytes": 6910,
@@ -296,9 +301,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 2191,
+      "bytes": 2348,
       "path": "docs/memory/phases/PHASE_HISTORY.md",
-      "sha256": "08a53d18c108e63fdd5d5e68bf004268280c76a88641d0e994ffad18ead168a8"
+      "sha256": "b16a8c36c6ecf33eee5c35bd5fd3db6f8d4f5c451499f451abdd9c75fd3918b8"
     },
     {
       "bytes": 462,
@@ -431,14 +436,19 @@
       "sha256": "478a2093ec0a4ef8309c0196a8b5073387f74615cb9fbcc81397fb43abbfc1ad"
     },
     {
-      "bytes": 9308,
+      "bytes": 9799,
       "path": "docs/memory/phases/e8-full-analysis-roadmap-memory-reconciliation-fix1-task-contract.md",
-      "sha256": "d61d176400da118c9a0dbe2c943466e3321f0cd8c5ee078a1a88f77a3fc76a8c"
+      "sha256": "e861e905a0a15e81d62499355af70d3af92879d7346ecc73a07674b33648763d"
     },
     {
-      "bytes": 23796,
+      "bytes": 24287,
       "path": "docs/memory/phases/e8-full-analysis-roadmap-memory-reconciliation-task-contract.md",
-      "sha256": "b3fed7f504e63ed15fcc4160b4451f3df60af6220ab05f674eed8b8a0f26de9a"
+      "sha256": "d6b7cd358bcaaa255b62afab1f4e3f9b9984cc802958f655558700b055e3aa88"
+    },
+    {
+      "bytes": 17122,
+      "path": "docs/memory/phases/e8-no-empirical-residual-memory-correction-task-contract.md",
+      "sha256": "2070bee0fbb136b71d5c770f882b2925759177f2de8059b51bf28f6d8b60af84"
     },
     {
       "bytes": 1900,
@@ -521,14 +531,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 15546,
+      "bytes": 15790,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "988707b1264d19485fc2518fe69855f833ddcac96f432393faf58e7d4b5c58fa"
+      "sha256": "6956d868d8938765d69627476439af43bdd9073c048dba9312970ea31584194d"
     },
     {
-      "bytes": 5592,
+      "bytes": 5718,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "0595de8e5e8ca63b3c2df47b1f1d2e81d8c633c795c78816c961ec5b457b1284"
+      "sha256": "4d6192af965dba70aafcec0428ce265a9cc6c2b74d3e375e1111332cc98e203d"
     },
     {
       "bytes": 1698,

@@ -37,6 +37,10 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 - E.8 remains `ACTIVE` and presentation-only. The baseline production branch
   remains authoritative; Method A is detached/non-production and Method B is
   diagnostic/cross-check only.
+- The accepted active background profile is `no_empirical_residual`; it forces
+  both empirical residual-background scales to zero. Legacy empirical residual
+  Fit 1/Fit 2 are dormant historical source machinery and are outside the
+  current E.8 scientific/presentation chain.
 - E.8.1.Fix.1 and E.8.1.Fix.2 retain their narrow `CLOSED / RUNTIME VALIDATED`
   closures. E.8.1.Fix.3 remains `SOURCE REVIEWED`; its context/handoff repair
   has farm evidence and its earlier overlay subrepair was superseded by Fix.5.
@@ -84,10 +88,10 @@ not a blocker or a failure for this roadmap.
 
 NEXT — E.8.2 baseline full-analysis stage audit: define the authoritative
 before/component/after missing-mass and stage-yield presentation path for
-prompt/random, dummy, slow proton, baseline pion, Fit 1, Fit 2, and final
-canonical `(t,phi)` MM/yields. It must first obtain or consume a true
-authoritative pre-proton snapshot; current yield-level filling already applies
-accepted proton cleaning and must not be relabeled as pre-proton.
+prompt/random, dummy, slow proton, baseline pion, and final baseline canonical
+`MM_0(t,phi)`/yields. It must first obtain or consume a true authoritative
+pre-proton snapshot; current yield-level filling already applies accepted
+proton cleaning and must not be relabeled as pre-proton.
 
 ## Success Criteria
 

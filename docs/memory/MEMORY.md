@@ -38,6 +38,12 @@ binning -> slow proton -> pion subtraction. A setting-wide K-Lambda gate
 controls whether proposed proton weights become applied; never partially
 commit per-t proton results.
 
+Legacy empirical residual Fit 1/Fit 2 are dormant historical machinery. The
+accepted active profile is `no_empirical_residual`, which forces both empirical
+residual-background scales to zero; those fits are not part of the current
+production or presentation chain and must not be reintroduced by E.8, Method A,
+diagnostics, or presentation work.
+
 Pion-alignment comparisons use fixed evaluation envelopes. HGCer diagnostics
 consume the frozen baseline rather than redefine it. Cuts, templates, priors,
 component definitions, normalizations, binning, efficiencies, acceptance, L/T
