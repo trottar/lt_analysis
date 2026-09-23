@@ -5009,12 +5009,15 @@ def _e8_add_text(ROOT, coordinates, lines, *, size=0.030, align=12):
         return None
 
 
-def _e8_text_page(ROOT, pdf_name, name, title, lines):
+def _e8_text_page(ROOT, pdf_name, name, title, lines, *, size=0.034):
+    """Render explicitly bounded E.8 presentation text without ROOT wrapping."""
     if not hasattr(ROOT, "TCanvas"):
         return False
     canvas = ROOT.TCanvas(str(name), str(title), 1400, 900)
     try:
-        drawn = _e8_add_text(ROOT, (0.08, 0.10, 0.92, 0.92), (title, "") + tuple(lines), size=0.034)
+        drawn = _e8_add_text(
+            ROOT, (0.08, 0.08, 0.92, 0.94), (title, "") + tuple(lines), size=size,
+        )
         if drawn is None:
             return False
         canvas.Print(pdf_name)
@@ -5140,7 +5143,14 @@ def _e8_overlay_tile(
     return bool(histograms or unavailable)
 
 
-def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
+def _e8_overlay_legend(
+    ROOT,
+    host,
+    legend_sources,
+    draw_objects,
+    *,
+    coordinates=(0.03, 0.945, 0.97, 0.995),
+):
     """Draw the explicit persisted-population key used by every E.8 overlay page."""
     if not hasattr(ROOT, "TLegend") or not isinstance(legend_sources, dict):
         return False
@@ -5157,8 +5167,8 @@ def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
                 proxy.SetLineStyle(1)
             sources[population_name] = proxy
             draw_objects.append(proxy)
-        canvas.cd()
-        legend = ROOT.TLegend(0.03, 0.945, 0.97, 0.995)
+        host.cd()
+        legend = ROOT.TLegend(*coordinates)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
         if hasattr(legend, "SetNColumns"):
@@ -5170,7 +5180,7 @@ def _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
         )
         legend.AddEntry(
             sources["B"],
-            "B: physical pion control, NPE > 2, w0",
+            "B: physical pion control, NPE > 2, baseline w0",
             "l",
         )
         legend.AddEntry(
@@ -5247,7 +5257,7 @@ def _e8_joint_tile(ROOT, canvas, pad_number, child, joint_name, population_name,
 
 
 def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
-    if not hasattr(ROOT, "TCanvas"):
+    if not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPad"):
         return False
     canvas = ROOT.TCanvas(
         "C_full_background_e8_overlays_t{}".format(int(parent["canonical_t_index"]) + 1),
@@ -5255,16 +5265,60 @@ def _e8_render_overlay_page(ROOT, pdf_name, parent, kaon_window):
     )
     draw_objects = []
     try:
-        canvas.Divide(3, 9)
+        header_pad = ROOT.TPad(
+            "P_full_background_e8_overlays_header_t{}".format(
+                int(parent["canonical_t_index"]) + 1
+            ),
+            "E.8 persisted L/B/A overlay header",
+            0.0,
+            0.89,
+            1.0,
+            1.0,
+        )
+        grid_pad = ROOT.TPad(
+            "P_full_background_e8_overlays_grid_t{}".format(
+                int(parent["canonical_t_index"]) + 1
+            ),
+            "E.8 persisted L/B/A overlay grid",
+            0.0,
+            0.0,
+            1.0,
+            0.89,
+        )
+        canvas.cd()
+        header_pad.Draw()
+        grid_pad.Draw()
+        grid_pad.cd()
+        grid_pad.Divide(3, 9)
+        header_pad.cd()
+        header = _e8_add_text(
+            ROOT,
+            (0.02, 0.54, 0.98, 0.96),
+            ("E.8 persisted L/B/A overlays - t{}".format(
+                int(parent["canonical_t_index"]) + 1
+            ),),
+            size=0.034,
+            align=22,
+        )
+        if header is None:
+            return False
+        draw_objects.append(header)
+        grid_pad.cd()
         legend_sources = {}
         for row, child in enumerate(parent["children"]):
             for column, variable in enumerate(_E8_ONE_DIMENSIONAL):
                 if not _e8_overlay_tile(
-                    ROOT, canvas, row * 3 + column + 1, child, variable,
+                    ROOT, grid_pad, row * 3 + column + 1, child, variable,
                     kaon_window, draw_objects, legend_sources,
                 ):
                     return False
-        if not _e8_overlay_legend(ROOT, canvas, legend_sources, draw_objects):
+        if not _e8_overlay_legend(
+            ROOT,
+            header_pad,
+            legend_sources,
+            draw_objects,
+            coordinates=(0.02, 0.05, 0.98, 0.48),
+        ):
             return False
         canvas.Print(pdf_name)
     except Exception:
@@ -5308,18 +5362,38 @@ def _e8_render_map_page(ROOT, pdf_name, parent, kaon_window, *, joint_names, pag
 
 
 def _render_full_background_subtraction_e8_context_page(ROOT, pdf_name, payload):
-    return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_context", "E.8 — frozen F.6.2 acceptance-refinement atlas", (
-        "Presentation-only final procedure-PDF section; no event correction, yield, or cross section is changed.",
-        "Current setting: {}; frozen input SHA-256: {}".format(payload["setting_id"], payload["input_sha256"]),
-        "Artifact fingerprint: {}; validation fingerprint: {}".format(payload["artifact_fingerprint"], payload["validation_fingerprint"]),
-        "L — observed upstream low-HGCer diagnostic reference before the downstream HGCer gate: 0 < P_hgcer_npeSum <= 2.",
-        "B — physical pion-control population with P_hgcer_npeSum > 2, weighted by baseline pion w0.",
-        "A — the same physical pion-control population as B, weighted by w0*C.",
-        "B-to-A is a persisted acceptance-refinement shape comparison, not an absolute yield comparison, production application, or promotion decision.",
-        "Frozen kaon missing-mass window: [{:.5g}, {:.5g}] GeV.".format(payload["kaon_window"]["mm_min"], payload["kaon_window"]["mm_max"]),
-        "Maps use one common L/B/A display scale per comparison; values are not renormalized or recomputed.",
-        "The full baseline-versus-w0*C production-impact comparison belongs to later F.6.3 work.",
-    ))
+    return _e8_text_page(
+        ROOT,
+        pdf_name,
+        "C_full_background_e8_context",
+        "E.8 - frozen F.6.2 acceptance-refinement atlas",
+        (
+            "Presentation-only final procedure-PDF section.",
+            "No event correction, yield, or cross section is changed.",
+            "Current setting: {}".format(payload["setting_id"]),
+            "Frozen input SHA-256:",
+            payload["input_sha256"],
+            "Artifact fingerprint:",
+            payload["artifact_fingerprint"],
+            "Validation fingerprint:",
+            payload["validation_fingerprint"],
+            "L - observed upstream low-HGCer diagnostic reference before the downstream",
+            "HGCer gate: 0 < P_hgcer_npeSum <= 2.",
+            "B - physical pion-control population with P_hgcer_npeSum > 2,",
+            "weighted by baseline pion w0.",
+            "A - same physical pion-control population as B, weighted by w0*C.",
+            "B-to-A is a persisted acceptance-refinement shape comparison, not an",
+            "absolute yield comparison, production application, or promotion decision.",
+            "Frozen kaon missing-mass window: [{:.5g}, {:.5g}] GeV.".format(
+                payload["kaon_window"]["mm_min"], payload["kaon_window"]["mm_max"],
+            ),
+            "Maps use one common L/B/A display scale per comparison; values are not",
+            "renormalized or recomputed.",
+            "The full baseline-versus-w0*C production-impact comparison",
+            "belongs to later F.6.3 work.",
+        ),
+        size=0.024,
+    )
 
 
 def _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, payload, parent, manifest, failures):
@@ -5344,15 +5418,25 @@ def _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, payload,
 
 
 def _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, payload):
-    return _e8_text_page(ROOT, pdf_name, "C_full_background_e8_handoff", "E.8 handoff", (
-        "The accepted F.6.2 distributions and metrics above are shown exactly as persisted.",
-        "D.10 onward remains built as detached evidence; it is intentionally omitted from this ordinary procedure PDF.",
-        "F.6.2 quantities shown here remain non-authoritative and presentation-only.",
-        "No Method-A production correction or promotion occurs in E.8.",
-        "The full baseline-versus-w0*C production-impact comparison belongs to later F.6.3 work.",
-        "Any production promotion remains later work and is not implied by these plots.",
-        "This appendix requires independent farm PDF review before runtime closure.",
-    ))
+    return _e8_text_page(
+        ROOT,
+        pdf_name,
+        "C_full_background_e8_handoff",
+        "E.8 handoff",
+        (
+            "The accepted F.6.2 distributions and metrics above are shown exactly as",
+            "persisted.",
+            "D.10 onward remains built as detached evidence; it is intentionally",
+            "omitted from this ordinary procedure PDF.",
+            "F.6.2 quantities shown here remain non-authoritative and presentation-only.",
+            "No Method-A production correction or promotion occurs in E.8.",
+            "The full baseline-versus-w0*C production-impact comparison belongs to",
+            "later F.6.3 work.",
+            "Any production promotion remains later work and is not implied by these plots.",
+            "This appendix requires independent farm PDF review before runtime closure.",
+        ),
+        size=0.028,
+    )
 
 
 def _render_full_background_subtraction_e8_unavailable_page(ROOT, pdf_name, payload):

@@ -357,13 +357,16 @@ class _ProjectionHistogram(_BinnedHistogram):
 
 
 class _FakeCanvas:
-    def __init__(self, *_args):
-        return None
+    def __init__(self, root=None, *_args):
+        self.root = root if isinstance(root, _FakeROOT) else None
+        self.divisions = []
 
-    def Divide(self, _columns, _rows):
-        return None
+    def Divide(self, columns, rows):
+        self.divisions.append((int(columns), int(rows)))
 
     def cd(self, *_args):
+        if self.root is not None:
+            self.root.active_pad = self
         return self
 
     def Print(self, _name):
@@ -371,6 +374,41 @@ class _FakeCanvas:
 
     def Close(self):
         return None
+
+
+class _FakeGridCellPad:
+    def __init__(self, parent, index):
+        self.parent = parent
+        self.index = int(index)
+
+
+class _FakePad:
+    def __init__(self, root, name, title, x_low, y_low, x_high, y_high):
+        self.root = root
+        self.name = str(name)
+        self.title = str(title)
+        self.coordinates = (
+            float(x_low), float(y_low), float(x_high), float(y_high),
+        )
+        self.divisions = []
+        self.cells = []
+        self.drawn = False
+
+    def Draw(self):
+        self.drawn = True
+        self.root.drawn_pads.append(self)
+
+    def Divide(self, columns, rows):
+        columns, rows = int(columns), int(rows)
+        self.divisions.append((columns, rows))
+        self.cells = [
+            _FakeGridCellPad(self, index)
+            for index in range(1, columns * rows + 1)
+        ]
+
+    def cd(self, index=None):
+        self.root.active_pad = self if index is None else self.cells[int(index) - 1]
+        return self.root.active_pad
 
 
 class _FakeLegend:
@@ -448,9 +486,17 @@ class _FakeROOT:
         self.legends = []
         self.legend_lines = []
         self.pave_texts = []
+        self.pads = []
+        self.drawn_pads = []
+        self.active_pad = None
 
     def TCanvas(self, *_args):
-        return _FakeCanvas(*_args)
+        return _FakeCanvas(self, *_args)
+
+    def TPad(self, *args):
+        pad = _FakePad(self, *args)
+        self.pads.append(pad)
+        return pad
 
     def TLegend(self, *_args):
         legend = _FakeLegend(*_args)
@@ -6942,7 +6988,17 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
                 root, "ignored.pdf", payload
             )
         )
-        context = "\n".join(root.drawn_text[-1])
+        context_lines = root.drawn_text[-1]
+        context = " ".join(context_lines)
+        self.assertEqual(
+            context_lines[0], "E.8 - frozen F.6.2 acceptance-refinement atlas"
+        )
+        self.assertNotIn("\u2014", context)
+        self.assertNotIn("\u00e2\u20ac\u201d", context)
+        self.assertIn(payload["input_sha256"], context_lines)
+        self.assertIn(payload["artifact_fingerprint"], context_lines)
+        self.assertIn(payload["validation_fingerprint"], context_lines)
+        self.assertTrue(all(len(line) <= 96 for line in context_lines))
         self.assertIn("0 < P_hgcer_npeSum <= 2", context)
         self.assertIn("P_hgcer_npeSum > 2", context)
         self.assertIn("same physical pion-control population as B", context)
@@ -6961,7 +7017,7 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             [entry[0] for entry in legend.entries],
             [
                 "L: upstream 0 < NPE <= 2 diagnostic reference",
-                "B: physical pion control, NPE > 2, w0",
+                "B: physical pion control, NPE > 2, baseline w0",
                 "A: same B population, w0*C",
             ],
         )
@@ -6976,7 +7032,9 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
                 root, "ignored.pdf", payload
             )
         )
-        handoff = "\n".join(root.drawn_text[-1])
+        handoff_lines = root.drawn_text[-1]
+        handoff = " ".join(handoff_lines)
+        self.assertTrue(all(len(line) <= 96 for line in handoff_lines))
         self.assertIn("F.6.2 quantities shown here remain non-authoritative", handoff)
         self.assertIn("No Method-A production correction or promotion occurs in E.8.", handoff)
         self.assertIn("F.6.3", handoff)
@@ -7009,7 +7067,7 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
             [entry[0] for entry in legend.entries],
             [
                 "L: upstream 0 < NPE <= 2 diagnostic reference",
-                "B: physical pion control, NPE > 2, w0",
+                "B: physical pion control, NPE > 2, baseline w0",
                 "A: same B population, w0*C",
             ],
         )
@@ -7040,6 +7098,54 @@ class FullBackgroundSubtractionE8Tests(unittest.TestCase):
         self.assertIs(overlay_legend.objects[0], real_sources["L"])
         self.assertIs(overlay_legend.objects[1], real_sources["B"])
         self.assertIsInstance(overlay_legend.objects[2], _FakeLegendLine)
+
+    def test_e8_overlay_reserves_header_above_the_complete_canonical_grid(self):
+        root = _FakeROOT()
+        children = tuple({"child_index": index} for index in range(9))
+        parent = {"canonical_t_index": 1, "children": children}
+        observed_tiles = []
+
+        def record_overlay_tile(
+            _root,
+            host,
+            pad_number,
+            child,
+            variable,
+            _kaon_window,
+            _draw_objects,
+            _legend_sources,
+        ):
+            observed_tiles.append((host, pad_number, child["child_index"], variable))
+            return True
+
+        with patch.object(plots, "_e8_overlay_tile", side_effect=record_overlay_tile):
+            self.assertTrue(
+                plots._e8_render_overlay_page(
+                    root, "ignored.pdf", parent, {"mm_min": 0.45, "mm_max": 0.55}
+                )
+            )
+
+        header_pad, grid_pad = root.pads
+        self.assertEqual(header_pad.coordinates, (0.0, 0.89, 1.0, 1.0))
+        self.assertEqual(grid_pad.coordinates, (0.0, 0.0, 1.0, 0.89))
+        self.assertLessEqual(grid_pad.coordinates[3], header_pad.coordinates[1])
+        self.assertEqual(root.drawn_pads, [header_pad, grid_pad])
+        self.assertEqual(grid_pad.divisions, [(3, 9)])
+        self.assertEqual(
+            [(pad_number, child_index, variable) for _host, pad_number, child_index, variable in observed_tiles],
+            [
+                (row * 3 + column + 1, row, variable)
+                for row in range(9)
+                for column, variable in enumerate(plots._E8_ONE_DIMENSIONAL)
+            ],
+        )
+        self.assertTrue(all(host is grid_pad for host, *_rest in observed_tiles))
+        self.assertIs(root.legends[-1].drawn_on, header_pad)
+        self.assertIs(root.pave_texts[-1].drawn_on, header_pad)
+        self.assertEqual(
+            [line.line_color for line in root.legend_lines],
+            [root.kBlue, root.kBlack, root.kMagenta],
+        )
 
     def test_e8_uses_persisted_matrix_values_with_shared_display_scale_and_mm_only_markers(self):
         artifact = _e8_frozen_artifact()

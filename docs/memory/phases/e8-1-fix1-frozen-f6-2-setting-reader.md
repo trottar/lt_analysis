@@ -2,18 +2,23 @@
 
 ## Status and farm finding
 
-`SOURCE REVIEWED` — this narrow presentation-reader and regression-test repair
-starts from `test` / `origin/test` committed HEAD
-`1c1a0be5da997043378fb49263b1de6ffc0d473c`. ChatGPT independently inspected
-the actual complete diff and found the reader/test repair PASS. Codex-reported
-deterministic tests were `NOT RUN by ChatGPT`. This is not a ROOT/PyROOT, farm,
-or runtime acceptance claim.
+`CLOSED / RUNTIME VALIDATED` — only for the narrow frozen persisted
+parent-setting reader defect. This repair started from `test` / `origin/test`
+committed HEAD `1c1a0be5da997043378fb49263b1de6ffc0d473c`; ChatGPT independently
+inspected the actual complete diff and found the reader/test repair PASS.
+Codex-reported deterministic tests were `NOT RUN by ChatGPT`.
 
 The user pushed the reviewed repair as
 `8985d9a212799c021c4ad1a759a689ea3826e0ea` (`Fix E8 frozen F6.2 setting
-reader`). The next provenance step is the separate E.8.1.Fix.2 profile re-pin
-to this exact analysis/procedure source; that future profile/bundle commit is
-distinct and must not be inferred here.
+reader`). The separate Fix.2 profile re-pin subsequently targeted this exact
+analysis/procedure source.
+
+The fresh, complete Fix.2 `Left / lowe` bundle now establishes this narrow
+runtime result: the E.8 section was available with its ordinary 47-page
+inventory, rather than ending at `full_background.e8.unavailable` with
+`parent_setting_identity_invalid`. Its direct provenance and PDF-layout blocker
+record is [E.8.1.Fix.2 Left/lowe evidence](../evidence/e8-1-fix2-left-lowe-layout-blocker.md).
+That success neither accepts E.8.1 nor claims closure for the later layout repair.
 
 Fresh targeted Jefferson Lab evidence exposed the blocker in
 `KaonLT_E8_1_Debug1_Fix1_Q4p4W2p74_Left_lowe_20260923-012755.zip`:
@@ -97,9 +102,7 @@ The intended change set is limited to:
 - the user-created task contract
   `docs/memory/phases/e8-1-fix1-frozen-f6-2-setting-reader-task-contract.md`.
 
-Next: ChatGPT actual-diff review and user-controlled commit/push of the
-separate E.8.1.Fix.2 profile re-pin. Its resulting pushed profile commit is the
-future wrapper `--bundle-commit`; it remains distinct from this repaired source
-commit. Only then rerun `Q4p4W2p74 / Left / lowe`; after that narrow farm gate
-passes, return to the planned detailed `Left / highe` review before any broader
-setting coverage.
+Next: independently review the active E.8.1.Fix.3 presentation-layout diff;
+after its user-controlled push and a separate profile re-pin to its new source,
+rerun `Q4p4W2p74 / Left / lowe` and inspect the repaired PDF before returning to
+detailed `Left / highe` review or broader coverage.

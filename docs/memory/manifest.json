@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 8185,
+      "bytes": 6405,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "1fd2c8ceb0ed7c947c7d413322e9f7e2eaca102519860c50afb879bcd3655bb6"
+      "sha256": "7bc2048d71c17ea299b540689dc9e1aaae61c7086d0f561f76aaf9a37daee15c"
     },
     {
       "bytes": 1978,
@@ -109,6 +109,11 @@
       "bytes": 1300,
       "path": "docs/memory/evidence/e3-fix2-left-low-runtime.md",
       "sha256": "282d558384b5bfefc3485fa23a823d871790d09eaf51a83ff8b2f9f5cfe781ba"
+    },
+    {
+      "bytes": 2058,
+      "path": "docs/memory/evidence/e8-1-fix2-left-lowe-layout-blocker.md",
+      "sha256": "0a81a68e1541b5b4255080e4e171615a493e654bb0595c7580e9c41d0ea75271"
     },
     {
       "bytes": 1489,
@@ -316,9 +321,9 @@
       "sha256": "a0ea079479cd753c25708cab3b2a2137da42ef91ecd5126f30ce0233120fd777"
     },
     {
-      "bytes": 5502,
+      "bytes": 5737,
       "path": "docs/memory/phases/e8-1-fix1-frozen-f6-2-setting-reader.md",
-      "sha256": "b59d546902fbb4bae11556d90fb39c137dd262da55ef50927c8f072a8a099d2d"
+      "sha256": "445a6736c19169ffca13a9561a312c13e13706049ef2033aeb0efec153542597"
     },
     {
       "bytes": 11614,
@@ -326,14 +331,29 @@
       "sha256": "dbb866b565bfd22faddbe593275847f8eca9cb2c29da69089e802a86d6220908"
     },
     {
-      "bytes": 3544,
+      "bytes": 3624,
       "path": "docs/memory/phases/e8-1-fix2-bundle-profile-repin.md",
-      "sha256": "87a39fac790e90d5159069de0ce61e27f7e3c3123cb428b4f18a9a05f91e9308"
+      "sha256": "a6f999f3019211f716b542d7e8c1e8ef93f1e5db0f5cd8214c4ff5cb0d992302"
     },
     {
       "bytes": 5116,
       "path": "docs/memory/phases/e8-1-fix2-source-review-reconciliation-task-contract.md",
       "sha256": "8d474de04c61e25971630b277706afab7e90ba75b7ed8c1b3b4ef153f62cbbdc"
+    },
+    {
+      "bytes": 16276,
+      "path": "docs/memory/phases/e8-1-fix3-procedure-pdf-layout-task-contract.md",
+      "sha256": "ad85d8387ebfbfedd06aed55ec40d0001b3a2f63ee831f42b21279826ccf7b9b"
+    },
+    {
+      "bytes": 2750,
+      "path": "docs/memory/phases/e8-1-fix3-procedure-pdf-layout.md",
+      "sha256": "67d4b8d55d520be3bbf6392e0e47653132a7769b2124fc3eb8342b7e9138d02d"
+    },
+    {
+      "bytes": 6509,
+      "path": "docs/memory/phases/e8-1-fix3-source-review-reconciliation-task-contract.md",
+      "sha256": "cbd9fca10e840a19a8a736da6b7127630b82801142fe23e0cfe6621861cb9e02"
     },
     {
       "bytes": 1900,
