@@ -2,12 +2,14 @@
 
 ## Status
 
-`SOURCE REVIEWED` — this narrow presentation-only repair starts from committed
+`SOURCE REVIEWED` — this narrow presentation-only repair started from committed
 `test` HEAD `9f7094b19f3cdb0887c95f1f972d98471f2ecfdc`. ChatGPT independently
 inspected the complete actual diff and found the source/test repair PASS.
-Codex-reported deterministic checks were `NOT RUN by ChatGPT`. No ROOT/PyROOT,
-farm, or runtime validation is claimed, no Fix.3 commit exists yet, and this
-record makes no E.8.1 acceptance claim.
+Codex-reported deterministic checks were `NOT RUN by ChatGPT`. The user pushed
+that reviewed source as `350c34c55b2de33ad01011559dc6d8ed84d9c8a7` (`Fix E8.1
+procedure PDF layout`). Pushed-state source review remains distinct from
+ROOT/PyROOT, farm, and runtime validation; this record makes no E.8.1
+acceptance claim.
 
 ## Farm-owned blocker
 
@@ -45,8 +47,10 @@ The intended change set is only `src/cuts/full_background_subtraction_plots.py`,
 Fix.1/Fix.2 reconciliation records, `CURRENT.md`, the supplied blocker evidence,
 the manifest, and the user-created Fix.3 task contract.
 
-Next: user-controlled commit/push of this `SOURCE REVIEWED` repair, followed by
-ChatGPT pushed-state review. A separate narrow profile re-pin must then target
-that pushed Fix.3 source and receive review before a fresh `Left / lowe` PDF
-gate. Detailed `Left / highe` and broader coverage remain gated on independent
-visual passage of the repaired Left/lowe PDF.
+Next: the separate `ACTIVE` E.8.1.Fix.4 profile re-pin must require pushed
+Fix.3 source `350c34c55b2de33ad01011559dc6d8ed84d9c8a7`, then receive independent
+actual-diff review and user-controlled commit/push. Its future pushed profile
+commit, distinct from the Fix.3 source, becomes the wrapper `--bundle-commit`
+before a fresh `Left / lowe` PDF gate. Detailed `Left / highe` and broader
+coverage remain gated on independent visual passage of the repaired Left/lowe
+PDF.

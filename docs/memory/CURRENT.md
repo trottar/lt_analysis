@@ -19,10 +19,12 @@ ordinary procedure PDF had the expected available 47-page inventory, and the
 farm module passed. It validates the narrow Fix.1 reader and Fix.2 profile
 provenance defects, but independent PDF inspection found context/handoff text
 clipping, context em-dash mojibake, and overlay header/grid clipping. Fix.3 is
-`SOURCE REVIEWED`: ChatGPT inspected its complete actual diff and found the
-presentation-only source/test repair PASS. Codex-reported checks were `NOT RUN
-by ChatGPT`; no Fix.3 ROOT/PyROOT, farm, or runtime result is claimed, and no
-Fix.3 commit exists yet. See the
+`SOURCE REVIEWED` and user-pushed at
+`350c34c55b2de33ad01011559dc6d8ed84d9c8a7`; no Fix.3 ROOT/PyROOT, farm, or
+runtime result is claimed. Fix.4 is `SOURCE REVIEWED`: ChatGPT inspected its
+complete actual profile/test diff and found it
+PASS. Codex-reported checks were `NOT RUN by ChatGPT`; no Fix.4 ROOT/PyROOT,
+farm, or runtime result is claimed, and no Fix.4 commit exists yet. See the
 [Left/lowe blocker evidence](evidence/e8-1-fix2-left-lowe-layout-blocker.md).
 
 ## Verified State
@@ -40,10 +42,13 @@ Fix.3 commit exists yet. See the
 - E.8.1.Fix.2 is `CLOSED / RUNTIME VALIDATED` only for its profile provenance
   re-pin. Its source was independently `SOURCE REVIEWED` before the complete,
   fail-closed fresh bundle result; this does not accept E.8.1.
-- E.8.1.Fix.3 is `SOURCE REVIEWED`: ChatGPT inspected its complete actual diff
-  and found the presentation-only source/test repair PASS. Codex-reported
-  deterministic checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or
-  runtime claim is made, and no Fix.3 commit exists yet.
+- E.8.1.Fix.3 is `SOURCE REVIEWED` and user-pushed at
+  `350c34c55b2de33ad01011559dc6d8ed84d9c8a7`; its pushed source review remains
+  distinct from ROOT/PyROOT, farm, and runtime validation.
+- E.8.1.Fix.4 is `SOURCE REVIEWED`: ChatGPT inspected its complete actual
+  profile/test diff and found the provenance re-pin PASS. Codex-reported checks
+  were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or runtime claim is made,
+  and no Fix.4 commit exists yet.
 - E.8.1.Debug.1 at `4c4a18a098d184fe0b13dd1fc57010ac7f5b30c0` was reviewed
   with a Diamond-cut blocker and is superseded; E.8.1.Debug.1.Fix.1 remains
   `SOURCE REVIEWED`. Its earlier incomplete output does not prove launcher
@@ -58,6 +63,10 @@ Fix.3 commit exists yet. See the
 - E.8.1.Fix.1 reader/test source: `8985d9a212799c021c4ad1a759a689ea3826e0ea`.
 - E.8.1.Fix.2 pushed profile-repin source:
   `9f7094b19f3cdb0887c95f1f972d98471f2ecfdc`; it requires Fix.1 source.
+- E.8.1.Fix.3 pushed procedure-PDF source:
+  `350c34c55b2de33ad01011559dc6d8ed84d9c8a7`.
+- E.8.1.Fix.4 `SOURCE REVIEWED` profile re-pin requires that exact Fix.3 source;
+  its future profile/bundle commit is not yet known and must remain distinct.
 - E.8.1 canonical-five-setting bundle/profile source:
   `c25f9d8248f2acfb8b0443a482fc76781eb405ca`.
 - F.6.2 reviewed scientific source: `0b37af2a2927b08bdeaf897c545f290b55329cea`.
@@ -71,22 +80,23 @@ Fix.3 commit exists yet. See the
 
 ## Blockers
 
-E.8.1 remains `ACTIVE` because the reviewed Fix.3 source must be
+E.8.1 remains `ACTIVE` because the reviewed Fix.4 profile must be
 user-committed/pushed, independently reviewed in its pushed state, and followed
-by a separate profile re-pin and fresh farm PDF inspection. The current farm
-record is a presentation blocker, not E.8.1 acceptance. F.6.3 remains `BLOCKED`
-pending E.8.1; F.6.4 remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook
-dispatch is non-required and `BLOCKED` / `DEFERRED`.
+by a fresh farm PDF inspection. The current farm record is a presentation
+blocker, not E.8.1 acceptance. F.6.3 remains `BLOCKED` pending E.8.1; F.6.4
+remains `BLOCKED` pending F.6.3 evidence. Lifecycle-hook dispatch is
+non-required and `BLOCKED` / `DEFERRED`.
 
 ## Next Action
 
-NEXT — User-controlled commit/push of the `SOURCE REVIEWED` E.8.1.Fix.3 change
-set; ChatGPT then inspects the actual pushed commit. After pushed-state review,
-create and review a separate narrow E.8.1 profile re-pin to that Fix.3 source.
-Only after the separately reviewed profile push should the user rerun
-`Q4p4W2p74 / Left / lowe`, return its bundle/PDF for independent visual review,
-then return to detailed `Left / highe` and broaden only after the repaired
-Left/lowe PDF passes.
+NEXT — User-controlled commit/push of the `SOURCE REVIEWED` E.8.1.Fix.4 change
+set; ChatGPT then inspects the actual pushed profile commit. That future Fix.4
+commit, distinct from the profile's required Fix.3 source
+`350c34c55b2de33ad01011559dc6d8ed84d9c8a7`, becomes the wrapper
+`--bundle-commit`. Only after pushed-state review rerun `Q4p4W2p74 / Left /
+lowe`, return its bundle/PDF for independent visual review, and inspect the
+repaired clipping, mojibake, handoff, and overlay-header defects before
+returning to detailed `Left / highe` or broadening.
 
 ## Success Criteria
 
@@ -114,4 +124,5 @@ evidence for style.
 - [E.8.1.Fix.1 reader record](phases/e8-1-fix1-frozen-f6-2-setting-reader.md)
 - [E.8.1.Fix.2 profile record](phases/e8-1-fix2-bundle-profile-repin.md)
 - [E.8.1.Fix.3 layout record](phases/e8-1-fix3-procedure-pdf-layout.md)
+- [E.8.1.Fix.4 profile re-pin record](phases/e8-1-fix4-bundle-profile-repin.md)
 - [E.8.1.Fix.2 Left/lowe blocker evidence](evidence/e8-1-fix2-left-lowe-layout-blocker.md)
