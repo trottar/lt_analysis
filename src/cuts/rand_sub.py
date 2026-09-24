@@ -215,6 +215,7 @@ from full_background_subtraction_plots import (
     build_full_background_subtraction_e72_payload,
     build_full_background_subtraction_f1_payload,
     build_full_background_subtraction_page_manifest_artifact,
+    capture_full_background_subtraction_e8_2_render_state,
     close_full_background_subtraction_pdf,
     full_background_subtraction_page_manifest_filename,
     full_background_subtraction_pdf_path,
@@ -7603,6 +7604,12 @@ def rand_sub(
         full_background_subtraction_pdf = full_background_subtraction_pdf_path(
             main_pdf
         )
+        full_background_page_manifest_setting = (
+            (histDict.get("pion_hgcer_refinement_checkpoint") or {}).get(
+                "setting"
+            )
+        )
+        full_background_page_manifest_path = None
         full_background_subtraction_open = False
         try:
             full_background_subtraction_d6_payload = (
@@ -7843,11 +7850,6 @@ def rand_sub(
                         )
                     )
         try:
-            full_background_page_manifest_setting = (
-                (histDict.get("pion_hgcer_refinement_checkpoint") or {}).get(
-                    "setting"
-                )
-            )
             full_background_page_manifest_artifact = (
                 build_full_background_subtraction_page_manifest_artifact(
                     setting=full_background_page_manifest_setting,
@@ -7882,6 +7884,41 @@ def rand_sub(
         histDict["full_background_subtraction_renderer_failures"] = list(
             full_background_subtraction_failures
         )
+        try:
+            if full_background_page_manifest_path is None:
+                raise RuntimeError("full_background_page_manifest_path_missing")
+            histDict["_e8_2_full_background_render_state"] = (
+                capture_full_background_subtraction_e8_2_render_state(
+                    pdf_path=full_background_subtraction_pdf,
+                    page_manifest_path=full_background_page_manifest_path,
+                    page_manifest_setting=full_background_page_manifest_setting,
+                    payloads={
+                        "d6": full_background_subtraction_d6_payload,
+                        "d7": full_background_subtraction_d7_payload,
+                        "d8": full_background_subtraction_d8_payload,
+                        "d9": full_background_subtraction_d9_payload,
+                        "d10": full_background_subtraction_d10_payload,
+                        "d11": full_background_subtraction_d11_payload,
+                        "e2": full_background_subtraction_e2_payload,
+                        "e3": full_background_subtraction_e3_payload,
+                        "e4": full_background_subtraction_e4_payload,
+                        "e6": full_background_subtraction_e6_payload,
+                        "e7": full_background_subtraction_e7_payload,
+                        "f1": full_background_subtraction_f1_payload,
+                        "e72": full_background_subtraction_e72_payload,
+                        "e8": full_background_subtraction_e8_payload,
+                    },
+                )
+            )
+        except Exception as exc:
+            histDict["_e8_2_full_background_finalization_status"] = {
+                "status": "unavailable",
+                "reason": "e8_2_step3_render_state_capture_exception:{}".format(
+                    type(exc).__name__
+                ),
+                "exception_message": str(exc),
+                "production_objects_mutated": False,
+            }
         setting_renderer_failures.extend(full_background_subtraction_failures)
         for supplement_key, role in (
             ("proton_debug", "proton-debug"),

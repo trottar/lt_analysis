@@ -34,9 +34,16 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   scientific JSON SHA-256, artifact fingerprint, and validation fingerprint
   remain frozen. See the [scientific closure](evidence/f6-2-scientific-runtime-closure.md)
   and [presentation closure](evidence/f6-2-fix5-presentation-runtime-closure.md).
-- E.8 remains `ACTIVE` and presentation-only. The baseline production branch
-  remains authoritative; Method A is detached/non-production and Method B is
-  diagnostic/cross-check only.
+- E.8 remains `ACTIVE` and presentation-only. E.8.2 is `SOURCE REVIEWED`:
+  independent ChatGPT inspection of the complete cumulative E.8.2/Fix.1/Fix.2/
+  Fix.3 actual diff passed. The source-reviewed baseline audit captures the true
+  same-traversal pre-proton diagnostic, the actual post-proton pre-/post-prune
+  production snapshots, the exact baseline-pion before/template/after objects,
+  and the existing `Y_0`. Production physics, `w0`, proton factors, pruning,
+  random/dummy normalization, canonical binning, public yields/errors, Method A,
+  Method B, and frozen F.6.2 science remain unchanged. Codex-reported local
+  checks were `NOT RUN by ChatGPT`; source review is not ROOT/PyROOT,
+  full-analysis, farm, or runtime acceptance.
 - The accepted active background profile is `no_empirical_residual`; it forces
   both empirical residual-background scales to zero. Legacy empirical residual
   Fit 1/Fit 2 are dormant historical source machinery and are outside the
@@ -52,7 +59,8 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   does not prove launcher provenance or the intentional full-high-epsilon skip.
 - The parameterized validation-bundle wrapper remains `SOURCE REVIEWED` at
   31abff9b8ab02f715cf7d6285a8dd2f53855a5e4; that is source review only.
-- F.6.3 is `BLOCKED` pending source-reviewed E.8.2 and E.8.3, not final E.8
+- E.8.3 is `NEXT`: it remains a detached/non-production Method-A reweighting
+  audit. F.6.3 is `BLOCKED` pending source-reviewed E.8.3, not final E.8
   closure. E.8.4 is `BLOCKED` pending F.6.3; final E.8 is `BLOCKED` pending
   E.8.4 and its later runtime/visual gate; F.6.4 is `BLOCKED` pending that full
   production-impact evidence. Lifecycle-hook dispatch remains BLOCKED / DEFERRED.
@@ -78,20 +86,23 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
-E.8.2 needs a true authoritative pre-proton snapshot or producer path; it must
-not infer one from snapshots created after accepted proton cleaning. E.8.3 is
-blocked on source-reviewed E.8.2; F.6.3 is blocked on source-reviewed E.8.2 and
+E.8.2 is `SOURCE REVIEWED`, not runtime accepted: it has no ROOT/PyROOT,
+full-analysis, farm, or runtime validation claim. E.8.3 is now unblocked as the
+next detached/non-production audit. F.6.3 remains `BLOCKED` on source-reviewed
 E.8.3; E.8.4 and final E.8 remain downstream. The deferred E.8.1 settings are
 not a blocker or a failure for this roadmap.
 
 ## Next Action
 
-NEXT — E.8.2 baseline full-analysis stage audit: define the authoritative
-before/component/after missing-mass and stage-yield presentation path for
-prompt/random, dummy, slow proton, baseline pion, and final baseline canonical
-`MM_0(t,phi)`/yields. It must first obtain or consume a true authoritative
-pre-proton snapshot; current yield-level filling already applies accepted
-proton cleaning and must not be relabeled as pre-proton.
+NEXT — user-controlled commit/push of the reviewed E.8.2 source/test/memory set
+-> ChatGPT pushed-state review -> E.8.3 detached Method-A reweighting audit.
+
+E.8.3 remains detached/non-production only. It consumes accepted F.4/F.5/F.6.1/
+F.6.2 results; shows `b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`; does not
+renormalize canonical `(t,phi)` children; uses no Method-B numerical input; and
+does not activate or present empirical residual Fit 1/Fit 2. It must not construct
+the parallel full production branch: F.6.3 alone owns that work. No farm action is
+required before beginning E.8.3.
 
 ## Success Criteria
 

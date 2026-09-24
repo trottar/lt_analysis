@@ -87,6 +87,7 @@ from background_config import (
     get_proton_contamination_cleaning_config,
     resolve_pion_subtraction_scope,
     validate_bg_optimization_prepass_config,
+    get_active_bg_profile_name,
 )
 from pion_component_shapes import (
     load_kaon_simc_signal_shape,
@@ -239,9 +240,32 @@ def _clone_processed_entry(entry):
     for key, val in entry.items():
         if is_hist(val):
             cloned[key] = _clone_hist_for_plot(val)
+        elif key == "_e8_2_baseline_stage_capture":
+            cloned[key] = _clone_e8_2_detached_value(val)
         else:
             cloned[key] = val
     return cloned
+
+
+def _clone_e8_2_detached_value(value):
+    """Clone E.8.2 sidecar values without letting a cache retain ROOT aliases.
+
+    Ordinary processed-entry values retain their historical clone semantics, while
+    the new nested E.8.2 presentation capture must also detach its histogram
+    children before the optional background-optimization cache reuses it.
+    """
+    if is_hist(value):
+        return _clone_hist_for_plot(value)
+    if isinstance(value, dict):
+        return {
+            key: _clone_e8_2_detached_value(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_clone_e8_2_detached_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_clone_e8_2_detached_value(item) for item in value)
+    return value
 
 
 def _resolve_hist_background_sample_root(hist, inpDict, background_name):
@@ -1248,6 +1272,289 @@ def _init_hist_group_matrices(names, n_t, n_phi):
     }
 
 
+def _init_e8_2_capture_hists(template_hist, n_t, n_phi):
+    """Allocate detached wide-MM audit captures for the four existing sources.
+
+    These spectra are observational only.  They deliberately use the same wide
+    axis as the existing pion-stage audit and are never inserted into, or used by,
+    the production subtraction/yield histograms.
+    """
+    captures = {}
+    for source_role in ("prompt", "random", "dummy_prompt", "dummy_random"):
+        captures[source_role] = _init_hist_group_matrices(
+            ("pre_proton", "post_proton", "proton_removed"), n_t, n_phi
+        )
+    for j in range(n_t):
+        for k in range(n_phi):
+            for source_role, channels in captures.items():
+                for channel in channels:
+                    channels[channel][j][k] = clone_root_histogram(
+                        template_hist[j][k],
+                        scope="e8_2_t{}_phi{}".format(j + 1, k + 1),
+                        role="{}_{}".format(source_role, channel),
+                        name="H_E8_2_{}_{}_{}_{}".format(
+                            source_role, channel, j, k
+                        ),
+                        reset=True,
+                        sumw2=True,
+                    )
+    return captures
+
+
+def _e8_2_clone_scale(histogram, factor, role):
+    if histogram is None:
+        return None
+    clone = clone_root_histogram(
+        histogram,
+        scope="e8_2",
+        role=role,
+        name="{}_e8_2".format(role),
+        optional=True,
+        sumw2=True,
+    )
+    if clone is None:
+        return None
+    try:
+        clone.Scale(float(factor))
+    except Exception:
+        return None
+    return clone
+
+
+def _e8_2_clone_difference(left, right, role):
+    if left is None or right is None:
+        return None
+    clone = clone_root_histogram(
+        left,
+        scope="e8_2",
+        role=role,
+        name="{}_e8_2".format(role),
+        optional=True,
+        sumw2=True,
+    )
+    if clone is None:
+        return None
+    try:
+        clone.Add(right, -1.0)
+    except Exception:
+        return None
+    return clone
+
+
+def _build_e8_2_early_stage_capture(captures, j, k, n_windows, normfac_data,
+                                    normfac_dummy,
+                                    production_after_proton_pre_prune,
+                                    production_after_proton_post_prune):
+    """Build detached current-chain source-role spectra for one canonical child.
+
+    This mirrors the existing random and dummy algebra on auxiliary spectra only.
+    The two post-proton objects are cloned from the production histogram on the
+    two sides of its existing pruning treatment.  E.8.2 therefore cannot relabel
+    a diagnostic reconstruction as either authoritative production state.
+    """
+    try:
+        n_windows = float(n_windows)
+        if not math.isfinite(n_windows) or n_windows <= 0.0:
+            return None, "e8_2_random_window_count_invalid"
+        channels = {}
+        for channel in ("pre_proton", "post_proton", "proton_removed"):
+            prompt = _e8_2_clone_scale(
+                captures["prompt"][channel][j][k], normfac_data,
+                "prompt_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            random_component = _e8_2_clone_scale(
+                captures["random"][channel][j][k], normfac_data / n_windows,
+                "random_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            after_random = _e8_2_clone_difference(
+                prompt, random_component,
+                "after_random_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            dummy_prompt = _e8_2_clone_scale(
+                captures["dummy_prompt"][channel][j][k], 1.0,
+                "dummy_prompt_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            dummy_random = _e8_2_clone_scale(
+                captures["dummy_random"][channel][j][k], 1.0 / n_windows,
+                "dummy_random_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            dummy_component = _e8_2_clone_difference(
+                dummy_prompt, dummy_random,
+                "dummy_component_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            if dummy_component is not None:
+                dummy_component.Scale(float(normfac_dummy))
+            after_dummy = _e8_2_clone_difference(
+                after_random, dummy_component,
+                "after_dummy_{}_t{}_phi{}".format(channel, j + 1, k + 1),
+            )
+            if any(value is None for value in (
+                prompt, random_component, after_random, dummy_component, after_dummy,
+            )):
+                return None, "e8_2_auxiliary_source_histogram_missing"
+            channels[channel] = {
+                "prompt": prompt,
+                "random_component": random_component,
+                "after_random": after_random,
+                "dummy_component": dummy_component,
+                "after_dummy": after_dummy,
+            }
+        after_proton_pre_prune = _clone_hist_for_plot(
+            production_after_proton_pre_prune,
+            scope="e8_2",
+            role="production_after_proton_pre_prune",
+        )
+        if after_proton_pre_prune is None:
+            return None, "e8_2_production_after_proton_pre_prune_missing"
+        after_proton_post_prune = _clone_hist_for_plot(
+            production_after_proton_post_prune,
+            scope="e8_2",
+            role="production_after_proton_post_prune",
+        )
+        if after_proton_post_prune is None:
+            return None, "e8_2_production_after_proton_post_prune_missing"
+        return {
+            "prompt_pre_proton": channels["pre_proton"]["prompt"],
+            "random_component_pre_proton": channels["pre_proton"]["random_component"],
+            "after_random_pre_proton": channels["pre_proton"]["after_random"],
+            "dummy_component_pre_proton": channels["pre_proton"]["dummy_component"],
+            "after_dummy_pre_proton": channels["pre_proton"]["after_dummy"],
+            "proton_component_removed": channels["proton_removed"]["after_dummy"],
+            "after_proton_pre_prune": after_proton_pre_prune,
+            "after_proton_post_prune": after_proton_post_prune,
+            # Retained for producer-level consistency checks without being an
+            # E.8.2 presentation stage.
+            "_auxiliary_after_proton": channels["post_proton"]["after_dummy"],
+        }, None
+    except Exception as exc:
+        return None, "e8_2_early_capture_exception:{}".format(type(exc).__name__)
+
+
+def _build_e8_2_pion_stage_capture(component_payload):
+    """Select the exact accepted pion application objects, never reconstructing one."""
+    payload = component_payload if isinstance(component_payload, dict) else {}
+    accepted = bool(payload.get("accepted"))
+    child_valid = bool(payload.get("child_valid", accepted))
+    fallback_mode = payload.get("fallback_mode")
+    reason = payload.get("fallback_reason") or payload.get("reason")
+    if not accepted or not child_valid:
+        return {
+            "available": False,
+            "reason": str(reason or fallback_mode or "pion_application_unavailable"),
+            "pion_application_status": str(fallback_mode or "not_accepted"),
+            "pion_application_reason": str(reason or fallback_mode or "pion_application_unavailable"),
+            "stages": {},
+        }
+    required = {
+        "pion_input": payload.get("H_MM_nosub_before_pion_subtraction"),
+        "pion_component_removed": payload.get("H_pion_subtraction_template_MM_nosub"),
+        "after_pion_final": payload.get("H_MM_nosub_after_pion_subtraction"),
+    }
+    if any(histogram is None for histogram in required.values()):
+        return {
+            "available": False,
+            "reason": "accepted_pion_application_missing_exact_wide_object",
+            "pion_application_status": "accepted",
+            "pion_application_reason": "accepted_pion_application_missing_exact_wide_object",
+            "stages": {},
+        }
+    detached = {
+        stage: _clone_hist_for_plot(histogram, scope="e8_2", role=stage)
+        for stage, histogram in required.items()
+    }
+    if any(histogram is None for histogram in detached.values()):
+        return {
+            "available": False,
+            "reason": "accepted_pion_application_clone_failed",
+            "pion_application_status": "accepted",
+            "pion_application_reason": "accepted_pion_application_clone_failed",
+            "stages": {},
+        }
+    return {
+        "available": True,
+        "reason": None,
+        "pion_application_status": "accepted",
+        "pion_application_reason": None,
+        "stages": detached,
+    }
+
+
+def _e8_2_histogram_edges(histogram):
+    if histogram is None:
+        return None
+    try:
+        axis = histogram.GetXaxis()
+        return [
+            float(axis.GetBinLowEdge(index))
+            for index in range(1, int(histogram.GetNbinsX()) + 2)
+        ]
+    except Exception:
+        return None
+
+
+def _e8_2_histogram_content_match(left, right, tolerance=1.0e-9):
+    """Return whether two detached E.8.2 spectra agree bin-for-bin."""
+    edges = _e8_2_histogram_edges(left)
+    if edges is None or _e8_2_histogram_edges(right) != edges:
+        return False
+    try:
+        for index in range(1, int(left.GetNbinsX()) + 1):
+            left_value = float(left.GetBinContent(index))
+            right_value = float(right.GetBinContent(index))
+            if not math.isfinite(left_value) or not math.isfinite(right_value):
+                return False
+            scale = max(1.0, abs(left_value), abs(right_value))
+            if abs(left_value - right_value) / scale > float(tolerance):
+                return False
+    except Exception:
+        return False
+    return True
+
+
+def _e8_2_histogram_closure(before, component, after, tolerance=1.0e-9):
+    """Validate a signed diagnostic subtraction without modifying a spectrum."""
+    edges = _e8_2_histogram_edges(before)
+    if (
+        edges is None
+        or _e8_2_histogram_edges(component) != edges
+        or _e8_2_histogram_edges(after) != edges
+    ):
+        return False
+    try:
+        for index in range(1, int(before.GetNbinsX()) + 1):
+            before_value = float(before.GetBinContent(index))
+            component_value = float(component.GetBinContent(index))
+            after_value = float(after.GetBinContent(index))
+            if not all(math.isfinite(value) for value in (
+                before_value, component_value, after_value,
+            )):
+                return False
+            scale = max(1.0, abs(before_value), abs(component_value), abs(after_value))
+            if abs(before_value - component_value - after_value) / scale > float(tolerance):
+                return False
+    except Exception:
+        return False
+    return True
+
+
+def _e8_2_stage_integrals(stages, mm_min, mm_max):
+    ordered = (
+        "prompt_pre_proton",
+        "after_random_pre_proton",
+        "after_dummy_pre_proton",
+        "after_proton_pre_prune",
+        "after_proton_post_prune",
+        "after_pion_final",
+    )
+    return [
+        {
+            "stage": stage,
+            "value": float(integrate_hist_range(stages[stage], mm_min, mm_max)),
+        }
+        for stage in ordered
+    ]
+
+
 def _process_yield_data_tree(
     tree,
     cache_section,
@@ -1266,6 +1573,7 @@ def _process_yield_data_tree(
     update_mm_offset=False,
     source_label=None,
     proton_cleaning_result=None,
+    e8_2_capture=None,
 ):
     mm_offset_data = None
     total_entries = tree.GetEntries()
@@ -1341,6 +1649,14 @@ def _process_yield_data_tree(
             continue
 
         if nommcuts:
+            if e8_2_capture is not None:
+                e8_2_capture["pre_proton"][t_index][phi_index].Fill(adj_MM, 1.0)
+                e8_2_capture["post_proton"][t_index][phi_index].Fill(
+                    adj_MM, proton_factor
+                )
+                e8_2_capture["proton_removed"][t_index][phi_index].Fill(
+                    adj_MM, 1.0 - proton_factor
+                )
             hist_group["fit1sub"][t_index][phi_index].Fill(adj_MM, proton_factor)
             hist_group["pisub"][t_index][phi_index].Fill(adj_MM, proton_factor)
             hist_group["nosub"][t_index][phi_index].Fill(adj_MM, proton_factor)
@@ -1557,6 +1873,7 @@ def process_hist_data(
     dummy_hists = _init_hist_group_matrices(yield_hist_names, n_t, n_phi)
     rand_hists = _init_hist_group_matrices(yield_hist_names, n_t, n_phi)
     dummy_rand_hists = _init_hist_group_matrices(yield_hist_names, n_t, n_phi)
+    e8_2_capture_hists = None
 
     # Pion subtraction by scaling pion background to peak size
     if ParticleType == "kaon":
@@ -1761,6 +2078,11 @@ def process_hist_data(
                 subDict["H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k)]  \
                     = TH1D("H_MM_nosub_SUB_DUMMY_RAND_{}_{}".format(j, k),"MM_{}".format(SubtractedParticle), 100, BG_OPT_MM_PLOT_MIN, BG_OPT_MM_PLOT_MAX)
                 
+    if ParticleType == "kaon":
+        e8_2_capture_hists = _init_e8_2_capture_hists(
+            data_hists["nosub"], n_t, n_phi
+        )
+
     hole_contains = hgcer_cutg.IsInside if hgcer_cutg is not None else None
 
     print("\nBinning data...")
@@ -1782,6 +2104,7 @@ def process_hist_data(
         update_mm_offset=True,
         source_label="prompt",
         proton_cleaning_result=proton_cleaning_result,
+        e8_2_capture=(e8_2_capture_hists or {}).get("prompt"),
     )
 
     print("\nBinning dummy...")
@@ -1802,6 +2125,7 @@ def process_hist_data(
         progress_bar,
         source_label="dummy_prompt",
         proton_cleaning_result=proton_cleaning_result,
+        e8_2_capture=(e8_2_capture_hists or {}).get("dummy_prompt"),
     )
 
     print("\nBinning rand...")
@@ -1822,6 +2146,7 @@ def process_hist_data(
         progress_bar,
         source_label="rand",
         proton_cleaning_result=proton_cleaning_result,
+        e8_2_capture=(e8_2_capture_hists or {}).get("random"),
     )
 
     print("\nBinning dummy_rand...")
@@ -1842,6 +2167,7 @@ def process_hist_data(
         progress_bar,
         source_label="dummy_rand",
         proton_cleaning_result=proton_cleaning_result,
+        e8_2_capture=(e8_2_capture_hists or {}).get("dummy_random"),
     )
 
     # Component t-bin production consumes the cuts-stage pion-control cache.
@@ -1873,6 +2199,7 @@ def process_hist_data(
     n_phi = len(phi_bins) - 1
     arr_scale_factor = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]
     stage_snapshot_dict = {}
+    e8_2_early_stage_captures = [[None for _ in range(n_phi)] for _ in range(n_t)]
 
     # Per-(t,phi) fractional uncertainty from the background fits (background_fit1/2)
     bg_fit1_frac_err = [[0.0 for _ in range(n_phi)] for _ in range(n_t)]    
@@ -2019,10 +2346,33 @@ def process_hist_data(
                 hist_bin_dict["H_MM_pisub_DATA_{}_{}".format(j, k)],
                 event_threshold
             )   
+            e8_2_after_proton_pre_prune = None
+            if ParticleType == "kaon":
+                # This is the authoritative, factor-cleaned production spectrum
+                # immediately before its established pruning treatment.  It is
+                # observational only: do not reconstruct or prune this clone.
+                e8_2_after_proton_pre_prune = _clone_hist_for_plot(
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                    scope="e8_2",
+                    role="production_after_proton_pre_prune_t{}_phi{}".format(
+                        j + 1, k + 1,
+                    ),
+                )
             prune_hist(
                 hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
                 event_threshold
             )                               
+            e8_2_after_proton_post_prune = None
+            if ParticleType == "kaon":
+                # Preserve the separately owned production handoff that enters
+                # the exact accepted pion application below.
+                e8_2_after_proton_post_prune = _clone_hist_for_plot(
+                    hist_bin_dict["H_MM_nosub_DATA_{}_{}".format(j, k)],
+                    scope="e8_2",
+                    role="production_after_proton_post_prune_t{}_phi{}".format(
+                        j + 1, k + 1,
+                    ),
+                )
             prune_hist(
                 hist_bin_dict["H_MM_DATA_{}_{}".format(j, k)],
                 event_threshold
@@ -2031,6 +2381,18 @@ def process_hist_data(
                 hist_bin_dict["H_t_DATA_{}_{}".format(j, k)],
                 event_threshold
             )
+
+            if ParticleType == "kaon":
+                e8_2_early_stage_captures[j][k] = _build_e8_2_early_stage_capture(
+                    e8_2_capture_hists,
+                    j,
+                    k,
+                    nWindows,
+                    normfac_data,
+                    normfac_dummy,
+                    e8_2_after_proton_pre_prune,
+                    e8_2_after_proton_post_prune,
+                )
 
             # Pion subtraction by scaling pion background to peak size
             if ParticleType == "kaon":
@@ -2591,6 +2953,18 @@ def process_hist_data(
                 "bg_fit2_frac_err" : bg_fit2_frac_err[j][k],
                 "oversub_diagnostics" : bg_oversub_diagnostics[j][k],
             }
+            if ParticleType == "kaon":
+                early_stages, early_reason = e8_2_early_stage_captures[j][k] or (
+                    None, "e8_2_early_capture_not_created"
+                )
+                pion_stage = _build_e8_2_pion_stage_capture(component_payload)
+                processed_entry["_e8_2_baseline_stage_capture"] = {
+                    "schema_version": "e8_2_baseline_stage_source/v1",
+                    "available": bool(early_stages is not None),
+                    "reason": early_reason,
+                    "early_stages": early_stages or {},
+                    "pion_stage": pion_stage,
+                }
             processed_entry.update({
                 "H_Q2_DATA" : hist_bin_dict["H_Q2_DATA_{}_{}".format(j, k)],
                 "H_W_DATA" : hist_bin_dict["H_W_DATA_{}_{}".format(j, k)],
@@ -3189,6 +3563,188 @@ def bin_data(
 
     return binned_dict, ave_event_cache, sub_event_cache
 
+
+def _build_e8_2_baseline_stage_source(hist, processed_dict, t_bins, phi_bins,
+                                      inpDict, yield_measurements):
+    """Assemble the private E.8.2 baseline sidecar after existing yields exist.
+
+    This routine only selects detached diagnostic snapshots and existing yield
+    results.  It does not call a fit, touch a production histogram, or alter the
+    public yield dictionary.
+    """
+    profile_name = str(get_active_bg_profile_name()).strip()
+    source = {
+        "schema_version": "e8_2_baseline_stage_source/v1",
+        "available": False,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "active_profile": profile_name,
+        "setting": str(hist.get("phi_setting") or ""),
+        "epsilon": str(inpDict.get("EPSSET") or ""),
+        "t_edges": [float(value) for value in t_bins],
+        "phi_edges": [float(value) for value in phi_bins],
+        "mm_edges": None,
+        "lambda_window": [float(inpDict["mm_min"]), float(inpDict["mm_max"])],
+        "children": [],
+    }
+    if profile_name != "no_empirical_residual":
+        source["reason"] = "active_profile_not_no_empirical_residual"
+        return source
+    if len(t_bins) < 2 or len(phi_bins) < 2:
+        source["reason"] = "canonical_geometry_malformed"
+        return source
+
+    def fail_closed_for_authority(child, reason):
+        """Keep the child record while making the whole E.8.2 source unusable.
+
+        A defined zero/skip/rejected child is an authoritative presentation state.
+        By contrast, a populated current-chain child that loses an object or yield
+        authority cannot be represented faithfully and must not be downgraded to
+        an ordinary unavailable panel.
+        """
+        child["valid"] = False
+        child["reason"] = str(reason)
+        source["children"].append(child)
+        source["reason"] = str(reason)
+        return source
+
+    valid_child_count = 0
+    for j in range(len(t_bins) - 1):
+        for k in range(len(phi_bins) - 1):
+            entry = processed_dict.get("t_bin{}phi_bin{}".format(j + 1, k + 1)) or {}
+            capture = entry.get("_e8_2_baseline_stage_capture") or {}
+            early = capture.get("early_stages") or {}
+            pion = capture.get("pion_stage") or {}
+            child = {
+                "t_index": int(j),
+                "t_low": float(t_bins[j]),
+                "t_high": float(t_bins[j + 1]),
+                "phi_index": int(k),
+                "phi_low": float(phi_bins[k]),
+                "phi_high": float(phi_bins[k + 1]),
+                "valid": False,
+                "reason": None,
+                "pion_application_status": pion.get("pion_application_status"),
+                "pion_application_reason": pion.get("pion_application_reason"),
+                "stages": {},
+                "stage_window_integrals": [],
+                "final_yield": None,
+                "statistical_error": None,
+                "total_error": None,
+            }
+            current_chain_child = bool(entry.get("child_valid", True))
+            if not bool(capture.get("available")):
+                child["reason"] = str(capture.get("reason") or "early_stage_capture_unavailable")
+                if current_chain_child:
+                    return fail_closed_for_authority(
+                        child, "e8_2_authority_failure_early_stage_capture_missing"
+                    )
+                source["children"].append(child)
+                continue
+            if not bool(pion.get("available")):
+                child["reason"] = str(pion.get("reason") or "pion_stage_unavailable")
+                if pion.get("pion_application_status") == "accepted":
+                    return fail_closed_for_authority(
+                        child,
+                        "e8_2_authority_failure_{}".format(
+                            child["reason"]
+                        ),
+                    )
+                source["children"].append(child)
+                continue
+            stages = dict(early)
+            stages.update(dict(pion.get("stages") or {}))
+            required = (
+                "prompt_pre_proton", "random_component_pre_proton",
+                "after_random_pre_proton", "dummy_component_pre_proton",
+                "after_dummy_pre_proton", "proton_component_removed",
+                "after_proton_pre_prune", "after_proton_post_prune",
+                "pion_input", "pion_component_removed", "after_pion_final",
+            )
+            if any(stages.get(name) is None for name in required):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_required_stage_histogram_missing"
+                )
+            edges = _e8_2_histogram_edges(stages["after_proton_pre_prune"])
+            if (
+                edges is None
+                or _e8_2_histogram_edges(stages["after_proton_post_prune"]) != edges
+            ):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_pre_post_prune_binning_inconsistent"
+                )
+            if _e8_2_histogram_edges(stages["pion_input"]) != edges:
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_post_prune_pion_input_binning_inconsistent"
+                )
+            if any(_e8_2_histogram_edges(stages[name]) != edges for name in required):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_stage_histogram_binning_inconsistent"
+                )
+            if not _e8_2_histogram_closure(
+                stages["after_dummy_pre_proton"],
+                stages["proton_component_removed"],
+                stages["after_proton_pre_prune"],
+            ):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_pre_prune_proton_closure_failed"
+                )
+            if not _e8_2_histogram_content_match(
+                stages["after_proton_post_prune"], stages["pion_input"],
+            ):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_post_prune_pion_input_content_mismatch"
+                )
+            if source["mm_edges"] is None:
+                source["mm_edges"] = edges
+            elif source["mm_edges"] != edges:
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_canonical_mm_binning_inconsistent"
+                )
+            measurement = yield_measurements.get((j, k))
+            if not isinstance(measurement, dict):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_final_yield_missing"
+                )
+            try:
+                final_yield = float(measurement["yield"])
+                stat_error = float(measurement["statistical_error"])
+                total_error = float(measurement["total_error"])
+            except (KeyError, TypeError, ValueError):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_final_yield_malformed"
+                )
+            if not all(math.isfinite(value) for value in (final_yield, stat_error, total_error)):
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_final_yield_nonfinite"
+                )
+            try:
+                child["stage_window_integrals"] = _e8_2_stage_integrals(
+                    stages, float(inpDict["mm_min"]), float(inpDict["mm_max"])
+                )
+            except Exception:
+                return fail_closed_for_authority(
+                    child, "e8_2_authority_failure_stage_window_integral_unavailable"
+                )
+            child.update({
+                "valid": True,
+                "reason": None,
+                "stages": {name: stages[name] for name in required},
+                "final_yield": final_yield,
+                "statistical_error": stat_error,
+                "total_error": total_error,
+            })
+            valid_child_count += 1
+            source["children"].append(child)
+    if source["mm_edges"] is None:
+        source["reason"] = "no_valid_e8_2_canonical_child"
+        return source
+    source["available"] = True
+    source["reason"] = None
+    source["valid_child_count"] = int(valid_child_count)
+    return source
+
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
@@ -3303,6 +3859,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     nphi = len(phi_bins) - 1
     yield_hist = []
     yield_err_hist = []
+    e8_2_yield_measurements = {}
     binned_sub_data = [[],[]]
     i=0 # iter
     print("-"*25)
@@ -3312,6 +3869,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Data is dummy, background (if used) subtracted and normalized
         bin_val_data, hist_val_data = data
         arr_data = np.array(hist_val_data)
+        yld_stat_err = float("nan")
         try:
             yld, yld_stat_err = integral_with_stat_error(final_hist)
             dummy_yld, _ = integral_with_stat_error(dummy_hist)
@@ -3343,6 +3901,11 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             yld_err = -1000.0
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
+        e8_2_yield_measurements[(j, k)] = {
+            "yield": float(yld),
+            "statistical_error": float(yld_stat_err),
+            "total_error": float(yld_err),
+        }
         binned_sub_data[0].append(bin_val_data)
         binned_sub_data[1].append(arr_data)
         i+=1
@@ -3394,6 +3957,15 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         }            
     if invalid_child_bins:
         hist.setdefault("_pion_invalid_child_bins", []).extend(invalid_child_bins)
+    if str(inpDict.get("ParticleType", "")).strip().lower() == "kaon":
+        hist["_e8_2_baseline_stage_source"] = _build_e8_2_baseline_stage_source(
+            hist,
+            hist["_yield_data_processed_dict"],
+            t_bins,
+            phi_bins,
+            inpDict,
+            e8_2_yield_measurements,
+        )
             
     return groups
 

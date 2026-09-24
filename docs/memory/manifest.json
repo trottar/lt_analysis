@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 6597,
+      "bytes": 7383,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "fdff3dca1e3e03fce539e666f53ad74888e710b2ad6ca58b58860440cdb0e239"
+      "sha256": "19fcb243afc8c8f8170b427a81b68013dee6b267e79a3ddd48d5ad41e3471ce7"
     },
     {
       "bytes": 1978,
@@ -434,6 +434,36 @@
       "bytes": 8209,
       "path": "docs/memory/phases/e8-1-fix6-source-review-reconciliation-task-contract.md",
       "sha256": "478a2093ec0a4ef8309c0196a8b5073387f74615cb9fbcc81397fb43abbfc1ad"
+    },
+    {
+      "bytes": 23109,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit-fix1-task-contract.md",
+      "sha256": "2be64968ec2229e78f792d99124b40820213969e1a91f6f3aa3efca3eef7b51d"
+    },
+    {
+      "bytes": 26058,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit-fix2-task-contract.md",
+      "sha256": "ad920cbacefa2a55d276ab918dde64eee75f251c80d3babbd3ed06038cc4af22"
+    },
+    {
+      "bytes": 14068,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit-fix3-task-contract.md",
+      "sha256": "29377ea4bdc8aefb02998ddadc7328d03c9dd42afd6fa5e852277848d507578f"
+    },
+    {
+      "bytes": 15063,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit-source-review-reconciliation-task-contract.md",
+      "sha256": "407b005da8b8b8a058b4eb6450b6f6553cdedfbd28e17e236ff19b4aa8ff65fb"
+    },
+    {
+      "bytes": 32420,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit-task-contract.md",
+      "sha256": "bb3824ab0a55aa479c17f44c29b68240d46aa53b5f6b2d6786ea1db2c136ea78"
+    },
+    {
+      "bytes": 16050,
+      "path": "docs/memory/phases/e8-2-baseline-stage-audit.md",
+      "sha256": "50357c9189269d0056e01761f37dcea5672981531da0a113f0c48ee2a7df886f"
     },
     {
       "bytes": 9799,

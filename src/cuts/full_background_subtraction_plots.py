@@ -13,6 +13,7 @@ import hashlib
 import json
 import math
 import os
+import shutil
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -42,6 +43,8 @@ FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 # second calculation of the acceptance-refinement diagnostics.  These values
 # are the approved Q4p4W2p74 authority; a same-schema file is not sufficient.
 E8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8/v1"
+E8_2_SOURCE_SCHEMA_VERSION = "e8_2_baseline_stage_source/v1"
+E8_2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_2/v1"
 E8_F6_2_INPUT_SHA256 = "5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1"
 E8_F6_2_ARTIFACT_SCHEMA = (
     "pion_hgcer_method_a_acceptance_refinement_validation_artifact/v1"
@@ -5422,6 +5425,542 @@ def _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, payload,
             failures.append("E.8 {} page unavailable for {}".format(page_id.rsplit(".", 1)[-1], scope))
 
 
+def _e8_2_histogram_edges(histogram):
+    if histogram is None:
+        return None
+    try:
+        axis = histogram.GetXaxis()
+        return [
+            float(axis.GetBinLowEdge(index))
+            for index in range(1, int(histogram.GetNbinsX()) + 2)
+        ]
+    except Exception:
+        return None
+
+
+def _e8_2_histogram_closure(before, component, after, tolerance=1.0e-9):
+    """Validate a signed before-component-after relation without modifying it."""
+    edges = _e8_2_histogram_edges(before)
+    if (
+        edges is None
+        or _e8_2_histogram_edges(component) != edges
+        or _e8_2_histogram_edges(after) != edges
+    ):
+        return False
+    maximum = 0.0
+    try:
+        for index in range(1, int(before.GetNbinsX()) + 1):
+            residual = (
+                float(before.GetBinContent(index))
+                - float(component.GetBinContent(index))
+                - float(after.GetBinContent(index))
+            )
+            scale = max(
+                1.0,
+                abs(float(before.GetBinContent(index))),
+                abs(float(component.GetBinContent(index))),
+                abs(float(after.GetBinContent(index))),
+            )
+            maximum = max(maximum, abs(residual) / scale)
+    except Exception:
+        return False
+    return maximum <= float(tolerance)
+
+
+def _e8_2_histogram_content_match(left, right, tolerance=1.0e-9):
+    """Validate the exact production-to-pion handoff without deriving either side."""
+    edges = _e8_2_histogram_edges(left)
+    if edges is None or _e8_2_histogram_edges(right) != edges:
+        return False
+    try:
+        for index in range(1, int(left.GetNbinsX()) + 1):
+            left_value = float(left.GetBinContent(index))
+            right_value = float(right.GetBinContent(index))
+            if not math.isfinite(left_value) or not math.isfinite(right_value):
+                return False
+            scale = max(1.0, abs(left_value), abs(right_value))
+            if abs(left_value - right_value) / scale > float(tolerance):
+                return False
+    except Exception:
+        return False
+    return True
+
+
+def _e8_2_unavailable(reason):
+    return {
+        "schema_version": E8_2_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "active_profile": None,
+        "setting": None,
+        "epsilon": None,
+        "t_edges": [],
+        "phi_edges": [],
+        "mm_edges": [],
+        "lambda_window": [],
+        "per_t": (),
+    }
+
+
+def build_full_background_subtraction_e8_2_payload(source):
+    """Detach and validate the E.8.2 current-baseline audit source.
+
+    E.8.2 is deliberately a reader of the producer-side sidecar.  In particular,
+    this builder never calls a fit, resolves a pion weight, or derives a missing
+    component from the displayed before/after pair.
+    """
+    source = _mapping(source)
+    if source.get("schema_version") != E8_2_SOURCE_SCHEMA_VERSION:
+        return _e8_2_unavailable("e8_2_source_schema_invalid")
+    if source.get("available") is not True:
+        return _e8_2_unavailable(source.get("reason") or "e8_2_source_unavailable")
+    if source.get("active_profile") != "no_empirical_residual":
+        return _e8_2_unavailable("active_profile_not_no_empirical_residual")
+    t_edges = _strict_edges(source.get("t_edges"))
+    phi_edges = _strict_edges(source.get("phi_edges"))
+    mm_edges = _strict_edges(source.get("mm_edges"))
+    lambda_window = source.get("lambda_window")
+    if (
+        t_edges is None or phi_edges is None or mm_edges is None
+        or not isinstance(lambda_window, Sequence) or len(lambda_window) != 2
+    ):
+        return _e8_2_unavailable("e8_2_canonical_geometry_invalid")
+    try:
+        lambda_window = [float(value) for value in lambda_window]
+    except (TypeError, ValueError):
+        return _e8_2_unavailable("e8_2_lambda_window_invalid")
+    if (
+        not all(math.isfinite(value) for value in lambda_window)
+        or lambda_window[1] <= lambda_window[0]
+    ):
+        return _e8_2_unavailable("e8_2_lambda_window_invalid")
+    source_children = tuple(source.get("children") or ())
+    if len(source_children) != (len(t_edges) - 1) * (len(phi_edges) - 1):
+        return _e8_2_unavailable("e8_2_child_inventory_invalid")
+    required = (
+        "prompt_pre_proton", "random_component_pre_proton",
+        "after_random_pre_proton", "dummy_component_pre_proton",
+        "after_dummy_pre_proton", "proton_component_removed",
+        "after_proton_pre_prune", "after_proton_post_prune", "pion_input",
+        "pion_component_removed", "after_pion_final",
+    )
+    expected_coordinates = {
+        (t_index, phi_index)
+        for t_index in range(len(t_edges) - 1)
+        for phi_index in range(len(phi_edges) - 1)
+    }
+    children_by_t = [[] for _unused in range(len(t_edges) - 1)]
+    seen = set()
+    for raw_child in source_children:
+        child = _mapping(raw_child)
+        try:
+            t_index = int(child.get("t_index"))
+            phi_index = int(child.get("phi_index"))
+        except (TypeError, ValueError):
+            return _e8_2_unavailable("e8_2_child_coordinate_invalid")
+        coordinate = (t_index, phi_index)
+        if coordinate not in expected_coordinates or coordinate in seen:
+            return _e8_2_unavailable("e8_2_child_inventory_invalid")
+        seen.add(coordinate)
+        if (
+            child.get("t_low") != t_edges[t_index]
+            or child.get("t_high") != t_edges[t_index + 1]
+            or child.get("phi_low") != phi_edges[phi_index]
+            or child.get("phi_high") != phi_edges[phi_index + 1]
+            or type(child.get("valid")) is not bool
+        ):
+            return _e8_2_unavailable("e8_2_child_geometry_invalid")
+        presentation_child = {
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "phi_index": phi_index,
+            "phi_low": float(phi_edges[phi_index]),
+            "phi_high": float(phi_edges[phi_index + 1]),
+            "valid": bool(child["valid"]),
+            "reason": child.get("reason"),
+            "pion_application_status": child.get("pion_application_status"),
+            "pion_application_reason": child.get("pion_application_reason"),
+            "stages": {},
+            "stage_window_integrals": tuple(),
+            "final_yield": child.get("final_yield"),
+            "statistical_error": child.get("statistical_error"),
+            "total_error": child.get("total_error"),
+        }
+        if presentation_child["valid"]:
+            stages = _mapping(child.get("stages"))
+            if set(stages) != set(required):
+                return _e8_2_unavailable("e8_2_valid_child_stage_inventory_invalid")
+            if any(stages.get(name) is None for name in required):
+                return _e8_2_unavailable("e8_2_required_stage_histogram_missing")
+            if any(_e8_2_histogram_edges(stages[name]) != mm_edges for name in required):
+                return _e8_2_unavailable("e8_2_stage_histogram_binning_inconsistent")
+            if not (
+                _e8_2_histogram_closure(
+                    stages["prompt_pre_proton"],
+                    stages["random_component_pre_proton"],
+                    stages["after_random_pre_proton"],
+                )
+                and _e8_2_histogram_closure(
+                    stages["after_random_pre_proton"],
+                    stages["dummy_component_pre_proton"],
+                    stages["after_dummy_pre_proton"],
+                )
+                and _e8_2_histogram_closure(
+                    stages["after_dummy_pre_proton"],
+                    stages["proton_component_removed"],
+                    stages["after_proton_pre_prune"],
+                )
+                and _e8_2_histogram_closure(
+                    stages["pion_input"],
+                    stages["pion_component_removed"],
+                    stages["after_pion_final"],
+                )
+            ):
+                return _e8_2_unavailable("e8_2_stage_closure_failed")
+            if not _e8_2_histogram_content_match(
+                stages["after_proton_post_prune"], stages["pion_input"],
+            ):
+                return _e8_2_unavailable("e8_2_post_prune_pion_input_mismatch")
+            clones = {
+                name: _clone_display_histogram(
+                    stages[name], "H_full_background_e8_2_{}_t{}_phi{}".format(
+                        name, t_index + 1, phi_index + 1,
+                    )
+                )
+                for name in required
+            }
+            if any(value is None for value in clones.values()):
+                return _e8_2_unavailable("e8_2_stage_histogram_clone_failed")
+            values = (
+                presentation_child["final_yield"],
+                presentation_child["statistical_error"],
+                presentation_child["total_error"],
+            )
+            try:
+                values = tuple(float(value) for value in values)
+            except (TypeError, ValueError):
+                return _e8_2_unavailable("e8_2_final_yield_authority_missing")
+            if not all(math.isfinite(value) for value in values):
+                return _e8_2_unavailable("e8_2_final_yield_authority_missing")
+            integrals = tuple(child.get("stage_window_integrals") or ())
+            expected_stages = (
+                "prompt_pre_proton", "after_random_pre_proton",
+                "after_dummy_pre_proton", "after_proton_pre_prune",
+                "after_proton_post_prune", "after_pion_final",
+            )
+            if (
+                len(integrals) != len(expected_stages)
+                or tuple(_mapping(row).get("stage") for row in integrals) != expected_stages
+            ):
+                return _e8_2_unavailable("e8_2_stage_window_integrals_invalid")
+            try:
+                tuple(float(_mapping(row)["value"]) for row in integrals)
+            except (KeyError, TypeError, ValueError):
+                return _e8_2_unavailable("e8_2_stage_window_integrals_invalid")
+            presentation_child.update({
+                "stages": clones,
+                "stage_window_integrals": tuple(
+                    {"stage": str(_mapping(row)["stage"]), "value": float(_mapping(row)["value"])}
+                    for row in integrals
+                ),
+                "final_yield": values[0],
+                "statistical_error": values[1],
+                "total_error": values[2],
+            })
+        children_by_t[t_index].append(presentation_child)
+    if seen != expected_coordinates:
+        return _e8_2_unavailable("e8_2_child_inventory_invalid")
+    per_t = []
+    for t_index, children in enumerate(children_by_t):
+        children.sort(key=lambda item: item["phi_index"])
+        per_t.append({
+            "t_index": t_index,
+            "t_low": float(t_edges[t_index]),
+            "t_high": float(t_edges[t_index + 1]),
+            "children": tuple(children),
+        })
+    return {
+        "schema_version": E8_2_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "active_profile": "no_empirical_residual",
+        "setting": str(source.get("setting") or ""),
+        "epsilon": str(source.get("epsilon") or ""),
+        "t_edges": list(t_edges),
+        "phi_edges": list(phi_edges),
+        "mm_edges": list(mm_edges),
+        "lambda_window": list(lambda_window),
+        "per_t": tuple(per_t),
+    }
+
+
+def _e8_2_page_record(payload, group, page_id, semantic_stage):
+    children = tuple(group.get("children") or ())
+    return {
+        "page_id": page_id,
+        "schema_version": E8_2_PRESENTATION_SCHEMA_VERSION,
+        "semantic_stage": semantic_stage,
+        "scope": "t{}".format(int(group["t_index"]) + 1),
+        "setting": payload.get("setting"),
+        "epsilon": payload.get("epsilon"),
+        "t_index": int(group["t_index"]),
+        "t_edges": [float(group["t_low"]), float(group["t_high"])],
+        "represented_phi_inventory": [
+            {
+                "phi_index": int(child["phi_index"]),
+                "phi_edges": [float(child["phi_low"]), float(child["phi_high"])],
+            }
+            for child in children
+        ],
+        "invalid_unavailable_children": [
+            {
+                "phi_index": int(child["phi_index"]),
+                "reason": str(child.get("reason") or "unavailable"),
+            }
+            for child in children if not child.get("valid")
+        ],
+        "authoritative": False,
+        "presentation_only": True,
+    }
+
+
+def _e8_2_draw_unavailable(ROOT, reason):
+    text = ROOT.TPaveText(0.12, 0.36, 0.88, 0.64, "NDC")
+    text.SetFillStyle(0)
+    text.SetBorderSize(1)
+    text.SetTextAlign(22)
+    text.SetTextSize(0.045)
+    text.AddText("E.8.2 child unavailable")
+    text.AddText(str(reason or "unspecified reason"))
+    text.Draw()
+    return text
+
+
+def _e8_2_draw_lambda_window(ROOT, histogram, window):
+    try:
+        y_low = float(histogram.GetMinimum())
+        y_high = float(histogram.GetMaximum())
+    except Exception:
+        return ()
+    lines = []
+    for value in window:
+        line = ROOT.TLine(float(value), y_low, float(value), y_high)
+        line.SetLineStyle(2)
+        line.SetLineColor(getattr(ROOT, "kBlue", 4))
+        line.Draw()
+        lines.append(line)
+    return tuple(lines)
+
+
+def _e8_2_render_subtraction_page(ROOT, pdf_name, payload, group, *, page_id,
+                                  semantic_stage, title, columns, manifest):
+    children = tuple(group.get("children") or ())
+    if not children or not hasattr(ROOT, "TCanvas"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_{}_t{}".format(page_id.replace(".", "_"), int(group["t_index"]) + 1),
+        title, 1800, max(600, 360 * len(children)),
+    )
+    canvas.Divide(len(columns), len(children))
+    retained = []
+    try:
+        for row_index, child in enumerate(children):
+            stage_hists = _mapping(child.get("stages"))
+            y_range = _combined_histogram_y_range(
+                [stage_hists.get(stage) for _label, stage in columns]
+            )
+            for column_index, (label, stage) in enumerate(columns):
+                canvas.cd(row_index * len(columns) + column_index + 1)
+                if not child.get("valid"):
+                    retained.append(_e8_2_draw_unavailable(ROOT, child.get("reason")))
+                    continue
+                histogram = _clone_display_histogram(
+                    stage_hists.get(stage), "H_{}_t{}_phi{}".format(
+                        page_id.replace(".", "_"), int(group["t_index"]) + 1,
+                        int(child["phi_index"]) + 1,
+                    )
+                )
+                if histogram is None:
+                    return False
+                _set_histogram_title(
+                    histogram,
+                    "{};Missing mass [GeV];Signed normalized yield".format(label),
+                )
+                _style_histogram(histogram, getattr(ROOT, "kBlack", 1))
+                _apply_display_y_range(histogram, y_range)
+                histogram.Draw("hist e")
+                retained.append(histogram)
+                retained.extend(_e8_2_draw_lambda_window(
+                    ROOT, histogram, payload["lambda_window"]
+                ))
+                note = _draw_small_note(
+                    ROOT, "phi {} = [{:.1f}, {:.1f}] deg".format(
+                        int(child["phi_index"]) + 1,
+                        float(child["phi_low"]), float(child["phi_high"]),
+                    ),
+                )
+                retained.append(note)
+        retained.append(_draw_page_header(ROOT, canvas, title, group))
+        canvas._full_background_e8_2_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    manifest.append(_e8_2_page_record(payload, group, page_id, semantic_stage))
+    return True
+
+
+def _e8_2_render_final_mm_page(ROOT, pdf_name, payload, group, manifest):
+    children = tuple(group.get("children") or ())
+    if not children or not hasattr(ROOT, "TCanvas"):
+        return False
+    columns = min(3, len(children))
+    rows = int(math.ceil(float(len(children)) / float(columns)))
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_2_final_mm_t{}".format(int(group["t_index"]) + 1),
+        "E.8.2 final baseline missing mass", 1600, max(700, 500 * rows),
+    )
+    canvas.Divide(columns, rows)
+    retained = []
+    try:
+        for index, child in enumerate(children):
+            canvas.cd(index + 1)
+            if not child.get("valid"):
+                retained.append(_e8_2_draw_unavailable(ROOT, child.get("reason")))
+                continue
+            histogram = _clone_display_histogram(
+                _mapping(child.get("stages")).get("after_pion_final"),
+                "H_full_background_e8_2_final_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ),
+            )
+            if histogram is None:
+                return False
+            _set_histogram_title(
+                histogram, "Final baseline MM_0;Missing mass [GeV];Signed normalized yield"
+            )
+            _style_histogram(histogram, getattr(ROOT, "kBlack", 1))
+            histogram.Draw("hist e")
+            retained.append(histogram)
+            retained.extend(_e8_2_draw_lambda_window(ROOT, histogram, payload["lambda_window"]))
+            note = _draw_small_note(
+                ROOT,
+                "phi {} [{:.1f}, {:.1f}] deg; Y_0={:.5g}; stat={:.3g}; total={:.3g}".format(
+                    int(child["phi_index"]) + 1, float(child["phi_low"]),
+                    float(child["phi_high"]), float(child["final_yield"]),
+                    float(child["statistical_error"]), float(child["total_error"]),
+                ),
+            )
+            retained.append(note)
+        retained.append(_draw_page_header(ROOT, canvas, "E.8.2 final baseline clean kaon MM_0", group))
+        canvas._full_background_e8_2_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    manifest.append(_e8_2_page_record(
+        payload, group, "full_background.e8_2.final_mm.t{}".format(int(group["t_index"]) + 1),
+        "final_baseline_mm",
+    ))
+    return True
+
+
+def _e8_2_render_stage_yield_page(ROOT, pdf_name, payload, group, manifest):
+    if not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPaveText"):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_2_stage_yields_t{}".format(int(group["t_index"]) + 1),
+        "E.8.2 baseline stage-window audit", 1700, 1000,
+    )
+    text = None
+    try:
+        text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
+        text.SetFillStyle(0)
+        text.SetBorderSize(0)
+        text.SetTextAlign(12)
+        text.SetTextSize(0.028)
+        text.AddText("E.8.2 diagnostic Lambda-window integrals (not final extracted yields)")
+        for child in tuple(group.get("children") or ()):
+            if not child.get("valid"):
+                text.AddText("phi {} unavailable: {}".format(
+                    int(child["phi_index"]) + 1, child.get("reason")
+                ))
+                continue
+            fields = ", ".join(
+                "{}={:.5g}".format(row["stage"], float(row["value"]))
+                for row in tuple(child.get("stage_window_integrals") or ())
+            )
+            text.AddText("phi {} [{:.1f}, {:.1f}] deg: {}".format(
+                int(child["phi_index"]) + 1, float(child["phi_low"]),
+                float(child["phi_high"]), fields,
+            ))
+            text.AddText("  final authoritative Y_0={:.5g}; statistical={:.3g}; existing total={:.3g}".format(
+                float(child["final_yield"]), float(child["statistical_error"]),
+                float(child["total_error"]),
+            ))
+        text.Draw()
+        header = _draw_page_header(ROOT, canvas, "E.8.2 baseline stage-yield audit", group)
+        canvas._full_background_e8_2_draw_objects = (text, header)
+        canvas.Print(pdf_name)
+    finally:
+        canvas.Close()
+    manifest.append(_e8_2_page_record(
+        payload, group, "full_background.e8_2.stage_yields.t{}".format(int(group["t_index"]) + 1),
+        "baseline_stage_yields",
+    ))
+    return True
+
+
+def _render_full_background_subtraction_e8_2_pages(ROOT, pdf_name, payload, manifest, failures):
+    page_specs = (
+        (
+            "random", "random_subtraction", "E.8.2 random subtraction",
+            (("prompt pre-proton", "prompt_pre_proton"),
+             ("random component removed", "random_component_pre_proton"),
+             ("after random pre-proton", "after_random_pre_proton")),
+        ),
+        (
+            "dummy", "dummy_subtraction", "E.8.2 dummy subtraction",
+            (("after random pre-proton", "after_random_pre_proton"),
+             ("dummy component removed", "dummy_component_pre_proton"),
+             ("after dummy pre-proton", "after_dummy_pre_proton")),
+        ),
+        (
+            "proton", "slow_proton_cleaning",
+            "E.8.2 slow-proton closure; production prune_hist lies between columns 3 and 4",
+            (("after dummy pre-proton", "after_dummy_pre_proton"),
+             ("proton component removed", "proton_component_removed"),
+             ("production after proton, pre-prune", "after_proton_pre_prune"),
+             ("after existing production prune_hist; pion input state",
+              "after_proton_post_prune")),
+        ),
+        (
+            "pion", "baseline_pion_subtraction", "E.8.2 baseline pion subtraction w0",
+            (("proton-cleaned pion input", "pion_input"),
+             ("exact baseline pion component B_pi^0", "pion_component_removed"),
+             ("final baseline clean kaon K_0", "after_pion_final")),
+        ),
+    )
+    for group in tuple(payload.get("per_t") or ()):
+        group = _mapping(group)
+        t_number = int(group.get("t_index", -1)) + 1
+        for suffix, semantic_stage, title, columns in page_specs:
+            page_id = "full_background.e8_2.{}.t{}".format(suffix, t_number)
+            if not _e8_2_render_subtraction_page(
+                ROOT, pdf_name, payload, group, page_id=page_id,
+                semantic_stage=semantic_stage, title=title, columns=columns,
+                manifest=manifest,
+            ):
+                failures.append("E.8.2 {} page unavailable for t{}".format(suffix, t_number))
+        if not _e8_2_render_final_mm_page(ROOT, pdf_name, payload, group, manifest):
+            failures.append("E.8.2 final-MM page unavailable for t{}".format(t_number))
+        if not _e8_2_render_stage_yield_page(ROOT, pdf_name, payload, group, manifest):
+            failures.append("E.8.2 stage-yield page unavailable for t{}".format(t_number))
+
+
 def _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, payload):
     return _e8_text_page(
         ROOT,
@@ -5456,6 +5995,7 @@ def render_full_background_subtraction_procedure_pages(
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
     e7_payload=None, f1_payload=None, e72_payload=None, e8_payload=None,
+    e8_2_payload=None,
     page_manifest=None,
 ):
     """Append retained D.6-D.9 pages followed by the frozen E.8 final section.
@@ -5471,6 +6011,7 @@ def render_full_background_subtraction_procedure_pages(
     d8 = _mapping(d8_payload)
     d9 = _mapping(d9_payload)
     e8 = _mapping(e8_payload) if e8_payload is not None else _e8_unavailable("frozen_f6_2_payload_not_supplied")
+    e8_2 = _mapping(e8_2_payload) if e8_2_payload is not None else None
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_available = bool(d8.get("available"))
@@ -5541,6 +6082,15 @@ def render_full_background_subtraction_procedure_pages(
             result["failures"].append("E.8 context page unavailable")
         for parent in tuple(e8.get("parents") or ()):
             _render_full_background_subtraction_e8_parent_pages(ROOT, pdf_name, e8, _mapping(parent), manifest, result["failures"])
+        if e8_2 is not None:
+            if e8_2.get("available") is True:
+                _render_full_background_subtraction_e8_2_pages(
+                    ROOT, pdf_name, e8_2, manifest, result["failures"]
+                )
+            else:
+                result["failures"].append(
+                    "E.8.2 procedure input unavailable: {}".format(e8_2.get("reason"))
+                )
         if _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, e8):
             manifest.append({"page_id": "full_background.e8.handoff", "scope": "setting", "authoritative": False})
         else:
@@ -5550,6 +6100,295 @@ def render_full_background_subtraction_procedure_pages(
     else:
         result["failures"].append("E.8 unavailable page rendering failed: {}".format(e8.get("reason")))
     return result
+
+
+def _e8_2_detach_render_value(value, label="value"):
+    """Detach a Step-3 render input, including nested ROOT histograms."""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, Mapping):
+        return {
+            key: _e8_2_detach_render_value(item, "{}_{}".format(label, key))
+            for key, item in value.items()
+        }
+    if isinstance(value, tuple):
+        return tuple(
+            _e8_2_detach_render_value(item, "{}_{}".format(label, index))
+            for index, item in enumerate(value)
+        )
+    if isinstance(value, list):
+        return [
+            _e8_2_detach_render_value(item, "{}_{}".format(label, index))
+            for index, item in enumerate(value)
+        ]
+    if hasattr(value, "Clone"):
+        clone = _clone_display_histogram(value, "H_e8_2_render_state_{}".format(label))
+        if clone is None:
+            raise ValueError("e8_2_render_state_histogram_clone_failed")
+        return clone
+    # Existing payloads include immutable scalar/array-like diagnostic values.
+    # They are not later scientific inputs; retaining such a value is safer than
+    # coercing it into a new numerical representation.
+    return value
+
+
+def capture_full_background_subtraction_e8_2_render_state(
+    *, pdf_path, page_manifest_path, page_manifest_setting, payloads,
+):
+    """Freeze the Step-3 procedure inputs needed for a post-yield rerender."""
+    required = (
+        "d6", "d7", "d8", "d9", "d10", "d11", "e2", "e3", "e4",
+        "e6", "e7", "f1", "e72", "e8",
+    )
+    if not isinstance(payloads, Mapping) or any(key not in payloads for key in required):
+        raise ValueError("e8_2_render_state_payload_inventory_invalid")
+    if not all(isinstance(path, str) and path for path in (pdf_path, page_manifest_path)):
+        raise ValueError("e8_2_render_state_paths_invalid")
+    return {
+        "schema_version": "e8_2_full_background_render_state/v1",
+        "pdf_path": str(pdf_path),
+        "page_manifest_path": str(page_manifest_path),
+        "page_manifest_setting": _e8_2_detach_render_value(
+            page_manifest_setting, "page_manifest_setting"
+        ),
+        "payloads": {
+            key: _e8_2_detach_render_value(payloads[key], key)
+            for key in required
+        },
+    }
+
+
+def _e8_2_temporary_path(path, tag):
+    root, extension = os.path.splitext(os.fspath(path))
+    return "{}.{}{}".format(root, tag, extension)
+
+
+def _e8_2_remove_temporary_file(path):
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+    except OSError:
+        pass
+
+
+def _e8_2_copy_recovery_file(source_path, destination_path):
+    """Copy a closed preliminary artifact to or from a private recovery path."""
+    if not os.path.isfile(source_path):
+        raise FileNotFoundError("e8_2_recovery_source_missing:{}".format(source_path))
+    shutil.copy2(source_path, destination_path)
+    if not os.path.isfile(destination_path):
+        raise RuntimeError("e8_2_recovery_copy_missing:{}".format(destination_path))
+
+
+def _e8_2_restore_preliminary_pair(pdf_path, manifest_path,
+                                    recovery_pdf, recovery_manifest):
+    """Restore both preliminary artifacts and report every recovery failure."""
+    recovery_errors = []
+    for source_path, destination_path, artifact_name in (
+        (recovery_pdf, pdf_path, "pdf"),
+        (recovery_manifest, manifest_path, "manifest"),
+    ):
+        try:
+            _e8_2_copy_recovery_file(source_path, destination_path)
+        except Exception as exc:
+            recovery_errors.append(
+                "{}_restore:{}:{}".format(
+                    artifact_name, type(exc).__name__, exc,
+                )
+            )
+    return not recovery_errors, recovery_errors
+
+
+def finalize_full_background_subtraction_e8_2(hist):
+    """Replace the preliminary pair only after post-yield rendering succeeds.
+
+    It consumes retained presentation state plus the private yield-sidecar only;
+    it never replays trees, fits a model, or recalculates a yield.
+
+    Filesystems cannot atomically replace two names together.  The preliminary
+    PDF and manifest are therefore copied to recovery paths before either final
+    artifact is installed, and both are restored on a handled partial failure.
+    """
+    if not isinstance(hist, Mapping):
+        return {"status": "unavailable", "reason": "e8_2_histogram_state_invalid"}
+    state = hist.get("_e8_2_full_background_render_state")
+    if not isinstance(state, Mapping):
+        status = {"status": "unavailable", "reason": "e8_2_step3_render_state_missing"}
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    source = hist.get("_e8_2_baseline_stage_source")
+    presentation = build_full_background_subtraction_e8_2_payload(source)
+    if presentation.get("available") is not True:
+        status = {
+            "status": "unavailable",
+            "reason": presentation.get("reason") or "e8_2_presentation_source_unavailable",
+            "production_objects_mutated": False,
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    payloads = _mapping(state.get("payloads"))
+    pdf_path = state.get("pdf_path")
+    manifest_path = state.get("page_manifest_path")
+    if (
+        state.get("schema_version") != "e8_2_full_background_render_state/v1"
+        or not pdf_path or not manifest_path
+    ):
+        status = {"status": "unavailable", "reason": "e8_2_step3_render_state_invalid"}
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    temporary_pdf = _e8_2_temporary_path(pdf_path, "e8_2.tmp")
+    temporary_manifest = _e8_2_temporary_path(manifest_path, "e8_2.tmp")
+    recovery_pdf = _e8_2_temporary_path(pdf_path, "e8_2.recovery")
+    recovery_manifest = _e8_2_temporary_path(manifest_path, "e8_2.recovery")
+    _e8_2_remove_temporary_file(temporary_pdf)
+    _e8_2_remove_temporary_file(temporary_manifest)
+    _e8_2_remove_temporary_file(recovery_pdf)
+    _e8_2_remove_temporary_file(recovery_manifest)
+    preliminary_pair_exists = bool(
+        os.path.isfile(pdf_path) and os.path.isfile(manifest_path)
+    )
+    opened = False
+    manifest = []
+    failures = []
+    try:
+        opened = open_full_background_subtraction_pdf(temporary_pdf)
+        if not opened:
+            raise RuntimeError("e8_2_pyroot_rendering_unavailable")
+        rendered = render_full_background_subtraction_procedure_pages(
+            temporary_pdf,
+            payloads.get("d6"), payloads.get("d7"), payloads.get("d8"),
+            payloads.get("d9"), payloads.get("d10"), payloads.get("d11"),
+            e2_payload=payloads.get("e2"), e3_payload=payloads.get("e3"),
+            e4_payload=payloads.get("e4"), e6_payload=payloads.get("e6"),
+            e7_payload=payloads.get("e7"), f1_payload=payloads.get("f1"),
+            e72_payload=payloads.get("e72"), e8_payload=payloads.get("e8"),
+            e8_2_payload=presentation, page_manifest=manifest,
+        )
+        failures.extend(rendered.get("failures") or ())
+        if close_full_background_subtraction_pdf(temporary_pdf) is not True:
+            raise RuntimeError("e8_2_temporary_pdf_close_failed")
+        opened = False
+        if failures:
+            _e8_2_remove_temporary_file(temporary_pdf)
+            _e8_2_remove_temporary_file(temporary_manifest)
+            status = {
+                "status": "unavailable",
+                "reason": "e8_2_renderer_failures",
+                "renderer_failures": list(failures),
+                "production_objects_mutated": False,
+                "preliminary_artifact_preserved": preliminary_pair_exists,
+            }
+            hist["_e8_2_full_background_finalization_status"] = status
+            return status
+        artifact = build_full_background_subtraction_page_manifest_artifact(
+            setting=state.get("page_manifest_setting"),
+            pdf_basename=os.path.basename(pdf_path),
+            pages=manifest,
+            renderer_failures=failures,
+        )
+        write_full_background_subtraction_page_manifest_json(
+            temporary_manifest, artifact
+        )
+    except Exception as exc:
+        if opened:
+            try:
+                close_full_background_subtraction_pdf(temporary_pdf)
+            except Exception:
+                pass
+        _e8_2_remove_temporary_file(temporary_pdf)
+        _e8_2_remove_temporary_file(temporary_manifest)
+        _e8_2_remove_temporary_file(recovery_pdf)
+        _e8_2_remove_temporary_file(recovery_manifest)
+        status = {
+            "status": "unavailable",
+            "reason": "e8_2_finalization_exception:{}".format(type(exc).__name__),
+            "exception_message": str(exc),
+            "production_objects_mutated": False,
+            "preliminary_artifact_preserved": preliminary_pair_exists,
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    if not (
+        os.path.isfile(temporary_pdf) and os.path.isfile(temporary_manifest)
+    ):
+        _e8_2_remove_temporary_file(temporary_pdf)
+        _e8_2_remove_temporary_file(temporary_manifest)
+        status = {
+            "status": "unavailable",
+            "reason": "e8_2_temporary_artifact_pair_missing",
+            "production_objects_mutated": False,
+            "preliminary_artifact_preserved": preliminary_pair_exists,
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    if not preliminary_pair_exists:
+        _e8_2_remove_temporary_file(temporary_pdf)
+        _e8_2_remove_temporary_file(temporary_manifest)
+        status = {
+            "status": "unavailable",
+            "reason": "e8_2_preliminary_artifact_pair_missing",
+            "production_objects_mutated": False,
+            "preliminary_artifact_preserved": False,
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    try:
+        _e8_2_copy_recovery_file(pdf_path, recovery_pdf)
+        _e8_2_copy_recovery_file(manifest_path, recovery_manifest)
+    except Exception as exc:
+        _e8_2_remove_temporary_file(temporary_pdf)
+        _e8_2_remove_temporary_file(temporary_manifest)
+        _e8_2_remove_temporary_file(recovery_pdf)
+        _e8_2_remove_temporary_file(recovery_manifest)
+        status = {
+            "status": "unavailable",
+            "reason": "e8_2_preliminary_pair_backup_failed:{}".format(
+                type(exc).__name__
+            ),
+            "exception_message": str(exc),
+            "production_objects_mutated": False,
+            "preliminary_artifact_preserved": True,
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    try:
+        os.replace(temporary_pdf, pdf_path)
+        os.replace(temporary_manifest, manifest_path)
+    except Exception as exc:
+        recovered, recovery_errors = _e8_2_restore_preliminary_pair(
+            pdf_path, manifest_path, recovery_pdf, recovery_manifest
+        )
+        _e8_2_remove_temporary_file(temporary_pdf)
+        _e8_2_remove_temporary_file(temporary_manifest)
+        if recovered:
+            _e8_2_remove_temporary_file(recovery_pdf)
+            _e8_2_remove_temporary_file(recovery_manifest)
+        status = {
+            "status": "unavailable",
+            "reason": "e8_2_artifact_pair_installation_failed:{}".format(
+                type(exc).__name__
+            ),
+            "exception_message": str(exc),
+            "recovery_errors": list(recovery_errors),
+            "production_objects_mutated": False,
+            "preliminary_artifact_preserved": bool(recovered),
+        }
+        hist["_e8_2_full_background_finalization_status"] = status
+        return status
+    _e8_2_remove_temporary_file(recovery_pdf)
+    _e8_2_remove_temporary_file(recovery_manifest)
+    hist["full_background_subtraction_page_manifest"] = [dict(page) for page in manifest]
+    hist["full_background_subtraction_renderer_failures"] = list(failures)
+    hist.pop("_e8_2_full_background_render_state", None)
+    status = {
+        "status": "available",
+        "reason": None,
+        "production_objects_mutated": False,
+        "finalized_after_data_yields": True,
+        "renderer_failures": list(failures),
+    }
+    hist["_e8_2_full_background_finalization_status"] = status
+    return status
 
 
 def _e2_unavailable(reason):

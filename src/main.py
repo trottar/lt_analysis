@@ -1298,6 +1298,9 @@ output_file_lst.append(outputpdf)
 
 sys.path.append("binning")
 from calculate_yield import find_yield_data, find_yield_simc
+from full_background_subtraction_plots import (
+    finalize_full_background_subtraction_e8_2,
+)
 from xsect_support import write_xsect_support
 from ave_per_bin import ave_per_bin_data
 from pion_component_subtraction import validate_frozen_t_bin_pion_parent_collection
@@ -1322,6 +1325,18 @@ record_stage_time("Step 6 frozen t-bin pion parent validation", stage_start)
 stage_start = perf_counter()
 yieldDict.update(find_yield_data(histlist, inpDict))
 record_stage_time("Step 6 data yields", stage_start)
+stage_start = perf_counter()
+for hist in histlist:
+    if str(hist.get("ParticleType", ParticleType)).strip().lower() != "kaon":
+        continue
+    finalization = finalize_full_background_subtraction_e8_2(hist)
+    print(
+        "[E.8.2] post-yield procedure finalization setting={} status={} reason={}".format(
+            hist.get("phi_setting"), finalization.get("status"),
+            finalization.get("reason"),
+        )
+    )
+record_stage_time("Step 6 E.8.2 post-yield procedure finalization", stage_start)
 stage_start = perf_counter()
 yieldDict.update(find_yield_simc(histlist, inpDict))
 record_stage_time("Step 6 simc yields", stage_start)
