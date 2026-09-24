@@ -117,7 +117,9 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 ## E.8.2 — baseline full-analysis stage audit
 
-`NEXT` — E.8.2 exposes the complete existing baseline analysis as an authoritative before/component/after missing-mass and yield chain. It is presentation-only and does not change physics.
+`SOURCE REVIEWED` — E.8.2 exposes the complete existing baseline analysis as an
+authoritative before/component/after missing-mass and yield chain. It is
+presentation-only and does not change physics.
 
 ### E.8.2a — prompt/random subtraction
 
@@ -156,7 +158,9 @@ when its authoritative producer can persist or provide it.
 
 ## E.8.3 — detached Method-A reweighting audit
 
-`BLOCKED` pending E.8.2 source-reviewed completion. It is detached/non-production and consumes accepted F.4/F.5/F.6.1/F.6.2 results only.
+`SOURCE REVIEWED` — detached/non-production audit consuming accepted
+F.4/F.5/F.6.1/F.6.2 results only. Independent ChatGPT actual-diff review
+passed; this is not runtime acceptance.
 
 Method A operates on the accepted pion background after the proton-cleaned
 baseline picture; it does not invoke legacy empirical residual fits.
@@ -179,7 +183,11 @@ Retain accepted explanatory diagnostics: L/B/A normalized shapes, `delta x xptar
 
 ## F.6.3 — parallel full procedure plus Method A
 
-`BLOCKED` pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. F.6.3 alone constructs the actual parallel Method-A full-analysis branch. It preserves the accepted full yield calculation unchanged as baseline and changes exactly `w0_j -> w0_j * C_j` while filling the pion-subtraction template.
+`NEXT` — source-reviewed E.8.3 clears the dependency gate, not final E.8
+closure. F.6.3 alone constructs the actual parallel Method-A full-analysis
+branch. It preserves the
+accepted full yield calculation unchanged as baseline and changes exactly
+`w0_j -> w0_j * C_j` while filling the pion-subtraction template.
 
 Both branches use the same proton-cleaned input. Random/dummy subtraction,
 slow-proton treatment, pion component models/fits/windows/amplitudes except
@@ -233,8 +241,9 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-Its active successor is the approved E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward
-sequence. Do not alter ROOT or production behavior.
+E.8.2 and E.8.3 are `SOURCE REVIEWED`; F.6.3 is the current successor in the
+approved E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward sequence. Do not alter ROOT
+or production behavior.
 
 ## Farm milestone cadence
 

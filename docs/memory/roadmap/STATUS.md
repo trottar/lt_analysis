@@ -48,7 +48,7 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 #### E.8.2 — baseline full-analysis stage audit
 
-`NEXT` — present the existing baseline before/component/after chain through
+`SOURCE REVIEWED` — presents the existing baseline before/component/after chain through
 prompt/random, dummy, slow proton, baseline pion, final canonical `(t,phi)`
 missing mass, and stage/final yields. The accepted `no_empirical_residual`
 profile keeps legacy empirical residual Fit 1/Fit 2 disabled. This has no
@@ -56,12 +56,17 @@ production-physics ownership.
 
 #### E.8.3 — detached Method-A reweighting audit
 
-`BLOCKED` — pending E.8.2 source-reviewed completion. It exposes the accepted parent-preserving `w0 -> w0*C` pion-background redistribution, baseline versus reweighted comparison, signed difference/defined ratio, all canonical children, and parent closure without child renormalization.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff review accepted the local
+detached/non-production audit implementation of the parent-preserving
+`w0 -> w0*C` pion-background redistribution, baseline versus reweighted
+comparison, signed difference/defined ratio, all canonical children, and parent
+closure without child renormalization. This has no runtime acceptance claim.
 
 #### F.6.3 — parallel full procedure plus Method A
 
-`BLOCKED` — pending source-reviewed E.8.2 and E.8.3, not final E.8 closure. It
-alone constructs the parallel full-analysis branch, changing only
+`NEXT` — source-reviewed E.8.3 clears the dependency gate; substantive work
+still awaits the user commit/push and pushed-state review owned by `CURRENT.md`.
+F.6.3 alone constructs the parallel full-analysis branch, changing only
 `w0_j -> w0_j * C_j` in pion-template filling while retaining the frozen
 baseline procedure. Legacy empirical residual Fit 1/Fit 2 remain disabled.
 

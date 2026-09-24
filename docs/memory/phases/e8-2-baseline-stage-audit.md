@@ -265,11 +265,14 @@ Codex-reported deterministic checks above were `NOT RUN by ChatGPT`; the known
 
 ## Next
 
-`NEXT` — user-controlled commit/push of the reviewed E.8.2 source/test/memory
-set -> ChatGPT pushed-state review -> E.8.3 detached Method-A reweighting audit.
-E.8.3 is detached/non-production only: it consumes accepted F.4/F.5/F.6.1/F.6.2
-results, shows `b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`, forbids child
-`(t,phi)` renormalization, Method-B numerical input, and empirical residual Fit
-1/Fit 2, and does not construct the parallel full production branch. F.6.3
-remains `BLOCKED` pending source-reviewed E.8.3. No farm action is requested by
-this phase.
+The reviewed E.8.2 source/test/memory set was pushed at
+`91bb7809d27d84d7709a6600dbb0dc9ab514a458`; pushed-state review passed. This
+remains source review only and makes no E.8.2 ROOT/PyROOT, farm, or runtime
+validation claim.
+
+E.8.3 has since completed independent source review. F.6.3 is now the
+dependency `NEXT`; the immediate repository action is the user-controlled
+commit/push of the reviewed cumulative candidate, then ChatGPT pushed-state
+review, followed by the F.6.3 source/runtime-path audit and standalone
+implementation contract. Neither E.8.2 nor E.8.3 has ROOT/PyROOT,
+full-analysis, farm, or runtime acceptance.

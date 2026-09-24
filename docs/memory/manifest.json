@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 7383,
+      "bytes": 8132,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "19fcb243afc8c8f8170b427a81b68013dee6b267e79a3ddd48d5ad41e3471ce7"
+      "sha256": "73f387b289e08f207d1715afd12a5ebc89c6733a1d4e8076b2133831d37f4111"
     },
     {
       "bytes": 1978,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 9382,
+      "bytes": 9443,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "bda199c0173a4b0673ced21541c79f4cdba39986ddedcde36a9781a122eed48a"
+      "sha256": "66867bee726fe656395cd4010e8329cafd681e39efe107b89d9a0a2e08ee12b8"
     },
     {
       "bytes": 2363,
@@ -461,9 +461,39 @@
       "sha256": "bb3824ab0a55aa479c17f44c29b68240d46aa53b5f6b2d6786ea1db2c136ea78"
     },
     {
-      "bytes": 16050,
+      "bytes": 16116,
       "path": "docs/memory/phases/e8-2-baseline-stage-audit.md",
-      "sha256": "50357c9189269d0056e01761f37dcea5672981531da0a113f0c48ee2a7df886f"
+      "sha256": "c1f4157951394cc0a4252dc8129e86244e137a705e06d5ddee97930bc1045627"
+    },
+    {
+      "bytes": 14543,
+      "path": "docs/memory/phases/e8-2-post-push-memory-reconciliation-task-contract.md",
+      "sha256": "dbd1baca66182a4a7aff7a45eb7d0cb0f8f6ce41f62ae4cd6d5120d25d53e935"
+    },
+    {
+      "bytes": 17399,
+      "path": "docs/memory/phases/e8-3-detached-method-a-reweighting-audit-fix1-task-contract.md",
+      "sha256": "826cb441c6666b5620975b38d1f52c16d7307c84b1be0811680431fee31f40a1"
+    },
+    {
+      "bytes": 17463,
+      "path": "docs/memory/phases/e8-3-detached-method-a-reweighting-audit-task-contract.md",
+      "sha256": "5ec6d5d889905890dea96e11fbf450d5f5c215c68d8218e8d31a556c73b0c0c0"
+    },
+    {
+      "bytes": 9152,
+      "path": "docs/memory/phases/e8-3-detached-method-a-reweighting-audit.md",
+      "sha256": "d32b2ad94499555becc2d594483d1600f50451bbb8031e7b1e642ba31714aa8d"
+    },
+    {
+      "bytes": 7498,
+      "path": "docs/memory/phases/e8-3-final-pre-push-memory-cleanup-task-contract.md",
+      "sha256": "18166ae12edb2c77c7da941183c0337f77364f6d881871f160f5c7dd2b594e00"
+    },
+    {
+      "bytes": 11188,
+      "path": "docs/memory/phases/e8-3-source-review-reconciliation-task-contract.md",
+      "sha256": "139339f589d0886e0cd82dc0a221d5c0e78a8e380c5c9bbd84dea22fb2bf9b53"
     },
     {
       "bytes": 9799,
@@ -561,14 +591,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 15790,
+      "bytes": 15906,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "6956d868d8938765d69627476439af43bdd9073c048dba9312970ea31584194d"
+      "sha256": "382d1c1701bbccb8c4466d58159cd8e8351c2105fa43e8f6632821c9a5f2c8e8"
     },
     {
-      "bytes": 5718,
+      "bytes": 5904,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "4d6192af965dba70aafcec0428ce265a9cc6c2b74d3e375e1111332cc98e203d"
+      "sha256": "d5aca5da0a42aef00975f6d6bffa91e356649d13f9a42cee769c1c255b8788a2"
     },
     {
       "bytes": 1698,

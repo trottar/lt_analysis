@@ -45,6 +45,7 @@ FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX = "_full-background-subtraction"
 E8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8/v1"
 E8_2_SOURCE_SCHEMA_VERSION = "e8_2_baseline_stage_source/v1"
 E8_2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_2/v1"
+E8_3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_3/v1"
 E8_F6_2_INPUT_SHA256 = "5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1"
 E8_F6_2_ARTIFACT_SCHEMA = (
     "pion_hgcer_method_a_acceptance_refinement_validation_artifact/v1"
@@ -59,6 +60,15 @@ E8_F6_2_VALIDATION_FINGERPRINT = (
     "7edc73fce20ad7dc7622b8c23a7ba7e8986e367ace605884e010945595370b3b"
 )
 E8_F6_2_KINEMATIC_TOKEN = "Q4p4W2p74"
+E8_3_F4_INPUT_SHA256 = "adcc01900b8adc211e296aaedaa314fdb86207d51483ebfd4b3edf69f558f188"
+E8_3_F5_INPUT_SHA256 = "143e3af6b1c69560e5bf351155b570d05f19e7e0ceb14665f5448c351ad501be"
+E8_3_F6_1_INPUT_SHA256 = "62bad2dae0f65f1fff87eeffd071c29dbbd4cdc15a43f37d6d9853cb58b25bd6"
+E8_3_F4_CORRECTION_FINGERPRINT = "362241005c02f2149e260c391b5c3d35793287573128b42cf5ed693419d9d2f3"
+E8_3_F4_ARTIFACT_FINGERPRINT = "c4b9f513d5918ca77179bbe5fab28c5d9d14e63a440338545e73961fa50b9d67"
+E8_3_F5_PROPAGATION_FINGERPRINT = "d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa"
+E8_3_F5_ARTIFACT_FINGERPRINT = "261968ee7d9590d7d0afe0cd15155ef745a4169f95f52ffffd392aadd320de63"
+E8_3_F6_1_ARTIFACT_FINGERPRINT = "377872a218a780481347402e4410c81bd568a4fb7682cd49f0f3352b499bad41"
+E8_3_F6_1_VALIDATION_FINGERPRINT = "d992d789b3434897d76691df27c190a0f51479f67c0d5b496e84835e517c77f8"
 _E8_SETTING_IDS = (
     "Left-lowe", "Left-highe", "Center-lowe", "Center-highe", "Right-highe",
 )
@@ -462,6 +472,358 @@ def load_full_background_subtraction_e8_payload(
         "parents": selected,
         "non_authoritative": True,
         "production_objects_mutated": False,
+    }
+
+
+def _e8_3_unavailable(reason, *, setting_id=None, paths=None):
+    """Return an explicit detached E.8.3 unavailable display payload."""
+    return {
+        "schema_version": E8_3_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "setting_id": setting_id,
+        "input_paths": dict(paths or {}),
+        "input_sha256": {},
+        "accepted_fingerprints": {},
+        "parents": (),
+        "non_authoritative": True,
+        "presentation_only": True,
+        "production_application_performed": False,
+        "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+        "empirical_residual_dependency": False,
+    }
+
+
+def _e8_3_read_json(path_value, expected_sha256, label):
+    """Read one frozen authority before parsing it; never search for a fallback."""
+    path = Path(path_value).expanduser().resolve(strict=False)
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise _E8PayloadError("{}_input_unavailable:{}".format(label, type(exc).__name__)) from exc
+    observed = hashlib.sha256(raw).hexdigest()
+    if observed != expected_sha256:
+        raise _E8PayloadError("{}_input_sha256_mismatch".format(label))
+    try:
+        return json.loads(raw.decode("utf-8"), parse_constant=_e8_reject_json_constant), path, observed
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise _E8PayloadError("{}_json_invalid".format(label)) from exc
+
+
+def _e8_3_hash(value, label):
+    if not isinstance(value, str) or len(value) != 64:
+        raise _E8PayloadError("{}_invalid".format(label))
+    return value
+
+
+def _e8_3_setting_id(value, label):
+    setting = _e8_require(value, label)
+    setting_id = "{}-{}".format(
+        setting.get("phi_setting"), setting.get("epsilon_filename_token")
+    )
+    if (
+        setting_id not in _E8_SETTING_IDS
+        or setting.get("kinematic_token") != E8_F6_2_KINEMATIC_TOKEN
+        or setting.get("particle_type") != "kaon"
+    ):
+        raise _E8PayloadError("{}_identity_invalid".format(label))
+    return setting_id
+
+
+def _e8_3_matrix(value, label, *, integer=False):
+    rows = _e8_sequence(value, label)
+    if len(rows) != 3:
+        raise _E8PayloadError("{}_shape_invalid".format(label))
+    copied = []
+    for row in rows:
+        entries = _e8_sequence(row, label)
+        if len(entries) != 9:
+            raise _E8PayloadError("{}_shape_invalid".format(label))
+        if integer:
+            copied.append([_e8_integer(item, label) for item in entries])
+        else:
+            copied.append([_e8_finite(item, label) for item in entries])
+    return copied
+
+
+def _e8_3_validate_f4(artifact, authority):
+    artifact = _e8_require(artifact, "f4_artifact")
+    if artifact.get("schema_version") != "pion_hgcer_method_a_parent_preserving_correction_artifact/v1":
+        raise _E8PayloadError("f4_artifact_schema_invalid")
+    _e8_flags(artifact, {
+        "non_authoritative": True, "correction_applied_to_production": False,
+        "event_correction_persisted": False, "child_renormalization_performed": False,
+        "production_application_performed": False, "production_objects_mutated": False,
+        "method_b_numerical_dependency": False, "basis_frozen": True,
+    }, "f4_artifact")
+    if artifact.get("artifact_fingerprint") != authority["f4_artifact_fingerprint"]:
+        raise _E8PayloadError("f4_artifact_fingerprint_invalid")
+    correction = _e8_require(artifact.get("correction"), "f4_correction")
+    if (
+        correction.get("schema_version") != "pion_hgcer_method_a_parent_preserving_correction/v1"
+        or correction.get("available") is not True
+        or correction.get("fingerprint") != authority["f4_correction_fingerprint"]
+    ):
+        raise _E8PayloadError("f4_correction_authority_invalid")
+    _e8_flags(correction, {
+        "non_authoritative": True, "parent_normalization_constructed": True,
+        "correction_applied_to_production": False, "event_correction_persisted": False,
+        "child_renormalization_performed": False, "production_application_performed": False,
+        "production_objects_mutated": False, "method_b_numerical_dependency": False,
+    }, "f4_correction")
+    parents = _e8_sequence(correction.get("parents"), "f4_parents")
+    if len(parents) != 15:
+        raise _E8PayloadError("f4_parent_inventory_invalid")
+    seen = set()
+    for value in parents:
+        parent = _e8_require(value, "f4_parent")
+        setting_id = _e8_3_setting_id(parent.get("setting"), "f4_parent_setting")
+        t_index = _e8_integer(parent.get("canonical_t_index"), "f4_parent_t_index")
+        if (setting_id, t_index) not in _E8_PARENT_KEYS or (setting_id, t_index) in seen:
+            raise _E8PayloadError("f4_parent_geometry_invalid")
+        seen.add((setting_id, t_index))
+        baseline = _e8_finite(parent.get("baseline_parent_sum"), "f4_parent_baseline")
+        adjusted = _e8_finite(parent.get("adjusted_parent_sum"), "f4_parent_adjusted")
+        residual = _e8_finite(parent.get("closure_residual"), "f4_parent_residual")
+        if parent.get("closure_passed") is not True or not math.isclose(
+            adjusted - baseline, residual, rel_tol=0.0, abs_tol=1.0e-9
+        ):
+            raise _E8PayloadError("f4_parent_closure_invalid")
+    if seen != _E8_PARENT_KEYS:
+        raise _E8PayloadError("f4_canonical_parent_inventory_invalid")
+    return correction
+
+
+def _e8_3_validate_f5(artifact, authority):
+    artifact = _e8_require(artifact, "f5_artifact")
+    if artifact.get("schema_version") != "pion_hgcer_method_a_tphi_propagation_artifact/v1":
+        raise _E8PayloadError("f5_artifact_schema_invalid")
+    _e8_flags(artifact, {
+        "non_authoritative": True, "f4_correction_consumed": True,
+        "f4_correction_modified": False, "event_correction_persisted": False,
+        "canonical_child_renormalization_performed": False,
+        "production_application_performed": False, "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+    }, "f5_artifact")
+    if artifact.get("artifact_fingerprint") != authority["f5_artifact_fingerprint"]:
+        raise _E8PayloadError("f5_artifact_fingerprint_invalid")
+    propagation = _e8_require(artifact.get("propagation"), "f5_propagation")
+    if (
+        propagation.get("schema_version") != "pion_hgcer_method_a_tphi_propagation/v1"
+        or propagation.get("available") is not True
+        or propagation.get("fingerprint") != authority["f5_propagation_fingerprint"]
+    ):
+        raise _E8PayloadError("f5_propagation_authority_invalid")
+    for name in (
+        "f4_source_file_sha256", "f4_correction_fingerprint",
+        "f4_artifact_fingerprint",
+    ):
+        if propagation.get(name) != authority[name]:
+            raise _E8PayloadError("f5_f4_continuity_invalid")
+    _e8_flags(propagation, {
+        "non_authoritative": True, "f4_correction_consumed": True,
+        "f4_correction_modified": False, "canonical_child_renormalization_performed": False,
+        "production_application_performed": False, "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+    }, "f5_propagation")
+    templates = _e8_sequence(propagation.get("setting_templates"), "f5_setting_templates")
+    if len(templates) != len(_E8_SETTING_IDS):
+        raise _E8PayloadError("f5_setting_inventory_invalid")
+    selected = {}
+    for value in templates:
+        template = _e8_require(value, "f5_setting_template")
+        setting_id = template.get("setting_id")
+        if setting_id != _e8_3_setting_id(template.get("setting"), "f5_setting") or setting_id in selected:
+            raise _E8PayloadError("f5_setting_identity_invalid")
+        t_edges = _strict_edges(template.get("t_edges"))
+        phi_edges = _strict_edges(template.get("phi_edges"))
+        if t_edges is None or len(t_edges) != 4 or phi_edges is None or len(phi_edges) != 10:
+            raise _E8PayloadError("f5_canonical_geometry_invalid")
+        copied = {"setting_id": setting_id, "t_edges": t_edges, "phi_edges": phi_edges}
+        for name in ("baseline_signed_contents", "adjusted_signed_contents", "signed_delta_contents"):
+            copied[name] = _e8_3_matrix(template.get(name), "f5_{}".format(name))
+        # F.5 owns empty-child identity.  Retain its accepted integer matrix
+        # verbatim for display; numerical aggregates remain separate below.
+        copied["event_counts"] = _e8_3_matrix(
+            template.get("event_counts"), "f5_event_counts", integer=True,
+        )
+        parents = _e8_sequence(template.get("parents"), "f5_parents")
+        if len(parents) != 3:
+            raise _E8PayloadError("f5_parent_inventory_invalid")
+        copied["parents"] = []
+        for t_index, parent_value in enumerate(parents):
+            parent = _e8_require(parent_value, "f5_parent")
+            if _e8_integer(parent.get("canonical_t_index"), "f5_parent_t_index") != t_index:
+                raise _E8PayloadError("f5_parent_geometry_invalid")
+            summary = {}
+            for name in ("baseline_parent_sum", "adjusted_parent_sum", "closure_residual"):
+                summary[name] = _e8_finite(parent.get(name), "f5_parent_{}".format(name))
+            if not math.isclose(
+                summary["adjusted_parent_sum"] - summary["baseline_parent_sum"],
+                summary["closure_residual"], rel_tol=0.0, abs_tol=1.0e-9,
+            ):
+                raise _E8PayloadError("f5_parent_closure_invalid")
+            copied["parents"].append(summary)
+        selected[setting_id] = copied
+    if set(selected) != set(_E8_SETTING_IDS):
+        raise _E8PayloadError("f5_canonical_setting_inventory_invalid")
+    return selected
+
+
+def _e8_3_validate_f6_1(artifact, authority):
+    artifact = _e8_require(artifact, "f6_1_artifact")
+    if artifact.get("schema_version") != "pion_hgcer_method_a_reweighting_validation_artifact/v1":
+        raise _E8PayloadError("f6_1_artifact_schema_invalid")
+    _e8_flags(artifact, {
+        "non_authoritative": True, "validation_only": True,
+        "event_correction_persisted": False, "production_application_performed": False,
+        "production_objects_mutated": False, "yield_constructed": False,
+        "method_b_numerical_dependency": False,
+    }, "f6_1_artifact")
+    if artifact.get("artifact_fingerprint") != authority["f6_1_artifact_fingerprint"]:
+        raise _E8PayloadError("f6_1_artifact_fingerprint_invalid")
+    validation = _e8_require(artifact.get("validation"), "f6_1_validation")
+    if (
+        validation.get("schema_version") != "pion_hgcer_method_a_reweighting_validation/v1"
+        or validation.get("available") is not True
+        or validation.get("fingerprint") != authority["f6_1_validation_fingerprint"]
+    ):
+        raise _E8PayloadError("f6_1_validation_authority_invalid")
+    if (
+        _mapping(validation.get("f4_reproduction")).get("correction_fingerprint")
+        != authority["f4_correction_fingerprint"]
+        or _mapping(validation.get("f5_reproduction")).get("propagation_fingerprint")
+        != authority["f5_propagation_fingerprint"]
+    ):
+        raise _E8PayloadError("f6_1_f4_f5_continuity_invalid")
+    _e8_flags(validation, {
+        "non_authoritative": True, "validation_only": True,
+        "event_correction_persisted": False, "production_application_performed": False,
+        "production_objects_mutated": False, "yield_constructed": False,
+        "method_b_numerical_dependency": False,
+    }, "f6_1_validation")
+    parents = _e8_sequence(validation.get("parents"), "f6_1_parents")
+    if len(parents) != 15:
+        raise _E8PayloadError("f6_1_parent_inventory_invalid")
+    selected = {}
+    for value in parents:
+        parent = _e8_require(value, "f6_1_parent")
+        setting_id = parent.get("setting_id")
+        if setting_id != _e8_3_setting_id(parent.get("setting"), "f6_1_parent_setting"):
+            raise _E8PayloadError("f6_1_parent_setting_invalid")
+        t_index = _e8_integer(parent.get("canonical_t_index"), "f6_1_parent_t_index")
+        key = (setting_id, t_index)
+        if key not in _E8_PARENT_KEYS or key in selected:
+            raise _E8PayloadError("f6_1_parent_geometry_invalid")
+        signed = _e8_require(parent.get("signed_background"), "f6_1_signed_background")
+        mm = _e8_require(signed.get("analysis_MM"), "f6_1_analysis_mm")
+        edges = _strict_edges(mm.get("edges"))
+        if edges is None:
+            raise _E8PayloadError("f6_1_mm_edges_invalid")
+        copied = {"edges": edges}
+        for name in ("baseline_signed_contents", "method_a_signed_contents", "signed_delta_contents"):
+            values = _e8_sequence(mm.get(name), "f6_1_{}".format(name))
+            if len(values) != len(edges) - 1:
+                raise _E8PayloadError("f6_1_mm_content_shape_invalid")
+            copied[name] = [_e8_finite(item, "f6_1_{}".format(name)) for item in values]
+        selected[key] = copied
+    if set(selected) != _E8_PARENT_KEYS:
+        raise _E8PayloadError("f6_1_canonical_parent_inventory_invalid")
+    return selected
+
+
+def build_full_background_subtraction_e8_3_payload(
+    f4_json_path, f5_json_path, f6_1_json_path, e8_payload, *,
+    kinematic_token=E8_F6_2_KINEMATIC_TOKEN, setting_id="Left-lowe",
+    expected_f4_sha256=E8_3_F4_INPUT_SHA256,
+    expected_f5_sha256=E8_3_F5_INPUT_SHA256,
+    expected_f6_1_sha256=E8_3_F6_1_INPUT_SHA256,
+    authority=None,
+):
+    """Build a detached E.8.3 display payload from the four frozen authorities.
+
+    The optional SHA/fingerprint arguments are keyword-only synthetic-test
+    plumbing.  Normal runtime callers have no override and therefore pin the
+    reviewed F.4/F.5/F.6.1/F.6.2 bytes and fingerprints above.
+    """
+    paths = {
+        "f4": os.fspath(f4_json_path), "f5": os.fspath(f5_json_path),
+        "f6_1": os.fspath(f6_1_json_path),
+    }
+    if kinematic_token != E8_F6_2_KINEMATIC_TOKEN or setting_id not in _E8_SETTING_IDS:
+        return _e8_3_unavailable("unsupported_e8_3_current_setting", setting_id=setting_id, paths=paths)
+    try:
+        authority_overrides = dict(authority or {})
+    except (TypeError, ValueError):
+        return _e8_3_unavailable("accepted_fingerprint_authority_invalid", setting_id=setting_id, paths=paths)
+    authority = dict({
+        "f4_correction_fingerprint": E8_3_F4_CORRECTION_FINGERPRINT,
+        "f4_artifact_fingerprint": E8_3_F4_ARTIFACT_FINGERPRINT,
+        "f4_source_file_sha256": E8_3_F4_INPUT_SHA256,
+        "f5_propagation_fingerprint": E8_3_F5_PROPAGATION_FINGERPRINT,
+        "f5_artifact_fingerprint": E8_3_F5_ARTIFACT_FINGERPRINT,
+        "f6_1_artifact_fingerprint": E8_3_F6_1_ARTIFACT_FINGERPRINT,
+        "f6_1_validation_fingerprint": E8_3_F6_1_VALIDATION_FINGERPRINT,
+    }, **authority_overrides)
+    if any(not isinstance(value, str) or len(value) != 64 for value in authority.values()):
+        return _e8_3_unavailable("accepted_fingerprint_authority_invalid", setting_id=setting_id, paths=paths)
+    if not all(isinstance(value, str) and len(value) == 64 for value in (
+        expected_f4_sha256, expected_f5_sha256, expected_f6_1_sha256,
+    )):
+        return _e8_3_unavailable("expected_input_sha256_invalid", setting_id=setting_id, paths=paths)
+    e8 = _mapping(e8_payload)
+    if (
+        e8.get("available") is not True
+        or e8.get("setting_id") != setting_id
+        or e8.get("input_sha256") != E8_F6_2_INPUT_SHA256
+        or e8.get("artifact_fingerprint") != E8_F6_2_ARTIFACT_FINGERPRINT
+        or e8.get("validation_fingerprint") != E8_F6_2_VALIDATION_FINGERPRINT
+    ):
+        return _e8_3_unavailable("frozen_f6_2_authority_unavailable", setting_id=setting_id, paths=paths)
+    try:
+        f4_artifact, f4_path, f4_sha = _e8_3_read_json(f4_json_path, expected_f4_sha256, "f4")
+        f5_artifact, f5_path, f5_sha = _e8_3_read_json(f5_json_path, expected_f5_sha256, "f5")
+        f6_1_artifact, f6_1_path, f6_1_sha = _e8_3_read_json(f6_1_json_path, expected_f6_1_sha256, "f6_1")
+        f4 = _e8_3_validate_f4(f4_artifact, authority)
+        f5 = _e8_3_validate_f5(f5_artifact, authority)
+        f6_1 = _e8_3_validate_f6_1(f6_1_artifact, authority)
+    except _E8PayloadError as exc:
+        return _e8_3_unavailable("frozen_e8_3_authority_rejected:{}".format(exc), setting_id=setting_id, paths=paths)
+    selected = []
+    for t_index in range(3):
+        f6_1_mm = f6_1[(setting_id, t_index)]
+        f5_setting = f5[setting_id]
+        selected.append({
+            "canonical_t_index": t_index,
+            "canonical_t_low": f5_setting["t_edges"][t_index],
+            "canonical_t_high": f5_setting["t_edges"][t_index + 1],
+            "phi_edges": list(f5_setting["phi_edges"]),
+            "f6_1_analysis_mm": f6_1_mm,
+            "f5_baseline_signed_contents": list(f5_setting["baseline_signed_contents"][t_index]),
+            "f5_method_a_signed_contents": list(f5_setting["adjusted_signed_contents"][t_index]),
+            "f5_signed_delta_contents": list(f5_setting["signed_delta_contents"][t_index]),
+            "f5_event_counts": list(f5_setting["event_counts"][t_index]),
+            "f5_parent_closure": dict(f5_setting["parents"][t_index]),
+        })
+    return {
+        "schema_version": E8_3_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "setting_id": setting_id,
+        "kinematic_token": kinematic_token,
+        "input_paths": {"f4": os.fspath(f4_path), "f5": os.fspath(f5_path), "f6_1": os.fspath(f6_1_path), "f6_2": e8.get("json_path")},
+        "input_sha256": {"f4": f4_sha, "f5": f5_sha, "f6_1": f6_1_sha, "f6_2": e8["input_sha256"]},
+        "accepted_fingerprints": dict(authority, f6_2_artifact_fingerprint=e8["artifact_fingerprint"], f6_2_validation_fingerprint=e8["validation_fingerprint"]),
+        "parents": tuple(selected),
+        "non_authoritative": True,
+        "presentation_only": True,
+        "production_application_performed": False,
+        "production_objects_mutated": False,
+        "method_b_numerical_dependency": False,
+        "empirical_residual_dependency": False,
+        "f4_parent_normalization_preserved": True,
+        "canonical_child_renormalization_performed": False,
     }
 
 
@@ -5990,12 +6352,229 @@ def _render_full_background_subtraction_e8_unavailable_page(ROOT, pdf_name, payl
     ))
 
 
+def _e8_3_ratio_points(edges, baseline, adjusted):
+    """Return only mathematically defined persisted B^A/B^0 ratio points."""
+    points = []
+    for index, (left, right, base, shifted) in enumerate(
+        zip(edges, edges[1:], baseline, adjusted)
+    ):
+        if math.isfinite(base) and math.isfinite(shifted) and base != 0.0:
+            points.append(((float(left) + float(right)) / 2.0, float(shifted) / float(base)))
+    return points
+
+
+def _e8_3_signed_histogram(ROOT, name, title, edges, values, color):
+    if not hasattr(ROOT, "TH1D"):
+        return None
+    histogram = ROOT.TH1D(str(name), str(title), len(edges) - 1, array("d", edges))
+    if hasattr(histogram, "SetDirectory"):
+        histogram.SetDirectory(0)
+    if hasattr(histogram, "SetStats"):
+        histogram.SetStats(0)
+    for index, value in enumerate(values, 1):
+        histogram.SetBinContent(index, float(value))
+    _style_histogram(histogram, color)
+    return histogram
+
+
+def _e8_3_render_authority_page(ROOT, pdf_name, payload):
+    fingerprints = _mapping(payload.get("accepted_fingerprints"))
+    hashes = _mapping(payload.get("input_sha256"))
+    return _e8_text_page(
+        ROOT, pdf_name, "C_full_background_e8_3_authority",
+        "E.8.3 detached Method-A reweighting audit",
+        (
+            "b_j^0 = s_j * w0_j",
+            "b_j^A = s_j * w0_j * C_j",
+            "C_j is the accepted F.4 parent-preserving correction; parent normalization",
+            "preserves each signed canonical-t parent sum. No phi child is independently normalized.",
+            "Detached presentation only: no production application, yield, or cross section is changed.",
+            "Method B has no numerical input. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
+            "Only F.6.3 may later construct a parallel production branch.",
+            "Current setting: {}".format(payload.get("setting_id")),
+            "Accepted input SHA-256: F.4={} F.5={}".format(hashes.get("f4"), hashes.get("f5")),
+            "F.6.1={} F.6.2={}".format(hashes.get("f6_1"), hashes.get("f6_2")),
+            "F.4 correction fingerprint: {}".format(fingerprints.get("f4_correction_fingerprint")),
+            "F.5 propagation fingerprint: {}".format(fingerprints.get("f5_propagation_fingerprint")),
+            "F.6.1 validation fingerprint: {}".format(fingerprints.get("f6_1_validation_fingerprint")),
+        ), size=0.023,
+    )
+
+
+def _e8_3_render_mm_page(ROOT, pdf_name, payload, parent):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    mm = _mapping(parent.get("f6_1_analysis_mm"))
+    edges = _strict_edges(mm.get("edges"))
+    baseline = tuple(mm.get("baseline_signed_contents") or ())
+    adjusted = tuple(mm.get("method_a_signed_contents") or ())
+    delta = tuple(mm.get("signed_delta_contents") or ())
+    if edges is None or len(baseline) != len(edges) - 1 or len(adjusted) != len(baseline) or len(delta) != len(baseline):
+        return False
+    if any(not math.isclose(float(shifted) - float(base), float(change), rel_tol=0.0, abs_tol=1.0e-9)
+           for base, shifted, change in zip(baseline, adjusted, delta)):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_3_mm_t{}".format(int(parent["canonical_t_index"]) + 1),
+        "E.8.3 persisted signed pion missing mass", 1800, 1100,
+    )
+    objects = []
+    try:
+        canvas.Divide(2, 2)
+        baseline_hist = _e8_3_signed_histogram(
+            ROOT, "H_full_background_e8_3_mm_baseline_t{}".format(int(parent["canonical_t_index"]) + 1),
+            "B_pi^0(MM);analysis_MM;persisted signed content", edges, baseline,
+            getattr(ROOT, "kBlack", 1),
+        )
+        adjusted_hist = _e8_3_signed_histogram(
+            ROOT, "H_full_background_e8_3_mm_method_a_t{}".format(int(parent["canonical_t_index"]) + 1),
+            "B_pi^A(MM);analysis_MM;persisted signed content", edges, adjusted,
+            getattr(ROOT, "kMagenta", 6),
+        )
+        delta_hist = _e8_3_signed_histogram(
+            ROOT, "H_full_background_e8_3_mm_delta_t{}".format(int(parent["canonical_t_index"]) + 1),
+            "Delta B_pi = B_pi^A - B_pi^0;analysis_MM;persisted signed content", edges,
+            delta, getattr(ROOT, "kBlue", 4),
+        )
+        if None in (baseline_hist, adjusted_hist, delta_hist):
+            return False
+        canvas.cd(1); baseline_hist.Draw("hist"); adjusted_hist.Draw("hist same")
+        canvas.cd(2); delta_hist.Draw("hist")
+        points = _e8_3_ratio_points(edges, baseline, adjusted)
+        canvas.cd(3)
+        if points and hasattr(ROOT, "TGraph"):
+            graph = ROOT.TGraph(len(points), array("d", [point[0] for point in points]), array("d", [point[1] for point in points]))
+            graph.SetTitle("R_pi = B_pi^A / B_pi^0 (defined bins only);analysis_MM;ratio")
+            _style_histogram(graph, getattr(ROOT, "kMagenta", 6))
+            # Points only: never bridge an undefined persisted denominator bin.
+            graph.Draw("AP")
+            objects.append(graph)
+        else:
+            note = _e8_add_text(ROOT, (0.10, 0.40, 0.90, 0.60), ("No finite nonzero persisted B_pi^0 denominator bins.",), size=0.035, align=22)
+            if note is None:
+                return False
+            objects.append(note)
+        canvas.cd(4)
+        note = _e8_add_text(
+            ROOT, (0.08, 0.16, 0.92, 0.88), (
+                "E.8.3 current setting {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1),
+                "All curves are accepted persisted F.6.1 aggregate arrays.",
+                "The signed delta is displayed only after direct persisted-array consistency validation.",
+                "Undefined ratio bins are absent; no clipping, cap, smoothing, interpolation, or renormalization occurs.",
+            ), size=0.030,
+        )
+        if note is None:
+            return False
+        objects.extend((baseline_hist, adjusted_hist, delta_hist, note))
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_3_render_tphi_page(ROOT, pdf_name, payload, parent):
+    """Render all nine persisted physical phi cells without a child rescaling."""
+    if not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPaveText"):
+        return False
+    baseline = tuple(parent.get("f5_baseline_signed_contents") or ())
+    adjusted = tuple(parent.get("f5_method_a_signed_contents") or ())
+    delta = tuple(parent.get("f5_signed_delta_contents") or ())
+    event_counts = tuple(parent.get("f5_event_counts") or ())
+    phi_edges = tuple(parent.get("phi_edges") or ())
+    closure = _mapping(parent.get("f5_parent_closure"))
+    if (
+        len(baseline) != 9 or len(adjusted) != 9 or len(delta) != 9
+        or len(event_counts) != 9 or len(phi_edges) != 10
+    ):
+        return False
+    if any(not math.isclose(float(a) - float(b), float(d), rel_tol=0.0, abs_tol=1.0e-9)
+           for b, a, d in zip(baseline, adjusted, delta)):
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_3_tphi_t{}".format(int(parent["canonical_t_index"]) + 1),
+        "E.8.3 persisted canonical t phi redistribution", 1800, 1100,
+    )
+    text = None
+    try:
+        text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
+        text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.026)
+        text.AddText("E.8.3 persisted canonical (t,phi) pion redistribution — {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1))
+        text.AddText("All nine physical phi children are retained. EMPTY is copied only from persisted F.5 event_count == 0; no child normalization.")
+        for index, (base, shifted, change, event_count) in enumerate(zip(baseline, adjusted, delta, event_counts)):
+            status = "EMPTY" if event_count == 0 else "POPULATED n={}".format(int(event_count))
+            text.AddText("phi {} [{:.0f},{:.0f}): {}  B_pi^0={:.8g}  B_pi^A={:.8g}  Delta={:.8g}".format(
+                index + 1, float(phi_edges[index]), float(phi_edges[index + 1]), status,
+                float(base), float(shifted), float(change)
+            ))
+        text.AddText("Persisted parent closure: sum_phi B_pi^0={:.8g}; sum_phi B_pi^A={:.8g}; absolute residual={:.8g}".format(
+            float(closure.get("baseline_parent_sum")), float(closure.get("adjusted_parent_sum")), abs(float(closure.get("closure_residual")))
+        ))
+        text.AddText("No relative closure metric is displayed because the accepted F.5 parent summary does not persist one.")
+        text.Draw(); canvas._full_background_e8_3_draw_objects = (text,)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _render_full_background_subtraction_e8_3_pages(ROOT, pdf_name, payload, manifest, failures):
+    if _e8_3_render_authority_page(ROOT, pdf_name, payload):
+        manifest.append({"page_id": "full_background.e8_3.authority", "scope": "setting", "authoritative": False})
+    else:
+        failures.append("E.8.3 authority page unavailable")
+    for parent in tuple(payload.get("parents") or ()):
+        scope = "t{}".format(int(parent["canonical_t_index"]) + 1)
+        for page_id, renderer in (
+            ("full_background.e8_3.mm", _e8_3_render_mm_page),
+            ("full_background.e8_3.tphi", _e8_3_render_tphi_page),
+        ):
+            if renderer(ROOT, pdf_name, payload, parent):
+                manifest.append({"page_id": page_id, "scope": scope, "authoritative": False})
+            else:
+                failures.append("E.8.3 {} page unavailable for {}".format(page_id.rsplit(".", 1)[-1], scope))
+    if _e8_text_page(
+        ROOT, pdf_name, "C_full_background_e8_3_f6_2_cross_reference",
+        "E.8.3 cross-reference to accepted F.6.2 explanation",
+        (
+            "The preceding redistribution consumes F.5/F.6.1 persisted aggregates only.",
+            "The existing E.8/E.8.1 F.6.2 pages remain the accepted explanation of L/B/A shapes,",
+            "acceptance maps/correlations, support/OOD, effective statistics, and kaon-window refinement.",
+            "E.8.3 neither duplicates nor recomputes that F.6.2 science.",
+        ), size=0.031,
+    ):
+        manifest.append({"page_id": "full_background.e8_3.f6_2_cross_reference", "scope": "setting", "authoritative": False})
+    else:
+        failures.append("E.8.3 F.6.2 cross-reference page unavailable")
+
+
+def _render_full_background_subtraction_e8_3_unavailable_page(ROOT, pdf_name, payload):
+    return _e8_text_page(
+        ROOT, pdf_name, "C_full_background_e8_3_unavailable",
+        "E.8.3 detached Method-A audit unavailable",
+        (
+            "No persisted authority was replaced, reconstructed, or recomputed.",
+            "Literal unavailable reason: {}".format(payload.get("reason")),
+            "Baseline production and the existing procedure-PDF artifacts remain unaffected.",
+        ), size=0.031,
+    )
+
+
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
     e7_payload=None, f1_payload=None, e72_payload=None, e8_payload=None,
-    e8_2_payload=None,
+    e8_2_payload=None, e8_3_payload=None,
     page_manifest=None,
 ):
     """Append retained D.6-D.9 pages followed by the frozen E.8 final section.
@@ -6012,6 +6591,10 @@ def render_full_background_subtraction_procedure_pages(
     d9 = _mapping(d9_payload)
     e8 = _mapping(e8_payload) if e8_payload is not None else _e8_unavailable("frozen_f6_2_payload_not_supplied")
     e8_2 = _mapping(e8_2_payload) if e8_2_payload is not None else None
+    # Existing callers that do not opt into E.8.3 retain their historical page
+    # inventory.  The production route always supplies an explicit available or
+    # unavailable E.8.3 payload from the byte-pinned reader above.
+    e8_3 = _mapping(e8_3_payload) if e8_3_payload is not None else None
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_available = bool(d8.get("available"))
@@ -6091,12 +6674,23 @@ def render_full_background_subtraction_procedure_pages(
                 result["failures"].append(
                     "E.8.2 procedure input unavailable: {}".format(e8_2.get("reason"))
                 )
+        if e8_3 is not None:
+            if e8_3.get("available") is True:
+                _render_full_background_subtraction_e8_3_pages(
+                    ROOT, pdf_name, e8_3, manifest, result["failures"]
+                )
+            elif _render_full_background_subtraction_e8_3_unavailable_page(ROOT, pdf_name, e8_3):
+                manifest.append({"page_id": "full_background.e8_3.unavailable", "scope": "setting", "authoritative": False, "reason": e8_3.get("reason")})
+            else:
+                result["failures"].append("E.8.3 unavailable page rendering failed: {}".format(e8_3.get("reason")))
         if _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, e8):
             manifest.append({"page_id": "full_background.e8.handoff", "scope": "setting", "authoritative": False})
         else:
             result["failures"].append("E.8 handoff page unavailable")
     elif _render_full_background_subtraction_e8_unavailable_page(ROOT, pdf_name, e8):
         manifest.append({"page_id": "full_background.e8.unavailable", "scope": "setting", "authoritative": False, "reason": e8.get("reason")})
+        if e8_3 is not None and _render_full_background_subtraction_e8_3_unavailable_page(ROOT, pdf_name, e8_3):
+            manifest.append({"page_id": "full_background.e8_3.unavailable", "scope": "setting", "authoritative": False, "reason": e8_3.get("reason")})
     else:
         result["failures"].append("E.8 unavailable page rendering failed: {}".format(e8.get("reason")))
     return result
@@ -6152,8 +6746,13 @@ def capture_full_background_subtraction_e8_2_render_state(
             page_manifest_setting, "page_manifest_setting"
         ),
         "payloads": {
-            key: _e8_2_detach_render_value(payloads[key], key)
-            for key in required
+            **{
+                key: _e8_2_detach_render_value(payloads[key], key)
+                for key in required
+            },
+            **({
+                "e8_3": _e8_2_detach_render_value(payloads["e8_3"], "e8_3")
+            } if "e8_3" in payloads else {}),
         },
     }
 
@@ -6262,7 +6861,8 @@ def finalize_full_background_subtraction_e8_2(hist):
             e4_payload=payloads.get("e4"), e6_payload=payloads.get("e6"),
             e7_payload=payloads.get("e7"), f1_payload=payloads.get("f1"),
             e72_payload=payloads.get("e72"), e8_payload=payloads.get("e8"),
-            e8_2_payload=presentation, page_manifest=manifest,
+            e8_2_payload=presentation, e8_3_payload=payloads.get("e8_3"),
+            page_manifest=manifest,
         )
         failures.extend(rendered.get("failures") or ())
         if close_full_background_subtraction_pdf(temporary_pdf) is not True:
@@ -10365,7 +10965,11 @@ __all__ = (
     "E72_PRESENTATION_SCHEMA_VERSION",
     "F1_PRESENTATION_SCHEMA_VERSION",
     "E8_PRESENTATION_SCHEMA_VERSION",
+    "E8_3_PRESENTATION_SCHEMA_VERSION",
     "E8_F6_2_INPUT_SHA256",
+    "E8_3_F4_INPUT_SHA256",
+    "E8_3_F5_INPUT_SHA256",
+    "E8_3_F6_1_INPUT_SHA256",
     "FULL_BACKGROUND_SUBTRACTION_PAGE_MANIFEST_SCHEMA_VERSION",
     "FULL_BACKGROUND_SUBTRACTION_PDF_SUFFIX",
     "build_full_background_subtraction_d6_payload",
@@ -10380,6 +10984,7 @@ __all__ = (
     "build_full_background_subtraction_e6_payload",
     "build_full_background_subtraction_e7_payload",
     "build_full_background_subtraction_e72_payload",
+    "build_full_background_subtraction_e8_3_payload",
     "build_full_background_subtraction_f1_payload",
     "build_full_background_subtraction_page_manifest_artifact",
     "close_full_background_subtraction_pdf",

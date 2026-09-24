@@ -36,14 +36,16 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   and [presentation closure](evidence/f6-2-fix5-presentation-runtime-closure.md).
 - E.8 remains `ACTIVE` and presentation-only. E.8.2 is `SOURCE REVIEWED`:
   independent ChatGPT inspection of the complete cumulative E.8.2/Fix.1/Fix.2/
-  Fix.3 actual diff passed. The source-reviewed baseline audit captures the true
-  same-traversal pre-proton diagnostic, the actual post-proton pre-/post-prune
-  production snapshots, the exact baseline-pion before/template/after objects,
-  and the existing `Y_0`. Production physics, `w0`, proton factors, pruning,
-  random/dummy normalization, canonical binning, public yields/errors, Method A,
-  Method B, and frozen F.6.2 science remain unchanged. Codex-reported local
-  checks were `NOT RUN by ChatGPT`; source review is not ROOT/PyROOT,
-  full-analysis, farm, or runtime acceptance.
+  Fix.3 actual diff passed, and the pushed set at
+  `91bb7809d27d84d7709a6600dbb0dc9ab514a458` matches that reviewed candidate.
+  The source-reviewed baseline audit captures the true same-traversal pre-proton
+  diagnostic, the actual post-proton pre-/post-prune production snapshots, the
+  exact baseline-pion before/template/after objects, and the existing `Y_0`.
+  Production physics, `w0`, proton factors, pruning, random/dummy normalization,
+  canonical binning, public yields/errors, Method A, Method B, and frozen F.6.2
+  science remain unchanged. Codex-reported local checks were `NOT RUN by
+  ChatGPT`; source review is not ROOT/PyROOT, full-analysis, farm, or runtime
+  acceptance.
 - The accepted active background profile is `no_empirical_residual`; it forces
   both empirical residual-background scales to zero. Legacy empirical residual
   Fit 1/Fit 2 are dormant historical source machinery and are outside the
@@ -59,11 +61,16 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   does not prove launcher provenance or the intentional full-high-epsilon skip.
 - The parameterized validation-bundle wrapper remains `SOURCE REVIEWED` at
   31abff9b8ab02f715cf7d6285a8dd2f53855a5e4; that is source review only.
-- E.8.3 is `NEXT`: it remains a detached/non-production Method-A reweighting
-  audit. F.6.3 is `BLOCKED` pending source-reviewed E.8.3, not final E.8
-  closure. E.8.4 is `BLOCKED` pending F.6.3; final E.8 is `BLOCKED` pending
-  E.8.4 and its later runtime/visual gate; F.6.4 is `BLOCKED` pending that full
-  production-impact evidence. Lifecycle-hook dispatch remains BLOCKED / DEFERRED.
+- E.8.3 is `SOURCE REVIEWED`: independent ChatGPT actual-diff review passed
+  for the complete cumulative E.8.3 + Fix.1 candidate
+  `kaonlt_review(20260924-064150).diff`. Codex-reported deterministic checks
+  were `NOT RUN by ChatGPT`; this is source review only and does not claim
+  ROOT/PyROOT, full-analysis, farm, or runtime acceptance. F.6.3 is `NEXT` in
+  the approved dependency order, but substantive F.6.3 work waits for the
+  user-controlled commit/push and ChatGPT pushed-state review below. E.8.4 is
+  `BLOCKED` pending F.6.3; final E.8 is `BLOCKED` pending E.8.4 and its later
+  runtime/visual gate; F.6.4 is `BLOCKED` pending that full production-impact
+  evidence. Lifecycle-hook dispatch remains BLOCKED / DEFERRED.
 
 ## Source / Evidence Identity
 
@@ -72,6 +79,9 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 - Fix.6 pushed profile/bundle source:
   0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b. Its profile requires the distinct
   Fix.5 source above; source ancestry passed with no unexpected committed files.
+- E.8.2 pushed source/test/memory set:
+  91bb7809d27d84d7709a6600dbb0dc9ab514a458. Pushed-state review passed; this
+  is source/push provenance only, not farm or runtime evidence.
 - Fresh Fix.6 PDF SHA-256:
   d809a80fb1a46602dbb6cb930ed1d6c8932c2583ce8c5158ac82a78e6e6301e5.
   The 47-page manifest SHA-256 is
@@ -86,23 +96,26 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
-E.8.2 is `SOURCE REVIEWED`, not runtime accepted: it has no ROOT/PyROOT,
-full-analysis, farm, or runtime validation claim. E.8.3 is now unblocked as the
-next detached/non-production audit. F.6.3 remains `BLOCKED` on source-reviewed
-E.8.3; E.8.4 and final E.8 remain downstream. The deferred E.8.1 settings are
-not a blocker or a failure for this roadmap.
+E.8.2 and E.8.3 are `SOURCE REVIEWED`, not runtime accepted: neither has a
+ROOT/PyROOT, full-analysis, farm, or runtime validation claim. F.6.3 is `NEXT`
+only after the user-controlled commit/push and pushed-state review; E.8.4 and
+final E.8 remain downstream. The deferred E.8.1 settings are not a blocker or
+a failure for this roadmap.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the reviewed E.8.2 source/test/memory set
--> ChatGPT pushed-state review -> E.8.3 detached Method-A reweighting audit.
+NEXT — user-controlled commit/push of the reviewed cumulative
+post-E.8.2-reconciliation + E.8.3/Fix.1 source/test/memory set
+-> ChatGPT pushed-state review
+-> F.6.3 source/runtime-path audit and standalone implementation contract.
 
-E.8.3 remains detached/non-production only. It consumes accepted F.4/F.5/F.6.1/
-F.6.2 results; shows `b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`; does not
-renormalize canonical `(t,phi)` children; uses no Method-B numerical input; and
-does not activate or present empirical residual Fit 1/Fit 2. It must not construct
-the parallel full production branch: F.6.3 alone owns that work. No farm action is
-required before beginning E.8.3.
+Do not begin F.6.3 in this reconciliation. E.8.3 consumes only accepted
+persisted F.4/F.5/F.6.1/F.6.2 results; shows
+`b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`; does not renormalize canonical
+`(t,phi)` children; uses no Method-B numerical input; and does not activate or
+present empirical residual Fit 1/Fit 2. It must not construct the parallel full
+production branch: F.6.3 alone owns that work. Local deterministic checks do not
+establish ROOT/PyROOT, full-analysis, farm, or runtime validation.
 
 ## Success Criteria
 

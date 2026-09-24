@@ -213,6 +213,7 @@ from full_background_subtraction_plots import (
     build_full_background_subtraction_e6_payload,
     build_full_background_subtraction_e7_payload,
     build_full_background_subtraction_e72_payload,
+    build_full_background_subtraction_e8_3_payload,
     build_full_background_subtraction_f1_payload,
     build_full_background_subtraction_page_manifest_artifact,
     capture_full_background_subtraction_e8_2_render_state,
@@ -7794,6 +7795,34 @@ def rand_sub(
                     setting_id=full_background_subtraction_e8_setting,
                 )
             )
+            # E.8.3 reads only the accepted global detached F.4/F.5/F.6.1
+            # evidence.  It never uses the live producer objects above as an
+            # authority and it has no fallback path when a frozen input is absent.
+            full_background_subtraction_e8_3_payload = (
+                build_full_background_subtraction_e8_3_payload(
+                    os.path.join(
+                        OUTPATH,
+                        "{}_kaon_pion-background_hgcer_method-a-parent-preserving-correction.json".format(
+                            full_background_subtraction_e8_kinematic
+                        ),
+                    ),
+                    os.path.join(
+                        OUTPATH,
+                        "{}_kaon_pion-background_hgcer_method-a-tphi-propagation.json".format(
+                            full_background_subtraction_e8_kinematic
+                        ),
+                    ),
+                    os.path.join(
+                        OUTPATH,
+                        "{}_kaon_pion-background_hgcer_method-a-reweighting-validation.json".format(
+                            full_background_subtraction_e8_kinematic
+                        ),
+                    ),
+                    full_background_subtraction_e8_payload,
+                    kinematic_token=full_background_subtraction_e8_kinematic,
+                    setting_id=full_background_subtraction_e8_setting,
+                )
+            )
             # The E.8 unavailable page is itself a required final procedure
             # record, so open the detached PDF even if every input is absent.
             full_background_subtraction_open = open_full_background_subtraction_pdf(
@@ -7820,6 +7849,7 @@ def rand_sub(
                     f1_payload=full_background_subtraction_f1_payload,
                     e72_payload=full_background_subtraction_e72_payload,
                     e8_payload=full_background_subtraction_e8_payload,
+                    e8_3_payload=full_background_subtraction_e8_3_payload,
                     page_manifest=full_background_subtraction_manifest,
                 )
                 full_background_subtraction_failures.extend(
@@ -7907,6 +7937,7 @@ def rand_sub(
                         "f1": full_background_subtraction_f1_payload,
                         "e72": full_background_subtraction_e72_payload,
                         "e8": full_background_subtraction_e8_payload,
+                        "e8_3": full_background_subtraction_e8_3_payload,
                     },
                 )
             )
