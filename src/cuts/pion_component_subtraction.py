@@ -1094,6 +1094,23 @@ def _component_cache_event_coefficient(source_spec, idx):
     return cached_coefficient * (coefficient / base_coefficient)
 
 
+def _method_a_event_multiplier(event_multipliers, source_spec, cache_section, idx):
+    """Resolve one validated transient F.6.3 multiplier without fallback."""
+    if event_multipliers is None:
+        return 1.0
+    try:
+        identity = (str(source_spec["label"]), int(cache_section["entry_index"][idx]))
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise ValueError("method_a_event_identity_unavailable") from exc
+    try:
+        multiplier = float(event_multipliers[identity])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("method_a_event_multiplier_missing") from exc
+    if not math.isfinite(multiplier) or multiplier <= 0.0:
+        raise ValueError("method_a_event_multiplier_invalid")
+    return multiplier
+
+
 def fill_simc_shape_pion_subtraction_templates(
     template_hists,
     source_specs,
@@ -1105,6 +1122,7 @@ def fill_simc_shape_pion_subtraction_templates(
     mm_background_reference_hist=None,
     mm_background_weights=None,
     residual_weights=None,
+    method_a_event_multipliers=None,
 ):
     stats = {
         "n_events_allcuts": 0,
@@ -1125,7 +1143,13 @@ def fill_simc_shape_pion_subtraction_templates(
         for idx in nommcut_indices:
             adj_mm = float(cache_section["adj_MM"][idx])
             pion_weight = simc_shape_pion_weight_from_value(adj_mm, h_pion_reference, pion_mm_weights)
-            event_weight = _component_cache_event_coefficient(source_spec, idx) * pion_weight
+            event_weight = (
+                _component_cache_event_coefficient(source_spec, idx)
+                * pion_weight
+                * _method_a_event_multiplier(
+                    method_a_event_multipliers, source_spec, cache_section, idx
+                )
+            )
             if event_weight == 0.0:
                 continue
             if "mm_nosub" in template_hists:
@@ -1139,7 +1163,13 @@ def fill_simc_shape_pion_subtraction_templates(
         for idx in allcut_indices:
             adj_mm = float(cache_section["adj_MM"][idx])
             pion_weight = simc_shape_pion_weight_from_value(adj_mm, h_pion_reference, pion_mm_weights)
-            event_weight = _component_cache_event_coefficient(source_spec, idx) * pion_weight
+            event_weight = (
+                _component_cache_event_coefficient(source_spec, idx)
+                * pion_weight
+                * _method_a_event_multiplier(
+                    method_a_event_multipliers, source_spec, cache_section, idx
+                )
+            )
             if mm_background_reference_hist is not None and mm_background_weights is not None:
                 event_weight *= mm_background_weight_from_value(
                     adj_mm,

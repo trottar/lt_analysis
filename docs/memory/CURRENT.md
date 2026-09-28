@@ -61,16 +61,15 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   does not prove launcher provenance or the intentional full-high-epsilon skip.
 - The parameterized validation-bundle wrapper remains `SOURCE REVIEWED` at
   31abff9b8ab02f715cf7d6285a8dd2f53855a5e4; that is source review only.
-- E.8.3 is `SOURCE REVIEWED`: independent ChatGPT actual-diff review passed
-  for the complete cumulative E.8.3 + Fix.1 candidate
-  `kaonlt_review(20260924-064150).diff`. Codex-reported deterministic checks
-  were `NOT RUN by ChatGPT`; this is source review only and does not claim
-  ROOT/PyROOT, full-analysis, farm, or runtime acceptance. F.6.3 is `NEXT` in
-  the approved dependency order, but substantive F.6.3 work waits for the
-  user-controlled commit/push and ChatGPT pushed-state review below. E.8.4 is
-  `BLOCKED` pending F.6.3; final E.8 is `BLOCKED` pending E.8.4 and its later
-  runtime/visual gate; F.6.4 is `BLOCKED` pending that full production-impact
-  evidence. Lifecycle-hook dispatch remains BLOCKED / DEFERRED.
+- E.8.3 is `SOURCE REVIEWED` from
+  `kaonlt_review(20260924-064150).diff`. F.6.3 is `SOURCE REVIEWED` from
+  independent ChatGPT actual-diff/source-runtime-path review of
+  `kaonlt_review(20260928-161516).diff`. Codex-reported deterministic checks
+  were `NOT RUN by ChatGPT`; these source reviews do not claim ROOT/PyROOT,
+  full-analysis, farm, or runtime acceptance. E.8.4 is `NEXT`; final E.8 is
+  `BLOCKED` pending its later runtime/visual gate; F.6.4 is `BLOCKED` pending
+  production-impact evidence. Lifecycle-hook dispatch remains BLOCKED /
+  DEFERRED.
 
 ## Source / Evidence Identity
 
@@ -96,26 +95,28 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
-E.8.2 and E.8.3 are `SOURCE REVIEWED`, not runtime accepted: neither has a
-ROOT/PyROOT, full-analysis, farm, or runtime validation claim. F.6.3 is `NEXT`
-only after the user-controlled commit/push and pushed-state review; E.8.4 and
-final E.8 remain downstream. The deferred E.8.1 settings are not a blocker or
-a failure for this roadmap.
+E.8.2, E.8.3, and F.6.3 are `SOURCE REVIEWED`, not runtime accepted. F.6.3's
+Codex-reported checks were not independently run by ChatGPT. E.8.4 is the next
+unimplemented source phase; final E.8 remains downstream. The deferred E.8.1
+settings are not a blocker or failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the reviewed cumulative
-post-E.8.2-reconciliation + E.8.3/Fix.1 source/test/memory set
--> ChatGPT pushed-state review
--> F.6.3 source/runtime-path audit and standalone implementation contract.
+NEXT — user-controlled commit/push of the reviewed cumulative F.6.3 + Fix.1 +
+Fix.2 set -> ChatGPT pushed-state review -> E.8.4 source/runtime-path audit
+and standalone implementation contract. E.8.4 is `NEXT`, not `ACTIVE`; do not
+begin its implementation or request a farm run during this final pre-push
+review.
 
-Do not begin F.6.3 in this reconciliation. E.8.3 consumes only accepted
-persisted F.4/F.5/F.6.1/F.6.2 results; shows
+E.8.3 consumes only accepted persisted F.4/F.5/F.6.1/F.6.2 results; shows
 `b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`; does not renormalize canonical
 `(t,phi)` children; uses no Method-B numerical input; and does not activate or
-present empirical residual Fit 1/Fit 2. It must not construct the parallel full
-production branch: F.6.3 alone owns that work. Local deterministic checks do not
-establish ROOT/PyROOT, full-analysis, farm, or runtime validation.
+present empirical residual Fit 1/Fit 2. F.6.3 alone owns the private parallel
+full-analysis branch. No farm run occurs between F.6.3 source review and E.8.4
+source development under the governing roadmap; the next farm milestone remains
+after coherent F.6.3 + E.8.4 source review. Local deterministic checks and
+source review do not establish ROOT/PyROOT, full-analysis, farm, or runtime
+validation.
 
 ## Success Criteria
 

@@ -183,10 +183,9 @@ Retain accepted explanatory diagnostics: L/B/A normalized shapes, `delta x xptar
 
 ## F.6.3 — parallel full procedure plus Method A
 
-`NEXT` — source-reviewed E.8.3 clears the dependency gate, not final E.8
-closure. F.6.3 alone constructs the actual parallel Method-A full-analysis
-branch. It preserves the
-accepted full yield calculation unchanged as baseline and changes exactly
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+passed the local F.6.3 private parallel Method-A full-analysis candidate. It
+preserves the accepted full yield calculation unchanged as baseline and changes exactly
 `w0_j -> w0_j * C_j` while filling the pion-subtraction template.
 
 Both branches use the same proton-cleaned input. Random/dummy subtraction,
@@ -203,7 +202,7 @@ the unchanged baseline branch.
 
 ## E.8.4 — baseline-versus-Method-A production-impact audit
 
-`BLOCKED` pending F.6.3. E.8.4 consumes, and never constructs, F.6.3 two-branch outputs.
+`NEXT` — E.8.4 consumes, and never constructs, F.6.3 two-branch outputs.
 
 ### E.8.4a — actual pion-subtraction consequence
 
@@ -241,9 +240,9 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-E.8.2 and E.8.3 are `SOURCE REVIEWED`; F.6.3 is the current successor in the
-approved E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward sequence. Do not alter ROOT
-or production behavior.
+E.8.2, E.8.3, and F.6.3 are `SOURCE REVIEWED`; E.8.4 is `NEXT` in the approved
+E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward sequence. Do not alter ROOT or
+production behavior.
 
 ## Farm milestone cadence
 

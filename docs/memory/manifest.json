@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 8132,
+      "bytes": 8108,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "73f387b289e08f207d1715afd12a5ebc89c6733a1d4e8076b2133831d37f4111"
+      "sha256": "bc521f8d85c28c9116a56dd8daad631ebad00f7a613648a24f7a613df6f47a90"
     },
     {
       "bytes": 1978,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 9443,
+      "bytes": 9491,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "66867bee726fe656395cd4010e8329cafd681e39efe107b89d9a0a2e08ee12b8"
+      "sha256": "bfb6eb42707aca1241fb4bb1b91711b5cfe62c40def03e0de5d804a37bd03c46"
     },
     {
       "bytes": 2363,
@@ -511,6 +511,31 @@
       "sha256": "2070bee0fbb136b71d5c770f882b2925759177f2de8059b51bf28f6d8b60af84"
     },
     {
+      "bytes": 9832,
+      "path": "docs/memory/phases/f6-3-final-pre-push-source-review-reconciliation-task-contract.md",
+      "sha256": "82ebb0d8c7e6c9e378115f5d882e3532e84b1caa4216ebb3aa8246a30012395a"
+    },
+    {
+      "bytes": 19055,
+      "path": "docs/memory/phases/f6-3-parallel-full-procedure-method-a-fix1-task-contract.md",
+      "sha256": "e6c5bf0f44a39e7af21ca1604af5bf59ce713dfe44d2ac7db80bbbdca3f9effa"
+    },
+    {
+      "bytes": 11871,
+      "path": "docs/memory/phases/f6-3-parallel-full-procedure-method-a-fix2-task-contract.md",
+      "sha256": "e6a69216363ca342e030e7baad54bbee7f430cc4b7eb06697cc833a84086b0e7"
+    },
+    {
+      "bytes": 25511,
+      "path": "docs/memory/phases/f6-3-parallel-full-procedure-method-a-task-contract.md",
+      "sha256": "8e9415cfaf2dbeece9822f11675f0de2baacd5618b2ad0b6a0e24bf1750a65a1"
+    },
+    {
+      "bytes": 10508,
+      "path": "docs/memory/phases/f6-3-parallel-full-procedure-method-a.md",
+      "sha256": "4df6113b7c5b0480df73ad1424151ef67db0a7aad122259bf7eac93ed958e07c"
+    },
+    {
       "bytes": 1900,
       "path": "docs/memory/phases/farm-validation-bundle-wrapper-fix1-state-reconciliation.md",
       "sha256": "73546d1eb0dcde468b3ff0d087a816872c66bd898969a1032d619ce644ab61f3"
@@ -591,14 +616,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 15906,
+      "bytes": 15882,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "382d1c1701bbccb8c4466d58159cd8e8351c2105fa43e8f6632821c9a5f2c8e8"
+      "sha256": "1268e8bf75f7d19eda4f08f1c97c023ada023d57da3458837b553e61476bd803"
     },
     {
-      "bytes": 5904,
+      "bytes": 5822,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "d5aca5da0a42aef00975f6d6bffa91e356649d13f9a42cee769c1c255b8788a2"
+      "sha256": "33e63e21c83677ece1528c8bb0be95524bba667cb1ebd61547827ba3e7ce4ef9"
     },
     {
       "bytes": 1698,

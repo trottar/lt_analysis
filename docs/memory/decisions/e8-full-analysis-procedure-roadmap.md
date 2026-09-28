@@ -93,9 +93,9 @@ Retain accepted explanatory diagnostics: L/B/A normalized shapes; `delta x xptar
 
 ## F.6.3 — parallel full procedure plus Method A
 
-`NEXT` — source-reviewed E.8.3 clears the dependency gate, not final E.8
-closure. F.6.3 is the only step here that constructs the actual parallel
-Method-A full-analysis branch.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+passed the local F.6.3 private parallel Method-A full-analysis candidate. This
+is source review only and has no ROOT/PyROOT, farm, or runtime acceptance claim.
 It changes exactly `w0_j -> w0_j * C_j` while filling the pion-subtraction
 template.
 
@@ -114,7 +114,8 @@ baseline exactly.
 
 ## E.8.4 — baseline-versus-Method-A production-impact audit
 
-`BLOCKED` pending F.6.3. It consumes authoritative F.6.3 two-branch outputs and must not construct them.
+`NEXT` — it consumes authoritative F.6.3 two-branch outputs and must not
+construct them.
 
 ### E.8.4a — actual pion-subtraction consequence
 

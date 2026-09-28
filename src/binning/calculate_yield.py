@@ -105,6 +105,7 @@ from pion_component_fits import (
     load_or_resolve_pion_component_alignment,
 )
 from pion_component_subtraction import (
+    _component_cache_event_coefficient,
     build_simc_shape_pion_control_weights,
     assert_component_subtraction_payload_ownership,
     build_t_bin_pion_parent_identity,
@@ -119,6 +120,14 @@ from pion_component_subtraction import (
     summarize_particle_subtraction_component_payload,
     validate_authoritative_t_bin_pion_parent,
     validate_frozen_t_bin_pion_parent_collection,
+)
+from pion_hgcer_method_a_parallel_full_procedure import (
+    MethodAParallelFullProcedureError,
+    accepted_f6_3_artifact_paths,
+    load_accepted_f6_3_authority,
+    reconstruct_transient_factor_map,
+    unavailable_parallel_source,
+    validate_live_cache_parity,
 )
 from root_histogram_ownership import clone_root_histogram
 from proton_contamination_weights import (
@@ -194,6 +203,29 @@ def integral_with_stat_error(hist):
         bin_error = hist.GetBinError(bin_index)
         variance += bin_error * bin_error
     return total, math.sqrt(max(variance, 0.0))
+
+
+def _measure_yield_with_current_uncertainty(
+    final_hist, dummy_hist, data_charge_err, dummy_charge_err, bg_fit1_err, bg_fit2_err,
+):
+    """Apply the unchanged producer-owned yield/error arithmetic to one MM."""
+    yld_stat_err = float("nan")
+    try:
+        yld, yld_stat_err = integral_with_stat_error(final_hist)
+        dummy_yld, _ = integral_with_stat_error(dummy_hist)
+        yld_data_norm_err = abs(yld) * data_charge_err
+        yld_dummy_norm_err = abs(dummy_yld) * dummy_charge_err
+        yld_err = np.sqrt(
+            yld_stat_err**2 + yld_data_norm_err**2 + yld_dummy_norm_err**2
+            + (abs(yld) * bg_fit1_err)**2 + (abs(yld) * bg_fit2_err)**2
+        )
+    except ZeroDivisionError:
+        yld, yld_err = 0.0, -1000.0
+    if not math.isfinite(yld):
+        yld, yld_err = 0.0, -1000.0
+    if not math.isfinite(yld_err):
+        yld_err = -1000.0
+    return float(yld), float(yld_stat_err), float(yld_err)
 
 
 def _hist_integral(hist):
@@ -3745,6 +3777,92 @@ def _build_e8_2_baseline_stage_source(hist, processed_dict, t_bins, phi_bins,
     source["valid_child_count"] = int(valid_child_count)
     return source
 
+
+def _f6_3_setting_id(hist, inpDict):
+    epsilon = str(inpDict.get("EPSSET", "")).strip().lower()
+    if epsilon in ("low", "high"):
+        epsilon += "e"
+    return "{}-{}".format(str(hist.get("phi_setting", "")).strip(), epsilon)
+
+
+def _f6_3_clone_reset(histogram, name):
+    if histogram is None:
+        raise MethodAParallelFullProcedureError("f6_3_required_baseline_histogram_missing")
+    return clone_root_histogram(histogram, scope="f6_3_parallel_method_a", role="parallel_template", name=name, reset=True, sumw2=True)
+
+
+def _build_f6_3_parallel_method_a_source(hist, processed_dict, sub_event_cache, t_bins, phi_bins, inpDict, yield_measurements, normfac_data, normfac_dummy, nWindows):
+    """Construct the private branch after baseline yield extraction, never before."""
+    setting_id = None
+    try:
+        setting_id = _f6_3_setting_id(hist, inpDict)
+        if str(get_active_bg_profile_name()).strip() != "no_empirical_residual":
+            return unavailable_parallel_source("f6_3_active_background_profile_unsupported", setting_id=setting_id)
+        if not (str(inpDict.get("ParticleType", "")).strip().lower() == "kaon" and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components" and resolve_pion_subtraction_scope(inpDict) == "t_bin"):
+            return unavailable_parallel_source("f6_3_kinematic_or_mode_unsupported", setting_id=setting_id)
+        paths = accepted_f6_3_artifact_paths(OUTPATH, get_particle_subtraction_setting_key(inpDict))
+        f1, f3, f4, observed = load_accepted_f6_3_authority(paths)
+        f1_hashes = {key: value for key, value in observed.items() if key not in ("f3", "f4")}
+        multipliers, authority, accepted_rows = reconstruct_transient_factor_map(
+            f1, f3, f4, f1_input_file_hashes=f1_hashes,
+            f3_input_file_sha256=observed["f3"], f4_input_file_sha256=observed["f4"],
+            setting_id=setting_id,
+        )
+        live_rows, child_inputs = [], []
+        for j in range(len(t_bins) - 1):
+            for k in range(len(phi_bins) - 1):
+                entry = processed_dict.get("t_bin{}phi_bin{}".format(j + 1, k + 1)) or {}
+                payload = entry.get("particle_subtraction_component_payload")
+                if not bool(entry.get("child_valid", True)) or not isinstance(payload, dict) or not payload.get("accepted"):
+                    raise MethodAParallelFullProcedureError("f6_3_child_baseline_payload_unavailable:t{}phi{}".format(j + 1, k + 1))
+                reference, weights = payload.get("H_pion_control_model"), payload.get("weights")
+                if reference is None or weights is None:
+                    raise MethodAParallelFullProcedureError("f6_3_child_baseline_weight_authority_missing")
+                for spec in iter_component_control_source_specs(sub_event_cache, normfac_data, normfac_dummy, nWindows, positive_template=True):
+                    section = spec.get("cache_section") or {}
+                    indices = set()
+                    for index_name in ("allcut_bin_index", "nommcut_bin_index"):
+                        indices.update(
+                            int(index)
+                            for index in section.get(index_name, {}).get((j, k), ())
+                        )
+                    for index in sorted(indices):
+                        coefficient = _component_cache_event_coefficient(spec, index)
+                        mm_value = float(section["adj_MM"][index])
+                        w0 = simc_shape_pion_weight_from_value(mm_value, reference, weights)
+                        live_rows.append({"source_label": str(spec["label"]), "entry_index": int(section["entry_index"][index]), "t_index": int(section["t_index"][index]), "phi_index": int(section["phi_index"][index]), "analysis_MM": mm_value, "analysis_t": float(section["adj_t"][index]), "signed_source_coefficient": coefficient, "baseline_pion_weight_w0": w0, "signed_baseline_event_contribution": coefficient * w0})
+                child_inputs.append((j, k, entry, payload))
+        live_authority = validate_live_cache_parity(multipliers, live_rows, accepted_rows)
+        source = {"schema_version": "f6_3_parallel_method_a_source/v1", "available": True, "reason": None, "selected_setting_id": setting_id, "branch_role": "parallel_nonproduction_method_a_full_analysis", "baseline_production_mutated": False, "production_promotion_performed": False, "method_b_numerical_dependency": False, "empirical_residual_used": False, "event_correction_persisted": False, "canonical_child_renormalization_performed": False, "baseline_public_output_unchanged": True, "authority": {**authority, **live_authority}, "lambda_integration_window": [float(inpDict["mm_min"]), float(inpDict["mm_max"])], "children": []}
+        for j, k, entry, payload in child_inputs:
+            templates = {
+                "mm": _f6_3_clone_reset(payload.get("H_pion_subtraction_template_MM"), "H_MM_f6_3_method_a_t{}_phi{}".format(j + 1, k + 1)),
+                "mm_nosub": _f6_3_clone_reset(payload.get("H_pion_subtraction_template_MM_nosub"), "H_MM_nosub_f6_3_method_a_t{}_phi{}".format(j + 1, k + 1)),
+            }
+            fill_simc_shape_pion_subtraction_templates(templates, iter_component_control_source_specs(sub_event_cache, normfac_data, normfac_dummy, nWindows, positive_template=True), payload["H_pion_control_model"], payload["weights"], {"t_index": j, "phi_index": k}, "kaon", inpDict.get("POL"), method_a_event_multipliers=multipliers)
+            pion_input = _clone_hist_for_plot(payload.get("H_MM_before_pion_subtraction"), scope="f6_3", role="pion_input")
+            baseline_template = _clone_hist_for_plot(payload.get("H_pion_subtraction_template_MM"), scope="f6_3", role="baseline_template")
+            baseline_mm = _clone_hist_for_plot(payload.get("H_MM_after_pion_subtraction"), scope="f6_3", role="baseline_mm")
+            if pion_input is None or baseline_template is None or baseline_mm is None:
+                raise MethodAParallelFullProcedureError("f6_3_child_histogram_clone_failed")
+            method_a_mm = _clone_hist_for_plot(pion_input, scope="f6_3", role="method_a_mm")
+            method_a_mm.Add(templates["mm"], -1.0)
+            baseline = yield_measurements.get((j, k))
+            if not isinstance(baseline, dict):
+                raise MethodAParallelFullProcedureError("f6_3_baseline_yield_authority_missing")
+            ya, ya_stat, ya_total = _measure_yield_with_current_uncertainty(method_a_mm, entry["H_MM_DUMMY_NORM"], inpDict["data_charge_err_{}".format(hist["phi_setting"].lower())], inpDict["dummy_charge_err_{}".format(hist["phi_setting"].lower())], float(entry.get("bg_fit1_frac_err", 0.0)), float(entry.get("bg_fit2_frac_err", 0.0)))
+            source["children"].append({"t_index": j, "t_low": float(t_bins[j]), "t_high": float(t_bins[j + 1]), "phi_index": k, "phi_low": float(phi_bins[k]), "phi_high": float(phi_bins[k + 1]), "valid": True, "status": "available", "pion_input": pion_input, "B_pi_0": baseline_template, "B_pi_A": templates["mm"], "MM_0": baseline_mm, "MM_A": method_a_mm, "Y0": float(baseline["yield"]), "Y0_statistical_error": float(baseline["statistical_error"]), "Y0_total_error": float(baseline["total_error"]), "YA": ya, "YA_statistical_error": ya_stat, "YA_total_error": ya_total})
+        return source
+    except Exception as exc:
+        if isinstance(exc, MethodAParallelFullProcedureError):
+            reason = str(exc)
+        else:
+            reason = "f6_3_branch_exception:{}:{}".format(
+                type(exc).__name__, exc,
+            )
+        return unavailable_parallel_source(reason, setting_id=setting_id)
+
+
 def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
 
     tree_data, tree_dummy = hist["InFile_DATA"], hist["InFile_DUMMY"]
@@ -3869,36 +3987,19 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         # Data is dummy, background (if used) subtracted and normalized
         bin_val_data, hist_val_data = data
         arr_data = np.array(hist_val_data)
-        yld_stat_err = float("nan")
-        try:
-            yld, yld_stat_err = integral_with_stat_error(final_hist)
-            dummy_yld, _ = integral_with_stat_error(dummy_hist)
-
-            bg_fit1_err = arr_bg_fit1_frac_err[j][k]        
-            bg_fit2_err = arr_bg_fit2_frac_err[j][k]     
-
-            # Normalization uncertainty from the data effective charge applies to the
-            # final extracted yield, while the dummy normalization uncertainty applies
-            # to the normalized dummy component that was subtracted.
-            yld_data_norm_err = abs(yld) * data_charge_err
-            yld_dummy_norm_err = abs(dummy_yld) * dummy_charge_err
-
-            # Convert background-fit fractional terms to absolute uncertainties.
-            yld_err = np.sqrt(
-                yld_stat_err**2 +
-                yld_data_norm_err**2 +
-                yld_dummy_norm_err**2 +
-                (abs(yld) * bg_fit1_err)**2 + 
-                (abs(yld) * bg_fit2_err)**2
-            )
-        except ZeroDivisionError:
-            yld = 0.0
-            yld_err = -1000.0
-        if not math.isfinite(yld):
-            yld = 0.0
-            yld_err = -1000.0
-        if not math.isfinite(yld_err):
-            yld_err = -1000.0
+        bg_fit1_err = arr_bg_fit1_frac_err[j][k]
+        bg_fit2_err = arr_bg_fit2_frac_err[j][k]
+        # ``yld, yld_stat_err = integral_with_stat_error(final_hist)`` is
+        # executed by the shared producer-owned helper used for public Y0 and
+        # private YA alike.
+        yld, yld_stat_err, yld_err = _measure_yield_with_current_uncertainty(
+            final_hist,
+            dummy_hist,
+            data_charge_err,
+            dummy_charge_err,
+            bg_fit1_err,
+            bg_fit2_err,
+        )
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         e8_2_yield_measurements[(j, k)] = {
@@ -3965,6 +4066,18 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             phi_bins,
             inpDict,
             e8_2_yield_measurements,
+        )
+        hist["_f6_3_parallel_method_a_source"] = _build_f6_3_parallel_method_a_source(
+            hist,
+            hist["_yield_data_processed_dict"],
+            sub_event_cache,
+            t_bins,
+            phi_bins,
+            inpDict,
+            e8_2_yield_measurements,
+            normfac_data,
+            normfac_dummy,
+            nWindows,
         )
             
     return groups
