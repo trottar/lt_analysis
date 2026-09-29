@@ -8,6 +8,7 @@ import math
 import os
 import sys
 import tempfile
+import types
 import unittest
 
 
@@ -28,6 +29,43 @@ from background_config import get_pion_component_dynamic_alignment_config
 
 if ROOT is not None:
     import pion_component_fits as fits
+else:
+    class _RootImportStub(types.ModuleType):
+        """Allow deterministic provenance tests to import the ROOT-bound module."""
+
+        def __getattr__(self, name):
+            return type(name, (), {})
+
+
+    def _load_root_free_alignment_module():
+        """Load the production predicate without leaking a fake ROOT module."""
+        originals = {name: sys.modules.get(name) for name in ("ROOT", "utility", "pion_component_fits")}
+        root_stub = _RootImportStub("ROOT")
+        for color_name, color_value in {
+            "kRed": 632,
+            "kAzure": 860,
+            "kMagenta": 616,
+            "kBlue": 600,
+            "kCyan": 432,
+        }.items():
+            setattr(root_stub, color_name, color_value)
+        utility_stub = types.ModuleType("utility")
+        utility_stub.normalize_hist_to_unit_area = lambda histogram: histogram
+        sys.modules["ROOT"] = root_stub
+        sys.modules["utility"] = utility_stub
+        sys.modules.pop("pion_component_fits", None)
+        try:
+            import pion_component_fits as root_free_fits
+        finally:
+            for name, original in originals.items():
+                if original is None:
+                    sys.modules.pop(name, None)
+                else:
+                    sys.modules[name] = original
+        return root_free_fits
+
+
+    fits = _load_root_free_alignment_module()
 
 
 class DynamicPionAlignmentConfigTests(unittest.TestCase):
@@ -49,6 +87,135 @@ class DynamicPionAlignmentConfigTests(unittest.TestCase):
             with open(os.path.join(REPO_ROOT, relative_path), "r") as handle:
                 source = handle.read()
             self.assertIn("load_or_resolve_pion_component_alignment", source)
+
+
+class _AxisStub:
+    def __init__(self, edges):
+        self._edges = list(edges)
+
+    def GetXmin(self):
+        return self._edges[0]
+
+    def GetXmax(self):
+        return self._edges[-1]
+
+    def GetBinLowEdge(self, index):
+        return self._edges[index - 1]
+
+
+class _HistogramStub:
+    def __init__(self, name, edges, contents):
+        self._name = name
+        self._axis = _AxisStub(edges)
+        self._contents = [0.0, *contents, 0.0]
+        self._errors = [0.0, *(math.sqrt(abs(value)) for value in contents), 0.0]
+
+    def GetName(self):
+        return self._name
+
+    def GetXaxis(self):
+        return self._axis
+
+    def GetNbinsX(self):
+        return len(self._contents) - 2
+
+    def GetBinContent(self, index):
+        return self._contents[index]
+
+    def GetBinError(self, index):
+        return self._errors[index]
+
+
+class DynamicPionAlignmentPersistenceAndBoundaryTests(unittest.TestCase):
+    def _identity(self):
+        return {
+            "kinematic_setting": "Q2W-test",
+            "epsilon": "lowe",
+            "phi_setting": "center",
+            "analysis_scope": "setting-wide",
+            "t_bin": None,
+            "phi_bin": None,
+        }
+
+    def _pion_control(self, name, edges=(0.70, 0.90, 1.10, 1.30), contents=(12.0, 18.0, 7.0)):
+        return _HistogramStub(name, edges, contents)
+
+    def _cache_payload(self, pion_control):
+        payload = fits.build_expected_pion_alignment_metadata(
+            "Q2W-test",
+            "setting-wide",
+            self._identity(),
+            pion_control,
+            {name: None for name in fits.COMPONENT_NAMES},
+            inp_dict={},
+            phi_setting="center",
+            common_setting_shift_gev=0.005,
+        )
+        payload.update({"accepted": True, "selected_score": 1.0})
+        return payload
+
+    def test_cache_reuses_checksum_and_axis_when_histogram_name_changes(self):
+        first_control = self._pion_control("pion_control_20260924")
+        second_control = self._pion_control("pion_control_20260929")
+        payload = self._cache_payload(first_control)
+        with tempfile.TemporaryDirectory() as directory:
+            fits.persist_pion_component_alignment(
+                directory, "Q2W-test", "center", "lowe", payload
+            )
+            original_resolver = fits.resolve_pion_component_alignment
+            fits.resolve_pion_component_alignment = lambda *args, **kwargs: self.fail(
+                "compatible cache hit must not resolve again"
+            )
+            try:
+                cached, status, reasons, _ = fits.load_or_resolve_pion_component_alignment(
+                    directory,
+                    "Q2W-test",
+                    "center",
+                    "lowe",
+                    "setting-wide",
+                    self._identity(),
+                    second_control,
+                    {name: None for name in fits.COMPONENT_NAMES},
+                    inp_dict={},
+                    common_setting_shift_gev=0.005,
+                )
+            finally:
+                fits.resolve_pion_component_alignment = original_resolver
+        self.assertEqual(status, "reused")
+        self.assertEqual(reasons, [])
+        self.assertEqual(cached["pion_control_histogram_identifier"]["hist_name"], "pion_control_20260924")
+
+    def test_pion_control_semantic_mismatches_fail_closed(self):
+        payload = self._cache_payload(self._pion_control("pion_control_original"))
+        with tempfile.TemporaryDirectory() as directory:
+            fits.persist_pion_component_alignment(
+                directory, "Q2W-test", "center", "lowe", payload
+            )
+            for expected in (
+                self._cache_payload(self._pion_control("same_axis_new_content", contents=(12.0, 19.0, 7.0))),
+                self._cache_payload(self._pion_control("changed_axis", edges=(0.70, 0.85, 1.10, 1.30))),
+            ):
+                cached, reasons, _ = fits.load_pion_component_alignment(
+                    directory, "Q2W-test", "center", "lowe", expected
+                )
+                self.assertIsNone(cached)
+                self.assertIn("pion control histogram identifier mismatch", reasons)
+            malformed = copy.deepcopy(payload)
+            del malformed["pion_control_histogram_identifier"]["checksum"]
+            cached, reasons, _ = fits.load_pion_component_alignment(
+                directory, "Q2W-test", "center", "lowe", malformed
+            )
+        self.assertIsNone(cached)
+        self.assertIn("pion control histogram identifier mismatch", reasons)
+
+    def test_template_integral_minimum_accepts_only_machine_scale_roundoff(self):
+        self.assertIn(
+            "_template_integral_meets_minimum",
+            inspect.getsource(fits.scan_pion_component_alignment),
+        )
+        self.assertTrue(fits._template_integral_meets_minimum(1.0, 1.0))
+        self.assertTrue(fits._template_integral_meets_minimum(1.0 - 1.0e-13, 1.0))
+        self.assertFalse(fits._template_integral_meets_minimum(1.0 - 1.0e-6, 1.0))
 
 
 @unittest.skipUnless(ROOT is not None, "PyROOT is required for histogram alignment tests")

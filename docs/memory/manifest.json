@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 8685,
+      "bytes": 9742,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c5b5fd9f015bb372a4d1b5ab3e1999b5764ac5fa169b7b789fc8b80b0458281a"
+      "sha256": "014dac67dd39e2549ff59965757c88aac37f39ec7bb795654d2aad1fe9e497ef"
     },
     {
       "bytes": 1978,
@@ -134,6 +134,11 @@
       "bytes": 2912,
       "path": "docs/memory/evidence/e8-1-fix6-left-lowe-runtime-closure.md",
       "sha256": "06ef27c2f2e4993c22981a4154974227fbdee57b59e870d061467ac021d1f64f"
+    },
+    {
+      "bytes": 1987,
+      "path": "docs/memory/evidence/e8-4-left-lowe-pion-alignment-determinism-blocker.md",
+      "sha256": "81e7dc85156e483f23c53dcb90a643eb58e49b89d36fad6bc2cdec12c3defa3c"
     },
     {
       "bytes": 1489,
@@ -531,6 +536,16 @@
       "sha256": "a94f297a5ee89ce227aa40d5b158f0e9b703c04b57da06a0bffced1db48df2a4"
     },
     {
+      "bytes": 21814,
+      "path": "docs/memory/phases/e8-4-fix3-pion-alignment-determinism-task-contract.md",
+      "sha256": "e52e0c9d40b4f903662de1d3a0aef1732ca411683b0788bb4e568442dc22dc00"
+    },
+    {
+      "bytes": 3047,
+      "path": "docs/memory/phases/e8-4-fix3-pion-alignment-determinism.md",
+      "sha256": "988db1c56c059562156eb6842e4c9fd2938cb4c6c44d6231cd8b83d1feec1ada"
+    },
+    {
       "bytes": 26240,
       "path": "docs/memory/phases/e8-4-production-impact-audit-task-contract.md",
       "sha256": "2140d5aed22729abfcd357b5065b19d62952747c018a13f8f562b33c31cd59dc"
@@ -666,9 +681,9 @@
       "sha256": "166b4a84aa33122dc9c5ab46966b069ce345dd58878ad095f3aab47a98110d47"
     },
     {
-      "bytes": 6605,
+      "bytes": 7105,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "99a489ba1714c82d8701e2fc48e74ef0a125b0dd9c771e58572b2f4fe1accd39"
+      "sha256": "c67e75a9a058a846b0d24448b42508667925b7238979f51fc799eb0baeb58405"
     },
     {
       "bytes": 1698,

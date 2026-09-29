@@ -6270,6 +6270,80 @@ def _pion_control_histogram_identifier(hist):
     }
 
 
+def _pion_control_histogram_semantic_identity(identifier):
+    """Return the stable cache identity, or ``None`` for malformed provenance.
+
+    ROOT allocates histogram names at runtime, so that diagnostic field is not
+    semantic cache identity.  A persisted pion-control calibration still
+    requires its content checksum and complete axis specification.
+    """
+    if not isinstance(identifier, dict):
+        return None
+    checksum, axis = identifier.get("checksum"), identifier.get("axis")
+    if (
+        not isinstance(checksum, str)
+        or len(checksum) != 64
+        or any(character not in "0123456789abcdef" for character in checksum)
+        or not isinstance(axis, dict)
+    ):
+        return None
+    try:
+        raw_nbins = axis["nbins"]
+        nbins = int(raw_nbins)
+        xmin, xmax = float(axis["xmin"]), float(axis["xmax"])
+        edges = axis["bin_edges"]
+    except (KeyError, TypeError, ValueError, OverflowError):
+        return None
+    if (
+        isinstance(raw_nbins, bool)
+        or not _is_finite_number(raw_nbins)
+        or float(raw_nbins) != float(nbins)
+        or nbins <= 0
+        or not (_is_finite_number(xmin) and _is_finite_number(xmax))
+        or not isinstance(edges, list)
+        or len(edges) != nbins + 1
+    ):
+        return None
+    try:
+        numeric_edges = [float(edge) for edge in edges]
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if (
+        not all(_is_finite_number(edge) for edge in numeric_edges)
+        or any(right <= left for left, right in zip(numeric_edges, numeric_edges[1:]))
+        or xmin != numeric_edges[0]
+        or xmax != numeric_edges[-1]
+    ):
+        return None
+    return {"checksum": checksum, "axis": axis}
+
+
+def _pion_control_histogram_identifiers_are_compatible(stored, expected):
+    """Compare only stable pion-control provenance and fail closed otherwise."""
+    stored_identity = _pion_control_histogram_semantic_identity(stored)
+    expected_identity = _pion_control_histogram_semantic_identity(expected)
+    return (
+        stored_identity is not None
+        and expected_identity is not None
+        and stored_identity == expected_identity
+    )
+
+
+def _template_integral_meets_minimum(template_integral, minimum_template_integral):
+    """Apply machine-scale tolerance only at the template-integral boundary.
+
+    A shifted template renormalized to the configured minimum can land a few
+    floating-point ulps below it.  This deliberately does not change the
+    configured threshold or any other alignment acceptance criterion.
+    """
+    value = float(template_integral)
+    threshold = float(minimum_template_integral)
+    return not (
+        value < threshold
+        and not math.isclose(value, threshold, rel_tol=1e-12, abs_tol=1e-12)
+    )
+
+
 def _alignment_canonical_windows(inp_dict, phi_setting):
     resolved = resolve_particle_subtraction_component_fit_windows(
         "pion_control", mm_offset_data=0.0, inp_dict=inp_dict, phi_setting=phi_setting
@@ -6410,7 +6484,10 @@ def scan_pion_component_alignment(
             reasons.append("insufficient evaluation bins")
         if support["support_integral_for_acceptance"] < support_threshold:
             reasons.append("insufficient {} support".format(support["support_metric_used"]))
-        if _hist_integral(template) < float(acceptance.get("minimum_template_integral", 0.0) or 0.0):
+        if not _template_integral_meets_minimum(
+            _hist_integral(template),
+            float(acceptance.get("minimum_template_integral", 0.0) or 0.0),
+        ):
             reasons.append("insufficient template integral")
         if float(shift_diagnostics.get("lost_integral_fraction", 0.0) or 0.0) > float(acceptance.get("maximum_lost_template_integral_fraction", 1.0) or 1.0):
             reasons.append("lost template integral exceeds threshold")
@@ -6937,7 +7014,10 @@ def _alignment_compatibility_reasons(stored, expected):
         reasons.append("parent_alignment_hash mismatch")
     if _alignment_template_metadata_map(stored) != _alignment_template_metadata_map(expected):
         reasons.append("immutable source template identifier/checksum mismatch")
-    if stored.get("pion_control_histogram_identifier") != expected.get("pion_control_histogram_identifier"):
+    if not _pion_control_histogram_identifiers_are_compatible(
+        stored.get("pion_control_histogram_identifier"),
+        expected.get("pion_control_histogram_identifier"),
+    ):
         reasons.append("pion control histogram identifier mismatch")
     return reasons
 

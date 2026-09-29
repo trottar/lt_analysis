@@ -12,6 +12,17 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+E.8.4.Fix.3 pion-alignment determinism repair is `ACTIVE` pending independent
+ChatGPT actual-diff review. The narrow local candidate makes persisted
+pion-control compatibility depend on checksum plus axis rather than an
+ephemeral generated ROOT histogram name, and makes only the renormalized
+template minimum-integral boundary machine-scale roundoff safe. It preserves
+schema-v2 cache compatibility, all other provenance checks, the configured
+threshold, and the existing scan/production physics. Local deterministic tests
+are not ROOT/PyROOT, full-analysis, farm, or runtime validation. See the
+[Fix.3 determinism blocker evidence](evidence/e8-4-left-lowe-pion-alignment-determinism-blocker.md)
+and [Fix.3 phase record](phases/e8-4-fix3-pion-alignment-determinism.md).
+
 The fresh `Q4p4W2p74 / Left / lowe` Fix.6 package
 `KaonLT_E8_1_Fix6_Q4p4W2p74_Left_lowe_20260923-090850.zip` is direct, reviewed
 Jefferson Lab runtime evidence. Its bundle/profile commit is
@@ -75,6 +86,10 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   `BLOCKED` pending its later runtime/visual gate; F.6.4 is `BLOCKED` pending
   production-impact evidence. Lifecycle-hook dispatch remains BLOCKED /
   DEFERRED.
+- E.8.4.Fix.3 is `ACTIVE` pending independent actual-diff review. It is a
+  baseline pion-alignment determinism/provenance repair, not a reopened
+  F.1--F.6.2 scientific result or a Method-A promotion. Its direct farm
+  evidence is a blocker record, not runtime closure.
 - The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`:
   independent ChatGPT reviewed `kaonlt_review(20260929-100154).diff` and
   returned a passing source/provenance result. It requires pushed source
@@ -115,11 +130,12 @@ failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the reviewed bundle-profile re-pin.
+NEXT — independent ChatGPT review of the complete E.8.4.Fix.3 actual diff and
+review bundle only.
 
-Do not provide or authorize farm-run commands until this exact validation
-bundle/profile is independently source-reviewed, pushed, and pushed-state
-reviewed. Do not advance to later gates before this one passes.
+E.8.4.Fix.3 remains `ACTIVE` until that review passes. Do not advance to later
+validation gates before the repair is independently source-reviewed and the
+user has controlled any subsequent Git action.
 
 F.6.3 alone owns the private parallel full-analysis branch; E.8.4 only consumes
 its post-yield sidecar in the existing pair-safe procedure rerender. Method B
