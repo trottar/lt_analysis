@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 8177,
+      "bytes": 8685,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "8fa01b7cf981dd189f7b8d7ccb6152573c6f13560330e58815f829de3bace04d"
+      "sha256": "c5b5fd9f015bb372a4d1b5ab3e1999b5764ac5fa169b7b789fc8b80b0458281a"
     },
     {
       "bytes": 1978,
@@ -46,9 +46,9 @@
       "sha256": "f9f77d5195dc25f485670d34d841129d2120f2fb170217a6821a166866aab776"
     },
     {
-      "bytes": 3366,
+      "bytes": 3667,
       "path": "docs/memory/USER.md",
-      "sha256": "315f7e22878f4a30bdc1ba1099f98c115e536e9bc585dbfeb94229f9f1a0f988"
+      "sha256": "40c8db3067a60fd1d82f488f77ed3882a13170f7e857d6a7500f0e201cdcc7ec"
     },
     {
       "bytes": 1157,
@@ -496,6 +496,26 @@
       "sha256": "139339f589d0886e0cd82dc0a221d5c0e78a8e380c5c9bbd84dea22fb2bf9b53"
     },
     {
+      "bytes": 6728,
+      "path": "docs/memory/phases/e8-4-bundle-profile-repin-final-source-review-reconciliation-task-contract.md",
+      "sha256": "7f70e054577288d6ffe4b412de9c419aa0c5e361838e9c92307206967792065f"
+    },
+    {
+      "bytes": 7498,
+      "path": "docs/memory/phases/e8-4-bundle-profile-repin-fix1-memory-evidence-task-contract.md",
+      "sha256": "7be3bf633ab170ee54562a111a5fd5fbf6ac59c9ec4d59084db9e7b247e37524"
+    },
+    {
+      "bytes": 9032,
+      "path": "docs/memory/phases/e8-4-bundle-profile-repin-task-contract.md",
+      "sha256": "c0d09cafde7d22a3fd1b2d2f81cd20cfce2252762c21dcccddf102f41dac8602"
+    },
+    {
+      "bytes": 5515,
+      "path": "docs/memory/phases/e8-4-bundle-profile-repin.md",
+      "sha256": "27bbabe10dadab2990389124ccacbd4411aba3f697140ddc979a9d476a6a4b6a"
+    },
+    {
       "bytes": 11174,
       "path": "docs/memory/phases/e8-4-final-pre-push-source-review-reconciliation-task-contract.md",
       "sha256": "08b88cfab6f7018d24cbe361b944eac8eadf426f3544e5fcda35fc340a91a7e8"
@@ -646,9 +666,9 @@
       "sha256": "166b4a84aa33122dc9c5ab46966b069ce345dd58878ad095f3aab47a98110d47"
     },
     {
-      "bytes": 6281,
+      "bytes": 6605,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "4cd6883d1677426c227901edb4708d468c9501440aaa4f64c46e06eb4289040b"
+      "sha256": "99a489ba1714c82d8701e2fc48e74ef0a125b0dd9c771e58572b2f4fe1accd39"
     },
     {
       "bytes": 1698,

@@ -81,6 +81,12 @@ sidecar Lambda-window/child-inventory fail-closed behavior. Codex-reported
 checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or runtime acceptance
 is claimed.
 
+The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
+changes only the profile/test required analysis source
+from Fix.5 `53fd262b730af8f1254e411a38231aebeb6a1da3` to pushed E.8.4
+`1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself remains `SOURCE
+REVIEWED` and no farm/runtime status changes.
+
 #### Final E.8 closure
 
 `BLOCKED` — pending E.8.4 and later runtime/visual validation of the complete full-analysis visual chain.

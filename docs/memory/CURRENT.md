@@ -75,6 +75,15 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   `BLOCKED` pending its later runtime/visual gate; F.6.4 is `BLOCKED` pending
   production-impact evidence. Lifecycle-hook dispatch remains BLOCKED /
   DEFERRED.
+- The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`:
+  independent ChatGPT reviewed `kaonlt_review(20260929-100154).diff` and
+  returned a passing source/provenance result. It requires pushed source
+  `1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`, with the exact canonical-five
+  artifact inventory and profile/test-only range allowlist intact. The review
+  is source/provenance only; Codex-reported checks were `NOT RUN by ChatGPT`,
+  and it claims no ROOT/PyROOT, procedure-PDF, farm, or runtime acceptance.
+  The non-fatal `check_memory_health.py` CURRENT soft-size warning remains
+  distinct from a source or runtime failure.
 
 ## Source / Evidence Identity
 
@@ -106,16 +115,11 @@ failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the reviewed cumulative E.8.4 + Fix.1 +
-Fix.2 + final source-review memory reconciliation
--> ChatGPT pushed-state review
--> one narrow Jefferson Lab farm gate for Q4p4W2p74 / Left / lowe
--> fresh artifacts
--> ChatGPT evidence review
+NEXT — user-controlled commit/push of the reviewed bundle-profile re-pin.
 
-Do not run the farm before the user-controlled commit/push and ChatGPT
-pushed-state review. Do not broaden immediately to the canonical-five-setting
-campaign.
+Do not provide or authorize farm-run commands until this exact validation
+bundle/profile is independently source-reviewed, pushed, and pushed-state
+reviewed. Do not advance to later gates before this one passes.
 
 F.6.3 alone owns the private parallel full-analysis branch; E.8.4 only consumes
 its post-yield sidecar in the existing pair-safe procedure rerender. Method B

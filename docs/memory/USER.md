@@ -18,6 +18,11 @@ in repository memory, supplied artifacts, or current source. Prefer the
 smallest complete validation-artifact package needed for the question, and keep
 source review explicitly distinct from farm validation.
 
+Do not provide or authorize farm-run commands until the exact validation
+bundle/profile required for that gate is ready, independently source-reviewed,
+pushed, and pushed-state reviewed. Advance one workflow gate at a time; do not
+provide commands for later gates before the current gate has passed.
+
 After Codex completes a local source-changing task, ChatGPT must inspect the
 actual diff before the user commits or pushes. If the diff is too large to
 review comfortably in terminal output, Codex must provide an exact command that
