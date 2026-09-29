@@ -114,8 +114,14 @@ baseline exactly.
 
 ## E.8.4 — baseline-versus-Method-A production-impact audit
 
-`NEXT` — it consumes authoritative F.6.3 two-branch outputs and must not
-construct them.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+passed the complete cumulative `kaonlt_review(20260928-233040).diff` candidate.
+E.8.4 consumes authoritative F.6.3 two-branch outputs and does not construct
+them. The reviewed candidate retains Fix.1's E.8.2-to-F.6.3 setting-token
+identity, internal analysis-MM geometry, and common pion input, and Fix.2's
+explicit malformed optional-sidecar Lambda-window/child-inventory fail-closed
+boundary. Codex-reported deterministic checks were `NOT RUN by ChatGPT`; this
+is not ROOT/PyROOT, full-analysis, farm, or runtime validation.
 
 ### E.8.4a — actual pion-subtraction consequence
 

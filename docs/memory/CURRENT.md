@@ -66,7 +66,12 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   independent ChatGPT actual-diff/source-runtime-path review of
   `kaonlt_review(20260928-161516).diff`. Codex-reported deterministic checks
   were `NOT RUN by ChatGPT`; these source reviews do not claim ROOT/PyROOT,
-  full-analysis, farm, or runtime acceptance. E.8.4 is `NEXT`; final E.8 is
+  full-analysis, farm, or runtime acceptance. E.8.4 is `SOURCE REVIEWED`:
+  ChatGPT passed complete `kaonlt_review(20260928-233040).diff` actual-diff/
+  source-runtime-path review. The consumer retains Fix.1's identity/geometry/
+  common-input repairs and Fix.2's malformed-sidecar fail-closed boundary; it
+  cannot construct either branch. Codex checks were `NOT RUN by ChatGPT`; no
+  ROOT/PyROOT, full-analysis, farm, or runtime claim. Final E.8 is
   `BLOCKED` pending its later runtime/visual gate; F.6.4 is `BLOCKED` pending
   production-impact evidence. Lifecycle-hook dispatch remains BLOCKED /
   DEFERRED.
@@ -95,28 +100,27 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
-E.8.2, E.8.3, and F.6.3 are `SOURCE REVIEWED`, not runtime accepted. F.6.3's
-Codex-reported checks were not independently run by ChatGPT. E.8.4 is the next
-unimplemented source phase; final E.8 remains downstream. The deferred E.8.1
-settings are not a blocker or failure.
+E.8.2, E.8.3, F.6.3, and E.8.4 are `SOURCE REVIEWED`, not runtime accepted.
+Final E.8 remains downstream. The deferred E.8.1 settings are not a blocker or
+failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the reviewed cumulative F.6.3 + Fix.1 +
-Fix.2 set -> ChatGPT pushed-state review -> E.8.4 source/runtime-path audit
-and standalone implementation contract. E.8.4 is `NEXT`, not `ACTIVE`; do not
-begin its implementation or request a farm run during this final pre-push
-review.
+NEXT — user-controlled commit/push of the reviewed cumulative E.8.4 + Fix.1 +
+Fix.2 + final source-review memory reconciliation
+-> ChatGPT pushed-state review
+-> one narrow Jefferson Lab farm gate for Q4p4W2p74 / Left / lowe
+-> fresh artifacts
+-> ChatGPT evidence review
 
-E.8.3 consumes only accepted persisted F.4/F.5/F.6.1/F.6.2 results; shows
-`b_j^0 = s_j*w0_j` to `b_j^A = s_j*w0_j*C_j`; does not renormalize canonical
-`(t,phi)` children; uses no Method-B numerical input; and does not activate or
-present empirical residual Fit 1/Fit 2. F.6.3 alone owns the private parallel
-full-analysis branch. No farm run occurs between F.6.3 source review and E.8.4
-source development under the governing roadmap; the next farm milestone remains
-after coherent F.6.3 + E.8.4 source review. Local deterministic checks and
-source review do not establish ROOT/PyROOT, full-analysis, farm, or runtime
-validation.
+Do not run the farm before the user-controlled commit/push and ChatGPT
+pushed-state review. Do not broaden immediately to the canonical-five-setting
+campaign.
+
+F.6.3 alone owns the private parallel full-analysis branch; E.8.4 only consumes
+its post-yield sidecar in the existing pair-safe procedure rerender. Method B
+remains numerically absent and Fit 1/Fit 2 dormant. Local checks and source
+review do not establish ROOT/PyROOT, full-analysis, farm, or runtime validation.
 
 ## Success Criteria
 

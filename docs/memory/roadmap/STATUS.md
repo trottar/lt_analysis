@@ -71,9 +71,15 @@ acceptance is claimed. Legacy empirical residual Fit 1/Fit 2 remain disabled.
 
 #### E.8.4 — baseline-versus-Method-A production-impact audit
 
-`NEXT` — consumes authoritative two-branch outputs for post-pion, final
-canonical MM, final yield, and delta-yield comparisons; it does not construct
-branch outputs.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+passed the complete cumulative `kaonlt_review(20260928-233040).diff` candidate.
+The presentation-only consumer uses authoritative two-branch outputs for
+post-pion, final canonical MM, final-yield, and delta-yield comparisons; it
+does not construct branch outputs. The reviewed cumulative candidate retains
+Fix.1 identity/geometry/common-input repairs and Fix.2 malformed optional-
+sidecar Lambda-window/child-inventory fail-closed behavior. Codex-reported
+checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or runtime acceptance
+is claimed.
 
 #### Final E.8 closure
 

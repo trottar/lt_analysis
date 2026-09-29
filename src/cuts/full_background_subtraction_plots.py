@@ -46,6 +46,7 @@ E8_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8/v1"
 E8_2_SOURCE_SCHEMA_VERSION = "e8_2_baseline_stage_source/v1"
 E8_2_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_2/v1"
 E8_3_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_3/v1"
+E8_4_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_e8_4/v1"
 E8_F6_2_INPUT_SHA256 = "5fb52310b44c4fbba66bbbf868c0c7ee8894992a8f06f2d0bd209d1608310bb1"
 E8_F6_2_ARTIFACT_SCHEMA = (
     "pion_hgcer_method_a_acceptance_refinement_validation_artifact/v1"
@@ -5759,8 +5760,8 @@ def _render_full_background_subtraction_e8_context_page(ROOT, pdf_name, payload)
             ),
             "Maps use one common L/B/A display scale per comparison; values are not",
             "renormalized or recomputed.",
-            "The full baseline-versus-w0*C production-impact comparison",
-            "belongs to later F.6.3 work.",
+            "F.6.3 constructs the private parallel branch; E.8.4 consumes it for",
+            "the actual baseline-versus-w0*C production-impact audit without promotion.",
         ),
         size=0.024,
     )
@@ -6061,6 +6062,286 @@ def build_full_background_subtraction_e8_2_payload(source):
     }
 
 
+def _e8_4_unavailable(reason, *, setting_id=None):
+    """Return the detached, explicit consumer boundary for E.8.4."""
+    return {
+        "schema_version": E8_4_PRESENTATION_SCHEMA_VERSION,
+        "available": False,
+        "reason": str(reason),
+        "setting_id": setting_id,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+    }
+
+
+def _e8_4_finite_scalar(value, label):
+    try:
+        copied = float(value)
+    except (TypeError, ValueError):
+        raise _E8PayloadError("e8_4_{}_invalid".format(label))
+    if not math.isfinite(copied):
+        raise _E8PayloadError("e8_4_{}_nonfinite".format(label))
+    return copied
+
+
+def _e8_4_histogram_is_finite(histogram):
+    """Accept only a displayable detached branch-output histogram."""
+    try:
+        bin_count = int(histogram.GetNbinsX())
+        return bin_count > 0 and all(
+            math.isfinite(float(histogram.GetBinContent(index)))
+            and math.isfinite(float(histogram.GetBinError(index)))
+            for index in range(1, bin_count + 1)
+        )
+    except Exception:
+        return False
+
+
+def _e8_4_histogram_edges(histogram):
+    """Return one validated F.6.3 analysis-MM axis without altering it."""
+    return _strict_edges(_e8_2_histogram_edges(histogram))
+
+
+def _e8_4_e8_2_children(payload):
+    """Return the exact canonical E.8.2 child inventory for cross-checking."""
+    e8_2 = _mapping(payload)
+    if (
+        e8_2.get("schema_version") != E8_2_PRESENTATION_SCHEMA_VERSION
+        or e8_2.get("available") is not True
+    ):
+        raise _E8PayloadError("e8_4_baseline_presentation_unavailable")
+    t_edges = _strict_edges(e8_2.get("t_edges"))
+    phi_edges = _strict_edges(e8_2.get("phi_edges"))
+    mm_edges = _strict_edges(e8_2.get("mm_edges"))
+    window = tuple(e8_2.get("lambda_window") or ())
+    if (
+        t_edges is None or phi_edges is None or mm_edges is None
+        or len(window) != 2
+    ):
+        raise _E8PayloadError("e8_4_baseline_geometry_invalid")
+    window = tuple(_e8_4_finite_scalar(value, "baseline_lambda_window") for value in window)
+    if window[1] <= window[0]:
+        raise _E8PayloadError("e8_4_baseline_lambda_window_invalid")
+    setting = str(e8_2.get("setting") or "")
+    epsilon = str(e8_2.get("epsilon") or "")
+    if not setting or not epsilon:
+        raise _E8PayloadError("e8_4_baseline_setting_identity_invalid")
+    f6_3_epsilon = {"low": "lowe", "high": "highe"}.get(epsilon)
+    if f6_3_epsilon is None:
+        raise _E8PayloadError("e8_4_baseline_epsilon_identity_invalid")
+    expected = {
+        (t_index, phi_index)
+        for t_index in range(len(t_edges) - 1)
+        for phi_index in range(len(phi_edges) - 1)
+    }
+    children = {}
+    for group in tuple(e8_2.get("per_t") or ()):
+        group = _mapping(group)
+        try:
+            t_index = int(group.get("t_index"))
+        except (TypeError, ValueError):
+            raise _E8PayloadError("e8_4_baseline_child_coordinate_invalid")
+        if t_index not in range(len(t_edges) - 1):
+            raise _E8PayloadError("e8_4_baseline_child_coordinate_invalid")
+        if (
+            group.get("t_low") != t_edges[t_index]
+            or group.get("t_high") != t_edges[t_index + 1]
+        ):
+            raise _E8PayloadError("e8_4_baseline_child_geometry_invalid")
+        for child in tuple(group.get("children") or ()):
+            child = _mapping(child)
+            try:
+                phi_index = int(child.get("phi_index"))
+            except (TypeError, ValueError):
+                raise _E8PayloadError("e8_4_baseline_child_coordinate_invalid")
+            coordinate = (t_index, phi_index)
+            if coordinate not in expected or coordinate in children:
+                raise _E8PayloadError("e8_4_baseline_child_inventory_invalid")
+            if (
+                child.get("t_index") != t_index
+                or child.get("t_low") != t_edges[t_index]
+                or child.get("t_high") != t_edges[t_index + 1]
+                or child.get("phi_low") != phi_edges[phi_index]
+                or child.get("phi_high") != phi_edges[phi_index + 1]
+                or child.get("valid") is not True
+            ):
+                raise _E8PayloadError("e8_4_baseline_child_geometry_invalid")
+            children[coordinate] = child
+    if set(children) != expected:
+        raise _E8PayloadError("e8_4_baseline_child_inventory_invalid")
+    return {
+        "setting": setting,
+        "epsilon": epsilon,
+        "setting_id": "{}-{}".format(setting, f6_3_epsilon),
+        "t_edges": t_edges,
+        "phi_edges": phi_edges,
+        "mm_edges": mm_edges,
+        "lambda_window": window,
+        "children": children,
+    }
+
+
+def build_full_background_subtraction_e8_4_payload(
+    f6_3_source, e8_2_payload, *, setting_id=None,
+):
+    """Validate and detach the already-produced F.6.3 comparison sidecar.
+
+    This is deliberately a consumer: it validates branch provenance, geometry,
+    and baseline identity, then clones display objects.  It neither constructs
+    the parallel branch nor derives a replacement baseline result.
+    """
+    source = _mapping(f6_3_source)
+    source_setting = source.get("selected_setting_id")
+    if source.get("schema_version") != "f6_3_parallel_method_a_source/v1":
+        return _e8_4_unavailable("f6_3_source_schema_invalid", setting_id=source_setting)
+    if source.get("available") is not True:
+        return _e8_4_unavailable(
+            source.get("reason") or "f6_3_source_unavailable", setting_id=source_setting,
+        )
+    try:
+        baseline = _e8_4_e8_2_children(e8_2_payload)
+        required_setting = str(setting_id or baseline["setting_id"])
+        if source_setting != required_setting or source_setting != baseline["setting_id"]:
+            raise _E8PayloadError("e8_4_setting_identity_mismatch")
+        if source.get("branch_role") != "parallel_nonproduction_method_a_full_analysis":
+            raise _E8PayloadError("e8_4_branch_role_invalid")
+        authority = _mapping(source.get("authority"))
+        if not authority or authority.get("live_cache_parity_passed") is not True:
+            raise _E8PayloadError("e8_4_live_cache_parity_not_passed")
+        required_flags = {
+            "baseline_production_mutated": False,
+            "production_promotion_performed": False,
+            "method_b_numerical_dependency": False,
+            "empirical_residual_used": False,
+            "event_correction_persisted": False,
+            "canonical_child_renormalization_performed": False,
+            "baseline_public_output_unchanged": True,
+        }
+        if any(source.get(name) is not value for name, value in required_flags.items()):
+            raise _E8PayloadError("e8_4_nonproduction_flags_invalid")
+        source_window = source.get("lambda_integration_window")
+        if not isinstance(source_window, Sequence) or isinstance(source_window, (str, bytes)):
+            raise _E8PayloadError("e8_4_lambda_window_invalid")
+        source_window = tuple(source_window)
+        if len(source_window) != 2:
+            raise _E8PayloadError("e8_4_lambda_window_invalid")
+        source_window = tuple(_e8_4_finite_scalar(value, "lambda_window") for value in source_window)
+        if source_window != baseline["lambda_window"]:
+            raise _E8PayloadError("e8_4_lambda_window_mismatch")
+        expected = set(baseline["children"])
+        source_children = source.get("children")
+        if not isinstance(source_children, Sequence) or isinstance(source_children, (str, bytes)):
+            raise _E8PayloadError("e8_4_child_inventory_invalid")
+        source_children = tuple(source_children)
+        if len(source_children) != len(expected):
+            raise _E8PayloadError("e8_4_child_inventory_invalid")
+        copied_children = {}
+        analysis_mm_edges = None
+        required_histograms = ("pion_input", "B_pi_0", "B_pi_A", "MM_0", "MM_A")
+        required_scalars = (
+            "Y0", "Y0_statistical_error", "Y0_total_error",
+            "YA", "YA_statistical_error", "YA_total_error",
+        )
+        for source_child in source_children:
+            source_child = _mapping(source_child)
+            try:
+                coordinate = (int(source_child.get("t_index")), int(source_child.get("phi_index")))
+            except (TypeError, ValueError):
+                raise _E8PayloadError("e8_4_child_coordinate_invalid")
+            if coordinate not in expected or coordinate in copied_children:
+                raise _E8PayloadError("e8_4_child_inventory_invalid")
+            t_index, phi_index = coordinate
+            baseline_child = baseline["children"][coordinate]
+            if (
+                source_child.get("valid") is not True
+                or source_child.get("status") != "available"
+                or source_child.get("t_low") != baseline["t_edges"][t_index]
+                or source_child.get("t_high") != baseline["t_edges"][t_index + 1]
+                or source_child.get("phi_low") != baseline["phi_edges"][phi_index]
+                or source_child.get("phi_high") != baseline["phi_edges"][phi_index + 1]
+            ):
+                raise _E8PayloadError("e8_4_child_geometry_invalid")
+            scalars = {
+                name: _e8_4_finite_scalar(source_child.get(name), name)
+                for name in required_scalars
+            }
+            baseline_values = {
+                "Y0": _e8_4_finite_scalar(baseline_child.get("final_yield"), "baseline_y0"),
+                "Y0_statistical_error": _e8_4_finite_scalar(baseline_child.get("statistical_error"), "baseline_y0_statistical_error"),
+                "Y0_total_error": _e8_4_finite_scalar(baseline_child.get("total_error"), "baseline_y0_total_error"),
+            }
+            if any(scalars[name] != baseline_values[name] for name in baseline_values):
+                raise _E8PayloadError("e8_4_baseline_y0_identity_mismatch")
+            clones = {
+                name: _clone_display_histogram(
+                    source_child.get(name), "H_full_background_e8_4_{}_t{}_phi{}".format(
+                        name, t_index + 1, phi_index + 1,
+                    ),
+                )
+                for name in required_histograms
+            }
+            if any(value is None for value in clones.values()):
+                raise _E8PayloadError("e8_4_required_histogram_clone_failed")
+            if not all(_e8_4_histogram_is_finite(value) for value in clones.values()):
+                raise _E8PayloadError("e8_4_required_histogram_nonfinite")
+            histogram_edges = {
+                name: _e8_4_histogram_edges(value)
+                for name, value in clones.items()
+            }
+            if any(edges is None for edges in histogram_edges.values()):
+                raise _E8PayloadError("e8_4_histogram_geometry_invalid")
+            child_mm_edges = tuple(histogram_edges["pion_input"])
+            if any(tuple(edges) != child_mm_edges for edges in histogram_edges.values()):
+                raise _E8PayloadError("e8_4_histogram_binning_mismatch")
+            if analysis_mm_edges is None:
+                analysis_mm_edges = child_mm_edges
+            elif child_mm_edges != analysis_mm_edges:
+                raise _E8PayloadError("e8_4_histogram_binning_mismatch")
+            delta_y = scalars["YA"] - scalars["Y0"]
+            fraction = None if scalars["Y0"] == 0.0 else delta_y / scalars["Y0"]
+            copied_children[coordinate] = {
+                "t_index": t_index,
+                "t_low": float(baseline["t_edges"][t_index]),
+                "t_high": float(baseline["t_edges"][t_index + 1]),
+                "phi_index": phi_index,
+                "phi_low": float(baseline["phi_edges"][phi_index]),
+                "phi_high": float(baseline["phi_edges"][phi_index + 1]),
+                **scalars,
+                "delta_y": float(delta_y),
+                "delta_y_over_y0": None if fraction is None else float(fraction),
+                "delta_y_over_y0_reason": "y0_zero_fraction_undefined" if fraction is None else None,
+                "histograms": clones,
+            }
+        if set(copied_children) != expected:
+            raise _E8PayloadError("e8_4_child_inventory_invalid")
+        per_t = tuple({
+            "t_index": t_index,
+            "t_low": float(baseline["t_edges"][t_index]),
+            "t_high": float(baseline["t_edges"][t_index + 1]),
+            "children": tuple(copied_children[(t_index, phi_index)] for phi_index in range(len(baseline["phi_edges"]) - 1)),
+        } for t_index in range(len(baseline["t_edges"]) - 1))
+    except _E8PayloadError as exc:
+        return _e8_4_unavailable(str(exc), setting_id=source_setting)
+    return {
+        "schema_version": E8_4_PRESENTATION_SCHEMA_VERSION,
+        "available": True,
+        "reason": None,
+        "non_authoritative": True,
+        "production_objects_mutated": False,
+        "setting": baseline["setting"],
+        "epsilon": baseline["epsilon"],
+        "setting_id": source_setting,
+        "t_edges": list(baseline["t_edges"]),
+        "phi_edges": list(baseline["phi_edges"]),
+        "mm_edges": list(analysis_mm_edges),
+        "lambda_window": list(source_window),
+        "branch_role": source["branch_role"],
+        "authority": dict(authority),
+        **required_flags,
+        "per_t": per_t,
+    }
+
+
 def _e8_2_page_record(payload, group, page_id, semantic_stage):
     children = tuple(group.get("children") or ())
     return {
@@ -6336,9 +6617,9 @@ def _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, payload)
             "omitted from this ordinary procedure PDF.",
             "F.6.2 quantities shown here remain non-authoritative and presentation-only.",
             "No Method-A production correction or promotion occurs in E.8.",
-            "The full baseline-versus-w0*C production-impact comparison belongs to",
-            "later F.6.3 work.",
-            "Any production promotion remains later work and is not implied by these plots.",
+            "F.6.3 constructs the private parallel w0*C branch; E.8.4 consumes that",
+            "already-produced branch for the baseline-versus-Method-A impact audit.",
+            "Any production promotion remains the later F.6.4 decision and is not implied by these plots.",
             "This appendix requires independent farm PDF review before runtime closure.",
         ),
         size=0.028,
@@ -6390,7 +6671,8 @@ def _e8_3_render_authority_page(ROOT, pdf_name, payload):
             "preserves each signed canonical-t parent sum. No phi child is independently normalized.",
             "Detached presentation only: no production application, yield, or cross section is changed.",
             "Method B has no numerical input. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
-            "Only F.6.3 may later construct a parallel production branch.",
+            "F.6.3 alone constructs the private parallel branch; E.8.4 consumes it for impact display.",
+            "Method A is not production-promoted; F.6.4 remains the sole promotion decision.",
             "Current setting: {}".format(payload.get("setting_id")),
             "Accepted input SHA-256: F.4={} F.5={}".format(hashes.get("f4"), hashes.get("f5")),
             "F.6.1={} F.6.2={}".format(hashes.get("f6_1"), hashes.get("f6_2")),
@@ -6569,12 +6851,395 @@ def _render_full_background_subtraction_e8_3_unavailable_page(ROOT, pdf_name, pa
     )
 
 
+def _e8_4_page_record(payload, page_id, scope, *, group=None):
+    record = {
+        "page_id": page_id,
+        "schema_version": E8_4_PRESENTATION_SCHEMA_VERSION,
+        "scope": scope,
+        "setting": payload.get("setting"),
+        "epsilon": payload.get("epsilon"),
+        "authoritative": False,
+        "presentation_only": True,
+    }
+    if group is not None:
+        record.update({
+            "t_index": int(group["t_index"]),
+            "t_edges": [float(group["t_low"]), float(group["t_high"])],
+            "represented_phi_inventory": [
+                {
+                    "phi_index": int(child["phi_index"]),
+                    "phi_edges": [float(child["phi_low"]), float(child["phi_high"])],
+                }
+                for child in tuple(group.get("children") or ())
+            ],
+        })
+    return record
+
+
+def _e8_4_render_authority_page(ROOT, pdf_name, payload):
+    flags = (
+        "baseline_production_mutated", "production_promotion_performed",
+        "method_b_numerical_dependency", "empirical_residual_used",
+        "event_correction_persisted", "canonical_child_renormalization_performed",
+        "baseline_public_output_unchanged",
+    )
+    return _e8_text_page(
+        ROOT, pdf_name, "C_full_background_e8_4_authority",
+        "E.8.4 baseline-versus-Method-A production-impact audit",
+        (
+            "Current setting: {}; F.6.3 source schema: {}".format(
+                payload.get("setting_id"), "f6_3_parallel_method_a_source/v1",
+            ),
+            "Branch role: {}; Lambda integration window: [{:.6g}, {:.6g}]".format(
+                payload.get("branch_role"), float(payload["lambda_window"][0]),
+                float(payload["lambda_window"][1]),
+            ),
+            "Canonical children: {}; live-cache parity passed: {}".format(
+                sum(len(group.get("children") or ()) for group in payload.get("per_t") or ()),
+                bool(_mapping(payload.get("authority")).get("live_cache_parity_passed")),
+            ),
+            "Non-production flags: {}".format(
+                ", ".join("{}={}".format(name, payload.get(name)) for name in flags),
+            ),
+            "Method B is numerically absent. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
+            "No production promotion is performed. The Method-A minus baseline shift is a",
+            "correction effect, not automatically a systematic uncertainty.",
+        ), size=0.025,
+    )
+
+
+def _e8_4_draw_histogram(
+    ROOT, histogram, name, title, color, y_range, retained, *, draw_option="hist e",
+):
+    clone = _clone_display_histogram(histogram, name)
+    if clone is None:
+        return None
+    _set_histogram_title(clone, title)
+    _style_histogram(clone, color)
+    _apply_display_y_range(clone, y_range)
+    clone.Draw(draw_option)
+    retained.append(clone)
+    return clone
+
+
+def _e8_4_render_pion_consequence_page(ROOT, pdf_name, payload, group):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    children = tuple(group.get("children") or ())
+    if not children:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_4_pion_t{}".format(int(group["t_index"]) + 1),
+        "E.8.4 pion-template consequence", 1800, max(700, 400 * int(math.ceil(len(children) / 3.0))),
+    )
+    retained = []
+    try:
+        columns = min(3, len(children))
+        canvas.Divide(columns, int(math.ceil(float(len(children)) / float(columns))))
+        for index, child in enumerate(children, 1):
+            canvas.cd(index)
+            hists = _mapping(child.get("histograms"))
+            y_range = _combined_histogram_y_range(
+                [hists.get(name) for name in ("pion_input", "B_pi_0", "B_pi_A")]
+            )
+            input_hist = _e8_4_draw_histogram(
+                ROOT, hists.get("pion_input"), "H_e8_4_pion_input_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ), "Common proton-cleaned pion input;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kBlack", 1), y_range, retained,
+            )
+            baseline = _e8_4_draw_histogram(
+                ROOT, hists.get("B_pi_0"), "H_e8_4_bpi0_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ), "B_pi^0 and B_pi^A on common proton-cleaned input;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kBlue", 4), y_range, retained, draw_option="hist e same",
+            )
+            adjusted = _clone_display_histogram(
+                hists.get("B_pi_A"), "H_e8_4_bpia_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ),
+            )
+            if input_hist is None or baseline is None or adjusted is None:
+                return False
+            _set_histogram_title(adjusted, baseline.GetTitle() if hasattr(baseline, "GetTitle") else "B_pi^A")
+            _style_histogram(adjusted, getattr(ROOT, "kMagenta", 6))
+            _apply_display_y_range(adjusted, y_range)
+            adjusted.Draw("hist e same")
+            retained.append(adjusted)
+            retained.append(_draw_small_note(
+                ROOT, "phi {} [{:.1f}, {:.1f}] deg: common input; stored B_pi^0 (blue), B_pi^A (magenta)".format(
+                    int(child["phi_index"]) + 1, float(child["phi_low"]), float(child["phi_high"]),
+                ),
+            ))
+        retained.append(_draw_page_header(ROOT, canvas, "E.8.4 common-input pion-template consequence", group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_4_render_final_mm_page(ROOT, pdf_name, payload, group):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    children = tuple(group.get("children") or ())
+    if not children:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_4_final_mm_t{}".format(int(group["t_index"]) + 1),
+        "E.8.4 final clean-kaon missing mass", 1800, max(700, 400 * int(math.ceil(len(children) / 3.0))),
+    )
+    retained = []
+    try:
+        columns = min(3, len(children))
+        canvas.Divide(columns, int(math.ceil(float(len(children)) / float(columns))))
+        for index, child in enumerate(children, 1):
+            canvas.cd(index)
+            hists = _mapping(child.get("histograms"))
+            y_range = _combined_histogram_y_range([hists.get("MM_0"), hists.get("MM_A")])
+            baseline = _e8_4_draw_histogram(
+                ROOT, hists.get("MM_0"), "H_e8_4_mm0_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ), "MM_0 and MM_A;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kBlue", 4), y_range, retained,
+            )
+            adjusted = _clone_display_histogram(
+                hists.get("MM_A"), "H_e8_4_mma_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ),
+            )
+            if baseline is None or adjusted is None:
+                return False
+            _style_histogram(adjusted, getattr(ROOT, "kMagenta", 6))
+            _apply_display_y_range(adjusted, y_range)
+            adjusted.Draw("hist e same")
+            retained.append(adjusted)
+            retained.extend(_e8_2_draw_lambda_window(ROOT, baseline, payload["lambda_window"]))
+            retained.append(_draw_small_note(
+                ROOT, "t{} phi {} [{:.1f}, {:.1f}] deg; Y0={:.5g}; YA={:.5g}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                    float(child["phi_low"]), float(child["phi_high"]),
+                    float(child["Y0"]), float(child["YA"]),
+                ),
+            ))
+        retained.append(_draw_page_header(ROOT, canvas, "E.8.4 final clean-kaon MM_0 versus MM_A", group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_4_signed_difference(ROOT, left, right, name, title, color):
+    """Make a display-only signed difference from already-detached clones."""
+    difference = _clone_display_histogram(left, name)
+    other = _clone_display_histogram(right, "{}_right".format(name))
+    if difference is None or other is None or not hasattr(difference, "Add"):
+        return None
+    try:
+        difference.Add(other, -1.0)
+    except Exception:
+        return None
+    _set_histogram_title(difference, title)
+    _style_histogram(difference, color)
+    return difference
+
+
+def _e8_4_render_signed_difference_page(ROOT, pdf_name, payload, group):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    children = tuple(group.get("children") or ())
+    if not children:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_4_difference_t{}".format(int(group["t_index"]) + 1),
+        "E.8.4 signed branch-output differences", 1800, max(900, 280 * len(children)),
+    )
+    retained = []
+    try:
+        canvas.Divide(2, len(children))
+        for row, child in enumerate(children):
+            hists = _mapping(child.get("histograms"))
+            b_delta = _e8_4_signed_difference(
+                ROOT, hists.get("B_pi_A"), hists.get("B_pi_0"),
+                "H_e8_4_delta_bpi_t{}_phi{}".format(int(group["t_index"]) + 1, int(child["phi_index"]) + 1),
+                "Delta B_pi = B_pi^A - B_pi^0;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kBlue", 4),
+            )
+            k_delta = _e8_4_signed_difference(
+                ROOT, hists.get("MM_A"), hists.get("MM_0"),
+                "H_e8_4_delta_k_t{}_phi{}".format(int(group["t_index"]) + 1, int(child["phi_index"]) + 1),
+                "Delta K = MM_A - MM_0;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kMagenta", 6),
+            )
+            if b_delta is None or k_delta is None:
+                return False
+            y_range = _combined_histogram_y_range((b_delta, k_delta))
+            canvas.cd(2 * row + 1); _apply_display_y_range(b_delta, y_range); b_delta.Draw("hist e")
+            canvas.cd(2 * row + 2); _apply_display_y_range(k_delta, y_range); k_delta.Draw("hist e")
+            retained.extend((b_delta, k_delta))
+        retained.append(_draw_page_header(ROOT, canvas, "E.8.4 direct signed display differences", group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_4_graph(ROOT, title, values):
+    if not values or not hasattr(ROOT, "TGraph"):
+        return None
+    graph = ROOT.TGraph(
+        len(values), array("d", [float(point[0]) for point in values]),
+        array("d", [float(point[1]) for point in values]),
+    )
+    graph.SetTitle(str(title))
+    _style_histogram(graph, getattr(ROOT, "kBlue", 4))
+    return graph
+
+
+def _e8_4_render_yield_impact_page(ROOT, pdf_name, payload, group):
+    if not hasattr(ROOT, "TCanvas"):
+        return False
+    children = tuple(group.get("children") or ())
+    if not children:
+        return False
+    canvas = ROOT.TCanvas(
+        "C_full_background_e8_4_yield_t{}".format(int(group["t_index"]) + 1),
+        "E.8.4 stored yield impact", 1800, 1100,
+    )
+    retained = []
+    try:
+        canvas.Divide(2, 2)
+        centers = [
+            (float(child["phi_low"]) + float(child["phi_high"])) / 2.0
+            for child in children
+        ]
+        series = (
+            ("Stored Y0(phi);phi [deg];yield", [(x, child["Y0"]) for x, child in zip(centers, children)]),
+            ("Stored YA(phi);phi [deg];yield", [(x, child["YA"]) for x, child in zip(centers, children)]),
+            ("DeltaY = YA - Y0;phi [deg];yield", [(x, child["delta_y"]) for x, child in zip(centers, children)]),
+            ("DeltaY/Y0 (defined cells only);phi [deg];fraction", [
+                (x, child["delta_y_over_y0"]) for x, child in zip(centers, children)
+                if child.get("delta_y_over_y0") is not None
+            ]),
+        )
+        for panel, (title, values) in enumerate(series, 1):
+            canvas.cd(panel)
+            graph = _e8_4_graph(ROOT, title, values)
+            if graph is None:
+                note = _e8_add_text(ROOT, (0.10, 0.42, 0.90, 0.58), ("No defined fractional Y0 denominator in this parent.",), size=0.032, align=22)
+                if note is None:
+                    return False
+                retained.append(note)
+            else:
+                # Points only: undefined fractional children cannot be bridged.
+                graph.Draw("AP")
+                retained.append(graph)
+        retained.append(_draw_page_header(ROOT, canvas, "E.8.4 stored Y0 / YA / DeltaY impact (no DeltaY uncertainty)", group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
+    if not hasattr(ROOT, "TPaveText") or not hasattr(ROOT, "TCanvas"):
+        return False
+    canvas = ROOT.TCanvas("C_full_background_e8_4_summary", "E.8.4 t phi impact summary", 1800, 1100)
+    text = None
+    try:
+        text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
+        text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.025)
+        text.AddText("E.8.4 stored canonical t-by-phi impact summary — {}".format(payload.get("setting_id")))
+        text.AddText("No t-integrated observable or shift uncertainty is constructed on this page.")
+        for group in tuple(payload.get("per_t") or ()):
+            text.AddText("t{} [{:.4f}, {:.4f}] GeV^2".format(
+                int(group["t_index"]) + 1, float(group["t_low"]), float(group["t_high"]),
+            ))
+            for child in tuple(group.get("children") or ()):
+                fraction = child.get("delta_y_over_y0")
+                fraction_text = "undefined ({})".format(child.get("delta_y_over_y0_reason")) if fraction is None else "{:.8g}".format(float(fraction))
+                text.AddText("  phi {} [{:.1f}, {:.1f}]: DeltaY={:.8g}; DeltaY/Y0={}".format(
+                    int(child["phi_index"]) + 1, float(child["phi_low"]), float(child["phi_high"]),
+                    float(child["delta_y"]), fraction_text,
+                ))
+        text.Draw(); canvas._full_background_e8_4_draw_objects = (text,); canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        try:
+            canvas.Close()
+        except Exception:
+            pass
+    return True
+
+
+def _render_full_background_subtraction_e8_4_pages(ROOT, pdf_name, payload, manifest, failures):
+    if _e8_4_render_authority_page(ROOT, pdf_name, payload):
+        manifest.append(_e8_4_page_record(payload, "full_background.e8_4.authority", "setting"))
+    else:
+        failures.append("E.8.4 authority page unavailable")
+    page_specs = (
+        ("pion_consequence", _e8_4_render_pion_consequence_page),
+        ("final_mm", _e8_4_render_final_mm_page),
+        ("signed_difference", _e8_4_render_signed_difference_page),
+        ("yield_impact", _e8_4_render_yield_impact_page),
+    )
+    for group in tuple(payload.get("per_t") or ()):
+        scope = "t{}".format(int(group["t_index"]) + 1)
+        for suffix, renderer in page_specs:
+            if renderer(ROOT, pdf_name, payload, group):
+                manifest.append(_e8_4_page_record(
+                    payload, "full_background.e8_4.{}".format(suffix), scope, group=group,
+                ))
+            else:
+                failures.append("E.8.4 {} page unavailable for {}".format(suffix, scope))
+    if _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
+        manifest.append(_e8_4_page_record(payload, "full_background.e8_4.setting_summary", "setting"))
+    else:
+        failures.append("E.8.4 setting-summary page unavailable")
+
+
+def _render_full_background_subtraction_e8_4_unavailable_page(ROOT, pdf_name, payload):
+    return _e8_text_page(
+        ROOT, pdf_name, "C_full_background_e8_4_unavailable",
+        "E.8.4 production-impact audit unavailable",
+        (
+            "The optional F.6.3 parallel branch was not reconstructed or replaced.",
+            "Baseline production and E.8.2/E.8.3 evidence remain unaffected.",
+            "Literal unavailable reason: {}".format(payload.get("reason")),
+        ), size=0.031,
+    )
+
+
 def render_full_background_subtraction_procedure_pages(
     pdf_name, d6_payload, d7_payload, d8_payload=None, d9_payload=None, d10_payload=None,
     d11_payload=None,
     *, e2_payload=None, e3_payload=None, e4_payload=None, e6_payload=None,
     e7_payload=None, f1_payload=None, e72_payload=None, e8_payload=None,
-    e8_2_payload=None, e8_3_payload=None,
+    e8_2_payload=None, e8_3_payload=None, e8_4_payload=None,
     page_manifest=None,
 ):
     """Append retained D.6-D.9 pages followed by the frozen E.8 final section.
@@ -6595,6 +7260,9 @@ def render_full_background_subtraction_procedure_pages(
     # inventory.  The production route always supplies an explicit available or
     # unavailable E.8.3 payload from the byte-pinned reader above.
     e8_3 = _mapping(e8_3_payload) if e8_3_payload is not None else None
+    # E.8.4 is also opt-in for existing callers.  The post-yield finalizer
+    # always supplies its explicit consumer result, including unavailable data.
+    e8_4 = _mapping(e8_4_payload) if e8_4_payload is not None else None
     d6_available = bool(d6.get("available"))
     d7_available = bool(d7.get("available"))
     d8_available = bool(d8.get("available"))
@@ -6683,6 +7351,18 @@ def render_full_background_subtraction_procedure_pages(
                 manifest.append({"page_id": "full_background.e8_3.unavailable", "scope": "setting", "authoritative": False, "reason": e8_3.get("reason")})
             else:
                 result["failures"].append("E.8.3 unavailable page rendering failed: {}".format(e8_3.get("reason")))
+        if e8_4 is not None:
+            if e8_4.get("available") is True:
+                _render_full_background_subtraction_e8_4_pages(
+                    ROOT, pdf_name, e8_4, manifest, result["failures"]
+                )
+            elif _render_full_background_subtraction_e8_4_unavailable_page(ROOT, pdf_name, e8_4):
+                manifest.append({
+                    "page_id": "full_background.e8_4.unavailable", "scope": "setting",
+                    "authoritative": False, "reason": e8_4.get("reason"),
+                })
+            else:
+                result["failures"].append("E.8.4 unavailable page rendering failed: {}".format(e8_4.get("reason")))
         if _render_full_background_subtraction_e8_handoff_page(ROOT, pdf_name, e8):
             manifest.append({"page_id": "full_background.e8.handoff", "scope": "setting", "authoritative": False})
         else:
@@ -6691,6 +7371,8 @@ def render_full_background_subtraction_procedure_pages(
         manifest.append({"page_id": "full_background.e8.unavailable", "scope": "setting", "authoritative": False, "reason": e8.get("reason")})
         if e8_3 is not None and _render_full_background_subtraction_e8_3_unavailable_page(ROOT, pdf_name, e8_3):
             manifest.append({"page_id": "full_background.e8_3.unavailable", "scope": "setting", "authoritative": False, "reason": e8_3.get("reason")})
+        if e8_4 is not None and _render_full_background_subtraction_e8_4_unavailable_page(ROOT, pdf_name, e8_4):
+            manifest.append({"page_id": "full_background.e8_4.unavailable", "scope": "setting", "authoritative": False, "reason": e8_4.get("reason")})
     else:
         result["failures"].append("E.8 unavailable page rendering failed: {}".format(e8.get("reason")))
     return result
@@ -6825,6 +7507,13 @@ def finalize_full_background_subtraction_e8_2(hist):
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
+    e8_4_presentation = build_full_background_subtraction_e8_4_payload(
+        hist.get("_f6_3_parallel_method_a_source"), presentation,
+    )
+    e8_4_status = {
+        "e8_4_available": e8_4_presentation.get("available") is True,
+        "e8_4_reason": e8_4_presentation.get("reason"),
+    }
     payloads = _mapping(state.get("payloads"))
     pdf_path = state.get("pdf_path")
     manifest_path = state.get("page_manifest_path")
@@ -6862,6 +7551,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             e7_payload=payloads.get("e7"), f1_payload=payloads.get("f1"),
             e72_payload=payloads.get("e72"), e8_payload=payloads.get("e8"),
             e8_2_payload=presentation, e8_3_payload=payloads.get("e8_3"),
+            e8_4_payload=e8_4_presentation,
             page_manifest=manifest,
         )
         failures.extend(rendered.get("failures") or ())
@@ -6877,6 +7567,7 @@ def finalize_full_background_subtraction_e8_2(hist):
                 "renderer_failures": list(failures),
                 "production_objects_mutated": False,
                 "preliminary_artifact_preserved": preliminary_pair_exists,
+                **e8_4_status,
             }
             hist["_e8_2_full_background_finalization_status"] = status
             return status
@@ -6905,6 +7596,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             "exception_message": str(exc),
             "production_objects_mutated": False,
             "preliminary_artifact_preserved": preliminary_pair_exists,
+            **e8_4_status,
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
@@ -6918,6 +7610,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             "reason": "e8_2_temporary_artifact_pair_missing",
             "production_objects_mutated": False,
             "preliminary_artifact_preserved": preliminary_pair_exists,
+            **e8_4_status,
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
@@ -6929,6 +7622,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             "reason": "e8_2_preliminary_artifact_pair_missing",
             "production_objects_mutated": False,
             "preliminary_artifact_preserved": False,
+            **e8_4_status,
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
@@ -6948,6 +7642,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             "exception_message": str(exc),
             "production_objects_mutated": False,
             "preliminary_artifact_preserved": True,
+            **e8_4_status,
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
@@ -6972,6 +7667,7 @@ def finalize_full_background_subtraction_e8_2(hist):
             "recovery_errors": list(recovery_errors),
             "production_objects_mutated": False,
             "preliminary_artifact_preserved": bool(recovered),
+            **e8_4_status,
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
@@ -6986,6 +7682,7 @@ def finalize_full_background_subtraction_e8_2(hist):
         "production_objects_mutated": False,
         "finalized_after_data_yields": True,
         "renderer_failures": list(failures),
+        **e8_4_status,
     }
     hist["_e8_2_full_background_finalization_status"] = status
     return status
@@ -10966,6 +11663,7 @@ __all__ = (
     "F1_PRESENTATION_SCHEMA_VERSION",
     "E8_PRESENTATION_SCHEMA_VERSION",
     "E8_3_PRESENTATION_SCHEMA_VERSION",
+    "E8_4_PRESENTATION_SCHEMA_VERSION",
     "E8_F6_2_INPUT_SHA256",
     "E8_3_F4_INPUT_SHA256",
     "E8_3_F5_INPUT_SHA256",
@@ -10985,6 +11683,7 @@ __all__ = (
     "build_full_background_subtraction_e7_payload",
     "build_full_background_subtraction_e72_payload",
     "build_full_background_subtraction_e8_3_payload",
+    "build_full_background_subtraction_e8_4_payload",
     "build_full_background_subtraction_f1_payload",
     "build_full_background_subtraction_page_manifest_artifact",
     "close_full_background_subtraction_pdf",

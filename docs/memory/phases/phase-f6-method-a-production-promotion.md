@@ -202,7 +202,14 @@ the unchanged baseline branch.
 
 ## E.8.4 — baseline-versus-Method-A production-impact audit
 
-`NEXT` — E.8.4 consumes, and never constructs, F.6.3 two-branch outputs.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+passed the complete cumulative `kaonlt_review(20260928-233040).diff` candidate.
+E.8.4 consumes, and never constructs, F.6.3 two-branch outputs. The reviewed
+candidate retains Fix.1 presentation-consumer identity, geometry, and
+common-input visibility repairs, plus Fix.2 malformed optional-sidecar
+Lambda-window/child-inventory fail-closed behavior. Codex-reported deterministic
+checks were `NOT RUN by ChatGPT`; source review does not claim ROOT/PyROOT,
+full-analysis, farm, or runtime acceptance.
 
 ### E.8.4a — actual pion-subtraction consequence
 
@@ -240,9 +247,9 @@ its uncertainty; later production closure requires separate justification.
 
 This roadmap does not authorize production weights/yields, Method-A promotion,
 or alteration of accepted F.1-F.6.2 scientific evidence. F.6 remains detached.
-E.8.2, E.8.3, and F.6.3 are `SOURCE REVIEWED`; E.8.4 is `NEXT` in the approved
-E.8.2 -> E.8.3 -> F.6.3 -> E.8.4 forward sequence. Do not alter ROOT or
-production behavior.
+E.8.2, E.8.3, F.6.3, and E.8.4 are `SOURCE REVIEWED` in the approved E.8.2
+-> E.8.3 -> F.6.3 -> E.8.4 forward sequence. Do not alter ROOT or production
+behavior.
 
 ## Farm milestone cadence
 
