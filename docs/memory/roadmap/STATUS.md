@@ -87,13 +87,24 @@ from Fix.5 `53fd262b730af8f1254e411a38231aebeb6a1da3` to pushed E.8.4
 `1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself remains `SOURCE
 REVIEWED` and no farm/runtime status changes.
 
-E.8.4.Fix.3 — pion-alignment determinism repair is `ACTIVE` pending
-independent actual-diff review. It narrows persisted pion-control compatibility
-to checksum plus axis (while retaining every other cache boundary) and makes
-only the configured minimum-template-integral comparison machine-scale
-roundoff safe. The associated `Q4p4W2p74 / Left / lowe` farm observation is a
-determinism blocker, not runtime closure; E.8.4 remains `SOURCE REVIEWED` and
-no production or Method-A ownership changes.
+E.8.4.Fix.3 — pion-alignment determinism repair is `SOURCE REVIEWED`: its
+independent actual-diff/source and pushed-state reviews passed for
+user-controlled pushed source `29d7b7f9635db899939efeb3508e941e994e8928`.
+It narrows persisted pion-control compatibility to checksum plus axis (while
+retaining every other cache boundary) and makes only the configured
+minimum-template-integral comparison machine-scale roundoff safe. The
+associated `Q4p4W2p74 / Left / lowe` farm observation remains a determinism
+blocker, not runtime closure; E.8.4 remains `SOURCE REVIEWED` and no production
+or Method-A ownership changes.
+
+E.8.4.Fix.3 validation-bundle profile re-pin is `SOURCE REVIEWED`: final
+independent ChatGPT actual-diff/source-provenance review of
+`kaonlt_review_e8_4_fix3_profile_repin.diff` `PASSED`. It changes only the
+profile/test required analysis source to the pushed Fix.3 source; the
+canonical-five artifact inventory, provenance allowlists, generic collector,
+`tcsh` wrapper, and scientific/runtime source remain unchanged. Codex-reported
+deterministic checks were `NOT RUN by ChatGPT`. This is not ROOT/PyROOT,
+procedure-PDF, farm, runtime, production, or Method-A-promotion evidence.
 
 #### Final E.8 closure
 

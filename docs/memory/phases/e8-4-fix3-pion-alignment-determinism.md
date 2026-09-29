@@ -2,9 +2,11 @@
 
 ## Status
 
-`ACTIVE` — local implementation is complete pending independent ChatGPT
-actual-diff review. This is not ROOT/PyROOT, full-analysis, farm, or runtime
-validation.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source review and
+pushed-state review passed for the user-controlled pushed source
+`29d7b7f9635db899939efeb3508e941e994e8928` (`E8.4 Fix.3: repair pion
+alignment determinism`). This is not ROOT/PyROOT, full-analysis, procedure-PDF,
+farm, or runtime validation.
 
 ## Starting identity and narrow scope
 
@@ -59,6 +61,6 @@ PASS  git -c core.safecrlf=false diff --check
 
 ## Next
 
-`NEXT` — independent ChatGPT review of the complete E.8.4.Fix.3 actual diff
-and review bundle only. Do not infer source review or runtime closure from the
-local implementation.
+`NEXT` — user-controlled commit/push of the independently reviewed E.8.4.Fix.3
+validation-bundle profile re-pin. Do not infer runtime closure from source
+review or local implementation.

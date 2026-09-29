@@ -12,16 +12,26 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-E.8.4.Fix.3 pion-alignment determinism repair is `ACTIVE` pending independent
-ChatGPT actual-diff review. The narrow local candidate makes persisted
-pion-control compatibility depend on checksum plus axis rather than an
-ephemeral generated ROOT histogram name, and makes only the renormalized
-template minimum-integral boundary machine-scale roundoff safe. It preserves
-schema-v2 cache compatibility, all other provenance checks, the configured
-threshold, and the existing scan/production physics. Local deterministic tests
-are not ROOT/PyROOT, full-analysis, farm, or runtime validation. See the
+E.8.4.Fix.3 pion-alignment determinism repair is `SOURCE REVIEWED`: independent
+ChatGPT actual-diff/source review and pushed-state review passed for the
+user-controlled pushed source `29d7b7f9635db899939efeb3508e941e994e8928`.
+It makes persisted pion-control compatibility depend on checksum plus axis
+rather than an ephemeral generated ROOT histogram name, and makes only the
+renormalized template minimum-integral boundary machine-scale roundoff safe.
+It preserves schema-v2 cache compatibility, all other provenance checks, the
+configured threshold, and existing scan/production physics. This remains no
+ROOT/PyROOT, full-analysis, procedure-PDF, farm, or runtime validation. See the
 [Fix.3 determinism blocker evidence](evidence/e8-4-left-lowe-pion-alignment-determinism-blocker.md)
 and [Fix.3 phase record](phases/e8-4-fix3-pion-alignment-determinism.md).
+
+E.8.4.Fix.3 validation-bundle profile re-pin is `SOURCE REVIEWED`: final
+independent ChatGPT actual-diff/source-provenance review of
+`kaonlt_review_e8_4_fix3_profile_repin.diff` passed. It changes only the
+generic E.8.1 bundle profile/test required analysis source to the pushed Fix.3
+source; the collector, wrapper, and scientific/runtime source remain frozen.
+Codex-reported deterministic checks were `NOT RUN by ChatGPT`. This is not
+ROOT/PyROOT, procedure-PDF, farm, runtime, production, or Method-A-promotion
+evidence. See the [Fix.3 bundle-profile re-pin](phases/e8-4-fix3-bundle-profile-repin.md).
 
 The fresh `Q4p4W2p74 / Left / lowe` Fix.6 package
 `KaonLT_E8_1_Fix6_Q4p4W2p74_Left_lowe_20260923-090850.zip` is direct, reviewed
@@ -86,10 +96,15 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
   `BLOCKED` pending its later runtime/visual gate; F.6.4 is `BLOCKED` pending
   production-impact evidence. Lifecycle-hook dispatch remains BLOCKED /
   DEFERRED.
-- E.8.4.Fix.3 is `ACTIVE` pending independent actual-diff review. It is a
-  baseline pion-alignment determinism/provenance repair, not a reopened
-  F.1--F.6.2 scientific result or a Method-A promotion. Its direct farm
-  evidence is a blocker record, not runtime closure.
+- E.8.4.Fix.3 is `SOURCE REVIEWED`: independent actual-diff/source and
+  pushed-state reviews passed for user-controlled pushed commit
+  `29d7b7f9635db899939efeb3508e941e994e8928`. It is a baseline
+  pion-alignment determinism/provenance repair, not a reopened F.1--F.6.2
+  scientific result or a Method-A promotion. Its direct farm evidence remains
+  a blocker record, not runtime closure. Its narrow validation-bundle profile
+  re-pin is `SOURCE REVIEWED` after final independent actual-diff/
+  source-provenance review passed; that review is not runtime or production
+  evidence.
 - The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`:
   independent ChatGPT reviewed `kaonlt_review(20260929-100154).diff` and
   returned a passing source/provenance result. It requires pushed source
@@ -130,12 +145,12 @@ failure.
 
 ## Next Action
 
-NEXT — independent ChatGPT review of the complete E.8.4.Fix.3 actual diff and
-review bundle only.
+NEXT — user-controlled commit/push of the independently reviewed E.8.4.Fix.3
+validation-bundle profile re-pin.
 
-E.8.4.Fix.3 remains `ACTIVE` until that review passes. Do not advance to later
-validation gates before the repair is independently source-reviewed and the
-user has controlled any subsequent Git action.
+Do not advance to later validation gates before the user-controlled Git action
+and its required subsequent reconciliation. Source review does not establish
+ROOT/PyROOT, procedure-PDF, farm, runtime, production, or Method-A promotion.
 
 F.6.3 alone owns the private parallel full-analysis branch; E.8.4 only consumes
 its post-yield sidecar in the existing pair-safe procedure rerender. Method B
