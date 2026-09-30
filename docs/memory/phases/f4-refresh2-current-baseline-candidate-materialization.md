@@ -1,0 +1,19 @@
+# F.4.Refresh.2 — current-baseline Method-A candidate materialization
+
+## Status
+
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review of the repaired cumulative `kaonlt_review(20260930-111446).diff` passed. The detached, fail-closed materializer is a local uncommitted candidate based on committed `test` HEAD `08f8c5be84ab7a54278e8c623eae5d9d3c43d938`. It has not run on farm artifacts. No candidate materialization result or accepted authority update is claimed.
+
+## Scope and evidence boundary
+
+The [F.4.Refresh.1 farm comparator evidence](../evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md) closed the comparison gate: F.2/F.3 scientific payloads matched; F.4 was the first changed scientific stage. That does not accept a new F.4 authority. Historical F.1 through F.6.2 closures remain intact. F.6.3/E.8.4 remain `SOURCE REVIEWED` and blocked at runtime.
+
+`testing/materialize_method_a_current_baseline_authority.py` accepts explicit canonical-five current F.1, accepted F.2/F.3/F.4, reviewed comparison JSON, its expected raw SHA-256, a supplied source HEAD, and an existing output directory. It checks accepted and current-input raw identities, independently rebuilds candidate F.2/F.3/F.4 through public builders, reproduces candidate F.2/F.3 deterministic writer-byte hashes, proves their exact provenance-excluded scientific equality, and reproduces the complete F.4 detailed comparison and summary. The candidate F.3 authority override uses only an in-memory all-zero farm-head sentinel. Public writers create distinct, non-authoritative candidate files in a task-local temporary directory; byte checks precede publication, and a diagnostic manifest is published last. The manifest records source-owned representation/map/correction stage fingerprints separately from scientific equality in `scientific_gate`. On overwrite, a previous completion marker is removed from its final path before candidate replacement; failure after replacement leaves no final manifest. This does not change source-owned accepted authorities or production objects.
+
+## Next gate
+
+User-controlled commit/push after independent final pre-push reconciliation review. Codex-reported local deterministic checks in the reviewed bundle passed: Python compilation; materializer 13, unchanged comparator 8, F.2 14, F.3 10, F.4 8, F.6.3 21, and memory-health 35 tests, all with 0 skips; manifest write/check, memory health/bootstrap, and `git diff --check` also passed. ChatGPT independently compiled the two new Python files but did not run the unit suites. Memory health had only the existing nonfatal `CURRENT.md` soft-size warning. These local/source-review results do not validate farm materialization. Profile creation, packaging, accepted-authority changes, F.5/F.6.3/E.8.4 runtime validation, and Method-A promotion are later gates.
+
+## F.4.Refresh.2.Fix.1 — SOURCE REVIEWED
+
+Independent ChatGPT review of `kaonlt_review(20260930-104453).diff` identified two narrow manifest-integrity defects. The accepted and candidate F.2/F.3/F.4 provenance-bound stage fingerprints were mislabeled `scientific_payload_fingerprint`; the repaired manifest uses the source-owned representation, map, correction, algorithm, and F.3 basis fields. Exact scientific equality remains solely in `scientific_gate`. Under `--overwrite`, the old `complete=true` manifest could remain visible while candidate targets were replaced. The repaired publication moves that exact marker into the task temporary directory before any candidate replacement; a failure after replacement leaves no final manifest. Independent ChatGPT actual-diff/source-runtime-path review of the repaired `kaonlt_review(20260930-111446).diff` passed this fix and its focused regressions. No farm materialization, refreshed authority acceptance, F.6.3/E.8.4 runtime closure, or Method-A promotion is claimed.

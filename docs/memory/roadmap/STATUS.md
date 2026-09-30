@@ -25,13 +25,15 @@ Random subtraction, slow-proton PID cleaning, pion component subtraction, Method
 `CLOSED / RUNTIME VALIDATED` — the accepted correction remains detached, parent-preserving, and non-production. See [F.4 runtime evidence](../evidence/f4-runtime-closure.md).
 
 F.4.Refresh.1 current-baseline Method-A authority comparison and Fix.1 are
-`SOURCE REVIEWED`: independent ChatGPT actual-diff/source-runtime-path review
-of `kaonlt_review(20260930-090154).diff` PASSED. The detached comparator has
-not run on farm artifacts and cannot revise accepted F.2/F.3/F.4 authority.
-Fresh Left/lowe evidence preserves exact F.3 input projections but changes all
-F.4 baseline projections. F.6.3/E.8.4 remain `SOURCE REVIEWED` and their fresh
-runtime gate remains `BLOCKED`. See the
-[phase record](../phases/f4-refresh1-current-baseline-authority-comparison.md).
+`CLOSED / RUNTIME VALIDATED` only for their detached comparison gate. The
+supplied farm result found exact F.2/F.3 scientific equality and F.4 as the
+first changed stage. See [comparator evidence](../evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md).
+F.4.Refresh.2 detached candidate materialization and Fix.1 are
+`SOURCE REVIEWED` after independent ChatGPT actual-diff/source-runtime-path
+review of `kaonlt_review(20260930-111446).diff` passed. No accepted
+F.2/F.3/F.4 authority has changed; F.6.3/E.8.4 remain `SOURCE REVIEWED` and
+runtime `BLOCKED`. See the
+[phase record](../phases/f4-refresh2-current-baseline-candidate-materialization.md).
 
 ### F.5 and F.5.2 — detached propagation and presentation review
 

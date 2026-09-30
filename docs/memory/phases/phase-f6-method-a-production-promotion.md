@@ -2,13 +2,15 @@
 
 F.1 through F.6.2, including F.6.1 and F.6.2.Fix.5, remain `CLOSED / RUNTIME VALIDATED`. Their accepted evidence, F.5 scientific fingerprint `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`, and frozen F.6.2 JSON/fingerprints remain unchanged. No production promotion is authorized by those closures.
 
-F.4.Refresh.1 and its Fix.1 nested-delta repair are `SOURCE REVIEWED`:
+F.4.Refresh.1 and its Fix.1 nested-delta repair are `CLOSED / RUNTIME VALIDATED`
+only for the detached current-baseline comparison gate. The supplied farm
+comparator found F.2/F.3 scientific equality and F.4 as the first changed
+stage; see [comparison evidence](../evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md).
+F.4.Refresh.2 candidate materialization and Fix.1 are `SOURCE REVIEWED` after
 independent ChatGPT actual-diff/source-runtime-path review of
-`kaonlt_review(20260930-090154).diff` PASSED. Fresh Left/lowe evidence confirms
-the narrow Fix.4 cache-semantics gate, unchanged F.3 training/application
-projections, and changed F.4 baseline inputs. The detached comparator has not
-run on farm artifacts and no authority-refresh decision has been made.
-See [direct evidence](../evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
+`kaonlt_review(20260930-111446).diff` passed. This is detached materializer
+source review only. The accepted historical F.4 authority remains frozen; no
+refreshed authority has been validated, and F.6.3/E.8.4 remain runtime blocked.
 
 ## Frozen baseline and Method-A boundary
 

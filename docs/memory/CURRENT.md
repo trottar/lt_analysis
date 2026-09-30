@@ -12,9 +12,26 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+F.4.Refresh.2 current-baseline Method-A candidate materialization and its
+Fix.1 manifest-integrity repair are `SOURCE REVIEWED`: independent ChatGPT
+actual-diff/source-runtime-path review of `kaonlt_review(20260930-111446).diff`
+passed. The detached candidate preserves exact identity/science gates and
+fail-closed overwrite semantics. Codex-reported local checks passed
+(materializer 13 and unchanged suites, 0 skips); ChatGPT did not run unit tests.
+No farm materialization, refreshed authority acceptance, production application,
+or Method-A promotion follows. See the
+[phase record](phases/f4-refresh2-current-baseline-candidate-materialization.md).
+
 F.4.Refresh.1 current-baseline Method-A authority comparison and its Fix.1
-nested-delta repair are `SOURCE REVIEWED`: independent ChatGPT actual-diff/
-source-runtime-path review of `kaonlt_review(20260930-090154).diff` PASSED.
+nested-delta repair are `CLOSED / RUNTIME VALIDATED` only for the detached
+comparison gate. The supplied farm comparator
+`KaonLT_F4_Refresh1_authority_comparison_Q4p4W2p74_20260930-134654.json`
+(SHA-256 `c16287e9192288ed5f116b5eebf95f49261d7fd09755ee923070154e047cf7b5`)
+reports F.2/F.3 scientific equality, F.4 scientific difference, and first
+changed stage `F4`. See [comparator evidence](evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md).
+
+Earlier independent ChatGPT actual-diff/source-runtime-path review of
+`kaonlt_review(20260930-090154).diff` PASSED the comparator and Fix.1 source.
 The detached comparator requires canonical-five current F.1 artifacts, records
 raw-byte SHA-256 provenance, rebuilds candidates through the existing public
 F.2/F.3/F.4 builders, hashes serialized candidate F.2/F.3, and uses an
@@ -24,9 +41,9 @@ recursive F.4 parent/source/phi deltas. Accepted authorities, scientific and
 production source, and Method-A promotion are unchanged. Codex-reported local
 checks passed (Fix.1 comparator 8, F.4 8, F.6.3 21, memory 35 tests, with no
 required-suite skips); they were `NOT RUN by ChatGPT`. The original unchanged
-F.2 and F.3 suites had reported 14 and 10 passing tests. The comparator has
-not run on farm artifacts and establishes no current-baseline F.2/F.3/F.4
-outcome, F.6.3/E.8.4 runtime acceptance, or production acceptance. See the
+F.2 and F.3 suites had reported 14 and 10 passing tests. The later farm
+comparison closes only the detached diagnostic question; it does not validate
+a refreshed F.4 authority, F.6.3/E.8.4 runtime, or production. See the
 [phase record](phases/f4-refresh1-current-baseline-authority-comparison.md)
 and [direct Fix.4 evidence](evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
 
@@ -192,14 +209,15 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
-The fresh `Q4p4W2p74 / Left / lowe` E.8.4 farm gate is `BLOCKED` by
+The fresh `Q4p4W2p74 / Left / lowe` F.6.3/E.8.4 runtime gate remains `BLOCKED` by
 `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
 The fresh farm evidence confirms Fix.4 stale-cache rejection/recomputation.
 Record-by-record current/frozen F.1 comparison found exact F.3 training
 (52,397) and application (55,380) projections, but all 55,380 F.4/F.6.3
 baseline projections differ in `analysis_MM`, `baseline_pion_weight_w0`, and
-`signed_baseline_event_contribution`. F.4.Refresh.1 must compare rebuilt
-candidate F.2/F.3/F.4 scientific payloads before any authority decision.
+`signed_baseline_event_contribution`. F.4.Refresh.1 has established F.4 as
+the first scientifically changed stage. F.4.Refresh.2 is source reviewed only;
+farm materialization and authority review remain before any authority decision.
 
 E.8.2, E.8.3, F.6.3, and E.8.4 are `SOURCE REVIEWED`, not runtime accepted.
 Final E.8 remains downstream. The deferred E.8.1 settings are not a blocker or
@@ -207,7 +225,7 @@ failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the independently reviewed F.4.Refresh.1 current-baseline Method-A authority comparator.
+NEXT — user-controlled commit/push of the independently reviewed F.4.Refresh.2 current-baseline Method-A candidate materializer.
 
 This memory reconciliation stops for independent final pre-push review. Source
 review does not establish ROOT/PyROOT, procedure-PDF, farm, runtime, production,

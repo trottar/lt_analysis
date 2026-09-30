@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 15108,
+      "bytes": 16331,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "1eb64d2058807ded7a180e11997236cefed4f1cb9231293ebcf54903edf5c452"
+      "sha256": "aab544a2b17bfcc4218ed1966974a1d86008501f416516984976e5e1596c07cc"
     },
     {
       "bytes": 1978,
@@ -174,6 +174,11 @@
       "bytes": 1367,
       "path": "docs/memory/evidence/f3-runtime-closure.md",
       "sha256": "e61ed96f5123c2b2875996148fe66df68d024b907e1d9a7577ca209a80c542cd"
+    },
+    {
+      "bytes": 2919,
+      "path": "docs/memory/evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md",
+      "sha256": "a4400bf013f7bc23a048decd8d2fe8597b2cbacf2e22064a0a4be253e3f849c6"
     },
     {
       "bytes": 1406,
@@ -631,9 +636,9 @@
       "sha256": "27cff133524e0aa340e1badb945d2ab38051d0a37c5b03119997ee027e66ee9f"
     },
     {
-      "bytes": 4149,
+      "bytes": 4096,
       "path": "docs/memory/phases/f4-refresh1-current-baseline-authority-comparison.md",
-      "sha256": "8e95b871d0a24f20b94db26b1b28ddc8e57be336758d57df0f3ea9602c24fb63"
+      "sha256": "1f7688e051e0843f3d59d136afcb7757843c97274f44aa064e99dfdcd308b738"
     },
     {
       "bytes": 13425,
@@ -644,6 +649,26 @@
       "bytes": 12969,
       "path": "docs/memory/phases/f4-refresh1-fix1-nested-f4-delta-task-contract.md",
       "sha256": "b7aa93644477ad3c16f9576e787080f96ba88f19ee4c9b8c45a598e2ec31b9ce"
+    },
+    {
+      "bytes": 27831,
+      "path": "docs/memory/phases/f4-refresh2-current-baseline-candidate-materialization-task-contract.md",
+      "sha256": "8db8547136611c2e29b8b19bf3e090c40efa3f37d91db5174ce169335cfa4d6c"
+    },
+    {
+      "bytes": 3906,
+      "path": "docs/memory/phases/f4-refresh2-current-baseline-candidate-materialization.md",
+      "sha256": "4f6ca591af4b6269d9a542209488f5bfc1c713741769122ed38156431ecbf0d8"
+    },
+    {
+      "bytes": 15374,
+      "path": "docs/memory/phases/f4-refresh2-final-pre-push-source-review-reconciliation-task-contract.md",
+      "sha256": "566ef5c3cf557123f8a14b7682374d7f94b75566bc6d8e30d95cca5ef074bb69"
+    },
+    {
+      "bytes": 16305,
+      "path": "docs/memory/phases/f4-refresh2-fix1-materialization-manifest-integrity-task-contract.md",
+      "sha256": "ca45bd6c0f2b5adce1348b6324e551b6e10f0638f8743e1e9cb27204ab2b6def"
     },
     {
       "bytes": 9832,
@@ -751,14 +776,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 16916,
+      "bytes": 17096,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "6cf8a66da05dd3939b08e96cf5af6c25fb74aba21ca53f37fd7c3a2d339960c7"
+      "sha256": "a69173349152130170563610235681cfb5308230aa4624cd2d0ac45f51012bda"
     },
     {
-      "bytes": 10391,
+      "bytes": 10557,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "fa4c872be55ea8b72d3be6a33d531bf90db3148b2297833322cded15a73a9419"
+      "sha256": "c4d95911bf22317aa8327df831780a04953b08bab1770b4a138056f52a85812d"
     },
     {
       "bytes": 1698,
