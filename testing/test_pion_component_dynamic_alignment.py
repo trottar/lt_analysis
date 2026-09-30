@@ -158,6 +158,10 @@ class DynamicPionAlignmentPersistenceAndBoundaryTests(unittest.TestCase):
         first_control = self._pion_control("pion_control_20260924")
         second_control = self._pion_control("pion_control_20260929")
         payload = self._cache_payload(first_control)
+        self.assertEqual(
+            payload["alignment_semantics_version"],
+            fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION,
+        )
         with tempfile.TemporaryDirectory() as directory:
             fits.persist_pion_component_alignment(
                 directory, "Q2W-test", "center", "lowe", payload
@@ -184,6 +188,86 @@ class DynamicPionAlignmentPersistenceAndBoundaryTests(unittest.TestCase):
         self.assertEqual(status, "reused")
         self.assertEqual(reasons, [])
         self.assertEqual(cached["pion_control_histogram_identifier"]["hist_name"], "pion_control_20260924")
+        self.assertEqual(cached["alignment_semantics_version"], fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION)
+
+    def test_missing_semantics_cache_resolves_once_and_then_reuses(self):
+        control = self._pion_control("pion_control")
+        old_payload = self._cache_payload(control)
+        del old_payload["alignment_semantics_version"]
+        calls = []
+        with tempfile.TemporaryDirectory() as directory:
+            fits.persist_pion_component_alignment(directory, "Q2W-test", "center", "lowe", old_payload)
+            original_resolver = fits.resolve_pion_component_alignment
+
+            def resolve_once(*args, **kwargs):
+                calls.append(True)
+                return self._cache_payload(control)
+
+            fits.resolve_pion_component_alignment = resolve_once
+            try:
+                resolved, status, reasons, _ = fits.load_or_resolve_pion_component_alignment(
+                    directory, "Q2W-test", "center", "lowe", "setting-wide",
+                    self._identity(), control, {name: None for name in fits.COMPONENT_NAMES},
+                    inp_dict={}, common_setting_shift_gev=0.005,
+                )
+                reused, second_status, second_reasons, _ = fits.load_or_resolve_pion_component_alignment(
+                    directory, "Q2W-test", "center", "lowe", "setting-wide",
+                    self._identity(), control, {name: None for name in fits.COMPONENT_NAMES},
+                    inp_dict={}, common_setting_shift_gev=0.005,
+                )
+            finally:
+                fits.resolve_pion_component_alignment = original_resolver
+        self.assertEqual(calls, [True])
+        self.assertEqual(status, "rejected_stale_then_created")
+        self.assertIn("alignment_semantics_version mismatch", reasons)
+        self.assertEqual(resolved["alignment_semantics_version"], fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION)
+        self.assertEqual(second_status, "reused")
+        self.assertEqual(second_reasons, [])
+        self.assertEqual(reused["alignment_semantics_version"], fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION)
+
+    def test_wrong_and_malformed_semantics_cache_records_fail_closed(self):
+        control = self._pion_control("pion_control")
+        expected = self._cache_payload(control)
+        for value in ("pion_component_dynamic_alignment_semantics/v1", None, 2, {}):
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as directory:
+                stored = copy.deepcopy(expected)
+                stored["alignment_semantics_version"] = value
+                fits.persist_pion_component_alignment(directory, "Q2W-test", "center", "lowe", stored)
+                cached, reasons, _ = fits.load_pion_component_alignment(
+                    directory, "Q2W-test", "center", "lowe", expected
+                )
+                self.assertIsNone(cached)
+                self.assertIn("alignment_semantics_version mismatch", reasons)
+
+    def test_stale_parent_semantics_fails_closed_before_fine_scan(self):
+        config = get_pion_component_dynamic_alignment_config(
+            inp_dict={}, phi_setting="center", setting_key="Q2W-test"
+        )
+        config_hash = fits._alignment_hash(config)
+        parent = {
+            "accepted": True,
+            "alignment_schema_version": fits.ALIGNMENT_SCHEMA_VERSION,
+            "resolved_configuration_hash": config_hash,
+            "parent_setting_key": "Q2W-test",
+            "components": {},
+        }
+        parent["parent_alignment_hash"] = fits._alignment_parent_hash(
+            "Q2W-test", 0.005, parent["components"], config_hash
+        )
+        for version in (None, "pion_component_dynamic_alignment_semantics/v1"):
+            with self.subTest(version=version):
+                candidate = copy.deepcopy(parent)
+                if version is not None:
+                    candidate["alignment_semantics_version"] = version
+                result = fits.resolve_pion_component_alignment(
+                    "Q2W-test", "yield_t_phi", self._identity(),
+                    self._pion_control("fine_control"),
+                    {name: None for name in fits.COMPONENT_NAMES},
+                    parent_alignment=candidate, inp_dict={}, phi_setting="center",
+                    common_setting_shift_gev=0.005,
+                )
+                self.assertEqual(result["source"], "current_common_shift_fallback")
+                self.assertEqual(result["alignment_semantics_version"], fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION)
 
     def test_pion_control_semantic_mismatches_fail_closed(self):
         payload = self._cache_payload(self._pion_control("pion_control_original"))
@@ -305,6 +389,7 @@ class DynamicPionAlignmentTests(unittest.TestCase):
         parent_hash = fits._alignment_parent_hash("Q2W-test", 0.005, components, config_hash)
         return {
             "alignment_schema_version": fits.ALIGNMENT_SCHEMA_VERSION,
+            "alignment_semantics_version": fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION,
             "accepted": True,
             "parent_setting_key": "Q2W-test",
             "resolved_configuration_hash": config_hash,
@@ -343,6 +428,23 @@ class DynamicPionAlignmentTests(unittest.TestCase):
         self.assertEqual(result["source"], "current_common_shift_fallback")
         self.assertEqual(component["source"], "current_common_shift_fallback")
         self.assertNotIn("candidate_summaries", component)
+
+    def test_stale_parent_semantics_uses_common_shift_fallback(self):
+        for version in (None, "pion_component_dynamic_alignment_semantics/v1"):
+            with self.subTest(version=version):
+                parent = self._valid_parent()
+                if version is None:
+                    del parent["alignment_semantics_version"]
+                else:
+                    parent["alignment_semantics_version"] = version
+                result = fits.resolve_pion_component_alignment(
+                    "Q2W-test", "yield_t_phi", self._identity(),
+                    self._histogram("fine_stale_parent"), self.sources,
+                    parent_alignment=parent, inp_dict=self.inp_dict,
+                    phi_setting="center", common_setting_shift_gev=0.005,
+                )
+                self.assertEqual(result["source"], "current_common_shift_fallback")
+                self.assertEqual(result["alignment_semantics_version"], fits.PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION)
 
     def test_local_correction_is_accepted_only_when_it_beats_the_parent_score(self):
         self.config_override["components"]["pi_n"]["fine_bin_offset_scan_gev"] = {

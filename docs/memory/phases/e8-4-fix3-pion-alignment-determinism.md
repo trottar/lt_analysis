@@ -33,6 +33,13 @@ farm, or runtime validation.
   renormalization, scan grids, windows, scoring, ordering, and production
   pion-subtraction behavior are unchanged.
 
+Fresh Left/lowe evidence after Fix.3 invalidated the earlier assumption that
+every otherwise compatible schema-v2 store remained reusable: the cache load
+precedes the candidate scan, and schema/config compatibility did not record
+the changed scan-acceptance semantics. Fix.3 remains `SOURCE REVIEWED`;
+E.8.4.Fix.4 owns the narrow semantic-version cache repair. See the [fresh
+blocker evidence](../evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
+
 ## Deterministic local coverage
 
 The focused suite includes a ROOT-independent persisted-cache regression for a

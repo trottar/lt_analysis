@@ -106,6 +106,18 @@ canonical-five artifact inventory, provenance allowlists, generic collector,
 deterministic checks were `NOT RUN by ChatGPT`. This is not ROOT/PyROOT,
 procedure-PDF, farm, runtime, production, or Method-A-promotion evidence.
 
+E.8.4.Fix.4 persisted-alignment semantic-version repair is `SOURCE REVIEWED`:
+independent ChatGPT actual-diff/source-runtime-path review of
+`kaonlt_review(20260929-215203).diff` passed. The reviewed candidate makes
+pre-Fix.3 alignment records stale while retaining current-semantics reuse and
+direct parent fail-closed semantics; only the two allowed source/test files
+change substantively. Codex-reported checks were `NOT RUN by ChatGPT`. The
+fresh Left/lowe farm gate remains `BLOCKED` by an F.3 input-content mismatch
+in F.6.3's F.4 reproduction. This is not ROOT/PyROOT, full-analysis,
+procedure-PDF, farm, runtime, production, or Method-A-promotion closure.
+See the [Fix.4 phase record](../phases/e8-4-fix4-alignment-cache-semantics.md)
+and [blocker evidence](../evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
+
 #### Final E.8 closure
 
 `BLOCKED` — pending E.8.4 and later runtime/visual validation of the complete full-analysis visual chain.

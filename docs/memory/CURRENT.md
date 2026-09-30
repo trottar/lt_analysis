@@ -12,6 +12,20 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+E.8.4.Fix.4 persisted-alignment semantic-version repair is `SOURCE REVIEWED`:
+independent ChatGPT actual-diff/source-runtime-path review of
+`kaonlt_review(20260929-215203).diff` passed. The reviewed local candidate
+starts from committed `test` HEAD `8d62dcfdf2fd8d08298c075940b4ab1b28d7f079`.
+It rejects pre-Fix.3 schema-v2 alignment caches for one-time recomputation,
+retains current-semantics reuse, and requires current semantics for direct
+fine-bin parent validity. The two reviewed source/test diffs remain byte-identical
+to that bundle. Codex-reported deterministic checks passed, including 19
+focused alignment tests with 11 PyROOT-dependent skips; these checks were
+`NOT RUN by ChatGPT`. No ROOT/PyROOT, full `main.py`, procedure-PDF, farm,
+runtime, production, or Method-A promotion acceptance follows. See the [Fix.4 phase
+record](phases/e8-4-fix4-alignment-cache-semantics.md) and [fresh Left/lowe
+blocker](evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
+
 E.8.4.Fix.3 pion-alignment determinism repair is `SOURCE REVIEWED`: independent
 ChatGPT actual-diff/source review and pushed-state review passed for the
 user-controlled pushed source `29d7b7f9635db899939efeb3508e941e994e8928`.
@@ -139,17 +153,24 @@ See the [Fix.6 Left/lowe runtime closure](evidence/e8-1-fix6-left-lowe-runtime-c
 
 ## Blockers
 
+The fresh `Q4p4W2p74 / Left / lowe` E.8.4 farm gate is `BLOCKED` by
+`f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
+The supplied F.1 partition comparison and source audit identify stale
+pre-Fix.3 alignment-cache reuse as the repair target; the farm output did not
+directly print a cache-reuse status. Source-reviewed Fix.4 still needs
+user-controlled commit/push and pushed-state review, any required separately
+reviewed profile re-pin, and a new narrow farm run before runtime status can change.
+
 E.8.2, E.8.3, F.6.3, and E.8.4 are `SOURCE REVIEWED`, not runtime accepted.
 Final E.8 remains downstream. The deferred E.8.1 settings are not a blocker or
 failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the independently reviewed E.8.4.Fix.3
-validation-bundle profile re-pin.
+NEXT — user-controlled commit/push of the independently reviewed E.8.4.Fix.4 persisted-alignment semantic-version repair.
 
-Do not advance to later validation gates before the user-controlled Git action
-and its required subsequent reconciliation. Source review does not establish
+This Codex reconciliation stops for independent final pre-push review before
+that user action. No farm rerun is authorized yet. Source review does not establish
 ROOT/PyROOT, procedure-PDF, farm, runtime, production, or Method-A promotion.
 
 F.6.3 alone owns the private parallel full-analysis branch; E.8.4 only consumes

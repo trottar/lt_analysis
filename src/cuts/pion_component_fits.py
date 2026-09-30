@@ -6069,6 +6069,7 @@ def resolve_scope_single_shape(
 
 
 ALIGNMENT_SCHEMA_VERSION = int(PION_COMPONENT_DYNAMIC_ALIGNMENT_SCHEMA_VERSION)
+PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION = "pion_component_dynamic_alignment_semantics/v2"
 
 
 def _canonical_json(value):
@@ -6595,6 +6596,7 @@ def build_expected_pion_alignment_metadata(
     parent = parent_alignment or {}
     return {
         "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION,
+        "alignment_semantics_version": PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION,
         "analysis_scope": str(analysis_scope or ""),
         "bin_key": deepcopy(bin_key),
         "complete_physical_bin_identity": deepcopy(bin_key),
@@ -6650,6 +6652,7 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
         parent.get("accepted", False)
         and parent.get("parent_alignment_hash")
         and parent.get("alignment_schema_version") == ALIGNMENT_SCHEMA_VERSION
+        and parent.get("alignment_semantics_version") == PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION
         and parent.get("resolved_configuration_hash") == config_hash
         and parent.get("parent_setting_key") == setting_key
         and parent.get("parent_alignment_hash") == expected_parent_hash
@@ -6686,7 +6689,7 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
     if not bool(config.get("enabled", False)) or (not is_parent and not parent_valid):
         reason = "dynamic alignment disabled" if not bool(config.get("enabled", False)) else "parent alignment unavailable, stale, incompatible, or invalid"
         return {
-            "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key),
+            "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "alignment_semantics_version": PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key),
             "parent_setting_key": setting_key, "source": "component_disabled" if not bool(config.get("enabled", False)) else "current_common_shift_fallback", "accepted": False,
             "common_setting_shift_gev": common_shift, "baseline_source": "current_common_shift",
             "baseline_score": None, "proposed_score": None, "proposed_relative_improvement": None,
@@ -6941,7 +6944,7 @@ def resolve_pion_component_alignment(setting_key, analysis_scope, bin_key, pion_
         "disabled": sum(1 for component in applied_components.values() if component.get("component_applied_source") == "component_disabled"),
     }
     return {
-        "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key), "parent_setting_key": setting_key,
+        "alignment_schema_version": ALIGNMENT_SCHEMA_VERSION, "alignment_semantics_version": PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION, "analysis_scope": scope, "bin_key": deepcopy(bin_key), "complete_physical_bin_identity": deepcopy(bin_key), "parent_setting_key": setting_key,
         "source": "setting_global_scan" if is_parent and accepted else ("bin_local_scan" if accepted else ("current_common_shift_fallback" if is_parent else "parent_setting_fallback")), "accepted": accepted,
         "common_setting_shift_gev": common_shift, "baseline_score": baseline_metrics.get("score"),
         "proposed_score": proposed_metrics.get("score"), "proposed_relative_improvement": proposed_improvement,
@@ -7009,6 +7012,12 @@ def _alignment_compatibility_reasons(stored, expected):
     ):
         if stored.get(field) != expected.get(field):
             reasons.append("{} mismatch".format(field))
+    if (
+        not isinstance(stored.get("alignment_semantics_version"), str)
+        or stored["alignment_semantics_version"] != PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION
+        or expected.get("alignment_semantics_version") != PION_COMPONENT_ALIGNMENT_SEMANTICS_VERSION
+    ):
+        reasons.append("alignment_semantics_version mismatch")
     expected_parent_hash = expected.get("parent_alignment_hash")
     if expected_parent_hash and stored.get("parent_alignment_hash") != expected_parent_hash:
         reasons.append("parent_alignment_hash mismatch")
@@ -7086,6 +7095,7 @@ def persist_pion_component_alignment(outpath, setting_key, phi_setting, epsset, 
         for component_name, component in (record.get("components") or {}).items():
             rows.append({
                 "alignment_schema_version": record.get("alignment_schema_version"),
+                "alignment_semantics_version": record.get("alignment_semantics_version"),
                 "resolved_configuration_hash": record.get("resolved_configuration_hash"),
                 "setting": record.get("parent_setting_key"), "scope": record.get("analysis_scope"),
                 "bin_key": _canonical_json(record.get("complete_physical_bin_identity")), "component": component_name,
