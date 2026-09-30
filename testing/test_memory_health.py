@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib
+import contextlib
+import io
 import json
 import sys
 import tempfile
@@ -41,6 +43,46 @@ class StrictMemoryHealthTests(unittest.TestCase):
             root = Path(directory)
             self.write_fixture(root)
             self.assertEqual(self.errors(root), [])
+
+    def test_cli_strict_warning_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            real_run_checks = health.run_checks
+
+            def invoke(strict: bool) -> tuple[int, str]:
+                output = io.StringIO()
+                argv = ["check_memory_health.py", "--root", str(root)]
+                if strict:
+                    argv.append("--fail-on-warning")
+                with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                    health, "run_checks", side_effect=lambda path: real_run_checks(path, check_manifest=False)
+                ), contextlib.redirect_stdout(output):
+                    result = health.main()
+                return result, output.getvalue()
+
+            self.assertEqual(invoke(True), (0, "MEMORY HEALTH: PASS\n"))
+
+            current = root / "docs/memory/CURRENT.md"
+            soft, hard = health.SIZE_LIMITS["docs/memory/CURRENT.md"]
+            original = current.read_bytes()
+            current.write_bytes(original[:-1] + b" " * (soft + 1 - len(original)) + b"\n")
+            self.assertLess(current.stat().st_size, hard)
+            self.assertEqual(self.run_health(root)[0], [])
+            default_code, default_output = invoke(False)
+            strict_code, strict_output = invoke(True)
+            self.assertEqual(default_code, 0)
+            self.assertEqual(strict_code, 1)
+            self.assertIn("MEMORY HEALTH: WARN: docs/memory/CURRENT.md", default_output)
+            self.assertEqual(strict_output, default_output)
+
+            warned = current.read_bytes()
+            current.write_bytes(warned[:-1] + b" " * (hard + 1 - len(warned)) + b"\n")
+            for strict in (False, True):
+                with self.subTest(strict=strict):
+                    code, output = invoke(strict)
+                    self.assertEqual(code, 1)
+                    self.assertIn("MEMORY HEALTH: FAIL: docs/memory/CURRENT.md", output)
 
     def test_schema2_current_fails(self):
         with tempfile.TemporaryDirectory() as directory:

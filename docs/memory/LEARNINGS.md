@@ -36,6 +36,13 @@
 - Do not perform unrelated cleanup merely to make a gate pass.
 - Do not make the user the first validator of deterministic logic that can be
   checked locally.
+- A reviewed profile and collector do not prove the requested farm operation
+  has a tracked execution owner. Audit the complete executable path before
+  handoff; if multi-step orchestration is missing, stop for a source-changing
+  contract instead of composing a farm-shell sequence.
+- A soft memory-health warning requires consolidation before the next gate,
+  unless the user approves a recorded maintenance exception. Report exact
+  byte counts, warnings, and manifest state after each substantial gate.
 
 ## Repository memory and provenance
 

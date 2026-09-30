@@ -7,6 +7,12 @@
 focused synthetic test. The required analysis source is the pushed, independently reviewed
 F.4.Refresh.2 materializer at `141a3d04f9e5d07be21dba14e0e63212c3990bf1`.
 No farm materialization or ZIP has been produced for this gate.
+The profile's `SOURCE REVIEWED` status does not establish operational farm
+readiness. The farm execution gate is `BLOCKED` until a separate tracked,
+reviewed, pushed, and pushed-state-reviewed owner covers validated inputs ->
+materialization -> verification -> collection -> returned ZIP. The generic
+wrapper packages only; it does not run the materializer. See the
+[operational-readiness investigation](../investigations/f4-refresh2-validation1-operational-readiness-failure.md).
 
 ## Scope and source boundary
 
@@ -34,10 +40,13 @@ final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Next gate
 
-User-controlled commit/push after independent final pre-push reconciliation
-review. Codex-reported local checks passed: profile 4, collector 28,
+This profile remains source reviewed. The separately missing execution owner
+must pass the source-changing workflow before any farm command; the
+[hardening task](memory-health-operational-completeness-hardening.md) is active.
+Earlier Codex-reported local checks passed: profile 4, collector 28,
 materializer 13, memory 35 tests, all with 0 skips; manifest write/check,
-bootstrap, and `git diff --check` passed. Memory health exited 0 with the
-existing `CURRENT.md` soft-size warning. ChatGPT did not run those unit suites.
+bootstrap, and `git diff --check` passed. The then-existing CURRENT soft-size
+warning is now a workflow blocker to be repaired by the hardening task;
+ChatGPT did not run those unit suites.
 Source review cannot establish ROOT/PyROOT, farm materialization,
 candidate-authority acceptance, or production promotion.

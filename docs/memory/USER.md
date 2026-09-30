@@ -22,6 +22,14 @@ Do not provide or authorize farm-run commands until the exact validation
 bundle/profile required for that gate is ready, independently source-reviewed,
 pushed, and pushed-state reviewed. Advance one workflow gate at a time; do not
 provide commands for later gates before the current gate has passed.
+Before a farm command, verify the complete tracked, reviewed, pushed, and
+pushed-state-reviewed path from input authority through production/checking,
+packaging, invocation, and returned artifact. Multi-step operations require a
+tracked orchestration owner; otherwise farm readiness is `BLOCKED` and no
+interactive shell sequence is provided. A single reviewed CLI may own a
+complete direct operation. Codex and ChatGPT each report memory health after
+substantial gates; unresolved warnings block the next gate unless the user
+approves a recorded maintenance exception.
 
 After Codex completes a local source-changing task, ChatGPT must inspect the
 actual diff before the user commits or pushes. If the diff is too large to

@@ -59,6 +59,9 @@ state. The handoff should remain exceptional and small. `MEMORY.md` may grow
 more because it carries durable cross-phase knowledge. A soft-limit warning
 calls for focused consolidation; a hard-limit failure requires maintenance
 before further expansion.
+An unresolved warning blocks beginning another phase, fix, or farm gate unless
+the user approves a recorded maintenance exception. A warning is not itself a
+scientific or runtime failure.
 
 Perform maintenance after a meaningful implementation or review, accepted farm
 evidence, regression, phase decision, changed blocker, or changed next action.
@@ -74,9 +77,27 @@ statement needed for future work.
    in unrelated chronology or chat records.
 3. Keep accepted runtime, source review, active work, deferred work, and next
    actions explicitly distinct.
-4. Discover `<PYTHON>` as described in [TOOLS.md](TOOLS.md), then regenerate
-   and check the manifest and run memory health.
+4. Discover `<PYTHON>` as described in [TOOLS.md](TOOLS.md). After memory
+   changes regenerate and check the manifest, then run the task-final gate:
+   `<PYTHON> -B tools/check_memory_health.py --root . --fail-on-warning`.
 5. Inspect the resulting diff and report the exact remaining next action.
+
+After every substantial implementation, source review reconciliation, closure,
+or pushed-state handoff, Codex reports its deterministic local result and
+ChatGPT independently verifies the available evidence. Both surface:
+
+```text
+Memory health: PASS | BLOCKED
+CURRENT bytes: <integer>
+MEMORY bytes: <integer>
+CURRENT_HANDOFF bytes: <integer>
+health warnings: <none or exact list>
+manifest check: PASS | FAIL
+```
+
+Resolve warnings before handing off to a new gate, unless the user approves a
+recorded maintenance exception. The non-strict health command remains useful
+for diagnosis but cannot complete a substantial task.
 
 The generated manifest is integrity metadata only: it contains no active-state,
 date, or stored-HEAD authority. Regenerate/check it after versionable memory

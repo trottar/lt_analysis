@@ -39,6 +39,10 @@ actual-diff/source-provenance review of `kaonlt_review(20260930-152818).diff`
 passed. The generic profile pins pushed materializer source
 `141a3d04f9e5d07be21dba14e0e63212c3990bf1`; no farm or authority result
 is claimed. See the [profile record](../phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md).
+Its farm execution gate is `BLOCKED`: the reviewed profile and bundle-only
+wrapper do not own materialize -> verify -> package. A separate tracked,
+reviewed execution owner is required before farm handoff. See the
+[operational-readiness investigation](../investigations/f4-refresh2-validation1-operational-readiness-failure.md).
 
 ### F.5 and F.5.2 — detached propagation and presentation review
 
@@ -159,6 +163,14 @@ Method-A-promotion status changes.
 #### F.6.4 — explicit production-promotion decision
 
 `BLOCKED` — pending completed F.6.3/E.8.4 production-impact evidence; no automatic promotion.
+
+## Workflow controls
+
+Memory-health and farm-gate operational-completeness hardening is
+`SOURCE REVIEWED` after independent actual-diff review of
+`kaonlt_review(20260930-173355).diff`. Its strict health and execution-chain
+rules do not close the `BLOCKED` F.4.Refresh.2 farm execution gate; see the
+[hardening phase](../phases/memory-health-operational-completeness-hardening.md).
 
 ## Active-state ownership
 

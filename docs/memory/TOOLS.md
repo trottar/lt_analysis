@@ -28,11 +28,16 @@ Discover a working interpreter and represent it as `<PYTHON>`; do not assume a
 workstation-specific executable.
 
 ```sh
-<PYTHON> -B tools/check_memory_health.py --root .
 <PYTHON> -B tools/update_memory_manifest.py --root . --check
 <PYTHON> -B tools/update_memory_manifest.py --root . --write
+<PYTHON> -B tools/check_memory_health.py --root . --fail-on-warning
 <PYTHON> -B tools/memory_bootstrap.py --root . --json
 ```
+
+Run manifest write then check in sequence after memory changes. The strict
+health command is the task-final gate; the same command without
+`--fail-on-warning` remains diagnostic only. Report exact
+CURRENT/MEMORY/CURRENT_HANDOFF byte counts and warnings after substantial work.
 
 ## JLab environment
 

@@ -64,6 +64,14 @@ actual diff. The user alone commits/pushes accepted changes and runs farm
 validation. Workflow: Codex local changes -> ChatGPT audit -> user commit/push
 -> user farm run -> ChatGPT evidence review.
 
+Before any farm command, audit the complete tracked execution chain from input
+authority through producer, checker, collector, invocation owner, and returned
+artifact. A multi-step operation without a reviewed, pushed driver is
+`BLOCKED`; see [CODEX.md](CODEX.md) and [COMMUNICATION.md](COMMUNICATION.md).
+After each substantial gate, both Codex and ChatGPT report memory health;
+unresolved warnings block the next phase, fix, or farm gate unless the user
+approves a recorded maintenance exception.
+
 ## Operational ownership
 
 - [USER.md](USER.md) owns stable collaboration and delivery preferences.

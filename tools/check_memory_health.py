@@ -515,7 +515,7 @@ def run_checks(root: Path, *, check_manifest: bool = True) -> tuple[list[str], l
     return errors, warnings
 
 
-def print_result(errors: Iterable[str], warnings: Iterable[str]) -> int:
+def print_result(errors: Iterable[str], warnings: Iterable[str], *, fail_on_warning: bool = False) -> int:
     errors, warnings = list(errors), list(warnings)
     for warning in warnings:
         print(f"MEMORY HEALTH: WARN: {warning}")
@@ -524,7 +524,7 @@ def print_result(errors: Iterable[str], warnings: Iterable[str]) -> int:
     if errors:
         return 1
     print("MEMORY HEALTH: WARN" if warnings else "MEMORY HEALTH: PASS")
-    return 0
+    return 1 if warnings and fail_on_warning else 0
 
 
 def fixture_current() -> str:
@@ -643,6 +643,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=default_root(), help="repository root")
     parser.add_argument("--self-test", action="store_true", help="run deterministic temporary-fixture checks")
+    parser.add_argument("--fail-on-warning", action="store_true", help="exit nonzero when any health warning is reported")
     return parser.parse_args()
 
 
@@ -653,7 +654,7 @@ def main() -> int:
         print("SELF-TEST: PASS")
         return 0
     errors, warnings = run_checks(args.root.resolve())
-    return print_result(errors, warnings)
+    return print_result(errors, warnings, fail_on_warning=args.fail_on_warning)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,19 @@ for detailed packaging.
 
 ## Request and return pattern
 
+Before providing a farm command, audit input authority -> producer/materializer/
+analyzer/renderer (if any) -> verification/checker (if any) -> collector/
+packager -> invocation owner -> expected returned artifact. Every required
+executable step must be tracked, locally deterministic where possible,
+independently source reviewed, pushed, and pushed-state reviewed. State
+`Farm readiness: PASS` and name the tracked source owners of the complete
+operation before a command. If an owner is missing or unreviewed, state
+`Farm readiness: BLOCKED` and provide no command. Multi-step orchestration
+needs a tracked, reviewed driver; do not assemble it interactively in the
+farm shell. One reviewed CLI can directly own a complete single-command
+operation. Unresolved memory-health warnings also block farm readiness unless
+the user approves a recorded maintenance exception.
+
 Farm commands must be valid `tcsh`. Communicate a simple operation as:
 
 1. the exact requested operation and artifact;

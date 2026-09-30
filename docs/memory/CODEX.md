@@ -52,6 +52,15 @@ unless it is explicitly intended to be tracked.
 
 ## Contract policy
 
+Before a farm handoff, audit input authority -> producer/materializer/analyzer/
+renderer (if any) -> verification/checker (if any) -> collector/packager ->
+invocation owner -> expected returned artifact. Every required executable step
+must have tracked source, be locally deterministic where possible, independently
+source reviewed, pushed, and pushed-state reviewed. If multi-step orchestration
+lacks a tracked, reviewed driver, mark the farm gate `BLOCKED` and return to a
+source-changing contract. A single reviewed CLI may directly own a complete
+single-command operation. A reviewed profile alone does not establish readiness.
+
 Each task contract must state:
 
 - exact starting HEAD;
@@ -70,6 +79,18 @@ Each task contract must state:
 - diff audit;
 - acceptance criteria; and
 - hard stop.
+
+For a farm-bound task, the contract also names the complete execution chain,
+the source owner of each executable step, whether a driver is needed, and the
+missing-orchestration blocking rule. Its memory-health section requires byte
+counts for CURRENT/MEMORY/CURRENT_HANDOFF, manifest write/check after memory
+changes, and the task-final strict check:
+`<PYTHON> -B tools/check_memory_health.py --root . --fail-on-warning`.
+After substantial implementation, source review reconciliation, closure, or
+pushed-state handoff, Codex reports local health and ChatGPT independently
+verifies available evidence using the [maintenance format](MAINTENANCE.md).
+Unresolved warnings block the next phase, fix, or farm gate unless the user
+approves a recorded maintenance exception.
 
 Codex's summary is not proof: actual source and diff must be reviewed. If the
 branch and HEAD have not moved, work remains local/proposed rather than

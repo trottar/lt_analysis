@@ -98,6 +98,16 @@ and source review without a farm run after every edit. Farm validation remains
 mandatory for ROOT/PyROOT or full-runtime claims and is scheduled at explicit
 milestones; inspect fresh artifacts before broadening a narrow runtime gate.
 
+Before a farm handoff, audit input authority, producer (if any), checker (if
+any), collector, invocation owner, and returned artifact. Every required
+executable step must be tracked, deterministic locally where possible,
+independently source reviewed, pushed, and pushed-state reviewed. Unowned
+multi-step orchestration blocks farm readiness; one reviewed CLI may own a
+complete direct operation. After substantial implementation, review, closure,
+or pushed-state handoff, Codex and ChatGPT report memory health. Unresolved
+warnings block a new phase, fix, or farm gate unless the user approves a
+recorded maintenance exception.
+
 ## Canonical record ownership
 
 - [CURRENT.md](CURRENT.md) owns the sole active objective, blockers, and exact
