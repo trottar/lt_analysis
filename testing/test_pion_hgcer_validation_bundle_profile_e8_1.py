@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 COLLECTOR_PATH = REPO_ROOT / "testing" / "collect_pion_hgcer_validation_bundle.py"
 PROFILE_PATH = REPO_ROOT / "testing" / "pion_hgcer_validation_bundle_profile_e8_1.json"
 KINEMATIC = "Q4p4W2p74"
-REVIEWED_SOURCE = "29d7b7f9635db899939efeb3508e941e994e8928"
+REVIEWED_SOURCE = "6e2adf7a37ac9e79cad99242686804cf51701644"
 SETTINGS = (
     ("Left", "lowe"),
     ("Left", "highe"),

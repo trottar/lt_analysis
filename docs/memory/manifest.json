@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 12328,
+      "bytes": 13443,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "9c8f9a2c4044e2e26039801cc7ae39e363fa06dbe5dd0a6315b10040da0ed8fa"
+      "sha256": "36e04a956d6ef37038cca3ebdfed6f173093396281d1c992e47dbc75f85cd9cb"
     },
     {
       "bytes": 1978,
@@ -571,9 +571,24 @@
       "sha256": "5904dcc7d8081089c676c5d515e0cfdb7c29517b4f97c60a4bae7ed313fe448e"
     },
     {
-      "bytes": 3451,
+      "bytes": 4089,
       "path": "docs/memory/phases/e8-4-fix4-alignment-cache-semantics.md",
-      "sha256": "abcaad3ba08dca960402f8583282bf990e1f70ec5ac0f5a0149d6ba7a1640b59"
+      "sha256": "d3ba8e7a610add85836da003c06f6dabd5c3ee8413d41fabec83619c95822d1e"
+    },
+    {
+      "bytes": 12746,
+      "path": "docs/memory/phases/e8-4-fix4-bundle-profile-repin-final-pre-push-source-review-reconciliation-task-contract.md",
+      "sha256": "e354943da9516b16a5bdae3f7932ea131adb136bd399145c55576e657d8a0241"
+    },
+    {
+      "bytes": 16065,
+      "path": "docs/memory/phases/e8-4-fix4-bundle-profile-repin-task-contract.md",
+      "sha256": "b267417b1aeb8fff1bea7d70cfe22c8b9ca265fc2343e10032d7564a52e3b0eb"
+    },
+    {
+      "bytes": 3196,
+      "path": "docs/memory/phases/e8-4-fix4-bundle-profile-repin.md",
+      "sha256": "10816690a862b6cf7473035bd0c7592570e9fa2e3b7364580a38585aa9b9852c"
     },
     {
       "bytes": 12914,
@@ -716,9 +731,9 @@
       "sha256": "166b4a84aa33122dc9c5ab46966b069ce345dd58878ad095f3aab47a98110d47"
     },
     {
-      "bytes": 8648,
+      "bytes": 9468,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "bd55c83f96d7d23317009cee22871ffd693ba7b8a73cfa4f1df3bb2f0298edd5"
+      "sha256": "2bbaff8e604cd671abb7a71df257c99fbef2fcf99647df189ed46bc3de2b8520"
     },
     {
       "bytes": 1698,

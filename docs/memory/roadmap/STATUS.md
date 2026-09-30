@@ -118,6 +118,19 @@ procedure-PDF, farm, runtime, production, or Method-A-promotion closure.
 See the [Fix.4 phase record](../phases/e8-4-fix4-alignment-cache-semantics.md)
 and [blocker evidence](../evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
 
+Independent pushed-state review passed for user-controlled Fix.4 source
+`6e2adf7a37ac9e79cad99242686804cf51701644`, parent
+`8d62dcfdf2fd8d08298c075940b4ab1b28d7f079`, with the exact ten reviewed
+candidate paths. E.8.4.Fix.4 validation-bundle profile re-pin is `SOURCE
+REVIEWED`: independent ChatGPT actual-diff/source-provenance review of
+`kaonlt_review(20260929-222602).diff` passed. Only the generic profile/test
+required analysis source changes to pushed Fix.4. Canonical-five artifacts,
+source-range allowlists, collector, wrapper, and scientific/runtime source
+remain frozen. Codex-reported checks were `NOT RUN by ChatGPT`. See the
+[profile re-pin record](../phases/e8-4-fix4-bundle-profile-repin.md). No
+ROOT/PyROOT, full-analysis, procedure-PDF, farm, runtime, production, or
+Method-A-promotion status changes.
+
 #### Final E.8 closure
 
 `BLOCKED` — pending E.8.4 and later runtime/visual validation of the complete full-analysis visual chain.

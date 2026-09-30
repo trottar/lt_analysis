@@ -12,6 +12,19 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+E.8.4.Fix.4 validation-bundle profile re-pin is `SOURCE REVIEWED`: independent
+ChatGPT actual-diff/source-provenance review of
+`kaonlt_review(20260929-222602).diff` passed. The reviewed candidate changes only the
+generic E.8.1 bundle profile and focused test's required analysis source from
+Fix.3 `29d7b7f9635db899939efeb3508e941e994e8928` to pushed Fix.4
+`6e2adf7a37ac9e79cad99242686804cf51701644`. Canonical-five settings,
+artifact inventory, allowlists, collector, wrapper, and scientific/runtime
+source remain unchanged. Codex-reported local checks passed (5 profile, 28
+collector, and 19 alignment tests with 11 PyROOT-dependent skips); they were
+`NOT RUN by ChatGPT`. No ROOT/PyROOT, full `main.py`, procedure-PDF, farm,
+runtime, production, or Method-A promotion acceptance follows. See the
+[profile re-pin phase record](phases/e8-4-fix4-bundle-profile-repin.md).
+
 E.8.4.Fix.4 persisted-alignment semantic-version repair is `SOURCE REVIEWED`:
 independent ChatGPT actual-diff/source-runtime-path review of
 `kaonlt_review(20260929-215203).diff` passed. The reviewed local candidate
@@ -25,6 +38,9 @@ focused alignment tests with 11 PyROOT-dependent skips; these checks were
 runtime, production, or Method-A promotion acceptance follows. See the [Fix.4 phase
 record](phases/e8-4-fix4-alignment-cache-semantics.md) and [fresh Left/lowe
 blocker](evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
+Independent pushed-state review passed for user-controlled pushed Fix.4 source
+`6e2adf7a37ac9e79cad99242686804cf51701644`, whose parent is the reviewed
+starting HEAD above. This is source/provenance evidence, not runtime closure.
 
 E.8.4.Fix.3 pion-alignment determinism repair is `SOURCE REVIEWED`: independent
 ChatGPT actual-diff/source review and pushed-state review passed for the
@@ -157,9 +173,10 @@ The fresh `Q4p4W2p74 / Left / lowe` E.8.4 farm gate is `BLOCKED` by
 `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
 The supplied F.1 partition comparison and source audit identify stale
 pre-Fix.3 alignment-cache reuse as the repair target; the farm output did not
-directly print a cache-reuse status. Source-reviewed Fix.4 still needs
-user-controlled commit/push and pushed-state review, any required separately
-reviewed profile re-pin, and a new narrow farm run before runtime status can change.
+directly print a cache-reuse status. Source-reviewed Fix.4 has been pushed and
+pushed-state reviewed; the source-reviewed profile re-pin still needs
+user-controlled commit/push and pushed-state review before a new narrow farm
+run can change runtime status.
 
 E.8.2, E.8.3, F.6.3, and E.8.4 are `SOURCE REVIEWED`, not runtime accepted.
 Final E.8 remains downstream. The deferred E.8.1 settings are not a blocker or
@@ -167,7 +184,7 @@ failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the independently reviewed E.8.4.Fix.4 persisted-alignment semantic-version repair.
+NEXT — user-controlled commit/push of the independently reviewed E.8.4.Fix.4 validation-bundle profile re-pin.
 
 This Codex reconciliation stops for independent final pre-push review before
 that user action. No farm rerun is authorized yet. Source review does not establish

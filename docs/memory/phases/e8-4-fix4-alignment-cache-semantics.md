@@ -61,3 +61,15 @@ The fresh Left/lowe E.8.4 gate remains `BLOCKED` by
 After final pre-push reconciliation review, the user controls commit/push;
 pushed-state review, any required separately reviewed profile re-pin, and a
 new narrow farm gate remain subsequent steps.
+
+## Pushed-state provenance
+
+Independent GitHub pushed-state review passed for user-controlled remote
+`test` commit `6e2adf7a37ac9e79cad99242686804cf51701644` (`E8.4 Fix.4:
+version persisted alignment semantics`), parent
+`8d62dcfdf2fd8d08298c075940b4ab1b28d7f079`. The pushed commit contains
+exactly the ten reviewed Fix.4 candidate paths, including only the two
+substantive source/test files named above; temporary review bundles are absent.
+This is source/provenance evidence only. The validation-bundle profile re-pin
+is a distinct `ACTIVE` gate and no ROOT/PyROOT, farm, runtime, production, or
+Method-A promotion conclusion changes.
