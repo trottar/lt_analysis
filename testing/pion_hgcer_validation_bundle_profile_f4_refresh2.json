@@ -1,0 +1,55 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_f4_refresh2_current_baseline_candidate_materialization_farm_review/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {"phi": "Left", "epsilon": "lowe"},
+    {"phi": "Left", "epsilon": "highe"},
+    {"phi": "Center", "epsilon": "lowe"},
+    {"phi": "Center", "epsilon": "highe"},
+    {"phi": "Right", "epsilon": "highe"}
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "f4_refresh1_comparison_input",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-current-baseline-authority-comparison-input.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f4_refresh2_candidate_f2",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-acceptance-representation-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f4_refresh2_candidate_f3",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f4_refresh2_candidate_f4",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-parent-preserving-correction-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "f4_refresh2_materialization_manifest",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-current-baseline-authority-materialization-manifest.json",
+        "kind": "json",
+        "required": true
+      }
+    ],
+    "settings": []
+  },
+  "source_identity": {
+    "required_analysis_commit": "141a3d04f9e5d07be21dba14e0e63212c3990bf1",
+    "allowed_committed_files": [
+      "testing/pion_hgcer_validation_bundle_profile_f4_refresh2.json",
+      "testing/test_pion_hgcer_validation_bundle_profile_f4_refresh2.py"
+    ],
+    "allowed_non_analysis_path_prefixes": ["docs/memory/"]
+  }
+}

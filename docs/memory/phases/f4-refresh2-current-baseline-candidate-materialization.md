@@ -2,7 +2,7 @@
 
 ## Status
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review of the repaired cumulative `kaonlt_review(20260930-111446).diff` passed. The detached, fail-closed materializer is a local uncommitted candidate based on committed `test` HEAD `08f8c5be84ab7a54278e8c623eae5d9d3c43d938`. It has not run on farm artifacts. No candidate materialization result or accepted authority update is claimed.
+`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review of the repaired cumulative `kaonlt_review(20260930-111446).diff` passed. The detached, fail-closed materializer was subsequently pushed at `test` commit `141a3d04f9e5d07be21dba14e0e63212c3990bf1`; its reviewed local candidate was based on committed HEAD `08f8c5be84ab7a54278e8c623eae5d9d3c43d938`. It has not run on farm artifacts. No candidate materialization result or accepted authority update is claimed.
 
 ## Scope and evidence boundary
 
@@ -12,7 +12,7 @@ The [F.4.Refresh.1 farm comparator evidence](../evidence/f4-refresh1-current-bas
 
 ## Next gate
 
-User-controlled commit/push after independent final pre-push reconciliation review. Codex-reported local deterministic checks in the reviewed bundle passed: Python compilation; materializer 13, unchanged comparator 8, F.2 14, F.3 10, F.4 8, F.6.3 21, and memory-health 35 tests, all with 0 skips; manifest write/check, memory health/bootstrap, and `git diff --check` also passed. ChatGPT independently compiled the two new Python files but did not run the unit suites. Memory health had only the existing nonfatal `CURRENT.md` soft-size warning. These local/source-review results do not validate farm materialization. Profile creation, packaging, accepted-authority changes, F.5/F.6.3/E.8.4 runtime validation, and Method-A promotion are later gates.
+The pushed materializer source is now pinned by the `SOURCE REVIEWED` [Validation.1 generic bundle/profile candidate](f4-refresh2-validation1-farm-materialization-bundle-profile.md). Codex-reported local deterministic checks in the reviewed materializer bundle passed: Python compilation; materializer 13, unchanged comparator 8, F.2 14, F.3 10, F.4 8, F.6.3 21, and memory-health 35 tests, all with 0 skips; manifest write/check, memory health/bootstrap, and `git diff --check` also passed. ChatGPT independently compiled the two new Python files but did not run the unit suites. Memory health had only the existing nonfatal `CURRENT.md` soft-size warning. These local/source-review results do not validate farm materialization. Packaging, accepted-authority changes, F.5/F.6.3/E.8.4 runtime validation, and Method-A promotion are later gates.
 
 ## F.4.Refresh.2.Fix.1 — SOURCE REVIEWED
 

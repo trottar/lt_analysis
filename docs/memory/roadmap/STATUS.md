@@ -34,6 +34,11 @@ review of `kaonlt_review(20260930-111446).diff` passed. No accepted
 F.2/F.3/F.4 authority has changed; F.6.3/E.8.4 remain `SOURCE REVIEWED` and
 runtime `BLOCKED`. See the
 [phase record](../phases/f4-refresh2-current-baseline-candidate-materialization.md).
+F.4.Refresh.2.Validation.1 is `SOURCE REVIEWED` after independent ChatGPT
+actual-diff/source-provenance review of `kaonlt_review(20260930-152818).diff`
+passed. The generic profile pins pushed materializer source
+`141a3d04f9e5d07be21dba14e0e63212c3990bf1`; no farm or authority result
+is claimed. See the [profile record](../phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md).
 
 ### F.5 and F.5.2 — detached propagation and presentation review
 

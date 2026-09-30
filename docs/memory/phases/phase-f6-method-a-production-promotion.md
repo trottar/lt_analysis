@@ -11,6 +11,11 @@ independent ChatGPT actual-diff/source-runtime-path review of
 `kaonlt_review(20260930-111446).diff` passed. This is detached materializer
 source review only. The accepted historical F.4 authority remains frozen; no
 refreshed authority has been validated, and F.6.3/E.8.4 remain runtime blocked.
+F.4.Refresh.2.Validation.1 is `SOURCE REVIEWED`: independent ChatGPT review of
+`kaonlt_review(20260930-152818).diff` passed for its generic bundle/profile. It
+pins pushed materializer source `141a3d04f9e5d07be21dba14e0e63212c3990bf1`
+without changing the collector or accepted authority. No farm materialization
+or authority acceptance follows from this profile.
 
 ## Frozen baseline and Method-A boundary
 

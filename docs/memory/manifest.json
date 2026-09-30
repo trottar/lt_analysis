@@ -16,9 +16,9 @@
       "sha256": "972e5650021d1bddbb7cc03696455361bad1fb76914688000f97df99b651ff52"
     },
     {
-      "bytes": 16331,
+      "bytes": 16338,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "aab544a2b17bfcc4218ed1966974a1d86008501f416516984976e5e1596c07cc"
+      "sha256": "17804c2d132538a668e9659ef0599f7b5bd57d1d0e7579f6b5141edbc62a151b"
     },
     {
       "bytes": 1978,
@@ -656,9 +656,9 @@
       "sha256": "8db8547136611c2e29b8b19bf3e090c40efa3f37d91db5174ce169335cfa4d6c"
     },
     {
-      "bytes": 3906,
+      "bytes": 4078,
       "path": "docs/memory/phases/f4-refresh2-current-baseline-candidate-materialization.md",
-      "sha256": "4f6ca591af4b6269d9a542209488f5bfc1c713741769122ed38156431ecbf0d8"
+      "sha256": "0db3c9e9588f52bd1ff3bc67048d2ebb0072248084956079b8c49da25b5296ac"
     },
     {
       "bytes": 15374,
@@ -669,6 +669,21 @@
       "bytes": 16305,
       "path": "docs/memory/phases/f4-refresh2-fix1-materialization-manifest-integrity-task-contract.md",
       "sha256": "ca45bd6c0f2b5adce1348b6324e551b6e10f0638f8743e1e9cb27204ab2b6def"
+    },
+    {
+      "bytes": 23063,
+      "path": "docs/memory/phases/f4-refresh2-validation1-farm-materialization-bundle-profile-task-contract.md",
+      "sha256": "907be106d4b274e0a8254726736e00552be4adf0c4bbf42ca4c4e22c1b290986"
+    },
+    {
+      "bytes": 2399,
+      "path": "docs/memory/phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md",
+      "sha256": "17d8fa75be8a5a3188543b3d97c1d3bde68a7948d5988985c32e1be5a3192a13"
+    },
+    {
+      "bytes": 14796,
+      "path": "docs/memory/phases/f4-refresh2-validation1-final-pre-push-source-review-reconciliation-task-contract.md",
+      "sha256": "573d806e9b6e9572be419bd67e0a67db75b9090966ec886bfba97655d836684a"
     },
     {
       "bytes": 9832,
@@ -776,14 +791,14 @@
       "sha256": "ac9b3928132f8bd0ffddf70fd5f0ff6b97ab29f856e0466161aa7d4cdef1d6b8"
     },
     {
-      "bytes": 17096,
+      "bytes": 17459,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
-      "sha256": "a69173349152130170563610235681cfb5308230aa4624cd2d0ac45f51012bda"
+      "sha256": "3772ab5fc28c9e2b1942e30af9dc937a410334c1701a637211fcf94c4bae321a"
     },
     {
-      "bytes": 10557,
+      "bytes": 10953,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "c4d95911bf22317aa8327df831780a04953b08bab1770b4a138056f52a85812d"
+      "sha256": "8eb0c3afa021d4f086b88f6bcbebd06d4ba6fd4368cadcfd185278eda32a2021"
     },
     {
       "bytes": 1698,

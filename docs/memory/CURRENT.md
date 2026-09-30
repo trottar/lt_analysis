@@ -12,15 +12,14 @@ Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-F.4.Refresh.2 current-baseline Method-A candidate materialization and its
-Fix.1 manifest-integrity repair are `SOURCE REVIEWED`: independent ChatGPT
-actual-diff/source-runtime-path review of `kaonlt_review(20260930-111446).diff`
-passed. The detached candidate preserves exact identity/science gates and
-fail-closed overwrite semantics. Codex-reported local checks passed
-(materializer 13 and unchanged suites, 0 skips); ChatGPT did not run unit tests.
-No farm materialization, refreshed authority acceptance, production application,
-or Method-A promotion follows. See the
-[phase record](phases/f4-refresh2-current-baseline-candidate-materialization.md).
+F.4.Refresh.2.Validation.1 generic farm materialization bundle/profile is
+`SOURCE REVIEWED`: independent ChatGPT actual-diff/source-provenance review of
+`kaonlt_review(20260930-152818).diff` passed. Its five required global JSONs
+pin pushed materializer source `141a3d04f9e5d07be21dba14e0e63212c3990bf1`.
+Codex-reported local profile/collector/materializer tests passed (4/28/13,
+0 skips); ChatGPT did not run those suites. F.4.Refresh.2/Fix.1 remain
+`SOURCE REVIEWED`. No farm materialization, authority acceptance, or Method-A
+promotion follows. See the [profile phase record](phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md).
 
 F.4.Refresh.1 current-baseline Method-A authority comparison and its Fix.1
 nested-delta repair are `CLOSED / RUNTIME VALIDATED` only for the detached
@@ -225,7 +224,7 @@ failure.
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the independently reviewed F.4.Refresh.2 current-baseline Method-A candidate materializer.
+NEXT — user-controlled commit/push of the independently reviewed F.4.Refresh.2.Validation.1 farm materialization bundle/profile candidate.
 
 This memory reconciliation stops for independent final pre-push review. Source
 review does not establish ROOT/PyROOT, procedure-PDF, farm, runtime, production,
