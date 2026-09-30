@@ -2,7 +2,16 @@
 
 ## Status
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
+`CLOSED / RUNTIME VALIDATED` — fresh Left/lowe farm evidence directly shows a
+current-semantics setting-wide alignment record with
+`persistence_status = rejected_stale_then_created` and rejection reason
+`alignment_semantics_version mismatch`. This closure covers only stale-cache
+rejection and recomputation. F.6.3 and E.8.4 remain unvalidated at runtime;
+their fresh gate remains blocked by
+`f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
+See [fresh Fix.4 evidence](../evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
+
+Prior source review: independent ChatGPT actual-diff/source-runtime-path review
 of `kaonlt_review(20260929-215203).diff` passed for the local candidate at
 fixed `test` starting HEAD `8d62dcfdf2fd8d08298c075940b4ab1b28d7f079`.
 The reviewed source/test diffs remain byte-identical. This review is not

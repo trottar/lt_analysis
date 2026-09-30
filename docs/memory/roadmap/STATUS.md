@@ -24,6 +24,15 @@ Random subtraction, slow-proton PID cleaning, pion component subtraction, Method
 
 `CLOSED / RUNTIME VALIDATED` — the accepted correction remains detached, parent-preserving, and non-production. See [F.4 runtime evidence](../evidence/f4-runtime-closure.md).
 
+F.4.Refresh.1 current-baseline Method-A authority comparison and Fix.1 are
+`SOURCE REVIEWED`: independent ChatGPT actual-diff/source-runtime-path review
+of `kaonlt_review(20260930-090154).diff` PASSED. The detached comparator has
+not run on farm artifacts and cannot revise accepted F.2/F.3/F.4 authority.
+Fresh Left/lowe evidence preserves exact F.3 input projections but changes all
+F.4 baseline projections. F.6.3/E.8.4 remain `SOURCE REVIEWED` and their fresh
+runtime gate remains `BLOCKED`. See the
+[phase record](../phases/f4-refresh1-current-baseline-authority-comparison.md).
+
 ### F.5 and F.5.2 — detached propagation and presentation review
 
 `CLOSED / RUNTIME VALIDATED` — accepted event-level `(t,phi)` propagation and its presentation-only rerender retain their frozen scientific fingerprint and never renormalize child bins independently. See [F.5 runtime evidence](../evidence/f5-runtime-closure.md) and [F.5.2 runtime evidence](../evidence/f5-2-runtime-closure.md).
@@ -106,15 +115,20 @@ canonical-five artifact inventory, provenance allowlists, generic collector,
 deterministic checks were `NOT RUN by ChatGPT`. This is not ROOT/PyROOT,
 procedure-PDF, farm, runtime, production, or Method-A-promotion evidence.
 
-E.8.4.Fix.4 persisted-alignment semantic-version repair is `SOURCE REVIEWED`:
-independent ChatGPT actual-diff/source-runtime-path review of
+E.8.4.Fix.4 persisted-alignment semantic-version repair is `CLOSED / RUNTIME VALIDATED`
+for the narrow cache-semantics gate. Fresh farm evidence shows current-semantics
+`rejected_stale_then_created` with `alignment_semantics_version mismatch`;
+the F.6.3/E.8.4 gate remains blocked. See
+[direct evidence](../evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
+Prior independent ChatGPT actual-diff/source-runtime-path review of
 `kaonlt_review(20260929-215203).diff` passed. The reviewed candidate makes
 pre-Fix.3 alignment records stale while retaining current-semantics reuse and
 direct parent fail-closed semantics; only the two allowed source/test files
 change substantively. Codex-reported checks were `NOT RUN by ChatGPT`. The
-fresh Left/lowe farm gate remains `BLOCKED` by an F.3 input-content mismatch
-in F.6.3's F.4 reproduction. This is not ROOT/PyROOT, full-analysis,
-procedure-PDF, farm, runtime, production, or Method-A-promotion closure.
+fresh Left/lowe F.6.3/E.8.4 gate remains `BLOCKED` by an F.3 input-content
+mismatch in F.6.3's F.4 reproduction. This Fix.4 closure does not establish
+full-analysis, procedure-PDF, F.6.3/E.8.4 runtime, production, or
+Method-A-promotion closure.
 See the [Fix.4 phase record](../phases/e8-4-fix4-alignment-cache-semantics.md)
 and [blocker evidence](../evidence/e8-4-fix3-left-lowe-stale-alignment-cache-runtime-blocker.md).
 

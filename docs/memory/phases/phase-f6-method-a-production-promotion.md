@@ -2,6 +2,14 @@
 
 F.1 through F.6.2, including F.6.1 and F.6.2.Fix.5, remain `CLOSED / RUNTIME VALIDATED`. Their accepted evidence, F.5 scientific fingerprint `d11b728d1089301a12c29e7f8b1798c6e0b6021ac47bd5d2afc2b62b47a1effa`, and frozen F.6.2 JSON/fingerprints remain unchanged. No production promotion is authorized by those closures.
 
+F.4.Refresh.1 and its Fix.1 nested-delta repair are `SOURCE REVIEWED`:
+independent ChatGPT actual-diff/source-runtime-path review of
+`kaonlt_review(20260930-090154).diff` PASSED. Fresh Left/lowe evidence confirms
+the narrow Fix.4 cache-semantics gate, unchanged F.3 training/application
+projections, and changed F.4 baseline inputs. The detached comparator has not
+run on farm artifacts and no authority-refresh decision has been made.
+See [direct evidence](../evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
+
 ## Frozen baseline and Method-A boundary
 
 The accepted full pion-subtraction baseline remains authoritative. For each authoritative pion-control event, `b_j^0 = s_j * w0_j`, where `s_j` is the established signed prompt/random/dummy coefficient and `w0_j` is the accepted missing-mass-dependent pion-background weight. The only Method-A variation is `b_j^A = s_j * w0_j * C_j`, using exactly the accepted F.4 parent-preserving correction.
