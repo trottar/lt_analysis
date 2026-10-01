@@ -28,8 +28,23 @@ packaging, invocation, and returned artifact. Multi-step operations require a
 tracked orchestration owner; otherwise farm readiness is `BLOCKED` and no
 interactive shell sequence is provided. A single reviewed CLI may own a
 complete direct operation. Codex and ChatGPT each report memory health after
-substantial gates; unresolved warnings block the next gate unless the user
-approves a recorded maintenance exception.
+substantial gates. Hard failures and material active-state/provenance ambiguity
+block progress; record nonblocking warnings and batch correction at the next
+checkpoint or milestone audit.
+
+Repository memory exists to improve scientific throughput and prevent
+regression; maintenance must not displace substantive physics work. The normal
+loop brackets science and validation with memory checkpoints. ChatGPT
+actual-diff review -> user commit/push -> ChatGPT pushed-state synchronization
+review remains required so Codex, ChatGPT, and the farm use the same source.
+Pushed-state review verifies identity, gate-relevant changed paths/blobs, and
+CURRENT/NEXT continuity. Once synchronization passes and active memory is
+materially accurate, proceed directly to the substantive gate; a push alone
+requires no new source-change contract or broad memory reconciliation. Favor
+early narrow runtime tests over prolonged speculative hardening. Record
+nonblocking drift while continuing the active milestone, then batch cleanup
+at meaningful milestones; standalone repairs require concrete active-state
+ambiguity. See the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 
 After Codex completes a local source-changing task, ChatGPT must inspect the
 actual diff before the user commits or pushes. If the diff is too large to

@@ -40,9 +40,23 @@
   has a tracked execution owner. Audit the complete executable path before
   handoff; if multi-step orchestration is missing, stop for a source-changing
   contract instead of composing a farm-shell sequence.
-- A soft memory-health warning requires consolidation before the next gate,
-  unless the user approves a recorded maintenance exception. Report exact
-  byte counts, warnings, and manifest state after each substantial gate.
+- Hard integrity failures and material active-state/provenance ambiguities
+  block progress. Record nonblocking memory warnings and batch consolidation
+  at checkpoints/milestone audits. Report exact byte counts, warnings, and
+  manifest state after substantial gates.
+- Test earlier: process and speculative hardening cannot substitute for fresh
+  narrow runtime evidence.
+- Memory is a checkpoint mechanism bracketing substantive work, not a parallel
+  deliverable stream. Batch nonblocking drift rather than recursively creating
+  repair/reconciliation phases.
+- Actual-diff review, user commit/push, and pushed-state synchronization are
+  necessary. Keep synchronization lightweight: verify the same source and
+  materially accurate CURRENT/NEXT, then continue directly to the substantive
+  gate when no concrete blocker is exposed.
+- Every scientific loop must produce visible evidence: a plot, yield table,
+  validated numerical comparison, accepted runtime artifact, or one directly
+  evidenced scientific/runtime blocker with one coherent repair. Documentation
+  alone is not completion.
 
 ## Repository memory and provenance
 

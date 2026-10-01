@@ -10,7 +10,14 @@ execution, or claim farm execution, ROOT/PyROOT integration, full `main.py`
 validation, rendered procedure-PDF farm behavior, or phase closure without
 direct applicable farm evidence. Passing local tests is not farm integration.
 ChatGPT audits the actual diff. The user alone commits/pushes accepted changes and runs farm validation.
-Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user farm run -> ChatGPT evidence review.
+Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> ChatGPT pushed-state synchronization review -> user farm run -> ChatGPT evidence review.
+Default cycle: contract -> Codex implementation + local tests -> ChatGPT
+actual-diff review -> user commit/push -> ChatGPT pushed-state synchronization
+review -> user narrow farm gate if required -> fresh evidence review.
+Opening and closing memory checkpoints bracket this substantive cycle; see
+the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
+Commit/push and pushed-state review are required synchronization stages,
+not independent scientific phases.
 
 ## Task classes
 
@@ -36,13 +43,19 @@ Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user farm 
    commit/push.
 8. After push, ChatGPT reviews the pushed repository before farm validation.
 
-Final-pre-push reconciliation must give CURRENT a push-stable NEXT: the sole
+CURRENT must already have a materially correct, push-stable NEXT: the sole
 ordinary NEXT cannot be the commit/push itself. State the substantive next
 gate conditional on user-controlled commit/push and pushed-state review, so it
 remains accurate across that transition. During pushed-state review, explicitly
-check CURRENT for consumed pre-push wording. If it still calls pushed work
-local or asks for an already completed push, memory continuity is `BLOCKED`;
-reconcile it before starting another scientific or farm gate.
+check source identity, exact gate-relevant changed paths/blobs, and CURRENT/NEXT
+continuity. When the pushed state matches the source-reviewed candidate and
+memory remains materially accurate, proceed directly to the substantive gate.
+No new source-change contract or broad memory reconciliation is required merely
+because a push occurred. A separate reconciliation is warranted only for
+concrete ambiguity about source identity, accepted evidence/status, active
+ownership/blocker, frozen scientific interface, or exact NEXT. Record cosmetic
+or historical wording drift and batch it at the next checkpoint or milestone
+audit unless it changes active meaning.
 
 Do not require staging merely to review a diff. For each task, enumerate its
 actual scoped paths. A safe generic POSIX/Git-Bash pattern is:
@@ -92,13 +105,26 @@ For a farm-bound task, the contract also names the complete execution chain,
 the source owner of each executable step, whether a driver is needed, and the
 missing-orchestration blocking rule. Its memory-health section requires byte
 counts for CURRENT/MEMORY/CURRENT_HANDOFF, manifest write/check after memory
-changes, and the task-final strict check:
-`<PYTHON> -B tools/check_memory_health.py --root . --fail-on-warning`.
+changes, and the ordinary task-final check:
+`<PYTHON> -B tools/check_memory_health.py --root .`.
+This command returns nonzero for hard health failures. Require
+`--fail-on-warning` only for an explicit milestone/zero-warning audit, a
+memory-hardening task that owns warning elimination, or an active warning
+already classified as materially blocking. A normal source/science cycle may
+complete with all hard checks passing and a recorded nonblocking warning
+explicitly scheduled for the next checkpoint or milestone audit.
 After substantial implementation, source review reconciliation, closure, or
 pushed-state handoff, Codex reports local health and ChatGPT independently
 verifies available evidence using the [maintenance format](MAINTENANCE.md).
-Unresolved warnings block the next phase, fix, or farm gate unless the user
-approves a recorded maintenance exception.
+Hard failures remain blocking. Classify each warning as blocking or nonblocking.
+Warnings block only for material ambiguity about current source identity,
+accepted evidence/status, frozen scientific interfaces, active scientific
+ownership/blocker, or exact NEXT, or a hard integrity violation; record
+nonblocking warnings and batch correction at a checkpoint or milestone audit.
+Each substantive loop
+must deliver a plot, yield table, validated numerical comparison, accepted
+runtime artifact, or one directly evidenced runtime/scientific blocker with
+one coherent repair. Documentation alone is not scientific completion.
 
 Codex's summary is not proof: actual source and diff must be reviewed. If the
 branch and HEAD have not moved, work remains local/proposed rather than

@@ -105,8 +105,27 @@ independently source reviewed, pushed, and pushed-state reviewed. Unowned
 multi-step orchestration blocks farm readiness; one reviewed CLI may own a
 complete direct operation. After substantial implementation, review, closure,
 or pushed-state handoff, Codex and ChatGPT report memory health. Unresolved
-warnings block a new phase, fix, or farm gate unless the user approves a
-recorded maintenance exception.
+warnings block progress only for material active-state/provenance ambiguity
+or a hard integrity violation. Record nonblocking warnings and batch their
+repair at the next checkpoint or milestone audit; hard failures remain blocking.
+
+The default loop is memory checkpoint -> substantive science/implementation ->
+deterministic local test -> ChatGPT actual-diff review -> user commit/push ->
+ChatGPT pushed-state synchronization review -> narrow farm/runtime validation
+when required -> fresh evidence review -> memory checkpoint. Commit/push and
+pushed-state review are required synchronization stages, not independent
+scientific phases. A matching pushed candidate with materially accurate CURRENT
+proceeds directly to the substantive gate, without a new reconciliation contract
+merely to restate the push.
+
+A memory inconsistency blocks only when it creates concrete ambiguity about
+current source identity, accepted evidence, frozen scientific interfaces, active
+scientific ownership, or the exact next operation. Otherwise record it, continue
+the active milestone, and batch correction at a meaningful checkpoint. Every
+substantive scientific loop must produce a plot, yield table, validated numerical
+comparison, accepted runtime artifact, or one directly evidenced scientific/
+runtime blocker with one coherent repair. Documentation alone is not scientific
+completion. See the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 
 ## Canonical record ownership
 

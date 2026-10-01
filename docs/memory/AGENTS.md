@@ -62,15 +62,22 @@ Codex must not commit, push, update remote refs, initiate Jefferson Lab farm
 execution, or claim farm/runtime validation. ChatGPT independently audits the
 actual diff. The user alone commits/pushes accepted changes and runs farm
 validation. Workflow: Codex local changes -> ChatGPT audit -> user commit/push
--> user farm run -> ChatGPT evidence review.
+-> ChatGPT pushed-state synchronization review -> user farm run
+when required -> ChatGPT evidence review. Commit/push and pushed-state review
+are required synchronization stages, not independent scientific phases. A
+matching pushed candidate with materially accurate CURRENT proceeds directly
+to the substantive gate; a push alone creates no reconciliation phase.
 
 Before any farm command, audit the complete tracked execution chain from input
 authority through producer, checker, collector, invocation owner, and returned
 artifact. A multi-step operation without a reviewed, pushed driver is
 `BLOCKED`; see [CODEX.md](CODEX.md) and [COMMUNICATION.md](COMMUNICATION.md).
 After each substantial gate, both Codex and ChatGPT report memory health;
-unresolved warnings block the next phase, fix, or farm gate unless the user
-approves a recorded maintenance exception.
+hard integrity failures block. Warnings block only when they create material
+ambiguity about current source identity, accepted evidence/status, frozen
+scientific interfaces, active scientific ownership/blocker, or exact NEXT.
+Record nonblocking warnings and batch correction at the next checkpoint or
+milestone audit.
 
 ## Operational ownership
 

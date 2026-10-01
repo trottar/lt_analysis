@@ -39,18 +39,19 @@ actual-diff/source-provenance review of `kaonlt_review(20260930-152818).diff`
 passed. The generic profile pins pushed materializer source
 `141a3d04f9e5d07be21dba14e0e63212c3990bf1`; no farm or authority result
 is claimed. See the [profile record](../phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md).
-Its farm execution gate remains `BLOCKED` pending user commit/push and
-pushed-state review of the now source-reviewed Validation.2/Fix.1 execution
-owner; the profile and bundle-only wrapper alone cannot own the operation. See the
+Its historical missing-owner blocker is resolved by Validation.2/Fix.1 pushed
+at `712ba32b062772d87fe44efa6865346e5c438827` and the supplied independent
+ChatGPT pushed-state synchronization review. The profile/wrapper alone cannot
+own the operation; the tracked owner supplies it. No farm result is claimed. See the
 [operational-readiness investigation](../investigations/f4-refresh2-validation1-operational-readiness-failure.md).
 F.4.Refresh.2.Validation.2/Fix.1 tracked execution owner is
 `SOURCE REVIEWED` after independent ChatGPT actual-diff/source-runtime-path
 review of `kaonlt_review(20261001-092421).diff` passed. The reviewed owner delegates
 candidate construction to the reviewed materializer, verifies completion and
 hashes, and delegates ZIP collection to the unchanged wrapper/collector. The
-farm execution gate stays `BLOCKED` until user commit/push and independent
-pushed-state review. Source review did not itself establish commit, push, or
-farm execution. See
+owner/profile at pushed `712ba32...` match the source-reviewed candidate;
+supplied pushed-state synchronization passed. Source review/synchronization
+does not establish farm execution or runtime acceptance. See
 the [Validation.2 phase](../phases/f4-refresh2-validation2-tracked-execution-owner.md).
 Fix.1 repairs only the omitted two reviewed post-materializer hardening paths;
 their bytes, the materializer pin, and the owner architecture remain unchanged.
@@ -181,9 +182,20 @@ Method-A-promotion status changes.
 
 Memory-health and farm-gate operational-completeness hardening is
 `SOURCE REVIEWED` after independent actual-diff review of
-`kaonlt_review(20260930-173355).diff`. Its strict health and execution-chain
-rules do not close the `BLOCKED` F.4.Refresh.2 farm execution gate; see the
+`kaonlt_review(20260930-173355).diff`. Its execution-chain and integrity
+rules remain; see the
 [hardening phase](../phases/memory-health-operational-completeness-hardening.md).
+
+The [workflow decision](../decisions/memory-bracketed-scientific-throughput.md)
+brackets substantive science and validation with memory checkpoints. Required
+actual-diff review, user commit/push, and pushed-state synchronization are not
+independent scientific phases. Record and batch nonblocking maintenance at
+milestones; concrete source/provenance/active-state blockers alone warrant
+separate reconciliation. The substantive gate sequence remains narrow
+`Q4p4W2p74` F.4.Refresh.2 farm materialize -> verify -> package, then, only
+after accepted evidence, `Q4p4W2p74 / Left / lowe` Method-A reweighting/yield
+demonstration. Canonical-five presentation cannot precede Left/lowe before/
+after evidence. This changes no phase dependencies or scientific statuses.
 
 ## Active-state ownership
 

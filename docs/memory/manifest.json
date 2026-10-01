@@ -1,39 +1,39 @@
 {
   "files": [
     {
-      "bytes": 4023,
+      "bytes": 4541,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "ae80630a87907196c19c444292e32a562974508c77d1553954171b7e7a6dea06"
+      "sha256": "111b84d83677b2c7d830afe2c2d2f943fe3e5864c80e73dd962b277abeeb4d8b"
     },
     {
-      "bytes": 5459,
+      "bytes": 7345,
       "path": "docs/memory/CODEX.md",
-      "sha256": "0cdbbce191e865a52a984104dc60864d9aa626966e33443c45ad6d1c6f60c495"
+      "sha256": "fe9ddf40c589eb77dabced4c56c4b6d34929345312d31bef53da6659879ae6a8"
     },
     {
-      "bytes": 3089,
+      "bytes": 3663,
       "path": "docs/memory/COMMUNICATION.md",
-      "sha256": "5ced5af30115edcef3a133f6357e2ddf19180c70844492345d3526945cca9a19"
+      "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
     },
     {
-      "bytes": 7032,
+      "bytes": 7492,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "6fc1abe13bc09a752da684019a80d7c6eb7e3c63a5b8fffd2ed68a238c863d79"
+      "sha256": "ce6944e87120d2977b2838c65382e8620a69aa84bf581266d6336b90f259df18"
     },
     {
-      "bytes": 2486,
+      "bytes": 3359,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "952c109e26bdc07155d7d7be6c279548af2be4b034321efbf4d313c71e520bc6"
+      "sha256": "3d20c9c4bf82344b0b41f3deebe8c5e20574620ac004f742c09563b36e72e5ce"
     },
     {
-      "bytes": 5415,
+      "bytes": 7347,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "f9c71d0cb12b60d9ee7f0ad47b671329482f4418af0998e52f1417783b91fcd7"
+      "sha256": "da9d9467e14e4a7dc428aa8f9f2d7a7ca85a70a5816829d0c483b375652f660e"
     },
     {
-      "bytes": 6997,
+      "bytes": 8348,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "5f309b43b92600657bef7153c60a096822060704352e7ecdf6bd56cede6506f2"
+      "sha256": "18b0e055977171714617cb200e7f06c2451f7690623bdc65aabf4f07d3575967"
     },
     {
       "bytes": 3469,
@@ -46,9 +46,9 @@
       "sha256": "88245c39f22decde055b9b383b5dacc837ba600f685765faf69708b560a03519"
     },
     {
-      "bytes": 4237,
+      "bytes": 5304,
       "path": "docs/memory/USER.md",
-      "sha256": "d53b2bba6d541c00121e0a3826565bb05472b44f1fcdf9bcf1f50dd0b66d35c0"
+      "sha256": "0399a000485b83dbb7c00cf925d355de47f74e16de7c17459edd650db845f9ba"
     },
     {
       "bytes": 1157,
@@ -94,6 +94,11 @@
       "bytes": 3131,
       "path": "docs/memory/decisions/farm-validation-bundle-wrapper-contract.md",
       "sha256": "6194f83e803d5222ae887c4211f75d842e9fe388c4c3d0f8a344fab7a6ed4d07"
+    },
+    {
+      "bytes": 4035,
+      "path": "docs/memory/decisions/memory-bracketed-scientific-throughput.md",
+      "sha256": "1f6359fca9550443fa8f070efc44661dc3aa26a298eca8581edf030d0ca64149"
     },
     {
       "bytes": 5949,
@@ -761,6 +766,16 @@
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
     },
     {
+      "bytes": 14192,
+      "path": "docs/memory/phases/memory-bracketed-scientific-throughput-policy-surface-fix-task-contract.md",
+      "sha256": "c34e4bc3aa5893c813606adf0d75f967ad7c54637b8724926016d5944b784f4c"
+    },
+    {
+      "bytes": 15541,
+      "path": "docs/memory/phases/memory-bracketed-scientific-throughput-task-contract.md",
+      "sha256": "0d6bbab2b0f12def817d8673f52330d7a99fcb9ae53636ee6128a48a76ad9d23"
+    },
+    {
       "bytes": 12126,
       "path": "docs/memory/phases/memory-health-operational-completeness-hardening-final-pre-push-reconciliation-task-contract.md",
       "sha256": "f46923a24edfdfcbc1d182fdf161a9ce4c01794a997c408fd786ffcaf97b7106"
@@ -866,9 +881,9 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
-      "bytes": 12651,
+      "bytes": 13481,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "cc018ba7f0cb12fe52ae4cc910cbd66ae692680170f531774f493ae4a93675a9"
+      "sha256": "b547944347283c0b4118444e1cec867da252be7ae8d943b54e849316e4a081a5"
     },
     {
       "bytes": 1698,
@@ -881,9 +896,9 @@
       "sha256": "7a313d04f53c410f1b5769902134f5bb6211c84d85ef72ae8c6801babbd618f8"
     },
     {
-      "bytes": 2124,
+      "bytes": 3082,
       "path": "docs/memory/templates/CODEX_CONTRACT.md",
-      "sha256": "54daa283e2b545878e7ce38dbfbd53517e6c3cc9ba6805c6647ba80887196e6a"
+      "sha256": "f6dc4bbea793d59e53114e2ad1184199628b60ba9a8fa79bbda98d3de64fd0fa"
     },
     {
       "bytes": 387,

@@ -17,8 +17,11 @@ operation before a command. If an owner is missing or unreviewed, state
 `Farm readiness: BLOCKED` and provide no command. Multi-step orchestration
 needs a tracked, reviewed driver; do not assemble it interactively in the
 farm shell. One reviewed CLI can directly own a complete single-command
-operation. Unresolved memory-health warnings also block farm readiness unless
-the user approves a recorded maintenance exception.
+operation. Hard failures and material active-state or provenance ambiguity
+block farm readiness: current source identity, accepted evidence/status, frozen
+scientific interfaces, active scientific ownership/blocker, or exact NEXT.
+A nonblocking memory warning alone does not block an otherwise ready farm
+gate; record it and batch correction at the next checkpoint or milestone audit.
 
 Farm commands must be valid `tcsh`. Communicate a simple operation as:
 
@@ -58,6 +61,10 @@ farm packaging procedure.
 
 Codex may make allowlisted local changes and deterministic checks, but must not commit, push, update remote refs, or initiate Jefferson Lab farm execution.
 ChatGPT audits the actual diff; the user commits/pushes accepted changes and runs farm validation.
-Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user farm
-run -> ChatGPT evidence review. See [CODEX.md](CODEX.md) for the canonical
-source-changing workflow.
+Workflow: Codex local changes -> ChatGPT audit -> user commit/push
+-> ChatGPT pushed-state synchronization review -> user farm run when required
+-> ChatGPT evidence review. Commit/push and pushed-state review are mandatory
+synchronization stages, not independent scientific phases. A matching pushed
+candidate with materially accurate CURRENT proceeds directly to the substantive
+gate; a push alone creates no reconciliation phase. See [CODEX.md](CODEX.md)
+for the canonical source-changing workflow.

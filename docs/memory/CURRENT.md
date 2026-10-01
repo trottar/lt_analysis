@@ -11,19 +11,20 @@ production, frozen F.6.2 science, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-F.4.Refresh.2.Validation.2/Fix.1 materialize -> verify -> package owner is
-`SOURCE REVIEWED` for the candidate reviewed against
-committed `test` HEAD `c406c138285727503b12115177dfb8bc7efcb7fe`.
-Independent ChatGPT actual-diff/source-runtime-path review of
-`kaonlt_review(20261001-092421).diff` passed. The reviewed materializer,
-wrapper/collector, source pin, and exact hardening blobs remain unchanged;
+This memory-only [workflow checkpoint](decisions/memory-bracketed-scientific-throughput.md)
+restores memory -> science -> validation -> memory, with required actual-diff
+review, user commit/push, and pushed-state synchronization between local tests
+and farm execution. Synchronization is not a separate scientific phase.
+
+F.4.Refresh.2.Validation.2/Fix.1 remains `SOURCE REVIEWED`, now pushed at
+`712ba32b062772d87fe44efa6865346e5c438827`. Supplied independent ChatGPT
+pushed-state synchronization review passed. At checkpoint start, local HEAD
+and owner/profile blobs matched that source. The materializer, wrapper/collector, science pin,
+and hardening blobs are unchanged. No farm output or authority update exists;
 see the [Validation.2 phase](phases/f4-refresh2-validation2-tracked-execution-owner.md)
 and [Fix.1 phase](phases/f4-refresh2-validation2-fix1-post-hardening-source-allowlist.md).
-Validation.1 remains `SOURCE REVIEWED`; farm execution remains `BLOCKED` until
-user commit/push and pushed-state review. No farm output or authority update exists.
-Memory-health hardening and push-stable continuity remain `SOURCE REVIEWED`;
-see their [hardening](phases/memory-health-operational-completeness-hardening.md)
-and [continuity](phases/post-push-current-continuity.md) records.
+Validation.1, memory-health hardening, and push-stable continuity remain
+`SOURCE REVIEWED`.
 
 ## Verified State
 
@@ -74,10 +75,11 @@ detached and Method B diagnostic-only. See [roadmap status](roadmap/STATUS.md).
 
 ## Blockers
 
-F.4.Refresh.2 farm execution remains `BLOCKED` pending user-controlled
-commit/push and independent pushed-state review. Source review did not itself
-establish commit, push, farm execution, or runtime validation. See
-[investigation](investigations/f4-refresh2-validation1-operational-readiness-failure.md).
+The former F.4.Refresh.2 invocation-owner synchronization blocker is resolved
+by pushed `712ba32...` and the supplied review. This checkpoint does not run
+or validate the farm gate; explicit validated inputs and fresh evidence remain
+required. The [earlier investigation](investigations/f4-refresh2-validation1-operational-readiness-failure.md)
+records the historical ownership failure.
 
 The fresh `Q4p4W2p74 / Left / lowe` F.6.3/E.8.4 runtime gate remains
 `BLOCKED` by `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
@@ -89,19 +91,25 @@ and [Refresh.1 comparator evidence](evidence/f4-refresh1-current-baseline-author
 
 ## Next Action
 
-NEXT — after user-controlled commit/push and pushed-state review of the SOURCE REVIEWED F.4.Refresh.2.Validation.2/Fix.1 execution owner, prepare the single narrow Q4p4W2p74 F.4.Refresh.2 materialize -> verify -> package farm gate; do not begin F.6.3/E.8.4 until the returned F.4.Refresh.2 evidence is reviewed.
+NEXT — after this workflow checkpoint's normal actual-diff review, user commit/push, and pushed-state synchronization, proceed to the narrow Q4p4W2p74 F.4.Refresh.2 farm materialize -> verify -> package gate; if fresh evidence is accepted, proceed directly to Q4p4W2p74 / Left / lowe Method-A reweighting and yield evidence.
 
 No farm, accepted-authority update, production promotion, or full-analysis
 runtime claim follows from this source review or memory/status reconciliation.
 
 ## Success Criteria
 
-The reviewed hardening requires strict memory health with zero warnings, a concise
-CURRENT, durable operational-readiness failure record, and a pre-farm audit of
-every tracked executable owner. A multi-step operation without a reviewed,
-pushed driver remains blocked. E.8 presentation consumes authoritative inputs
-without recomputing science; F.6.3 alone owns the private parallel `w0 -> w0*C`
-branch, and F.6.4 alone could decide production promotion after runtime review.
+Memory checkpoints bracket substantive work; batch nonblocking drift at
+milestones. Only material active-state/provenance ambiguity or hard integrity
+failure blocks progress. Required synchronization verifies the complete farm
+execution chain without recursively creating reconciliation phases.
+
+Left/lowe evidence must show baseline versus reweighted missing-mass spectra
+and per-t comparisons, per-(t,phi) baseline and reweighted yields, absolute and
+fractional yield changes, parent-t preservation, and the effect in the
+procedure PDF. No canonical-five expansion or unrelated hardening/presentation
+cleanup precedes that evidence unless a concrete blocker requires it.
+E.8 consumes authoritative outputs; F.6.3 owns the private `w0 -> w0*C` branch,
+and only F.6.4 could decide production promotion after runtime review.
 
 ## Do Not Reopen Without New Evidence
 
