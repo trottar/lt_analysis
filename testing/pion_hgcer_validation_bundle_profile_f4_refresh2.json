@@ -48,7 +48,11 @@
     "required_analysis_commit": "141a3d04f9e5d07be21dba14e0e63212c3990bf1",
     "allowed_committed_files": [
       "testing/pion_hgcer_validation_bundle_profile_f4_refresh2.json",
-      "testing/test_pion_hgcer_validation_bundle_profile_f4_refresh2.py"
+      "testing/test_pion_hgcer_validation_bundle_profile_f4_refresh2.py",
+      "testing/run_f4_refresh2_materialize_verify_package.py",
+      "testing/test_run_f4_refresh2_materialize_verify_package.py",
+      "testing/test_memory_health.py",
+      "tools/check_memory_health.py"
     ],
     "allowed_non_analysis_path_prefixes": ["docs/memory/"]
   }

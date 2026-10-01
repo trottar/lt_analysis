@@ -25,7 +25,11 @@ DECLARATIONS = (
     ("f4_refresh2_materialization_manifest", "{kinematic}_kaon_pion-background_hgcer-method-a-current-baseline-authority-materialization-manifest.json"),
 )
 ALLOWED = ["testing/pion_hgcer_validation_bundle_profile_f4_refresh2.json",
-           "testing/test_pion_hgcer_validation_bundle_profile_f4_refresh2.py"]
+           "testing/test_pion_hgcer_validation_bundle_profile_f4_refresh2.py",
+           "testing/run_f4_refresh2_materialize_verify_package.py",
+           "testing/test_run_f4_refresh2_materialize_verify_package.py",
+           "testing/test_memory_health.py",
+           "tools/check_memory_health.py"]
 
 
 def _runner(command, _cwd):
@@ -134,6 +138,8 @@ class F4Refresh2BundleProfileTests(unittest.TestCase):
 
         for label, runner, error in (
             ("missing_ancestor", runner_with(ancestor=False), "required_analysis_commit_not_present"),
+            ("unreviewed_testing_helper", runner_with(changed="testing/unreviewed_helper.py\n"), "unexpected_committed_files_after_required_analysis_commit"),
+            ("unreviewed_tools_helper", runner_with(changed="tools/unreviewed_helper.py\n"), "unexpected_committed_files_after_required_analysis_commit"),
             ("unreviewed_materializer", runner_with(changed="testing/materialize_method_a_current_baseline_authority.py\n"), "unexpected_committed_files_after_required_analysis_commit"),
             ("unreviewed_science", runner_with(changed="src/cuts/unreviewed.py\n"), "unexpected_committed_files_after_required_analysis_commit"),
         ):

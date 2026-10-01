@@ -16,9 +16,9 @@
       "sha256": "5ced5af30115edcef3a133f6357e2ddf19180c70844492345d3526945cca9a19"
     },
     {
-      "bytes": 7142,
+      "bytes": 7032,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "110b8c84ddfa817355b49c219a67487767ca1602a46f9a7c17ae78c6f4d0da3a"
+      "sha256": "6fc1abe13bc09a752da684019a80d7c6eb7e3c63a5b8fffd2ed68a238c863d79"
     },
     {
       "bytes": 2486,
@@ -691,6 +691,41 @@
       "sha256": "573d806e9b6e9572be419bd67e0a67db75b9090966ec886bfba97655d836684a"
     },
     {
+      "bytes": 18120,
+      "path": "docs/memory/phases/f4-refresh2-validation2-final-pre-push-push-stability-repair-task-contract.md",
+      "sha256": "818fbd64e86a55892bee8a9d9b2235a845d7591e76589f9a626d92541644ecb7"
+    },
+    {
+      "bytes": 2639,
+      "path": "docs/memory/phases/f4-refresh2-validation2-final-pre-push-push-stability-repair.md",
+      "sha256": "5d8755247526c00d0525ac86370e3ae416cb99ff0ba3a7cf8c097de143c4e465"
+    },
+    {
+      "bytes": 20373,
+      "path": "docs/memory/phases/f4-refresh2-validation2-final-pre-push-source-review-reconciliation-task-contract.md",
+      "sha256": "f0713b5774831f865c687cfdd82ff6c80026525f5ef55bc0d8ebdbe38a4de6fa"
+    },
+    {
+      "bytes": 16473,
+      "path": "docs/memory/phases/f4-refresh2-validation2-fix1-post-hardening-source-allowlist-task-contract.md",
+      "sha256": "fcb3698240f932345a8a6d0fa74f14df83435560c05a11fe52c3029ef0980d77"
+    },
+    {
+      "bytes": 4459,
+      "path": "docs/memory/phases/f4-refresh2-validation2-fix1-post-hardening-source-allowlist.md",
+      "sha256": "a7350f27242787064fb813b56f509f72f43243727edff7bcd7ea6a7ad1463d49"
+    },
+    {
+      "bytes": 26142,
+      "path": "docs/memory/phases/f4-refresh2-validation2-tracked-execution-owner-task-contract.md",
+      "sha256": "13facf6aa9667611bc29cd08b4e69b17ec4903970ff88e1e0c59f17225f6edb8"
+    },
+    {
+      "bytes": 4393,
+      "path": "docs/memory/phases/f4-refresh2-validation2-tracked-execution-owner.md",
+      "sha256": "da5c9e911260247a7e8bf645d6f9a553a4b778f5a67994146015d2c1cad0bb15"
+    },
+    {
       "bytes": 9832,
       "path": "docs/memory/phases/f6-3-final-pre-push-source-review-reconciliation-task-contract.md",
       "sha256": "82ebb0d8c7e6c9e378115f5d882e3532e84b1caa4216ebb3aa8246a30012395a"
@@ -831,9 +866,9 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
-      "bytes": 11664,
+      "bytes": 12651,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "ba0d98490f4094b3618e094feced9c0844e0a01fe70ef0f3dde36a0234279aea"
+      "sha256": "cc018ba7f0cb12fe52ae4cc910cbd66ae692680170f531774f493ae4a93675a9"
     },
     {
       "bytes": 1698,

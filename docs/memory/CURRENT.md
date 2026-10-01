@@ -11,22 +11,19 @@ production, frozen F.6.2 science, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-Memory-health and farm-gate operational-completeness hardening is
-`SOURCE REVIEWED`: independent ChatGPT actual-diff review of
-`kaonlt_review(20260930-173355).diff` passed. Pushed source is
-`3fd4edfcd05fd4cc25fb4e2119fb5f212ee916a1`; independent pushed-state
-source/provenance review passed. This is not farm/runtime validation. See the
-[hardening phase](phases/memory-health-operational-completeness-hardening.md).
-Post-push CURRENT continuity repair is `SOURCE REVIEWED`: independent
-ChatGPT actual-diff review of `kaonlt_review(20260930-194901).diff` passed.
-See the [phase record](phases/post-push-current-continuity.md).
-
-F.4.Refresh.2.Validation.1 remains `SOURCE REVIEWED` for its generic bundle
-profile and test. Its farm execution gate is `BLOCKED`: no tracked, reviewed
-owner runs the complete materialize -> verify -> package operation. The
-reviewed materializer exists in pushed source; the generic wrapper is
-bundle-only. No farm materialization or authority mutation occurred. See the
-[profile phase](phases/f4-refresh2-validation1-farm-materialization-bundle-profile.md).
+F.4.Refresh.2.Validation.2/Fix.1 materialize -> verify -> package owner is
+`SOURCE REVIEWED` for the candidate reviewed against
+committed `test` HEAD `c406c138285727503b12115177dfb8bc7efcb7fe`.
+Independent ChatGPT actual-diff/source-runtime-path review of
+`kaonlt_review(20261001-092421).diff` passed. The reviewed materializer,
+wrapper/collector, source pin, and exact hardening blobs remain unchanged;
+see the [Validation.2 phase](phases/f4-refresh2-validation2-tracked-execution-owner.md)
+and [Fix.1 phase](phases/f4-refresh2-validation2-fix1-post-hardening-source-allowlist.md).
+Validation.1 remains `SOURCE REVIEWED`; farm execution remains `BLOCKED` until
+user commit/push and pushed-state review. No farm output or authority update exists.
+Memory-health hardening and push-stable continuity remain `SOURCE REVIEWED`;
+see their [hardening](phases/memory-health-operational-completeness-hardening.md)
+and [continuity](phases/post-push-current-continuity.md) records.
 
 ## Verified State
 
@@ -77,11 +74,10 @@ detached and Method B diagnostic-only. See [roadmap status](roadmap/STATUS.md).
 
 ## Blockers
 
-F.4.Refresh.2 farm execution is `BLOCKED` until a separate tracked execution
-owner for validated inputs -> materialization -> verification -> collection
--> returned ZIP is built, locally checked, independently source reviewed,
-pushed, and pushed-state reviewed. The bundle profile alone cannot run that
-chain. No farm command is ready; see [investigation](investigations/f4-refresh2-validation1-operational-readiness-failure.md).
+F.4.Refresh.2 farm execution remains `BLOCKED` pending user-controlled
+commit/push and independent pushed-state review. Source review did not itself
+establish commit, push, farm execution, or runtime validation. See
+[investigation](investigations/f4-refresh2-validation1-operational-readiness-failure.md).
 
 The fresh `Q4p4W2p74 / Left / lowe` F.6.3/E.8.4 runtime gate remains
 `BLOCKED` by `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
@@ -93,10 +89,10 @@ and [Refresh.1 comparator evidence](evidence/f4-refresh1-current-baseline-author
 
 ## Next Action
 
-NEXT — after user-controlled commit/push and pushed-state review of this continuity reconciliation, audit and contract the missing tracked F.4.Refresh.2 materialize -> verify -> package execution owner.
+NEXT — after user-controlled commit/push and pushed-state review of the SOURCE REVIEWED F.4.Refresh.2.Validation.2/Fix.1 execution owner, prepare the single narrow Q4p4W2p74 F.4.Refresh.2 materialize -> verify -> package farm gate; do not begin F.6.3/E.8.4 until the returned F.4.Refresh.2 evidence is reviewed.
 
 No farm, accepted-authority update, production promotion, or full-analysis
-runtime claim follows from this continuity reconciliation.
+runtime claim follows from this source review or memory/status reconciliation.
 
 ## Success Criteria
 
