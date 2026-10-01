@@ -13,10 +13,13 @@ production, frozen F.6.2 science, and detached Method-A/Method-B boundaries.
 
 Memory-health and farm-gate operational-completeness hardening is
 `SOURCE REVIEWED`: independent ChatGPT actual-diff review of
-`kaonlt_review(20260930-173355).diff` passed. The candidate is local to
-committed `test` base `86590fa655512926f2e4d0c50bf12b57d5198da5`;
-no farm/runtime validation is claimed. See the [phase record](phases/memory-health-operational-completeness-hardening.md)
-and [investigation](investigations/f4-refresh2-validation1-operational-readiness-failure.md).
+`kaonlt_review(20260930-173355).diff` passed. Pushed source is
+`3fd4edfcd05fd4cc25fb4e2119fb5f212ee916a1`; independent pushed-state
+source/provenance review passed. This is not farm/runtime validation. See the
+[hardening phase](phases/memory-health-operational-completeness-hardening.md).
+Post-push CURRENT continuity repair is `SOURCE REVIEWED`: independent
+ChatGPT actual-diff review of `kaonlt_review(20260930-194901).diff` passed.
+See the [phase record](phases/post-push-current-continuity.md).
 
 F.4.Refresh.2.Validation.1 remains `SOURCE REVIEWED` for its generic bundle
 profile and test. Its farm execution gate is `BLOCKED`: no tracked, reviewed
@@ -90,14 +93,14 @@ and [Refresh.1 comparator evidence](evidence/f4-refresh1-current-baseline-author
 
 ## Next Action
 
-NEXT — user-controlled commit/push of the independently reviewed memory-health and farm-gate operational-completeness hardening candidate.
+NEXT — after user-controlled commit/push and pushed-state review of this continuity reconciliation, audit and contract the missing tracked F.4.Refresh.2 materialize -> verify -> package execution owner.
 
 No farm, accepted-authority update, production promotion, or full-analysis
-runtime claim follows from this local memory/tooling work.
+runtime claim follows from this continuity reconciliation.
 
 ## Success Criteria
 
-Current hardening requires strict memory health with zero warnings, a concise
+The reviewed hardening requires strict memory health with zero warnings, a concise
 CURRENT, durable operational-readiness failure record, and a pre-farm audit of
 every tracked executable owner. A multi-step operation without a reviewed,
 pushed driver remains blocked. E.8 presentation consumes authoritative inputs

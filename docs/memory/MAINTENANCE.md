@@ -27,6 +27,13 @@
 
 Maintain one active objective and one authoritative next action. Do not create
 competing live-state summaries or copy another record's detailed procedure.
+At final-pre-push reconciliation, CURRENT's sole ordinary NEXT must remain
+accurate before and immediately after the user's commit/push: name the actual
+substantive next gate conditional on commit/push and pushed-state review, not
+the push alone. Pushed-state review must check for consumed pre-push wording;
+stale local/unpushed claims or a completed push as NEXT make memory continuity
+`BLOCKED` until repaired. Do not start another scientific or farm gate from
+stale CURRENT.
 
 ## Startup contract health
 

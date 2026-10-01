@@ -25,6 +25,11 @@
   unless the user approves a recorded maintenance exception. Codex and ChatGPT
   each report health after substantial implementation, review reconciliation,
   closure, or pushed-state handoff.
+- **Push-stable NEXT:** Final-pre-push reconciliation must make CURRENT's sole
+  ordinary NEXT the substantive next gate conditional on user-controlled
+  commit/push and pushed-state review, never the push itself. Pushed-state
+  review checks for consumed local/unpushed language; stale CURRENT blocks
+  scientific and farm progression until reconciled.
 - **Execution authority:** Codex performs local changes/checks only; ChatGPT
   audits the actual diff; the user alone commits/pushes and runs the farm.
   Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user

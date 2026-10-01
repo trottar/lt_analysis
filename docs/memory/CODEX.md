@@ -36,6 +36,14 @@ Workflow: Codex local changes -> ChatGPT audit -> user commit/push -> user farm 
    commit/push.
 8. After push, ChatGPT reviews the pushed repository before farm validation.
 
+Final-pre-push reconciliation must give CURRENT a push-stable NEXT: the sole
+ordinary NEXT cannot be the commit/push itself. State the substantive next
+gate conditional on user-controlled commit/push and pushed-state review, so it
+remains accurate across that transition. During pushed-state review, explicitly
+check CURRENT for consumed pre-push wording. If it still calls pushed work
+local or asks for an already completed push, memory continuity is `BLOCKED`;
+reconcile it before starting another scientific or farm gate.
+
 Do not require staging merely to review a diff. For each task, enumerate its
 actual scoped paths. A safe generic POSIX/Git-Bash pattern is:
 
