@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 from contextlib import ExitStack
+import hashlib
 import json
 from pathlib import Path
 import inspect
@@ -25,6 +26,7 @@ import pion_hgcer_method_a_tphi_propagation as f5
 from testing.test_e8_2_baseline_stage_audit import _Histogram as _YieldHistogram
 from testing.test_e8_2_baseline_stage_audit import _load_calculate_yield_module
 from testing.test_e8_2_baseline_stage_audit import _public_yield_fixture
+from testing import test_pion_hgcer_method_a_tphi_propagation as f5_fixtures
 
 
 class _Axis:
@@ -69,6 +71,11 @@ def _accepted_rows(*rows):
     }
 
 
+def _raw_f1(*rows):
+    return [{"setting": {"phi_setting": "Left", "epsilon_filename_token": "lowe"},
+             "contract": {"application_records": list(rows)}}]
+
+
 def _cache():
     return {
         "entry_index": np.asarray([7], dtype=np.int32),
@@ -83,6 +90,173 @@ def _cache():
         "allcut_bin_index": {(0, 0): np.asarray([0], dtype=np.int32)},
         "nommcut_bin_index": {(0, 0): np.asarray([0], dtype=np.int32)},
     }
+
+
+class CandidateLineageTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Synthetic inputs exercise the real unchanged F.4/F.5 validators and
+        # calculator. They do not stand in for the farm's candidate artifacts.
+        cls.artifacts = f5_fixtures._artifacts()
+        for artifact in cls.artifacts:
+            for row in artifact["contract"]["application_records"]:
+                row["analysis_MM"] = 1.12
+                row["analysis_t"] = (row["t_low"] + row["t_high"]) / 2.0
+            f5_fixtures.f1_fixtures._seal_f1_artifact(artifact)
+        cls.hashes = f5_fixtures.f1_fixtures.input_hashes()
+        cls.f3 = f5_fixtures.f4_fixtures._f3(cls.artifacts, cls.hashes)
+        cls.f3_sha = hashlib.sha256(json.dumps(cls.f3, sort_keys=True).encode()).hexdigest()
+        cls.f3_authority = f5_fixtures.f4_fixtures._authority(cls.f3, cls.f3_sha)
+        cls.f3_authority["Q4p4W2p74"]["farm_source_head"] = "0" * 40
+        cls.f4_artifact = f4.build_pion_hgcer_method_a_parent_preserving_correction_artifact(
+            cls.artifacts, cls.f3, f1_input_file_hashes=cls.hashes,
+            f3_input_file_sha256=cls.f3_sha,
+            accepted_f3_runtime_authority_by_kinematic=cls.f3_authority,
+            input_paths={"f1": {}, "f3": "candidate-three"},
+        )
+        cls.f4_sha = hashlib.sha256(json.dumps(cls.f4_artifact, sort_keys=True).encode()).hexdigest()
+        correction = cls.f4_artifact["correction"]
+        cls.f4_authority = {"Q4p4W2p74": {
+            "source_file_sha256": cls.f4_sha,
+            "correction_fingerprint": correction["fingerprint"],
+            "artifact_fingerprint": cls.f4_artifact["artifact_fingerprint"],
+            "farm_source_head": f63.F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
+            **{name: correction[name] for name in (
+                "f3_source_file_sha256", "f3_map_fingerprint",
+                "f3_algorithm_fingerprint", "f3_artifact_fingerprint",
+            )},
+            "f1_source_file_sha256": cls.hashes,
+        }}
+
+    def _reconstruct(self, *, f4_sha=None, f3=None, f3_sha=None, hashes=None):
+        with mock.patch.object(f63, "F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC", self.f3_authority), \
+             mock.patch.object(f63, "F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC", self.f4_authority):
+            return f63.reconstruct_transient_factor_map(
+                self.artifacts, self.f3 if f3 is None else f3, self.f4_artifact,
+                f1_input_file_hashes=self.hashes if hashes is None else hashes,
+                f3_input_file_sha256=self.f3_sha if f3_sha is None else f3_sha,
+                f4_input_file_sha256=self.f4_sha if f4_sha is None else f4_sha,
+                setting_id="Left-lowe",
+            )
+
+    def test_exact_candidate_paths_and_canonical_f1_inventory(self):
+        paths = f63.accepted_f6_3_artifact_paths(ROOT / "OUTPUT", "Q4p4W2p74")
+        self.assertEqual(Path(paths["f3"]).name,
+                         "Q4p4W2p74_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json")
+        self.assertEqual(Path(paths["f4"]).name,
+                         "Q4p4W2p74_kaon_pion-background_hgcer-method-a-parent-preserving-correction-current-baseline-candidate.json")
+        _, _, f1_filename, _, _ = f63._runtime_dependencies()
+        self.assertEqual(paths["f1"], {
+            "{}-{}".format(phi, epsilon): str(ROOT / "OUTPUT" / f1_filename(phi, "kaon", "Q4p4W2p74", epsilon))
+            for phi, epsilon in (("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"), ("Center", "highe"), ("Right", "highe"))
+        })
+        with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "kinematic_unsupported"):
+            f63.accepted_f6_3_artifact_paths(ROOT, "Q3p0W2p32")
+
+    def test_exact_farm_candidate_identity_pins_and_reconstruction_sentinel(self):
+        f3_record = f63.F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC
+        self.assertEqual(f3_record, {"Q4p4W2p74": {
+            "source_file_sha256": "eeb480d9b7ddffab1e97c7f9f27c3099d0780c2bbb4d42a0ee68c077a5752b3d",
+            "map_fingerprint": "3a9787fc58d26cc0816012bd1b637ad0c8f201b448d54cb1625a841131154728",
+            "algorithm_fingerprint": "ba29630b2f40a87cbadbe751504ce48f23e2b17a08378a2c8a219f93131cb912",
+            "artifact_fingerprint": "8d2d12068dfa98922d01dfafedbaa4b994bce0bf1e39ce23b1333872313ef121",
+            "farm_source_head": "0" * 40,
+        }})
+        hashes = {
+            "Left-lowe": "10086d7d4c42389c9fdd16471c49d59cd189a30980767bcdb87b85914169ef95",
+            "Left-highe": "203f4c76f1a251e3e8f231fa3a5e50c9a4fa337420efffffd803205c6d7ea218",
+            "Center-lowe": "1593e22b55382b4a9e831d3a1114584e2e3057fcbc4aeeea4aa74c948edf39f8",
+            "Center-highe": "5de64b850735ebe70040a703bac999bdd1ac84dc821aba8e1a21ec86ae4b9db3",
+            "Right-highe": "77d98006ff81e772c466bf8d10ec83088509a0b8a4d430bded1172bc118bc15f",
+        }
+        self.assertEqual(f63.F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256, hashes)
+        self.assertEqual(f63.F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
+                         "b349967c0d4210a78b144ce6134d3c1f15970245")
+        self.assertEqual(f63.F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC, {"Q4p4W2p74": {
+            "source_file_sha256": "1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902",
+            "correction_fingerprint": "bce0cc12ef283b0c361818b436c4e190fc4ea5165436f6c36912cfbb6de53368",
+            "artifact_fingerprint": "4c935271a0b2723b58b02cc34d82a1e7d5757f7cd36b7707f400c2b28893668a",
+            "farm_source_head": "b349967c0d4210a78b144ce6134d3c1f15970245",
+            "f3_source_file_sha256": f3_record["Q4p4W2p74"]["source_file_sha256"],
+            "f3_map_fingerprint": f3_record["Q4p4W2p74"]["map_fingerprint"],
+            "f3_algorithm_fingerprint": f3_record["Q4p4W2p74"]["algorithm_fingerprint"],
+            "f3_artifact_fingerprint": f3_record["Q4p4W2p74"]["artifact_fingerprint"],
+            "f1_source_file_sha256": hashes,
+        }})
+
+    def test_real_candidate_reproduction_uses_explicit_records_and_preserves_historical_authorities(self):
+        historical_f3 = copy.deepcopy(f4.ACCEPTED_F3_RUNTIME_AUTHORITY_BY_KINEMATIC)
+        historical_f4 = copy.deepcopy(f5.ACCEPTED_F4_RUNTIME_AUTHORITY_BY_KINEMATIC)
+        inputs = copy.deepcopy((self.artifacts, self.f3, self.f4_artifact))
+        with mock.patch.object(f5, "_validate_f4_artifact", wraps=f5._validate_f4_artifact) as validate, \
+             mock.patch.object(f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data",
+                               wraps=f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data) as build:
+            factors, provenance, rows = self._reconstruct()
+        self.assertIs(validate.call_args.args[2], self.f4_authority)
+        self.assertIs(build.call_args.kwargs["accepted_f3_runtime_authority_by_kinematic"], self.f3_authority)
+        self.assertEqual(self.f3_authority["Q4p4W2p74"]["farm_source_head"], "0" * 40)
+        self.assertEqual(provenance["candidate_f3_reconstruction_role"], "candidate_construction_sentinel_only")
+        self.assertEqual(provenance["branch_role"], "parallel_nonproduction_method_a_full_analysis")
+        self.assertTrue(provenance["current_baseline_candidate_lineage"])
+        self.assertFalse(provenance["production_promotion_performed"])
+        self.assertFalse(provenance["event_correction_persisted"])
+        self.assertEqual(provenance["candidate_f3_source_file_sha256"], self.f3_sha)
+        self.assertEqual(provenance["candidate_f4_source_file_sha256"], self.f4_sha)
+        self.assertEqual(set(factors), set(rows))
+        self.assertTrue(all(math.isfinite(value) and value > 0.0 for value in factors.values()))
+        live_rows = [{"source_label": source, "entry_index": entry, **row}
+                     for (source, entry), row in rows.items()]
+        self.assertTrue(f63.validate_live_cache_parity(factors, live_rows, rows)["live_cache_parity_passed"])
+        raw_rows = {(row["source_label"], row["entry_index"]): row
+                    for row in self.artifacts[0]["contract"]["application_records"]}
+        for identity, row in rows.items():
+            for field in ("analysis_MM", "analysis_t"):
+                self.assertEqual(row[field], raw_rows[identity][field])
+        live_rows[0]["analysis_MM"] += 0.01
+        with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f1_analysis_MM_mismatch"):
+            f63.validate_live_cache_parity(factors, live_rows, rows)
+        self.assertEqual((self.artifacts, self.f3, self.f4_artifact), inputs)
+        self.assertEqual(f4.ACCEPTED_F3_RUNTIME_AUTHORITY_BY_KINEMATIC, historical_f3)
+        self.assertEqual(f5.ACCEPTED_F4_RUNTIME_AUTHORITY_BY_KINEMATIC, historical_f4)
+        # Parent-t closure is preserved by the actual unchanged calculator.
+        for t_index in range(3):
+            identities = [key for key, row in rows.items() if row["t_index"] == t_index]
+            baseline = sum(rows[key]["signed_baseline_event_contribution"] for key in identities)
+            adjusted = sum(rows[key]["signed_baseline_event_contribution"] * factors[key] for key in identities)
+            self.assertAlmostEqual(adjusted, baseline, places=10)
+        self.assertNotIn("correction_factors", json.dumps(provenance))
+
+    def test_wrong_candidate_raw_hashes_and_f1_lineage_fail_closed(self):
+        with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f4_runtime_authority_source_file_sha256_mismatch"):
+            self._reconstruct(f4_sha="d" * 64)
+        with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f3_runtime_authority_source_file_sha256_mismatch"):
+            self._reconstruct(f3_sha="d" * 64)
+        hashes = dict(self.hashes); hashes["Left-lowe"] = "d" * 64
+        with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "shared_reproduction_failed|shared_reproduction_mismatch"):
+            self._reconstruct(hashes=hashes)
+
+    def test_wrong_candidate_f3_fingerprints_fail_closed(self):
+        for field in ("map_fingerprint", "algorithm_fingerprint", "artifact_fingerprint"):
+            authority = copy.deepcopy(self.f3_authority)
+            authority["Q4p4W2p74"][field] = "d" * 64
+            with self.subTest(field=field), mock.patch.object(self, "f3_authority", authority), \
+                 self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f3_runtime_authority_{}_mismatch".format(field)):
+                self._reconstruct()
+
+    def test_wrong_inherited_candidate_f3_and_f1_pins_fail_f5_validation(self):
+        for field in ("f3_source_file_sha256", "f3_map_fingerprint", "f3_algorithm_fingerprint", "f3_artifact_fingerprint", "f1_source_file_sha256"):
+            authority = copy.deepcopy(self.f4_authority)
+            authority["Q4p4W2p74"][field] = {"Left-lowe": "d" * 64} if field == "f1_source_file_sha256" else "d" * 64
+            with self.subTest(field=field), mock.patch.object(self, "f4_authority", authority), \
+                 self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f4_runtime_authority_{}_mismatch".format(field)):
+                self._reconstruct()
+
+    def test_nonzero_reconstruction_head_cannot_reproduce_candidate(self):
+        authority = copy.deepcopy(self.f3_authority)
+        authority["Q4p4W2p74"]["farm_source_head"] = f63.F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD
+        with mock.patch.object(self, "f3_authority", authority), \
+             self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "shared_reproduction_mismatch"):
+            self._reconstruct()
 
 
 class ParallelAuthorityTests(unittest.TestCase):
@@ -125,7 +299,7 @@ class ParallelAuthorityTests(unittest.TestCase):
              mock.patch.object(f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", return_value=(persisted, review)), \
              mock.patch.object(f4, "_raw_application_rows", return_value=rows):
             factors, provenance, accepted_rows = f63.reconstruct_transient_factor_map(
-                [{}], {}, {"artifact_fingerprint": "artifact"},
+                _raw_f1(_row()), {}, {"artifact_fingerprint": "artifact"},
                 f1_input_file_hashes={"Left-lowe": "a" * 64}, f3_input_file_sha256="b" * 64,
                 f4_input_file_sha256="c" * 64, setting_id="Left-lowe",
             )
@@ -153,17 +327,17 @@ class ParallelAuthorityTests(unittest.TestCase):
              mock.patch.object(f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", return_value=({"fingerprint": "other"}, review)), \
              mock.patch.object(f4, "_raw_application_rows", return_value=rows):
             with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "shared_reproduction_mismatch"):
-                f63.reconstruct_transient_factor_map([{}], {}, {}, **common)
+                f63.reconstruct_transient_factor_map(_raw_f1(_row()), {}, {}, **common)
         with mock.patch.object(f63, "_runtime_dependencies", return_value=(f4, f5, None, None, None)), \
              mock.patch.object(f5, "_validate_f4_artifact", side_effect=RuntimeError("source_sha_mismatch")):
             with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "shared_reproduction_failed"):
-                f63.reconstruct_transient_factor_map([{}], {}, {}, **common)
+                f63.reconstruct_transient_factor_map(_raw_f1(_row()), {}, {}, **common)
         with mock.patch.object(f63, "_runtime_dependencies", return_value=(f4, f5, None, None, None)), \
              mock.patch.object(f5, "_validate_f4_artifact", return_value=({}, persisted, {})), \
              mock.patch.object(f4._f3, "_validate_f1_artifacts", return_value=parsed):
             bad = dict(common); bad["f1_input_file_hashes"] = {"Right-highe": "a" * 64}
             with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "f1_hash_inventory"):
-                f63.reconstruct_transient_factor_map([{}], {}, {}, **bad)
+                f63.reconstruct_transient_factor_map(_raw_f1(_row()), {}, {}, **bad)
 
     def test_reconstruction_rejects_length_and_duplicate_application_rows(self):
         persisted = {"fingerprint": "f4"}
@@ -180,7 +354,7 @@ class ParallelAuthorityTests(unittest.TestCase):
              mock.patch.object(f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", return_value=(persisted, [{"setting_id": "Left-lowe", "canonical_t_index": 0, "correction_factors": np.asarray([1.0, 2.0])}])), \
              mock.patch.object(f4, "_raw_application_rows", return_value={("Left-lowe", 0): [_row()]}):
             with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "row_alignment"):
-                f63.reconstruct_transient_factor_map([{}], {}, {}, **common)
+                f63.reconstruct_transient_factor_map(_raw_f1(_row()), {}, {}, **common)
         duplicate_review = [
             {"setting_id": "Left-lowe", "canonical_t_index": 0, "correction_factors": np.asarray([1.0])},
             {"setting_id": "Left-lowe", "canonical_t_index": 1, "correction_factors": np.asarray([1.0])},
@@ -192,7 +366,7 @@ class ParallelAuthorityTests(unittest.TestCase):
              mock.patch.object(f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data", return_value=(persisted, duplicate_review)), \
              mock.patch.object(f4, "_raw_application_rows", return_value=duplicate_rows):
             with self.assertRaisesRegex(f63.MethodAParallelFullProcedureError, "identity_duplicate"):
-                f63.reconstruct_transient_factor_map([{}], {}, {}, **common)
+                f63.reconstruct_transient_factor_map(_raw_f1(_row()), {}, {}, **common)
 
     def test_live_cache_requires_every_f1_baseline_field_to_match(self):
         reference = _row()

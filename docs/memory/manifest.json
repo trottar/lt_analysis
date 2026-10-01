@@ -16,9 +16,9 @@
       "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
     },
     {
-      "bytes": 7492,
+      "bytes": 7410,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "ce6944e87120d2977b2838c65382e8620a69aa84bf581266d6336b90f259df18"
+      "sha256": "3203d6ef57b1a65fa5a1750672b86781166f29706cc6f2e523d86488cf02efc1"
     },
     {
       "bytes": 3359,
@@ -729,6 +729,16 @@
       "bytes": 4393,
       "path": "docs/memory/phases/f4-refresh2-validation2-tracked-execution-owner.md",
       "sha256": "da5c9e911260247a7e8bf645d6f9a553a4b778f5a67994146015d2c1cad0bb15"
+    },
+    {
+      "bytes": 19271,
+      "path": "docs/memory/phases/f6-3-current-baseline-candidate-lineage-adoption-task-contract.md",
+      "sha256": "6c497fc7b3e8a2fc3a5c444b3edeba6627f6b2026c236d226b474db7c367620b"
+    },
+    {
+      "bytes": 4592,
+      "path": "docs/memory/phases/f6-3-current-baseline-candidate-lineage-adoption.md",
+      "sha256": "6d3b342ca3fddaa617e1b5e6aa3364daef344a54b2e9e1090e69ca343ef45589"
     },
     {
       "bytes": 9832,

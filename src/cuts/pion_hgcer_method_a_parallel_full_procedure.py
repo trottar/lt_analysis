@@ -1,4 +1,4 @@
-"""Fail-closed transient F.4 authority for the private F.6.3 branch.
+"""Fail-closed transient candidate F.4 lineage for the private F.6.3 branch.
 
 This module deliberately contains no ROOT import and no tree traversal.  It
 reuses the accepted F.4 shared calculator, joins its transient factors to the
@@ -19,6 +19,47 @@ import numpy as np
 F6_3_PARALLEL_SCHEMA_VERSION = "f6_3_parallel_method_a_authority/v1"
 _CANONICAL_SETTINGS = (("Left", "lowe"), ("Left", "highe"), ("Center", "lowe"), ("Center", "highe"), ("Right", "highe"))
 _TOLERANCE = 1.0e-12
+
+# Detached F.6.3 current-baseline candidate lineage only. These records do not
+# replace the historical accepted F.3/F.4 authorities or promote Method A.
+F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD = "b349967c0d4210a78b144ce6134d3c1f15970245"
+F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC = {
+    "Q4p4W2p74": {
+        "f3": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
+        "f4": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-parent-preserving-correction-current-baseline-candidate.json",
+    },
+}
+F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256 = {
+    "Left-lowe": "10086d7d4c42389c9fdd16471c49d59cd189a30980767bcdb87b85914169ef95",
+    "Left-highe": "203f4c76f1a251e3e8f231fa3a5e50c9a4fa337420efffffd803205c6d7ea218",
+    "Center-lowe": "1593e22b55382b4a9e831d3a1114584e2e3057fcbc4aeeea4aa74c948edf39f8",
+    "Center-highe": "5de64b850735ebe70040a703bac999bdd1ac84dc821aba8e1a21ec86ae4b9db3",
+    "Right-highe": "77d98006ff81e772c466bf8d10ec83088509a0b8a4d430bded1172bc118bc15f",
+}
+# The zero farm head is a candidate-construction sentinel only, required to
+# reproduce the materialized candidate F.4 exactly. It is not farm F.3 authority.
+F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC = {
+    "Q4p4W2p74": {
+        "source_file_sha256": "eeb480d9b7ddffab1e97c7f9f27c3099d0780c2bbb4d42a0ee68c077a5752b3d",
+        "map_fingerprint": "3a9787fc58d26cc0816012bd1b637ad0c8f201b448d54cb1625a841131154728",
+        "algorithm_fingerprint": "ba29630b2f40a87cbadbe751504ce48f23e2b17a08378a2c8a219f93131cb912",
+        "artifact_fingerprint": "8d2d12068dfa98922d01dfafedbaa4b994bce0bf1e39ce23b1333872313ef121",
+        "farm_source_head": "0000000000000000000000000000000000000000",
+    },
+}
+F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC = {
+    "Q4p4W2p74": {
+        "source_file_sha256": "1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902",
+        "correction_fingerprint": "bce0cc12ef283b0c361818b436c4e190fc4ea5165436f6c36912cfbb6de53368",
+        "artifact_fingerprint": "4c935271a0b2723b58b02cc34d82a1e7d5757f7cd36b7707f400c2b28893668a",
+        "farm_source_head": F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
+        "f3_source_file_sha256": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["source_file_sha256"],
+        "f3_map_fingerprint": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["map_fingerprint"],
+        "f3_algorithm_fingerprint": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["algorithm_fingerprint"],
+        "f3_artifact_fingerprint": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["artifact_fingerprint"],
+        "f1_source_file_sha256": F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256,
+    },
+}
 
 
 class MethodAParallelFullProcedureError(RuntimeError):
@@ -68,10 +109,13 @@ def _setting_id(phi_setting: object, epsilon_token: object) -> str:
 
 
 def accepted_f6_3_artifact_paths(outpath: object, kinematic_token: object) -> dict[str, object]:
-    """Return deterministic accepted F.1/F.3/F.4 paths; never search/fallback."""
+    """Return current F.1 and exact candidate F.3/F.4 paths; never fallback."""
     root = os.fspath(outpath)
     token = str(kinematic_token)
-    _f4, _f5, f1_filename, f3_filename, f4_filename = _runtime_dependencies()
+    candidate = F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC.get(token)
+    if candidate is None:
+        raise MethodAParallelFullProcedureError("f6_3_kinematic_unsupported")
+    _f4, _f5, f1_filename, _f3_filename, _f4_filename = _runtime_dependencies()
     f1 = {
         "{}-{}".format(phi, epsilon): os.path.join(
             root,
@@ -81,8 +125,8 @@ def accepted_f6_3_artifact_paths(outpath: object, kinematic_token: object) -> di
     }
     return {
         "f1": f1,
-        "f3": os.path.join(root, f3_filename(token)),
-        "f4": os.path.join(root, f4_filename(token)),
+        "f3": os.path.join(root, candidate["f3"]),
+        "f4": os.path.join(root, candidate["f4"]),
     }
 
 
@@ -121,7 +165,8 @@ def reconstruct_transient_factor_map(
     _f4, _f5, _f1_filename, _f3_filename, _f4_filename = _runtime_dependencies()
     try:
         _artifact, persisted, authority = _f5._validate_f4_artifact(
-            f4_artifact, str(f4_input_file_sha256), None,
+            f4_artifact, str(f4_input_file_sha256),
+            F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC,
         )
         parsed = _f4._f3._validate_f1_artifacts(f1_artifacts)
         hashes = {str(key): str(value) for key, value in f1_input_file_hashes.items()}
@@ -132,8 +177,23 @@ def reconstruct_transient_factor_map(
             f3_artifact,
             f1_input_file_hashes=hashes,
             f3_input_file_sha256=str(f3_input_file_sha256),
+            accepted_f3_runtime_authority_by_kinematic=F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC,
         )
         rows_by_parent = _f4._raw_application_rows(f1_artifacts, parsed, _TOLERANCE)
+        # F.4's sanitized calculation rows deliberately omit these baseline
+        # coordinates. Join them from the same fully audited raw F.1 population
+        # for F.6.3 parity only; do not change the shared F.4 calculator.
+        baseline_coordinates = {
+            (str(row["source_label"]), int(row["entry_index"])): {
+                name: row[name] for name in ("analysis_MM", "analysis_t")
+            }
+            for artifact in f1_artifacts
+            if "{}-{}".format(
+                artifact["setting"]["phi_setting"],
+                artifact["setting"]["epsilon_filename_token"],
+            ) == setting_id
+            for row in artifact["contract"]["application_records"]
+        }
     except MethodAParallelFullProcedureError:
         raise
     except Exception as exc:
@@ -161,16 +221,24 @@ def reconstruct_transient_factor_map(
             accepted_rows[identity] = {
                 name: row[name]
                 for name in (
-                    "t_index", "phi_index", "analysis_MM", "analysis_t",
+                    "t_index", "phi_index",
                     "signed_source_coefficient", "baseline_pion_weight_w0",
                     "signed_baseline_event_contribution",
                 )
             }
+            accepted_rows[identity].update(baseline_coordinates[identity])
     if not factors:
         raise MethodAParallelFullProcedureError("f6_3_selected_factor_population_missing")
     identities = sorted((source, entry) for source, entry in factors)
     provenance = {
         "schema_version": F6_3_PARALLEL_SCHEMA_VERSION,
+        "branch_role": "parallel_nonproduction_method_a_full_analysis",
+        "current_baseline_candidate_lineage": True,
+        "candidate_validation_source_head": F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
+        "candidate_f3_reconstruction_role": "candidate_construction_sentinel_only",
+        "candidate_f3_source_file_sha256": str(f3_input_file_sha256),
+        "candidate_f4_source_file_sha256": str(f4_input_file_sha256),
+        "production_promotion_performed": False,
         "selected_setting_id": setting_id,
         "accepted_f1_source_file_sha256": dict(sorted(hashes.items())),
         "accepted_f3_source_file_sha256": str(f3_input_file_sha256),
