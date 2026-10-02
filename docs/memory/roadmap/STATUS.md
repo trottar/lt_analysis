@@ -191,26 +191,28 @@ and [investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lin
 
 #### E.8.4.Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
 
-`ACTIVE` — the planned audit must close binwise pion-template/final-MM algebra,
-histogram/scalar-yield identity, signed positive/negative/absolute support and
-same-cell SIMC object/normalization/unit provenance. These checks are not yet
-validated; no numerical object defect, cancellation explanation or SIMC
-normalization error is established. E.8.3 retains `SOURCE REVIEWED` status for
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local proposed numerical
+and provenance audit passes deterministic checks; actual-diff review remains
+pending. Signed support and current-only aggregates are available. SIMC
+absolute units are not source-proven; Fix.1 blocks only authoritative
+absolute-SIMC page families/claims, preserving the valid current-F.6.3 E.8.4
+payload without rescaling. No farm numerical closure, cancellation explanation or
+SIMC normalization error is established. E.8.3 retains `SOURCE REVIEWED` status for
 the historical accepted F.6.1 aggregate lineage, not the current F.6.3 candidate
 explanation. The confirmed cross-page lineage mismatch does not invalidate
 historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-current-lineage-identity-audit.md).
 
-Visualization-only improvement is `BLOCKED` on numerical closure: baseline
+Visualization-only improvement is `BLOCKED` on actual-diff review and
+pushed-state synchronization of the numerical source: baseline
 blue curves obscured by magenta Method-A curves require independently visible
 presentation without any physics or normalization change. Dependency order is
-checkpoint -> ChatGPT PASS -> user commit/push -> pushed-state review ->
-separate Fix.5.4 numerical contract -> Codex numerical implementation ->
-ChatGPT actual-diff review -> user commit/push -> pushed-state review ->
+local numerical implementation -> ChatGPT actual-diff review -> user
+commit/push -> pushed-state review ->
 visualization-only contract and Codex implementation from that reviewed pushed
 numerical source -> ChatGPT actual-diff review -> user commit/push ->
 pushed-state review -> one narrow Q4p4W2p74 / Left / lowe farm run -> fresh
-scientific and visual evidence review. This memory checkpoint
-authorizes neither implementation nor another farm run. The missing ZIP is a
+scientific and visual evidence review. This task authorizes no farm run and
+preserves the SIMC absolute-unit blocker. The missing ZIP is a
 separate post-render operational issue; diagnosing it alone needs no rerun.
 
 #### Final E.8 closure

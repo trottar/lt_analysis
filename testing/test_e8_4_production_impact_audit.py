@@ -17,6 +17,22 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(REPO_ROOT / "src" / "utility"), str(REPO_ROOT / "src" / "cuts")]
 
 import full_background_subtraction_plots as plots
+from root_histogram_ownership import fingerprint_histogram_content_error
+from testing.test_e8_2_baseline_stage_audit import _load_calculate_yield_module
+
+
+_audit_producer = _load_calculate_yield_module()
+_audit_producer.fingerprint_histogram_content_error = fingerprint_histogram_content_error
+
+
+def _refresh_identity(source):
+    children = source["children"]
+    source["identity_audit"] = _audit_producer._build_f6_3_identity_audit(
+        source, {(row["t_index"], row["phi_index"]): row["MM_0"].Clone("final_yield_histogram") for row in children},
+        sorted(set([row["t_low"] for row in children] + [row["t_high"] for row in children])),
+        sorted(set([row["phi_low"] for row in children] + [row["phi_high"] for row in children])),
+    )
+    return source
 
 
 class _Axis:
@@ -25,6 +41,12 @@ class _Axis:
 
     def GetBinLowEdge(self, index):
         return self.edges[int(index) - 1]
+
+    def GetXmin(self):
+        return self.edges[0]
+
+    def GetXmax(self):
+        return self.edges[-1]
 
 
 class _Histogram:
@@ -50,9 +72,13 @@ class _Histogram:
         return len(self.contents)
 
     def GetBinContent(self, index):
+        if int(index) in (0, len(self.contents) + 1):
+            return 0.0
         return self.contents[int(index) - 1]
 
     def GetBinError(self, index):
+        if int(index) in (0, len(self.contents) + 1):
+            return 0.0
         return self.errors[int(index) - 1]
 
     def GetXaxis(self):
@@ -265,18 +291,18 @@ def _f6_3_source(
                 "t_index": t_index, "t_low": t_edges[t_index], "t_high": t_edges[t_index + 1],
                 "phi_index": phi_index, "phi_low": phi_edges[phi_index],
                 "phi_high": phi_edges[phi_index + 1], "valid": True, "status": "available",
-                "pion_input": _histogram(8.0 + child_offset, edges=mm_edges),
+                "pion_input": _Histogram((baseline + 2.0 + child_offset, 2.5 + child_offset), edges=mm_edges, errors=(0.1, 0.2)),
                 "B_pi_0": _histogram(2.0 + child_offset, edges=mm_edges),
-                "B_pi_A": _histogram(2.1 + child_offset, edges=mm_edges),
-                "MM_0": _histogram(5.0 + child_offset, edges=mm_edges),
-                "MM_A": _histogram(5.1 + child_offset, edges=mm_edges),
+                "B_pi_A": _Histogram((2.0 + child_offset - (adjusted - baseline), 2.5 + child_offset), edges=mm_edges, errors=(0.1, 0.2)),
+                "MM_0": _Histogram((baseline, 0.0), edges=mm_edges, errors=(0.1, 0.2)),
+                "MM_A": _Histogram((adjusted, 0.0), edges=mm_edges, errors=(0.1, 0.2)),
                 "Y0": float(baseline), "Y0_statistical_error": 0.2,
                 "Y0_total_error": 0.3, "YA": float(adjusted),
                 "YA_statistical_error": 0.25, "YA_total_error": 0.35,
             })
     if reverse:
         children.reverse()
-    return {
+    return _refresh_identity({
         "schema_version": "f6_3_parallel_method_a_source/v1", "available": True,
         "reason": None, "selected_setting_id": selected_setting_id,
         "branch_role": "parallel_nonproduction_method_a_full_analysis",
@@ -287,7 +313,7 @@ def _f6_3_source(
         "baseline_public_output_unchanged": True,
         "authority": {"live_cache_parity_passed": True, "accepted": "fixture"},
         "lambda_integration_window": [1.08, 1.18], "children": children,
-    }
+    })
 
 
 def _render_payloads():
@@ -322,8 +348,21 @@ def _support(source, baseline):
     edges = (1.10, 1.13, 1.16)
     if isinstance(source, dict) and isinstance(source.get("children"), (list, tuple)) and source["children"]:
         edges = source["children"][0]["pion_input"].edges
-    return {"mm": [[_histogram(6.0, edges=edges) for _ in range(len(baseline["phi_edges"]) - 1)]
-                   for _ in range(len(baseline["t_edges"]) - 1)]}
+    support = {"mm": [[_histogram(6.0, edges=edges) for _ in range(len(baseline["phi_edges"]) - 1)]
+                      for _ in range(len(baseline["t_edges"]) - 1)]}
+    record = _audit_producer._build_f6_3_simc_provenance(
+        {"phi_setting": baseline["setting"], "InFile_SIMC": type("RootFile", (), {"GetName": lambda self: "synthetic.root"})(),
+         "normfac_simc": 0.5, "simc_normfactor": 5.0, "simc_nevents": 10},
+        support, baseline["t_edges"], baseline["phi_edges"],
+        {"EPSSET": baseline["epsilon"], "mm_min": 1.08, "mm_max": 1.18},
+    )
+    # This is explicit synthetic unit authority, never a farm/SIMC claim.
+    record.update(absolute_comparison_available=True, histogram_units="yield_per_effective_data_charge",
+                  absolute_units_source_authority="synthetic_deterministic_fixture")
+    record.pop("fingerprint")
+    record["fingerprint"] = _audit_producer._f6_3_audit_digest(record)
+    support["normalization_audit"] = record
+    return support
 
 
 def _build(source, baseline, **kwargs):
@@ -776,6 +815,11 @@ class E84ShareablePagesTests(unittest.TestCase):
         from testing.run_e8_4_fix5_left_lowe_plot_gate import NEW_PAGE_IDS, OLD_PAGES
         for page_id in NEW_PAGE_IDS:
             self.assertEqual(sum(page["page_id"] == page_id for page in manifest), 1)
+        for page in manifest:
+            if "simc" in page["page_id"]:
+                self.assertTrue(page["available"])
+                self.assertTrue(page["simc_absolute_comparison_available"])
+                self.assertIsNone(page["reason"])
         self.assertTrue(set(OLD_PAGES) <= {(page["page_id"], page["scope"]) for page in manifest})
         self.assertEqual(len(manifest), 24)
         self.assertEqual(_FakeLegend.entries.count("SIMC"), 54)
@@ -820,6 +864,9 @@ class E84ShareablePagesTests(unittest.TestCase):
         source, baseline, support, closure = self.fixtures()
         source["children"][0]["MM_A"].contents[:] = [0.0, 0.0]
         source["children"][0]["MM_A"].errors[:] = [0.0, 0.0]
+        source["children"][0]["YA"] = 0.0
+        source["children"][0]["B_pi_A"].contents[:] = source["children"][0]["pion_input"].contents
+        _refresh_identity(source)
         payload = self.build(source, baseline, support, closure)
         _FakeText.lines[:] = []
         self.assertTrue(plots._e8_4_render_method_a_simc_page(_FakeRoot, "fixture.pdf", payload, payload["per_t"][0]))

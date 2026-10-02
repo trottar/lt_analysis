@@ -1,5 +1,128 @@
 # E.8.4 Fix.5 Left/lowe post-farm identity, lineage and visualization — 2026-10-02
 
+## Fix.5.4 local source audit and proposed implementation
+
+Local starting/unchanged `test` HEAD is
+`71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Its parent is the supplied Fix.5
+scientific source below; the committed range changes memory only. No tracked
+worktree changes existed at task start. Two user-supplied untracked contracts
+and an existing temporary review diff were preserved; only that review diff
+is regenerated. Source findings below are independent of farm acceptance.
+
+The producer/runtime path was traced before editing:
+
+- Baseline: `main.py` Step 6 calls `find_yield_data`; `process_hist_data`
+  performs normalized random/dummy and existing slow-proton treatment, then
+  `_apply_component_pion_subtraction_for_bin` clones the pion input, fills the
+  baseline template with existing signed source coefficients and `w0`,
+  subtracts it from `H_MM_DATA`, and clones
+  `payload["H_MM_after_pion_subtraction"]`. Subsequent empirical fit/subtraction
+  and pruning blocks run only for positive resolved scales. In the active
+  profile both are disabled. The cached path likewise gates downstream
+  operations; it clones the processed dictionary first. `bin_data` clones
+  final `entry["H_MM_DATA"]` into `mm_hist_data`; `calculate_yield_data`
+  passes that exact clone to `_measure_yield_with_current_uncertainty` for Y0.
+  The new private audit compares the sidecar MM_0 fingerprint to that exact
+  measured clone, including axis, all contents/errors and flow bins. No
+  source-proven wrong-baseline linkage was found or repaired.
+- Method A: the existing `_build_f6_3_parallel_method_a_source` reconstructs
+  the pinned current candidate transient factors and validates live-cache
+  parity. `fill_simc_shape_pion_subtraction_templates` fills each selected
+  allcut MM child with `signed_source_coefficient * w0 * C`. It fills the
+  separate wide histogram on nommcut support. The branch clones the existing
+  pion input, subtracts B_pi_A, and uses the same producer-owned uncertainty
+  helper for YA. The new audit attaches only after this branch and baseline
+  extraction; it never changes factors, histograms, yields or uncertainties.
+- Aggregate: sum normal MM-bin contents of B_pi_0/B_pi_A from those exact
+  current canonical children. F.4 parent application sums cover physical
+  control records beyond the Lambda allcut support, including nommcut and
+  potentially outside-child support; they are not the same population integral
+  as the plotted cut-window templates. No forced F.4/template closure or child
+  normalization is introduced. Current authority and child fingerprints are
+  retained; historical accepted F.6.1 objects cannot substitute.
+- SIMC: `get_eff_charge.find_events` reads original SIMC `.hist` `normfac`
+  and `Ncontribute`, storing them and their ratio. `main.py` prepares/opens
+  the setting-specific model ROOT input. `iter_weight.py` writes h10 iter_weight
+  using `param_active.iterWeight`; the reviewed kaon implementation
+  `param_kaon_pl.py` multiplies previous event weight by new/previous model
+  cross section. `find_yield_simc -> calculate_yield_simc -> bin_simc ->
+  process_hist_simc -> _process_yield_simc_tree` applies existing cuts and the
+  HGCer hole, assigns canonical -t/phi, fills h10 missmass with iter_weight,
+  scales once by the existing ratio, and clones each histogram into
+  `_xsect_support_simc.mm`. The metadata copies the actual root/tree identity,
+  geometry, normalization inputs/factor, weight semantics, units/meaning and
+  window integrals without touching the yield producer's numerical behavior.
+- Consumer: Step 6 calls `finalize_full_background_subtraction_e8_2` after
+  both yield producers. Its E.8.4 builder validates/clones the branch and same
+  SIMC support, then passes the detached payload to the existing renderer.
+  New records fail closed on missing, stale, cross-lineage or inconsistent
+  provenance. No draw order, marker, color, range or page ID changes occur.
+
+Integration is the existing `integral_with_stat_error` normal-bin sum in
+ascending bin order, without bin-width weighting. Underflow/overflow are
+excluded consistently from algebra, scalar support and aggregate summaries,
+and included in ownership fingerprints. Identity tolerance is fixed scaled
+`1e-12`; no user threshold is introduced. Signed positive, signed negative,
+signed total and absolute support include negative/zero/sparse children.
+
+SIMC luminosity/effective-charge units are not defined by the traced source.
+The kaon model's cross-section units do not establish the units of the external
+SIMC normalization factor. Absolute amplitude comparability is therefore
+unavailable with `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
+After Fix.1, E.8.4 retains an available valid current-F.6.3 payload and detached
+child/aggregate/SIMC audit records. Only the absolute-SIMC page families are
+provenance-blocked with explicit text and page-level status, preventing a
+validated absolute overlay claim while preserving data-only evidence.
+No display scale or physics conclusion is authorized.
+This is an acceptable explicit scientific result under the implementation
+contract, not evidence of incorrect SIMC normalization.
+
+Local verification: discovered Python 3.12.10; 205 tests ran successfully with 23 retained
+skips (9 unavailable-PyROOT tests and 14 superseded procedure-tail assertions).
+Suites: Fix.5.4 identity, E.8.4 impact, full-background plotting, F.6.3 parallel
+branch, E.8.2 baseline yield, ROOT ownership, parent-preserving correction and
+t/phi propagation. After the final metadata refinement and explicit empty-child
+test, the two focused suites passed all 32 tests. In-memory syntax checks passed for all four changed/new
+Python files; `git diff --check` passed. No ROOT/PyROOT/full-analysis/farm/PDF
+validation is inferred. Actual-diff review is pending; no commit, push or farm
+run occurred. The owner ZIP failure remains outside this task.
+
+Fix.1 corrects the original candidate's manifest/review scope: the unrelated
+pre-existing workflow contract is preserved unchanged and untracked, and is
+excluded from both the intended versioned manifest and review additions.
+The parent Fix.5.4 contract and Fix.1 contract are intended versioned inputs.
+Manifest write/check and ordinary health run in a temporary candidate view
+containing tracked memory plus those intended contracts, using unchanged tools.
+The resulting manifest is copied back to the working tree. The original worktree
+contains unrelated untracked memory and is not the intended versioned view.
+No Git index, ignore rules, user file or memory tool is changed.
+
+Fix.1 verification: the full eight-suite regression run completed 206 tests
+with 23 retained skips (9 unavailable-PyROOT, 14 superseded historical-tail
+assertions). After adding explicit all-three-parent page-status coverage, the
+focused suites passed 33 tests with no skips. The existing identity validators
+and `calculate_yield.py` candidate bytes are unchanged by Fix.1. Overall
+availability is independent of the valid SIMC audit's absolute-unit flag;
+affected pages carry that flag and the literal reason, while identity/yield
+and parent-closure evidence remains available. Comparable synthetic SIMC
+still follows the existing overlay path without a display normalization.
+
+Scoped manifest write/check and ordinary candidate-view memory health pass
+without warnings or hard failures. CURRENT/MEMORY/CURRENT_HANDOFF sizes are
+6703/11163/323 bytes. The unrelated contract's preservation SHA-256 is
+`0ee396c059be03e0a528bef18a1fba1128be12e75b63ef725e9cf9a02dffe421`;
+it remains untracked and contributes no manifest entry or review addition.
+The temporary view contains 195 indexed memory files, including both intended
+contracts. Syntax and `git diff --check` pass; no local result establishes
+ROOT/PyROOT/full-analysis/PDF/farm validation. The repaired complete candidate
+still awaits independent actual-diff review before user commit/push and
+pushed-state review. No visualization, packaging or farm action is authorized.
+
+The next source-changing stage, conditional on numerical actual-diff review,
+user commit/push and pushed-state review, is visualization-only improvement
+from this numerical source while retaining the SIMC absolute-unit blocker.
+CURRENT owns the sole NEXT; no farm execution is authorized by this task.
+
 ## Scope and evidence authority
 
 `Q4p4W2p74 / Left / lowe`, pushed/farm source

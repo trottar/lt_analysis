@@ -16,9 +16,9 @@
       "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
     },
     {
-      "bytes": 6037,
+      "bytes": 6703,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "bb9667c136b7ced4a025fe6cc3b63bf721cdb399e309c51b2deee9a1984c0232"
+      "sha256": "ba44765369f15a9fffe4ff9d21b1833f69bdb934803b3cbb54cf17a21add045b"
     },
     {
       "bytes": 4239,
@@ -31,9 +31,9 @@
       "sha256": "da9d9467e14e4a7dc428aa8f9f2d7a7ca85a70a5816829d0c483b375652f660e"
     },
     {
-      "bytes": 10342,
+      "bytes": 11163,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "2b5e6b65bb7718c07bb6947e5ba062aaa927f02f28d87b58f93436a5fd25899c"
+      "sha256": "06c1bd7cc26a6041ede1fdbc8991c3b43676905daeeaf883cac8e78847f50f53"
     },
     {
       "bytes": 3469,
@@ -331,9 +331,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 10203,
+      "bytes": 18554,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
-      "sha256": "2e74737274d068bc9a568fd92f5f65f7e5b3a79e925f3c3d86b733906b27ed51"
+      "sha256": "0c2b46019ca06906766a0ac9f53144dc0185b13afda0ed061a747afcd746e87a"
     },
     {
       "bytes": 2081,
@@ -641,9 +641,19 @@
       "sha256": "c37d44fb3069f1c0cf5c37c945655710ceccee7dfc887db4d045950c9cf5e41d"
     },
     {
-      "bytes": 3903,
+      "bytes": 23878,
+      "path": "docs/memory/phases/e8-4-fix5-4-current-lineage-identity-audit-and-fix-task-contract.md",
+      "sha256": "e85eade3d70cdb563e6369e2c909ef52c0dae25369576b71075bf714e155f09e"
+    },
+    {
+      "bytes": 5423,
       "path": "docs/memory/phases/e8-4-fix5-4-current-lineage-identity-audit.md",
-      "sha256": "cf121736ebacc09b433bd33cdb7e9bb70ad8311cb2f141d791ac2f2dc7dd495b"
+      "sha256": "ac0ab30b9e0b97dda8a1751f595805f8f820501b395c969fb4584e27acb4556b"
+    },
+    {
+      "bytes": 11725,
+      "path": "docs/memory/phases/e8-4-fix5-4-fix1-simc-availability-and-manifest-scope-task-contract.md",
+      "sha256": "fa925946b66ca35299234c5b2b28aa3578cc123862f2d921ad8f16b6c7a5ba1a"
     },
     {
       "bytes": 18084,
@@ -936,9 +946,9 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
-      "bytes": 16601,
+      "bytes": 16696,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "28c30df9e810348374eb0807ae122bae0254ef18c378c24a21e09201e63e7f52"
+      "sha256": "123ca6e2009c830a1740592df0ddd2fe29ca6caf80200ef51c4409f00e2e063d"
     },
     {
       "bytes": 1698,

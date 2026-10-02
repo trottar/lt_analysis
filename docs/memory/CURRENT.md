@@ -11,11 +11,14 @@ upstream authorities, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-[E.8.4 Fix.5.4](phases/e8-4-fix5-4-current-lineage-identity-audit.md) is `ACTIVE`:
-current-lineage numerical identity and SIMC-normalization audit. This
-memory-only checkpoint records the supplied post-farm findings; it implements
-no audit or visualization change. A separate implementation contract follows
-independent review, user commit/push, and pushed-state synchronization.
+[E.8.4 Fix.5.4](phases/e8-4-fix5-4-current-lineage-identity-audit.md) is
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local proposed numerical and
+provenance audits pass deterministic tests. The exact final-yield histogram is
+fingerprint-checked against the private baseline sidecar; current aggregates
+use only current F.6.3 children. SIMC absolute units are not source-proven:
+Fix.1 blocks only the absolute-SIMC page families, preserving the otherwise
+valid current-F.6.3 E.8.4 payload without rescaling. Repaired actual-diff review remains
+pending; no visualization, owner/profile repair or farm execution occurred.
 
 ## Verified State
 
@@ -45,6 +48,10 @@ remain `BLOCKED`.
 
 - Observed pushed/committed `test` HEAD and supplied Fix.5 farm source:
   `f9d70732290ea461096374ca1270b47452644991`.
+- Local implementation starting/unchanged HEAD on 2026-10-02:
+  `71a912bf14c59eee6d52956462aa0aa39c7f7c84` on `test`; its parent is the
+  above scientific source and its committed changes are memory-only.
+  Fix.5.4 source/test/memory edits are uncommitted local proposals.
 - Fresh PDF/manifest: farm-visible timestamp `2026-10-01 23:34`, PDF about
   2.2 MB; inspection copies `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439.pdf`
   and `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439-manifest.json`.
@@ -62,34 +69,39 @@ remain `BLOCKED`.
 
 ## Blockers
 
-Scientific interpretation of fresh Fix.5 comparison pages is `BLOCKED` until
-four checks close: binwise pion-template/final-MM algebra, histogram/scalar-yield
-closure using producer-owned integration, signed positive/negative/absolute
-support diagnostics, and same-cell SIMC object/normalization/unit provenance.
-Near-overlapping t1 MM curves with substantially different stored yields and
-large data/SIMC amplitudes require audit; neither an object error, cancellation
-explanation nor incorrect SIMC normalization is established.
+Scientific interpretation of fresh Fix.5 pages remains `BLOCKED` pending farm
+evidence for the new identities. Local synthetic tests establish binwise
+algebra, normal-bin yield closure, signed support and current-lineage aggregate
+validation; they do not explain the observed farm curves or establish signed
+cancellation there. SIMC uses `iter_weight * normfac / Ncontribute`; the traced
+source does not define its luminosity/effective-charge units. E.8.4 therefore
+retains an available current-F.6.3 payload and structured audits but marks only
+absolute-SIMC comparison pages/claims unavailable with literal provenance.
+No wrong normalization or permitted conversion is established.
 
-Visualization improvement is dependency-blocked until numerical identity
-closes. The missing owner ZIP is a separate unresolved post-render operational
+Visualization improvement is dependency-blocked on actual-diff review and
+pushed-state synchronization of the numerical source. The missing owner ZIP is a separate unresolved post-render operational
 failure; explaining it alone does not require another expensive analysis run.
 No further farm execution is authorized by this checkpoint.
 
 ## Next Action
 
-NEXT — audit the exact current-lineage producer -> sidecar -> payload -> renderer path and implement only the numerical invariants or narrow source repairs warranted by that audit, under a separate reviewed implementation contract after this checkpoint is reviewed, user committed/pushed, and synchronized.
+NEXT — after Fix.5.4 actual-diff review -> user commit/push -> pushed-state
+review, the next source-changing stage is a separate visualization-only
+improvement contract consuming the validated current-lineage objects. Preserve
+the explicit SIMC absolute-unit blocker; authorize no farm execution yet.
 
 ## Success Criteria
 
-The planned Fix.5.4 audit must cover every populated canonical child with
+The implemented Fix.5.4 audit covers every available canonical child with
 explicit tolerances, identities, integration semantics and signed support.
-Sequence: checkpoint ChatGPT PASS/user commit-push/pushed-state review ->
-numerical contract/Codex implementation -> ChatGPT actual-diff review/user
+Sequence: local numerical implementation -> ChatGPT actual-diff review/user
 commit-push/pushed-state review -> visualization-only contract/Codex
 implementation from that reviewed pushed numerical source -> ChatGPT actual-diff
 review/user commit-push/pushed-state review -> one narrow Q4p4W2p74 / Left / lowe
-farm run -> fresh scientific and visual evidence review. This checkpoint stops before
-implementation; renderer success alone does not establish scientific linkage.
+farm run -> fresh scientific and visual evidence review. This implementation
+stops at local checks and complete diff preparation; renderer success alone
+does not establish scientific linkage.
 
 ## Do Not Reopen Without New Evidence
 

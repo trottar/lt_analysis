@@ -25,6 +25,8 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 from copy import deepcopy
 import sys, math, os, subprocess
+import hashlib
+import json
 from array import array
 from ROOT import TCanvas, TH1D, TH2D, gStyle, gPad, TPaveText, TArc, TGraphPolar, TFile, TLegend, TMultiGraph, TLine, TCutG
 from ROOT import kBlack, kCyan, kRed, kGreen, kMagenta
@@ -129,7 +131,7 @@ from pion_hgcer_method_a_parallel_full_procedure import (
     unavailable_parallel_source,
     validate_live_cache_parity,
 )
-from root_histogram_ownership import clone_root_histogram
+from root_histogram_ownership import clone_root_histogram, fingerprint_histogram_content_error
 from proton_contamination_weights import (
     get_kaon_proton_cleaning_event_payload,
     print_kaon_proton_cleaning_pages,
@@ -3791,6 +3793,129 @@ def _f6_3_clone_reset(histogram, name):
     return clone_root_histogram(histogram, scope="f6_3_parallel_method_a", role="parallel_template", name=name, reset=True, sumw2=True)
 
 
+_F6_3_IDENTITY_TOLERANCE = 1.0e-12
+_F6_3_IDENTITY_SCHEMA = "f6_3_current_lineage_identity_audit/v1"
+
+
+def _f6_3_audit_digest(record):
+    return hashlib.sha256(json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
+
+
+def _f6_3_identity_close(left, right):
+    return abs(left - right) <= _F6_3_IDENTITY_TOLERANCE * max(1.0, abs(left), abs(right))
+
+
+def _f6_3_signed_support(values):
+    positive = sum(value for value in values if value > 0.0)
+    negative = sum(value for value in values if value < 0.0)
+    return {"positive_support": positive, "negative_support": negative,
+            "signed_integral": sum(values), "absolute_support": positive - negative}
+
+
+def _build_f6_3_identity_audit(source, final_baseline_histograms, t_bins, phi_bins):
+    """Audit existing private objects; never adjust a bin, scalar or factor.
+
+    Scalar integration is exactly integral_with_stat_error: normal bins in
+    order, without bin-width weighting. Flow bins are excluded from algebra,
+    yield and aggregates, but included in content/error ownership fingerprints.
+    """
+    expected = {(j, k) for j in range(len(t_bins) - 1) for k in range(len(phi_bins) - 1)}
+    children = source["children"]
+    coordinates = [(child["t_index"], child["phi_index"]) for child in children]
+    if len(coordinates) != len(expected) or set(coordinates) != expected:
+        raise MethodAParallelFullProcedureError("f6_3_identity_child_inventory_invalid")
+    result = {"schema_version": _F6_3_IDENTITY_SCHEMA,
+              "lineage": "current_f6_3_candidate_lineage",
+              "selected_setting_id": source["selected_setting_id"],
+              "authority": deepcopy(source["authority"]),
+              "t_edges": list(t_bins), "phi_edges": list(phi_bins),
+              "lambda_integration_window": list(source["lambda_integration_window"]),
+              "integration": "normal_bins_in_order_no_width_weighting_flows_excluded",
+              "floating_identity_tolerance": _F6_3_IDENTITY_TOLERANCE,
+              "children": [], "aggregates": []}
+    common_edges = None
+    for child in sorted(children, key=lambda row: (row["t_index"], row["phi_index"])):
+        coordinate = (child["t_index"], child["phi_index"])
+        if child.get("status") != "available" or child.get("valid") is not True:
+            raise MethodAParallelFullProcedureError("f6_3_identity_child_unavailable")
+        names = ("B_pi_0", "B_pi_A", "MM_0", "MM_A")
+        histograms = {name: child[name] for name in names}
+        histograms["final_baseline"] = final_baseline_histograms[coordinate]
+        edges = {name: _e8_2_histogram_edges(histogram) for name, histogram in histograms.items()}
+        if any(edge != edges["MM_0"] for edge in edges.values()) or not edges["MM_0"]:
+            raise MethodAParallelFullProcedureError("f6_3_identity_mm_binning_mismatch")
+        if common_edges is not None and common_edges != edges["MM_0"]:
+            raise MethodAParallelFullProcedureError("f6_3_identity_mm_binning_mismatch")
+        common_edges = edges["MM_0"]
+        fingerprints = {name: fingerprint_histogram_content_error(histogram) for name, histogram in histograms.items()}
+        if fingerprints["MM_0"] != fingerprints["final_baseline"]:
+            raise MethodAParallelFullProcedureError("f6_3_identity_final_baseline_fingerprint_mismatch")
+        values = {name: [float(histogram.GetBinContent(i)) for i in range(1, histogram.GetNbinsX() + 1)]
+                  for name, histogram in histograms.items() if name in names}
+        delta = [a - b for a, b in zip(values["MM_A"], values["MM_0"])]
+        residuals, scaled = [], []
+        for b0, ba, m0, ma in zip(*(values[name] for name in names)):
+            residual = (ma - m0) + (ba - b0)
+            scale = max(1.0, abs(b0), abs(ba), abs(m0), abs(ma))
+            residuals.append(abs(residual)); scaled.append(abs(residual) / scale)
+        integrals = {name: integral_with_stat_error(histograms[name])[0] for name in ("MM_0", "MM_A")}
+        y0, ya = float(child["Y0"]), float(child["YA"])
+        dy, dm = ya - y0, sum(delta)
+        if not all(math.isfinite(value) for value in (*residuals, *scaled, *integrals.values(), y0, ya, dy, dm)):
+            raise MethodAParallelFullProcedureError("f6_3_identity_nonfinite")
+        failing = sum(value > _F6_3_IDENTITY_TOLERANCE for value in scaled)
+        yield_passed = all(_f6_3_identity_close(left, right) for left, right in (
+            (integrals["MM_0"], y0), (integrals["MM_A"], ya), (dm, dy)))
+        record = {"t_index": coordinate[0], "phi_index": coordinate[1],
+                  "mm_edges": list(common_edges), "histogram_fingerprints": fingerprints,
+                  "baseline_ownership_identity_passed": True,
+                  "maximum_absolute_bin_residual": max(residuals, default=0.0),
+                  "maximum_scaled_bin_residual": max(scaled, default=0.0),
+                  "failing_bin_count": failing, "algebra_identity_passed": failing == 0,
+                  "MM_0_integral": integrals["MM_0"], "MM_A_integral": integrals["MM_A"],
+                  "delta_MM_integral": dm, "Y0": y0, "YA": ya, "delta_Y": dy,
+                  "MM_0_minus_Y0": integrals["MM_0"] - y0,
+                  "MM_A_minus_YA": integrals["MM_A"] - ya,
+                  "delta_integral_minus_delta_Y": dm - dy, "yield_identity_passed": yield_passed,
+                  "signed_support": {"MM_0": _f6_3_signed_support(values["MM_0"]),
+                                     "MM_A": _f6_3_signed_support(values["MM_A"]),
+                                     "delta_MM": _f6_3_signed_support(delta)},
+                  "pion_normal_bin_contents": {name: values[name] for name in ("B_pi_0", "B_pi_A")},
+                  "populated": any(value != 0.0 for row in values.values() for value in row)}
+        result["children"].append(record)
+    for j in range(len(t_bins) - 1):
+        rows = [row for row in result["children"] if row["t_index"] == j]
+        b0 = [sum(row["pion_normal_bin_contents"]["B_pi_0"][i] for row in rows) for i in range(len(common_edges) - 1)]
+        ba = [sum(row["pion_normal_bin_contents"]["B_pi_A"][i] for row in rows) for i in range(len(common_edges) - 1)]
+        result["aggregates"].append({"t_index": j, "lineage": result["lineage"],
+            "child_inventory": [[j, row["phi_index"]] for row in rows],
+            "populated_child_inventory": [[j, row["phi_index"]] for row in rows if row["populated"]],
+            "mm_edges": list(common_edges), "B_pi_0_current": b0, "B_pi_A_current": ba,
+            "Delta_B_pi_current": [a - b for a, b in zip(ba, b0)],
+            "aggregate_B_pi_0_integral": sum(b0), "aggregate_B_pi_A_integral": sum(ba),
+            "aggregate_delta_integral": sum(a - b for a, b in zip(ba, b0)),
+            "candidate_f4_parent_sum_comparable": False,
+            "candidate_f4_parent_sum_reason": "F4_application_population_includes_nommcut_support;_MM_template_uses_allcuts_lambda_window_only"})
+    result["identity_passed"] = all(row["algebra_identity_passed"] and row["yield_identity_passed"] for row in result["children"])
+    result["fingerprint"] = _f6_3_audit_digest(result)
+    return result
+
+
+def _attach_f6_3_identity_audit(source, yield_measurements, t_bins, phi_bins):
+    if source.get("available") is not True:
+        return source
+    try:
+        final_histograms = {(j, k): yield_measurements[(j, k)]["final_histogram"]
+                            for j in range(len(t_bins) - 1) for k in range(len(phi_bins) - 1)}
+        audit = _build_f6_3_identity_audit(source, final_histograms, t_bins, phi_bins)
+        source["identity_audit"] = audit
+        if audit["identity_passed"] is not True:
+            source.update(available=False, reason="f6_3_current_lineage_numerical_identity_failed")
+    except (KeyError, TypeError, ValueError, RuntimeError) as exc:
+        source.update(available=False, reason="f6_3_identity_audit_failed:{}".format(exc))
+    return source
+
+
 def _build_f6_3_parallel_method_a_source(hist, processed_dict, sub_event_cache, t_bins, phi_bins, inpDict, yield_measurements, normfac_data, normfac_dummy, nWindows):
     """Construct the private branch after baseline yield extraction, never before."""
     setting_id = None
@@ -4003,6 +4128,7 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
         yield_hist.append(yld)
         yield_err_hist.append(yld_err)
         e8_2_yield_measurements[(j, k)] = {
+            "final_histogram": final_hist,
             "yield": float(yld),
             "statistical_error": float(yld_stat_err),
             "total_error": float(yld_err),
@@ -4078,6 +4204,9 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
             normfac_data,
             normfac_dummy,
             nWindows,
+        )
+        _attach_f6_3_identity_audit(
+            hist["_f6_3_parallel_method_a_source"], e8_2_yield_measurements, t_bins, phi_bins,
         )
             
     return groups
@@ -4377,6 +4506,39 @@ def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, i
         
     return binned_dict, ave_simc_event_cache
 
+def _build_f6_3_simc_provenance(hist, support, t_bins, phi_bins, inpDict):
+    """Describe the existing SIMC producer without asserting undocumented units."""
+    record = {"schema_version": _F6_3_IDENTITY_SCHEMA, "record_kind": "simc_normalization_provenance",
+              "selected_setting_id": _f6_3_setting_id(hist, inpDict),
+              "kinematic_token": get_particle_subtraction_setting_key(inpDict),
+              "t_edges": list(t_bins), "phi_edges": list(phi_bins),
+              "lambda_integration_window": [float(inpDict["mm_min"]), float(inpDict["mm_max"])],
+              "source_root_file": str(hist["InFile_SIMC"].GetName()), "source_tree": "h10",
+              "normalization_producer": "get_eff_charge.find_events",
+              "histogram_producer": "calculate_yield.process_hist_simc",
+              "normalization_factor_applied": float(hist["normfac_simc"]),
+              "simc_normfactor": float(hist["simc_normfactor"]),
+              "simc_ncontribute": int(hist["simc_nevents"]),
+              "normalization_semantics": "SIMC_.hist_normfac_divided_by_Ncontribute",
+              "model_weight_semantics": "h10.iter_weight_from_iter_weight.py_and_param_active.iterWeight",
+              "model_reweighting_semantics": "previous_event_weight_times_new_model_cross_section_divided_by_previous_cross_section",
+              "luminosity_semantics": "not_declared_by_normfac_or_iter_weight_source",
+              "histogram_units": "sum_iter_weight_times_normfac_divided_by_Ncontribute",
+              "data_units": "yield_per_effective_data_charge",
+              "absolute_comparison_available": False,
+              "absolute_comparison_reason": "SIMC_normfac_luminosity_and_charge_units_not_source_proven",
+              "display_normalization_applied": False, "children": []}
+    for j in range(len(t_bins) - 1):
+        for k in range(len(phi_bins) - 1):
+            histogram = support["mm"][j][k]
+            record["children"].append({"t_index": j, "phi_index": k,
+                "mm_edges": list(_e8_2_histogram_edges(histogram)),
+                "histogram_fingerprint": fingerprint_histogram_content_error(histogram),
+                "SIMC_integral_in_the_same_lambda_window": integral_with_stat_error(histogram)[0]})
+    record["fingerprint"] = _f6_3_audit_digest(record)
+    return record
+
+
 def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
 
     tree_simc, normfac_simc = hist["InFile_SIMC"], hist["normfac_simc"]
@@ -4389,6 +4551,15 @@ def calculate_yield_simc(kin_type, hist, t_bins, phi_bins, inpDict, iteration):
     binned_dict, ave_simc_event_cache = bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration)
     hist["_yield_simc_event_cache"] = ave_simc_event_cache
     hist["_xsect_support_simc"] = binned_dict[kin_type]["support_hist_dict"]
+    if str(inpDict.get("ParticleType", "")).strip().lower() == "kaon":
+        try:
+            hist["_xsect_support_simc"]["normalization_audit"] = _build_f6_3_simc_provenance(
+                hist, hist["_xsect_support_simc"], t_bins, phi_bins, inpDict,
+            )
+        except (AttributeError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+            hist["_xsect_support_simc"]["normalization_audit"] = {
+                "available": False, "reason": "simc_normalization_provenance_failed:{}".format(exc),
+            }
 
     binned_t_simc = binned_dict[kin_type]["binned_t_simc"]
     binned_hist_simc = binned_dict[kin_type]["binned_hist_simc"]

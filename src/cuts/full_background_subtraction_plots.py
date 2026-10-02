@@ -14,11 +14,13 @@ import json
 import math
 import os
 import shutil
+from copy import deepcopy
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from canonical_binning import find_canonical_bin
 from pion_component_subtraction import simc_shape_pion_weight_from_value
+from root_histogram_ownership import fingerprint_histogram_content_error
 
 
 D6_PRESENTATION_SCHEMA_VERSION = "full_background_subtraction_d6/v1"
@@ -6181,6 +6183,161 @@ def _e8_4_e8_2_children(payload):
     }
 
 
+def _e8_4_validate_audit_fingerprint(record):
+    if not isinstance(record, Mapping) or record.get("schema_version") != "f6_3_current_lineage_identity_audit/v1":
+        raise _E8PayloadError("e8_4_identity_audit_missing_or_malformed")
+    copied = deepcopy(dict(record))
+    fingerprint = copied.pop("fingerprint", None)
+    try:
+        digest = hashlib.sha256(json.dumps(copied, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
+    except (TypeError, ValueError):
+        raise _E8PayloadError("e8_4_identity_audit_nonfinite_or_malformed")
+    if fingerprint != digest:
+        raise _E8PayloadError("e8_4_identity_audit_fingerprint_mismatch")
+    return deepcopy(dict(record))
+
+
+def _e8_4_validate_current_identity_audit(source, children, baseline):
+    """Validate producer records and object linkage; do not rebuild the branch."""
+    audit = _e8_4_validate_audit_fingerprint(source.get("identity_audit"))
+    if (audit.get("lineage") != "current_f6_3_candidate_lineage"
+        or audit.get("selected_setting_id") != source["selected_setting_id"]
+        or audit.get("authority") != source["authority"]
+        or audit.get("lambda_integration_window") != list(source["lambda_integration_window"])
+        or audit.get("t_edges") != list(baseline["t_edges"])
+        or audit.get("phi_edges") != list(baseline["phi_edges"])):
+        raise _E8PayloadError("e8_4_identity_audit_stale_or_cross_lineage")
+    if (audit.get("identity_passed") is not True
+        or audit.get("floating_identity_tolerance") != 1.0e-12
+        or audit.get("integration") != "normal_bins_in_order_no_width_weighting_flows_excluded"):
+        raise _E8PayloadError("e8_4_current_lineage_identity_not_passed")
+    rows = audit.get("children")
+    if not isinstance(rows, list) or len(rows) != len(children):
+        raise _E8PayloadError("e8_4_identity_audit_child_inventory_invalid")
+    seen = set()
+    for row in rows:
+        coordinate = (row.get("t_index"), row.get("phi_index"))
+        if coordinate not in children or coordinate in seen:
+            raise _E8PayloadError("e8_4_identity_audit_child_inventory_invalid")
+        seen.add(coordinate)
+        child = children[coordinate]
+        if (row.get("algebra_identity_passed") is not True or row.get("yield_identity_passed") is not True
+            or row.get("baseline_ownership_identity_passed") is not True
+            or row.get("failing_bin_count") != 0 or row.get("maximum_scaled_bin_residual", float("inf")) > 1.0e-12
+            or row.get("Y0") != child["Y0"] or row.get("YA") != child["YA"]):
+            raise _E8PayloadError("e8_4_current_lineage_identity_not_passed")
+        fingerprints = _mapping(row.get("histogram_fingerprints"))
+        for name in ("B_pi_0", "B_pi_A", "MM_0", "MM_A"):
+            try:
+                observed = fingerprint_histogram_content_error(child["histograms"][name])
+            except RuntimeError:
+                raise _E8PayloadError("e8_4_identity_audit_histogram_invalid")
+            if fingerprints.get(name) != observed:
+                raise _E8PayloadError("e8_4_identity_audit_histogram_fingerprint_mismatch")
+        if fingerprints.get("MM_0") != fingerprints.get("final_baseline"):
+            raise _E8PayloadError("e8_4_identity_audit_final_baseline_mismatch")
+        if row.get("mm_edges") != list(_e8_4_histogram_edges(child["histograms"]["MM_0"])):
+            raise _E8PayloadError("e8_4_identity_audit_geometry_mismatch")
+        for name in ("B_pi_0", "B_pi_A"):
+            histogram = child["histograms"][name]
+            if _mapping(row.get("pion_normal_bin_contents")).get(name) != [
+                float(histogram.GetBinContent(i)) for i in range(1, histogram.GetNbinsX() + 1)
+            ]:
+                raise _E8PayloadError("e8_4_current_aggregate_child_content_mismatch")
+        values = {name: [float(histogram.GetBinContent(i)) for i in range(1, histogram.GetNbinsX() + 1)]
+                  for name, histogram in child["histograms"].items() if name in ("MM_0", "MM_A", "B_pi_0", "B_pi_A")}
+        delta = [a - b for a, b in zip(values["MM_A"], values["MM_0"])]
+        # Validate persisted audit arithmetic on the cloned producer objects.
+        # This does not replace stored yields or reconstruct any correction.
+        for name, bins in (("MM_0", values["MM_0"]), ("MM_A", values["MM_A"]), ("delta_MM", delta)):
+            positive = sum(value for value in bins if value > 0.0)
+            negative = sum(value for value in bins if value < 0.0)
+            support = {"positive_support": positive, "negative_support": negative,
+                       "signed_integral": sum(bins), "absolute_support": positive - negative}
+            if _mapping(row.get("signed_support")).get(name) != support:
+                raise _E8PayloadError("e8_4_signed_support_identity_mismatch")
+        for actual, recorded, scalar in ((sum(values["MM_0"]), row.get("MM_0_integral"), child["Y0"]),
+                                         (sum(values["MM_A"]), row.get("MM_A_integral"), child["YA"]),
+                                         (sum(delta), row.get("delta_MM_integral"), child["YA"] - child["Y0"])):
+            if recorded != actual or abs(actual - scalar) > 1.0e-12 * max(1.0, abs(actual), abs(scalar)):
+                raise _E8PayloadError("e8_4_histogram_scalar_identity_mismatch")
+        scaled = [abs((ma - m0) + (ba - b0)) / max(1.0, abs(ma), abs(m0), abs(ba), abs(b0))
+                  for m0, ma, b0, ba in zip(values["MM_0"], values["MM_A"], values["B_pi_0"], values["B_pi_A"])]
+        if max(scaled, default=0.0) > 1.0e-12 or row.get("maximum_scaled_bin_residual") != max(scaled, default=0.0):
+            raise _E8PayloadError("e8_4_bin_algebra_identity_mismatch")
+        child["identity_audit"] = deepcopy(row)
+    aggregates = audit.get("aggregates")
+    if not isinstance(aggregates, list) or len(aggregates) != len(baseline["t_edges"]) - 1:
+        raise _E8PayloadError("e8_4_current_aggregate_inventory_invalid")
+    for j, aggregate in enumerate(aggregates):
+        current_rows = [row for row in rows if row["t_index"] == j]
+        inventory = [[j, k] for k in range(len(baseline["phi_edges"]) - 1)]
+        if (aggregate.get("lineage") != "current_f6_3_candidate_lineage"
+            or aggregate.get("t_index") != j or aggregate.get("child_inventory") != inventory
+            or aggregate.get("populated_child_inventory") != [[row["t_index"], row["phi_index"]] for row in current_rows if row["populated"]]):
+            raise _E8PayloadError("e8_4_current_aggregate_stale_or_cross_lineage")
+        # These are identity checks of persisted sums, never a replacement plot.
+        for name, output in (("B_pi_0", "B_pi_0_current"), ("B_pi_A", "B_pi_A_current")):
+            expected = [sum(row["pion_normal_bin_contents"][name][i] for row in current_rows)
+                        for i in range(len(current_rows[0]["mm_edges"]) - 1)]
+            if aggregate.get(output) != expected:
+                raise _E8PayloadError("e8_4_current_aggregate_sum_mismatch")
+            if aggregate.get("aggregate_{}_integral".format(name)) != sum(expected):
+                raise _E8PayloadError("e8_4_current_aggregate_integral_mismatch")
+        delta = [a - b for a, b in zip(aggregate["B_pi_A_current"], aggregate["B_pi_0_current"])]
+        if aggregate.get("Delta_B_pi_current") != delta or aggregate.get("aggregate_delta_integral") != sum(delta):
+            raise _E8PayloadError("e8_4_current_aggregate_delta_mismatch")
+        if (aggregate.get("mm_edges") != current_rows[0]["mm_edges"]
+            or aggregate.get("candidate_f4_parent_sum_comparable") is not False
+            or not aggregate.get("candidate_f4_parent_sum_reason")):
+            raise _E8PayloadError("e8_4_current_aggregate_units_invalid")
+    return audit
+
+
+def _e8_4_validate_simc_audit(support, children, baseline, source_window):
+    audit = _e8_4_validate_audit_fingerprint(_mapping(support).get("normalization_audit"))
+    if (audit.get("record_kind") != "simc_normalization_provenance"
+        or audit.get("selected_setting_id") != baseline["setting_id"]
+        or audit.get("t_edges") != list(baseline["t_edges"])
+        or audit.get("phi_edges") != list(baseline["phi_edges"])
+        or audit.get("lambda_integration_window") != list(source_window)
+        or audit.get("normalization_producer") != "get_eff_charge.find_events"
+        or audit.get("histogram_producer") != "calculate_yield.process_hist_simc"
+        or audit.get("source_tree") != "h10" or not audit.get("source_root_file")
+        or audit.get("display_normalization_applied") is not False):
+        raise _E8PayloadError("e8_4_simc_provenance_invalid")
+    numerator = _e8_4_finite_scalar(audit.get("simc_normfactor"), "simc_normfactor")
+    denominator = _e8_4_finite_scalar(audit.get("simc_ncontribute"), "simc_ncontribute")
+    factor = _e8_4_finite_scalar(audit.get("normalization_factor_applied"), "simc_factor")
+    if denominator <= 0 or factor != numerator / denominator:
+        raise _E8PayloadError("e8_4_simc_normalization_identity_invalid")
+    rows = audit.get("children")
+    if not isinstance(rows, list) or len(rows) != len(children):
+        raise _E8PayloadError("e8_4_simc_provenance_inventory_invalid")
+    seen = set()
+    for row in rows:
+        coordinate = (row.get("t_index"), row.get("phi_index"))
+        if coordinate not in children or coordinate in seen:
+            raise _E8PayloadError("e8_4_simc_provenance_inventory_invalid")
+        seen.add(coordinate)
+        histogram = children[coordinate]["histograms"]["SIMC"]
+        if (row.get("histogram_fingerprint") != fingerprint_histogram_content_error(histogram)
+            or row.get("mm_edges") != list(_e8_4_histogram_edges(histogram))):
+            raise _E8PayloadError("e8_4_simc_object_identity_mismatch")
+        _e8_4_finite_scalar(row.get("SIMC_integral_in_the_same_lambda_window"), "simc_window_integral")
+        if row["SIMC_integral_in_the_same_lambda_window"] != sum(float(histogram.GetBinContent(i)) for i in range(1, histogram.GetNbinsX() + 1)):
+            raise _E8PayloadError("e8_4_simc_window_integral_identity_mismatch")
+    comparable = audit.get("absolute_comparison_available")
+    if comparable is True:
+        if (audit.get("histogram_units") != "yield_per_effective_data_charge"
+            or audit.get("data_units") != "yield_per_effective_data_charge"
+            or not audit.get("absolute_units_source_authority")):
+            raise _E8PayloadError("e8_4_simc_absolute_units_unproven")
+    elif comparable is not False or not audit.get("absolute_comparison_reason"):
+        raise _E8PayloadError("e8_4_simc_absolute_units_unproven")
+    return audit
+
+
 def build_full_background_subtraction_e8_4_payload(
     f6_3_source, e8_2_payload, *, setting_id=None, simc_support=None,
     parent_closure=None, candidate_pdf_path=None,
@@ -6335,6 +6492,8 @@ def build_full_background_subtraction_e8_4_payload(
             if tuple(_e8_4_histogram_edges(display) or ()) != analysis_mm_edges:
                 raise _E8PayloadError("e8_4_simc_mm_binning_mismatch")
             child["histograms"]["SIMC"] = display
+        identity_audit = _e8_4_validate_current_identity_audit(source, copied_children, baseline)
+        simc_audit = _e8_4_validate_simc_audit(simc_support, copied_children, baseline, source_window)
         if parent_closure is None and candidate_pdf_path is not None:
             try:
                 parent_closure = _e8_4_read_candidate_parent_closure(source, candidate_pdf_path)
@@ -6347,12 +6506,17 @@ def build_full_background_subtraction_e8_4_payload(
             "t_high": float(baseline["t_edges"][t_index + 1]),
             "children": tuple(copied_children[(t_index, phi_index)] for phi_index in range(len(baseline["phi_edges"]) - 1)),
         } for t_index in range(len(baseline["t_edges"]) - 1))
-    except _E8PayloadError as exc:
+    except (_E8PayloadError, AttributeError, KeyError, TypeError, ValueError, RuntimeError, OverflowError) as exc:
         return _e8_4_unavailable(str(exc), setting_id=source_setting)
     return {
         "schema_version": E8_4_PRESENTATION_SCHEMA_VERSION,
         "available": True,
         "reason": None,
+        "simc_absolute_comparison_available": simc_audit["absolute_comparison_available"],
+        "simc_absolute_comparison_reason": None if simc_audit["absolute_comparison_available"] else simc_audit["absolute_comparison_reason"],
+        "current_lineage_identity_audit": identity_audit,
+        "current_lineage_aggregate_audit": deepcopy(identity_audit["aggregates"]),
+        "simc_normalization_audit": simc_audit,
         "non_authoritative": True,
         "production_objects_mutated": False,
         "setting": baseline["setting"],
@@ -6970,6 +7134,7 @@ def _e8_4_render_authority_page(ROOT, pdf_name, payload):
                 ", ".join("{}={}".format(name, payload.get(name)) for name in flags),
             ),
             "Method B is numerically absent. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
+            "Current aggregates use only the current F.6.3 candidate children; historical E.8.3/F.6.1 is a separate lineage.",
             "No production promotion is performed. The Method-A minus baseline shift is a",
             "correction effect, not automatically a systematic uncertainty.",
         ), size=0.025,
@@ -7266,6 +7431,18 @@ def _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
 
 def _e8_4_render_simc_page(ROOT, pdf_name, payload, group, *, baseline=False):
     """Shareable child overlays; all objects are cloned before styling."""
+    if payload.get("simc_absolute_comparison_available") is not True:
+        return _e8_text_page(
+            ROOT, pdf_name, "C_e8_4_{}_unavailable_t{}".format(
+                "baseline_method_a_simc" if baseline else "method_a_vs_simc", group["t_index"] + 1,
+            ), "E.8.4 absolute SIMC comparison unavailable",
+            (
+                "Setting: {}; canonical t{}".format(payload.get("setting_id"), group["t_index"] + 1),
+                "Literal unavailable reason: {}".format(payload.get("simc_absolute_comparison_reason")),
+                "Absolute SIMC amplitude comparability is not validated; no agreement/disagreement is inferred.",
+                "The current F.6.3 data-only identity, yield and parent-closure audit remains available.",
+            ), size=0.031,
+        )
     title = "Baseline / Method A / SIMC" if baseline else "Method A / SIMC"
     canvas = ROOT.TCanvas("C_e8_4_{}_t{}".format(
         "baseline_method_a_simc" if baseline else "method_a_vs_simc", group["t_index"] + 1,
@@ -7425,7 +7602,15 @@ def _render_full_background_subtraction_e8_4_pages(ROOT, pdf_name, payload, mani
         ):
             page_id = "full_background.e8_4.{}.{}".format(suffix, scope)
             if renderer(ROOT, pdf_name, payload, group):
-                manifest.append(_e8_4_page_record(payload, page_id, scope, group=group))
+                record = _e8_4_page_record(payload, page_id, scope, group=group)
+                if suffix in ("method_a_vs_simc", "baseline_method_a_simc"):
+                    comparable = payload.get("simc_absolute_comparison_available") is True
+                    record.update(
+                        available=comparable,
+                        simc_absolute_comparison_available=comparable,
+                        reason=None if comparable else payload.get("simc_absolute_comparison_reason"),
+                    )
+                manifest.append(record)
             else:
                 failures.append("E.8.4 {} page unavailable".format(page_id))
     if _e8_4_render_parent_closure_page(ROOT, pdf_name, payload):

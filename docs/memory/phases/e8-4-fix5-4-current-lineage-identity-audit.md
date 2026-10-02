@@ -1,71 +1,84 @@
 # E.8.4 Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
 
-**Status:** `ACTIVE`.
-Memory checkpoint recorded 2026-10-02 at exact `test` HEAD
-`f9d70732290ea461096374ca1270b47452644991`.
+**Status:** `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+Local proposed implementation on 2026-10-02 starts and remains at exact `test`
+HEAD `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Its parent scientific source is
+`f9d70732290ea461096374ca1270b47452644991`; the starting commit changes memory
+only. Independent ChatGPT actual-diff review is pending.
 
-## Ownership and authorization
+## Ownership and implementation
 
-This phase owns the planned current-lineage identity audit. The
-[checkpoint contract](e8-4-fix5-4-post-farm-identity-audit-memory-checkpoint-task-contract.md)
-authorizes memory changes only. No audit code, plotting change or farm run is
-implemented or authorized here. A separate implementation contract will be
-written after independent review and user push of this checkpoint, followed by
-pushed-state synchronization.
+The [implementation contract](e8-4-fix5-4-current-lineage-identity-audit-and-fix-task-contract.md)
+owns this numerical/provenance step. `calculate_yield.py` attaches one private
+`f6_3_current_lineage_identity_audit/v1` record after public baseline yield
+extraction. It reads the exact measured final histogram and existing detached
+F.6.3 children. It validates geometry, content/error fingerprints, binwise
+pion/MM algebra and histogram/scalar closure with fixed scaled `1e-12` identity
+tolerance. Normal MM bins are summed in order without width weighting;
+underflow/overflow are excluded from arithmetic but included in ownership
+fingerprints. Signed positive, negative, signed and absolute support is retained
+for baseline, Method A and their difference, including sparse and zero children.
+No scalar or histogram is replaced to force closure.
 
-## Trigger and evidence boundary
+Current aggregates sum only current canonical children without normalization,
+retain complete/populated inventories and exact candidate authority. Candidate
+F.4 parent sums include broader application support; cut-window pion-template
+integrals are not asserted equal to those sums. Historical E.8.3/F.6.1
+aggregates remain separate and cannot satisfy this record.
 
-The supplied Fix.5 farm observation at the above pushed source reports fresh
-97-page Left/lowe output, zero renderer failures, all ten new pages and prior
-E.8.4 pages retained. The owner returned no final ZIP; accepted bundle closure
-and complete owner integration are not established. The
-[post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
-records exact artifact names/timestamps, input identities, representative
-scalar values, findings and uncertainties.
+`full_background_subtraction_plots.py` checks record fingerprints, current
+authority, inventories, object fingerprints and recorded arithmetic; clones
+objects and detached records; rejects missing, malformed, stale, historical or
+inconsistent identities. Explanatory wording explicitly separates current
+aggregates from historical E.8.3. Existing page IDs/styles are retained for
+consistent, comparable synthetic inputs.
 
-Confirmed findings: E.8.3 historical accepted F.6.1 aggregate lineage differs
-from current F.6.3/E.8.4 candidate lineage; blue baseline curves are obscured
-by magenta Method-A curves. Neither observation establishes which numerical
-object, if any, is wrong.
+## Source findings and scientific blocker
 
-## Planned numerical closure
+The active baseline snapshot is made immediately after pion subtraction.
+Both subsequent empirical fit/subtraction/pruning blocks are conditional and
+disabled in the active profile; final `H_MM_DATA` is cloned by `bin_data` and
+measured by `integral_with_stat_error`. Equality is enforced against that actual
+measured clone, rather than inferred solely from zero background scales.
+No source-proven wrong-object linkage repair was warranted.
 
-Scientific interpretation of fresh Fix.5 pages is `BLOCKED` pending:
+The existing SIMC producer fills same-cell `h10.missmass` with `iter_weight`
+after cuts, scales once by stored `normfac_simc = simc_normfactor / Ncontribute`,
+then clones to `_xsect_support_simc.mm`. Model iteration changes previous event
+weight by the ratio of model cross sections. Its luminosity/charge units are
+not declared by the traced source, while data yields use effective-charge
+normalization. The audit copies source/root/tree identity, setting/geometry,
+actual normalization inputs/factor, model semantics, histogram meaning,
+fingerprints and normal-bin window integrals. It records absolute comparison
+unavailable with `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
 
-1. Binwise `MM_A - MM_0 = -(B_pi_A - B_pi_0)` for every populated child,
-   with exact geometry and defined floating-point tolerance.
-2. Histogram/scalar closure: `Integral(MM_0) = Y0`, `Integral(MM_A) = YA`,
-   `Integral(MM_A - MM_0) = YA - Y0`, using exact producer-owned integration.
-3. Separate signed integral, positive-bin, negative-bin and absolute support
-   diagnostics before attributing large fractions to cancellation.
-4. Same-cell authoritative SIMC object, normalization and unit identity,
-   including its relevant integration-window integral and provenance.
+The [Fix.1 repair](e8-4-fix5-4-fix1-simc-availability-and-manifest-scope-task-contract.md)
+preserves overall availability of the valid current-F.6.3 E.8.4 payload and
+detached numerical/aggregate/SIMC audits. Only the two absolute-SIMC page
+families are provenance-blocked when those units are unproven, retaining page
+IDs, canonical inventories and literal reasons. Data-only/identity/yield and
+parent-closure evidence remains renderable. No renderer scale, unit conversion, setting-wide fallback or
+physics conclusion is introduced. This explicit unavailable scientific result
+is within the contract; it does not establish incorrect SIMC normalization.
+See the [source trace](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
 
-All four are **NOT YET VALIDATED**. Trace producer -> sidecar -> payload ->
-renderer and exact source/artifact/fingerprint identity. Preserve all 27
-canonical cells, explicit empty status, signed values and uncertainties;
-implement only warranted invariants or narrow source repairs under the future
-contract. Do not assume an object mismatch, cancellation or SIMC scaling error.
+## Local verification and boundaries
 
-## Preserved science and dependencies
+Python 3.12.10 was discovered locally. Deterministic focused numerical,
+provenance, E.8.4, plotting, F.6.3, E.8.2 yield, ownership, parent-correction
+and propagation tests pass; retained skip reasons distinguish unavailable
+PyROOT from superseded historical procedure-tail assertions. Exact final
+counts and memory health are recorded in the investigation. Syntax checks and
+`git diff --check` pass. These are local checks only, not ROOT/PyROOT, rendered
+PDF, full `main.py`, farm closure or actual observed signed-cancellation proof.
 
-F.4.Refresh.2, historical F.6.1/F.6.2 and the accepted narrow F.6.3 mechanics
-retain their closures. E.8.3 remains `SOURCE REVIEWED` for its historical
-lineage; it is not the current branch explanation. Method A remains detached,
-Method B diagnostic-only and numerically absent. Final canonical-five E.8 and
-F.6.4 remain `BLOCKED`. No accepted authority or production physics changes.
+F.4.Refresh.2 and accepted historical/narrow runtime closures remain unchanged.
+Method A remains detached/non-production; Method B remains numerically absent.
+Frozen factors, weights, cuts, windows, fits, normalization, yield arithmetic,
+production objects and uncertainties are unchanged. No SIMC helper, owner,
+profile, collector, visualization style, commit, push or farm execution changed.
 
-Visualization-only repair follows numerical closure: independently visible
-curves, clearer styles/legends, or a permitted support panel using validated
-objects. No content or normalization change for appearance. The missing ZIP
-is a separate post-render operational issue; diagnosing it alone does not
-warrant another expensive analysis run.
-
-Sequence: checkpoint -> ChatGPT PASS -> user commit/push -> pushed-state
-review -> separate Fix.5.4 numerical contract -> Codex numerical implementation
--> ChatGPT actual-diff review -> user commit/push -> pushed-state review ->
-visualization-only contract and Codex implementation from that reviewed pushed
-numerical source -> ChatGPT actual-diff review -> user commit/push ->
-pushed-state review -> one narrow Q4p4W2p74 / Left / lowe farm run -> fresh
-scientific and visual evidence review. CURRENT owns the sole
-ordinary NEXT. This checkpoint stops before all implementation and farm work.
+After actual-diff review -> user commit/push -> pushed-state review, the next
+source-changing stage is separately contracted visualization-only improvement
+using validated current-lineage objects and retaining the SIMC absolute-unit
+blocker. No farm execution is authorized here. CURRENT owns the sole NEXT.

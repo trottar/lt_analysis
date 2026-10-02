@@ -115,6 +115,18 @@ same-normalization and same-unit provenance, including the relevant
 integration-window integral. Cloning existing SIMC without renderer scaling
 alone does not prove those identities. See the [post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
 
+Fix.5.4 source audits use normal-bin, unweighted-by-width integration with
+flows excluded; exact content/error ownership fingerprints include flow bins.
+Current pion-template aggregates use current F.6.3 children only. F.4 parent
+application sums cover broader MM support and cannot be equated to cut-window
+template integrals. SIMC `iter_weight * normfac / Ncontribute` has no proven
+luminosity/effective-charge unit authority in the traced source. Preserve that
+absolute-comparison blocker without inventing a scale; data/SIMC agreement or
+disagreement cannot be inferred from the current overlay amplitude.
+Unresolved absolute SIMC units block the two absolute-SIMC page families and
+their interpretation only. They do not make a valid current-F.6.3 E.8.4
+data-only/identity/yield/parent-closure payload unavailable.
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw
