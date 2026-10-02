@@ -1,10 +1,13 @@
 # E.8.4 Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
 
 **Status:** `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-Local proposed implementation on 2026-10-02 starts and remains at exact `test`
-HEAD `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Its parent scientific source is
-`f9d70732290ea461096374ca1270b47452644991`; the starting commit changes memory
-only. Independent ChatGPT actual-diff review is pending.
+Numerical source is `SOURCE REVIEWED` at committed/pushed `test` HEAD
+`761fbb6c03d2d7a10bb911cf84e9ba898496fab6`, parent
+`71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Independent ChatGPT actual-diff
+and pushed-state review passed, as supplied by the Fix.5.5 task contract.
+The earlier implementation began at that parent, whose parent scientific
+source is `f9d70732290ea461096374ca1270b47452644991`. Review/push establishes
+source acceptance only; Fix.5.4 has no new farm numerical closure.
 
 ## Ownership and implementation
 
@@ -75,10 +78,11 @@ PDF, full `main.py`, farm closure or actual observed signed-cancellation proof.
 F.4.Refresh.2 and accepted historical/narrow runtime closures remain unchanged.
 Method A remains detached/non-production; Method B remains numerically absent.
 Frozen factors, weights, cuts, windows, fits, normalization, yield arithmetic,
-production objects and uncertainties are unchanged. No SIMC helper, owner,
-profile, collector, visualization style, commit, push or farm execution changed.
+production objects and uncertainties are unchanged. During Fix.5.4 implementation no SIMC helper, owner,
+profile, collector, visualization style or farm execution changed. The user
+subsequently committed/pushed the reviewed numerical source.
 
-After actual-diff review -> user commit/push -> pushed-state review, the next
-source-changing stage is separately contracted visualization-only improvement
-using validated current-lineage objects and retaining the SIMC absolute-unit
-blocker. No farm execution is authorized here. CURRENT owns the sole NEXT.
+The separately contracted [Fix.5.5 presentation](e8-4-fix5-5-current-lineage-visualization-clarity.md)
+now consumes these stored records from the reviewed numerical source, retaining
+the absolute-SIMC blocker. Numerical ownership, validators and producer bytes
+remain unchanged. CURRENT owns the sole NEXT; no farm execution is authorized.

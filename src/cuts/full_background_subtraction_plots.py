@@ -6895,8 +6895,9 @@ def _e8_3_render_authority_page(ROOT, pdf_name, payload):
     hashes = _mapping(payload.get("input_sha256"))
     return _e8_text_page(
         ROOT, pdf_name, "C_full_background_e8_3_authority",
-        "E.8.3 detached Method-A reweighting audit",
+        "E.8.3 historical accepted F.6.1 lineage",
         (
+            "Historical accepted F.6.1 lineage; not the current F.6.3/E.8.4 candidate lineage.",
             "b_j^0 = s_j * w0_j",
             "b_j^A = s_j * w0_j * C_j",
             "C_j is the accepted F.4 parent-preserving correction; parent normalization",
@@ -6971,8 +6972,8 @@ def _e8_3_render_mm_page(ROOT, pdf_name, payload, parent):
         canvas.cd(4)
         note = _e8_add_text(
             ROOT, (0.08, 0.16, 0.92, 0.88), (
-                "E.8.3 current setting {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1),
-                "All curves are accepted persisted F.6.1 aggregate arrays.",
+                "E.8.3 historical accepted F.6.1 aggregate context: {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1),
+                "Persisted historical arrays; not the current F.6.3/E.8.4 candidate lineage.",
                 "The signed delta is displayed only after direct persisted-array consistency validation.",
                 "Undefined ratio bins are absent; no clipping, cap, smoothing, interpolation, or renormalization occurs.",
             ), size=0.030,
@@ -7018,6 +7019,7 @@ def _e8_3_render_tphi_page(ROOT, pdf_name, payload, parent):
         text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
         text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.026)
         text.AddText("E.8.3 persisted canonical (t,phi) pion redistribution — {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1))
+        text.AddText("Historical accepted F.6.1 aggregate context; not the current F.6.3/E.8.4 candidate lineage.")
         text.AddText("All nine physical phi children are retained. EMPTY is copied only from persisted F.5 event_count == 0; no child normalization.")
         for index, (base, shifted, change, event_count) in enumerate(zip(baseline, adjusted, delta, event_counts)):
             status = "EMPTY" if event_count == 0 else "POPULATED n={}".format(int(event_count))
@@ -7060,7 +7062,9 @@ def _render_full_background_subtraction_e8_3_pages(ROOT, pdf_name, payload, mani
         ROOT, pdf_name, "C_full_background_e8_3_f6_2_cross_reference",
         "E.8.3 cross-reference to accepted F.6.2 explanation",
         (
+            "Historical accepted F.6.1 lineage; not the current F.6.3/E.8.4 candidate lineage.",
             "The preceding redistribution consumes F.5/F.6.1 persisted aggregates only.",
+            "It must not be used as the aggregate explanation for the current F.6.3/E.8.4 branch.",
             "The existing E.8/E.8.1 F.6.2 pages remain the accepted explanation of L/B/A shapes,",
             "acceptance maps/correlations, support/OOD, effective statistics, and kaon-window refinement.",
             "E.8.3 neither duplicates nor recomputes that F.6.2 science.",
@@ -7141,14 +7145,41 @@ def _e8_4_render_authority_page(ROOT, pdf_name, payload):
     )
 
 
+def _e8_4_comparison_style(histogram, role, color):
+    """Redundant comparison encoding, applied only to detached E.8.4 displays."""
+    _style_histogram(histogram, color)
+    line_style, width = {
+        "baseline": (1, 2), "method_a": (2, 4),
+        "simc": (1, 2), "common_input": (3, 1),
+    }[role]
+    histogram.SetLineStyle(line_style)
+    histogram.SetLineWidth(width)
+    if role == "baseline":
+        histogram.SetMarkerColor(color)
+        histogram.SetMarkerStyle(24)
+        histogram.SetMarkerSize(0.6)
+
+
+def _e8_4_comparison_legend(ROOT, entries, retained):
+    legend = ROOT.TLegend(0.52, 0.64, 0.90, 0.89)
+    legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextSize(0.025)
+    for histogram, label, option in entries:
+        legend.AddEntry(histogram, label, option)
+    legend.Draw()
+    retained.append(legend)
+
+
 def _e8_4_draw_histogram(
-    ROOT, histogram, name, title, color, y_range, retained, *, draw_option="hist e",
+    ROOT, histogram, name, title, color, y_range, retained, *, draw_option="hist e", role=None,
 ):
     clone = _clone_display_histogram(histogram, name)
     if clone is None:
         return None
     _set_histogram_title(clone, title)
-    _style_histogram(clone, color)
+    if role is None:
+        _style_histogram(clone, color)
+    else:
+        _e8_4_comparison_style(clone, role, color)
     _apply_display_y_range(clone, y_range)
     clone.Draw(draw_option)
     retained.append(clone)
@@ -7179,26 +7210,29 @@ def _e8_4_render_pion_consequence_page(ROOT, pdf_name, payload, group):
                 ROOT, hists.get("pion_input"), "H_e8_4_pion_input_t{}_phi{}".format(
                     int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
                 ), "Common proton-cleaned pion input;Missing mass [GeV];Signed normalized yield",
-                getattr(ROOT, "kBlack", 1), y_range, retained,
+                getattr(ROOT, "kBlack", 1), y_range, retained, role="common_input",
+            )
+            adjusted = _e8_4_draw_histogram(
+                ROOT, hists.get("B_pi_A"), "H_e8_4_bpia_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ), "B_pi^0 and B_pi^A on common proton-cleaned input;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kMagenta", 6), y_range, retained,
+                draw_option="hist e same", role="method_a",
             )
             baseline = _e8_4_draw_histogram(
                 ROOT, hists.get("B_pi_0"), "H_e8_4_bpi0_t{}_phi{}".format(
                     int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
                 ), "B_pi^0 and B_pi^A on common proton-cleaned input;Missing mass [GeV];Signed normalized yield",
-                getattr(ROOT, "kBlue", 4), y_range, retained, draw_option="hist e same",
-            )
-            adjusted = _clone_display_histogram(
-                hists.get("B_pi_A"), "H_e8_4_bpia_t{}_phi{}".format(
-                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
-                ),
+                getattr(ROOT, "kBlue", 4), y_range, retained,
+                draw_option="hist e p same", role="baseline",
             )
             if input_hist is None or baseline is None or adjusted is None:
                 return False
-            _set_histogram_title(adjusted, baseline.GetTitle() if hasattr(baseline, "GetTitle") else "B_pi^A")
-            _style_histogram(adjusted, getattr(ROOT, "kMagenta", 6))
-            _apply_display_y_range(adjusted, y_range)
-            adjusted.Draw("hist e same")
-            retained.append(adjusted)
+            _e8_4_comparison_legend(ROOT, (
+                (input_hist, "Common pion input", "l"),
+                (baseline, "Baseline B_pi_0", "lep"),
+                (adjusted, "Method A B_pi_A", "le"),
+            ), retained)
             retained.append(_draw_small_note(
                 ROOT, "phi {} [{:.1f}, {:.1f}] deg: common input; stored B_pi^0 (blue), B_pi^A (magenta)".format(
                     int(child["phi_index"]) + 1, float(child["phi_low"]), float(child["phi_high"]),
@@ -7235,23 +7269,25 @@ def _e8_4_render_final_mm_page(ROOT, pdf_name, payload, group):
             canvas.cd(index)
             hists = _mapping(child.get("histograms"))
             y_range = _combined_histogram_y_range([hists.get("MM_0"), hists.get("MM_A")])
+            adjusted = _e8_4_draw_histogram(
+                ROOT, hists.get("MM_A"), "H_e8_4_mma_t{}_phi{}".format(
+                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
+                ), "MM_0 and MM_A;Missing mass [GeV];Signed normalized yield",
+                getattr(ROOT, "kMagenta", 6), y_range, retained, role="method_a",
+            )
             baseline = _e8_4_draw_histogram(
                 ROOT, hists.get("MM_0"), "H_e8_4_mm0_t{}_phi{}".format(
                     int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
                 ), "MM_0 and MM_A;Missing mass [GeV];Signed normalized yield",
                 getattr(ROOT, "kBlue", 4), y_range, retained,
-            )
-            adjusted = _clone_display_histogram(
-                hists.get("MM_A"), "H_e8_4_mma_t{}_phi{}".format(
-                    int(group["t_index"]) + 1, int(child["phi_index"]) + 1,
-                ),
+                draw_option="hist e p same", role="baseline",
             )
             if baseline is None or adjusted is None:
                 return False
-            _style_histogram(adjusted, getattr(ROOT, "kMagenta", 6))
-            _apply_display_y_range(adjusted, y_range)
-            adjusted.Draw("hist e same")
-            retained.append(adjusted)
+            _e8_4_comparison_legend(ROOT, (
+                (baseline, "Baseline MM_0", "lep"),
+                (adjusted, "Method A MM_A", "le"),
+            ), retained)
             retained.extend(_e8_2_draw_lambda_window(ROOT, baseline, payload["lambda_window"]))
             retained.append(_draw_small_note(
                 ROOT, "t{} phi {} [{:.1f}, {:.1f}] deg; Y0={:.5g}; YA={:.5g}".format(
@@ -7406,7 +7442,9 @@ def _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
         text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
         text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.025)
         text.AddText("E.8.4 stored canonical t-by-phi impact summary — {}".format(payload.get("setting_id")))
-        text.AddText("No t-integrated observable or shift uncertainty is constructed on this page.")
+        text.AddText("Current-branch numerical identities: stored Fix.5.4 current-lineage audit; historical E.8.3 is separate.")
+        text.AddText("Signed support is diagnostic, not a correction or uncertainty. No t-integrated observable is constructed.")
+        text.AddText("Absolute SIMC amplitude interpretation remains blocked unless explicitly source-authorized.")
         for group in tuple(payload.get("per_t") or ()):
             text.AddText("t{} [{:.4f}, {:.4f}] GeV^2".format(
                 int(group["t_index"]) + 1, float(group["t_low"]), float(group["t_high"]),
@@ -7457,7 +7495,7 @@ def _e8_4_render_simc_page(ROOT, pdf_name, payload, group, *, baseline=False):
                        (column + 1) / 3.0, 0.03 + (3 - row) * 0.28)
             pad.SetTopMargin(0.12); pad.SetBottomMargin(0.14)
             hists = child["histograms"]
-            names = ("MM_0", "MM_A", "SIMC") if baseline else ("MM_A", "SIMC")
+            names = ("SIMC", "MM_A", "MM_0") if baseline else ("SIMC", "MM_A")
             labels = {"MM_0": "Baseline data", "MM_A": "Method A data", "SIMC": "SIMC"}
             colors = {"MM_0": getattr(ROOT, "kBlue", 4), "MM_A": getattr(ROOT, "kMagenta", 6), "SIMC": getattr(ROOT, "kBlack", 1)}
             y_range = _combined_histogram_y_range([hists[name] for name in names])
@@ -7471,11 +7509,12 @@ def _e8_4_render_simc_page(ROOT, pdf_name, payload, group, *, baseline=False):
                     ), "phi [{:.0f}, {:.0f}) deg;Missing mass [GeV];Normalized yield".format(
                         child["phi_low"], child["phi_high"],
                     ), colors[name], y_range, retained,
-                    draw_option="hist e" if position == 0 else "hist e same",
+                    draw_option=("hist e" if position == 0 else "hist e p same" if name == "MM_0" else "hist e same"),
+                    role={"MM_0": "baseline", "MM_A": "method_a", "SIMC": "simc"}[name],
                 )
                 if display is None:
                     return False
-                legend.AddEntry(display, labels[name], "le")
+                legend.AddEntry(display, labels[name], "lep" if name == "MM_0" else "le")
                 first = display if first is None else first
             legend.Draw(); retained.append(legend)
             retained.extend(_e8_2_draw_lambda_window(ROOT, first, payload["lambda_window"]))
@@ -7502,9 +7541,33 @@ def _e8_4_render_baseline_simc_page(ROOT, pdf_name, payload, group):
     return _e8_4_render_simc_page(ROOT, pdf_name, payload, group, baseline=True)
 
 
+def _e8_4_stored_support_lines(payload, group):
+    """Format producer-owned audit records; no histogram or child aggregation."""
+    rows = [
+        "Stored Fix.5.4 signed support: S = signed integral; Abs = absolute support (diagnostic, not uncertainty).",
+    ]
+    for child in group["children"]:
+        support = child["identity_audit"]["signed_support"]
+        rows.append("phi {} [{:.0f}, {:.0f}): ".format(
+            child["phi_index"] + 1, child["phi_low"], child["phi_high"],
+        ) + "; ".join("{} S={:.8g} Abs={:.8g}".format(
+            label, support[key]["signed_integral"], support[key]["absolute_support"],
+        ) for key, label in (("MM_0", "MM_0"), ("MM_A", "MM_A"), ("delta_MM", "delta"))))
+    aggregate = next(row for row in payload["current_lineage_aggregate_audit"]
+                     if row["t_index"] == group["t_index"])
+    rows.append("current F.6.3 candidate lineage; Lambda/allcut MM-template aggregate")
+    rows.append("Stored aggregate B_pi_0={:.8g}; B_pi_A={:.8g}; delta={:.8g}".format(
+        aggregate["aggregate_B_pi_0_integral"], aggregate["aggregate_B_pi_A_integral"],
+        aggregate["aggregate_delta_integral"],
+    ))
+    if aggregate["candidate_f4_parent_sum_comparable"] is False:
+        rows.append("Not the broader F.4 application-population parent sum (stored audit: non-comparable).")
+    return tuple(rows)
+
+
 def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
     """Stored clean yields and effects; never integrate display histograms."""
-    canvas = ROOT.TCanvas("C_e8_4_yield_summary_t{}".format(group["t_index"] + 1), "Method-A yield impact", 1800, 800)
+    canvas = ROOT.TCanvas("C_e8_4_yield_summary_t{}".format(group["t_index"] + 1), "Method-A yield impact", 1800, 1400)
     retained = []
     children = group["children"]
     centers = [(child["phi_low"] + child["phi_high"]) / 2.0 for child in children]
@@ -7516,7 +7579,7 @@ def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
             (3, ("delta_y_over_y0",), "DeltaY / Y0;phi [deg];Fractional change"),
         ):
             pad = canvas.cd(panel)
-            pad.SetPad((panel - 1) / 3.0, 0.06, panel / 3.0, 0.88)
+            pad.SetPad((panel - 1) / 3.0, 0.52, panel / 3.0, 0.90)
             values = [float(child[key]) for key in keys for child in children if child.get(key) is not None]
             errors = [float(child[key + "_statistical_error"]) for key in keys for child in children] if panel == 1 else []
             low, high = min([0.0] + values), max([0.0] + values)
@@ -7546,6 +7609,12 @@ def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
                              for child in children if child.get("delta_y_over_y0") is None]
                 if undefined:
                     retained.append(_e8_add_text(ROOT, (0.13, 0.55, 0.89, 0.89), tuple(undefined), size=0.030))
+        canvas.cd()
+        support_note = _e8_add_text(ROOT, (0.04, 0.04, 0.96, 0.47),
+                                   _e8_4_stored_support_lines(payload, group), size=0.021)
+        if support_note is None:
+            return False
+        retained.append(support_note)
         retained.append(_draw_page_header(ROOT, canvas, "Method-A yield impact (no new DeltaY uncertainty)", group))
         canvas._full_background_e8_4_draw_objects = tuple(retained)
         canvas.Print(pdf_name)

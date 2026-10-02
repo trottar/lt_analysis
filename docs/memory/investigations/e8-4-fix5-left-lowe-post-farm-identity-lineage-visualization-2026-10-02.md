@@ -1,8 +1,20 @@
 # E.8.4 Fix.5 Left/lowe post-farm identity, lineage and visualization — 2026-10-02
 
-## Fix.5.4 local source audit and proposed implementation
+## Reviewed numerical source and Fix.5.5 presentation checkpoint
 
-Local starting/unchanged `test` HEAD is
+The supplied Fix.5.5 contract records independent ChatGPT actual-diff and
+pushed-state review PASS for numerical source
+`761fbb6c03d2d7a10bb911cf84e9ba898496fab6` on `test`, parent
+`71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Exact local HEAD/branch match.
+Fix.5.4 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+[Fix.5.5](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md) is locally
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; only presentation, tests and
+warranted memory change. Its stored support diagnostics cannot establish actual
+farm cancellation. The numerical source, SIMC blocker and production remain frozen.
+
+## Fix.5.4 implementation history
+
+The Fix.5.4 implementation originally started on `test` HEAD
 `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Its parent is the supplied Fix.5
 scientific source below; the committed range changes memory only. No tracked
 worktree changes existed at task start. Two user-supplied untracked contracts
@@ -84,8 +96,8 @@ branch, E.8.2 baseline yield, ROOT ownership, parent-preserving correction and
 t/phi propagation. After the final metadata refinement and explicit empty-child
 test, the two focused suites passed all 32 tests. In-memory syntax checks passed for all four changed/new
 Python files; `git diff --check` passed. No ROOT/PyROOT/full-analysis/farm/PDF
-validation is inferred. Actual-diff review is pending; no commit, push or farm
-run occurred. The owner ZIP failure remains outside this task.
+validation is inferred. At that local checkpoint actual-diff review was pending; no commit, push or farm
+run occurred during implementation. Subsequent source review/push is recorded above. The owner ZIP failure remains outside this task.
 
 Fix.1 corrects the original candidate's manifest/review scope: the unrelated
 pre-existing workflow contract is preserved unchanged and untracked, and is
@@ -114,14 +126,13 @@ without warnings or hard failures. CURRENT/MEMORY/CURRENT_HANDOFF sizes are
 it remains untracked and contributes no manifest entry or review addition.
 The temporary view contains 195 indexed memory files, including both intended
 contracts. Syntax and `git diff --check` pass; no local result establishes
-ROOT/PyROOT/full-analysis/PDF/farm validation. The repaired complete candidate
-still awaits independent actual-diff review before user commit/push and
-pushed-state review. No visualization, packaging or farm action is authorized.
+ROOT/PyROOT/full-analysis/PDF/farm validation. The repaired numerical candidate subsequently passed independent actual-diff
+and pushed-state review at the source identity recorded above. No numerical
+farm closure or packaging repair follows from those reviews.
 
-The next source-changing stage, conditional on numerical actual-diff review,
-user commit/push and pushed-state review, is visualization-only improvement
-from this numerical source while retaining the SIMC absolute-unit blocker.
-CURRENT owns the sole NEXT; no farm execution is authorized by this task.
+Fix.5.5 is the separately authorized visualization-only stage from that
+reviewed numerical source. Its local checks pass without changing physics or
+normalization; CURRENT owns the sole NEXT and no farm execution is authorized.
 
 ## Scope and evidence authority
 
@@ -305,24 +316,12 @@ No authority replacement, scientific calculation or runtime behavior changes.
 
 ## Exact next sequence
 
-[Fix.5.4](../phases/e8-4-fix5-4-current-lineage-identity-audit.md) is `ACTIVE`.
-The sole substantive action is the current-lineage audit/fix after this
-checkpoint's independent review, user commit/push and pushed-state review, and
-a separate implementation contract. Dependency order:
+Fix.5.4 numerical actual-diff and pushed-state review are complete at
+`761fbb6c03d2d7a10bb911cf84e9ba898496fab6`. Fix.5.5 local implementation
+is complete; see its phase record for deterministic tests and preservation checks.
 
-1. this memory checkpoint -> ChatGPT PASS -> user commit/push -> pushed-state review;
-2. separate Fix.5.4 numerical audit/fix contract;
-3. Codex numerical implementation;
-4. ChatGPT actual-diff review;
-5. user commit/push;
-6. pushed-state review;
-7. only then write/run the visualization-only contract from that reviewed pushed numerical source, after numerical closure;
-8. Codex visualization implementation;
-9. ChatGPT actual-diff review;
-10. user commit/push;
-11. pushed-state review;
-12. one narrow Q4p4W2p74 / Left / lowe farm run;
-13. fresh scientific and visual evidence review.
-
-Stop this checkpoint before audit implementation, visualization implementation,
-commit, push or farm execution. CURRENT owns the exact ordinary NEXT.
+NEXT — Fix.5.5 actual-diff review -> user commit/push -> pushed-state review ->
+farm-readiness review of the tracked owner/packaging path -> one narrow
+Q4p4W2p74 / Left / lowe farm gate only after that path is ready -> fresh
+scientific and visual evidence review. The missing owner ZIP remains separate;
+no owner repair, commit, push or farm execution occurs in Fix.5.5. CURRENT owns NEXT.

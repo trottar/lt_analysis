@@ -11,14 +11,19 @@ upstream authorities, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-[E.8.4 Fix.5.4](phases/e8-4-fix5-4-current-lineage-identity-audit.md) is
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local proposed numerical and
-provenance audits pass deterministic tests. The exact final-yield histogram is
-fingerprint-checked against the private baseline sidecar; current aggregates
-use only current F.6.3 children. SIMC absolute units are not source-proven:
-Fix.1 blocks only the absolute-SIMC page families, preserving the otherwise
-valid current-F.6.3 E.8.4 payload without rescaling. Repaired actual-diff review remains
-pending; no visualization, owner/profile repair or farm execution occurred.
+[E.8.4 Fix.5.5](phases/e8-4-fix5-5-current-lineage-visualization-clarity.md) is
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local visualization-only
+implementation and deterministic checks pass. Baseline blue is solid with open
+markers and drawn last over wider dashed magenta. Existing yield-summary pages
+show stored Fix.5.4 signed/absolute support and current-F.6.3 aggregate values;
+E.8.3 is visibly historical. Page IDs, numerical identities and the absolute-
+SIMC blocker are preserved. Actual ROOT/PDF visual quality remains farm-only.
+
+[Fix.5.4 numerical source](phases/e8-4-fix5-4-current-lineage-identity-audit.md)
+is `SOURCE REVIEWED` at `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`:
+independent ChatGPT actual-diff and pushed-state review passed, as supplied by
+the Fix.5.5 contract. Fix.5.4 remains `DEVELOPMENT COMPLETE, FARM VALIDATION
+PENDING`; no new numerical farm closure is inferred.
 
 ## Verified State
 
@@ -31,7 +36,8 @@ The E.8.3 historical accepted F.6.1 aggregate and the current F.6.3/E.8.4
 candidate branch have a confirmed lineage mismatch. Historical E.8.3 remains
 `SOURCE REVIEWED`; it cannot explain the current branch without exact lineage
 identity. Baseline blue curves obscured by Method-A magenta are a confirmed
-presentation deficiency; visibility repair must follow numerical closure.
+presentation deficiency; Fix.5.5 addresses it from the reviewed numerical source,
+with real visual acceptance still pending.
 
 F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`. F.6.3 and the existing
 E.8.4 gate remain `CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe:
@@ -46,12 +52,13 @@ remain `BLOCKED`.
 
 ## Source / Evidence Identity
 
-- Observed pushed/committed `test` HEAD and supplied Fix.5 farm source:
+- Supplied prior Fix.5 committed/farm source:
   `f9d70732290ea461096374ca1270b47452644991`.
-- Local implementation starting/unchanged HEAD on 2026-10-02:
-  `71a912bf14c59eee6d52956462aa0aa39c7f7c84` on `test`; its parent is the
-  above scientific source and its committed changes are memory-only.
-  Fix.5.4 source/test/memory edits are uncommitted local proposals.
+- Fix.5.5 starting/unchanged committed `test` HEAD on 2026-10-02:
+  `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`, parent
+  `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. The supplied contract records
+  independent numerical actual-diff and pushed-state review PASS. Fix.5.5
+  presentation/test/memory changes are local candidates for actual-diff review.
 - Fresh PDF/manifest: farm-visible timestamp `2026-10-01 23:34`, PDF about
   2.2 MB; inspection copies `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439.pdf`
   and `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439-manifest.json`.
@@ -79,29 +86,27 @@ retains an available current-F.6.3 payload and structured audits but marks only
 absolute-SIMC comparison pages/claims unavailable with literal provenance.
 No wrong normalization or permitted conversion is established.
 
-Visualization improvement is dependency-blocked on actual-diff review and
-pushed-state synchronization of the numerical source. The missing owner ZIP is a separate unresolved post-render operational
-failure; explaining it alone does not require another expensive analysis run.
-No further farm execution is authorized by this checkpoint.
+Fix.5.5 real visual validation remains pending. The missing owner ZIP is a
+separate unresolved post-render operational failure; farm readiness requires
+review of the tracked owner/packaging path. No owner repair or farm execution
+is authorized by this contract.
 
 ## Next Action
 
-NEXT — after Fix.5.4 actual-diff review -> user commit/push -> pushed-state
-review, the next source-changing stage is a separate visualization-only
-improvement contract consuming the validated current-lineage objects. Preserve
-the explicit SIMC absolute-unit blocker; authorize no farm execution yet.
+NEXT — Fix.5.5 actual-diff review -> user commit/push -> pushed-state review ->
+farm-readiness review of the tracked owner/packaging path -> one narrow
+Q4p4W2p74 / Left / lowe farm gate only after that path is ready. Preserve the
+SIMC absolute-unit blocker. Stop at local checks and complete review diff.
 
 ## Success Criteria
 
-The implemented Fix.5.4 audit covers every available canonical child with
-explicit tolerances, identities, integration semantics and signed support.
-Sequence: local numerical implementation -> ChatGPT actual-diff review/user
-commit-push/pushed-state review -> visualization-only contract/Codex
-implementation from that reviewed pushed numerical source -> ChatGPT actual-diff
-review/user commit-push/pushed-state review -> one narrow Q4p4W2p74 / Left / lowe
-farm run -> fresh scientific and visual evidence review. This implementation
-stops at local checks and complete diff preparation; renderer success alone
-does not establish scientific linkage.
+The reviewed Fix.5.4 source owns numerical identities and support records;
+Fix.5.5 consumes them without recomputation. Local verification: 166 tests,
+148 passed, 18 retained skips (4 unavailable PyROOT, 14 superseded historical
+procedure-tail assertions); syntax and diff checks pass. Candidate-view memory
+manifest and ordinary health checks pass with no warnings or hard failures. Actual PDF/ROOT
+rendering, observed cancellation and scientific linkage still require fresh
+farm evidence; renderer success alone establishes none of those claims.
 
 ## Do Not Reopen Without New Evidence
 
@@ -113,6 +118,7 @@ does not close canonical-five E.8 or F.6.4.
 
 ## Relevant References
 
+- [Fix.5.5 phase](phases/e8-4-fix5-5-current-lineage-visualization-clarity.md)
 - [Fix.5.4 phase](phases/e8-4-fix5-4-current-lineage-identity-audit.md)
 - [Post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
 - [Fix.5 chronology](phases/e8-4-fix5-shareable-method-a-impact-pages.md)

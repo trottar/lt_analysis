@@ -39,6 +39,13 @@
   visibility after numerical identity closes; visualization must never change
   physics, histogram contents or normalization.
 
+- Use redundant line/marker styles and baseline-last draw order for nearly
+  overlapping comparisons; never change the values or ranges for visibility.
+- Present stored signed-support/aggregate diagnostics directly. A renderer
+  ownership test can use deliberately distinct stored values and prohibit
+  histogram reads, without accepting that fixture as a scientific identity.
+- Fake ROOT draw-order/style checks do not establish real PDF legibility.
+
 ## Workflow and failure handling
 
 - Prefer one narrow gate -> one targeted run -> fresh evidence -> inspect ->

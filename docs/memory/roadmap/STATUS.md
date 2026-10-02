@@ -191,9 +191,10 @@ and [investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lin
 
 #### E.8.4.Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local proposed numerical
-and provenance audit passes deterministic checks; actual-diff review remains
-pending. Signed support and current-only aggregates are available. SIMC
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — numerical/provenance source
+is `SOURCE REVIEWED` at `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`;
+independent ChatGPT actual-diff and pushed-state review passed per the supplied
+Fix.5.5 contract. Deterministic checks pass; new farm closure remains pending. Signed support and current-only aggregates are available. SIMC
 absolute units are not source-proven; Fix.1 blocks only authoritative
 absolute-SIMC page families/claims, preserving the valid current-F.6.3 E.8.4
 payload without rescaling. No farm numerical closure, cancellation explanation or
@@ -202,18 +203,21 @@ the historical accepted F.6.1 aggregate lineage, not the current F.6.3 candidate
 explanation. The confirmed cross-page lineage mismatch does not invalidate
 historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-current-lineage-identity-audit.md).
 
-Visualization-only improvement is `BLOCKED` on actual-diff review and
-pushed-state synchronization of the numerical source: baseline
-blue curves obscured by magenta Method-A curves require independently visible
-presentation without any physics or normalization change. Dependency order is
-local numerical implementation -> ChatGPT actual-diff review -> user
-commit/push -> pushed-state review ->
-visualization-only contract and Codex implementation from that reviewed pushed
-numerical source -> ChatGPT actual-diff review -> user commit/push ->
-pushed-state review -> one narrow Q4p4W2p74 / Left / lowe farm run -> fresh
-scientific and visual evidence review. This task authorizes no farm run and
-preserves the SIMC absolute-unit blocker. The missing ZIP is a
-separate post-render operational issue; diagnosing it alone needs no rerun.
+#### E.8.4.Fix.5.5 — current-lineage visualization clarity
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local presentation uses blue
+solid/open markers drawn last over wider dashed magenta, stored signed/absolute
+support and current-F.6.3 aggregate diagnostics, and explicit historical E.8.3
+labels. Numerical source, page inventory and absolute-SIMC blocker are frozen.
+166 deterministic tests ran: 148 passed, 18 retained skips. Actual ROOT/PDF
+visual quality and farm numerical closure remain pending. See the
+[Fix.5.5 phase](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md).
+
+Dependency order: Fix.5.5 actual-diff review -> user commit/push -> pushed-state
+review -> farm-readiness review of tracked owner/packaging -> one narrow
+Q4p4W2p74 / Left / lowe farm gate only after that path is ready -> fresh
+scientific and visual evidence review. The missing owner ZIP remains a separate
+post-render operational issue; this task authorizes no owner repair or farm run.
 
 #### Final E.8 closure
 
@@ -238,7 +242,7 @@ independent scientific phases. Record and batch nonblocking maintenance at
 milestones; concrete source/provenance/active-state blockers alone warrant
 separate reconciliation. The narrow Refresh.2 materialization and Left/lowe current-baseline
 reweighting/yield gates now have accepted evidence. The subsequent Fix.5
-shareable interpretation is blocked on the active Fix.5.4 numerical audit;
+shareable interpretation awaits fresh Fix.5.4/Fix.5.5 numerical and visual farm evidence;
 its presentation/owner gate remains narrow Left/lowe.
 Canonical-five closure and F.6.4 remain blocked; dependency order is unchanged.
 

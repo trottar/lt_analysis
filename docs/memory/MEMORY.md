@@ -127,6 +127,16 @@ Unresolved absolute SIMC units block the two absolute-SIMC page families and
 their interpretation only. They do not make a valid current-F.6.3 E.8.4
 data-only/identity/yield/parent-closure payload unavailable.
 
+Fix.5.4 numerical source `761fbb6` (full identity in CURRENT and the phase record) passed
+independent ChatGPT actual-diff and pushed-state review per the supplied
+Fix.5.5 contract; this is source acceptance, not new farm closure.
+Fix.5.5 presentation consumes stored child signed/absolute support and stored
+current-F.6.3 aggregates without histogram reintegration or child reaggregation.
+Baseline-last solid/open-marker blue and wider dashed magenta encode identity
+beyond color. Historical E.8.3 must visibly identify its accepted F.6.1 lineage
+as separate from current F.6.3/E.8.4. Fake ROOT checks establish draw commands and
+immutability; actual visual legibility remains a farm PDF acceptance question.
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw

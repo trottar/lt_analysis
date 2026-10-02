@@ -114,6 +114,18 @@ class _Histogram:
     def SetLineWidth(self, value):
         self.width = value
 
+    def SetLineStyle(self, value):
+        self.line_style = value
+
+    def SetMarkerStyle(self, value):
+        self.marker_style = value
+
+    def SetMarkerColor(self, value):
+        self.marker_color = value
+
+    def SetMarkerSize(self, value):
+        self.marker_size = value
+
     def SetStats(self, value):
         self.stats = value
 
@@ -558,7 +570,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
         }
         self.assertEqual(pion_draws, {
             "H_e8_4_pion_input_t1_phi1": "hist e",
-            "H_e8_4_bpi0_t1_phi1": "hist e same",
+            "H_e8_4_bpi0_t1_phi1": "hist e p same",
             "H_e8_4_bpia_t1_phi1": "hist e same",
         })
         self.assertEqual(_source_histogram_snapshot(source), before)
