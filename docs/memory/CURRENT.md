@@ -11,19 +11,18 @@ upstream authorities, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-[E.8.4 Fix.5.5](phases/e8-4-fix5-5-current-lineage-visualization-clarity.md) is
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local visualization-only
-implementation and deterministic checks pass. Baseline blue is solid with open
-markers and drawn last over wider dashed magenta. Existing yield-summary pages
-show stored Fix.5.4 signed/absolute support and current-F.6.3 aggregate values;
-E.8.3 is visibly historical. Page IDs, numerical identities and the absolute-
-SIMC blocker are preserved. Actual ROOT/PDF visual quality remains farm-only.
+[E.8.4 Fix.5.6](phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: the local operational owner
+candidate runs existing collector/source checks in an exact clean detached
+worktree before analysis and atomically persists per-attempt stage/failure
+status. Existing post-analysis artifact/page/collection/ZIP checks and bundle
+inventory are preserved. Owner runtime and final delivery await a farm attempt.
 
-[Fix.5.4 numerical source](phases/e8-4-fix5-4-current-lineage-identity-audit.md)
-is `SOURCE REVIEWED` at `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`:
-independent ChatGPT actual-diff and pushed-state review passed, as supplied by
-the Fix.5.5 contract. Fix.5.4 remains `DEVELOPMENT COMPLETE, FARM VALIDATION
-PENDING`; no new numerical farm closure is inferred.
+Fix.5.5 source is `SOURCE REVIEWED` at
+`df957a6414fc9c515d1f82228517cb801dc90350`; independent ChatGPT actual-diff
+and pushed-state review passed per the supplied Fix.5.6 contract. Fix.5.4 and
+Fix.5.5 remain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: source acceptance
+establishes no new numerical farm closure or actual PDF visual quality.
 
 ## Verified State
 
@@ -54,11 +53,11 @@ remain `BLOCKED`.
 
 - Supplied prior Fix.5 committed/farm source:
   `f9d70732290ea461096374ca1270b47452644991`.
-- Fix.5.5 starting/unchanged committed `test` HEAD on 2026-10-02:
-  `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`, parent
-  `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. The supplied contract records
-  independent numerical actual-diff and pushed-state review PASS. Fix.5.5
-  presentation/test/memory changes are local candidates for actual-diff review.
+- Fix.5.6 starting/unchanged committed `test` HEAD on 2026-10-02:
+  `df957a6414fc9c515d1f82228517cb801dc90350`, parent
+  `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`. The supplied contract records
+  independent Fix.5.5 actual-diff/pushed-state review PASS with exactly the
+  reviewed 12 paths. Fix.5.6 owner/test/memory edits are local review candidates.
 - Fresh PDF/manifest: farm-visible timestamp `2026-10-01 23:34`, PDF about
   2.2 MB; inspection copies `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439.pdf`
   and `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439-manifest.json`.
@@ -86,27 +85,27 @@ retains an available current-F.6.3 payload and structured audits but marks only
 absolute-SIMC comparison pages/claims unavailable with literal provenance.
 No wrong normalization or permitted conversion is established.
 
-Fix.5.5 real visual validation remains pending. The missing owner ZIP is a
-separate unresolved post-render operational failure; farm readiness requires
-review of the tracked owner/packaging path. No owner repair or farm execution
-is authorized by this contract.
+Fix.5.5 real visual validation remains pending. The prior missing owner ZIP
+has no established exact failure cause. The old analysis log captures only the
+launcher child stream, so absence of an owner failure there cannot exclude a
+post-analysis failure. Fix.5.6 adds durable owner-stage provenance and early
+source checks; it does not diagnose which prior stage failed or authorize a run.
 
 ## Next Action
 
-NEXT — Fix.5.5 actual-diff review -> user commit/push -> pushed-state review ->
-farm-readiness review of the tracked owner/packaging path -> one narrow
-Q4p4W2p74 / Left / lowe farm gate only after that path is ready. Preserve the
-SIMC absolute-unit blocker. Stop at local checks and complete review diff.
+NEXT — Fix.5.6 actual-diff review -> user commit/push -> pushed-state review ->
+one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
+ZIP/status/log/PDF/manifest evidence review. Preserve the SIMC absolute-unit
+blocker; no farm command or execution is authorized in this implementation task.
 
 ## Success Criteria
 
-The reviewed Fix.5.4 source owns numerical identities and support records;
-Fix.5.5 consumes them without recomputation. Local verification: 166 tests,
-148 passed, 18 retained skips (4 unavailable PyROOT, 14 superseded historical
-procedure-tail assertions); syntax and diff checks pass. Candidate-view memory
-manifest and ordinary health checks pass with no warnings or hard failures. Actual PDF/ROOT
-rendering, observed cancellation and scientific linkage still require fresh
-farm evidence; renderer success alone establishes none of those claims.
+Local Fix.5.6 checks: 66 tests passed, no skips; syntax and diff checks pass.
+The scoped 199-file candidate manifest and ordinary memory health pass with no
+warnings or hard failures.
+Source and deterministic tests do not establish farm filesystem/permissions,
+ROOT/PyROOT, full analysis, ZIP delivery, PDF legibility, numerical closure or
+observed signed cancellation. All scientific/presentation source is frozen.
 
 ## Do Not Reopen Without New Evidence
 
@@ -118,6 +117,7 @@ does not close canonical-five E.8 or F.6.4.
 
 ## Relevant References
 
+- [Fix.5.6 phase](phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md)
 - [Fix.5.5 phase](phases/e8-4-fix5-5-current-lineage-visualization-clarity.md)
 - [Fix.5.4 phase](phases/e8-4-fix5-4-current-lineage-identity-audit.md)
 - [Post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)

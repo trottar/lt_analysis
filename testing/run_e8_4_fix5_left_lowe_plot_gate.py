@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -223,47 +224,149 @@ def verify_zip(path, source_commit, records):
         require(seen == set(records), "bundle_artifact_missing")
 
 
+def gate_status_path(outdir, output):
+    return outdir / (output.stem + "-gate-status.json")
+
+
+class GateStatus:
+    """Atomically publish this attempt's diagnostic, separate from the bundle."""
+    def __init__(self, outdir, output, source_commit):
+        self.path = gate_status_path(outdir, output)
+        now = datetime.now(timezone.utc).isoformat()
+        self.record = {
+            "schema_version": "e8_4_fix5_owner_gate_status/v1",
+            "source_commit": source_commit, "kinematic": KINEMATIC,
+            "phi": "Left", "epsilon": "lowe",
+            "expected_zip_path": output.as_posix(),
+            "analysis_log_path": (outdir / (output.stem + ".log")).as_posix(),
+            "started_at_utc": now, "updated_at_utc": now,
+            "status": "running", "stage": "preflight", "failure_reason": None,
+            "analysis_started": False, "analysis_completed": False,
+            "artifact_verification_completed": False,
+            "collector_source_preflight_completed": False,
+            "collection_completed": False, "zip_verification_completed": False,
+        }
+        self._persist(initial=True)
+
+    def _persist(self, *, initial=False):
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=self.path.parent,
+                                             prefix=".gate-status-", delete=False) as handle:
+                temporary = Path(handle.name)
+                handle.write(json.dumps(self.record, indent=2, sort_keys=True) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            if initial:
+                # Exclusive atomic publication: an existing attempt is never replaced.
+                os.link(temporary, self.path)
+            else:
+                os.replace(temporary, self.path)
+        finally:
+            if temporary is not None and temporary.exists():
+                temporary.unlink()
+
+    def update(self, stage=None, **fields):
+        if stage is not None:
+            self.record["stage"] = stage
+        self.record.update(fields)
+        self.record["updated_at_utc"] = datetime.now(timezone.utc).isoformat()
+        self._persist()
+
+
+def collector_source_preflight(repo, source_commit, profile):
+    """Reuse the unchanged collector checks before spending analysis time."""
+    with clean_collection_worktree(repo, source_commit) as worktree:
+        with collection_module(worktree) as detached_collector, redirect_stdout(sys.stderr):
+            identity = profile["source_identity"]
+            require(identity["required_analysis_commit"] == source_commit,
+                    "collector_preflight_required_commit_mismatch")
+            detached_profile = detached_collector.load_validation_profile(worktree / PROFILE)
+            detached_profile["source_identity"]["required_analysis_commit"] = source_commit
+            require(detached_profile == profile, "collector_preflight_profile_mismatch")
+            _, checks = detached_collector.collect_source_checks(
+                worktree, required_analysis_commit=source_commit,
+                allowed_committed_files=identity["allowed_committed_files"],
+            )
+            for check in checks:
+                require(check["returncode"] == 0,
+                        "collector_source_check_failed:{}:returncode={}:{}".format(
+                            check["name"], check["returncode"], check["stderr"] +
+                            ("\nstdout: " + check["stdout"] if check["stdout"] else ""),
+                        ))
+            ancestor, _, unexpected = detached_collector._committed_identity(
+                checks, identity["allowed_committed_files"],
+                identity["allowed_non_analysis_path_prefixes"],
+            )
+            require(ancestor, "collector_preflight_required_commit_not_present")
+            require(not unexpected, "collector_preflight_unexpected_committed_files:" +
+                    json.dumps(unexpected, sort_keys=True))
+    return checks
+
+
 def execute_gate(repo, outdir, output, source_commit):
-    require(not output.exists(), "output_zip_already_exists")
-    require(output.parent.is_dir(), "output_directory_missing")
-    provenance = preflight(repo, source_commit)
-    profile = resolved_profile(repo, source_commit)
-    for name, expected in CANDIDATES.items():
-        require((outdir / name).is_file() and sha256(outdir / name) == expected, "candidate_identity_mismatch:" + name)
-    before = {path.name: (path.stat().st_mtime_ns, path.stat().st_size, sha256(path))
-              for path in outdir.iterdir() if path.is_file() and path.name in {
-                  declaration["basename_template"].format(kinematic=KINEMATIC, phi="Left", epsilon="lowe")
-                  for scope in ("global", "settings") for declaration in profile["artifacts"][scope]}}
-    log_path = outdir / (output.stem + ".log")
-    require(not log_path.exists(), "run_log_already_exists")
-    started_ns = time.time_ns()
-    require(run_analysis(repo, log_path) == 0, "analysis_failed")
-    text = log_path.read_text(encoding="utf-8", errors="replace")
-    require("Left / lowe debug analysis completed." in text and
-            "Full high-epsilon processing is intentionally skipped in -d debug mode." in text, "left_lowe_completion_missing")
-    records, page_count = verify_artifacts(outdir, profile, started_ns, before)
-    require(git(repo, "rev-parse", "HEAD") == source_commit, "head_changed_during_run")
-    summary = {"schema_version": "e8_4_fix5_left_lowe_run_summary/v1", "source_commit": source_commit,
-               "profile_template_sha256": sha256(repo / PROFILE), "pre_run_provenance": provenance,
-               "post_run_status_short": git(repo, "status", "--porcelain=v1", "--untracked-files=all").splitlines(),
-               "analysis_returncode": 0, "analysis_command": ["./run_Prod_Analysis.sh", "-d", "4p4", "2p74"],
-               "run_log_path": str(log_path), "run_log_sha256": sha256(log_path),
-               "started_ns": started_ns, "finished_at_utc": datetime.now(timezone.utc).isoformat(),
-               "page_count": page_count, "renderer_failures": [], "artifacts": records}
-    summary_path = outdir / SUMMARY
-    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    records[SUMMARY] = {"sha256": sha256(summary_path), "bytes": summary_path.stat().st_size}
-    with tempfile.TemporaryDirectory(prefix="kaonlt-e8-4-fix5-profile-") as directory:
-        effective_profile = Path(directory) / "profile.json"
-        effective_profile.write_text(json.dumps(profile), encoding="utf-8")
-        with clean_collection_worktree(repo, source_commit) as worktree:
-            with collection_module(worktree) as detached_collector, redirect_stdout(sys.stderr):
-                result = detached_collector.collect_validation_bundle(outdir=outdir, kinematic=KINEMATIC,
-                    output=output, profile_path=effective_profile, repo_root=worktree,
-                    phi="Left", epsilon="lowe")
-            require(result["returncode"] == 0, "collection_failed")
-            verify_zip(output, source_commit, records)
-    return output
+    status = GateStatus(outdir, output, source_commit)
+    try:
+        require(not output.exists(), "output_zip_already_exists")
+        require(output.parent.is_dir(), "output_directory_missing")
+        provenance = preflight(repo, source_commit)
+        status.update("profile")
+        profile = resolved_profile(repo, source_commit)
+        status.update("candidate_identity")
+        for name, expected in CANDIDATES.items():
+            require((outdir / name).is_file() and sha256(outdir / name) == expected, "candidate_identity_mismatch:" + name)
+        before = {path.name: (path.stat().st_mtime_ns, path.stat().st_size, sha256(path))
+                  for path in outdir.iterdir() if path.is_file() and path.name in {
+                      declaration["basename_template"].format(kinematic=KINEMATIC, phi="Left", epsilon="lowe")
+                      for scope in ("global", "settings") for declaration in profile["artifacts"][scope]}}
+        log_path = outdir / (output.stem + ".log")
+        require(not log_path.exists(), "run_log_already_exists")
+        status.update("collector_source_preflight")
+        checks = collector_source_preflight(repo, source_commit, profile)
+        status.update(collector_source_preflight_completed=True, collector_source_checks=checks)
+        started_ns = time.time_ns()
+        status.update("analysis", analysis_started=True)
+        require(run_analysis(repo, log_path) == 0, "analysis_failed")
+        status.update("completion_markers", analysis_completed=True)
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+        require("Left / lowe debug analysis completed." in text and
+                "Full high-epsilon processing is intentionally skipped in -d debug mode." in text, "left_lowe_completion_missing")
+        status.update("verify_artifacts")
+        records, page_count = verify_artifacts(outdir, profile, started_ns, before)
+        status.update(artifact_verification_completed=True)
+        require(git(repo, "rev-parse", "HEAD") == source_commit, "head_changed_during_run")
+        status.update("write_run_summary")
+        summary = {"schema_version": "e8_4_fix5_left_lowe_run_summary/v1", "source_commit": source_commit,
+                   "profile_template_sha256": sha256(repo / PROFILE), "pre_run_provenance": provenance,
+                   "post_run_status_short": git(repo, "status", "--porcelain=v1", "--untracked-files=all").splitlines(),
+                   "analysis_returncode": 0, "analysis_command": ["./run_Prod_Analysis.sh", "-d", "4p4", "2p74"],
+                   "run_log_path": str(log_path), "run_log_sha256": sha256(log_path),
+                   "started_ns": started_ns, "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+                   "page_count": page_count, "renderer_failures": [], "artifacts": records}
+        summary_path = outdir / SUMMARY
+        summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        records[SUMMARY] = {"sha256": sha256(summary_path), "bytes": summary_path.stat().st_size}
+        status.update("collection")
+        with tempfile.TemporaryDirectory(prefix="kaonlt-e8-4-fix5-profile-") as directory:
+            effective_profile = Path(directory) / "profile.json"
+            effective_profile.write_text(json.dumps(profile), encoding="utf-8")
+            with clean_collection_worktree(repo, source_commit) as worktree:
+                with collection_module(worktree) as detached_collector, redirect_stdout(sys.stderr):
+                    result = detached_collector.collect_validation_bundle(outdir=outdir, kinematic=KINEMATIC,
+                        output=output, profile_path=effective_profile, repo_root=worktree,
+                        phi="Left", epsilon="lowe")
+                require(result["returncode"] == 0, "collection_failed")
+                status.update("verify_zip", collection_completed=True)
+                verify_zip(output, source_commit, records)
+                status.update("collection_cleanup", zip_verification_completed=True)
+        status.update("complete", status="success")
+        return output
+    except Exception as exc:
+        try:
+            status.update(status="failed", failure_reason=str(exc))
+        except OSError as persistence_error:
+            print("Owner status persistence failed: {}".format(persistence_error), file=sys.stderr)
+        raise
 
 
 def main(argv=None):
@@ -273,8 +376,9 @@ def main(argv=None):
     output = GLOBUS / ("KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_" + datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f") + ".zip")
     try:
         result = execute_gate(REPO, ARTIFACTS, output, args.source_commit)
-    except (OSError, ValueError, zipfile.BadZipFile) as exc:
+    except Exception as exc:
         print("E.8.4.Fix.5 gate failed: {}".format(exc), file=sys.stderr)
+        print("Owner gate status: {}".format(gate_status_path(ARTIFACTS, output).as_posix()), file=sys.stderr)
         return 1
     print(result.as_posix())
     return 0

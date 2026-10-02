@@ -7,10 +7,32 @@ pushed-state review PASS for numerical source
 `761fbb6c03d2d7a10bb911cf84e9ba898496fab6` on `test`, parent
 `71a912bf14c59eee6d52956462aa0aa39c7f7c84`. Exact local HEAD/branch match.
 Fix.5.4 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-[Fix.5.5](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md) is locally
+[Fix.5.5](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md) remains
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; only presentation, tests and
 warranted memory change. Its stored support diagnostics cannot establish actual
 farm cancellation. The numerical source, SIMC blocker and production remain frozen.
+
+## Fix.5.6 owner readiness and failure provenance
+
+The supplied Fix.5.6 contract records independent ChatGPT actual-diff and
+pushed-state review PASS for Fix.5.5 source
+`df957a6414fc9c515d1f82228517cb801dc90350`, parent
+`761fbb6c03d2d7a10bb911cf84e9ba898496fab6`, with exactly the 12 reviewed
+paths. Exact local branch/HEAD match. No numerical or visual farm closure follows.
+
+Source trace confirms the old per-attempt `.log` is only the child
+`run_Prod_Analysis.sh` combined stream. Completion-marker checks, artifact/page
+verification, source rechecks, summary writing, collection and ZIP checks run
+in the owner after that child stream and could fail only to owner stderr.
+Absence of `E.8.4.Fix.5 gate failed: ...` from the child log therefore cannot
+exclude an owner failure. No exact prior failed stage/reason is established.
+
+[Fix.5.6](../phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md)
+adds atomic per-attempt gate-status JSON and reuses the unchanged collector's
+source checks before analysis in an exact clean detached worktree. Final
+collection and all artifact/page/ZIP checks remain; the sidecar is outside the
+unchanged ZIP inventory. Local deterministic tests establish control flow and
+synthetic persistence only, not farm delivery or a diagnosis of the previous ZIP.
 
 ## Fix.5.4 implementation history
 
@@ -316,12 +338,12 @@ No authority replacement, scientific calculation or runtime behavior changes.
 
 ## Exact next sequence
 
-Fix.5.4 numerical actual-diff and pushed-state review are complete at
-`761fbb6c03d2d7a10bb911cf84e9ba898496fab6`. Fix.5.5 local implementation
-is complete; see its phase record for deterministic tests and preservation checks.
+Fix.5.4 numerical and Fix.5.5 presentation source reviews/pushed-state reviews
+are complete at their recorded identities; numerical and visual farm closure
+remain pending. Fix.5.6 local owner repair is complete with 66 tests passed,
+no skips; its phase record owns verification details.
 
-NEXT — Fix.5.5 actual-diff review -> user commit/push -> pushed-state review ->
-farm-readiness review of the tracked owner/packaging path -> one narrow
-Q4p4W2p74 / Left / lowe farm gate only after that path is ready -> fresh
-scientific and visual evidence review. The missing owner ZIP remains separate;
-no owner repair, commit, push or farm execution occurs in Fix.5.5. CURRENT owns NEXT.
+NEXT — Fix.5.6 actual-diff review -> user commit/push -> pushed-state review ->
+one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
+ZIP/status/log/PDF/manifest evidence review. No commit, push or farm execution
+occurs here. The previous exact ZIP failure remains undiagnosed. CURRENT owns NEXT.

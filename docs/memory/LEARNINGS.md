@@ -81,6 +81,13 @@
   authoritative inputs, implement it in tracked source, test locally, then
   farm-render it. Ad-hoc chat plots do not fulfill that deliverable.
 
+- Persist owner orchestration failures separately from a child analysis log:
+  later verification/collection errors cannot appear in that child stream.
+- Run deterministic detached collector/source checks before expensive analysis;
+  keep final source rechecks, fresh artifact checks and ZIP verification intact.
+- Publish per-attempt status atomically and refuse existing attempt files. Keep
+  owner diagnostics out of a frozen scientific bundle inventory.
+
 ## Repository memory and provenance
 
 - Current source and diff outrank stale summaries for implementation.

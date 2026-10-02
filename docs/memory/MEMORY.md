@@ -137,6 +137,15 @@ beyond color. Historical E.8.3 must visibly identify its accepted F.6.1 lineage
 as separate from current F.6.3/E.8.4. Fake ROOT checks establish draw commands and
 immutability; actual visual legibility remains a farm PDF acceptance question.
 
+Fix.5.5 presentation source `df957a6` passed independent actual-diff and
+pushed-state review per the Fix.5.6 contract; full identity is in CURRENT and its
+phase record. Real PDF/farm numerical acceptance remains pending.
+An analysis subprocess log contains only its child stream, not later owner
+artifact/collection/ZIP failures. Absence of a gate-failure message there is
+not evidence of owner success. Fix.5.6 persists atomic per-attempt owner status
+outside the unchanged bundle and runs the unchanged detached collector's source
+checks before analysis, retaining final collection/rechecks and ZIP verification.
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw

@@ -1,5 +1,5 @@
 """Exercise the complete owner locally with synthetic artifacts and no farm."""
-from contextlib import contextmanager, redirect_stdout
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
 from copy import deepcopy
 import ast
 import hashlib
@@ -107,7 +107,8 @@ class OwnerTests(unittest.TestCase):
             with self.subTest(reason=reason), self.assertRaisesRegex(ValueError, reason):
                 owner.verify_pages(data)
 
-    def exercise(self, directory, *, fail_run=False, stale=False, fail_collection=False):
+    def exercise(self, directory, *, fail_run=False, stale=False, fail_collection=False,
+                 fail_preflight=False, missing_markers=False, fail_zip=False):
         root = Path(directory); outdir = root / "artifacts"; outdir.mkdir()
         output = root / "fresh.zip"
         profile = owner.resolved_profile(ROOT, SHA)
@@ -121,10 +122,18 @@ class OwnerTests(unittest.TestCase):
             return git_fixture(repo, *args)
         def run(repo, log_path):
             self.assertEqual(repo, ROOT)
+            status = json.loads(owner.gate_status_path(outdir, output).read_text())
+            self.assertEqual((status["status"], status["stage"]), ("running", "analysis"))
+            self.assertTrue(status["collector_source_preflight_completed"])
+            self.assertTrue(status["analysis_started"])
+            self.assertFalse(status["analysis_completed"])
+            self.assertFalse(output.exists())
             events.append("run")
             log_path.write_text("Left / lowe debug analysis completed.\nFull high-epsilon processing is intentionally skipped in -d debug mode.\n")
             if fail_run:
                 return 1
+            if missing_markers:
+                log_path.write_text("analysis returned zero without completion markers\n")
             for scope in ("global", "settings"):
                 for declaration in profile["artifacts"][scope]:
                     name = declaration["basename_template"].format(kinematic=owner.KINEMATIC, phi="Left", epsilon="lowe")
@@ -150,32 +159,61 @@ class OwnerTests(unittest.TestCase):
                 stdout = SHA + "\n" if command[:3] == ["git", "rev-parse", "HEAD"] else ""
                 return {"command": command, "returncode": 0, "stdout": stdout, "stderr": ""}
             return real_collect(**kwargs, command_runner=command_runner)
+        real_checks = owner.collector.collect_source_checks
+        real_load_profile = owner.collector.load_validation_profile
+        def load_profile(path):
+            if Path(path).as_posix().endswith(owner.PROFILE):
+                self.assertNotEqual(Path(path).parents[1], ROOT)
+                return real_load_profile(ROOT / owner.PROFILE)
+            return real_load_profile(path)
+        def source_checks(repo, command_runner=None, **kwargs):
+            self.assertNotEqual(repo, ROOT)
+            self.assertEqual(kwargs["required_analysis_commit"], SHA)
+            self.assertEqual(kwargs["allowed_committed_files"], [])
+            if command_runner is None:
+                events.append("source_preflight")
+                def command_runner(command, cwd=None):
+                    self.assertEqual(cwd, repo)
+                    failed = fail_preflight and "py_compile" in command
+                    return {"command": command, "returncode": 7 if failed else 0,
+                            "stdout": "", "stderr": "literal syntax failure" if failed else ""}
+            else:
+                events.append("source_recheck")
+            return real_checks(repo, command_runner, **kwargs)
         real_collect = owner.collector.collect_validation_bundle
         @contextmanager
         def module(worktree):
             self.assertNotEqual(worktree, ROOT)
             yield owner.collector
-        with patch.object(owner, "git", side_effect=git), patch.object(owner, "collection_module", side_effect=module), patch.object(owner, "resolved_profile", return_value=profile), patch.object(owner, "CANDIDATES", candidates), patch.object(owner, "run_analysis", side_effect=run), patch.object(owner.collector, "collect_validation_bundle", side_effect=collect):
+        with patch.object(owner, "git", side_effect=git), patch.object(owner, "collection_module", side_effect=module), patch.object(owner, "resolved_profile", return_value=profile), patch.object(owner, "CANDIDATES", candidates), patch.object(owner, "run_analysis", side_effect=run), patch.object(owner.collector, "collect_validation_bundle", side_effect=collect), patch.object(owner.collector, "load_validation_profile", side_effect=load_profile), patch.object(owner.collector, "collect_source_checks", side_effect=source_checks), patch.object(owner, "verify_zip", side_effect=ValueError("literal zip failure") if fail_zip else owner.verify_zip):
             # The template is read from the real repository; no source operation
             # or production launcher is performed by this synthetic gate.
             try:
                 result = owner.execute_gate(ROOT, outdir, output, SHA)
             finally:
-                self.assertEqual(events, ["run"] if fail_run or stale else ["run", "collect"])
+                expected_events = ["source_preflight"]
+                if not fail_preflight:
+                    expected_events += ["run"]
+                    if not (fail_run or stale or missing_markers):
+                        expected_events += ["collect"]
+                        if not fail_collection:
+                            expected_events += ["source_recheck"]
+                self.assertEqual(events, expected_events)
                 additions = [args for repo, args in git_calls if args[:2] == ("worktree", "add")]
                 removals = [args for repo, args in git_calls if args[:2] == ("worktree", "remove")]
-                self.assertEqual(len(additions), 0 if fail_run or stale else 1)
+                self.assertEqual(len(additions), 1 if fail_preflight or fail_run or stale or missing_markers else 2)
                 self.assertEqual(len(removals), len(additions))
                 if additions:
-                    self.assertEqual(additions[0][2], "--detach")
-                    self.assertEqual(additions[0][-1], SHA)
-                    self.assertEqual(removals[0], ("worktree", "remove", "--force", additions[0][-2]))
+                    for addition, removal in zip(additions, removals):
+                        self.assertEqual(addition[2], "--detach")
+                        self.assertEqual(addition[-1], SHA)
+                        self.assertEqual(removal, ("worktree", "remove", "--force", addition[-2]))
         return result, events, outdir
 
     def test_complete_run_verify_real_generic_collection_and_zip_integrity(self):
         with tempfile.TemporaryDirectory() as directory:
             result, events, outdir = self.exercise(directory)
-            self.assertEqual(events, ["run", "collect"])
+            self.assertEqual(events, ["source_preflight", "run", "collect", "source_recheck"])
             self.assertTrue(result.is_file())
             with zipfile.ZipFile(result) as archive:
                 manifest = json.loads(archive.read("manifest.json"))
@@ -186,14 +224,97 @@ class OwnerTests(unittest.TestCase):
                 self.assertEqual(set(manifest["global_artifacts"]), {"candidate_f3", "candidate_f4", "run_summary"})
                 self.assertEqual(set(manifest["settings"][0]["artifacts"]),
                                  {"procedure_pdf", "page_manifest", "full_analysis", "correction_ledger_json", "correction_ledger_csv"})
+            status = json.loads(owner.gate_status_path(outdir, result).read_text())
+            self.assertEqual((status["status"], status["stage"], status["failure_reason"]), ("success", "complete", None))
+            for flag in ("analysis_started", "analysis_completed", "artifact_verification_completed",
+                         "collector_source_preflight_completed", "collection_completed", "zip_verification_completed"):
+                self.assertIs(status[flag], True)
+            self.assertEqual(status["source_commit"], SHA)
+            self.assertEqual(status["expected_zip_path"], result.as_posix())
+            self.assertEqual(status["analysis_log_path"], (outdir / "fresh.log").as_posix())
+            self.assertLessEqual(status["started_at_utc"], status["updated_at_utc"])
+            with zipfile.ZipFile(result) as archive:
+                self.assertFalse(any("gate-status" in name for name in archive.namelist()))
             summary = json.loads((outdir / owner.SUMMARY).read_text())
             self.assertEqual(summary["pre_run_provenance"]["head"], SHA)
+            self.assertEqual(summary["run_log_sha256"], owner.sha256(outdir / "fresh.log"))
 
     def test_failed_analysis_stale_pdf_collection_failure_stop(self):
         for kwargs, reason in (({"fail_run": True}, "analysis_failed"), ({"stale": True}, "artifact_stale"), ({"fail_collection": True}, "collection_failed")):
             with self.subTest(reason=reason), tempfile.TemporaryDirectory() as directory:
                 with self.assertRaisesRegex(ValueError, reason):
                     self.exercise(directory, **kwargs)
+
+    def test_each_failure_persists_literal_stage_and_completed_flags(self):
+        for kwargs, stage, reason, completed, artifacts, collection in (
+            ({"fail_preflight": True}, "collector_source_preflight", "collector_source_check_failed:py_compile:returncode=7:literal syntax failure", False, False, False),
+            ({"fail_run": True}, "analysis", "analysis_failed", False, False, False),
+            ({"missing_markers": True}, "completion_markers", "left_lowe_completion_missing", True, False, False),
+            ({"stale": True}, "verify_artifacts", "artifact_stale:" + owner.PDF, True, False, False),
+            ({"fail_collection": True}, "collection", "collection_failed", True, True, False),
+            ({"fail_zip": True}, "verify_zip", "literal zip failure", True, True, True),
+        ):
+            with self.subTest(stage=stage), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaises(ValueError) as caught:
+                    self.exercise(directory, **kwargs)
+                self.assertEqual(str(caught.exception), reason)
+                root = Path(directory)
+                status = json.loads((root / "artifacts/fresh-gate-status.json").read_text())
+                self.assertEqual((status["status"], status["stage"], status["failure_reason"]), ("failed", stage, reason))
+                self.assertEqual(status["analysis_completed"], completed)
+                self.assertEqual(status["artifact_verification_completed"], artifacts)
+                self.assertEqual(status["collection_completed"], collection)
+                self.assertFalse(status["zip_verification_completed"])
+                self.assertEqual(status["analysis_started"], stage != "collector_source_preflight")
+                self.assertEqual(status["analysis_log_path"], (root / "artifacts/fresh.log").as_posix())
+                if stage == "collector_source_preflight":
+                    self.assertFalse((root / "fresh.zip").exists())
+                    self.assertFalse((root / "artifacts/fresh.log").exists())
+
+    def test_detached_preflight_rejects_effective_identity_profile_and_paths(self):
+        profile = owner.resolved_profile(ROOT, SHA)
+        for change, reason in (("profile", "collector_preflight_profile_mismatch"),
+                               ("commit", "collector_preflight_required_commit_mismatch"),
+                               ("paths", "collector_preflight_unexpected_committed_files")):
+            effective = deepcopy(profile)
+            if change == "profile":
+                effective["validation_profile"] = "wrong"
+            if change == "commit":
+                effective["source_identity"]["required_analysis_commit"] = "b" * 40
+            detached = deepcopy(profile)
+            checks = [{"name": "required_analysis_commit_ancestor", "returncode": 0, "stdout": "", "stderr": ""},
+                      {"name": "committed_files_after_required_analysis_commit", "returncode": 0,
+                       "stdout": "src/unexpected.py" if change == "paths" else "", "stderr": ""}]
+            with self.subTest(change=change), patch.object(owner, "git", side_effect=git_fixture), patch.object(owner, "collection_module") as module:
+                module.return_value.__enter__.return_value = owner.collector
+                with patch.object(owner.collector, "load_validation_profile", return_value=detached), patch.object(owner.collector, "collect_source_checks", return_value=("checks", checks)), self.assertRaisesRegex(ValueError, reason):
+                    owner.collector_source_preflight(ROOT, SHA, effective)
+
+    def test_status_publication_is_atomic_and_refuses_existing_attempt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); output = root / "fresh.zip"
+            with patch.object(owner.os, "link", wraps=owner.os.link) as link, patch.object(owner.os, "replace", wraps=owner.os.replace) as replace:
+                status = owner.GateStatus(root, output, SHA)
+                link.assert_called_once()
+                self.assertEqual(replace.call_count, 0)
+                status.update("profile")
+                self.assertEqual(replace.call_count, 1)
+            before = status.path.read_bytes()
+            with patch.object(owner, "preflight") as preflight, self.assertRaises(FileExistsError):
+                owner.execute_gate(ROOT, root, output, SHA)
+            self.assertEqual(status.path.read_bytes(), before)
+            preflight.assert_not_called()
+            self.assertEqual(list(root.glob(".gate-status-*")), [])
+
+    def test_unexpected_collector_import_failure_is_persisted_before_analysis(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(owner, "preflight", return_value={}), patch.object(owner, "resolved_profile", return_value={"artifacts": {"global": [], "settings": []}}), patch.object(owner, "CANDIDATES", {}), patch.object(owner, "collector_source_preflight", side_effect=ImportError("missing collector dependency")), patch.object(owner, "run_analysis") as run:
+            root = Path(directory)
+            with self.assertRaisesRegex(ImportError, "missing collector dependency"):
+                owner.execute_gate(ROOT, root, root / "fresh.zip", SHA)
+            run.assert_not_called()
+            status = json.loads((root / "fresh-gate-status.json").read_text())
+            self.assertEqual((status["stage"], status["failure_reason"]), ("collector_source_preflight", "missing collector dependency"))
+            self.assertEqual(status["status"], "failed")
 
     def test_existing_zip_refused_before_preflight_or_run(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(owner, "preflight") as preflight:
@@ -228,11 +349,14 @@ class OwnerTests(unittest.TestCase):
 
     def test_main_prints_exactly_one_zip_only_after_success_and_none_on_failure(self):
         for error in (False, True):
-            stdout = io.StringIO()
-            with patch.object(owner, "execute_gate", side_effect=ValueError("failed") if error else None, return_value=Path("/fresh.zip")), redirect_stdout(stdout):
+            stdout = io.StringIO(); stderr = io.StringIO()
+            with patch.object(owner, "execute_gate", side_effect=ValueError("failed") if error else None, return_value=Path("/fresh.zip")), redirect_stdout(stdout), redirect_stderr(stderr):
                 result = owner.main(["--source-commit", SHA])
             self.assertEqual(result, 1 if error else 0)
             self.assertEqual(stdout.getvalue(), "" if error else "/fresh.zip\n")
+            if error:
+                self.assertIn("Owner gate status: ", stderr.getvalue())
+                self.assertIn("-gate-status.json", stderr.getvalue())
 
 
 if __name__ == "__main__":

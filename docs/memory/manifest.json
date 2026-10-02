@@ -16,14 +16,14 @@
       "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
     },
     {
-      "bytes": 6994,
+      "bytes": 6992,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "fc13688cb2829da056c49a8fb9fdaca7836292b12ba532e0ee16b178fa4914e5"
+      "sha256": "d64e84d05719d3a1879aa8c284076b9765870cd34773025477e06ee24f6f863c"
     },
     {
-      "bytes": 4691,
+      "bytes": 5150,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "f957691d63c837e89588966ac05d3faf70e6953c05868bfdf747fb960c8f1e9a"
+      "sha256": "04f2794cb1782b089fa3701acc1bde9a45a794b02140ad5764b10ef12f5e5122"
     },
     {
       "bytes": 7347,
@@ -31,9 +31,9 @@
       "sha256": "da9d9467e14e4a7dc428aa8f9f2d7a7ca85a70a5816829d0c483b375652f660e"
     },
     {
-      "bytes": 11873,
+      "bytes": 12489,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "f5565391fc0e597354f1c79c5b617358f40b089b966155837961e4c500cc8258"
+      "sha256": "303c8cb2e4cac85318d0e624bc2a350219c2712a9dfb4c5c01ff190f5c3eec30"
     },
     {
       "bytes": 3469,
@@ -41,9 +41,9 @@
       "sha256": "e0395f612bd4d987a81874b2d6a851885d6b05a912c650eaeec5668bc4e4e6fa"
     },
     {
-      "bytes": 2277,
+      "bytes": 3223,
       "path": "docs/memory/TOOLS.md",
-      "sha256": "456e18228b2a34c6faaf49beaa4774df7fd40dfac1320df3d369585eeb28b33d"
+      "sha256": "6887cf90a3938584869085cc78f952dc4a473144b69714e2c52f262baa5db5cb"
     },
     {
       "bytes": 5587,
@@ -331,9 +331,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 18916,
+      "bytes": 20198,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
-      "sha256": "f257e7f3f95a9bc80dab78cd14d07ec05c2e5a92502c627bbc51282c72f81b8d"
+      "sha256": "e5823b7be71284a5f6a66a14c03ecc36ca881eb63eb87e84c209e53a2532e6b5"
     },
     {
       "bytes": 2081,
@@ -666,9 +666,19 @@
       "sha256": "01f029ca0201f08cec9d57213e7b0a9559418e48ab4ca8116426cacd469866f1"
     },
     {
-      "bytes": 5706,
+      "bytes": 6097,
       "path": "docs/memory/phases/e8-4-fix5-5-current-lineage-visualization-clarity.md",
-      "sha256": "db4c7243885b9581413a073f7d848bc6632cf57aa1a02f91176496ff9e2d9462"
+      "sha256": "565620ee6ac1b42fb38f444a397f42dec680c980e4a6d683ee8368901567e8a3"
+    },
+    {
+      "bytes": 17053,
+      "path": "docs/memory/phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance-task-contract.md",
+      "sha256": "1d3cbb9366e8b2b8cbd0d4ccc28ce05eedd9522a515e78de5f36fea834ff7ca6"
+    },
+    {
+      "bytes": 6681,
+      "path": "docs/memory/phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md",
+      "sha256": "116cc1062018aa5fe99cd4172e4e29ff749609c4a6f1591b3ad71f01303607bb"
     },
     {
       "bytes": 28512,
@@ -956,9 +966,9 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
-      "bytes": 17012,
+      "bytes": 17669,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "f2a3326145abb4659b0f7bb5e2a9f5ef2c69ee3bc8d9e9fdc7c5f90b277d7b78"
+      "sha256": "ba804ef0e03b86f99be6e403efbdbdcd24f3759e5f224802b1c22192753f83a7"
     },
     {
       "bytes": 1698,

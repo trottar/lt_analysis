@@ -5,12 +5,16 @@
 ## Source and authority
 
 Started on exact `test` HEAD `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`,
-parent `71a912bf14c59eee6d52956462aa0aa39c7f7c84`; committed HEAD remains
-unchanged. The [task contract](e8-4-fix5-5-current-lineage-visualization-clarity-task-contract.md)
+parent `71a912bf14c59eee6d52956462aa0aa39c7f7c84`; HEAD remained unchanged
+during that local implementation. The [task contract](e8-4-fix5-5-current-lineage-visualization-clarity-task-contract.md)
 supplies independent ChatGPT actual-diff and pushed-state review PASS for
 Fix.5.4 numerical source. That source is `SOURCE REVIEWED`; its phase remains
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Fix.5.5 was `ACTIVE` during
-implementation and awaits its own actual-diff review.
+implementation. Independent ChatGPT actual-diff and pushed-state review have
+now passed for pushed `test` source
+`df957a6414fc9c515d1f82228517cb801dc90350`, exactly one commit over the
+starting identity with the 12 reviewed paths, per the supplied Fix.5.6 contract.
+This is `SOURCE REVIEWED`, not actual ROOT/PDF or farm acceptance.
 
 Before editing, traced the existing private producer -> validated/cloned E.8.4
 payload -> renderers: child `identity_audit.signed_support` and payload
@@ -91,7 +95,8 @@ non-production, Method B numerically absent. No factors, contents/errors, yields
 normalization, cuts/binning, page IDs, owner/profile/collector or farm behavior
 change. No commit, push, packaging repair or farm execution occurs.
 
-NEXT — Fix.5.5 actual-diff review -> user commit/push -> pushed-state review ->
-farm-readiness review of tracked owner/packaging -> one narrow Q4p4W2p74 / Left /
-lowe farm gate only after that path is ready. CURRENT owns NEXT. Hard stop after
-local checks, scoped manifest and complete review diff preparation.
+Fix.5.5 scientific/presentation source remains frozen during the separately
+contracted [Fix.5.6 owner repair](e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md).
+CURRENT owns NEXT: after Fix.5.6 actual-diff review, user commit/push and
+pushed-state review, one narrow tracked-owner Left/lowe farm gate returns fresh
+ZIP/status/log/PDF/manifest evidence. No farm execution is authorized here.

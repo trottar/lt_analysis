@@ -54,6 +54,22 @@ Farm runtime remains farm-only; do not represent ROOT/PyROOT or full-analysis
 behavior as locally validated. A project-wide farm Python executable is not
 assumed here.
 
+## E.8.4 tracked-owner diagnostics
+
+The Left/lowe owner uses one timestamped output stem for the intended ZIP,
+child analysis `.log`, and `-gate-status.json`. The log and status live in the
+canonical analysis artifact root; the ZIP lives in Globus. Status schema
+`e8_4_fix5_owner_gate_status/v1` records source, setting, expected ZIP/log paths,
+UTC timestamps, stage, running/failed/success state, literal failure reason and
+stage completion flags. It is an owner diagnostic outside the frozen bundle.
+Owner failure prints the status path to stderr; success stdout is one ZIP path.
+
+The child log contains only launcher output and is unchanged after summary
+hashing. Inspect gate-status for later owner failures; its absence or a running
+state does not establish successful delivery. Early detached source checks and
+final detached collection both use the unchanged collector. This reference
+supplies no farm execution authorization or command.
+
 ## Provenance inspection
 
 ```sh

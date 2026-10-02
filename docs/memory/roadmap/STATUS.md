@@ -205,7 +205,9 @@ historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-c
 
 #### E.8.4.Fix.5.5 — current-lineage visualization clarity
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local presentation uses blue
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — source is `SOURCE REVIEWED`
+at `df957a6414fc9c515d1f82228517cb801dc90350`; independent actual-diff and
+pushed-state review passed per the supplied Fix.5.6 contract. Presentation uses blue
 solid/open markers drawn last over wider dashed magenta, stored signed/absolute
 support and current-F.6.3 aggregate diagnostics, and explicit historical E.8.3
 labels. Numerical source, page inventory and absolute-SIMC blocker are frozen.
@@ -213,11 +215,19 @@ labels. Numerical source, page inventory and absolute-SIMC blocker are frozen.
 visual quality and farm numerical closure remain pending. See the
 [Fix.5.5 phase](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md).
 
-Dependency order: Fix.5.5 actual-diff review -> user commit/push -> pushed-state
-review -> farm-readiness review of tracked owner/packaging -> one narrow
-Q4p4W2p74 / Left / lowe farm gate only after that path is ready -> fresh
-scientific and visual evidence review. The missing owner ZIP remains a separate
-post-render operational issue; this task authorizes no owner repair or farm run.
+#### E.8.4.Fix.5.6 — farm-owner readiness and failure provenance
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local owner adds existing
+detached collector/source checks before expensive analysis and atomic persistent
+per-attempt stage/failure JSON outside the unchanged bundle. All post-analysis
+artifact/page/collection/ZIP validation remains. 66 local tests passed, no skips.
+No scientific/presentation, launcher, profile or collector change; no farm run.
+See the [Fix.5.6 phase](../phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md).
+
+Dependency order: Fix.5.6 actual-diff review -> user commit/push -> pushed-state
+review -> one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
+ZIP/status/log/PDF/manifest evidence review. The prior missing ZIP's exact cause
+remains unknown; the child analysis log cannot show post-analysis owner failures.
 
 #### Final E.8 closure
 
