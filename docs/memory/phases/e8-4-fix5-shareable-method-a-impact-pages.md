@@ -93,3 +93,58 @@ It does not validate Fix.5, close canonical-five E.8/F.6.4, or promote Method A.
 CURRENT owns the sole authoritative action:
 
 NEXT — after user commit/push and pushed-state synchronization, run the tracked Q4p4W2p74 / Left / lowe E.8.4.Fix.5 farm owner to regenerate the full-analysis procedure PDF with the authoritative per-(t,phi) SIMC comparisons and shareable Method-A yield-impact pages, verify them, and return its single fresh validation ZIP.
+
+
+## 2026-10-02 — post-farm observation and Fix.5.4 dependency
+
+The sections above preserve the original local-development chronology,
+including its then-current review requirements and farm NEXT. They are not a
+statement that the new findings were known during implementation. CURRENT now
+owns the updated active state and action.
+
+The [Fix.5.3 cleanup-safety repair](e8-4-fix5-3-debug-launcher-cleanup-safety-task-contract.md)
+was included in pushed source `f9d70732290ea461096374ca1270b47452644991`.
+The supplied [Fix.5.4 checkpoint contract](e8-4-fix5-4-post-farm-identity-audit-memory-checkpoint-task-contract.md)
+reports a completed expensive Left/lowe analysis/render at that source.
+Canonical procedure PDF and manifest have farm-visible timestamp
+`2026-10-01 23:34`, PDF about 2.2 MB, `page_count = 97` and
+`renderer_failures = []`. All ten new shareable pages and prior E.8.4 pages
+were retained. Inspection-only Globus copies are
+`KaonLT_E8_4_Fix5_Left_lowe_20261001-234439.pdf` and its
+`KaonLT_E8_4_Fix5_Left_lowe_20261001-234439-manifest.json`.
+Codex records these supplied findings; it did not independently reopen the
+farm artifacts during this checkpoint.
+
+The owner did not return the final ZIP. This is not accepted bundle closure
+or complete run -> verify -> package acceptance. The separate post-render
+operational failure remains undiagnosed; explaining it does not by itself
+justify another expensive analysis run. Existing narrow upstream closures
+and the earlier packaging-time model-output caveat remain unchanged.
+
+**CONFIRMED:** E.8.3 presents historical accepted F.6.1 aggregate lineage,
+whereas current F.6.3/E.8.4 consumes the current-baseline candidate F.4 lineage.
+E.8.3 remains `SOURCE REVIEWED` for its own historical scope, not the aggregate
+explanation of the current branch without exact lineage identity.
+**CONFIRMED presentation deficiency:** the baseline blue curve is obscured by
+magenta Method A in many three-way panels.
+
+Scientific interpretation of fresh Fix.5 pages is `BLOCKED` pending
+[Fix.5.4](e8-4-fix5-4-current-lineage-identity-audit.md), now `ACTIVE`.
+Binwise pion-template/final-MM algebra, histogram/scalar closure, signed
+support diagnostics and same-cell SIMC normalization/unit identity are each
+**NOT YET VALIDATED**. Near-overlapping t1 spectra with substantially different
+stored Y0/YA and large data/SIMC amplitude differences require audit; neither
+a faulty object, cancellation nor wrong normalization has been established.
+Full hashes, representative values and exact planned checks are in the
+[post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
+
+Planned order: checkpoint -> ChatGPT PASS -> user commit/push -> pushed-state
+review -> separate Fix.5.4 numerical contract -> Codex numerical implementation
+-> ChatGPT actual-diff review -> user commit/push -> pushed-state review ->
+visualization-only contract and Codex implementation from that reviewed pushed
+numerical source -> ChatGPT actual-diff review -> user commit/push ->
+pushed-state review -> one narrow Q4p4W2p74 / Left / lowe farm run -> fresh
+scientific and visual evidence review. A separate implementation contract
+follows independent review and push of this memory checkpoint. No source,
+visualization or farm work is authorized here. Method A remains detached,
+Method B diagnostic-only; final canonical-five E.8 and F.6.4 stay `BLOCKED`.

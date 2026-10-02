@@ -178,17 +178,40 @@ remain frozen. Codex-reported checks were `NOT RUN by ChatGPT`. See the
 ROOT/PyROOT, full-analysis, procedure-PDF, farm, runtime, production, or
 Method-A-promotion status changes.
 
-#### E.8.4.Fix.5 / Fix.5.1 / Fix.5.2 — shareable pages and complete Left/lowe owner
+#### E.8.4.Fix.5 / Fix.5.1 / Fix.5.2 / Fix.5.3 — shareable pages and Left/lowe owner
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the preserved local candidate
-adds all 27 child Method-A/SIMC and baseline/Method-A/SIMC comparisons, stored
-Y0/YA, DeltaY and defined DeltaY/Y0 summaries, and pinned parent-closure sanity
-presentation. The single existing SIMC-yield call precedes E.8 finalization.
-The tracked owner performs run -> verify -> package with canonical-five profile
-declaration, explicit Left/lowe selection and clean detached collector source
-checks at the exact pushed SHA. See the [Fix.5 phase](../phases/e8-4-fix5-shareable-method-a-impact-pages.md).
-Independent actual-diff review and synchronization remain required; this is
-not new-page/owner farm acceptance or canonical-five closure.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — source pushed at
+`f9d70732290ea461096374ca1270b47452644991`. The supplied fresh Left/lowe
+observation reports 97 pages, zero renderer failures, all ten new pages and
+prior E.8.4 pages retained. No owner ZIP was returned: rendering does not
+establish accepted bundle closure or complete owner integration. Scientific
+interpretation is `BLOCKED` pending Fix.5.4 numerical/provenance closure.
+See the [dated Fix.5 chronology](../phases/e8-4-fix5-shareable-method-a-impact-pages.md)
+and [investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
+
+#### E.8.4.Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
+
+`ACTIVE` — the planned audit must close binwise pion-template/final-MM algebra,
+histogram/scalar-yield identity, signed positive/negative/absolute support and
+same-cell SIMC object/normalization/unit provenance. These checks are not yet
+validated; no numerical object defect, cancellation explanation or SIMC
+normalization error is established. E.8.3 retains `SOURCE REVIEWED` status for
+the historical accepted F.6.1 aggregate lineage, not the current F.6.3 candidate
+explanation. The confirmed cross-page lineage mismatch does not invalidate
+historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-current-lineage-identity-audit.md).
+
+Visualization-only improvement is `BLOCKED` on numerical closure: baseline
+blue curves obscured by magenta Method-A curves require independently visible
+presentation without any physics or normalization change. Dependency order is
+checkpoint -> ChatGPT PASS -> user commit/push -> pushed-state review ->
+separate Fix.5.4 numerical contract -> Codex numerical implementation ->
+ChatGPT actual-diff review -> user commit/push -> pushed-state review ->
+visualization-only contract and Codex implementation from that reviewed pushed
+numerical source -> ChatGPT actual-diff review -> user commit/push ->
+pushed-state review -> one narrow Q4p4W2p74 / Left / lowe farm run -> fresh
+scientific and visual evidence review. This memory checkpoint
+authorizes neither implementation nor another farm run. The missing ZIP is a
+separate post-render operational issue; diagnosing it alone needs no rerun.
 
 #### Final E.8 closure
 
@@ -213,7 +236,8 @@ independent scientific phases. Record and batch nonblocking maintenance at
 milestones; concrete source/provenance/active-state blockers alone warrant
 separate reconciliation. The narrow Refresh.2 materialization and Left/lowe current-baseline
 reweighting/yield gates now have accepted evidence. The subsequent Fix.5
-shareable presentation/owner runtime gate remains narrow Left/lowe.
+shareable interpretation is blocked on the active Fix.5.4 numerical audit;
+its presentation/owner gate remains narrow Left/lowe.
 Canonical-five closure and F.6.4 remain blocked; dependency order is unchanged.
 
 ## Active-state ownership

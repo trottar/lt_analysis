@@ -98,6 +98,23 @@ Clone only for display; never reload, refill, renormalize, or substitute a
 setting-wide SIMC shape. Yield summaries consume stored branch values, and
 parent closure consumes hash/fingerprint-pinned candidate F.4 records.
 
+An explanatory aggregate page and an applied downstream branch cannot be
+interpreted as the same correction lineage without exact source, artifact and
+fingerprint identity. Historical accepted E.8.3 F.6.1 aggregates and the
+current-baseline F.6.3/E.8.4 candidate are distinct; individual page correctness
+does not establish cross-page linkage. Renderer success does not establish
+scientific linkage consistency.
+
+Current-branch yield-impact presentations require explicit histogram-scalar
+closure against exact producer-owned integration semantics. When fractional
+signed-yield changes appear disproportionate to spectrum overlays, report
+signed integral, positive-bin support, negative-bin support and absolute
+support separately; cancellation is a hypothesis until those numbers exist.
+SIMC/data amplitude interpretation requires proven same-cell, same-object,
+same-normalization and same-unit provenance, including the relevant
+integration-window integral. Cloning existing SIMC without renderer scaling
+alone does not prove those identities. See the [post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw

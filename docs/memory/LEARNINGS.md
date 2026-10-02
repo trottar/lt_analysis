@@ -27,6 +27,18 @@
   or checkpoint -> checkpoint-first payload -> consumer -> renderer.
 - Retain raw quantities needed to challenge classifications.
 
+## Scientific linkage and visual comparison
+
+- Sequential procedure pages can be individually correct yet misleading when
+  they silently cross correction-lineage boundaries.
+- Every displayed scalar yield attached to a histogram must be auditable
+  against that exact histogram's producer-owned integral.
+- Signed-integral percentages need positive-bin, negative-bin and absolute
+  support diagnostics before cancellation can explain a large relative shift.
+- Overlapping comparison curves must remain independently visible. Repair
+  visibility after numerical identity closes; visualization must never change
+  physics, histogram contents or normalization.
+
 ## Workflow and failure handling
 
 - Prefer one narrow gate -> one targeted run -> fresh evidence -> inspect ->
