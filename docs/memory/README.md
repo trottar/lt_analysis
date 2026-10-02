@@ -8,7 +8,7 @@ maintained with the code, not reconstructed from chat or commit titles.
 At substantial-work start, establish actual branch, HEAD, and worktree state,
 then read these five files in full and in this exact order:
 
-1. [AGENTS.md](AGENTS.md)
+1. [repository-root AGENTS.md](../../AGENTS.md)
 2. [CURRENT.md](CURRENT.md)
 3. [MEMORY.md](MEMORY.md)
 4. [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md)
@@ -23,8 +23,9 @@ exact active next action.
 
 ## Navigation
 
-- [AGENTS.md](AGENTS.md) — high-level behavior, evidence, science, and
-  execution boundaries.
+- [repository-root AGENTS.md](../../AGENTS.md) — universal startup/behavior authority.
+- [memory AGENTS.md](AGENTS.md) — supplemental memory-specific operating guidance,
+  outside the universal startup core.
 - [CURRENT.md](CURRENT.md) — concise authoritative active state.
 - [MEMORY.md](MEMORY.md) — curated durable cross-phase knowledge.
 - [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md) — exceptional

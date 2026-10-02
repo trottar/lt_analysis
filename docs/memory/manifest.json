@@ -1,34 +1,34 @@
 {
   "files": [
     {
-      "bytes": 4541,
+      "bytes": 4603,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "111b84d83677b2c7d830afe2c2d2f943fe3e5864c80e73dd962b277abeeb4d8b"
+      "sha256": "de71043f446b7c84b77ce37c805f410512dbf61100f744691d450266f30c1da7"
     },
     {
-      "bytes": 7345,
+      "bytes": 8298,
       "path": "docs/memory/CODEX.md",
-      "sha256": "fe9ddf40c589eb77dabced4c56c4b6d34929345312d31bef53da6659879ae6a8"
+      "sha256": "03af851c87c4c7c1b0b13506e88e43d43c46508a81d63b5cd908c9c8576f3dbb"
     },
     {
-      "bytes": 3663,
+      "bytes": 6131,
       "path": "docs/memory/COMMUNICATION.md",
-      "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
+      "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 6992,
+      "bytes": 8192,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "d64e84d05719d3a1879aa8c284076b9765870cd34773025477e06ee24f6f863c"
+      "sha256": "770addc6d6be8bffd29bd3f372c37f5531ffc4b2ac8c2935bbc7574f50e27d7a"
     },
     {
-      "bytes": 5150,
+      "bytes": 5934,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "04f2794cb1782b089fa3701acc1bde9a45a794b02140ad5764b10ef12f5e5122"
+      "sha256": "bd99c520d9640985bcadc0a2105345cdf6e8c0af00a19ee91bc0b761a59010f8"
     },
     {
-      "bytes": 7347,
+      "bytes": 10627,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "da9d9467e14e4a7dc428aa8f9f2d7a7ca85a70a5816829d0c483b375652f660e"
+      "sha256": "a0c695072514149514cb55580612f1cc7f3c82f9b7da00fe4dc8a04fa585ade6"
     },
     {
       "bytes": 12489,
@@ -36,19 +36,19 @@
       "sha256": "303c8cb2e4cac85318d0e624bc2a350219c2712a9dfb4c5c01ff190f5c3eec30"
     },
     {
-      "bytes": 3469,
+      "bytes": 3606,
       "path": "docs/memory/README.md",
-      "sha256": "e0395f612bd4d987a81874b2d6a851885d6b05a912c650eaeec5668bc4e4e6fa"
+      "sha256": "6227eac9e4c874bff2e25ce661d48af7b157aff0c23d2042eef9372355d265a1"
     },
     {
-      "bytes": 3223,
+      "bytes": 3452,
       "path": "docs/memory/TOOLS.md",
-      "sha256": "6887cf90a3938584869085cc78f952dc4a473144b69714e2c52f262baa5db5cb"
+      "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 5587,
+      "bytes": 6876,
       "path": "docs/memory/USER.md",
-      "sha256": "840b143bbb5f695965db035b75f499a483682ded71bc9800cd1e4c9ef10320ac"
+      "sha256": "1a30dd650949232b6795f2c2aec927e9d339f0ec02f3b40cb29293b3343e5808"
     },
     {
       "bytes": 1157,
@@ -964,6 +964,16 @@
       "bytes": 1647,
       "path": "docs/memory/phases/post-push-current-continuity.md",
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
+    },
+    {
+      "bytes": 36178,
+      "path": "docs/memory/phases/workflow-continuity-and-chat-health-hardening-task-contract.md",
+      "sha256": "9b8ed8c9febcb175e1daa0f8279cc1cae2f1e154b25c9d433914bac2558ee221"
+    },
+    {
+      "bytes": 6094,
+      "path": "docs/memory/phases/workflow-continuity-and-chat-health-hardening.md",
+      "sha256": "4352f477358a23de19c3b1c47fbf72862440eafd7add53cf9f6232c80acc46ad"
     },
     {
       "bytes": 17669,

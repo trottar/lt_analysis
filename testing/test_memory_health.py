@@ -196,19 +196,67 @@ class StrictMemoryHealthTests(unittest.TestCase):
             (root / "docs/memory/USER.md").unlink()
             self.assert_error(self.errors(root), "missing required file: docs/memory/USER.md")
 
+    def test_root_agents_is_required_even_with_memory_agents(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            (root / "AGENTS.md").unlink()
+            self.assertTrue((root / "docs/memory/AGENTS.md").is_file())
+            self.assert_error(self.errors(root), "missing required file: AGENTS.md")
+            summary = bootstrap.collect_summary(root, lambda _: (1, "MEMORY HEALTH: FAIL"), lambda _: bootstrap.fixture_git(clean=True))
+            self.assertEqual(summary["core_records"][0], {"path": "AGENTS.md", "bytes": None})
+
+    def test_universal_core_paths_are_root_first(self):
+        expected = (
+            "AGENTS.md", "docs/memory/CURRENT.md", "docs/memory/MEMORY.md",
+            "docs/memory/handoffs/CURRENT_HANDOFF.md", "docs/memory/USER.md",
+        )
+        self.assertEqual(health.BOOTSTRAP_ORDER, expected)
+        self.assertEqual(bootstrap.CORE_RECORDS, expected)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            self.assertEqual(self.errors(root), [])
+            summary = bootstrap.collect_summary(root, lambda _: (0, "MEMORY HEALTH: PASS"), lambda _: bootstrap.fixture_git(clean=True))
+            self.assertEqual([item["path"] for item in summary["core_records"]], list(expected))
+
+    def test_memory_local_agents_cannot_replace_startup_root(self):
+        for relative, old, new in (
+            ("AGENTS.md", "1. `AGENTS.md`", "1. `docs/memory/AGENTS.md`"),
+            ("docs/memory/README.md", "1. [repository-root AGENTS.md](../../AGENTS.md)", "1. [AGENTS.md](AGENTS.md)"),
+            ("docs/memory/MAINTENANCE.md", "1. [repository-root AGENTS.md](../../AGENTS.md)", "1. `AGENTS.md`"),
+        ):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                path = root / relative
+                text = path.read_text(encoding="utf-8")
+                self.assertIn(old, text)
+                path.write_text(text.replace(old, new), encoding="utf-8")
+                self.assert_error(self.errors(root), "five-file startup order")
+
+    def test_memory_agents_must_remain_supplemental(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.write_fixture(root)
+            path = root / "docs/memory/AGENTS.md"
+            text = path.read_text(encoding="utf-8").replace("supplemental", "primary")
+            path.write_text(text, encoding="utf-8")
+            self.assert_error(self.errors(root), "must be supplemental")
+
     def test_agents_startup_order_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_fixture(root)
-            agents = root / "docs/memory/AGENTS.md"
-            agents.write_text(agents.read_text(encoding="utf-8").replace("1. `AGENTS.md`\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. `AGENTS.md`"), encoding="utf-8")
+            agents = root / "AGENTS.md"
+            agents.write_text(agents.read_text(encoding="utf-8").replace("1. `AGENTS.md`\n2. `docs/memory/CURRENT.md`", "1. `docs/memory/CURRENT.md`\n2. `AGENTS.md`"), encoding="utf-8")
             self.assert_error(self.errors(root), "AGENTS.md five-file startup order")
 
     def test_agents_incomplete_selective_expansion_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.write_fixture(root)
-            agents = root / "docs/memory/AGENTS.md"
+            agents = root / "AGENTS.md"
             agents.write_text(agents.read_text(encoding="utf-8").replace("required canonical evidence/decision/phase records", "other records"), encoding="utf-8")
             self.assert_error(self.errors(root), "AGENTS.md selective-expansion sources")
 
@@ -217,7 +265,7 @@ class StrictMemoryHealthTests(unittest.TestCase):
             root = Path(directory)
             self.write_fixture(root)
             readme = root / "docs/memory/README.md"
-            readme.write_text(readme.read_text(encoding="utf-8").replace("1. [AGENTS.md](AGENTS.md)\n2. [CURRENT.md](CURRENT.md)", "1. [CURRENT.md](CURRENT.md)\n2. [AGENTS.md](AGENTS.md)"), encoding="utf-8")
+            readme.write_text(readme.read_text(encoding="utf-8").replace("1. [repository-root AGENTS.md](../../AGENTS.md)\n2. [CURRENT.md](CURRENT.md)", "1. [CURRENT.md](CURRENT.md)\n2. [repository-root AGENTS.md](../../AGENTS.md)"), encoding="utf-8")
             self.assert_error(self.errors(root), "README.md five-file startup order")
 
     def test_maintenance_startup_order_fails(self):
@@ -225,7 +273,7 @@ class StrictMemoryHealthTests(unittest.TestCase):
             root = Path(directory)
             self.write_fixture(root)
             maintenance = root / "docs/memory/MAINTENANCE.md"
-            maintenance.write_text(maintenance.read_text(encoding="utf-8").replace("1. `AGENTS.md`\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. `AGENTS.md`"), encoding="utf-8")
+            maintenance.write_text(maintenance.read_text(encoding="utf-8").replace("1. [repository-root AGENTS.md](../../AGENTS.md)\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. [repository-root AGENTS.md](../../AGENTS.md)"), encoding="utf-8")
             self.assert_error(self.errors(root), "MAINTENANCE.md five-file startup order")
 
     def test_handoff_frontmatter_fails(self):

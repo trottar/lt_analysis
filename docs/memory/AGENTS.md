@@ -1,7 +1,9 @@
 # KaonLT memory operating rules
 
-This tracked file governs repository-owned memory only. It does not replace
-the root `AGENTS.md` or machine-local instructions.
+This tracked file is supplemental memory-specific operating guidance, not part
+of the universal five-file startup core. [Repository-root AGENTS.md](../../AGENTS.md)
+is the single repository-wide startup/behavior authority. Consult this file
+only for task-directed repository-memory maintenance after that core is read.
 
 ## Authority and startup
 
@@ -17,30 +19,20 @@ the root `AGENTS.md` or machine-local instructions.
   REVIEWED`, `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, `ACTIVE`,
   `DEFERRED`, `BLOCKED`, and `NEXT`.
 
-## Five-file startup contract
+## Task-directed memory guidance
 
-At substantial-work start, first establish actual branch, HEAD, and worktree
-state. Read these five files in full, in this exact order:
+Follow the universal root-first startup core defined by
+[repository-root AGENTS.md](../../AGENTS.md), then expand selectively from
+CURRENT direct references, the exact active task and required canonical
+evidence/decision/phase records. Do not eagerly load the whole memory hierarchy.
+Identify the active objective, evidence boundary, blockers and NEXT from the
+core; inspect current source/diff for implementation and distinguish source
+proof from farm/runtime proof. This supplemental file does not define a
+competing startup sequence.
 
-1. `AGENTS.md`
-2. `CURRENT.md`
-3. `MEMORY.md`
-4. `handoffs/CURRENT_HANDOFF.md`
-5. `USER.md`
-
-Only after those five are read in full may a session expand selectively from:
-
-- CURRENT direct references
-- exact active task
-- required canonical evidence/decision/phase records
-
-Do not eagerly load the whole memory hierarchy. Identify the active objective,
-evidence boundary, blockers, and NEXT from the core; inspect current source or
-diff whenever implementation is involved; and distinguish source proof from
-farm/runtime proof. Schema 3 is active: `CURRENT.md` is the sole ordinary
-active-state authority, the handoff is exceptional transfer state only, and the
-roadmap preserves dependency/status structure without owning the exact next
-action.
+Schema 3 is active: CURRENT is the sole ordinary active-state authority, the
+handoff is exceptional transfer state only, and the roadmap preserves
+dependency/status structure without owning the exact next action.
 
 ## Scientific and validation boundaries
 

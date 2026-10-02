@@ -12,11 +12,17 @@ upstream authorities, and detached Method-A/Method-B boundaries.
 ## Current Work Item
 
 [E.8.4 Fix.5.6](phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: the local operational owner
-candidate runs existing collector/source checks in an exact clean detached
-worktree before analysis and atomically persists per-attempt stage/failure
-status. Existing post-analysis artifact/page/collection/ZIP checks and bundle
-inventory are preserved. Owner runtime and final delivery await a farm attempt.
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: its pushed source had
+independent actual-diff and pushed-state review before the supplied farm
+attempt. The analysis child completed, but the owner failed at
+`verify_artifacts` with `page_manifest_setting_invalid`; collection and ZIP
+creation did not begin. Owner runtime acceptance and final delivery remain
+pending.
+
+Scientific work is paused at the user's request while
+[workflow/chat-health hardening](phases/workflow-continuity-and-chat-health-hardening.md)
+is implemented and independently reviewed; matching ChatGPT Project
+configuration is updated separately, outside this repository task.
 
 Fix.5.5 source is `SOURCE REVIEWED` at
 `df957a6414fc9c515d1f82228517cb801dc90350`; independent ChatGPT actual-diff
@@ -53,11 +59,13 @@ remain `BLOCKED`.
 
 - Supplied prior Fix.5 committed/farm source:
   `f9d70732290ea461096374ca1270b47452644991`.
-- Fix.5.6 starting/unchanged committed `test` HEAD on 2026-10-02:
-  `df957a6414fc9c515d1f82228517cb801dc90350`, parent
-  `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`. The supplied contract records
-  independent Fix.5.5 actual-diff/pushed-state review PASS with exactly the
-  reviewed 12 paths. Fix.5.6 owner/test/memory edits are local review candidates.
+- Gate-relevant pushed Fix.5.6 source and supplied failed farm-attempt source:
+  `ccaf15358efc205cd601aeccecdd1ab1b1360dff`. HEAD and local `origin/test`
+  matched this identity at hardening preflight on 2026-10-02. The hardening
+  contract supplies independent Fix.5.6 actual-diff and pushed-state review
+  before that attempt. Later memory-only descendants do not change this
+  gate-relevant source if frozen scientific/runtime files remain unchanged;
+  an observed HEAD is timestamped, not permanent authority.
 - Fresh PDF/manifest: farm-visible timestamp `2026-10-01 23:34`, PDF about
   2.2 MB; inspection copies `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439.pdf`
   and `KaonLT_E8_4_Fix5_Left_lowe_20261001-234439-manifest.json`.
@@ -89,20 +97,31 @@ Fix.5.5 real visual validation remains pending. The prior missing owner ZIP
 has no established exact failure cause. The old analysis log captures only the
 launcher child stream, so absence of an owner failure there cannot exclude a
 post-analysis failure. Fix.5.6 adds durable owner-stage provenance and early
-source checks; it does not diagnose which prior stage failed or authorize a run.
+source checks. The latest supplied Fix.5.6 attempt completed its analysis child
+(`analysis_started=true`, `analysis_completed=true`) but failed the owner at
+`verify_artifacts/page_manifest_setting_invalid`, before collection/ZIP.
+The generated PDF/manifest are failed-gate diagnostic artifacts, not accepted
+validation evidence. These continuity facts are supplied by the hardening
+contract; raw attempt artifacts were not independently reopened here.
+This task does not diagnose the failure, authorize a rerun or packaging, or
+permit scientific interpretation, canonical-five closure, production change
+or Method-A promotion.
 
 ## Next Action
 
-NEXT — Fix.5.6 actual-diff review -> user commit/push -> pushed-state review ->
-one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
-ZIP/status/log/PDF/manifest evidence review. Preserve the SIMC absolute-unit
-blocker; no farm command or execution is authorized in this implementation task.
+NEXT — after workflow hardening is complete and the user resumes scientific
+work, diagnose the exact `page_manifest_setting_invalid` failure and the
+corresponding page/payload provenance before any rerun, packaging or scientific
+interpretation. Preserve the SIMC absolute-unit blocker; no farm command or
+execution is authorized by this hardening task.
 
 ## Success Criteria
 
-Local Fix.5.6 checks: 66 tests passed, no skips; syntax and diff checks pass.
-The scoped 199-file candidate manifest and ordinary memory health pass with no
-warnings or hard failures.
+Prior local Fix.5.6 checks: 66 tests passed, no skips; syntax and diff
+checks passed. Its scoped 199-file candidate manifest and ordinary memory
+health passed with no warnings or hard failures. Hardening acceptance requires
+its own deterministic manifest/memory/text/diff checks and independent
+ChatGPT actual-diff review; it confers no scientific/runtime acceptance.
 Source and deterministic tests do not establish farm filesystem/permissions,
 ROOT/PyROOT, full analysis, ZIP delivery, PDF legibility, numerical closure or
 observed signed cancellation. All scientific/presentation source is frozen.

@@ -14,7 +14,7 @@ from typing import Any, Callable
 
 
 CORE_RECORDS = (
-    "docs/memory/AGENTS.md",
+    "AGENTS.md",
     "docs/memory/CURRENT.md",
     "docs/memory/MEMORY.md",
     "docs/memory/handoffs/CURRENT_HANDOFF.md",
@@ -186,12 +186,12 @@ def self_test() -> None:
         (evidence / "example.md").write_text("evidence\n", encoding="utf-8")
         for relative, text in (
             ("AGENTS.md", "agents\n"),
-            ("CURRENT.md", fixture_current()),
-            ("MEMORY.md", "memory\n"),
-            ("handoffs/CURRENT_HANDOFF.md", "# Handoff\n\n## Transfer State\n\nNo exceptional transfer state is recorded.\n\n## Resume\n\nCURRENT.md\n"),
-            ("USER.md", "user\n"),
+            ("docs/memory/CURRENT.md", fixture_current()),
+            ("docs/memory/MEMORY.md", "memory\n"),
+            ("docs/memory/handoffs/CURRENT_HANDOFF.md", "# Handoff\n\n## Transfer State\n\nNo exceptional transfer state is recorded.\n\n## Resume\n\nCURRENT.md\n"),
+            ("docs/memory/USER.md", "user\n"),
         ):
-            path = memory / relative
+            path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8")
         summary = collect_summary(
@@ -206,6 +206,12 @@ def self_test() -> None:
         assert summary["git"]["worktree"] == {"available": True, "clean": True, "status_short": []}, summary
         assert "active_state" not in summary, summary
         assert summary["memory_health"]["status"] == "pass", summary
+        assert CORE_RECORDS[0] == "AGENTS.md", summary
+        (root / "AGENTS.md").unlink()
+        (memory / "AGENTS.md").write_text("supplemental memory guidance\n", encoding="utf-8")
+        missing_root = collect_summary(root, lambda _: (1, "MEMORY HEALTH: FAIL"), lambda _: fixture_git(clean=True))
+        assert missing_root["core_records"][0] == {"path": "AGENTS.md", "bytes": None}, missing_root
+        (root / "AGENTS.md").write_text("agents\n", encoding="utf-8")
 
         dirty = collect_summary(
             root,

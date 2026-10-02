@@ -57,6 +57,58 @@ Source-changing task workflow belongs to [CODEX.md](CODEX.md); this record
 does not replace it, the command catalog, scientific contracts, or detailed
 farm packaging procedure.
 
+## Failed gates and verification before consumption
+
+Before readiness or a farm command, perform the full health check in
+[MAINTENANCE.md](MAINTENANCE.md), state `Farm readiness: PASS` or
+`Farm readiness: BLOCKED`, and identify the supporting evidence and tracked
+source owners. A previous successful run or a PDF/ZIP path alone proves no
+readiness.
+
+If an owner/checker/provenance/manifest/page/artifact gate fails, stop at that
+gate. Request/inspect the exact failure evidence and determine whether partial
+artifacts are admissible for diagnosis only. Label them failed/inadmissible
+validation evidence. Do not move to collection, packaging, copying, scientific
+interpretation or another run until the failed invariant is understood.
+Child-analysis completion does not establish owner success.
+
+A failed farm attempt does not authorize a rerun. Investigate the first failed
+invariant and earliest valid repair/debug gate, according to failure class:
+
+- Source/state failure -> source/state repair.
+- Artifact-schema/provenance failure -> artifact/provenance diagnosis.
+- Renderer/page failure -> renderer/presentation diagnosis.
+- Scientific closure failure -> producer/payload/consumer closure audit.
+
+Verification precedes consumption in this acceptance order:
+
+```text
+run
+-> owner/checker PASS
+-> provenance/freshness PASS
+-> structured payload/page-manifest PASS
+-> rendered-page inspection
+-> packaging/handoff
+-> scientific interpretation
+```
+
+This is the acceptance ordering, not authorization to bypass a tracked owner's
+implementation. File existence, `complete=true` or analysis completion alone
+is insufficient. Procedure-PDF acceptance includes required page IDs,
+represented children, renderer failures, provenance, required comparison
+objects and actual visual legibility, as applicable.
+
+When scalar yields and displayed spectra appear inconsistent, or a required
+comparison such as SIMC is absent, establish closure before explaining physics.
+Trace producer -> serializer/sidecar/checkpoint -> payload -> consumer ->
+renderer and test exact producer-owned closure/integration semantics.
+
+Once a reviewed owner/wrapper exists, retain it as authoritative. Do not
+improvise an alternate manual analysis/package workflow unless a concrete
+source-level blocker requires an explicit repair contract. Partial outputs may
+be inspected only to diagnose the failed invariant, never promoted as an
+accepted gate or delivered as accepted validation artifacts.
+
 ## Execution authority
 
 Codex may make allowlisted local changes and deterministic checks, but must not commit, push, update remote refs, or initiate Jefferson Lab farm execution.

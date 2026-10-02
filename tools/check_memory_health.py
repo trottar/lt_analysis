@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import posixpath
 from pathlib import Path
 import re
 import subprocess
@@ -13,6 +14,7 @@ from typing import Iterable
 
 
 REQUIRED_FILES = (
+    "AGENTS.md",
     "docs/memory/README.md", "docs/memory/AGENTS.md", "docs/memory/CURRENT.md",
     "docs/memory/MEMORY.md", "docs/memory/handoffs/CURRENT_HANDOFF.md",
     "docs/memory/USER.md", "docs/memory/TOOLS.md", "docs/memory/COMMUNICATION.md",
@@ -26,6 +28,7 @@ REQUIRED_FILES = (
     "tools/update_memory_manifest.py", "tools/memory_bootstrap.py",
 )
 LIVE_SURFACES = {
+    "AGENTS.md": "KaonLT development instructions",
     "docs/memory/README.md": "KaonLT development memory",
     "docs/memory/AGENTS.md": "KaonLT memory operating rules",
     "docs/memory/CURRENT.md": "Current KaonLT development state",
@@ -62,8 +65,12 @@ MEMORY_SECTIONS = (
     "Diagnostics and runtime validation", "Canonical record ownership",
 )
 HANDOFF_SECTIONS = ("Transfer State", "Resume")
-BOOTSTRAP_ORDER = ("AGENTS.md", "CURRENT.md", "MEMORY.md", "handoffs/CURRENT_HANDOFF.md", "USER.md")
+BOOTSTRAP_ORDER = (
+    "AGENTS.md", "docs/memory/CURRENT.md", "docs/memory/MEMORY.md",
+    "docs/memory/handoffs/CURRENT_HANDOFF.md", "docs/memory/USER.md",
+)
 REQUIRED_README_LINKS = (
+    "../../AGENTS.md",
     "AGENTS.md", "CURRENT.md", "MEMORY.md", "handoffs/CURRENT_HANDOFF.md", "USER.md",
     "TOOLS.md", "COMMUNICATION.md", "CODEX.md", "MAINTENANCE.md", "LEARNINGS.md",
     "chats/CHAT_INDEX.md", "sources/SOURCE_INDEX.md", "sources/ARTIFACT_INDEX.md",
@@ -253,13 +260,20 @@ def check_size_limits(root: Path) -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
-def check_startup_contract(text: str, label: str) -> list[str]:
+def check_startup_contract(text: str, label: str, document_relative: str) -> list[str]:
+    """Resolve the numbered core relative to its document, never by basename."""
     start = text.lower().find("read these five files")
     startup = text[start:] if start >= 0 else text
-    positions = [startup.find(relative) for relative in BOOTSTRAP_ORDER]
+    entries = re.findall(r"^\s*([1-5])\.\s+(.+)$", startup, re.MULTILINE)[:5]
+    paths = []
+    for _, entry in entries:
+        link = MARKDOWN_LINK.search(entry)
+        code = re.search(r"`([^`]+)`", entry)
+        target = link.group(1) if link else code.group(1) if code else ""
+        paths.append(posixpath.normpath((Path(document_relative).parent / target).as_posix()))
     errors = []
-    if any(position < 0 for position in positions) or positions != sorted(positions):
-        errors.append(f"{label} five-file startup order differs from the required order")
+    if [number for number, _ in entries] != list("12345") or paths != list(BOOTSTRAP_ORDER):
+        errors.append(f"{label} five-file startup order differs from the required root-first order")
     normalized_startup = re.sub(r"\s+", " ", startup)
     for marker in ("CURRENT direct references", "exact active task", "required canonical evidence/decision/phase records"):
         if marker not in normalized_startup:
@@ -270,28 +284,41 @@ def check_startup_contract(text: str, label: str) -> list[str]:
 
 def check_bootstrap(texts: dict[str, str]) -> list[str]:
     errors: list[str] = []
-    agents = texts.get("docs/memory/AGENTS.md", "")
+    agents = texts.get("AGENTS.md", "")
+    normalized_agents = re.sub(r"\s+", " ", agents)
     if "Read these five files in full, in this exact order:" not in agents:
         errors.append("AGENTS.md must require the full five-file core read")
-    if "Only after those five are read in full may a session expand selectively from:" not in agents:
+    if not any(marker in normalized_agents for marker in (
+        "Only after those five are read in full may a session expand selectively from:",
+        "Only then follow CURRENT direct references",
+    )):
         errors.append("AGENTS.md must require full-read-before-selective-expansion")
-    if "Do not eagerly load the whole memory hierarchy." not in agents:
+    if not any(marker in normalized_agents for marker in (
+        "Do not eagerly load the whole memory hierarchy.",
+        "Do not eagerly reload the entire history.",
+    )):
         errors.append("AGENTS.md must prohibit eager hierarchy expansion")
-    errors.extend(check_startup_contract(agents, "AGENTS.md"))
+    errors.extend(check_startup_contract(agents, "AGENTS.md", "AGENTS.md"))
+
+    supplemental = re.sub(r"\s+", " ", texts.get("docs/memory/AGENTS.md", ""))
+    if "supplemental" not in supplemental or "not part of the universal five-file startup core" not in supplemental:
+        errors.append("docs/memory/AGENTS.md must be supplemental, outside the universal startup core")
+    if "../../AGENTS.md" not in markdown_links_text(supplemental):
+        errors.append("docs/memory/AGENTS.md must link to repository-root AGENTS.md")
 
     readme = texts.get("docs/memory/README.md", "")
     if "read these five files in full and in this exact order" not in readme:
         errors.append("README.md must require the full five-file core read")
     if "Only then expand selectively" not in readme or "Do not load" not in readme or "whole hierarchy" not in readme:
         errors.append("README.md must preserve full-read-before-selective-expansion meaning")
-    errors.extend(check_startup_contract(readme, "README.md"))
+    errors.extend(check_startup_contract(readme, "README.md", "docs/memory/README.md"))
 
     maintenance = texts.get("docs/memory/MAINTENANCE.md", "")
     if "read these five files in full, in this exact order" not in maintenance:
         errors.append("MAINTENANCE.md must require the full five-file core read")
     if "Only after the five-file core is read" not in maintenance or "Do not eagerly load" not in maintenance or "whole" not in maintenance or "hierarchy" not in maintenance:
         errors.append("MAINTENANCE.md must preserve full-read-before-selective-expansion meaning")
-    errors.extend(check_startup_contract(maintenance, "MAINTENANCE.md"))
+    errors.extend(check_startup_contract(maintenance, "MAINTENANCE.md", "docs/memory/MAINTENANCE.md"))
     return errors
 
 
@@ -548,21 +575,22 @@ def write_fixture(root: Path) -> None:
     for directory in (memory / "handoffs", memory / "roadmap", memory / "evidence", memory / "sources", memory / "chats", memory / "history", memory / "import", memory / "templates", root / "tools"):
         directory.mkdir(parents=True, exist_ok=True)
     startup = (
-        "Read these five files in full, in this exact order:\n\n1. `AGENTS.md`\n2. `CURRENT.md`\n3. `MEMORY.md`\n4. `handoffs/CURRENT_HANDOFF.md`\n5. `USER.md`\n\n"
+        "Read these five files in full, in this exact order:\n\n1. `AGENTS.md`\n2. `docs/memory/CURRENT.md`\n3. `docs/memory/MEMORY.md`\n4. `docs/memory/handoffs/CURRENT_HANDOFF.md`\n5. `docs/memory/USER.md`\n\n"
         "Only after those five are read in full may a session expand selectively from:\n\n- CURRENT direct references\n- exact active task\n- required canonical evidence/decision/phase records\n\nDo not eagerly load the whole memory hierarchy.\n"
     )
     readme_startup = (
-        "read these five files in full and in this exact order:\n\n1. [AGENTS.md](AGENTS.md)\n2. [CURRENT.md](CURRENT.md)\n3. [MEMORY.md](MEMORY.md)\n4. [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md)\n5. [USER.md](USER.md)\n\n"
+        "read these five files in full and in this exact order:\n\n1. [repository-root AGENTS.md](../../AGENTS.md)\n2. [CURRENT.md](CURRENT.md)\n3. [MEMORY.md](MEMORY.md)\n4. [handoffs/CURRENT_HANDOFF.md](handoffs/CURRENT_HANDOFF.md)\n5. [USER.md](USER.md)\n\n"
         "Only then expand selectively from CURRENT direct references, the exact active task, and required canonical evidence/decision/phase records. Do not load the whole hierarchy without task-specific need.\n"
     )
     maintenance_startup = (
-        "read these five files in full, in this exact order:\n\n1. `AGENTS.md`\n2. `CURRENT.md`\n3. `MEMORY.md`\n4. `handoffs/CURRENT_HANDOFF.md`\n5. `USER.md`\n\n"
+        "read these five files in full, in this exact order:\n\n1. [repository-root AGENTS.md](../../AGENTS.md)\n2. `CURRENT.md`\n3. `MEMORY.md`\n4. `handoffs/CURRENT_HANDOFF.md`\n5. `USER.md`\n\n"
         "Only after the five-file core is read may task-directed expansion use CURRENT direct references, the exact active task, and required canonical evidence/decision/phase records. Do not eagerly load the whole memory hierarchy.\n"
     )
+    (root / "AGENTS.md").write_text("# KaonLT development instructions\n\n" + startup, encoding="utf-8")
     navigation = "\n".join(f"[x]({target})" for target in REQUIRED_README_LINKS)
     documents = {
         "README.md": "# KaonLT development memory\n\n" + readme_startup + "\n" + navigation + "\n",
-        "AGENTS.md": "# KaonLT memory operating rules\n\n" + startup + "\n## Execution authority\n\nCodex must not commit, push, update remote refs. The user alone commits/pushes accepted changes and runs farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
+        "AGENTS.md": "# KaonLT memory operating rules\n\nThis is supplemental memory guidance, not part of the universal five-file startup core. See [repository-root AGENTS.md](../../AGENTS.md).\n" + "\n## Execution authority\n\nCodex must not commit, push, update remote refs. The user alone commits/pushes accepted changes and runs farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
         "CURRENT.md": fixture_current(),
         "MEMORY.md": "# Durable KaonLT project knowledge\n\n" + "\n\n".join(f"## {heading}\n\nfixture durable knowledge" for heading in MEMORY_SECTIONS) + "\n",
         "USER.md": "# KaonLT user collaboration context\n\nfixture\n",

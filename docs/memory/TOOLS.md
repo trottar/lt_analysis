@@ -44,11 +44,14 @@ substantial work.
 ## JLab environment
 
 - Farm shell: `tcsh`.
-- Repository and analysis root:
-  `/group/c-kaonlt/USERS/trottar/lt_analysis`.
-- Analysis artifact root:
-  `/group/c-kaonlt/USERS/trottar/lt_analysis/OUTPUT/Analysis/KaonLT`.
-- Transferable bundle root: `/volatile/hallc/c-kaonlt/trottar/globus`.
+- Repository and analysis root: `<KAONLT_REPO_ROOT>`.
+- Analysis artifact root: `<KAONLT_ARTIFACT_ROOT>`.
+- Transferable bundle root: `<KAONLT_BUNDLE_ROOT>`.
+
+Concrete values are supplied by the active external environment/ChatGPT Project
+configuration, not stored in public workflow memory. These are symbolic roles,
+not guessed replacement paths. Never invent or substitute a generic path;
+request a necessary value only when unavailable from active configuration.
 
 Farm runtime remains farm-only; do not represent ROOT/PyROOT or full-analysis
 behavior as locally validated. A project-wide farm Python executable is not
@@ -58,7 +61,7 @@ assumed here.
 
 The Left/lowe owner uses one timestamped output stem for the intended ZIP,
 child analysis `.log`, and `-gate-status.json`. The log and status live in the
-canonical analysis artifact root; the ZIP lives in Globus. Status schema
+`<KAONLT_ARTIFACT_ROOT>`; the ZIP lives in `<KAONLT_BUNDLE_ROOT>`. Status schema
 `e8_4_fix5_owner_gate_status/v1` records source, setting, expected ZIP/log paths,
 UTC timestamps, stage, running/failed/success state, literal failure reason and
 stage completion flags. It is an owner diagnostic outside the frozen bundle.

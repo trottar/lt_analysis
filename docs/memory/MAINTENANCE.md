@@ -51,7 +51,7 @@ concrete blocker is exposed. See the [workflow decision](decisions/memory-bracke
 At substantial-work start, establish actual branch, HEAD, and worktree state.
 Then read these five files in full, in this exact order:
 
-1. `AGENTS.md`
+1. [repository-root AGENTS.md](../../AGENTS.md)
 2. `CURRENT.md`
 3. `MEMORY.md`
 4. `handoffs/CURRENT_HANDOFF.md`
@@ -63,6 +63,92 @@ evidence/decision/phase records. Do not eagerly load the whole hierarchy. Keep
 `CURRENT.md` as the concise sole ordinary active-state authority under schema
 3. The handoff is exceptional-only, and the roadmap contains no exact active
 next action.
+
+## In-chat health and synchronization
+
+Tracked public root `AGENTS.md` is mandatory and publicly retrievable; there is
+no normal missing-AGENTS fallback. The five-file startup order above is universal.
+The full health check is the synchronization receipt for substantial work.
+
+Require a compact full health check at the first substantial task in a new
+chat/session; before a source-changing Codex handoff; before farm readiness or
+a farm command; before accepting/interpreting a returned farm artifact after a
+state change; before changing a phase/status/NEXT; after any failed owner/
+checker/provenance/manifest/page/artifact gate; and after an explicit user
+workflow correction/re-anchor.
+
+```text
+KaonLT health check
+
+repository:
+  branch: <value>
+  live HEAD: <sha>
+  worktree: clean | dirty | NOT VERIFIED
+  source checked live: YES | NO
+
+state:
+  active item: <item>
+  authoritative NEXT: <gate>
+  current gate: <gate>
+  gate status: PASS | BLOCKED | NOT YET EVALUATED
+
+evidence:
+  newest accepted runtime evidence: <record/artifact/NONE>
+  current source/diff reviewed: YES | NO
+  runtime/farm validated in this chat: YES | NO
+  unresolved contradiction: NONE | <exact issue>
+
+ownership:
+  scientific source frozen: YES | NO
+  production logic touched: YES | NO
+  Method A role: <role>
+  Method B role: <role>
+
+verification:
+  SOURCE VERIFIED: <claims or NONE>
+  RUNTIME VERIFIED: <claims or NONE>
+  MEMORY ONLY: <claims or NONE>
+  INFERENCE: <claims or NONE>
+  NOT VERIFIED: <claims or NONE>
+
+next action:
+  <single next action>
+```
+
+The evidence labels defined in root AGENTS describe support for claims, not
+phase work-state labels. The health check is an observability aid, never a
+competing active-state record or new scientific phase. Do not require it for
+ordinary explanatory physics questions or every turn.
+
+For a long technical chat, emit a shorter health pulse after roughly 6–10
+substantive technical exchanges or a major workflow-state transition, whichever
+comes first:
+
+```text
+KaonLT health pulse
+HEAD: <sha>
+active item: <item>
+NEXT: <gate>
+current gate: <gate>
+source/memory consistency: PASS | DRIFT
+unverified assumptions: NONE | <list>
+```
+
+Compare live source identity with CURRENT's active/source statements. Force the
+professional AGENTS re-anchor when live HEAD differs from the identity in use;
+CURRENT materially disagrees with live source; an owner/checker/gate fails; the
+worktree becomes unexpectedly dirty; an unrecorded filesystem path is proposed;
+source changes are proposed without the required contract; artifact
+interpretation starts before provenance/checker/page validation; an assistant
+contradicts accepted status or NEXT; the user identifies workflow/state/path/
+task misalignment; or supporting evidence for an operational claim is missing.
+
+Report `DRIFT` and stop forward motion when the discrepancy creates concrete
+ambiguity about source identity, accepted evidence/status, frozen scientific
+interfaces, active ownership/blocker or exact NEXT. Perform only narrow
+reconciliation before substantive implementation. Cosmetic/historical drift
+remains nonblocking and follows the existing batching policy. A failed gate
+stops progression independently of whether memory itself is consistent.
 
 ## Size and semantic triggers
 

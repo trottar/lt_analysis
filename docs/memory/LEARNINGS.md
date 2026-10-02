@@ -88,6 +88,20 @@
 - Publish per-attempt status atomically and refuse existing attempt files. Keep
   owner diagnostics out of a frozen scientific bundle inventory.
 
+## Gate admissibility and chat health
+
+- A failed downstream gate stops forward progression even if its analysis child
+  completed. Child-process success and owner success are distinct.
+- Artifact existence is not artifact admissibility. A generated PDF does not
+  justify packaging or handoff after a failed manifest/page gate; partial
+  outputs are failed-gate diagnostic evidence only.
+- Never rerun by reflex. Investigate the first failed invariant and earliest
+  valid repair/debug gate before another operation.
+- Suspicious scalar/histogram disagreement requires exact producer-owned
+  closure before physics interpretation.
+- Full in-chat health checks, periodic health pulses and explicit evidence
+  labels expose stale state and unverified assumptions before silent drift.
+
 ## Repository memory and provenance
 
 - Current source and diff outrank stale summaries for implementation.

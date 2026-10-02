@@ -64,11 +64,31 @@ requested, never substitutes for tracked E.8 deliverables.
 
 ## Delivery preferences
 
-Deliver Codex plans and prompts as standalone Markdown files. For farm work,
-provide concise, exact instructions appropriate to the established JLab
-environment, with reproducible commands and paths. Preserve cumulative context
-in durable repository records rather than relying on giant chat-continuation
-prompts once the memory migration is complete.
+For a source-changing task, ChatGPT provides exactly one standalone Markdown
+**task contract**, placed in the repository, followed by one short **inline
+Codex launch prompt** telling Codex to read repository memory and that contract.
+The contract is the durable scoped implementation authority; the inline prompt
+is only the launch instruction. Do not create a second standalone Codex-prompt
+Markdown file unless the user explicitly asks. The contract file, not a shell
+heredoc, is the normal transfer artifact. After Codex completes, ChatGPT reviews
+the actual diff rather than accepting the Codex summary.
+
+For farm work, provide concise, exact instructions appropriate to the established
+JLab environment, with reproducible commands and supplied paths. Preserve
+cumulative context in durable repository records rather than giant
+chat-continuation prompts.
+
+Personal workstation, Downloads and machine-specific path values are external
+environment/session configuration, not durable public repository memory. Use
+the supplied active environment/ChatGPT Project configuration; never substitute
+a guessed generic path. Ask only when a needed value is genuinely unavailable.
+
+When the user identifies workflow, source-state, pathing, procedure, evidence or
+task misalignment, stop extending that approach and follow root AGENTS'
+professional re-anchor: re-establish identity, reread the startup core and
+relevant CURRENT records, identify the exact error and resume from the earliest
+valid gate. Preserve accepted work and closed phases; do not rationalize the
+previous approach or invent a replacement without a concrete blocker.
 
 Treat farm requests as safety-critical for an ordinary JLab user account, not
 an administrator account. Every farm command must be valid `tcsh`, scoped to
@@ -87,7 +107,7 @@ that the user reviews and runs those commands; Codex never commits or pushes.
 This record is stable collaboration context only; it is not a command
 reference, execution-authority policy, farm procedure, active state,
 scientific evidence, phase chronology, or source-identity ledger. See
-[AGENTS.md](AGENTS.md) for behavior and scientific boundaries,
+[root AGENTS.md](../../AGENTS.md) for behavior and scientific boundaries,
 [CURRENT.md](CURRENT.md) for active state, [TOOLS.md](TOOLS.md) for canonical
 operations, [COMMUNICATION.md](COMMUNICATION.md) for farm delivery, and
 [CODEX.md](CODEX.md) for source-changing workflow.

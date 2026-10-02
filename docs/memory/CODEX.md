@@ -19,6 +19,22 @@ the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 Commit/push and pushed-state review are required synchronization stages,
 not independent scientific phases.
 
+## Task-contract delivery and hard stops
+
+ChatGPT supplies one standalone Markdown task contract placed in the repository,
+then one short inline Codex launch prompt to read memory and that contract.
+The contract is the durable scoped authority; the prompt only launches it.
+No second standalone prompt artifact is created by default; require an explicit
+user request. Never use a giant shell heredoc as the normal transfer method.
+Contract placement uses external/session-specific configuration; do not guess
+or publish personal filesystem values in public repository memory.
+
+Before this handoff, perform the full in-chat health check in
+[MAINTENANCE.md](MAINTENANCE.md). Actual-diff review remains mandatory, including
+complete additions for intended new/untracked files. Preserve unrelated state
+and unrelated review bundles. At a failed contract hard stop, return `BLOCKED`;
+do not invent a workaround, reset, stash, clean or overwrite local work.
+
 ## Task classes
 
 1. **Implementation task:** make the approved source change, run local checks,
