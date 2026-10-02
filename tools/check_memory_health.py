@@ -123,6 +123,13 @@ MAINTENANCE_THRESHOLD_ROWS = (
     "| `docs/memory/MEMORY.md` | 30 KiB | 50 KiB |",
 )
 
+FULL_HEALTH_RECEIPT_MARKERS = (
+    "startup core: READ", "CURRENT/source consistency: PASS | DRIFT",
+    "task class:", "current gate:", "gate status:",
+    "SOURCE VERIFIED:", "RUNTIME VERIFIED:", "MEMORY ONLY:",
+    "INFERENCE:", "NOT VERIFIED:",
+)
+
 
 class CurrentFrontmatterError(ValueError):
     """Raised when CURRENT.md does not use the minimal schema-3 frontmatter."""
@@ -481,6 +488,18 @@ def check_maintenance_thresholds(text: str) -> list[str]:
     return [f"MAINTENANCE.md is missing final role-specific threshold row: {row}" for row in MAINTENANCE_THRESHOLD_ROWS if row not in text]
 
 
+def check_full_health_receipt(text: str) -> list[str]:
+    """Require synchronization/evidence markers inside the canonical full receipt."""
+    receipt = re.search(r"^```text\nKaonLT health check\n(.*?)^```[ \t]*$", text, re.MULTILINE | re.DOTALL)
+    lines = [line.strip() for line in receipt.group(1).splitlines()] if receipt else []
+    return [
+        f"MAINTENANCE.md full health receipt is missing required marker: {marker}"
+        for marker in FULL_HEALTH_RECEIPT_MARKERS
+        if not any(line == marker if marker in FULL_HEALTH_RECEIPT_MARKERS[:2]
+                   else line.startswith(marker) for line in lines)
+    ]
+
+
 def run_manifest_check(root: Path) -> tuple[bool, str]:
     script = root / "tools/update_memory_manifest.py"
     if not script.is_file():
@@ -525,6 +544,7 @@ def run_checks(root: Path, *, check_manifest: bool = True) -> tuple[list[str], l
         errors.extend(check_readme_navigation(texts["docs/memory/README.md"]))
     if "docs/memory/MAINTENANCE.md" in texts:
         errors.extend(check_maintenance_thresholds(texts["docs/memory/MAINTENANCE.md"]))
+        errors.extend(check_full_health_receipt(texts["docs/memory/MAINTENANCE.md"]))
     errors.extend(check_roles(root))
     for relative, markers in AUTHORITY_MARKERS.items():
         text = texts.get(relative)
@@ -597,7 +617,7 @@ def write_fixture(root: Path) -> None:
         "TOOLS.md": "# KaonLT tools and operational commands\n\nfixture\n",
         "COMMUNICATION.md": "# KaonLT farm communication\n\n## Execution authority\n\nCodex must not commit, push, update remote refs; the user commits/pushes accepted changes and runs farm validation.\nCodex local changes -> ChatGPT audit -> user commit/push\n",
         "CODEX.md": "# KaonLT Codex workflow\n\nCodex must not commit, push, update remote refs. The user alone commits/pushes accepted changes and runs farm.\nWorkflow: Codex local changes -> ChatGPT audit -> user commit/push\n",
-        "MAINTENANCE.md": "# KaonLT memory maintenance\n\n" + maintenance_startup + "\n" + "\n".join(MAINTENANCE_THRESHOLD_ROWS) + "\n",
+        "MAINTENANCE.md": "# KaonLT memory maintenance\n\n" + maintenance_startup + "\n" + "\n".join(MAINTENANCE_THRESHOLD_ROWS) + "\n\n```text\nKaonLT health check\n" + "\n".join(FULL_HEALTH_RECEIPT_MARKERS) + "\n```\n",
         "LEARNINGS.md": "# KaonLT durable learnings\n\nfixture\n",
         "handoffs/CURRENT_HANDOFF.md": "# Current KaonLT handoff\n\n## Transfer State\n\nNo exceptional transfer state is recorded.\n\n## Resume\n\nCURRENT.md is the sole authoritative resumable state. The handoff cannot override CURRENT.md.\n",
         "roadmap/STATUS.md": "# Approved KaonLT roadmap status\n\n### Fixture phase\n\n`ACTIVE` — fixture dependency/status structure.\n\nCURRENT.md owns the active objective, blockers, and next action.\n",

@@ -1,10 +1,13 @@
 # KaonLT workflow continuity and chat health hardening
 
 **Status:** `SOURCE REVIEWED`.
-This is the intended committed status, warranted only by independent ChatGPT
-actual-diff PASS for the repaired candidate before user-controlled publication.
-Pushed-state synchronization is a separate gate and is not claimed here.
-This workflow/memory hardening creates no farm gate or runtime acceptance.
+Independent ChatGPT actual-diff review passed; user-controlled publication
+occurred in two commits, and pushed-state synchronization passed through
+`8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. Root `AGENTS.md` is publicly tracked.
+Matching ChatGPT Project instructions and `KaonLT_Environment.md` are configured
+externally, confirmed by the closure contract for workflow/environment continuity
+only; they are not repository or scientific evidence. This workflow/memory
+hardening creates no farm gate or runtime/scientific acceptance.
 
 ## Purpose and source
 
@@ -32,8 +35,12 @@ active-state authority. The public contract uses generic path categories only.
 MAINTENANCE defines full in-chat health/synchronization checks at substantial
 startup and consequential workflow gates; shorter pulses occur after roughly
 6–10 substantive technical exchanges or a major transition. Material drift
-stops forward motion and invokes the professional re-anchor. Receipts are
-observability aids, not new state authorities or scientific phases.
+stops forward motion and invokes the professional re-anchor. The final
+[closure contract](workflow-continuity-and-chat-health-hardening-closure-task-contract.md)
+restores and deterministically enforces `startup core: READ`,
+`CURRENT/source consistency: PASS | DRIFT` and `task class:` inside the full
+health receipt. Receipts are observability aids, not new state authorities or
+scientific phases.
 
 Evidence labels distinguish `SOURCE VERIFIED`, `RUNTIME VERIFIED`,
 `MEMORY ONLY`, `INFERENCE` and `NOT VERIFIED` from phase work-state labels.
@@ -54,7 +61,7 @@ plus one short inline Codex launch prompt, with no duplicate prompt artifact
 unless explicitly requested. Actual-diff review includes intended new files.
 TOOLS externalizes concrete workstation/farm values to symbolic repository,
 artifact and bundle roots supplied by active external configuration; no paths
-are guessed. Matching ChatGPT Project configuration is handled separately.
+are guessed. Matching ChatGPT Project configuration is complete externally.
 LEARNINGS records reusable gate-admissibility and chat-health lessons.
 
 ## Current-state continuity and frozen science
@@ -64,7 +71,7 @@ failed owner attempt: analysis started/completed; failure at
 `verify_artifacts` with `page_manifest_setting_invalid`; collection/ZIP not
 started. Generated PDF/manifest remain failed-gate diagnostic artifacts, not
 accepted validation evidence. Raw farm artifacts were not reopened here.
-Scientific work remains paused pending hardening and explicit user resumption;
+Scientific work remains paused until explicit user resumption;
 then the substantive NEXT is failure/provenance diagnosis before any rerun,
 packaging or scientific interpretation. No diagnosis is performed here.
 
@@ -89,12 +96,13 @@ ignore-rule change is involved.
 
 The complete raw temporary `kaonlt_hardening_review.diff` contains every intended
 tracked change and full new AGENTS/phase/contract additions. It excludes the two
-preserved files and is not committed. Independent ChatGPT actual-diff review
-precedes user commit/push and pushed-state synchronization.
-No commit, push, farm execution, ROOT/PyROOT, full-analysis, PDF/ZIP acceptance,
-numerical closure, visual quality or production validation is claimed.
+preserved files and is not committed. The hardening passed independent actual-diff review, user publication and
+pushed-state synchronization; the narrow closure follows that same review and
+publication sequence separately. Codex performed no commit/push or farm run.
+No ROOT/PyROOT, full-analysis, PDF/ZIP acceptance, numerical closure, visual
+quality or production validation is claimed.
 
-Local results: scoped 201-file manifest write/check and ordinary memory health
+Hardening local results: scoped 201-file manifest write/check and ordinary memory health
 PASS; zero warnings/hard failures. CURRENT/MEMORY/CURRENT_HANDOFF bytes:
 8192/12489/323. Deterministic textual checks, accepted-status preservation,
 frozen-file SHA-256 and allowlist checks PASS. Bootstrap self-test and all 40

@@ -276,6 +276,32 @@ class StrictMemoryHealthTests(unittest.TestCase):
             maintenance.write_text(maintenance.read_text(encoding="utf-8").replace("1. [repository-root AGENTS.md](../../AGENTS.md)\n2. `CURRENT.md`", "1. `CURRENT.md`\n2. [repository-root AGENTS.md](../../AGENTS.md)"), encoding="utf-8")
             self.assert_error(self.errors(root), "MAINTENANCE.md five-file startup order")
 
+    def assert_receipt_marker_regression(self, marker: str) -> None:
+        for replacement in ("", marker.replace(":", " omitted:", 1)):
+            with self.subTest(marker=marker, replacement=replacement), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.write_fixture(root)
+                maintenance = root / "docs/memory/MAINTENANCE.md"
+                original = maintenance.read_text(encoding="utf-8")
+                self.assertIn(marker, original)
+                # A prose/pulse copy outside the full receipt cannot satisfy the invariant.
+                maintenance.write_text(original.replace(marker, replacement) + "\n" + marker + "\n", encoding="utf-8")
+                self.assert_error(self.errors(root), f"full health receipt is missing required marker: {marker}")
+
+    def test_full_health_receipt_requires_startup_read(self):
+        self.assert_receipt_marker_regression("startup core: READ")
+
+    def test_full_health_receipt_requires_current_source_consistency(self):
+        self.assert_receipt_marker_regression("CURRENT/source consistency: PASS | DRIFT")
+
+    def test_full_health_receipt_requires_task_class(self):
+        self.assert_receipt_marker_regression("task class:")
+
+    def test_full_health_receipt_retains_gate_and_evidence_markers(self):
+        for marker in ("current gate:", "gate status:", "SOURCE VERIFIED:",
+                       "RUNTIME VERIFIED:", "MEMORY ONLY:", "INFERENCE:", "NOT VERIFIED:"):
+            self.assert_receipt_marker_regression(marker)
+
     def test_handoff_frontmatter_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

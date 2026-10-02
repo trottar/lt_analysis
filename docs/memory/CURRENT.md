@@ -19,10 +19,12 @@ attempt. The analysis child completed, but the owner failed at
 creation did not begin. Owner runtime acceptance and final delivery remain
 pending.
 
-Scientific work is paused at the user's request while
-[workflow/chat-health hardening](phases/workflow-continuity-and-chat-health-hardening.md)
-is implemented and independently reviewed; matching ChatGPT Project
-configuration is updated separately, outside this repository task.
+[Workflow/chat-health hardening](phases/workflow-continuity-and-chat-health-hardening.md)
+is `SOURCE REVIEWED`; pushed-state synchronization passed through
+`8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. ChatGPT Project instructions and
+`KaonLT_Environment.md` are updated externally (per closure contract).
+Science is paused until explicit user resumption; no farm/runtime acceptance
+follows.
 
 Fix.5.5 source is `SOURCE REVIEWED` at
 `df957a6414fc9c515d1f82228517cb801dc90350`; independent ChatGPT actual-diff
@@ -109,19 +111,17 @@ or Method-A promotion.
 
 ## Next Action
 
-NEXT — after workflow hardening is complete and the user resumes scientific
-work, diagnose the exact `page_manifest_setting_invalid` failure and the
-corresponding page/payload provenance before any rerun, packaging or scientific
-interpretation. Preserve the SIMC absolute-unit blocker; no farm command or
-execution is authorized by this hardening task.
+NEXT — when the user explicitly resumes scientific work, diagnose the exact
+`page_manifest_setting_invalid` failure and corresponding page/payload provenance
+before any rerun, packaging or scientific interpretation. Preserve the SIMC
+absolute-unit blocker; this closure authorizes no farm command or execution.
 
 ## Success Criteria
 
-Prior local Fix.5.6 checks: 66 tests passed, no skips; syntax and diff
-checks passed. Its scoped 199-file candidate manifest and ordinary memory
-health passed with no warnings or hard failures. Hardening acceptance requires
-its own deterministic manifest/memory/text/diff checks and independent
-ChatGPT actual-diff review; it confers no scientific/runtime acceptance.
+Prior local Fix.5.6: 66 tests passed, no skips; syntax/diff, scoped 199-file
+manifest and ordinary memory health passed without warnings/hard failures.
+Published workflow hardening confers no scientific/runtime acceptance. Closure
+requires deterministic checks and independent actual-diff review.
 Source and deterministic tests do not establish farm filesystem/permissions,
 ROOT/PyROOT, full analysis, ZIP delivery, PDF legibility, numerical closure or
 observed signed cancellation. All scientific/presentation source is frozen.

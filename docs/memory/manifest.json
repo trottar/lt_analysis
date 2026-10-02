@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8192,
+      "bytes": 8190,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "770addc6d6be8bffd29bd3f372c37f5531ffc4b2ac8c2935bbc7574f50e27d7a"
+      "sha256": "0c0b2f9645ae10df33fc746510df24c88f1a7cd76c8d8be701f8c2b2383548cf"
     },
     {
       "bytes": 5934,
@@ -26,9 +26,9 @@
       "sha256": "bd99c520d9640985bcadc0a2105345cdf6e8c0af00a19ee91bc0b761a59010f8"
     },
     {
-      "bytes": 10627,
+      "bytes": 11088,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "a0c695072514149514cb55580612f1cc7f3c82f9b7da00fe4dc8a04fa585ade6"
+      "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
       "bytes": 12489,
@@ -966,14 +966,19 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
+      "bytes": 19421,
+      "path": "docs/memory/phases/workflow-continuity-and-chat-health-hardening-closure-task-contract.md",
+      "sha256": "bfc26b9bdd9f41442495d154b6c615e0be2f5f5a9eaa996e187c8e280707ac19"
+    },
+    {
       "bytes": 36178,
       "path": "docs/memory/phases/workflow-continuity-and-chat-health-hardening-task-contract.md",
       "sha256": "9b8ed8c9febcb175e1daa0f8279cc1cae2f1e154b25c9d433914bac2558ee221"
     },
     {
-      "bytes": 6094,
+      "bytes": 6673,
       "path": "docs/memory/phases/workflow-continuity-and-chat-health-hardening.md",
-      "sha256": "4352f477358a23de19c3b1c47fbf72862440eafd7add53cf9f6232c80acc46ad"
+      "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
       "bytes": 17669,

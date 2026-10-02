@@ -85,8 +85,11 @@ repository:
   live HEAD: <sha>
   worktree: clean | dirty | NOT VERIFIED
   source checked live: YES | NO
+  startup core: READ
+  CURRENT/source consistency: PASS | DRIFT
 
 state:
+  task class: <source review | contract | pushed-state review | farm evidence | other>
   active item: <item>
   authoritative NEXT: <gate>
   current gate: <gate>
@@ -114,6 +117,11 @@ verification:
 next action:
   <single next action>
 ```
+
+Report `startup core: READ` only after actually reading the universal five-file
+core in order. `CURRENT/source consistency: PASS | DRIFT` exposes material
+alignment of live source identity with CURRENT's active/source claims; `task
+class` identifies the workflow gate class and must reflect any class change.
 
 The evidence labels defined in root AGENTS describe support for claims, not
 phase work-state labels. The health check is an observability aid, never a
