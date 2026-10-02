@@ -1,9 +1,11 @@
 # F.6.3 — detached current-baseline candidate-lineage adoption
 
-**Status:** `ACTIVE` — local implementation and deterministic checks complete;
-independent ChatGPT actual-diff review pending. After that review passes, this
-adoption is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. It does not close
-F.6.3 or E.8.4 and does not promote Method A.
+**Status:** `CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe,
+from the supplied independently reviewed
+[runtime package](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
+at farm HEAD `da38444e7aa60efd62d6638780776344daf40276`. The earlier local
+implementation and review gate below are historical. This does not close
+canonical-five E.8 or F.6.4 and does not promote Method A.
 
 Implemented at exact `test` starting HEAD
 `b349967c0d4210a78b144ce6134d3c1f15970245` under the
@@ -70,11 +72,14 @@ They do not prove reproduction of the supplied farm bytes or farm integration.
 Manifest write/check, ordinary memory health, frozen-file identity verification,
 and actual-diff audit passed. No farm, local `main.py`, commit, or push occurred.
 
-## Required next gate
+## Historical narrow gate — now closed
 
 Following independent actual-diff review, user commit/push, and pushed-state
 synchronization, use the existing tracked Q4p4W2p74 / Left / lowe `-d` debug
 path. Preserve paired low/high preflight and stop before high-epsilon full
 processing. Inspect baseline/reweighted missing-mass spectra, per-t and
 per-(t,phi) yields/deltas, parent-t preservation, procedure-PDF representation,
-and absence of baseline production mutation. CURRENT owns the sole NEXT.
+and absence of baseline production mutation. The supplied runtime review now establishes this narrow gate; see the linked
+evidence for actual child-yield effects, parent closure and post-run provenance.
+The new E.8.4.Fix.5 presentation/owner gate remains farm pending; CURRENT owns
+the sole NEXT.

@@ -6182,7 +6182,8 @@ def _e8_4_e8_2_children(payload):
 
 
 def build_full_background_subtraction_e8_4_payload(
-    f6_3_source, e8_2_payload, *, setting_id=None,
+    f6_3_source, e8_2_payload, *, setting_id=None, simc_support=None,
+    parent_closure=None, candidate_pdf_path=None,
 ):
     """Validate and detach the already-produced F.6.3 comparison sidecar.
 
@@ -6314,6 +6315,32 @@ def build_full_background_subtraction_e8_4_payload(
             }
         if set(copied_children) != expected:
             raise _E8PayloadError("e8_4_child_inventory_invalid")
+        simc_mm = _mapping(simc_support).get("mm")
+        if not isinstance(simc_mm, Sequence) or isinstance(simc_mm, (str, bytes)):
+            raise _E8PayloadError("e8_4_simc_mm_support_missing")
+        if len(simc_mm) != len(baseline["t_edges"]) - 1 or any(
+            not isinstance(row, Sequence) or isinstance(row, (str, bytes))
+            or len(row) != len(baseline["phi_edges"]) - 1 for row in simc_mm
+        ):
+            raise _E8PayloadError("e8_4_simc_child_geometry_mismatch")
+        for (t_index, phi_index), child in copied_children.items():
+            display = _clone_display_histogram(
+                simc_mm[t_index][phi_index],
+                "H_full_background_e8_4_SIMC_t{}_phi{}".format(t_index + 1, phi_index + 1),
+            )
+            if display is None:
+                raise _E8PayloadError("e8_4_simc_child_missing")
+            if not _e8_4_histogram_is_finite(display):
+                raise _E8PayloadError("e8_4_simc_child_nonfinite")
+            if tuple(_e8_4_histogram_edges(display) or ()) != analysis_mm_edges:
+                raise _E8PayloadError("e8_4_simc_mm_binning_mismatch")
+            child["histograms"]["SIMC"] = display
+        if parent_closure is None and candidate_pdf_path is not None:
+            try:
+                parent_closure = _e8_4_read_candidate_parent_closure(source, candidate_pdf_path)
+            except (OSError, ValueError, TypeError) as exc:
+                raise _E8PayloadError("e8_4_parent_closure_read_failed:{}".format(exc))
+        closure = _e8_4_copy_parent_closure(parent_closure, baseline)
         per_t = tuple({
             "t_index": t_index,
             "t_low": float(baseline["t_edges"][t_index]),
@@ -6337,9 +6364,50 @@ def build_full_background_subtraction_e8_4_payload(
         "lambda_window": list(source_window),
         "branch_role": source["branch_role"],
         "authority": dict(authority),
+        "parent_closure": closure,
         **required_flags,
         "per_t": per_t,
     }
+
+
+def _e8_4_copy_parent_closure(parents, baseline):
+    """Copy persisted candidate F.4 closure; never sum display histograms."""
+    if not isinstance(parents, Sequence) or isinstance(parents, (str, bytes)):
+        raise _E8PayloadError("e8_4_parent_closure_missing")
+    copied = {}
+    for parent in parents:
+        parent = _mapping(parent)
+        index = parent.get("canonical_t_index")
+        if type(index) is not int or index not in range(len(baseline["t_edges"]) - 1) or index in copied:
+            raise _E8PayloadError("e8_4_parent_closure_geometry_invalid")
+        if parent.get("closure_passed") is not True:
+            raise _E8PayloadError("e8_4_parent_closure_not_passed")
+        values = {name: _e8_4_finite_scalar(parent.get(name), name) for name in (
+            "baseline_parent_sum", "adjusted_parent_sum", "closure_residual", "closure_relative_scale",
+        )}
+        copied[index] = {"canonical_t_index": index, **values}
+    if set(copied) != set(range(len(baseline["t_edges"]) - 1)):
+        raise _E8PayloadError("e8_4_parent_closure_inventory_invalid")
+    return tuple(copied[index] for index in sorted(copied))
+
+
+def _e8_4_read_candidate_parent_closure(source, pdf_path):
+    """Read only stored closure from the exact F.4 already validated by F.6.3."""
+    source = _mapping(source)
+    if source.get("available") is not True:
+        return None
+    from pion_hgcer_method_a_parallel_full_procedure import accepted_f6_3_artifact_paths
+    path = Path(accepted_f6_3_artifact_paths(Path(pdf_path).parent, "Q4p4W2p74")["f4"])
+    raw = path.read_bytes()
+    authority = _mapping(source.get("authority"))
+    if hashlib.sha256(raw).hexdigest() != authority.get("accepted_f4_source_file_sha256"):
+        raise _E8PayloadError("e8_4_parent_closure_f4_identity_mismatch")
+    artifact = json.loads(raw)
+    correction = _mapping(artifact.get("correction"))
+    if correction.get("fingerprint") != authority.get("accepted_f4_correction_fingerprint"):
+        raise _E8PayloadError("e8_4_parent_closure_f4_fingerprint_mismatch")
+    return tuple(parent for parent in correction.get("parents") or ()
+                 if _e8_3_setting_id(_mapping(parent).get("setting"), "candidate_parent_setting") == source.get("selected_setting_id"))
 
 
 def _e8_2_page_record(payload, group, page_id, semantic_stage):
@@ -7196,6 +7264,140 @@ def _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
     return True
 
 
+def _e8_4_render_simc_page(ROOT, pdf_name, payload, group, *, baseline=False):
+    """Shareable child overlays; all objects are cloned before styling."""
+    title = "Baseline / Method A / SIMC" if baseline else "Method A / SIMC"
+    canvas = ROOT.TCanvas("C_e8_4_{}_t{}".format(
+        "baseline_method_a_simc" if baseline else "method_a_vs_simc", group["t_index"] + 1,
+    ), title, 1800, 1400)
+    retained = []
+    try:
+        canvas.Divide(3, 3)
+        for index, child in enumerate(group["children"]):
+            pad = canvas.cd(index + 1)
+            column, row = index % 3, index // 3
+            pad.SetPad(column / 3.0, 0.03 + (2 - row) * 0.28,
+                       (column + 1) / 3.0, 0.03 + (3 - row) * 0.28)
+            pad.SetTopMargin(0.12); pad.SetBottomMargin(0.14)
+            hists = child["histograms"]
+            names = ("MM_0", "MM_A", "SIMC") if baseline else ("MM_A", "SIMC")
+            labels = {"MM_0": "Baseline data", "MM_A": "Method A data", "SIMC": "SIMC"}
+            colors = {"MM_0": getattr(ROOT, "kBlue", 4), "MM_A": getattr(ROOT, "kMagenta", 6), "SIMC": getattr(ROOT, "kBlack", 1)}
+            y_range = _combined_histogram_y_range([hists[name] for name in names])
+            legend = ROOT.TLegend(0.56, 0.61, 0.89, 0.86)
+            legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextSize(0.037)
+            first = None
+            for position, name in enumerate(names):
+                display = _e8_4_draw_histogram(
+                    ROOT, hists[name], "H_e8_4_share_{}_{}_t{}_phi{}".format(
+                        "triple" if baseline else "pair", name, group["t_index"] + 1, child["phi_index"] + 1,
+                    ), "phi [{:.0f}, {:.0f}) deg;Missing mass [GeV];Normalized yield".format(
+                        child["phi_low"], child["phi_high"],
+                    ), colors[name], y_range, retained,
+                    draw_option="hist e" if position == 0 else "hist e same",
+                )
+                if display is None:
+                    return False
+                legend.AddEntry(display, labels[name], "le")
+                first = display if first is None else first
+            legend.Draw(); retained.append(legend)
+            retained.extend(_e8_2_draw_lambda_window(ROOT, first, payload["lambda_window"]))
+            empty = all(hists["MM_A"].GetBinContent(i) == 0.0 and hists["MM_A"].GetBinError(i) == 0.0
+                        for i in range(1, hists["MM_A"].GetNbinsX() + 1))
+            retained.append(_e8_add_text(ROOT, (0.15, 0.70, 0.52, 0.84), (
+                "EMPTY" if empty else "YA = {:.5g}".format(child["YA"]),
+            ), size=0.037))
+        retained.append(_draw_page_header(ROOT, canvas, title, group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        canvas.Close()
+    return True
+
+
+def _e8_4_render_method_a_simc_page(ROOT, pdf_name, payload, group):
+    return _e8_4_render_simc_page(ROOT, pdf_name, payload, group)
+
+
+def _e8_4_render_baseline_simc_page(ROOT, pdf_name, payload, group):
+    return _e8_4_render_simc_page(ROOT, pdf_name, payload, group, baseline=True)
+
+
+def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
+    """Stored clean yields and effects; never integrate display histograms."""
+    canvas = ROOT.TCanvas("C_e8_4_yield_summary_t{}".format(group["t_index"] + 1), "Method-A yield impact", 1800, 800)
+    retained = []
+    children = group["children"]
+    centers = [(child["phi_low"] + child["phi_high"]) / 2.0 for child in children]
+    try:
+        canvas.Divide(3, 1)
+        for panel, keys, title in (
+            (1, ("Y0", "YA"), "Clean yields (statistical errors);phi [deg];Yield"),
+            (2, ("delta_y",), "DeltaY = YA - Y0;phi [deg];Yield change"),
+            (3, ("delta_y_over_y0",), "DeltaY / Y0;phi [deg];Fractional change"),
+        ):
+            pad = canvas.cd(panel)
+            pad.SetPad((panel - 1) / 3.0, 0.06, panel / 3.0, 0.88)
+            values = [float(child[key]) for key in keys for child in children if child.get(key) is not None]
+            errors = [float(child[key + "_statistical_error"]) for key in keys for child in children] if panel == 1 else []
+            low, high = min([0.0] + values), max([0.0] + values)
+            margin = max(high - low, max(errors, default=0.0), 1.0e-12) * 0.2 + max(errors, default=0.0)
+            frame = pad.DrawFrame(payload["phi_edges"][0], low - margin, payload["phi_edges"][-1], high + margin, title)
+            retained.append(frame)
+            for key in keys:
+                selected = [(x, child) for x, child in zip(centers, children) if child.get(key) is not None]
+                if not selected:
+                    continue
+                xs = array("d", [x for x, _ in selected]); ys = array("d", [child[key] for _, child in selected])
+                if panel == 1:
+                    graph = ROOT.TGraphErrors(len(selected), xs, ys, array("d", [0.0] * len(selected)), array("d", [child[key + "_statistical_error"] for _, child in selected]))
+                else:
+                    graph = ROOT.TGraph(len(selected), xs, ys)
+                graph.SetMarkerStyle(20 if key == "Y0" else 21)
+                graph.SetMarkerColor(getattr(ROOT, "kBlue", 4) if key == "Y0" else getattr(ROOT, "kMagenta", 6))
+                graph.SetLineColor(getattr(ROOT, "kBlue", 4) if key == "Y0" else getattr(ROOT, "kMagenta", 6))
+                graph.Draw("P same"); retained.append(graph)
+            if panel == 1:
+                legend = ROOT.TLegend(0.16, 0.76, 0.62, 0.89)
+                legend.SetBorderSize(0); legend.SetFillStyle(0)
+                legend.AddEntry(retained[-2], "Baseline Y0", "pe"); legend.AddEntry(retained[-1], "Method A YA", "pe")
+                legend.Draw(); retained.append(legend)
+            if panel == 3:
+                undefined = ["phi [{:.0f}, {:.0f}): undefined".format(child["phi_low"], child["phi_high"])
+                             for child in children if child.get("delta_y_over_y0") is None]
+                if undefined:
+                    retained.append(_e8_add_text(ROOT, (0.13, 0.55, 0.89, 0.89), tuple(undefined), size=0.030))
+        retained.append(_draw_page_header(ROOT, canvas, "Method-A yield impact (no new DeltaY uncertainty)", group))
+        canvas._full_background_e8_4_draw_objects = tuple(retained)
+        canvas.Print(pdf_name)
+    except Exception:
+        return False
+    finally:
+        canvas.Close()
+    return True
+
+
+def _e8_4_render_parent_closure_page(ROOT, pdf_name, payload):
+    rows = []
+    for parent in payload["parent_closure"]:
+        rows.append("t{}: baseline={:.10g}; adjusted={:.10g}".format(
+            parent["canonical_t_index"] + 1, parent["baseline_parent_sum"], parent["adjusted_parent_sum"],
+        ))
+        rows.append("  residual={:.5g}; stored tolerance={:.5g}".format(
+            parent["closure_residual"], parent["closure_relative_scale"],
+        ))
+        rows.append("  relative residual (stored residual / max(1, abs(baseline)))={:.5g}".format(
+            parent["closure_residual"] / max(1.0, abs(parent["baseline_parent_sum"])),
+        ))
+    return _e8_text_page(ROOT, pdf_name, "C_e8_4_parent_closure", "Parent-normalization sanity check", (
+        "Stored current-baseline candidate F.4 signed parent sums; {}".format(payload["setting_id"]),
+        "Equality is required by parent preservation; it is not the size of the child reweighting effect.",
+        *rows,
+    ), size=0.033)
+
+
 def _render_full_background_subtraction_e8_4_pages(ROOT, pdf_name, payload, manifest, failures):
     if _e8_4_render_authority_page(ROOT, pdf_name, payload):
         manifest.append(_e8_4_page_record(payload, "full_background.e8_4.authority", "setting"))
@@ -7216,6 +7418,20 @@ def _render_full_background_subtraction_e8_4_pages(ROOT, pdf_name, payload, mani
                 ))
             else:
                 failures.append("E.8.4 {} page unavailable for {}".format(suffix, scope))
+        for suffix, renderer in (
+            ("method_a_vs_simc", _e8_4_render_method_a_simc_page),
+            ("baseline_method_a_simc", _e8_4_render_baseline_simc_page),
+            ("yield_summary", _e8_4_render_yield_summary_page),
+        ):
+            page_id = "full_background.e8_4.{}.{}".format(suffix, scope)
+            if renderer(ROOT, pdf_name, payload, group):
+                manifest.append(_e8_4_page_record(payload, page_id, scope, group=group))
+            else:
+                failures.append("E.8.4 {} page unavailable".format(page_id))
+    if _e8_4_render_parent_closure_page(ROOT, pdf_name, payload):
+        manifest.append(_e8_4_page_record(payload, "full_background.e8_4.parent_closure", "setting"))
+    else:
+        failures.append("E.8.4 parent-closure page unavailable")
     if _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
         manifest.append(_e8_4_page_record(payload, "full_background.e8_4.setting_summary", "setting"))
     else:
@@ -7507,8 +7723,10 @@ def finalize_full_background_subtraction_e8_2(hist):
         }
         hist["_e8_2_full_background_finalization_status"] = status
         return status
+    f6_3_source = hist.get("_f6_3_parallel_method_a_source")
     e8_4_presentation = build_full_background_subtraction_e8_4_payload(
-        hist.get("_f6_3_parallel_method_a_source"), presentation,
+        f6_3_source, presentation, simc_support=hist.get("_xsect_support_simc"),
+        candidate_pdf_path=state.get("pdf_path"),
     )
     e8_4_status = {
         "e8_4_available": e8_4_presentation.get("available") is True,

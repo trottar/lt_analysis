@@ -340,7 +340,9 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
     if ! validate_external_sigma0_paths_before_cleanup; then
         exit 1
     fi
-    git clean -fdx
+    if [[ $d_flag != "true" ]]; then
+        git clean -fdx
+    fi
     ./set_SymLinks.sh $ParticleType
 fi
 

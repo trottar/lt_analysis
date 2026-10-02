@@ -1326,6 +1326,9 @@ stage_start = perf_counter()
 yieldDict.update(find_yield_data(histlist, inpDict))
 record_stage_time("Step 6 data yields", stage_start)
 stage_start = perf_counter()
+yieldDict.update(find_yield_simc(histlist, inpDict))
+record_stage_time("Step 6 simc yields", stage_start)
+stage_start = perf_counter()
 for hist in histlist:
     if str(hist.get("ParticleType", ParticleType)).strip().lower() != "kaon":
         continue
@@ -1337,9 +1340,6 @@ for hist in histlist:
         )
     )
 record_stage_time("Step 6 E.8.2 post-yield procedure finalization", stage_start)
-stage_start = perf_counter()
-yieldDict.update(find_yield_simc(histlist, inpDict))
-record_stage_time("Step 6 simc yields", stage_start)
 
 stage_start = perf_counter()
 debug_checkpoint(

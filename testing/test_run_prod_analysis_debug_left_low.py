@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -57,6 +58,53 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
         self.assertIn("fast kaon Left / lowe debug mode", self.launcher)
         self.assertIn("$d_flag = \"true\" && $ParticleType != \"kaon\"", self.launcher)
         self.assertNotRegex(self.launcher, r"d\)\s+DEBUG=")
+
+    def _cleanup_block(self):
+        start = self.launcher.index('if [[ $i_flag != "true" && $a_flag != "true" ]]; then')
+        end = self.launcher.index('\n# Efficiency csv file', start)
+        return self.launcher[start:end]
+
+    def _exercise_cleanup_block(self, debug, validation_status=0):
+        """Execute only the real cleanup block with harmless command stubs."""
+        bash = self._bash()
+        if bash is None:
+            self.skipTest("a local Bash executable is required for cleanup-path coverage")
+        with tempfile.TemporaryDirectory() as directory:
+            symlinks = Path(directory) / "set_SymLinks.sh"
+            symlinks.write_text('#!/bin/bash\nprintf "symlinks:%s\\n" "$1"\n', encoding="utf-8")
+            symlinks.chmod(0o755)
+            harness = (
+                'i_flag=false; a_flag=false; ParticleType=kaon\n'
+                'd_flag="$1"\n'
+                'validate_external_sigma0_paths_before_cleanup() { '
+                'printf "validate\\n"; return ' + str(validation_status) + '; }\n'
+                'git() { printf "git:%s\\n" "$*"; }\n'
+            )
+            return subprocess.run(
+                [bash, "-c", harness + self._cleanup_block(), "cleanup-test", debug],
+                cwd=directory, text=True, capture_output=True, check=False,
+            )
+
+    def test_debug_bypasses_only_cleanup_and_ordinary_cleanup_is_preserved(self):
+        self.assertEqual(len(re.findall(r'^\s*git clean -fdx\s*$', self.launcher, re.MULTILINE)), 1)
+        self.assertRegex(
+            self._cleanup_block(),
+            r'if \[\[ \$d_flag != "true" \]\]; then\s+git clean -fdx\s+fi\s+'
+            r'\./set_SymLinks\.sh \$ParticleType\s+fi',
+        )
+        for debug in ("true", "false", ""):
+            with self.subTest(debug=debug):
+                result = self._exercise_cleanup_block(debug)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                expected = ["validate", "symlinks:kaon"] if debug == "true" else ["validate", "git:clean -fdx", "symlinks:kaon"]
+                self.assertEqual(result.stdout.splitlines(), expected)
+
+    def test_external_sigma0_failure_blocks_cleanup_and_symlinks_in_both_modes(self):
+        for debug in ("true", "false"):
+            with self.subTest(debug=debug):
+                result = self._exercise_cleanup_block(debug, validation_status=1)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertEqual(result.stdout.splitlines(), ["validate"])
 
     def test_debug_flag_uses_existing_flagged_q2_w_convention(self):
         self.assertRegex(

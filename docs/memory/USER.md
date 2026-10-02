@@ -57,6 +57,11 @@ staging merely to make a diff reviewable. A review bundle must include both the
 tracked diff and complete `git diff --no-index /dev/null ...` representations
 for every intended new/untracked file.
 
+Tracked KaonLT analysis/procedure plots are implemented through the normal
+source-changing Codex workflow and farm-rendered from repository source.
+ChatGPT-generated/extracted plots are inspection aids only when explicitly
+requested, never substitutes for tracked E.8 deliverables.
+
 ## Delivery preferences
 
 Deliver Codex plans and prompts as standalone Markdown files. For farm work,

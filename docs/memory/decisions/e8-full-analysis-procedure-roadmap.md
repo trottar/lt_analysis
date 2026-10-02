@@ -93,11 +93,14 @@ Retain accepted explanatory diagnostics: L/B/A normalized shapes; `delta x xptar
 
 ## F.6.3 — parallel full procedure plus Method A
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
-passed the local F.6.3 private parallel Method-A full-analysis candidate. This
-is source review only and has no ROOT/PyROOT, farm, or runtime acceptance claim.
-It changes exactly `w0_j -> w0_j * C_j` while filling the pion-subtraction
-template.
+`CLOSED / RUNTIME VALIDATED` only for current-baseline candidate-lineage
+adoption at Q4p4W2p74 / Left / lowe. The supplied independently reviewed
+[runtime evidence](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
+establishes live-cache parity, real child-yield changes and parent preservation
+at farm HEAD `da38444e7aa60efd62d6638780776344daf40276`.
+The preceding independent source review covered the private branch changing
+exactly `w0_j -> w0_j * C_j` while filling the pion-subtraction template.
+No canonical-five closure or production promotion follows.
 
 The baseline full yield calculation remains unchanged. Both branches use the
 same proton-cleaned input; random/dummy subtraction, slow-proton treatment,
@@ -114,14 +117,17 @@ baseline exactly.
 
 ## E.8.4 — baseline-versus-Method-A production-impact audit
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
-passed the complete cumulative `kaonlt_review(20260928-233040).diff` candidate.
+`CLOSED / RUNTIME VALIDATED` only for the existing Q4p4W2p74 / Left / lowe
+impact audit, from the supplied [runtime evidence](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
+The preceding independent source review passed
+`kaonlt_review(20260928-233040).diff`.
 E.8.4 consumes authoritative F.6.3 two-branch outputs and does not construct
 them. The reviewed candidate retains Fix.1's E.8.2-to-F.6.3 setting-token
 identity, internal analysis-MM geometry, and common pion input, and Fix.2's
 explicit malformed optional-sidecar Lambda-window/child-inventory fail-closed
 boundary. Codex-reported deterministic checks were `NOT RUN by ChatGPT`; this
-is not ROOT/PyROOT, full-analysis, farm, or runtime validation.
+historical source review alone did not establish ROOT/PyROOT, full-analysis,
+farm or runtime validation.
 
 ### E.8.4a — actual pion-subtraction consequence
 
@@ -139,6 +145,29 @@ window.
 
 For every canonical `(t,phi)` show `Y0(t,phi)`, `YA(t,phi)`, `DeltaY = YA - Y0`, and `DeltaY/Y0` where defined. Summarize versus phi for each t, versus t for each setting, and later across all five canonical Q4p4W2p74 settings. The Method-A minus baseline shift is a correction effect, not automatically a systematic uncertainty.
 
+### E.8.4d — shareable SIMC and yield-impact presentation
+
+[Fix.5 / Fix.5.1 / Fix.5.2](../phases/e8-4-fix5-shareable-method-a-impact-pages.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. For each canonical t parent,
+show all nine children in final Method-A MM versus authoritative already-normalized
+per-child SIMC and baseline/Method-A/SIMC overlays. Clone the existing SIMC
+runtime support only after the single existing SIMC-yield producer; never reload,
+refill, rescale or use a setting-wide substitute.
+
+Shareable summaries show stored Y0/YA with existing statistical uncertainties,
+signed DeltaY and defined DeltaY/Y0 versus phi. Undefined fractions remain
+visible; no new DeltaY uncertainty is introduced. The parent-normalization
+sanity page displays hash/fingerprint-pinned stored candidate F.4 signed parent
+sums and residuals. Equality is the preservation constraint, not the magnitude
+of child-yield changes. Existing E.8 pages remain.
+
+The tracked narrow owner runs the existing Left/lowe debug analysis, verifies
+fresh pages/artifacts, then collects only Left/lowe using the canonical-five
+profile and a temporary clean detached collector/source-check worktree at the
+exact reviewed/pushed SHA. Ordinary canonical farm artifacts are consumed
+without ordinary-checkout cleanup or a separate manual packaging step.
+New-page rendering and owner integration still require fresh farm evidence.
+
 ## Final E.8 closure and F.6.4
 
 Final E.8 is `BLOCKED` pending E.8.4 and later required runtime/visual
@@ -147,7 +176,10 @@ final baseline canonical MM/yields and stage yields, explicit `w0 -> w0*C`,
 direct baseline-versus-reweighted pion background with signed difference/ratio,
 canonical redistribution/parent closure, F.6.2 explanation, actual F.6.3
 baseline-versus-Method-A clean-kaon MM comparison, final `Y0` versus `YA`, and
-absolute/fractional yield shifts.
+absolute/fractional yield shifts, per-child Method-A/SIMC and baseline/Method-A/SIMC
+comparisons without renormalization, shareable yield-impact summaries and parent
+closure sanity presentation. Accepted existing Left/lowe evidence does not close
+these new pages or the canonical-five program.
 
 F.6.4 is `BLOCKED` pending completed F.6.3/E.8.4 production-impact evidence. It is the only phase that may decide whether Method A becomes production pion-background treatment. No automatic promotion follows from detached validation, presentation, or source review.
 

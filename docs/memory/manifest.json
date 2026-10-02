@@ -16,14 +16,14 @@
       "sha256": "28366e2887a4fd3e6b1da0b209d5fa12274ea1e756bfbaf686bba3869531962f"
     },
     {
-      "bytes": 7410,
+      "bytes": 5141,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "3203d6ef57b1a65fa5a1750672b86781166f29706cc6f2e523d86488cf02efc1"
+      "sha256": "a2dbae4f8f45f1f719dc51a7ecf0866d28412cdd9e7ab22e63490d10a1b18ba3"
     },
     {
-      "bytes": 3359,
+      "bytes": 3579,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "3d20c9c4bf82344b0b41f3deebe8c5e20574620ac004f742c09563b36e72e5ce"
+      "sha256": "a083413bd17a3db54c231013baed1a0bc2282af58b0586b6a814bd5f64fb59f6"
     },
     {
       "bytes": 7347,
@@ -31,9 +31,9 @@
       "sha256": "da9d9467e14e4a7dc428aa8f9f2d7a7ca85a70a5816829d0c483b375652f660e"
     },
     {
-      "bytes": 8348,
+      "bytes": 9169,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "18b0e055977171714617cb200e7f06c2451f7690623bdc65aabf4f07d3575967"
+      "sha256": "af9156e8ffe7b360961a44adced9a4171763eef44af4fea2fb6e34a104cd5564"
     },
     {
       "bytes": 3469,
@@ -41,14 +41,14 @@
       "sha256": "e0395f612bd4d987a81874b2d6a851885d6b05a912c650eaeec5668bc4e4e6fa"
     },
     {
-      "bytes": 2174,
+      "bytes": 2277,
       "path": "docs/memory/TOOLS.md",
-      "sha256": "88245c39f22decde055b9b383b5dacc837ba600f685765faf69708b560a03519"
+      "sha256": "456e18228b2a34c6faaf49beaa4774df7fd40dfac1320df3d369585eeb28b33d"
     },
     {
-      "bytes": 5304,
+      "bytes": 5587,
       "path": "docs/memory/USER.md",
-      "sha256": "0399a000485b83dbb7c00cf925d355de47f74e16de7c17459edd650db845f9ba"
+      "sha256": "840b143bbb5f695965db035b75f499a483682ded71bc9800cd1e4c9ef10320ac"
     },
     {
       "bytes": 1157,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 10008,
+      "bytes": 12086,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "81c1ad672ef499c010d706fa3ff89e63f3cfcf0c174d7af151097b899d60c94e"
+      "sha256": "9250c0522d8f9db97a6c169f64362b4de22ad75ba8dad32a391a94f350d8d959"
     },
     {
       "bytes": 2363,
@@ -214,6 +214,11 @@
       "bytes": 2566,
       "path": "docs/memory/evidence/f6-2-scientific-runtime-closure.md",
       "sha256": "76e9bd7e684eaf7479ed4a31b4b7061e7fc3d73146a1c00994697692a9ac166a"
+    },
+    {
+      "bytes": 3253,
+      "path": "docs/memory/evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md",
+      "sha256": "3e0a97f363fb8cef8e5c8e3e668a6c3fcb4eaa138f0c47a41f304624d15cc29b"
     },
     {
       "bytes": 13175,
@@ -616,6 +621,31 @@
       "sha256": "a7bdb0a6e563ae793d8901911f5c5ad1cefdf501f1a53558d45b2a596543b3e6"
     },
     {
+      "bytes": 20948,
+      "path": "docs/memory/phases/e8-4-fix5-1-simc-runtime-handoff-unblock-task-contract.md",
+      "sha256": "488563fab444a0a35fc2a6119cd5af13b030f4aacccdfad6f434c74ad941b3b5"
+    },
+    {
+      "bytes": 22736,
+      "path": "docs/memory/phases/e8-4-fix5-2-collector-scope-owner-completion-task-contract.md",
+      "sha256": "6076fdd57b5443a5910b852d2d4e7dbfd7bc262fc60a4ea036732bf2713f56cf"
+    },
+    {
+      "bytes": 10930,
+      "path": "docs/memory/phases/e8-4-fix5-3-debug-launcher-cleanup-safety-task-contract.md",
+      "sha256": "c37d44fb3069f1c0cf5c37c945655710ceccee7dfc887db4d045950c9cf5e41d"
+    },
+    {
+      "bytes": 28512,
+      "path": "docs/memory/phases/e8-4-fix5-shareable-method-a-impact-pages-task-contract.md",
+      "sha256": "12e7475a784e4fe9be5c980e1631678b9c5627af2e5b68644145bf11c09c2497"
+    },
+    {
+      "bytes": 5681,
+      "path": "docs/memory/phases/e8-4-fix5-shareable-method-a-impact-pages.md",
+      "sha256": "33c8bf19e0c9944317af48bf241d304e3ef9d5a7bbc6e6e348b43f7d2f623fff"
+    },
+    {
       "bytes": 26240,
       "path": "docs/memory/phases/e8-4-production-impact-audit-task-contract.md",
       "sha256": "2140d5aed22729abfcd357b5065b19d62952747c018a13f8f562b33c31cd59dc"
@@ -736,9 +766,9 @@
       "sha256": "6c497fc7b3e8a2fc3a5c444b3edeba6627f6b2026c236d226b474db7c367620b"
     },
     {
-      "bytes": 4592,
+      "bytes": 4954,
       "path": "docs/memory/phases/f6-3-current-baseline-candidate-lineage-adoption.md",
-      "sha256": "6d3b342ca3fddaa617e1b5e6aa3364daef344a54b2e9e1090e69ca343ef45589"
+      "sha256": "1f7e8f562c87ec8b35d04548a715c784a72fe2ff2a5e2387653198061c2fd18c"
     },
     {
       "bytes": 9832,
@@ -891,9 +921,9 @@
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
     },
     {
-      "bytes": 13481,
+      "bytes": 14977,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "b547944347283c0b4118444e1cec867da252be7ae8d943b54e849316e4a081a5"
+      "sha256": "1b8fedbd5ca6b3c80946fb27afa12b4365c1af865cc478814f20c53424ddd381"
     },
     {
       "bytes": 1698,

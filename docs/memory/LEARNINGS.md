@@ -58,6 +58,10 @@
   evidenced scientific/runtime blocker with one coherent repair. Documentation
   alone is not completion.
 
+- A new procedure-PDF analysis figure is a source/presentation task: trace
+  authoritative inputs, implement it in tracked source, test locally, then
+  farm-render it. Ad-hoc chat plots do not fulfill that deliverable.
+
 ## Repository memory and provenance
 
 - Current source and diff outrank stale summaries for implementation.

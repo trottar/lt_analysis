@@ -30,14 +30,16 @@ workstation-specific executable.
 ```sh
 <PYTHON> -B tools/update_memory_manifest.py --root . --check
 <PYTHON> -B tools/update_memory_manifest.py --root . --write
-<PYTHON> -B tools/check_memory_health.py --root . --fail-on-warning
+<PYTHON> -B tools/check_memory_health.py --root .
 <PYTHON> -B tools/memory_bootstrap.py --root . --json
 ```
 
-Run manifest write then check in sequence after memory changes. The strict
-health command is the task-final gate; the same command without
-`--fail-on-warning` remains diagnostic only. Report exact
-CURRENT/MEMORY/CURRENT_HANDOFF byte counts and warnings after substantial work.
+Run manifest write then check in sequence after memory changes, followed by
+ordinary task-final health as shown above. Reserve `--fail-on-warning` for
+explicit milestone/zero-warning audits or materially blocking-warning cases.
+Hard failures block; record nonblocking warnings and batch their correction.
+Report exact CURRENT/MEMORY/CURRENT_HANDOFF byte counts and warnings after
+substantial work.
 
 ## JLab environment
 

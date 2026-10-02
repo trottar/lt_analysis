@@ -85,6 +85,19 @@ fit, factor, correction, normalization, or yield for plotting. Method-A
 reweighting remains parent-preserving (`w0 -> w0*C`) with no independent child
 normalization; Method B remains numerically excluded.
 
+The current-baseline F.6.3 Method-A full-analysis path has accepted direct
+runtime evidence for Q4p4W2p74 / Left / lowe only: real canonical child yields
+change while signed parent-t normalization is preserved. Parent equality is a
+constraint, not the magnitude of the redistribution effect. See the
+[Left/lowe evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
+No canonical-five closure or Method-A promotion follows.
+
+E.8 shareable pages consume the existing normalized per-child SIMC MM support
+from `hist["_xsect_support_simc"]["mm"]` after the existing SIMC-yield producer.
+Clone only for display; never reload, refill, renormalize, or substitute a
+setting-wide SIMC shape. Yield summaries consume stored branch values, and
+parent closure consumes hash/fingerprint-pinned candidate F.4 records.
+
 A completed bundle is insufficient by itself: inspect provenance, checker
 gates, structured payloads or logs, and rendered pages as applicable. When a
 checker disagrees with raw evidence or implementation behavior, inspect the raw

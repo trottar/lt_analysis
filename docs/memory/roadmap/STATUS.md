@@ -28,10 +28,12 @@ F.4.Refresh.1 current-baseline Method-A authority comparison and Fix.1 are
 `CLOSED / RUNTIME VALIDATED` only for their detached comparison gate. The
 supplied farm result found exact F.2/F.3 scientific equality and F.4 as the
 first changed stage. See [comparator evidence](../evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md).
-F.4.Refresh.2 detached candidate materialization and Fix.1 are
-`SOURCE REVIEWED` after independent ChatGPT actual-diff/source-runtime-path
+F.4.Refresh.2 detached candidate materialization is now `CLOSED / RUNTIME VALIDATED` from accepted 2026-10-01 materialization evidence; see the
+[adoption phase](../phases/f6-3-current-baseline-candidate-lineage-adoption.md).
+No historical accepted authority changes. The preceding source history follows.
+Materialization and Fix.1 were `SOURCE REVIEWED` after independent ChatGPT actual-diff/source-runtime-path
 review of `kaonlt_review(20260930-111446).diff` passed. No accepted
-F.2/F.3/F.4 authority has changed; F.6.3/E.8.4 remain `SOURCE REVIEWED` and
+F.2/F.3/F.4 authority had changed; F.6.3/E.8.4 were then `SOURCE REVIEWED` and
 runtime `BLOCKED`. See the
 [phase record](../phases/f4-refresh2-current-baseline-candidate-materialization.md).
 F.4.Refresh.2.Validation.1 is `SOURCE REVIEWED` after independent ChatGPT
@@ -98,22 +100,28 @@ closure without child renormalization. This has no runtime acceptance claim.
 
 #### F.6.3 — parallel full procedure plus Method A
 
-`SOURCE REVIEWED` — the local private parallel full-analysis candidate changes
-only `w0_j -> w0_j * C_j` in pion-template filling while retaining the frozen
-baseline procedure. This is source review only; no ROOT/PyROOT, farm, or runtime
-acceptance is claimed. Legacy empirical residual Fit 1/Fit 2 remain disabled.
+`CLOSED / RUNTIME VALIDATED` — only for current-baseline candidate-lineage
+adoption at Q4p4W2p74 / Left / lowe, farm HEAD
+`da38444e7aa60efd62d6638780776344daf40276`. The supplied reviewed
+[evidence](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
+shows live-cache parity, real child-yield changes and parent preservation.
+The private branch changes only `w0_j -> w0_j * C_j`; baseline production
+and disabled legacy empirical residual fits remain unchanged. No canonical-five
+closure or production promotion follows.
 
 #### E.8.4 — baseline-versus-Method-A production-impact audit
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff/source-runtime-path review
-passed the complete cumulative `kaonlt_review(20260928-233040).diff` candidate.
+`CLOSED / RUNTIME VALIDATED` — only for the existing Q4p4W2p74 / Left / lowe
+impact audit, from the supplied [runtime evidence](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
+The preceding source-review history: independent ChatGPT actual-diff/source-runtime-path
+review passed `kaonlt_review(20260928-233040).diff`.
 The presentation-only consumer uses authoritative two-branch outputs for
 post-pion, final canonical MM, final-yield, and delta-yield comparisons; it
 does not construct branch outputs. The reviewed cumulative candidate retains
 Fix.1 identity/geometry/common-input repairs and Fix.2 malformed optional-
 sidecar Lambda-window/child-inventory fail-closed behavior. Codex-reported
-checks were `NOT RUN by ChatGPT`; no ROOT/PyROOT, farm, or runtime acceptance
-is claimed.
+checks were `NOT RUN by ChatGPT`; that historical source review did not
+establish ROOT/PyROOT, farm or runtime acceptance.
 
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source
@@ -127,9 +135,9 @@ user-controlled pushed source `29d7b7f9635db899939efeb3508e941e994e8928`.
 It narrows persisted pion-control compatibility to checksum plus axis (while
 retaining every other cache boundary) and makes only the configured
 minimum-template-integral comparison machine-scale roundoff safe. The
-associated `Q4p4W2p74 / Left / lowe` farm observation remains a determinism
-blocker, not runtime closure; E.8.4 remains `SOURCE REVIEWED` and no production
-or Method-A ownership changes.
+associated historical `Q4p4W2p74 / Left / lowe` observation was a determinism
+blocker, not runtime closure. Later current-baseline evidence resolves the
+narrow gate; production and Method-A ownership remain unchanged.
 
 E.8.4.Fix.3 validation-bundle profile re-pin is `SOURCE REVIEWED`: final
 independent ChatGPT actual-diff/source-provenance review of
@@ -143,14 +151,14 @@ procedure-PDF, farm, runtime, production, or Method-A-promotion evidence.
 E.8.4.Fix.4 persisted-alignment semantic-version repair is `CLOSED / RUNTIME VALIDATED`
 for the narrow cache-semantics gate. Fresh farm evidence shows current-semantics
 `rejected_stale_then_created` with `alignment_semantics_version mismatch`;
-the F.6.3/E.8.4 gate remains blocked. See
+the historical F.6.3/E.8.4 gate was then blocked. See
 [direct evidence](../evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md).
 Prior independent ChatGPT actual-diff/source-runtime-path review of
 `kaonlt_review(20260929-215203).diff` passed. The reviewed candidate makes
 pre-Fix.3 alignment records stale while retaining current-semantics reuse and
 direct parent fail-closed semantics; only the two allowed source/test files
 change substantively. Codex-reported checks were `NOT RUN by ChatGPT`. The
-fresh Left/lowe F.6.3/E.8.4 gate remains `BLOCKED` by an F.3 input-content
+historical Left/lowe F.6.3/E.8.4 gate was `BLOCKED` by an F.3 input-content
 mismatch in F.6.3's F.4 reproduction. This Fix.4 closure does not establish
 full-analysis, procedure-PDF, F.6.3/E.8.4 runtime, production, or
 Method-A-promotion closure.
@@ -169,6 +177,18 @@ remain frozen. Codex-reported checks were `NOT RUN by ChatGPT`. See the
 [profile re-pin record](../phases/e8-4-fix4-bundle-profile-repin.md). No
 ROOT/PyROOT, full-analysis, procedure-PDF, farm, runtime, production, or
 Method-A-promotion status changes.
+
+#### E.8.4.Fix.5 / Fix.5.1 / Fix.5.2 — shareable pages and complete Left/lowe owner
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the preserved local candidate
+adds all 27 child Method-A/SIMC and baseline/Method-A/SIMC comparisons, stored
+Y0/YA, DeltaY and defined DeltaY/Y0 summaries, and pinned parent-closure sanity
+presentation. The single existing SIMC-yield call precedes E.8 finalization.
+The tracked owner performs run -> verify -> package with canonical-five profile
+declaration, explicit Left/lowe selection and clean detached collector source
+checks at the exact pushed SHA. See the [Fix.5 phase](../phases/e8-4-fix5-shareable-method-a-impact-pages.md).
+Independent actual-diff review and synchronization remain required; this is
+not new-page/owner farm acceptance or canonical-five closure.
 
 #### Final E.8 closure
 
@@ -191,11 +211,10 @@ brackets substantive science and validation with memory checkpoints. Required
 actual-diff review, user commit/push, and pushed-state synchronization are not
 independent scientific phases. Record and batch nonblocking maintenance at
 milestones; concrete source/provenance/active-state blockers alone warrant
-separate reconciliation. The substantive gate sequence remains narrow
-`Q4p4W2p74` F.4.Refresh.2 farm materialize -> verify -> package, then, only
-after accepted evidence, `Q4p4W2p74 / Left / lowe` Method-A reweighting/yield
-demonstration. Canonical-five presentation cannot precede Left/lowe before/
-after evidence. This changes no phase dependencies or scientific statuses.
+separate reconciliation. The narrow Refresh.2 materialization and Left/lowe current-baseline
+reweighting/yield gates now have accepted evidence. The subsequent Fix.5
+shareable presentation/owner runtime gate remains narrow Left/lowe.
+Canonical-five closure and F.6.4 remain blocked; dependency order is unchanged.
 
 ## Active-state ownership
 

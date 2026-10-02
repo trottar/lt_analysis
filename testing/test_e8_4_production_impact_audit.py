@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import inspect
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -104,6 +105,18 @@ class _FakeCanvas:
     def Divide(self, *_args):
         return None
 
+    def SetPad(self, *args):
+        return None
+
+    def SetTopMargin(self, value):
+        return None
+
+    def SetBottomMargin(self, value):
+        return None
+
+    def DrawFrame(self, *args):
+        return _FakeGraph()
+
     def cd(self, *_args):
         return self
 
@@ -156,9 +169,18 @@ class _FakeLine:
 
 class _FakeGraph:
     options = []
+    points = []
 
-    def __init__(self, *_args):
-        pass
+    def __init__(self, *args):
+        self.args = args
+        if len(args) >= 3:
+            self.points.append((list(args[1]), list(args[2])))
+
+    def SetMarkerStyle(self, value):
+        return None
+
+    def SetMarkerColor(self, value):
+        return None
 
     def SetTitle(self, value):
         self.title = value
@@ -176,11 +198,19 @@ class _FakeGraph:
         self.options.append(option)
 
 
+class _FakeLegend(_FakeText):
+    entries = []
+    def AddEntry(self, hist, label, option):
+        self.entries.append(label)
+
+
 class _FakeRoot:
     TCanvas = _FakeCanvas
     TPaveText = _FakeText
     TLine = _FakeLine
     TGraph = _FakeGraph
+    TGraphErrors = _FakeGraph
+    TLegend = _FakeLegend
     kBlack = 1
     kBlue = 4
     kMagenta = 6
@@ -192,9 +222,8 @@ def _histogram(value, *, errors=(0.1, 0.2), edges=(1.10, 1.13, 1.16)):
 
 def _e8_2_payload(
     *, y0=(3.0, 4.0), setting="Left", epsilon="low",
-    mm_edges=(0.70, 1.00, 1.30), t_edges=(0.0, 1.0),
+    mm_edges=(0.70, 1.00, 1.30), t_edges=(0.0, 1.0), phi_edges=(-180.0, 0.0, 180.0),
 ):
-    phi_edges = (-180.0, 0.0, 180.0)
     per_t = []
     for t_index in range(len(t_edges) - 1):
         children = []
@@ -223,9 +252,8 @@ def _e8_2_payload(
 def _f6_3_source(
     *, y0=(3.0, 4.0), ya=(3.6, 4.0), reverse=False,
     selected_setting_id="Left-lowe", mm_edges=(1.10, 1.13, 1.16),
-    t_edges=(0.0, 1.0),
+    t_edges=(0.0, 1.0), phi_edges=(-180.0, 0.0, 180.0),
 ):
-    phi_edges = (-180.0, 0.0, 180.0)
     children = []
     for t_index in range(len(t_edges) - 1):
         for phi_index in range(len(phi_edges) - 1):
@@ -283,11 +311,37 @@ def _source_histogram_snapshot(source):
     ], sort_keys=True)
 
 
+def _closure(count=1):
+    return [{"canonical_t_index": index, "closure_passed": True,
+             "baseline_parent_sum": 12.0 + index, "adjusted_parent_sum": 12.0 + index,
+             "closure_residual": 0.0, "closure_relative_scale": 1.0e-10}
+            for index in range(count)]
+
+
+def _support(source, baseline):
+    edges = (1.10, 1.13, 1.16)
+    if isinstance(source, dict) and isinstance(source.get("children"), (list, tuple)) and source["children"]:
+        edges = source["children"][0]["pion_input"].edges
+    return {"mm": [[_histogram(6.0, edges=edges) for _ in range(len(baseline["phi_edges"]) - 1)]
+                   for _ in range(len(baseline["t_edges"]) - 1)]}
+
+
+def _build(source, baseline, **kwargs):
+    return plots.build_full_background_subtraction_e8_4_payload(
+        source, baseline, simc_support=_support(source, baseline),
+        parent_closure=_closure(len(baseline["t_edges"]) - 1), **kwargs)
+
+
 class E84ProductionImpactAuditTests(unittest.TestCase):
+    def setUp(self):
+        patcher = patch.object(plots, "_e8_4_read_candidate_parent_closure", return_value=_closure())
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_valid_consumer_retains_canonical_geometry_deltas_and_detaches_histograms(self):
         source = _f6_3_source(reverse=True)
         before = deepcopy(source["children"][0]["MM_A"].contents)
-        payload = plots.build_full_background_subtraction_e8_4_payload(source, _e8_2_payload())
+        payload = _build(source, _e8_2_payload())
 
         self.assertTrue(payload["available"])
         self.assertEqual(payload["setting_id"], "Left-lowe")
@@ -310,7 +364,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             ("Center", "high", "Center-highe"),
         ):
             with self.subTest(selected_setting_id=selected_setting_id):
-                payload = plots.build_full_background_subtraction_e8_4_payload(
+                payload = _build(
                     _f6_3_source(selected_setting_id=selected_setting_id),
                     _e8_2_payload(setting=setting, epsilon=epsilon),
                 )
@@ -325,7 +379,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             child["B_pi_A"].contents[:] = child["B_pi_0"].contents
             child["MM_A"].contents[:] = child["MM_0"].contents
         source_contents = list(source["children"][0]["B_pi_A"].contents)
-        payload = plots.build_full_background_subtraction_e8_4_payload(source, _e8_2_payload())
+        payload = _build(source, _e8_2_payload())
         child = payload["per_t"][0]["children"][0]
         difference = plots._e8_4_signed_difference(
             _FakeRoot, child["histograms"]["B_pi_A"], child["histograms"]["B_pi_0"],
@@ -383,7 +437,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
         cases.append((nonfinite, _e8_2_payload(), "e8_4_YA_total_error_nonfinite"))
         for source, baseline, reason in cases:
             with self.subTest(reason=reason):
-                payload = plots.build_full_background_subtraction_e8_4_payload(source, baseline)
+                payload = _build(source, baseline)
                 self.assertFalse(payload["available"])
                 self.assertEqual(payload["reason"], reason)
 
@@ -391,7 +445,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
         narrow_edges = (1.10, 1.13, 1.16)
         wide_edges = (0.70, 1.00, 1.30)
         source = _f6_3_source(t_edges=(0.0, 1.0, 2.0), mm_edges=narrow_edges)
-        payload = plots.build_full_background_subtraction_e8_4_payload(
+        payload = _build(
             source,
             _e8_2_payload(t_edges=(0.0, 1.0, 2.0), mm_edges=wide_edges),
         )
@@ -402,7 +456,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
 
         within_child = _f6_3_source()
         within_child["children"][0]["B_pi_A"] = _histogram(2.1, edges=(1.10, 1.14, 1.16))
-        failed_within_child = plots.build_full_background_subtraction_e8_4_payload(
+        failed_within_child = _build(
             within_child, _e8_2_payload(),
         )
         self.assertFalse(failed_within_child["available"])
@@ -411,14 +465,14 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
         later_child = _f6_3_source(t_edges=(0.0, 1.0, 2.0))
         for name in ("pion_input", "B_pi_0", "B_pi_A", "MM_0", "MM_A"):
             later_child["children"][-1][name] = _histogram(8.0, edges=(1.11, 1.14, 1.16))
-        failed_later_child = plots.build_full_background_subtraction_e8_4_payload(
+        failed_later_child = _build(
             later_child, _e8_2_payload(t_edges=(0.0, 1.0, 2.0)),
         )
         self.assertFalse(failed_later_child["available"])
         self.assertEqual(failed_later_child["reason"], "e8_4_histogram_binning_mismatch")
 
     def test_zero_y0_has_an_explicit_undefined_fraction_without_epsilon_fallback(self):
-        payload = plots.build_full_background_subtraction_e8_4_payload(
+        payload = _build(
             _f6_3_source(y0=(0.0, 4.0), ya=(1.0, 4.0)), _e8_2_payload(y0=(0.0, 4.0)),
         )
         child = payload["per_t"][0]["children"][0]
@@ -429,7 +483,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
 
     def test_renderer_pages_have_stable_ids_points_only_fraction_and_no_source_mutation(self):
         source = _f6_3_source(y0=(0.0, 4.0), ya=(1.0, 4.0))
-        payload = plots.build_full_background_subtraction_e8_4_payload(source, _e8_2_payload(y0=(0.0, 4.0)))
+        payload = _build(source, _e8_2_payload(y0=(0.0, 4.0)))
         before = _source_histogram_snapshot(source)
         manifest, failures = [], []
         _FakeCanvas.printed[:] = []; _FakeGraph.options[:] = []; _FakeText.lines[:] = []
@@ -446,11 +500,15 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
                 "full_background.e8_4.final_mm",
                 "full_background.e8_4.signed_difference",
                 "full_background.e8_4.yield_impact",
+                "full_background.e8_4.method_a_vs_simc.t1",
+                "full_background.e8_4.baseline_method_a_simc.t1",
+                "full_background.e8_4.yield_summary.t1",
+                "full_background.e8_4.parent_closure",
                 "full_background.e8_4.setting_summary",
             ],
         )
         self.assertTrue(_FakeGraph.options)
-        self.assertTrue(all(option == "AP" for option in _FakeGraph.options))
+        self.assertTrue(all(option in ("AP", "P same") for option in _FakeGraph.options))
         pion_draws = {
             name: option for name, option in _Histogram.draw_calls
             if name in {
@@ -498,13 +556,14 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
 
     def test_finalizer_passes_e84_payload_through_the_existing_single_transaction(self):
         e8_2 = _e8_2_payload()
-        e8_4 = plots.build_full_background_subtraction_e8_4_payload(_f6_3_source(), e8_2)
+        e8_4 = _build(_f6_3_source(), e8_2)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             pdf_path, manifest_path = root / "preliminary.pdf", root / "preliminary.json"
             pdf_path.write_text("preliminary", encoding="utf-8")
             manifest_path.write_text("preliminary", encoding="utf-8")
             hist = {
+                "_xsect_support_simc": _support(_f6_3_source(), e8_2),
                 "_e8_2_baseline_stage_source": {"fixture": "delegated"},
                 "_f6_3_parallel_method_a_source": _f6_3_source(),
                 "_e8_2_full_background_render_state": plots.capture_full_background_subtraction_e8_2_render_state(
@@ -548,6 +607,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             pdf_path.write_text("preliminary", encoding="utf-8")
             manifest_path.write_text("preliminary", encoding="utf-8")
             hist = {
+                "_xsect_support_simc": _support(_f6_3_source(), e8_2),
                 "_e8_2_baseline_stage_source": {"fixture": "delegated"},
                 "_f6_3_parallel_method_a_source": unavailable,
                 "_e8_2_full_background_render_state": plots.capture_full_background_subtraction_e8_2_render_state(
@@ -593,6 +653,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             pdf_path.write_text("preliminary", encoding="utf-8")
             manifest_path.write_text("preliminary", encoding="utf-8")
             hist = {
+                "_xsect_support_simc": _support(_f6_3_source(), e8_2),
                 "_e8_2_baseline_stage_source": {"fixture": "delegated"},
                 "_f6_3_parallel_method_a_source": malformed,
                 "_e8_2_full_background_render_state": plots.capture_full_background_subtraction_e8_2_render_state(
@@ -640,6 +701,7 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             pdf_path.write_text("preliminary", encoding="utf-8")
             manifest_path.write_text("preliminary", encoding="utf-8")
             hist = {
+                "_xsect_support_simc": _support(_f6_3_source(), e8_2),
                 "_e8_2_baseline_stage_source": {"fixture": "delegated"},
                 "_f6_3_parallel_method_a_source": unavailable,
                 "_e8_2_full_background_render_state": plots.capture_full_background_subtraction_e8_2_render_state(
@@ -681,8 +743,122 @@ class E84ProductionImpactAuditTests(unittest.TestCase):
             "bg_fit", "Normalize", ".Scale(", ".Rebin(",
         ):
             self.assertNotIn(forbidden, source + renderer)
-        payload = plots.build_full_background_subtraction_e8_4_payload(_f6_3_source(), _e8_2_payload())
+        payload = _build(_f6_3_source(), _e8_2_payload())
         self.assertFalse(any("delta_y" in key and "error" in key for key in payload["per_t"][0]["children"][0]))
+
+
+class E84ShareablePagesTests(unittest.TestCase):
+    def fixtures(self):
+        geometry = {"t_edges": (0.0, 0.25, 0.5, 0.75), "phi_edges": tuple(range(-180, 181, 40))}
+        source = _f6_3_source(y0=(0.0, 4.0), ya=(1.0, 3.0), **geometry)
+        baseline = _e8_2_payload(y0=(0.0, 4.0), **geometry)
+        return source, baseline, _support(source, baseline), _closure(3)
+
+    def build(self, source, baseline, support, closure):
+        return plots.build_full_background_subtraction_e8_4_payload(
+            source, baseline, simc_support=support, parent_closure=closure)
+
+    def test_all_27_cells_overlays_stored_summary_closure_and_input_immutability(self):
+        source, baseline, support, closure = self.fixtures()
+        before = _source_histogram_snapshot(source)
+        simc_before = [(list(hist.contents), list(hist.errors), list(hist.edges), hist.directory)
+                       for row in support["mm"] for hist in row]
+        payload = self.build(source, baseline, support, closure)
+        self.assertTrue(payload["available"], payload.get("reason"))
+        for group in payload["per_t"]:
+            self.assertEqual(len(group["children"]), 9)
+            for child in group["children"]:
+                self.assertIsNot(child["histograms"]["SIMC"], support["mm"][child["t_index"]][child["phi_index"]])
+        _FakeLegend.entries[:] = []; _FakeGraph.points[:] = []; _FakeText.lines[:] = []; _Histogram.draw_calls[:] = []
+        manifest, failures = [], []
+        plots._render_full_background_subtraction_e8_4_pages(_FakeRoot, "fixture.pdf", payload, manifest, failures)
+        self.assertEqual(failures, [])
+        from testing.run_e8_4_fix5_left_lowe_plot_gate import NEW_PAGE_IDS, OLD_PAGES
+        for page_id in NEW_PAGE_IDS:
+            self.assertEqual(sum(page["page_id"] == page_id for page in manifest), 1)
+        self.assertTrue(set(OLD_PAGES) <= {(page["page_id"], page["scope"]) for page in manifest})
+        self.assertEqual(len(manifest), 24)
+        self.assertEqual(_FakeLegend.entries.count("SIMC"), 54)
+        self.assertEqual(_FakeLegend.entries.count("Method A data"), 54)
+        self.assertEqual(_FakeLegend.entries.count("Baseline data"), 27)
+        self.assertIn("parent-normalization", inspect.getsource(plots._e8_4_render_parent_closure_page).lower().replace(" ", "-"))
+        self.assertTrue(any("undefined" in text for text in _FakeText.lines))
+        self.assertTrue(any(-1.0 in ys for _, ys in _FakeGraph.points))
+        self.assertEqual(_source_histogram_snapshot(source), before)
+        self.assertEqual([(list(hist.contents), list(hist.errors), list(hist.edges), hist.directory)
+                          for row in support["mm"] for hist in row], simc_before)
+        self.assertEqual(payload["parent_closure"][0]["baseline_parent_sum"], closure[0]["baseline_parent_sum"])
+        self.assertEqual(payload["lambda_window"], source["lambda_integration_window"])
+
+    def test_simc_missing_dimension_axis_nonfinite_and_setting_wide_fallback_fail_closed(self):
+        for mutation, reason in (
+            (lambda support: support.clear(), "e8_4_simc_mm_support_missing"),
+            (lambda support: support.update(mm=support["mm"][:2]), "e8_4_simc_child_geometry_mismatch"),
+            (lambda support: support["mm"][1].pop(), "e8_4_simc_child_geometry_mismatch"),
+            (lambda support: support["mm"][1].__setitem__(3, None), "e8_4_simc_child_missing"),
+            (lambda support: setattr(support["mm"][0][0], "edges", [1.1, 1.14, 1.16]), "e8_4_simc_mm_binning_mismatch"),
+            (lambda support: support["mm"][0][0].contents.__setitem__(0, float("nan")), "e8_4_simc_child_nonfinite"),
+            (lambda support: support["mm"][0][0].errors.__setitem__(0, float("inf")), "e8_4_simc_child_nonfinite"),
+            (lambda support: support.update(mm=_histogram(1.0)), "e8_4_simc_mm_support_missing"),
+        ):
+            with self.subTest(reason=reason):
+                source, baseline, support, closure = self.fixtures()
+                mutation(support)
+                result = self.build(source, baseline, support, closure)
+                self.assertFalse(result["available"])
+                self.assertEqual(result["reason"], reason)
+
+    def test_missing_yield_and_method_b_contamination_are_unavailable(self):
+        source, baseline, support, closure = self.fixtures()
+        source["children"][0].pop("YA")
+        self.assertFalse(self.build(source, baseline, support, closure)["available"])
+        source, baseline, support, closure = self.fixtures()
+        source["method_b_numerical_dependency"] = True
+        self.assertFalse(self.build(source, baseline, support, closure)["available"])
+
+    def test_empty_pad_and_new_page_renderer_failure_are_explicit(self):
+        source, baseline, support, closure = self.fixtures()
+        source["children"][0]["MM_A"].contents[:] = [0.0, 0.0]
+        source["children"][0]["MM_A"].errors[:] = [0.0, 0.0]
+        payload = self.build(source, baseline, support, closure)
+        _FakeText.lines[:] = []
+        self.assertTrue(plots._e8_4_render_method_a_simc_page(_FakeRoot, "fixture.pdf", payload, payload["per_t"][0]))
+        self.assertIn("EMPTY", _FakeText.lines)
+        manifest, failures = [], []
+        with patch.object(plots, "_e8_4_render_method_a_simc_page", return_value=False):
+            plots._render_full_background_subtraction_e8_4_pages(_FakeRoot, "fixture.pdf", payload, manifest, failures)
+        self.assertEqual(len(failures), 3)
+        self.assertTrue(all("method_a_vs_simc.t" in reason for reason in failures))
+
+    def test_summary_never_integrates_or_rescales_and_uses_stored_values(self):
+        functions = (plots._e8_4_render_simc_page, plots._e8_4_render_yield_summary_page,
+                     plots.build_full_background_subtraction_e8_4_payload, plots._e8_4_render_parent_closure_page)
+        code = "\n".join(inspect.getsource(function) for function in functions)
+        for forbidden in (".Scale(", ".Integral(", ".Fill(", "TFile", ".Normalize(", "find_yield_simc"):
+            self.assertNotIn(forbidden, code)
+        source, baseline, support, closure = self.fixtures()
+        payload = self.build(source, baseline, support, closure)
+        child = payload["per_t"][0]["children"][1]
+        child["delta_y"] = -123.5
+        _FakeGraph.points[:] = []
+        self.assertTrue(plots._e8_4_render_yield_summary_page(_FakeRoot, "fixture.pdf", payload, payload["per_t"][0]))
+        self.assertTrue(any(-123.5 in values for _, values in _FakeGraph.points))
+
+    def test_candidate_parent_closure_is_hash_pinned_stored_input(self):
+        source, baseline, support, closure = self.fixtures()
+        from pion_hgcer_method_a_parallel_full_procedure import accepted_f6_3_artifact_paths
+        setting = {"phi_setting": "Left", "epsilon_filename_token": "lowe", "kinematic_token": "Q4p4W2p74", "particle_type": "kaon"}
+        raw = json.dumps({"correction": {"fingerprint": "fixture", "parents": [dict(parent, setting=setting) for parent in closure]}}).encode()
+        source["authority"].update(accepted_f4_source_file_sha256=hashlib.sha256(raw).hexdigest(), accepted_f4_correction_fingerprint="fixture")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(accepted_f6_3_artifact_paths(directory, "Q4p4W2p74")["f4"])
+            path.write_bytes(raw)
+            result = plots._e8_4_read_candidate_parent_closure(source, Path(directory) / "procedure.pdf")
+            self.assertEqual(len(result), 3)
+            self.assertEqual(result[0]["baseline_parent_sum"], closure[0]["baseline_parent_sum"])
+            path.write_bytes(raw + b" ")
+            with self.assertRaisesRegex(plots._E8PayloadError, "identity_mismatch"):
+                plots._e8_4_read_candidate_parent_closure(source, Path(directory) / "procedure.pdf")
 
 
 if __name__ == "__main__":  # pragma: no cover
