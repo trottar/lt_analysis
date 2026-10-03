@@ -11,35 +11,39 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+The Q4p4W2p74 / Left / lowe MM-versus-yield numerical-closure investigation is
+`ACTIVE`. Accepted execution and presentation evidence did not establish
+`MM_0 -> Y0` or `MM_A -> YA` histogram-to-scalar closure. The
+[post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
+records near-overlapping spectra with stored t1 yields: phi [-180,-140),
+Y0=0.033906 / YA=0.025165; phi [140,180), Y0=0.029873 / YA=0.016411.
+These are observations, not proof of which object is wrong. Signed cancellation
+remains unproven; historical E.8.3/F.6.1 lineage differences do not establish an
+explanation within E.8.4. Absolute-SIMC units remain a separate blocker.
+
 [E.8.4 Fix.5.8](phases/e8-4-fix5-8-presentation-legibility-repair.md) is
 `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
 presentation-legibility repair. The accepted structural and visual gate is
 recorded in [fresh Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
-This memory/evidence-only closing checkpoint changes no executable or science.
 
 Fix.5.7 is `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
 owner/checker setting-provenance repair through collection/final ZIP verification.
 Its source synchronization and farm gate are complete per the supplied
 independent review in the [fresh evidence record](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md).
-Codex has not independently reopened the raw bundle/PDF here.
 
-Workflow/chat-health hardening is `SOURCE REVIEWED`; synchronization passed
-through `8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. External Project instructions
-and environment configuration were updated per its closure contract.
-Fix.5.4/Fix.5.5 source review remains accepted. The narrow Fix.5 Left/lowe
-owner plus visual presentation gate is accepted by the later Fix.5.8 bundle.
+Workflow hardening is `SOURCE REVIEWED`, synchronized through
+`8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. Fix.5.4/Fix.5.5 source reviews remain
+accepted; Fix.5.8 accepts the narrow Left/lowe owner/visual gate.
 
 ## Verified State
 
-RUNTIME VERIFIED (supplied independent review): the Fix.5.8 ZIP is complete,
-error-free and intact; all eight artifact entries match hashes/bytes. Analysis
-and embedded checker return codes are zero; 97 PDF pages, no renderer failures,
-seven-field setting provenance and passed three-parent closure are retained.
-Pages 67/69/71/96 have ASCII-safe titles; all flags on 73 and all support values
-on 80/87/94 are visible without clipping/overlap. The full scan found no new
-renderer/glyph/clipping failure; representative baseline-versus-Method-A
-overlays retain their visibility. Codex records the contract-supplied review,
-not a new raw-artifact inspection. No canonical-five or promotion closure follows.
+RUNTIME VERIFIED (supplied independent review): complete, error-free Fix.5.8
+ZIP; eight artifact hashes/bytes match; analysis/checker return codes zero;
+97 pages, no renderer failures, seven setting fields and three-parent closure.
+Pages 67/69/71/96 titles, page 73 flags and pages 80/87/94 support are legible.
+Full scan found no new renderer/glyph/clipping failure; representative overlays
+retain visibility. This records supplied review, not a new artifact inspection.
+No canonical-five or promotion closure follows.
 
 F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`. F.6.3 and the prior E.8.4
 gate remain `CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe branch
@@ -52,8 +56,9 @@ and current F.6.3/E.8.4 are distinct lineages; no authority replacement follows.
 
 ## Source / Evidence Identity
 
-- Accepted Fix.5.8 farm source and observed local test HEAD/origin/test at this
-  closure startup: `2ddeab47d55edb57d2f313022a948c4376730c19`.
+- Observed local test HEAD/origin/test at re-anchor startup:
+  `5addf32433d61e94391fd31dc454b3628b026735`; not permanent source authority.
+- Accepted Fix.5.8 farm source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
   Bundle `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`:
   30851374 bytes; SHA-256
   `966e667b36b2626b5c16f00fc684a099a5d24e5d2015bb547612a1e63eb2a25e`.
@@ -61,7 +66,7 @@ and current F.6.3/E.8.4 are distinct lineages; no authority replacement follows.
   Bundle `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-002936-622785.zip`:
   30851202 bytes; SHA-256
   `d39b81544b483f332ae45cb0342aa7d95b2c1931d866cfcb04a52e46449fe38d`.
-  Artifact/evidence date is 2026-10-03; observed HEAD is not permanent authority.
+  Evidence date: 2026-10-03.
 - Fix.5.6 failed farm source: `ccaf15358efc205cd601aeccecdd1ab1b1360dff`;
   child completed, owner failed at verify_artifacts/page_manifest_setting_invalid
   before collection/ZIP. Fix.5.7 supersedes that failure, not historical evidence.
@@ -85,34 +90,35 @@ Ncontribute has no source-proven luminosity/effective-charge units. Preserve
 available current-F.6.3 data/identity/yield/closure payloads; only the two
 absolute-SIMC page families/claims are unavailable with literal provenance.
 No wrong normalization, conversion or amplitude conclusion is established.
-Scientific curve interpretation and observed signed cancellation are not
-established by local algebra/support tests or this presentation repair.
+Left/lowe MM/yield closure requires exact runtime object identity and producer-
+owned integration window, selected bins, flow treatment, factors/units and sign
+convention for every populated canonical child. Signed integral, positive-bin,
+negative-bin and absolute support must be reported separately; stored support
+and local tests do not establish cancellation or numerical closure.
 
-The active profile is no_empirical_residual; legacy residual scales remain
-zero. Method A is detached/non-production; Method B is diagnostic-only and
-numerically excluded. Freeze subtraction, SIMC normalization, weights, yields,
-uncertainties, cuts, templates, priors, binning, efficiencies, acceptance,
-L/T separation and cross sections. Never package failed artifacts as accepted
-evidence or infer scientific/visual acceptance from owner success alone.
+Keep no_empirical_residual and zero legacy residual scales. Method A remains
+detached/non-production; Method B diagnostic/cross-check only and numerically
+excluded. Freeze subtraction, SIMC, weights, yields, uncertainties, cuts,
+templates, priors, binning, efficiencies, acceptance, L/T and cross sections.
+Failed artifacts are not accepted evidence; owner success alone is not
+scientific/visual acceptance.
 
 ## Next Action
 
-NEXT — after this closing checkpoint's independent actual-diff review, user
-commit/push and pushed-state synchronization, resolve the existing user-deferred
-canonical-five E.8/F.6.3 expansion decision before any additional E.8 farm work.
-If explicitly lifted, create a dedicated contract for the remaining four settings
-and re-establish exact validation scope before any farm command. Otherwise keep
-the expansion `DEFERRED` and select the next approved roadmap item. This
-checkpoint authorizes no farm run and does not lift the deferral.
+NEXT — after independent actual-diff review, user commit/push and pushed-state
+synchronization, undertake a dedicated source/runtime-path audit under its own
+reviewed contract of exact Q4p4W2p74 / Left / lowe histogram-to-scalar-yield
+provenance and producer-owned integration semantics. Resolve `MM_0 -> Y0` and
+`MM_A -> YA` numerical closure before reconsidering canonical-five broadening.
+Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
+This re-anchor authorizes no farm run or scientific-source change.
 
 ## Success Criteria
 
-Record only the accepted narrow structural/visual result and remove consumed
-pre-farm wording from current-state records. Preserve scientific/scope blockers,
-historical chronology and sole CURRENT/NEXT authority. Only allowlisted memory
-and evidence change; manifest, ordinary health and zero-warning health must pass.
-The closing checkpoint still requires independent actual-diff review before
-user-controlled commit/push; Fix.5.8 source synchronization/runtime review is complete.
+Restore unresolved Left/lowe numerical closure and sole substantive `NEXT`;
+preserve accepted closures, ownership and separate blockers. Only allowlisted
+memory changes; manifest, ordinary/zero-warning health and diff checks must
+pass. Independent actual-diff review precedes user commit/push.
 
 ## Do Not Reopen Without New Evidence
 
@@ -123,6 +129,7 @@ Narrow Left/lowe evidence does not close canonical-five E.8 or F.6.4.
 
 ## Relevant References
 
+- [Memory re-anchor contract](phases/e8-4-left-lowe-mm-yield-closure-memory-reanchor-task-contract.md)
 - [Fix.5.8 contract](phases/e8-4-fix5-8-presentation-legibility-repair-task-contract.md)
 - [Accepted Fix.5.8 closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
 - [Prior Fix.5.7 evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)

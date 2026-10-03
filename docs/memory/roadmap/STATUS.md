@@ -247,8 +247,25 @@ bundle passes structural checks and targeted visual review of
 See [Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
 The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 `ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
-explanation and Method-A promotion do not follow. CURRENT owns the live decision
-gate; this roadmap does not lift the user-deferred canonical-five expansion.
+explanation and Method-A promotion do not follow. CURRENT owns the live gate;
+canonical-five expansion remains `DEFERRED` by user decision.
+
+#### E.8.4 / F.6.3 Left/lowe MM-versus-yield numerical closure
+
+`ACTIVE` — the Q4p4W2p74 / Left / lowe histogram-to-scalar-yield gate remains
+unresolved. Accepted branch execution, signed parent preservation and Fix.5.7/
+Fix.5.8 owner/presentation closures do not prove `MM_0 -> Y0` or `MM_A -> YA`.
+The [post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
+records the direct visual/scalar observation and required producer-owned
+integration/object-identity audit. Signed cancellation remains a hypothesis;
+historical E.8.3/F.6.1 lineage and absolute-SIMC units are separate issues.
+
+Dependency: accepted Left/lowe branch execution/presentation -> Left/lowe
+MM-versus-yield numerical closure -> only then reconsider canonical-five
+expansion -> final E.8 closure -> F.6.4 explicit production-promotion decision.
+Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
+Method A remains detached/non-production; Method B diagnostic/cross-check only
+and numerically excluded. CURRENT owns exact `NEXT`; no farm run is authorized.
 
 #### Final E.8 closure
 

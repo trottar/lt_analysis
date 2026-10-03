@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7750,
+      "bytes": 8090,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "31d27bd8b0bd2c3fd08a9eb7955f89d4f57f26e34223376bee3d5c037d70a860"
+      "sha256": "d250c125eb7e3427b31ab27eb566438b8e5271e82a34ae56150bb1be64328093"
     },
     {
       "bytes": 5934,
@@ -116,9 +116,9 @@
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
     },
     {
-      "bytes": 3535,
+      "bytes": 4244,
       "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
-      "sha256": "847484b3a072cbabd09ff3d51b355af3ebd6d196b536a3576b1e3b3a745c9a94"
+      "sha256": "e64e0a6199057aa3c31f363da6d0d279ed2e2aaf7794f266867a63ab62301454"
     },
     {
       "bytes": 1300,
@@ -726,6 +726,11 @@
       "sha256": "b531bce18db2688e7ed699b8bd149520b6751baaf642ae8faa8aee872a5812e0"
     },
     {
+      "bytes": 15410,
+      "path": "docs/memory/phases/e8-4-left-lowe-mm-yield-closure-memory-reanchor-task-contract.md",
+      "sha256": "692995fe00f4b0da7e6da7efb4cb393ac0a12dde7f5ec8dcef80a6e9e1763822"
+    },
+    {
       "bytes": 26240,
       "path": "docs/memory/phases/e8-4-production-impact-audit-task-contract.md",
       "sha256": "2140d5aed22729abfcd357b5065b19d62952747c018a13f8f562b33c31cd59dc"
@@ -1016,9 +1021,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 19125,
+      "bytes": 20228,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "979d72fdb07f514ba6b2011ec05b7c47f4b14f9cd7eb40fbc8af6abac401e8cc"
+      "sha256": "333bb5e39794aa795b4e9c332a75b42dc9fbffaf0a88219343a715d1fe719f41"
     },
     {
       "bytes": 1698,
