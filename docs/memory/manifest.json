@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8593,
+      "bytes": 7417,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "1ec0cac10d13ca192680175f8de2cc3ba2adc49046aa4674f6864bd6ec4d4aab"
+      "sha256": "9774324a5f7075d7436ac718f5f9a78c62f558dc1c5becaf48e2fa7df5dd84a8"
     },
     {
       "bytes": 5934,
@@ -149,6 +149,11 @@
       "bytes": 2204,
       "path": "docs/memory/evidence/e8-4-fix4-left-lowe-runtime-closure-and-f4-baseline-divergence.md",
       "sha256": "fcd5d19ee085f9ef366ee5e24cd0213523b63615be54e5069b359d45dfebfb48"
+    },
+    {
+      "bytes": 3305,
+      "path": "docs/memory/evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md",
+      "sha256": "bcf8fee222bfbd435e487a138bb57d0752073bb8a9f45c89bc6dfe7ebe808265"
     },
     {
       "bytes": 1987,
@@ -331,9 +336,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 21212,
+      "bytes": 22373,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
-      "sha256": "2ab1b61aa543816f74806ba183a30c19678b241417e1d2c9aba1bebd722b0cad"
+      "sha256": "84604c464289151132141023088400760b3e0d4bf26a3d7e611bec4fe6b5240d"
     },
     {
       "bytes": 2081,
@@ -689,6 +694,16 @@
       "bytes": 4777,
       "path": "docs/memory/phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md",
       "sha256": "ffeda9077e2f6e376066648b83adc2c1a4df7b6708eb9a969d09c9a782849f7f"
+    },
+    {
+      "bytes": 19585,
+      "path": "docs/memory/phases/e8-4-fix5-8-presentation-legibility-repair-task-contract.md",
+      "sha256": "60ebc32be8b51028969bf21341556da418fd5353244d0a310d388d3476b93755"
+    },
+    {
+      "bytes": 5684,
+      "path": "docs/memory/phases/e8-4-fix5-8-presentation-legibility-repair.md",
+      "sha256": "5d48cb8e554c75090029de7d896850192a87d90c29a70d76962869ab2b6315ad"
     },
     {
       "bytes": 28512,

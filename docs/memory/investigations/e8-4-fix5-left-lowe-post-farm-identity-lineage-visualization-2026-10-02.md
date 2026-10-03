@@ -1,5 +1,22 @@
 # E.8.4 Fix.5 Left/lowe post-farm identity, lineage and visualization — 2026-10-02
 
+## Fresh Fix.5.7 farm closure and Fix.5.8 visual repair checkpoint
+
+The [fresh evidence record](../evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
+records the independent review supplied by the Fix.5.8 contract: source
+`4da101ef2a0f633d3b98f95cc5dbe8f903b94a35`, complete/error-free Left/lowe ZIP,
+97 pages, full seven-field setting, no renderer failures and final ZIP
+verification. Fix.5.7 is narrowly `CLOSED / RUNTIME VALIDATED` for the owner/
+checker repair. Codex did not independently reopen the raw bundle/PDF here.
+This supersedes the Fix.5.6 setting-gate failure, not the older unknown ZIP failure.
+
+RUNTIME VERIFIED (supplied visual review): title mojibake on 67/69/71/96,
+authority flags clipping on 73, stored-support clipping on 80/87/94. Final
+Fix.5 visual acceptance remains `BLOCKED` only by those minor defects.
+Fix.5.8 owns a presentation-only repair; repaired farm rendering is NOT VERIFIED.
+The historical findings/hypotheses below retain their original scope and dates;
+no new cancellation, normalization or scientific interpretation follows.
+
 ## Fix.5.7 source-proven owner integration mismatch
 
 SOURCE VERIFIED at starting `test` HEAD `cdc6ead47be3c46987a8418b796d07d87b80f829`:
@@ -357,8 +374,9 @@ are complete at their recorded identities; numerical and visual farm closure
 remain pending. Fix.5.6 local owner repair is complete with 66 tests passed,
 no skips; its phase record owns verification details.
 
-Fix.5.6's supplied attempt failed the page-setting gate before collection/ZIP;
-Fix.5.7 now completes the narrow source repair and deterministic interface tests.
-CURRENT owns NEXT: after Fix.5.7 independent actual-diff review, user commit/push
-and pushed-state synchronization, one narrow tracked-owner Left/lowe farm gate
-and fresh evidence review. No farm command is authorized before synchronization.
+Fix.5.7's fresh supplied farm evidence closes the narrow setting-verifier path
+through final ZIP. Fix.5.8 is now the presentation repair checkpoint.
+CURRENT owns NEXT: after Fix.5.8 independent actual-diff review, user commit/push
+and pushed-state synchronization, one narrow tracked-owner Left/lowe farm gate,
+structural checks followed by targeted visual review of 67,69,71,73,80,87,94,96
+and prior overlay styling. No farm command is authorized before synchronization.

@@ -7018,7 +7018,7 @@ def _e8_3_render_tphi_page(ROOT, pdf_name, payload, parent):
     try:
         text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
         text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.026)
-        text.AddText("E.8.3 persisted canonical (t,phi) pion redistribution — {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1))
+        text.AddText("E.8.3 persisted canonical (t,phi) pion redistribution - {} t{}".format(payload["setting_id"], int(parent["canonical_t_index"]) + 1))
         text.AddText("Historical accepted F.6.1 aggregate context; not the current F.6.3/E.8.4 candidate lineage.")
         text.AddText("All nine physical phi children are retained. EMPTY is copied only from persisted F.5 event_count == 0; no child normalization.")
         for index, (base, shifted, change, event_count) in enumerate(zip(baseline, adjusted, delta, event_counts)):
@@ -7126,19 +7126,20 @@ def _e8_4_render_authority_page(ROOT, pdf_name, payload):
             "Current setting: {}; F.6.3 source schema: {}".format(
                 payload.get("setting_id"), "f6_3_parallel_method_a_source/v1",
             ),
-            "Branch role: {}; Lambda integration window: [{:.6g}, {:.6g}]".format(
-                payload.get("branch_role"), float(payload["lambda_window"][0]),
+            "Branch role: {}".format(payload.get("branch_role")),
+            "Lambda integration window: [{:.6g}, {:.6g}]".format(
+                float(payload["lambda_window"][0]),
                 float(payload["lambda_window"][1]),
             ),
             "Canonical children: {}; live-cache parity passed: {}".format(
                 sum(len(group.get("children") or ()) for group in payload.get("per_t") or ()),
                 bool(_mapping(payload.get("authority")).get("live_cache_parity_passed")),
             ),
-            "Non-production flags: {}".format(
-                ", ".join("{}={}".format(name, payload.get(name)) for name in flags),
-            ),
+            "Non-production flags:",
+            *("  {}={}".format(name, payload.get(name)) for name in flags),
             "Method B is numerically absent. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
-            "Current aggregates use only the current F.6.3 candidate children; historical E.8.3/F.6.1 is a separate lineage.",
+            "Current aggregates use only the current F.6.3 candidate children;",
+            "historical E.8.3/F.6.1 is a separate lineage.",
             "No production promotion is performed. The Method-A minus baseline shift is a",
             "correction effect, not automatically a systematic uncertainty.",
         ), size=0.025,
@@ -7441,7 +7442,7 @@ def _e8_4_render_setting_summary_page(ROOT, pdf_name, payload):
     try:
         text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
         text.SetFillStyle(0); text.SetBorderSize(0); text.SetTextAlign(12); text.SetTextSize(0.025)
-        text.AddText("E.8.4 stored canonical t-by-phi impact summary — {}".format(payload.get("setting_id")))
+        text.AddText("E.8.4 stored canonical t-by-phi impact summary - {}".format(payload.get("setting_id")))
         text.AddText("Current-branch numerical identities: stored Fix.5.4 current-lineage audit; historical E.8.3 is separate.")
         text.AddText("Signed support is diagnostic, not a correction or uncertainty. No t-integrated observable is constructed.")
         text.AddText("Absolute SIMC amplitude interpretation remains blocked unless explicitly source-authorized.")
@@ -7544,15 +7545,19 @@ def _e8_4_render_baseline_simc_page(ROOT, pdf_name, payload, group):
 def _e8_4_stored_support_lines(payload, group):
     """Format producer-owned audit records; no histogram or child aggregation."""
     rows = [
-        "Stored Fix.5.4 signed support: S = signed integral; Abs = absolute support (diagnostic, not uncertainty).",
+        "Stored Fix.5.4 signed support: S = signed integral; Abs = absolute support",
+        "(diagnostic, not uncertainty).",
     ]
     for child in group["children"]:
         support = child["identity_audit"]["signed_support"]
-        rows.append("phi {} [{:.0f}, {:.0f}): ".format(
+        rows.append("phi {} [{:.0f}, {:.0f}): MM_0 S={:.8g} Abs={:.8g}".format(
             child["phi_index"] + 1, child["phi_low"], child["phi_high"],
-        ) + "; ".join("{} S={:.8g} Abs={:.8g}".format(
-            label, support[key]["signed_integral"], support[key]["absolute_support"],
-        ) for key, label in (("MM_0", "MM_0"), ("MM_A", "MM_A"), ("delta_MM", "delta"))))
+            support["MM_0"]["signed_integral"], support["MM_0"]["absolute_support"],
+        ))
+        rows.append("  MM_A S={:.8g} Abs={:.8g}; delta S={:.8g} Abs={:.8g}".format(
+            support["MM_A"]["signed_integral"], support["MM_A"]["absolute_support"],
+            support["delta_MM"]["signed_integral"], support["delta_MM"]["absolute_support"],
+        ))
     aggregate = next(row for row in payload["current_lineage_aggregate_audit"]
                      if row["t_index"] == group["t_index"])
     rows.append("current F.6.3 candidate lineage; Lambda/allcut MM-template aggregate")
@@ -7579,7 +7584,7 @@ def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
             (3, ("delta_y_over_y0",), "DeltaY / Y0;phi [deg];Fractional change"),
         ):
             pad = canvas.cd(panel)
-            pad.SetPad((panel - 1) / 3.0, 0.52, panel / 3.0, 0.90)
+            pad.SetPad((panel - 1) / 3.0, 0.58, panel / 3.0, 0.90)
             values = [float(child[key]) for key in keys for child in children if child.get(key) is not None]
             errors = [float(child[key + "_statistical_error"]) for key in keys for child in children] if panel == 1 else []
             low, high = min([0.0] + values), max([0.0] + values)
@@ -7610,7 +7615,7 @@ def _e8_4_render_yield_summary_page(ROOT, pdf_name, payload, group):
                 if undefined:
                     retained.append(_e8_add_text(ROOT, (0.13, 0.55, 0.89, 0.89), tuple(undefined), size=0.030))
         canvas.cd()
-        support_note = _e8_add_text(ROOT, (0.04, 0.04, 0.96, 0.47),
+        support_note = _e8_add_text(ROOT, (0.04, 0.03, 0.96, 0.54),
                                    _e8_4_stored_support_lines(payload, group), size=0.021)
         if support_note is None:
             return False

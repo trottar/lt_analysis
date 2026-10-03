@@ -1,5 +1,7 @@
 """Presentation ownership and visibility checks; no ROOT/farm claim."""
 from copy import deepcopy
+import ast
+import inspect
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -91,6 +93,16 @@ class VisualizationTests(unittest.TestCase):
         expected.add(("full_background.e8_4.parent_closure", "setting"))
         self.assertEqual({(row["page_id"], row["scope"]) for row in manifest}, expected)
         self.assertEqual(len(manifest), 24)
+        ordered = [("full_background.e8_4.authority", "setting")]
+        for index in range(1, 4):
+            scope = "t{}".format(index)
+            ordered.extend(("full_background.e8_4." + suffix, scope) for suffix in
+                           ("pion_consequence", "final_mm", "signed_difference", "yield_impact"))
+            ordered.extend(("full_background.e8_4.{}.{}".format(suffix, scope), scope)
+                           for suffix in ("method_a_vs_simc", "baseline_method_a_simc", "yield_summary"))
+        ordered.extend(("full_background.e8_4." + suffix, "setting")
+                       for suffix in ("parent_closure", "setting_summary"))
+        self.assertEqual([(row["page_id"], row["scope"]) for row in manifest], ordered)
         self.assertEqual(failures, [])
         self.assertEqual(snapshot(self.payload), before)
         self.assertEqual(fixtures._source_histogram_snapshot(self.inputs[0]), source_before)
@@ -124,11 +136,11 @@ class VisualizationTests(unittest.TestCase):
         # Deliberately distinct stored values test presentation ownership only;
         # this modified fixture is never passed back to scientific validators.
         group = self.payload["per_t"][0]
-        for child in group["children"]:
+        for index, child in enumerate(group["children"]):
             child["identity_audit"]["signed_support"] = {
-                "MM_0": dict(positive_support=1000.25, negative_support=-1000, signed_integral=0.25, absolute_support=2000.25),
-                "MM_A": dict(positive_support=900, negative_support=-899.5, signed_integral=0.5, absolute_support=1799.5),
-                "delta_MM": dict(positive_support=100, negative_support=-99.75, signed_integral=0.25, absolute_support=199.75),
+                "MM_0": dict(positive_support=1000.25, negative_support=-1000, signed_integral=0.25 + index, absolute_support=2000.25 + index),
+                "MM_A": dict(positive_support=900, negative_support=-899.5, signed_integral=0.5 + index, absolute_support=1799.5 + index),
+                "delta_MM": dict(positive_support=100, negative_support=-99.75, signed_integral=0.75 + index, absolute_support=199.75 + index),
             }
         self.payload["current_lineage_aggregate_audit"][0].update(
             aggregate_B_pi_0_integral=12345.25, aggregate_B_pi_A_integral=23456.5, aggregate_delta_integral=11111.25)
@@ -136,13 +148,116 @@ class VisualizationTests(unittest.TestCase):
         with patch.object(fixtures._Histogram, "GetBinContent", side_effect=AssertionError("no re-sum")), patch.object(fixtures._Histogram, "GetBinError", side_effect=AssertionError("no re-integrate")):
             self.assertTrue(plots._e8_4_render_yield_summary_page(fixtures._FakeRoot, "ignored.pdf", self.payload, group))
         lines = fixtures._FakeText.lines
+        support_lines = plots._e8_4_stored_support_lines(self.payload, group)
+        self.assertTrue(all(len(line) <= 96 for line in support_lines), support_lines)
+        self.assertEqual(len(support_lines), 23)
         for child in group["children"]:
-            self.assertTrue(any(line.startswith("phi {} ".format(child["phi_index"] + 1)) and
-                                "MM_0 S=0.25 Abs=2000.25; MM_A S=0.5 Abs=1799.5; delta S=0.25 Abs=199.75" in line for line in lines))
+            row = next(i for i, line in enumerate(support_lines)
+                       if line.startswith("phi {} ".format(child["phi_index"] + 1)))
+            self.assertIn("[{:.0f}, {:.0f})".format(child["phi_low"], child["phi_high"]), support_lines[row])
+            for key, label, offset in (("MM_0", "MM_0", 0), ("MM_A", "MM_A", 1), ("delta_MM", "delta", 1)):
+                stored = child["identity_audit"]["signed_support"][key]
+                self.assertIn("{} S={:.8g} Abs={:.8g}".format(
+                    label, stored["signed_integral"], stored["absolute_support"]), support_lines[row + offset])
+            self.assertIn(support_lines[row], lines)
+            self.assertIn(support_lines[row + 1], lines)
         self.assertIn("Stored aggregate B_pi_0=12345.25; B_pi_A=23456.5; delta=11111.25", lines)
         self.assertIn("current F.6.3 candidate lineage; Lambda/allcut MM-template aggregate", lines)
         self.assertTrue(any("Not the broader F.4" in line for line in lines))
         self.assertEqual(snapshot(self.payload), before)
+
+    def test_stored_support_exponent_tokens_remain_bounded_at_original_precision(self):
+        group = self.payload["per_t"][0]
+        for child in group["children"]:
+            for stored in child["identity_audit"]["signed_support"].values():
+                stored.update(signed_integral=-1.2345678e-307, absolute_support=1.2345678e307)
+        self.payload["current_lineage_aggregate_audit"][0].update(
+            aggregate_B_pi_0_integral=-1.2345678e-307,
+            aggregate_B_pi_A_integral=1.2345678e307, aggregate_delta_integral=-1.2345678e307)
+        before = snapshot(self.payload)
+        lines = plots._e8_4_stored_support_lines(self.payload, group)
+        self.assertTrue(all(len(line) <= 96 for line in lines), lines)
+        self.assertIn("Stored aggregate B_pi_0=-1.2345678e-307; B_pi_A=1.2345678e+307; delta=-1.2345678e+307", lines)
+        self.assertEqual(snapshot(self.payload), before)
+
+    def test_authority_flags_and_statements_are_bounded_and_immutable(self):
+        flags = ("baseline_production_mutated", "production_promotion_performed",
+                 "method_b_numerical_dependency", "empirical_residual_used",
+                 "event_correction_persisted", "canonical_child_renormalization_performed",
+                 "baseline_public_output_unchanged")
+        # Distinct stored Boolean values prove this is formatting, not a default.
+        for index, name in enumerate(flags):
+            self.payload[name] = bool(index % 2)
+        before = snapshot(self.payload)
+        with patch.object(plots, "_e8_text_page", return_value=True) as page:
+            self.assertTrue(plots._e8_4_render_authority_page(fixtures._FakeRoot, "ignored.pdf", self.payload))
+        lines = page.call_args.args[4]
+        self.assertTrue(all(len(line) <= 96 for line in lines), lines)
+        self.assertLessEqual(len(page.call_args.args[3]), 96)
+        self.assertIn("Non-production flags:", lines)
+        for name in flags:
+            self.assertEqual(sum(name in line for line in lines), 1)
+            self.assertIn("  {}={}".format(name, self.payload[name]), lines)
+        joined = " ".join(lines)
+        self.assertIn("historical E.8.3/F.6.1 is a separate lineage.", joined)
+        self.assertIn("Method B is numerically absent.", joined)
+        self.assertIn("not automatically a systematic uncertainty.", joined)
+        self.assertEqual(snapshot(self.payload), before)
+
+    def test_yield_support_region_fits_nine_children_without_panel_overlap(self):
+        before = snapshot(self.payload)
+        with patch.object(plots, "_e8_add_text", wraps=plots._e8_add_text) as text, patch.object(
+                fixtures._FakeCanvas, "SetPad") as pads:
+            self.assertTrue(plots._e8_4_render_yield_summary_page(
+                fixtures._FakeRoot, "ignored.pdf", self.payload, self.payload["per_t"][0]))
+        support = next(call for call in text.call_args_list if call.args[1] == (0.04, 0.03, 0.96, 0.54))
+        self.assertEqual(support.kwargs["size"], 0.021)
+        self.assertEqual(len(support.args[2]), 23)
+        self.assertGreater(support.args[1][3] - support.args[1][1], len(support.args[2]) * support.kwargs["size"])
+        self.assertEqual(len(pads.call_args_list), 3)
+        for call in pads.call_args_list:
+            self.assertGreater(call.args[1], support.args[1][3])
+            self.assertEqual(call.args[3], 0.90)
+        self.assertEqual(snapshot(self.payload), before)
+
+    def test_target_titles_are_ascii_safe_and_retain_identity(self):
+        historical.DetachedMethodAReweightingAuditTests.setUpClass()
+        instance = historical.DetachedMethodAReweightingAuditTests()
+        with tempfile.TemporaryDirectory() as directory:
+            payload = instance._payload(directory)
+        before = deepcopy(payload)
+        historical._FakePaveText.instances[:] = []
+        for parent in payload["parents"]:
+            self.assertTrue(plots._e8_3_render_tphi_page(historical._FakeRoot, "ignored.pdf", payload, parent))
+            title = historical._FakePaveText.instances[-1].lines[0]
+            self.assertEqual(title, "E.8.3 persisted canonical (t,phi) pion redistribution - {} t{}".format(
+                payload["setting_id"], parent["canonical_t_index"] + 1))
+            self.assertNotIn("\u2014", title)
+            self.assertNotIn("\u00e2\u20ac\u201d", title)
+        self.assertEqual(payload, before)
+        before = snapshot(self.payload)
+        fixtures._FakeText.lines[:] = []
+        self.assertTrue(plots._e8_4_render_setting_summary_page(fixtures._FakeRoot, "ignored.pdf", self.payload))
+        title = fixtures._FakeText.lines[0]
+        self.assertEqual(title, "E.8.4 stored canonical t-by-phi impact summary - {}".format(self.payload["setting_id"]))
+        self.assertNotIn("\u2014", title)
+        self.assertNotIn("\u00e2\u20ac\u201d", title)
+        self.assertEqual(snapshot(self.payload), before)
+
+    def test_affected_renderers_have_no_numerical_producer_or_integration_calls(self):
+        forbidden = {"GetBinContent", "GetBinError", "Integral", "Scale", "Normalize",
+                     "Rebin", "Fill", "Add", "calculate_yield_data", "calculate_yield_simc",
+                     "fill_simc_shape_pion_subtraction_templates", "bin_data", "bin_simc", "bg_fit"}
+        for function in (plots._e8_3_render_tphi_page, plots._e8_4_render_setting_summary_page,
+                         plots._e8_4_render_authority_page, plots._e8_4_stored_support_lines,
+                         plots._e8_4_render_yield_summary_page):
+            tree = ast.parse(inspect.getsource(function))
+            calls = {node.func.attr if isinstance(node.func, ast.Attribute) else node.func.id
+                     for node in ast.walk(tree) if isinstance(node, ast.Call)
+                     and isinstance(node.func, (ast.Name, ast.Attribute))}
+            self.assertFalse(calls & forbidden, (function.__name__, calls & forbidden))
+            if function is plots._e8_4_stored_support_lines:
+                self.assertNotIn("sum", calls)
 
     def test_missing_stored_support_fails_closed_without_manifest_success(self):
         self.payload["per_t"][0]["children"][0]["identity_audit"].pop("signed_support")
