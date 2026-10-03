@@ -11,13 +11,14 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-Gate 4 is `ACTIVE`: final memory reconciliation for Q4p4W2p74 / Left / lowe
-Method-A scientific validity. Gates 1, 2 and 3 are consumed. Gate 2 found no
-blocking repository-memory contradiction; nonblocking historical drift is
-preserved as history under the [Gate-4 contract](phases/e8-4-left-lowe-method-a-gate4-final-memory-reconciliation-task-contract.md).
-Gate 3 completed a source/science audit, with no new farm evidence. Its
-[investigation](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
-separates source findings, accepted runtime scopes, hypotheses and unknowns.
+The external PID/background-methods research memory checkpoint is `ACTIVE` for
+Q4p4W2p74 / Left / lowe Method-A scientific validity. Gates 1–4 are consumed.
+The external review was explicitly user-authorized and is completed enough to
+alter planning; no implementation or new farm evidence occurred. The
+[research investigation](investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md)
+preserves stable bibliography, source hierarchy and access limitations. Prior
+[Gate-3 findings](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
+remain separate from EXTERNAL LITERATURE.
 
 Stale scalar/wrong histogram is not the primary scientific issue. Fail-closed
 checks, prior arithmetic and accepted narrow evidence support bookkeeping
@@ -25,10 +26,20 @@ consistency for this purpose, not production correctness. Large low-t/t1
 redistribution, global-weight differences and pion-background/yield impact
 remain scientifically unresolved.
 
+EXTERNAL LITERATURE: the strongest planning lesson is to separate sample
+purification, detector response, accepted `w0` physics transfer and normalization/
+preservation. No external method validates a specific KaonLT correction.
+F.4 signed normalization is a priority diagnostic question, not a proven defect.
+Test F.3 weak-positive response as a relative pion-to-kaon mis-ID topology proxy.
+HGC-free pion tagging is preferred if available; truncated/censored models are
+optional model-dependent cross-checks.
+
 ## Verified State
 
-SOURCE VERIFIED (Gate-3 findings, targeted confirmation at Gate-4 startup):
-positive-response training and physical NPE>2 application are distinct; F.3
+SOURCE VERIFIED (current PID masks; Gate-3 ownership retained): NPE=0 is the
+kaon PID category, NPE>0 the pion tree, NPE>2 physical pion control. Training
+and application differ; P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
+the kaon-selected sample, not an observed pion class. F.3
 `hgcer3` represents relative response, not absolute leakage probability. F.4
 preserves signed canonical-t parents, not each child or MM subregion. Baseline
 `w0` already owns the established pion-control-to-background transfer.
@@ -47,10 +58,8 @@ signed parent preservation. See [branch evidence](evidence/f6-3-e8-4-left-lowe-r
 Fix.5.7 remains `CLOSED / RUNTIME VALIDATED` only for Left/lowe owner/checker
 setting provenance through final ZIP; [Fix.5.8](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
 remains `CLOSED / RUNTIME VALIDATED` only for Left/lowe presentation legibility.
-Its complete/error-free 97-page bundle, eight matching artifact entries,
-zero analysis/checker return codes, seven setting fields and three-parent
-closure were independently reviewed. Target pages 67/69/71/73/80/87/94/96 are
-legible, with no representative overlay regression. No broader closure follows.
+Its 97-page bundle, structural checks, parent closure and visual review remain
+accepted at their recorded scope. External literature adds no runtime validation.
 
 Historical F.1-F.6.2 closures retain their accepted scopes in the
 [roadmap](roadmap/STATUS.md). E.8.2/E.8.3 and workflow hardening remain
@@ -59,8 +68,8 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
-- Observed Gate-4 startup branch `test`, HEAD/local `origin/test`:
-  `3a3a4217c78dde07123e71cd36e43ee54666d1e4`; timestamped observation,
+- Observed research-checkpoint startup branch `test`, HEAD/local `origin/test`:
+  `f7934f459b42b190235ffc63e486e7ba0e068e79`; timestamped observation,
   not permanent source or farm authority.
 - Accepted Fix.5.8 farm source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
   ZIP `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`,
@@ -83,7 +92,7 @@ question at relative HGCer response, current physical application, baseline
 normalization sensitivity; this is not an accepted explanation. NOT VERIFIED:
 current-lineage t1 signed/absolute support, source decomposition, raw-response
 and correction tails, child/MM-region redistribution, coordinate and support/OOD
-dependence, and a physically interpretable zero-photoelectron transfer comparison.
+dependence, weak-positive proxy validity and HGC-free pion-tag availability.
 No particular PMT, mirror, optical, track-geometry or hardware cause is established.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
@@ -95,22 +104,23 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after Gate-4 actual-diff review, user commit/push, and pushed-state
-synchronization: scientific-direction checkpoint to decide whether an external
-analogous-experiment / PID-background methods review should be performed before
-any implementation contract.
+NEXT — after independent review, user commit/push and pushed-state
+synchronization: define a detached current-lineage diagnostic-measurement
+contract with separate tests of (1) F.3 weak-positive response as a relative
+pion-to-kaon mis-ID topology proxy across hgcer3 and (2) Left/lowe t1 F.4
+signed-normalization sensitivity, before correction redesign or production.
 
-This checkpoint does not automatically authorize external research or an
-implementation. Gate 4 authorizes no farm run or scientific-source modification.
+This checkpoint records research; it authorizes no farm run, scientific-source
+modification, correction choice or diagnostic implementation contract here.
 Canonical-five expansion remains `DEFERRED` by user decision; final E.8/F.6.4
 remain `BLOCKED`.
 
 ## Success Criteria
 
-Compact allowlisted memory accurately preserves Gates 1-3 as consumed and Gate 4
-as the closing checkpoint, evidence labels and accepted narrow scopes. Manifest,
-ordinary/zero-warning memory health and diff checks must pass; independent
-actual-diff review and user-controlled synchronization remain required.
+Compact allowlisted memory preserves consumed gates, stable external sources,
+evidence distinctions and accepted narrow scopes. Manifest, ordinary memory
+health and diff checks must pass; independent actual-diff review and
+user-controlled synchronization remain required.
 
 ## Do Not Reopen Without New Evidence
 

@@ -214,18 +214,45 @@ preserves the evidence and limits behind these durable constraints:
   normalization. Where cancellation can matter, explicitly decompose signed
   and absolute support, source classes and response/correction tails. Possible
   amplification is an inference, not an accepted explanation of Left/lowe t1.
-- Zero-truncated/censored detector-response inference is relevant when the
-  target population is absent from the selected control sample. Existing
-  zero-photoelectron pion transfer machinery remains diagnostic-only and
-  non-authoritative, with no production side effects or automatic replacement role.
+- NPE=0 is the operational kaon PID category, NPE>0 the pion tree and NPE>2
+  physical pion control. P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
+  the kaon-selected sample, not an observed pion class. Existing zero-photoelectron
+  pion transfer machinery remains diagnostic-only and non-authoritative, with
+  no production side effects or automatic replacement role.
 - Slow-proton event probability -> proposed effect -> support/preservation
   diagnostic -> applied-effect decision is a structural analogue, not a
-  numerical pion prescription; positive-response control omits the target
-  zero-photoelectron pion population.
+  numerical pion prescription; HGC-positive control alone cannot establish
+  true-pion mis-ID into the kaon-selected sample.
 - Accepted current-baseline comparator evidence reproduced F.2/F.3 scientific
   payloads exactly, with F.4 the first scientifically changed stage. This
   concentrates the present question at relative response, physical application,
   baseline transfer and signed parent normalization; it establishes no cause.
+
+### External PID/background-methods lessons
+
+The [external review](investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md)
+is EXTERNAL LITERATURE and planning inference, not KaonLT runtime evidence:
+
+- Sample purification, conditional detector response, physics transfer and
+  normalization/closure are distinct roles. Signed component-separation weights
+  can be valid statistical weights without being physical event probabilities.
+- Detector-response transport should use a physically meaningful positive
+  population measure, with calibration/application support, composition,
+  detector coordinates and run-condition matching checked. This design lesson
+  does not approve replacing KaonLT's signed parent-preservation rule.
+- The primary response question is whether F.3 weak-positive pion response
+  (0<NPE<=2 versus >2) is a valid relative proxy for pion-to-kaon HGC mis-ID
+  topology across hgcer3. Independent HGC-free pion tagging is the preferred
+  direct calibration if available. Zero-truncated/censored response models are
+  optional model-dependent validation/cross-check machinery, not the foundation
+  or a mandatory solution; Poisson remains a hypothesis requiring validation.
+- Coupled cross-species PID may require a response/confusion matrix; its
+  calibration, unidentified state and uncertainty propagation must be explicit.
+  Literature does not mandate a KaonLT matrix or correction.
+- External methods make F.4 signed normalization a priority diagnostic target,
+  not a proven defect or accepted explanation of t1. Measure current-lineage
+  sensitivity separately from weak-positive proxy validity before choosing a
+  correction.
 
 ## Canonical record ownership
 

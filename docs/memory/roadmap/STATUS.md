@@ -252,7 +252,7 @@ canonical-five expansion remains `DEFERRED` by user decision.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
-`ACTIVE` — Gate 4 is the closing memory checkpoint for Q4p4W2p74 / Left / lowe scientific validity
+`ACTIVE` — the external-methods research memory checkpoint records a diagnostics-first direction for Q4p4W2p74 / Left / lowe scientific validity
 and detector-response origin of the large low-t Method-A redistribution,
 especially global-weight differences and t1 pion-background/yield impact.
 Fail-closed identity checks, prior arithmetic checks and accepted evidence
@@ -263,14 +263,20 @@ No detector cause or production correctness is established. Slow-proton event
 probability is analogue-only; no pion probability implementation is approved.
 Absolute-SIMC units remain a separate blocker.
 
-Dependency: accepted Left/lowe branch/runtime evidence -> Gate 1 initial memory
-re-anchor: consumed -> Gate 2 repository-memory consistency audit: consumed ->
-Gate 3 code/science audit: consumed -> Gate 4 final memory reconciliation:
-current closing checkpoint -> scientific-direction checkpoint -> implementation
-contract only if later explicitly warranted -> later reconsider canonical-five
-expansion -> final E.8 -> F.6.4 explicit production-promotion decision.
-CURRENT owns exact `NEXT`; external methods research is not yet decided or
-automatically authorized. Gates 1–4 authorize no farm run, scientific-source modification,
+Dependency: accepted Left/lowe evidence -> Gates 1–4 consumed -> external
+analogous-experiment / PID-background methods review consumed -> detached
+current-lineage diagnostic-measurement contract -> evidence-based method-selection
+decision -> implementation contract only if warranted -> later canonical-five
+reconsideration -> final E.8 -> F.6.4 explicit production-promotion decision.
+CURRENT owns exact `NEXT`. The user-authorized external review is recorded in
+the [research investigation](../investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md);
+no external method validates a KaonLT correction. The response question is F.3
+weak-positive (0<NPE<=2 versus >2) proxy validity for relative pion-to-kaon HGC
+mis-ID topology across hgcer3; F.4 signed-normalization sensitivity is a separate
+diagnostic question, not a proven defect. NPE=0 is the kaon PID category, NPE>0
+the pion tree and NPE>2 physical pion control. HGC-free pion tagging is preferred
+if available; truncated/censored models are optional model-dependent cross-checks.
+This memory checkpoint and Gates 1–4 authorize no farm run, scientific-source modification,
 production change, Method-A promotion, numerical Method-B use, canonical-five
 expansion or pion-probability implementation.
 Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.

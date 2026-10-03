@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7511,
+      "bytes": 8130,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "bf1e50203aee42410f45fa72766c7d425aeac31a945cdb4fe50022375e1afb87"
+      "sha256": "89d14483906658db3564468b3be026b534e13b8c86585fc39566074b094d5925"
     },
     {
       "bytes": 5934,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 15183,
+      "bytes": 16964,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "360ae02f3e308b3a5b5e80080c661351a2ff5035614d546de2936f63ee4ecd9e"
+      "sha256": "8ab28aa3621747ca1b0e1a31c594f0f719901709011d2f16694c26a672a1e0d3"
     },
     {
       "bytes": 3606,
@@ -349,6 +349,11 @@
       "bytes": 10914,
       "path": "docs/memory/investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md",
       "sha256": "074770440bf8cc4e24a9bdb6ccca8cb10cf2cb040b61fe62c97dc4dc996f9fac"
+    },
+    {
+      "bytes": 24721,
+      "path": "docs/memory/investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md",
+      "sha256": "bdf2069b69c3a3bbed729a1bbdcd74c99b36692411ba9bdac6c098dc0c4f125a"
     },
     {
       "bytes": 2081,
@@ -731,6 +736,11 @@
       "sha256": "b531bce18db2688e7ed699b8bd149520b6751baaf642ae8faa8aee872a5812e0"
     },
     {
+      "bytes": 26706,
+      "path": "docs/memory/phases/e8-4-left-lowe-method-a-external-pid-background-methods-research-memory-task-contract.md",
+      "sha256": "7d6ec4225305bf50b526d0437ce5ea015c9d787a72b7fbba66ff5c9bc22f9431"
+    },
+    {
       "bytes": 27468,
       "path": "docs/memory/phases/e8-4-left-lowe-method-a-gate4-final-memory-reconciliation-task-contract.md",
       "sha256": "1c61757aa25fb3acfb4c16b0723678335b772190dfb7ff2f480061447d331799"
@@ -1036,9 +1046,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 21343,
+      "bytes": 21929,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "5e97a99aeb0ae4c71160a42e2345d8c61f5afa34e5185b632db64a93fbaba2d3"
+      "sha256": "0d21015c55a54bd7174bad19eec72680cb295f4694c691a8cb35ebd24cdaef25"
     },
     {
       "bytes": 1698,
@@ -1046,9 +1056,9 @@
       "sha256": "f9ff456ed5c1312267c38f5402aa0218316d6abc346b46be52727aa34b310c5b"
     },
     {
-      "bytes": 2965,
+      "bytes": 6382,
       "path": "docs/memory/sources/SOURCE_INDEX.md",
-      "sha256": "7a313d04f53c410f1b5769902134f5bb6211c84d85ef72ae8c6801babbd618f8"
+      "sha256": "9d13f472a9fa20d45a58367f5bd2908985ef120c0725d0b27b45a227f72b3393"
     },
     {
       "bytes": 3082,
