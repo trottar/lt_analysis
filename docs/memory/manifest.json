@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8152,
+      "bytes": 7511,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "34db37eac102e3415be752458a1ff626c2981fda91c4093ea22e476a8ae4e085"
+      "sha256": "bf1e50203aee42410f45fa72766c7d425aeac31a945cdb4fe50022375e1afb87"
     },
     {
       "bytes": 5934,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 13294,
+      "bytes": 15183,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "b85435dd6703091bb7e31cf37da92c9f7622ae347bc1bd12277a235b689ad332"
+      "sha256": "360ae02f3e308b3a5b5e80080c661351a2ff5035614d546de2936f63ee4ecd9e"
     },
     {
       "bytes": 3606,
@@ -116,9 +116,9 @@
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
     },
     {
-      "bytes": 4568,
+      "bytes": 5159,
       "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
-      "sha256": "5ad62c043783ad520599985781ffa0120ef610457a4c4a6b6a79c802a1f7694d"
+      "sha256": "29d6421a235f6924c7c3bda9f450af0c1bb4b75bddb07460f047ccced971bfc0"
     },
     {
       "bytes": 1300,
@@ -344,6 +344,11 @@
       "bytes": 23507,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
       "sha256": "3a701b9f1660006f2b679fe6bebc8437b0bdcfd9e403be51967eb0b40bb1321f"
+    },
+    {
+      "bytes": 10914,
+      "path": "docs/memory/investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md",
+      "sha256": "074770440bf8cc4e24a9bdb6ccca8cb10cf2cb040b61fe62c97dc4dc996f9fac"
     },
     {
       "bytes": 2081,
@@ -726,6 +731,11 @@
       "sha256": "b531bce18db2688e7ed699b8bd149520b6751baaf642ae8faa8aee872a5812e0"
     },
     {
+      "bytes": 27468,
+      "path": "docs/memory/phases/e8-4-left-lowe-method-a-gate4-final-memory-reconciliation-task-contract.md",
+      "sha256": "1c61757aa25fb3acfb4c16b0723678335b772190dfb7ff2f480061447d331799"
+    },
+    {
       "bytes": 23646,
       "path": "docs/memory/phases/e8-4-left-lowe-method-a-scientific-validity-memory-reanchor-task-contract.md",
       "sha256": "8b85314385fe1f6360696b3e366bd80a9488f9158854c1ed514f6c07dccbbee1"
@@ -1026,9 +1036,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 20868,
+      "bytes": 21343,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "312d6820bb6391da455380fdb3a3951cdf6b6f0e65b99efa084925655f42edd2"
+      "sha256": "5e97a99aeb0ae4c71160a42e2345d8c61f5afa34e5185b632db64a93fbaba2d3"
     },
     {
       "bytes": 1698,

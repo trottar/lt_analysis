@@ -199,6 +199,34 @@ comparison, accepted runtime artifact, or one directly evidenced scientific/
 runtime blocker with one coherent repair. Documentation alone is not scientific
 completion. See the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 
+### Method-A detector-response scientific lessons
+
+The [Gate-3 source/science audit](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
+preserves the evidence and limits behind these durable constraints:
+
+- A relative detector-response representation is a different scientific object
+  from an absolute leakage probability; accepted F.3 `hgcer3` is the former.
+- Baseline `w0` already owns the established pion-control-to-background transfer.
+  Multiplying another response/transfer object into it requires distinct
+  scientific ownership and evidence that normalization/transfer physics is not
+  double-counted; this is not an approved replacement algorithm.
+- Signed parent-preserving normalization is not a positive probability-measure
+  normalization. Where cancellation can matter, explicitly decompose signed
+  and absolute support, source classes and response/correction tails. Possible
+  amplification is an inference, not an accepted explanation of Left/lowe t1.
+- Zero-truncated/censored detector-response inference is relevant when the
+  target population is absent from the selected control sample. Existing
+  zero-photoelectron pion transfer machinery remains diagnostic-only and
+  non-authoritative, with no production side effects or automatic replacement role.
+- Slow-proton event probability -> proposed effect -> support/preservation
+  diagnostic -> applied-effect decision is a structural analogue, not a
+  numerical pion prescription; positive-response control omits the target
+  zero-photoelectron pion population.
+- Accepted current-baseline comparator evidence reproduced F.2/F.3 scientific
+  payloads exactly, with F.4 the first scientifically changed stage. This
+  concentrates the present question at relative response, physical application,
+  baseline transfer and signed parent normalization; it establishes no cause.
+
 ## Canonical record ownership
 
 - [CURRENT.md](CURRENT.md) owns the sole active objective, blockers, and exact

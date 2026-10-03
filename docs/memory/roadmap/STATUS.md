@@ -252,7 +252,7 @@ canonical-five expansion remains `DEFERRED` by user decision.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
-`ACTIVE` — Gate 1 re-anchors Q4p4W2p74 / Left / lowe to scientific validity
+`ACTIVE` — Gate 4 is the closing memory checkpoint for Q4p4W2p74 / Left / lowe scientific validity
 and detector-response origin of the large low-t Method-A redistribution,
 especially global-weight differences and t1 pion-background/yield impact.
 Fail-closed identity checks, prior arithmetic checks and accepted evidence
@@ -263,19 +263,24 @@ No detector cause or production correctness is established. Slow-proton event
 probability is analogue-only; no pion probability implementation is approved.
 Absolute-SIMC units remain a separate blocker.
 
-Dependency: accepted Left/lowe branch execution/presentation and arithmetic
-bookkeeping -> Gate 1 initial memory re-anchor -> Gate 2 complete repository-
-memory consistency audit -> Gate 3 complete code/science audit of Method-A
-redistribution and detector-response origin -> Gate 4 final memory audit/
-reconciliation -> only then implementation contract if warranted -> later
-reconsider canonical-five expansion -> final E.8 -> F.6.4 explicit production-
-promotion decision. Gate 2 is the only next executable gate; CURRENT owns exact
-`NEXT`. Gates 1–4 authorize no farm run, scientific-source modification,
+Dependency: accepted Left/lowe branch/runtime evidence -> Gate 1 initial memory
+re-anchor: consumed -> Gate 2 repository-memory consistency audit: consumed ->
+Gate 3 code/science audit: consumed -> Gate 4 final memory reconciliation:
+current closing checkpoint -> scientific-direction checkpoint -> implementation
+contract only if later explicitly warranted -> later reconsider canonical-five
+expansion -> final E.8 -> F.6.4 explicit production-promotion decision.
+CURRENT owns exact `NEXT`; external methods research is not yet decided or
+automatically authorized. Gates 1–4 authorize no farm run, scientific-source modification,
 production change, Method-A promotion, numerical Method-B use, canonical-five
 expansion or pion-probability implementation.
 Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
 Method A remains detached/non-production; Method B diagnostic/cross-check only
-and numerically excluded. Later audits have not begun in Gate 1.
+and numerically excluded. Gate 2 found no blocking memory contradiction; its
+nonblocking historical drift outside the Gate-4 allowlist remains historical.
+Gate 3 supplied no new farm evidence or detector cause. Its
+[source/science investigation](../investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
+preserves relative-response/absolute-probability distinctions and signed
+normalization as a possible sensitivity mechanism, not an accepted explanation.
 
 #### Final E.8 closure
 

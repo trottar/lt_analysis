@@ -43,7 +43,14 @@ including global-weight differences and t1 pion-background/yield impact. The
 preserves earlier observations and audit chronology as history. No new farm
 evidence or causal explanation is claimed; absolute-SIMC units remain separate
 and no Method-A promotion follows. CURRENT owns the `ACTIVE` scientific-validity
-work item and the ordered pre-implementation gates.
+work item and the ordered pre-implementation gates. Gates 2 and 3 are completed;
+the repository-memory audit found no blocking contradiction, and the source/
+science audit supplied no new runtime evidence, detector cause or Method-A
+production validation. Accepted narrow runtime closures remain unchanged.
+Current scientific interpretation remains `BLOCKED` pending further evidence;
+absolute-SIMC provenance/units remain a separate limitation. Detailed findings
+and hypotheses belong in the [Gate-3 investigation](../investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md),
+not in farm-evidence history.
 
 ## Historical non-closures and their original scope
 
