@@ -1,6 +1,24 @@
 # E.8.4 Fix.5 Left/lowe post-farm identity, lineage and visualization — 2026-10-02
 
-## Fresh Fix.5.7 farm closure and Fix.5.8 visual repair checkpoint
+## Accepted Fix.5.8 closure and historical investigation boundary
+
+The [accepted Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
+supplies the independently reviewed structural/visual PASS at farm source
+`2ddeab47d55edb57d2f313022a948c4376730c19`. The title defects on 67/69/71/96,
+flag clipping on 73 and support clipping on 80/87/94 are resolved; representative
+baseline-versus-Method-A visibility has no regression. Fix.5.8 is narrowly
+`CLOSED / RUNTIME VALIDATED` for Left/lowe presentation, with the owner plus
+visual gate accepted. Fix.5.7 remains narrowly closed. Codex records the
+contract-supplied review, not a new raw-artifact inspection.
+
+The absolute-SIMC blocker, detached Method A, numerically excluded Method B,
+canonical-five deferral and F.6.4 blocker remain unchanged. No new cancellation
+or amplitude interpretation follows. CURRENT alone owns the live decision gate.
+All checkpoints, pending/NOT VERIFIED statements, hypotheses and exact-next
+sequences below are preserved historical chronology at their original dates,
+not competing current status or farm authorization.
+
+### Historical Fix.5.7 farm closure and Fix.5.8 visual repair checkpoint
 
 The [fresh evidence record](../evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
 records the independent review supplied by the Fix.5.8 contract: source

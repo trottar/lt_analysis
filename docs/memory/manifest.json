@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7417,
+      "bytes": 7750,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "9774324a5f7075d7436ac718f5f9a78c62f558dc1c5becaf48e2fa7df5dd84a8"
+      "sha256": "31d27bd8b0bd2c3fd08a9eb7955f89d4f57f26e34223376bee3d5c037d70a860"
     },
     {
       "bytes": 5934,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 12489,
+      "bytes": 12821,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "303c8cb2e4cac85318d0e624bc2a350219c2712a9dfb4c5c01ff190f5c3eec30"
+      "sha256": "a7f3da583b95a842b734769bd1bdce1f092da7a8db082b39139288b106d310f2"
     },
     {
       "bytes": 3606,
@@ -116,9 +116,9 @@
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
     },
     {
-      "bytes": 1866,
+      "bytes": 3535,
       "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
-      "sha256": "c563621e274b839c2f1f14c4ec99df571c18562da6936c52987c1d4f4e9c2659"
+      "sha256": "847484b3a072cbabd09ff3d51b355af3ebd6d196b536a3576b1e3b3a745c9a94"
     },
     {
       "bytes": 1300,
@@ -154,6 +154,11 @@
       "bytes": 3305,
       "path": "docs/memory/evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md",
       "sha256": "bcf8fee222bfbd435e487a138bb57d0752073bb8a9f45c89bc6dfe7ebe808265"
+    },
+    {
+      "bytes": 4647,
+      "path": "docs/memory/evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md",
+      "sha256": "0a45989ddbbc32621a23af89ee5a33556ab8ceb0f3bde8a782ad1a5927169932"
     },
     {
       "bytes": 1987,
@@ -336,9 +341,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 22373,
+      "bytes": 23507,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
-      "sha256": "84604c464289151132141023088400760b3e0d4bf26a3d7e611bec4fe6b5240d"
+      "sha256": "3a701b9f1660006f2b679fe6bebc8437b0bdcfd9e403be51967eb0b40bb1321f"
     },
     {
       "bytes": 2081,
@@ -701,9 +706,14 @@
       "sha256": "60ebc32be8b51028969bf21341556da418fd5353244d0a310d388d3476b93755"
     },
     {
-      "bytes": 5684,
+      "bytes": 7403,
       "path": "docs/memory/phases/e8-4-fix5-8-presentation-legibility-repair.md",
-      "sha256": "5d48cb8e554c75090029de7d896850192a87d90c29a70d76962869ab2b6315ad"
+      "sha256": "6ff0d2ec9de757a69c8d1644ecabfa60c8619af41a6c8fa6d6b9d25cfc278e3e"
+    },
+    {
+      "bytes": 19048,
+      "path": "docs/memory/phases/e8-4-fix5-8-runtime-closure-memory-checkpoint-task-contract.md",
+      "sha256": "be5f51abc1809f04e10251c4ea263beca01e6db6eebb727f706fe24f24c4645c"
     },
     {
       "bytes": 28512,
@@ -1006,9 +1016,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 17669,
+      "bytes": 19125,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "ba804ef0e03b86f99be6e403efbdbdcd24f3759e5f224802b1c22192753f83a7"
+      "sha256": "979d72fdb07f514ba6b2011ec05b7c47f4b14f9cd7eb40fbc8af6abac401e8cc"
     },
     {
       "bytes": 1698,

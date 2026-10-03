@@ -135,11 +135,16 @@ current-F.6.3 aggregates without histogram reintegration or child reaggregation.
 Baseline-last solid/open-marker blue and wider dashed magenta encode identity
 beyond color. Historical E.8.3 must visibly identify its accepted F.6.1 lineage
 as separate from current F.6.3/E.8.4. Fake ROOT checks establish draw commands and
-immutability; actual visual legibility remains a farm PDF acceptance question.
+immutability. The later Fix.5.8 farm gate validates the narrow Left/lowe
+owner/presentation result and actual PDF legibility; canonical-five closure
+and absolute-SIMC interpretation remain unresolved. See the
+[accepted closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
 
 Fix.5.5 presentation source `df957a6` passed independent actual-diff and
 pushed-state review per the Fix.5.6 contract; full identity is in CURRENT and its
-phase record. Real PDF/farm numerical acceptance remains pending.
+phase record. The later Fix.5.8 Left/lowe structural/visual farm gate is accepted;
+it does not supply broader numerical interpretation, other-setting acceptance
+or production promotion.
 An analysis subprocess log contains only its child stream, not later owner
 artifact/collection/ZIP failures. Absence of a gate-failure message there is
 not evidence of owner success. Fix.5.6 persists atomic per-attempt owner status

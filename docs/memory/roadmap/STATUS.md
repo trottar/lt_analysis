@@ -126,8 +126,7 @@ establish ROOT/PyROOT, farm or runtime acceptance.
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source
 from Fix.5 `53fd262b730af8f1254e411a38231aebeb6a1da3` to pushed E.8.4
-`1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself remains `SOURCE
-REVIEWED` and no farm/runtime status changes.
+`1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself remains `SOURCE REVIEWED` and no farm/runtime status changes.
 
 E.8.4.Fix.3 — pion-alignment determinism repair is `SOURCE REVIEWED`: its
 independent actual-diff/source and pushed-state reviews passed for
@@ -168,8 +167,7 @@ and [blocker evidence](../evidence/e8-4-fix3-left-lowe-stale-alignment-cache-run
 Independent pushed-state review passed for user-controlled Fix.4 source
 `6e2adf7a37ac9e79cad99242686804cf51701644`, parent
 `8d62dcfdf2fd8d08298c075940b4ab1b28d7f079`, with the exact ten reviewed
-candidate paths. E.8.4.Fix.4 validation-bundle profile re-pin is `SOURCE
-REVIEWED`: independent ChatGPT actual-diff/source-provenance review of
+candidate paths. E.8.4.Fix.4 validation-bundle profile re-pin is `SOURCE REVIEWED`: independent ChatGPT actual-diff/source-provenance review of
 `kaonlt_review(20260929-222602).diff` passed. Only the generic profile/test
 required analysis source changes to pushed Fix.4. Canonical-five artifacts,
 source-range allowlists, collector, wrapper, and scientific/runtime source
@@ -180,7 +178,7 @@ Method-A-promotion status changes.
 
 #### E.8.4.Fix.5 / Fix.5.1 / Fix.5.2 / Fix.5.3 — shareable pages and Left/lowe owner
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — source pushed at
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — historical checkpoint: source pushed at
 `f9d70732290ea461096374ca1270b47452644991`. The supplied fresh Left/lowe
 observation reports 97 pages, zero renderer failures, all ten new pages and
 prior E.8.4 pages retained. No owner ZIP was returned: rendering does not
@@ -191,7 +189,7 @@ and [investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lin
 
 #### E.8.4.Fix.5.4 — current-lineage numerical identity and SIMC normalization audit
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — numerical/provenance source
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — historical checkpoint: numerical/provenance source
 is `SOURCE REVIEWED` at `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`;
 independent ChatGPT actual-diff and pushed-state review passed per the supplied
 Fix.5.5 contract. Deterministic checks pass; new farm closure remains pending. Signed support and current-only aggregates are available. SIMC
@@ -205,33 +203,57 @@ historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-c
 
 #### E.8.4.Fix.5.5 — current-lineage visualization clarity
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — source is `SOURCE REVIEWED`
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — historical checkpoint: source is `SOURCE REVIEWED`
 at `df957a6414fc9c515d1f82228517cb801dc90350`; independent actual-diff and
 pushed-state review passed per the supplied Fix.5.6 contract. Presentation uses blue
 solid/open markers drawn last over wider dashed magenta, stored signed/absolute
 support and current-F.6.3 aggregate diagnostics, and explicit historical E.8.3
 labels. Numerical source, page inventory and absolute-SIMC blocker are frozen.
 166 deterministic tests ran: 148 passed, 18 retained skips. Actual ROOT/PDF
-visual quality and farm numerical closure remain pending. See the
+visual quality and farm numerical closure were then pending. The later Fix.5.8
+gate accepts narrow Left/lowe visual legibility, without new numerical
+interpretation. See the
 [Fix.5.5 phase](../phases/e8-4-fix5-5-current-lineage-visualization-clarity.md).
 
 #### E.8.4.Fix.5.6 — farm-owner readiness and failure provenance
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — local owner adds existing
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — historical checkpoint: local owner adds existing
 detached collector/source checks before expensive analysis and atomic persistent
 per-attempt stage/failure JSON outside the unchanged bundle. All post-analysis
 artifact/page/collection/ZIP validation remains. 66 local tests passed, no skips.
 No scientific/presentation, launcher, profile or collector change; no farm run.
 See the [Fix.5.6 phase](../phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md).
 
-Dependency order: Fix.5.6 actual-diff review -> user commit/push -> pushed-state
-review -> one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
-ZIP/status/log/PDF/manifest evidence review. The prior missing ZIP's exact cause
-remains unknown; the child analysis log cannot show post-analysis owner failures.
+Its reviewed/pushed farm attempt completed the analysis child but failed the
+owner setting gate before collection/ZIP. Fix.5.7 resolved that mismatch.
+The older missing ZIP's exact cause remains unknown; the child log alone
+cannot show post-analysis owner failures.
+
+#### E.8.4.Fix.5.7 — page-manifest setting-provenance owner repair
+
+`CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe owner/checker
+setting provenance through final ZIP, farm source
+`4da101ef2a0f633d3b98f95cc5dbe8f903b94a35`. See
+[Fix.5.7 evidence](../evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md).
+The visual defects found in that PDF motivated Fix.5.8; owner success alone
+did not accept visual legibility.
+
+#### E.8.4.Fix.5.8 — presentation-legibility repair
+
+`CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe, farm source
+`2ddeab47d55edb57d2f313022a948c4376730c19`. The accepted complete 97-page
+bundle passes structural checks and targeted visual review of
+67,69,71,73,80,87,94,96, without representative overlay-visibility regression.
+See [Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
+The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
+`ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
+explanation and Method-A promotion do not follow. CURRENT owns the live decision
+gate; this roadmap does not lift the user-deferred canonical-five expansion.
 
 #### Final E.8 closure
 
-`BLOCKED` — pending E.8.4 and later runtime/visual validation of the complete full-analysis visual chain.
+`BLOCKED` — final canonical-five validation is not supplied by the accepted
+Left/lowe scope; the existing canonical-five expansion remains `DEFERRED` by user decision.
 
 #### F.6.4 — explicit production-promotion decision
 
@@ -251,10 +273,10 @@ actual-diff review, user commit/push, and pushed-state synchronization are not
 independent scientific phases. Record and batch nonblocking maintenance at
 milestones; concrete source/provenance/active-state blockers alone warrant
 separate reconciliation. The narrow Refresh.2 materialization and Left/lowe current-baseline
-reweighting/yield gates now have accepted evidence. The subsequent Fix.5
-shareable interpretation awaits fresh Fix.5.4/Fix.5.5 numerical and visual farm evidence;
-its presentation/owner gate remains narrow Left/lowe.
-Canonical-five closure and F.6.4 remain blocked; dependency order is unchanged.
+reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
+Left/lowe owner and visual presentation gates are accepted. Broader numerical
+interpretation, absolute-SIMC units and the other four settings are not closed.
+Canonical-five expansion remains `DEFERRED` by user decision; final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Active-state ownership
 

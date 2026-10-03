@@ -1,6 +1,7 @@
 # E.8.4 Fix.5.8 — presentation legibility repair
 
-**Status:** `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+**Status:** `CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe
+presentation legibility. The implementation history below predates closure.
 
 ## Starting gate and opening checkpoint
 
@@ -45,7 +46,9 @@ tokens without dropping data. Nine children produce 23 lines, each <=96 chars.
 The lower text box is (0.04,0.03,0.96,0.54), keeping text size 0.021; the three
 upper panels begin at y=0.58 and retain their y=0.90 top. This fits the additional
 rows by deterministic geometry without panel/header overlap or smaller text.
-Actual ROOT font metrics and rendered legibility remain NOT VERIFIED.
+At local implementation completion, actual ROOT font metrics and rendered
+legibility were NOT VERIFIED; the later accepted rendered-page review below
+closes that narrow legibility gate.
 
 ## Deterministic checks
 
@@ -79,7 +82,7 @@ including page orchestration, scientific builders and visibility helpers, are
 unchanged. All 165 frozen tracked source/owner/collector/launcher/profile files
 match starting HEAD after checkout line-ending normalization.
 
-## NEXT and hard stop
+## Historical local handoff
 
 Final ordinary memory health and regenerated manifest checks PASS with no
 warnings/hard failures. CURRENT/MEMORY/CURRENT_HANDOFF bytes: 7417/12489/323;
@@ -90,11 +93,37 @@ The complete temporary root `kaonlt_review.diff` contains all five changed
 tracked files plus the three intended additions (contract, evidence, phase),
 without staging. Remove the review file before any user-controlled commit.
 
-After independent ChatGPT actual-diff review, user commit/push and ChatGPT
-pushed-state synchronization, one narrow tracked-owner Q4p4W2p74 / Left / lowe
-farm validation; review structural provenance first, then pages
-67,69,71,73,80,87,94,96 and prior overlays. CURRENT owns the sole NEXT.
-No farm command is authorized before those synchronization gates.
-Repaired ROOT rendering/PDF legibility and final Fix.5 visual acceptance remain
-NOT VERIFIED; canonical-five expansion, production changes and Method-A promotion
-remain blocked. No commit, push, remote-ref update or farm run occurs.
+The local handoff stopped before commit/push, with structural/farm validation
+and targeted page review then pending. Subsequent source synchronization and
+the accepted farm gate completed that historical sequence. The local checks
+alone did not establish runtime acceptance.
+
+## Accepted runtime closure — 2026-10-03
+
+RUNTIME VERIFIED from the independent review supplied by the
+[closure contract](e8-4-fix5-8-runtime-closure-memory-checkpoint-task-contract.md):
+farm source `2ddeab47d55edb57d2f313022a948c4376730c19`;
+ZIP `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`,
+30851374 bytes, SHA-256
+`966e667b36b2626b5c16f00fc684a099a5d24e5d2015bb547612a1e63eb2a25e`.
+See [canonical evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
+for full checks and exact parent values. Codex records the supplied accepted
+review; it did not independently reopen raw artifacts or run the farm here.
+
+Structural PASS: complete/error-free v4 ZIP, eight artifact hashes/bytes,
+exact source/scope/profile, zero analysis/checker return codes, 97 pages,
+no renderer failures and complete seven-field setting provenance.
+Targeted visual PASS: ASCII titles on 67/69/71/96, all flags on 73, all nine
+children/six support quantities on 80/87/94 without clipping or panel overlap.
+The full scan found no new renderer/glyph/clipping failure; representative
+baseline-versus-Method-A overlays have no visibility regression.
+
+Fix.5.8 and the narrow Fix.5 Left/lowe owner/visual gate are accepted.
+The six absolute-SIMC pages remain unavailable with
+`SIMC_normfac_luminosity_and_charge_units_not_source_proven`; no normalization
+error or amplitude interpretation follows. Method A stays detached/non-production;
+Method B diagnostic-only and numerically excluded. Other four settings,
+canonical-five E.8, F.6.4 and Method-A promotion are not closed. E.8 remains
+`ACTIVE` and canonical-five expansion `DEFERRED` by user decision. CURRENT owns the live
+decision gate after the closing checkpoint's review/synchronization; no
+additional farm run is authorized by this memory-only closure.

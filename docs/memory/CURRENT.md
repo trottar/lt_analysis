@@ -12,10 +12,10 @@ authorities and detached Method-A/Method-B boundaries.
 ## Current Work Item
 
 [E.8.4 Fix.5.8](phases/e8-4-fix5-8-presentation-legibility-repair.md) is
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
-presentation-only repair of two ROOT title separators and clipped authority/
-stored-support text. The explicit contract resumes only this narrow work.
-All scientific values, schemas, page inventory and overlay styling are frozen.
+`CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
+presentation-legibility repair. The accepted structural and visual gate is
+recorded in [fresh Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
+This memory/evidence-only closing checkpoint changes no executable or science.
 
 Fix.5.7 is `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
 owner/checker setting-provenance repair through collection/final ZIP verification.
@@ -26,21 +26,20 @@ Codex has not independently reopened the raw bundle/PDF here.
 Workflow/chat-health hardening is `SOURCE REVIEWED`; synchronization passed
 through `8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. External Project instructions
 and environment configuration were updated per its closure contract.
-Fix.5.4/Fix.5.5 source review remains accepted; final Fix.5 visual acceptance
-is `BLOCKED` only by the newly evidenced presentation defects.
+Fix.5.4/Fix.5.5 source review remains accepted. The narrow Fix.5 Left/lowe
+owner plus visual presentation gate is accepted by the later Fix.5.8 bundle.
 
 ## Verified State
 
-The supplied independently reviewed Fix.5.7 bundle is complete, has no errors,
-analysis return code zero, 97 pages and no renderer failures. Its setting
-retains all seven producer provenance fields. Page/payload/provenance checks
-and parent preservation passed. This closes only the owner/checker repair,
-not repaired Fix.5.8 legibility, canonical-five E.8, F.6.4 or Method-A promotion.
-
-RUNTIME VERIFIED (supplied review): pages 67/69/71 E.8.3 tphi and 96 E.8.4
-setting-summary have title mojibake; page 73 authority flags and pages
-80/87/94 stored-support lines clip. These are presentation failures only.
-Fix.5.8 repaired rendering remains NOT VERIFIED pending a later farm gate.
+RUNTIME VERIFIED (supplied independent review): the Fix.5.8 ZIP is complete,
+error-free and intact; all eight artifact entries match hashes/bytes. Analysis
+and embedded checker return codes are zero; 97 PDF pages, no renderer failures,
+seven-field setting provenance and passed three-parent closure are retained.
+Pages 67/69/71/96 have ASCII-safe titles; all flags on 73 and all support values
+on 80/87/94 are visible without clipping/overlap. The full scan found no new
+renderer/glyph/clipping failure; representative baseline-versus-Method-A
+overlays retain their visibility. Codex records the contract-supplied review,
+not a new raw-artifact inspection. No canonical-five or promotion closure follows.
 
 F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`. F.6.3 and the prior E.8.4
 gate remain `CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe branch
@@ -53,8 +52,12 @@ and current F.6.3/E.8.4 are distinct lineages; no authority replacement follows.
 
 ## Source / Evidence Identity
 
-- Fresh Fix.5.7 farm-evaluated source and observed local test HEAD/origin/test
-  at Fix.5.8 startup: `4da101ef2a0f633d3b98f95cc5dbe8f903b94a35`.
+- Accepted Fix.5.8 farm source and observed local test HEAD/origin/test at this
+  closure startup: `2ddeab47d55edb57d2f313022a948c4376730c19`.
+  Bundle `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`:
+  30851374 bytes; SHA-256
+  `966e667b36b2626b5c16f00fc684a099a5d24e5d2015bb547612a1e63eb2a25e`.
+- Prior Fix.5.7 farm source: `4da101ef2a0f633d3b98f95cc5dbe8f903b94a35`.
   Bundle `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-002936-622785.zip`:
   30851202 bytes; SHA-256
   `d39b81544b483f332ae45cb0342aa7d95b2c1931d866cfcb04a52e46449fe38d`.
@@ -94,23 +97,22 @@ evidence or infer scientific/visual acceptance from owner success alone.
 
 ## Next Action
 
-NEXT — after independent ChatGPT Fix.5.8 actual-diff review, user commit/push
-and ChatGPT pushed-state synchronization, one narrow Q4p4W2p74 / Left / lowe
-tracked-owner farm validation, then fresh structural and targeted visual review
-of pages 67,69,71,73,80,87,94,96 and prior baseline-versus-Method-A overlays.
-No farm command is authorized before synchronization; no canonical-five run follows.
+NEXT — after this closing checkpoint's independent actual-diff review, user
+commit/push and pushed-state synchronization, resolve the existing user-deferred
+canonical-five E.8/F.6.3 expansion decision before any additional E.8 farm work.
+If explicitly lifted, create a dedicated contract for the remaining four settings
+and re-establish exact validation scope before any farm command. Otherwise keep
+the expansion `DEFERRED` and select the next approved roadmap item. This
+checkpoint authorizes no farm run and does not lift the deferral.
 
 ## Success Criteria
 
-Only the contracted renderer/formatter and visualization tests change, with
-allowlisted memory/evidence. Preserve all seven flags, six per-child support
-values at .8g precision, stored aggregates, lineage/F.4 statements, all 24
-E.8.4 page records and six blocked SIMC placeholders. Repaired PDF legibility
-requires later structural and targeted visual review, independent of local tests.
-Local required suites ran 131 tests: 113 passed, 18 existing skips
-(4 unavailable-PyROOT, 14 superseded procedure-tail assertions). Two directly
-affected audit suites passed another 40 tests without skips. Independent
-actual-diff review remains pending; local tests establish no repaired farm rendering.
+Record only the accepted narrow structural/visual result and remove consumed
+pre-farm wording from current-state records. Preserve scientific/scope blockers,
+historical chronology and sole CURRENT/NEXT authority. Only allowlisted memory
+and evidence change; manifest, ordinary health and zero-warning health must pass.
+The closing checkpoint still requires independent actual-diff review before
+user-controlled commit/push; Fix.5.8 source synchronization/runtime review is complete.
 
 ## Do Not Reopen Without New Evidence
 
@@ -122,7 +124,8 @@ Narrow Left/lowe evidence does not close canonical-five E.8 or F.6.4.
 ## Relevant References
 
 - [Fix.5.8 contract](phases/e8-4-fix5-8-presentation-legibility-repair-task-contract.md)
-- [Fresh runtime/visual evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
+- [Accepted Fix.5.8 closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
+- [Prior Fix.5.7 evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
 - [Fix.5.7 implementation history](phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md)
 - [Post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
 - [E.8 procedure roadmap](decisions/e8-full-analysis-procedure-roadmap.md)
