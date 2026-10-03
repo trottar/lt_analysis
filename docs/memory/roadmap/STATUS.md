@@ -250,22 +250,32 @@ The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 explanation and Method-A promotion do not follow. CURRENT owns the live gate;
 canonical-five expansion remains `DEFERRED` by user decision.
 
-#### E.8.4 / F.6.3 Left/lowe MM-versus-yield numerical closure
+#### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
-`ACTIVE` — the Q4p4W2p74 / Left / lowe histogram-to-scalar-yield gate remains
-unresolved. Accepted branch execution, signed parent preservation and Fix.5.7/
-Fix.5.8 owner/presentation closures do not prove `MM_0 -> Y0` or `MM_A -> YA`.
-The [post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
-records the direct visual/scalar observation and required producer-owned
-integration/object-identity audit. Signed cancellation remains a hypothesis;
-historical E.8.3/F.6.1 lineage and absolute-SIMC units are separate issues.
+`ACTIVE` — Gate 1 re-anchors Q4p4W2p74 / Left / lowe to scientific validity
+and detector-response origin of the large low-t Method-A redistribution,
+especially global-weight differences and t1 pion-background/yield impact.
+Fail-closed identity checks, prior arithmetic checks and accepted evidence
+support bookkeeping consistency for this purpose; stale scalar/wrong histogram
+is not the primary scientific issue. Accepted branch execution, signed parent
+preservation and Fix.5.7/Fix.5.8 owner/presentation scopes remain intact.
+No detector cause or production correctness is established. Slow-proton event
+probability is analogue-only; no pion probability implementation is approved.
+Absolute-SIMC units remain a separate blocker.
 
-Dependency: accepted Left/lowe branch execution/presentation -> Left/lowe
-MM-versus-yield numerical closure -> only then reconsider canonical-five
-expansion -> final E.8 closure -> F.6.4 explicit production-promotion decision.
+Dependency: accepted Left/lowe branch execution/presentation and arithmetic
+bookkeeping -> Gate 1 initial memory re-anchor -> Gate 2 complete repository-
+memory consistency audit -> Gate 3 complete code/science audit of Method-A
+redistribution and detector-response origin -> Gate 4 final memory audit/
+reconciliation -> only then implementation contract if warranted -> later
+reconsider canonical-five expansion -> final E.8 -> F.6.4 explicit production-
+promotion decision. Gate 2 is the only next executable gate; CURRENT owns exact
+`NEXT`. Gates 1–4 authorize no farm run, scientific-source modification,
+production change, Method-A promotion, numerical Method-B use, canonical-five
+expansion or pion-probability implementation.
 Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
 Method A remains detached/non-production; Method B diagnostic/cross-check only
-and numerically excluded. CURRENT owns exact `NEXT`; no farm run is authorized.
+and numerically excluded. Later audits have not begun in Gate 1.
 
 #### Final E.8 closure
 

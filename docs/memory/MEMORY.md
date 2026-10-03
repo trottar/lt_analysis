@@ -110,6 +110,12 @@ closure against exact producer-owned integration semantics. When fractional
 signed-yield changes appear disproportionate to spectrum overlays, report
 signed integral, positive-bin support, negative-bin support and absolute
 support separately; cancellation is a hypothesis until those numbers exist.
+For the present Left/lowe work item, fail-closed identity checks, prior arithmetic
+checks and accepted narrow evidence support treating bookkeeping as internally
+consistent. Stale scalar/wrong histogram is no longer the primary unresolved
+question. Arithmetic consistency does not validate the scientific origin or
+production correctness of the large low-t Method-A redistribution; detector-
+response validity remains unresolved. The general histogram/scalar rule remains.
 SIMC/data amplitude interpretation requires proven same-cell, same-object,
 same-normalization and same-unit provenance, including the relevant
 integration-window integral. Cloning existing SIMC without renderer scaling

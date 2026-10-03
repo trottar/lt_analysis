@@ -31,15 +31,19 @@ provenance review, and rendered-page inspection.
   canonical-five, F.6.4, production or absolute-SIMC interpretation closure.
   See [Fix.5.8 evidence](e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
 
-The accepted Fix.5.7 owner/checker and Fix.5.8 presentation closures do not
-establish Left/lowe `MM_0 -> Y0` or `MM_A -> YA` histogram-to-scalar-yield
-numerical closure. Accepted F.6.3/E.8.4 branch execution, real child changes and
-signed parent preservation remain intact. The
+Accepted narrow evidence, prior arithmetic checks and current fail-closed
+identity validation support treating Left/lowe histogram/scalar bookkeeping as
+internally consistent for the present re-anchor. Stale scalar/wrong histogram
+is no longer the primary live scientific issue. Accepted Fix.5.7/Fix.5.8 and
+F.6.3/E.8.4 branch execution, real child changes and signed parent preservation
+retain their exact narrow scopes. These closures do not establish detector-
+response origin or scientific validity of the large low-t Method-A redistribution,
+including global-weight differences and t1 pion-background/yield impact. The
 [post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
-supports the direct near-overlapping-spectrum/differing-scalar observation and
-the unresolved producer-owned integration/object-identity audit. The cause is
-not established; signed cancellation remains a hypothesis, and absolute-SIMC
-units remain a separate blocker. CURRENT owns this `ACTIVE` numerical gate.
+preserves earlier observations and audit chronology as history. No new farm
+evidence or causal explanation is claimed; absolute-SIMC units remain separate
+and no Method-A promotion follows. CURRENT owns the `ACTIVE` scientific-validity
+work item and the ordered pre-implementation gates.
 
 ## Historical non-closures and their original scope
 

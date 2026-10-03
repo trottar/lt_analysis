@@ -11,15 +11,18 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The Q4p4W2p74 / Left / lowe MM-versus-yield numerical-closure investigation is
-`ACTIVE`. Accepted execution and presentation evidence did not establish
-`MM_0 -> Y0` or `MM_A -> YA` histogram-to-scalar closure. The
-[post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
-records near-overlapping spectra with stored t1 yields: phi [-180,-140),
-Y0=0.033906 / YA=0.025165; phi [140,180), Y0=0.029873 / YA=0.016411.
-These are observations, not proof of which object is wrong. Signed cancellation
-remains unproven; historical E.8.3/F.6.1 lineage differences do not establish an
-explanation within E.8.4. Absolute-SIMC units remain a separate blocker.
+Gate 1 is `ACTIVE`: Q4p4W2p74 / Left / lowe Method-A scientific validity and
+detector-response origin. Re-examined bookkeeping shows no established stale-
+scalar/wrong-histogram defect as the main issue. Fail-closed E.8.4 checks, prior
+arithmetic and accepted evidence support internally consistent bookkeeping for
+this purpose, not production correctness. Strong global-weight differences and
+large low-t/t1 pion-background/yield impact remain unresolved. HGCer/detector-
+response science is the investigation subject; no cause is accepted.
+
+Slow-proton event probability is analogue-only for a future rigorous pion
+HGCer-response/contamination-probability framework. Separate response, parent
+normalization, event/child redistribution, training/application populations and
+geometry/global weights. No code reuse or pion probability implementation is approved.
 
 [E.8.4 Fix.5.8](phases/e8-4-fix5-8-presentation-legibility-repair.md) is
 `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
@@ -28,8 +31,8 @@ recorded in [fresh Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-clos
 
 Fix.5.7 is `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
 owner/checker setting-provenance repair through collection/final ZIP verification.
-Its source synchronization and farm gate are complete per the supplied
-independent review in the [fresh evidence record](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md).
+Synchronization and farm gate are complete per supplied
+[review](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md).
 
 Workflow hardening is `SOURCE REVIEWED`, synchronized through
 `8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. Fix.5.4/Fix.5.5 source reviews remain
@@ -57,7 +60,7 @@ and current F.6.3/E.8.4 are distinct lineages; no authority replacement follows.
 ## Source / Evidence Identity
 
 - Observed local test HEAD/origin/test at re-anchor startup:
-  `5addf32433d61e94391fd31dc454b3628b026735`; not permanent source authority.
+  `222af982c567078b8ddf804b5762cb42cc991e32`; not permanent source authority.
 - Accepted Fix.5.8 farm source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
   Bundle `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`:
   30851374 bytes; SHA-256
@@ -73,8 +76,8 @@ and current F.6.3/E.8.4 are distinct lineages; no authority replacement follows.
 - Reviewed Fix.5.5 presentation source: `df957a6414fc9c515d1f82228517cb801dc90350`;
   reviewed Fix.5.4 numerical source: `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`.
 - Earlier supplied Fix.5 render/farm source: `f9d70732290ea461096374ca1270b47452644991`;
-  failed-gate diagnostic PDF/manifest and exact unknown older ZIP failure remain
-  historical in the [investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
+  failed artifacts and unknown older ZIP failure remain historical in the
+  [investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
 - Earlier accepted Left/lowe source: `da38444e7aa60efd62d6638780776344daf40276`;
   ZIP SHA-256 `200fda66fe410274df1c9a8252b9e87114d8fd10a520fb7d71691ec6b3772874`.
   Its candidate identities and post-run model-output caveat remain unchanged.
@@ -90,11 +93,11 @@ Ncontribute has no source-proven luminosity/effective-charge units. Preserve
 available current-F.6.3 data/identity/yield/closure payloads; only the two
 absolute-SIMC page families/claims are unavailable with literal provenance.
 No wrong normalization, conversion or amplitude conclusion is established.
-Left/lowe MM/yield closure requires exact runtime object identity and producer-
-owned integration window, selected bins, flow treatment, factors/units and sign
-convention for every populated canonical child. Signed integral, positive-bin,
-negative-bin and absolute support must be reported separately; stored support
-and local tests do not establish cancellation or numerical closure.
+Separately, scientific validity and detector-response origin of the large
+low-t Method-A redistribution remain `BLOCKED` pending the ordered audits.
+Bookkeeping consistency does not prove HGCer inefficiency, PMT/mirror/track
+geometry, a contamination probability or production correctness. No cause or
+signed-cancellation explanation is accepted by this re-anchor.
 
 Keep no_empirical_residual and zero legacy residual scales. Method A remains
 detached/non-production; Method B diagnostic/cross-check only and numerically
@@ -105,20 +108,24 @@ scientific/visual acceptance.
 
 ## Next Action
 
-NEXT — after independent actual-diff review, user commit/push and pushed-state
-synchronization, undertake a dedicated source/runtime-path audit under its own
-reviewed contract of exact Q4p4W2p74 / Left / lowe histogram-to-scalar-yield
-provenance and producer-owned integration semantics. Resolve `MM_0 -> Y0` and
-`MM_A -> YA` numerical closure before reconsidering canonical-five broadening.
+NEXT — after Gate 1 actual-diff review, user commit/push and synchronization:
+Gate 2 — complete repository-memory consistency audit, before code/science
+audit or any implementation contract.
+Sequence: Gate 1 — initial memory re-anchor ->
+Gate 2 — complete repository-memory consistency audit ->
+Gate 3 — complete code/science audit ->
+Gate 4 — final memory audit/reconciliation -> only then — implementation contract.
+Gates 1–4 authorize no farm run, scientific-source modification, production
+change, Method-A promotion, numerical Method-B use, canonical-five expansion
+or pion-probability implementation. Gate 2 has not begun.
 Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
-This re-anchor authorizes no farm run or scientific-source change.
 
 ## Success Criteria
 
-Restore unresolved Left/lowe numerical closure and sole substantive `NEXT`;
-preserve accepted closures, ownership and separate blockers. Only allowlisted
-memory changes; manifest, ordinary/zero-warning health and diff checks must
-pass. Independent actual-diff review precedes user commit/push.
+Distinguish arithmetic integrity from Method-A scientific validity; Gate 2 is
+sole substantive `NEXT`. Preserve accepted closures, ownership and separate
+blockers. Only allowlisted memory changes; manifest, ordinary/zero-warning
+health and diff checks must pass. Independent actual-diff review precedes push.
 
 ## Do Not Reopen Without New Evidence
 
@@ -129,10 +136,8 @@ Narrow Left/lowe evidence does not close canonical-five E.8 or F.6.4.
 
 ## Relevant References
 
-- [Memory re-anchor contract](phases/e8-4-left-lowe-mm-yield-closure-memory-reanchor-task-contract.md)
-- [Fix.5.8 contract](phases/e8-4-fix5-8-presentation-legibility-repair-task-contract.md)
+- [Gate 1 contract](phases/e8-4-left-lowe-method-a-scientific-validity-memory-reanchor-task-contract.md)
 - [Accepted Fix.5.8 closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
 - [Prior Fix.5.7 evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
-- [Fix.5.7 implementation history](phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md)
 - [Post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
 - [E.8 procedure roadmap](decisions/e8-full-analysis-procedure-roadmap.md)
