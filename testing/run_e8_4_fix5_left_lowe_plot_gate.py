@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from collections.abc import Mapping
 from contextlib import contextmanager, redirect_stdout
 from datetime import datetime, timezone
 import hashlib
@@ -160,7 +161,12 @@ def run_analysis(repo, log_path):
 
 def verify_pages(payload):
     require(payload.get("schema_version") == "full_background_subtraction_page_manifest/v1", "page_manifest_schema_invalid")
-    require(payload.get("setting") == {"kinematic_token": KINEMATIC, "epsilon_filename_token": "lowe", "phi_setting": "Left", "particle_type": "kaon"}, "page_manifest_setting_invalid")
+    setting = payload.get("setting")
+    expected_setting = {"kinematic_token": KINEMATIC, "epsilon_filename_token": "lowe",
+                        "phi_setting": "Left", "particle_type": "kaon", "epsilon_setting": "low"}
+    require(isinstance(setting, Mapping) and
+            all(setting.get(key) == value for key, value in expected_setting.items()),
+            "page_manifest_setting_invalid")
     require(payload.get("pdf_basename") == PDF, "page_manifest_pdf_invalid")
     require(payload.get("renderer_failures") == [], "renderer_failures_nonempty")
     pages = payload.get("pages")

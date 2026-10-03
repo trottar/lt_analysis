@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8190,
+      "bytes": 8593,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "0c0b2f9645ae10df33fc746510df24c88f1a7cd76c8d8be701f8c2b2383548cf"
+      "sha256": "1ec0cac10d13ca192680175f8de2cc3ba2adc49046aa4674f6864bd6ec4d4aab"
     },
     {
       "bytes": 5934,
@@ -331,9 +331,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 20198,
+      "bytes": 21212,
       "path": "docs/memory/investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md",
-      "sha256": "e5823b7be71284a5f6a66a14c03ecc36ca881eb63eb87e84c209e53a2532e6b5"
+      "sha256": "2ab1b61aa543816f74806ba183a30c19678b241417e1d2c9aba1bebd722b0cad"
     },
     {
       "bytes": 2081,
@@ -679,6 +679,16 @@
       "bytes": 6681,
       "path": "docs/memory/phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md",
       "sha256": "116cc1062018aa5fe99cd4172e4e29ff749609c4a6f1591b3ad71f01303607bb"
+    },
+    {
+      "bytes": 17151,
+      "path": "docs/memory/phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair-task-contract.md",
+      "sha256": "6c39584b0d864165efe6718b9e1667c8ec51673ad467151448fb4b7371c3ef47"
+    },
+    {
+      "bytes": 4777,
+      "path": "docs/memory/phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md",
+      "sha256": "ffeda9077e2f6e376066648b83adc2c1a4df7b6708eb9a969d09c9a782849f7f"
     },
     {
       "bytes": 28512,

@@ -11,6 +11,12 @@ upstream authorities, and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+[E.8.4 Fix.5.7](phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. SOURCE VERIFIED: owner
+exact-four-key equality rejected valid full checkpoint provenance. The verifier
+and real producer-interface tests are repaired; all science remains frozen.
+Independent actual-diff and pushed-state reviews remain pending.
+
 [E.8.4 Fix.5.6](phases/e8-4-fix5-6-owner-farm-readiness-and-failure-provenance.md)
 is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: its pushed source had
 independent actual-diff and pushed-state review before the supplied farm
@@ -23,8 +29,8 @@ pending.
 is `SOURCE REVIEWED`; pushed-state synchronization passed through
 `8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`. ChatGPT Project instructions and
 `KaonLT_Environment.md` are updated externally (per closure contract).
-Science is paused until explicit user resumption; no farm/runtime acceptance
-follows.
+The user has explicitly resumed only the Fix.5.7 owner/checker repair;
+no farm/runtime acceptance follows.
 
 Fix.5.5 source is `SOURCE REVIEWED` at
 `df957a6414fc9c515d1f82228517cb801dc90350`; independent ChatGPT actual-diff
@@ -105,23 +111,22 @@ source checks. The latest supplied Fix.5.6 attempt completed its analysis child
 The generated PDF/manifest are failed-gate diagnostic artifacts, not accepted
 validation evidence. These continuity facts are supplied by the hardening
 contract; raw attempt artifacts were not independently reopened here.
-This task does not diagnose the failure, authorize a rerun or packaging, or
-permit scientific interpretation, canonical-five closure, production change
-or Method-A promotion.
+Fix.5.7 diagnoses and repairs only the source-proven setting-interface mismatch;
+it authorizes no farm rerun, failed-artifact packaging, scientific interpretation,
+canonical-five closure, production change or Method-A promotion.
 
 ## Next Action
 
-NEXT — when the user explicitly resumes scientific work, diagnose the exact
-`page_manifest_setting_invalid` failure and corresponding page/payload provenance
-before any rerun, packaging or scientific interpretation. Preserve the SIMC
-absolute-unit blocker; this closure authorizes no farm command or execution.
+NEXT — after independent Fix.5.7 actual-diff review, user commit/push and ChatGPT
+pushed-state synchronization, run one narrow Q4p4W2p74 / Left / lowe tracked-owner
+farm gate and review fresh status/ZIP/log/PDF/manifest evidence. No farm command
+is authorized before those synchronization gates. Preserve the SIMC unit blocker.
 
 ## Success Criteria
 
-Prior local Fix.5.6: 66 tests passed, no skips; syntax/diff, scoped 199-file
-manifest and ordinary memory health passed without warnings/hard failures.
-Published workflow hardening confers no scientific/runtime acceptance. Closure
-requires deterministic checks and independent actual-diff review.
+Fix.5.7 local required suites: 159 tests, 141 passed, 18 existing skips
+(4 unavailable-PyROOT, 14 superseded procedure-tail assertions). In-memory syntax
+and diff checks pass. Independent actual-diff review is still required.
 Source and deterministic tests do not establish farm filesystem/permissions,
 ROOT/PyROOT, full analysis, ZIP delivery, PDF legibility, numerical closure or
 observed signed cancellation. All scientific/presentation source is frozen.

@@ -7,6 +7,7 @@ import io
 import json
 import os
 import re
+import sys
 from pathlib import Path
 import tempfile
 import time
@@ -19,6 +20,23 @@ from testing import run_e8_4_fix5_left_lowe_plot_gate as owner
 ROOT = Path(__file__).resolve().parents[1]
 SHA = "a" * 40
 
+for relative_path in ("src/cuts", "src/utility"):
+    path = str(ROOT / relative_path)
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+import full_background_subtraction_plots as plots
+import pion_hgcer_refinement_checkpoint as checkpoint
+
+
+def producer_setting():
+    return checkpoint.build_pion_hgcer_refinement_checkpoint(
+        setting={"kinematic_token": owner.KINEMATIC, "Q2": 4.4, "W": 2.74,
+                 "epsilon_setting": "low", "epsilon_filename_token": "lowe",
+                 "phi_setting": "Left", "particle_type": "kaon"},
+        phase_a={}, method_a={}, method_b={},
+    )["setting"]
+
 
 def pages():
     records = [{"page_id": page_id, "scope": scope} for page_id, scope in owner.CRITICAL_PAGES]
@@ -28,9 +46,10 @@ def pages():
         else:
             records.append({"page_id": page_id, "scope": page_id[-2:], "t_index": int(page_id[-1]) - 1,
                             "represented_phi_inventory": [{"phi_index": i, "phi_edges": [-180 + i * 40, -140 + i * 40]} for i in range(9)]})
-    return {"schema_version": "full_background_subtraction_page_manifest/v1",
-            "setting": {"kinematic_token": owner.KINEMATIC, "epsilon_filename_token": "lowe", "phi_setting": "Left", "particle_type": "kaon"},
-            "pdf_basename": owner.PDF, "pages": records, "renderer_failures": []}
+    return plots.build_full_background_subtraction_page_manifest_artifact(
+        setting=producer_setting(), pdf_basename=owner.PDF,
+        pages=records, renderer_failures=[],
+    )
 
 
 def git_fixture(repo, *args):
@@ -42,6 +61,37 @@ def git_fixture(repo, *args):
 
 
 class OwnerTests(unittest.TestCase):
+    def test_current_checkpoint_to_manifest_to_owner_preserves_provenance(self):
+        data = pages()
+        before = deepcopy(data)
+        self.assertEqual(data["setting"], producer_setting())
+        self.assertEqual(data["setting"]["Q2"], 4.4)
+        self.assertEqual(data["setting"]["W"], 2.74)
+        self.assertEqual(data["setting"]["epsilon_setting"], "low")
+        self.assertEqual(owner.verify_pages(data), len(data["pages"]))
+        self.assertEqual(data, before)
+
+    def test_wrong_or_missing_setting_identity_fails_closed(self):
+        for key, wrong in (("kinematic_token", "Q3p0W2p32"),
+                           ("epsilon_filename_token", "highe"), ("phi_setting", "Right"),
+                           ("particle_type", "pion"), ("epsilon_setting", "high")):
+            for missing in (False, True):
+                data = pages()
+                if missing:
+                    del data["setting"][key]
+                else:
+                    data["setting"][key] = wrong
+                before = deepcopy(data)
+                with self.subTest(key=key, missing=missing), self.assertRaisesRegex(
+                        ValueError, "^page_manifest_setting_invalid$"):
+                    owner.verify_pages(data)
+                self.assertEqual(data, before)
+        for invalid in (None, [], "low", 4):
+            data = pages(); data["setting"] = invalid
+            with self.subTest(setting=invalid), self.assertRaisesRegex(
+                    ValueError, "^page_manifest_setting_invalid$"):
+                owner.verify_pages(data)
+
     def test_real_owner_invokes_debug_launcher_with_non_destructive_cleanup_guard(self):
         tree = ast.parse((ROOT / "testing/run_e8_4_fix5_left_lowe_plot_gate.py").read_text(encoding="utf-8"))
         run = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "run_analysis")
@@ -94,6 +144,7 @@ class OwnerTests(unittest.TestCase):
 
     def test_new_ids_duplicates_failures_and_old_pages_fail_closed(self):
         for mutation, reason in (
+            (lambda data: data.update(schema_version="wrong"), "page_manifest_schema_invalid"),
             (lambda data: data["pages"].pop(), "new_page_missing_or_duplicate"),
             (lambda data: data["pages"].append(deepcopy(data["pages"][-1])), "new_page_missing_or_duplicate"),
             (lambda data: data.update(renderer_failures=["failed"]), "renderer_failures_nonempty"),
@@ -101,6 +152,7 @@ class OwnerTests(unittest.TestCase):
             (lambda data: data.update(pdf_basename="wrong.pdf"), "page_manifest_pdf_invalid"),
             (lambda data: data["pages"][-2].update(represented_phi_inventory=[]), "new_page_child_inventory_invalid"),
             (lambda data: data["pages"][-2].update(scope="setting"), "new_page_scope_invalid"),
+            (lambda data: data["pages"][-2].update(t_index=99), "new_page_t_identity_invalid"),
             (lambda data: data["pages"][-1].update(scope="t1"), "parent_closure_scope_invalid"),
         ):
             data = pages(); mutation(data)

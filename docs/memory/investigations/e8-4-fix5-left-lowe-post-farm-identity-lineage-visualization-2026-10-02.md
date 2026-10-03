@@ -1,5 +1,19 @@
 # E.8.4 Fix.5 Left/lowe post-farm identity, lineage and visualization — 2026-10-02
 
+## Fix.5.7 source-proven owner integration mismatch
+
+SOURCE VERIFIED at starting `test` HEAD `cdc6ead47be3c46987a8418b796d07d87b80f829`:
+the checkpoint producer's full setting mapping reaches the page-manifest builder;
+owner exact-four-key equality rejects the additional Q2/W/semantic-epsilon
+provenance. The old four-key owner fixture masked that interface mismatch.
+[Fix.5.7](../phases/e8-4-fix5-7-page-manifest-setting-provenance-owner-repair.md)
+repairs the verifier/tests only, preserving full metadata and requiring exact
+gate identity including semantic low epsilon. This explains the source mechanism
+for the supplied Fix.5.6 `verify_artifacts/page_manifest_setting_invalid` failure;
+raw failed-attempt artifacts were not independently reopened here. Earlier
+unknown ZIP failures and all numerical/visual hypotheses below remain separate.
+No failed artifact is promoted to accepted evidence; no farm rerun occurs.
+
 ## Reviewed numerical source and Fix.5.5 presentation checkpoint
 
 The supplied Fix.5.5 contract records independent ChatGPT actual-diff and
@@ -343,7 +357,8 @@ are complete at their recorded identities; numerical and visual farm closure
 remain pending. Fix.5.6 local owner repair is complete with 66 tests passed,
 no skips; its phase record owns verification details.
 
-NEXT — Fix.5.6 actual-diff review -> user commit/push -> pushed-state review ->
-one narrow Q4p4W2p74 / Left / lowe tracked-owner farm gate -> fresh
-ZIP/status/log/PDF/manifest evidence review. No commit, push or farm execution
-occurs here. The previous exact ZIP failure remains undiagnosed. CURRENT owns NEXT.
+Fix.5.6's supplied attempt failed the page-setting gate before collection/ZIP;
+Fix.5.7 now completes the narrow source repair and deterministic interface tests.
+CURRENT owns NEXT: after Fix.5.7 independent actual-diff review, user commit/push
+and pushed-state synchronization, one narrow tracked-owner Left/lowe farm gate
+and fresh evidence review. No farm command is authorized before synchronization.
