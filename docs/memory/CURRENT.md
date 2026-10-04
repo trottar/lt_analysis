@@ -11,14 +11,19 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The external PID/background-methods research memory checkpoint is `ACTIVE` for
-Q4p4W2p74 / Left / lowe Method-A scientific validity. Gates 1–4 are consumed.
-The external review was explicitly user-authorized and is completed enough to
-alter planning; no implementation or new farm evidence occurred. The
-[research investigation](investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md)
-preserves stable bibliography, source hierarchy and access limitations. Prior
-[Gate-3 findings](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
-remain separate from EXTERNAL LITERATURE.
+The external research checkpoint and Gates 1–4 are consumed. The detached
+current-lineage diagnostic is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`
+for Q4p4W2p74 / Left / lowe under the
+[diagnostic contract](phases/e8-4-left-lowe-method-a-current-lineage-diagnostic-measurement-task-contract.md).
+Separate aggregate measurements characterize (1) F.3 weak-positive HGC response
+as candidate relative pion-to-kaon mis-ID topology evidence and (2) F.4 signed-
+normalization sensitivity, with signed/absolute support and source decomposition.
+Exact current F.6.3 authority and complete shared F.4 payload reproduction are
+required before either measurement.
+
+SOURCE VERIFIED: consumed F.1/F.3/F.4 provide no HGC-free true-pion tag. Direct
+mis-ID calibration and proxy validity remain NOT VERIFIED. Synthetic tests and
+eight-page JSON/PDF rendering passed; no new farm evidence was produced.
 
 Stale scalar/wrong histogram is not the primary scientific issue. Fail-closed
 checks, prior arithmetic and accepted narrow evidence support bookkeeping
@@ -26,13 +31,11 @@ consistency for this purpose, not production correctness. Large low-t/t1
 redistribution, global-weight differences and pion-background/yield impact
 remain scientifically unresolved.
 
-EXTERNAL LITERATURE: the strongest planning lesson is to separate sample
-purification, detector response, accepted `w0` physics transfer and normalization/
-preservation. No external method validates a specific KaonLT correction.
-F.4 signed normalization is a priority diagnostic question, not a proven defect.
-Test F.3 weak-positive response as a relative pion-to-kaon mis-ID topology proxy.
-HGC-free pion tagging is preferred if available; truncated/censored models are
-optional model-dependent cross-checks.
+EXTERNAL LITERATURE remains separate in the
+[research investigation](investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md).
+Purification, response, `w0` transfer and preservation have distinct ownership.
+HGC-free tagging is preferred if available; truncated/censored models are
+optional cross-checks. No external method validates a KaonLT correction.
 
 ## Verified State
 
@@ -68,8 +71,8 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
-- Observed research-checkpoint startup branch `test`, HEAD/local `origin/test`:
-  `f7934f459b42b190235ffc63e486e7ba0e068e79`; timestamped observation,
+- Observed diagnostic-task startup branch `test`, HEAD/local `origin/test`:
+  `6542bba01946e370842566f24e2c8861071ecd09`; timestamped observation,
   not permanent source or farm authority.
 - Accepted Fix.5.8 farm source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
   ZIP `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`,
@@ -104,23 +107,21 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after independent review, user commit/push and pushed-state
-synchronization: define a detached current-lineage diagnostic-measurement
-contract with separate tests of (1) F.3 weak-positive response as a relative
-pion-to-kaon mis-ID topology proxy across hgcer3 and (2) Left/lowe t1 F.4
-signed-normalization sensitivity, before correction redesign or production.
+NEXT — after independent actual-diff review, user commit/push and pushed-state
+synchronization: run one narrow Q4p4W2p74 / Left / lowe farm diagnostic gate to
+produce the current-lineage diagnostic JSON/PDF, then review the measurements
+before any method-selection or correction-design decision. Separate farm
+readiness review is required; no farm command is authorized here.
 
-This checkpoint records research; it authorizes no farm run, scientific-source
-modification, correction choice or diagnostic implementation contract here.
 Canonical-five expansion remains `DEFERRED` by user decision; final E.8/F.6.4
 remain `BLOCKED`.
 
 ## Success Criteria
 
-Compact allowlisted memory preserves consumed gates, stable external sources,
-evidence distinctions and accepted narrow scopes. Manifest, ordinary memory
-health and diff checks must pass; independent actual-diff review and
-user-controlled synchronization remain required.
+Diagnostic tests, F.6.3/F.4/analyzer regressions, compilation, manifest, ordinary
+memory health and complete-diff checks must pass. Local checks do not validate
+farm execution or science; independent actual-diff review and user-controlled
+synchronization remain required.
 
 ## Do Not Reopen Without New Evidence
 

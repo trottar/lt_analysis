@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8130,
+      "bytes": 8097,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "89d14483906658db3564468b3be026b534e13b8c86585fc39566074b094d5925"
+      "sha256": "165136c1cb212f2c0593bb298561bbf93f4197930799027543e0641e982a1e3c"
     },
     {
       "bytes": 5934,
@@ -736,6 +736,11 @@
       "sha256": "b531bce18db2688e7ed699b8bd149520b6751baaf642ae8faa8aee872a5812e0"
     },
     {
+      "bytes": 32815,
+      "path": "docs/memory/phases/e8-4-left-lowe-method-a-current-lineage-diagnostic-measurement-task-contract.md",
+      "sha256": "f5d70d1e5e6205d0d076f924556028744b37e491f298b5c1d251e777b32361da"
+    },
+    {
       "bytes": 26706,
       "path": "docs/memory/phases/e8-4-left-lowe-method-a-external-pid-background-methods-research-memory-task-contract.md",
       "sha256": "7d6ec4225305bf50b526d0437ce5ea015c9d787a72b7fbba66ff5c9bc22f9431"
@@ -1046,9 +1051,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 21929,
+      "bytes": 21984,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "0d21015c55a54bd7174bad19eec72680cb295f4694c691a8cb35ebd24cdaef25"
+      "sha256": "7ee52ab7378e8d24182521954588364b9626ce3f09f4588eb85864b34caa3157"
     },
     {
       "bytes": 1698,

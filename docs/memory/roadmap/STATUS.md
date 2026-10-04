@@ -265,9 +265,10 @@ Absolute-SIMC units remain a separate blocker.
 
 Dependency: accepted Left/lowe evidence -> Gates 1–4 consumed -> external
 analogous-experiment / PID-background methods review consumed -> detached
-current-lineage diagnostic-measurement contract -> evidence-based method-selection
-decision -> implementation contract only if warranted -> later canonical-five
-reconsideration -> final E.8 -> F.6.4 explicit production-promotion decision.
+current-lineage diagnostic implementation -> narrow Left/lowe farm diagnostic
+measurement -> scientific interpretation / method-selection decision ->
+implementation contract only if warranted -> later canonical-five reconsideration
+-> final E.8 -> F.6.4 explicit production-promotion decision.
 CURRENT owns exact `NEXT`. The user-authorized external review is recorded in
 the [research investigation](../investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md);
 no external method validates a KaonLT correction. The response question is F.3
