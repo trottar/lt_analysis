@@ -114,8 +114,17 @@ For the present Left/lowe work item, fail-closed identity checks, prior arithmet
 checks and accepted narrow evidence support treating bookkeeping as internally
 consistent. Stale scalar/wrong histogram is no longer the primary unresolved
 question. Arithmetic consistency does not validate the scientific origin or
-production correctness of the large low-t Method-A redistribution; detector-
-response validity remains unresolved. The general histogram/scalar rule remains.
+production correctness of Method-A redistribution. The accepted current-lineage
+[Left/lowe diagnostic](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
+now measures t1 signed/absolute support, source decomposition, finite response/
+correction tails, child/MM redistribution, coordinate dependence and support/OOD.
+Its ~-1.02% signed-versus-positive-support normalization difference, ~0.106% OOD
+fraction, exact matched control populations and zero recorded parent residual
+do not support strong normalization pathology, broad OOD or population mismatch
+as explanations of t1. INFERENCE: with accepted F.6.2 acceptance/MM validation
+and comparator t1 continuity, no correction redesign is warranted by this
+diagnostic. Direct absolute calibration and hardware cause remain NOT VERIFIED;
+the general histogram/scalar rule remains.
 SIMC/data amplitude interpretation requires proven same-cell, same-object,
 same-normalization and same-unit provenance, including the relevant
 integration-window integral. Cloning existing SIMC without renderer scaling
@@ -213,7 +222,9 @@ preserves the evidence and limits behind these durable constraints:
 - Signed parent-preserving normalization is not a positive probability-measure
   normalization. Where cancellation can matter, explicitly decompose signed
   and absolute support, source classes and response/correction tails. Possible
-  amplification is an inference, not an accepted explanation of Left/lowe t1.
+  amplification requires measurement, not an assumed explanation. The accepted
+  Left/lowe t1 diagnostic measured only ~1.02% signed-versus-positive-support
+  normalization contrast and supports no strong signed-normalization pathology.
 - NPE=0 is the operational kaon PID category, NPE>0 the pion tree and NPE>2
   physical pion control. P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
   the kaon-selected sample, not an observed pion class. Existing zero-photoelectron
@@ -225,8 +236,20 @@ preserves the evidence and limits behind these durable constraints:
   true-pion mis-ID into the kaon-selected sample.
 - Accepted current-baseline comparator evidence reproduced F.2/F.3 scientific
   payloads exactly, with F.4 the first scientifically changed stage. This
-  concentrates the present question at relative response, physical application,
-  baseline transfer and signed parent normalization; it establishes no cause.
+  records floating-point-scale t1 F.4 differences versus substantive t0/t2
+  changes. Accepted F.6.2 is acceptance-correlated refinement validation using
+  normalized shapes, independent `SHMS_xptar`/`SHMS_yptar`, phi/MM and MM x
+  acceptance localization, support/OOD, effective statistics, fixed kaon-window
+  pion-change metrics and paired bootstrap intervals. That accepted evidence
+  remains directly relevant to current t1 through this continuity; t0/t2 must
+  not automatically inherit the exact t1 claim. No specific hardware cause or
+  production promotion follows.
+- Lack of an HGC-free true-pion tag in consumed F.1/F.3/F.4 limits direct absolute
+  `P(NPE=0 | true pion,x)` calibration and unique weak-positive-to-zero-response
+  proxy claims. It does not invalidate accepted relative acceptance-correlated
+  refinement. RF can corroborate where experimentally available at low epsilon;
+  high-epsilon data lack RF, so it is not a universal Method-A requirement. The
+  accepted returned diagnostic did not perform RF corroboration.
 
 ### External PID/background-methods lessons
 
@@ -240,7 +263,7 @@ is EXTERNAL LITERATURE and planning inference, not KaonLT runtime evidence:
   population measure, with calibration/application support, composition,
   detector coordinates and run-condition matching checked. This design lesson
   does not approve replacing KaonLT's signed parent-preservation rule.
-- The primary response question is whether F.3 weak-positive pion response
+- The external review's absolute-proxy question is whether F.3 weak-positive pion response
   (0<NPE<=2 versus >2) is a valid relative proxy for pion-to-kaon HGC mis-ID
   topology across hgcer3. Independent HGC-free pion tagging is the preferred
   direct calibration if available. Zero-truncated/censored response models are
@@ -249,10 +272,11 @@ is EXTERNAL LITERATURE and planning inference, not KaonLT runtime evidence:
 - Coupled cross-species PID may require a response/confusion matrix; its
   calibration, unidentified state and uncertainty propagation must be explicit.
   Literature does not mandate a KaonLT matrix or correction.
-- External methods make F.4 signed normalization a priority diagnostic target,
-  not a proven defect or accepted explanation of t1. Measure current-lineage
-  sensitivity separately from weak-positive proxy validity before choosing a
-  correction.
+- External methods motivated separate F.4 signed-normalization measurements,
+  not a proven defect or explanation of t1. The accepted current-lineage diagnostic
+  supplies those measurements without establishing direct absolute proxy validity
+  or warranting a replacement correction. Literature remains distinct from
+  accepted KaonLT runtime evidence.
 
 ## Canonical record ownership
 

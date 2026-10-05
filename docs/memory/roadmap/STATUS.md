@@ -252,42 +252,30 @@ canonical-five expansion remains `DEFERRED` by user decision.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
-`ACTIVE` — the external-methods research memory checkpoint records a diagnostics-first direction for Q4p4W2p74 / Left / lowe scientific validity
-and detector-response origin of the large low-t Method-A redistribution,
-especially global-weight differences and t1 pion-background/yield impact.
-Fail-closed identity checks, prior arithmetic checks and accepted evidence
-support bookkeeping consistency for this purpose; stale scalar/wrong histogram
-is not the primary scientific issue. Accepted branch execution, signed parent
-preservation and Fix.5.7/Fix.5.8 owner/presentation scopes remain intact.
-No detector cause or production correctness is established. Slow-proton event
-probability is analogue-only; no pion probability implementation is approved.
-Absolute-SIMC units remain a separate blocker.
+`CLOSED / RUNTIME VALIDATED` — only for the detached Q4p4W2p74 / Left / lowe
+current-lineage diagnostic measurement gate, not production correctness or
+promotion. The [accepted diagnostic evidence](../evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
+records the independently accepted JSON/PDF and consumed scientific interpretation.
+INFERENCE: measured normalization, support and population matching, together
+with accepted F.6.2 acceptance/MM validation and floating-point-scale t1 F.4
+continuity, warrant no correction-design implementation for t1. Current t0/t2
+have substantive F.4 changes and do not inherit that exact continuity claim.
+Direct absolute mis-ID calibration, hardware cause and RF corroboration remain
+NOT VERIFIED. Historical closed F-stage, branch and owner/presentation scopes
+remain intact; absolute-SIMC units remain a separate blocker.
 
-Dependency: accepted Left/lowe evidence -> Gates 1–4 consumed -> external
-analogous-experiment / PID-background methods review consumed -> detached
-current-lineage diagnostic implementation -> narrow Left/lowe farm diagnostic
-measurement -> scientific interpretation / method-selection decision ->
-implementation contract only if warranted -> later canonical-five reconsideration
--> final E.8 -> F.6.4 explicit production-promotion decision.
-CURRENT owns exact `NEXT`. The user-authorized external review is recorded in
-the [research investigation](../investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md);
-no external method validates a KaonLT correction. The response question is F.3
-weak-positive (0<NPE<=2 versus >2) proxy validity for relative pion-to-kaon HGC
-mis-ID topology across hgcer3; F.4 signed-normalization sensitivity is a separate
-diagnostic question, not a proven defect. NPE=0 is the kaon PID category, NPE>0
-the pion tree and NPE>2 physical pion control. HGC-free pion tagging is preferred
-if available; truncated/censored models are optional model-dependent cross-checks.
-This memory checkpoint and Gates 1–4 authorize no farm run, scientific-source modification,
-production change, Method-A promotion, numerical Method-B use, canonical-five
-expansion or pion-probability implementation.
-Expansion remains `DEFERRED` by user decision; final E.8/F.6.4 remain `BLOCKED`.
-Method A remains detached/non-production; Method B diagnostic/cross-check only
-and numerically excluded. Gate 2 found no blocking memory contradiction; its
-nonblocking historical drift outside the Gate-4 allowlist remains historical.
-Gate 3 supplied no new farm evidence or detector cause. Its
-[source/science investigation](../investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
-preserves relative-response/absolute-probability distinctions and signed
-normalization as a possible sensitivity mechanism, not an accepted explanation.
+Dependency: Gates 1–4 and external review consumed -> diagnostic implementation,
+narrow Left/lowe farm measurement and scientific interpretation consumed
+(no correction-design implementation warranted) -> later current-lineage
+canonical-five reconsideration (`DEFERRED` by user decision) -> final E.8
+(`BLOCKED`) -> F.6.4 explicit production-promotion decision (`BLOCKED`).
+CURRENT owns the exact next action. Lifting the expansion deferral requires
+explicit user authorization, then an exact five-setting current-lineage
+authority/validation audit before any implementation or farm contract. This
+closure authorizes no source/farm work or production promotion. Method A remains
+detached/non-production; Method B diagnostic/cross-check only and numerically
+excluded. RF is possible corroboration at low epsilon only, not a universal
+Method-A requirement.
 
 #### Final E.8 closure
 

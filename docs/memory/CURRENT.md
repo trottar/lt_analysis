@@ -11,49 +11,50 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The external research checkpoint and Gates 1–4 are consumed. The detached
-current-lineage diagnostic is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`
-for Q4p4W2p74 / Left / lowe under the
-[diagnostic contract](phases/e8-4-left-lowe-method-a-current-lineage-diagnostic-measurement-task-contract.md).
-Separate aggregate measurements characterize (1) F.3 weak-positive HGC response
-as candidate relative pion-to-kaon mis-ID topology evidence and (2) F.4 signed-
-normalization sensitivity, with signed/absolute support and source decomposition.
-Exact current F.6.3 authority and complete shared F.4 payload reproduction are
-required before either measurement.
+The detached current-lineage diagnostic is `CLOSED / RUNTIME VALIDATED` only
+for Q4p4W2p74 / Left / lowe, parents t0/t1/t2, primary target t1. The
+[accepted evidence checkpoint](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
+records user-supplied JSON/PDF independently accepted by ChatGPT before this
+Codex closure; Codex did not rerun or independently revalidate the artifacts.
+The external research checkpoint, Gates 1–4, narrow farm measurement and
+scientific interpretation gate are consumed.
 
-SOURCE VERIFIED: consumed F.1/F.3/F.4 provide no HGC-free true-pion tag. Direct
-mis-ID calibration and proxy validity remain NOT VERIFIED. Synthetic tests and
-eight-page JSON/PDF rendering passed; no new farm evidence was produced.
+RUNTIME VERIFIED (accepted review): exact current F.1/F.3/F.4 authority and
+shared F.4 reproduction passed, as did the eight-page PDF review. Training-control
+and physical-control identities match exactly (10716/18749/22356); t1 signed
+versus positive-support normalization differs by -1.02%, parent closure residual
+is 0.0, and only 21 of 19809 application records are OOD (~0.106%). Signed/absolute
+support, source decomposition, finite tails and child/MM/coordinate dependence
+are now measured.
 
-Stale scalar/wrong histogram is not the primary scientific issue. Fail-closed
-checks, prior arithmetic and accepted narrow evidence support bookkeeping
-consistency for this purpose, not production correctness. Large low-t/t1
-redistribution, global-weight differences and pion-background/yield impact
-remain scientifically unresolved.
-
-EXTERNAL LITERATURE remains separate in the
-[research investigation](investigations/e8-4-left-lowe-method-a-external-pid-background-methods-review-2026-10-03.md).
-Purification, response, `w0` transfer and preservation have distinct ownership.
-HGC-free tagging is preferred if available; truncated/censored models are
-optional cross-checks. No external method validates a KaonLT correction.
+INFERENCE / scientific decision: these measurements do not support strong
+signed-normalization pathology, broad OOD or training/application mismatch as
+explanations of t1 redistribution. Accepted F.6.2 acceptance/MM/paired-bootstrap
+validation and comparator t1 continuity support the detached refinement picture.
+No correction redesign is warranted by this diagnostic. Direct absolute mis-ID
+calibration, unique weak-positive-to-zero-response proxy validity, hardware cause
+and production promotion remain NOT VERIFIED.
 
 ## Verified State
 
 SOURCE VERIFIED (current PID masks; Gate-3 ownership retained): NPE=0 is the
 kaon PID category, NPE>0 the pion tree, NPE>2 physical pion control. Training
-and application differ; P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
+and application have distinct roles; P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
 the kaon-selected sample, not an observed pion class. F.3
 `hgcer3` represents relative response, not absolute leakage probability. F.4
 preserves signed canonical-t parents, not each child or MM subregion. Baseline
 `w0` already owns the established pion-control-to-background transfer.
-The configured HGCer hole is excluded from relevant populations. Existing
-zero-photoelectron pion transfer machinery is non-authoritative, diagnostic-only
-and production-side-effect-free; it is not an approved Method-A replacement.
-Slow-proton proposed/applied architecture is analogue-only, not a pion prescription.
+The configured HGCer hole is excluded. Zero-photoelectron pion transfer remains
+non-authoritative/diagnostic-only, not an approved replacement. Slow-proton
+architecture is analogue-only, not a pion prescription.
 
 RUNTIME VERIFIED (prior supplied accepted reviews, not new artifact inspection):
 the current-baseline comparator reproduced F.2/F.3 scientific payloads exactly;
-F.4 was the first scientifically changed stage. F.4.Refresh.2 remains
+F.4 was the first scientifically changed stage. Left/lowe t1 F.4 differs only at
+floating-point scale; t0/t2 carry substantive changes and do not inherit that
+exact t1 continuity claim. Accepted F.6.2 remains acceptance-correlated validation,
+including independent acceptance/MM information, not absolute HGC calibration.
+F.4.Refresh.2 remains
 `CLOSED / RUNTIME VALIDATED`. F.6.3/E.8.4 remain `CLOSED / RUNTIME VALIDATED`
 only for Left/lowe branch execution, live-cache parity, real child changes and
 signed parent preservation. See [branch evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
@@ -71,32 +72,31 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
-- Observed diagnostic-task startup branch `test`, HEAD/local `origin/test`:
-  `6542bba01946e370842566f24e2c8861071ecd09`; timestamped observation,
-  not permanent source or farm authority.
+- Accepted diagnostic farm `git_head` and observed closure startup branch
+  `test`, HEAD/local `origin/test`: `aad27a4d1639eef188dc61563fd3615682835835`.
+  The local observation is timestamped 2026-10-04, not permanent live authority.
+  Artifact hashes, sizes, fingerprints and dirty farm provenance are in the
+  diagnostic evidence checkpoint; no global farm cleanliness is claimed.
 - Accepted Fix.5.8 farm source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
   ZIP `KaonLT_E8_4_Fix5_Left_lowe_Q4p4W2p74_20261003-032934-987132.zip`,
   30851374 bytes; SHA-256
   `966e667b36b2626b5c16f00fc684a099a5d24e5d2015bb547612a1e63eb2a25e`.
 - Current F.6.3 F.4 candidate SHA-256:
   `1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902`.
-  Historical authority hashes and prior source/failed-owner identities remain
-  in the canonical evidence and [post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
+  Prior identities remain in canonical evidence and the
+  [post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
 - Reviewed Fix.5.4 numerical source: `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`;
   Fix.5.5 presentation source: `df957a6414fc9c515d1f82228517cb801dc90350`.
-  Workflow hardening synchronized through `8a6cad9c4c85bbe8fe9b32c15cc31402d4758af9`.
 
 ## Blockers
 
-Physical validity and detector-response origin of the large low-t/t1 Method-A
-redistribution remain `BLOCKED`. Accepted comparator evidence concentrates the
-question at relative HGCer response, current physical application, baseline
-`w0` transfer and signed F.4 normalization. INFERENCE: cancellation could amplify
-normalization sensitivity; this is not an accepted explanation. NOT VERIFIED:
-current-lineage t1 signed/absolute support, source decomposition, raw-response
-and correction tails, child/MM-region redistribution, coordinate and support/OOD
-dependence, weak-positive proxy validity and HGC-free pion-tag availability.
-No particular PMT, mirror, optical, track-geometry or hardware cause is established.
+The prior unmeasured t1 signed-normalization/support/population explanations are
+consumed by the accepted diagnostic and interpretation. This does not establish
+direct absolute pion mis-ID calibration, a specific PMT/mirror/optical/hardware
+cause or production correctness outside accepted detached scopes. RF corroboration
+was not performed; RF is additional information at low epsilon only, not a
+universal Method-A requirement. Canonical-five remains `DEFERRED` by user decision;
+final E.8 and F.6.4 production promotion remain `BLOCKED`.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
 `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. Existing
@@ -107,21 +107,19 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after independent actual-diff review, user commit/push and pushed-state
-synchronization: run one narrow Q4p4W2p74 / Left / lowe farm diagnostic gate to
-produce the current-lineage diagnostic JSON/PDF, then review the measurements
-before any method-selection or correction-design decision. Separate farm
-readiness review is required; no farm command is authorized here.
-
-Canonical-five expansion remains `DEFERRED` by user decision; final E.8/F.6.4
-remain `BLOCKED`.
+NEXT — after independent closure diff review, user commit/push and pushed-state
+synchronization, return to the user-deferred current-lineage canonical-five
+reconsideration gate using accepted Left/lowe and prior F.6.2/F.6.3 evidence.
+Start no canonical-five source/farm work unless the user explicitly authorizes
+lifting `DEFERRED`. If authorized, first audit exact five-setting current-lineage
+authority/validation scope before any implementation or farm contract.
 
 ## Success Criteria
 
-Diagnostic tests, F.6.3/F.4/analyzer regressions, compilation, manifest, ordinary
-memory health and complete-diff checks must pass. Local checks do not validate
-farm execution or science; independent actual-diff review and user-controlled
-synchronization remain required.
+Closure manifest, ordinary memory health, bootstrap, allowlist/provenance and
+complete-diff checks must pass. Local checks do not independently validate farm
+execution or science; actual-diff review and user-controlled synchronization remain
+required. This closure authorizes no scientific-source change or farm command.
 
 ## Do Not Reopen Without New Evidence
 

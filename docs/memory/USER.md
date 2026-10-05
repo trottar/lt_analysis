@@ -73,6 +73,13 @@ Markdown file unless the user explicitly asks. The contract file, not a shell
 heredoc, is the normal transfer artifact. After Codex completes, ChatGPT reviews
 the actual diff rather than accepting the Codex summary.
 
+When ChatGPT generates the single task contract as a downloadable file, provide
+the exact direct move command from the configured Downloads location into the
+exact repository contract path, using active external environment values. Do
+not ask the user to place it manually or insert unnecessary file-existence
+checks when a direct scoped move suffices. Concrete personal paths remain
+external and must not be stored in public repository memory.
+
 For farm work, provide concise, exact instructions appropriate to the established
 JLab environment, with reproducible commands and supplied paths. Preserve
 cumulative context in durable repository records rather than giant

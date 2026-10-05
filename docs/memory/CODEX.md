@@ -43,6 +43,17 @@ do not invent a workaround, reset, stash, clean or overwrite local work.
 2. **Closure task:** reconcile documentation, evidence, and status only after
    accepted farm evidence; it must not change scientific source.
 
+After ChatGPT independently accepts user-supplied farm artifacts, the tracked
+closure contract may carry exact accepted identities, measurements, evidence
+labels and decisions to Codex for repository reconciliation. Codex must not add
+a local raw-artifact prerequisite unless the contract explicitly assigns a
+separate local artifact-validation task. Do not invent a second external
+acceptance-review file between that completed review and the closure contract.
+The contract is scoped recording authority, not runtime evidence. Attribute the
+runtime acceptance to the supplied artifacts and prior ChatGPT review; Codex
+records that acceptance without claiming to have rerun or independently validated
+the farm artifacts.
+
 ## Actual-diff review before user handoff
 
 1. Codex implements locally and stops before commit/push.

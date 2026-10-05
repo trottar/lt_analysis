@@ -48,6 +48,21 @@
 
 ## Workflow and failure handling
 
+- After ChatGPT accepts supplied farm artifacts, use the tracked closure contract
+  to carry exact accepted facts into Codex repository reconciliation. Do not
+  convert that completed review into a redundant local-artifact prerequisite
+  unless a separate local validation is explicitly contracted. Attribute prior
+  acceptance transparently; recording it is not independent farm validation.
+- Do not invent a second standalone external acceptance-review artifact between
+  completed ChatGPT evidence review and the closure contract unless the user
+  requests it or a concrete repository workflow requires it.
+- Copy hashes, fingerprints and provenance paths exactly from accepted artifacts
+  or source and independently cross-check them before handoff. Never casually
+  retype, shorten or normalize those strings.
+- Deliver a generated downloadable task contract with the exact direct move
+  command from configured Downloads to its repository path, using active external
+  environment values. Avoid manual-placement requests and unnecessary intermediate
+  existence checks; keep concrete personal paths outside public memory.
 - Prefer one narrow gate -> one targeted run -> fresh evidence -> inspect ->
   one coherent repair.
 - Preserve negative, failed, sparse, unavailable, or rejected outcomes rather
