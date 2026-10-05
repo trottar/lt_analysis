@@ -280,7 +280,7 @@ class OwnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "not_canonical"):
             owner.verify_pages(pages(), "Right", "lowe")
 
-    def exercise(self, directory, defect=None, cli=False):
+    def exercise(self, directory, defect=None, cli=False, lineage_override=None, preflight_only=False):
         root = Path(directory).resolve()
         repo = root / "ordinary"; repo.mkdir()
         outdir = root / "volatile/OUTPUT/Analysis/KaonLT"; outdir.mkdir(parents=True)
@@ -303,6 +303,20 @@ class OwnerTests(unittest.TestCase):
             candidates[name] = owner.sha256(outdir / name)
         events, calls = [], []
         ran = False
+        def materialization(directory):
+            if defect == "materialization": raise ValueError("synthetic_materialization_failure")
+            events.append("materialization_verify")
+            return {"passed": True, "files": {}}
+        def staging(*args, **kwargs):
+            if defect == "staging": raise ValueError("synthetic_staging_failure")
+            events.append("candidate_staging")
+            return {"passed": True, "files": []}
+        def lineage(*args):
+            events.append("lineage_preflight")
+            if lineage_override is not None: return lineage_override(*args)
+            if defect and defect.startswith("lineage_"): raise ValueError("synthetic_" + defect)
+            return {"passed": True, "f4_shared_reproduction_passed": True,
+                    "settings": [{"setting_id": k} for k in owner.F1_SHA256]}
         def git(cwd, *args):
             calls.append((cwd, args))
             if args[:2] == ("worktree", "add"):
@@ -365,6 +379,7 @@ class OwnerTests(unittest.TestCase):
         real_preserve, real_verify, real_zip = owner.verify_preservation, owner.verify_artifacts, owner.verify_zip
         def preserve(*args):
             events.append("preservation_check")
+            if defect == "final_preservation": raise ValueError("synthetic_final_preservation_failure")
             return real_preserve(*args)
         def verify(*args):
             events.append("five_setting_verify")
@@ -405,22 +420,47 @@ class OwnerTests(unittest.TestCase):
                 raise OSError("synthetic_companion_copy_failure:" + name)
             real_copy(source, destination)
             self.assertEqual(owner.sha256(output), zip_hash)
+        real_ltsep_preserve = owner.verify_ltsep_preservation
+        def ltsep_preserve(*args):
+            if preflight_only: events.append("ltsep_preservation_check")
+            if defect == "final_ltsep": raise ValueError("synthetic_final_ltsep_failure")
+            return real_ltsep_preserve(*args)
         with ExitStack() as stack:
             for name, replacement in {"git": git, "CANDIDATES": candidates, "probe_paths": probes,
+                    "verify_candidate_materialization": materialization, "stage_candidates": staging,
+                    "lineage_preflight": lineage,
                     "prepare_runtime_overlay": lambda *args: ({}, {"baseline_paths": {}, "original_source_sha256": {}}),
                     "external_symlink_preflight": external, "run_analysis": run,
                     "verify_preservation": preserve, "verify_artifacts": verify,
                     "collector_source_preflight": source_checks, "collection_module": module,
-                    "verify_zip": verify_zip, "copy_companion": copy}.items():
+                    "verify_zip": verify_zip, "copy_companion": copy,
+                    "verify_ltsep_preservation": ltsep_preserve}.items():
                 stack.enter_context(patch.object(owner, name, replacement))
+            if preflight_only:
+                # Explicit tripwires: even an ignored return value is forbidden.
+                for name in ("run_analysis", "verify_completion", "verify_artifacts",
+                             "collector_source_preflight", "collection_module",
+                             "verify_zip", "deliver_evidence", "copy_companion", "artifact_names"):
+                    stack.enter_context(patch.object(owner, name,
+                        Mock(side_effect=AssertionError("preflight-only called " + name))))
             try:
                 if cli:
                     rc = owner.main(["--source-commit", SHA, "--repo", str(repo),
-                                     "--outdir", str(outdir), "--output", str(output)])
-                    result = output if rc == 0 else None
+                                     "--outdir", str(outdir), "--output", str(output),
+                                     "--candidate-materialization-dir", str(root / "materialization")] +
+                                    (["--lineage-preflight-only"] if preflight_only else []))
+                    result = (owner.accepted.gate_status_path(outdir, output) if preflight_only else output) if rc == 0 else None
                 else:
-                    result = owner.execute_gate(repo, outdir, output, SHA)
+                    result = owner.execute_gate(repo, outdir, output, SHA, root / "materialization",
+                                                lineage_preflight_only=preflight_only)
             finally:
+                if preflight_only:
+                    self.assertFalse(ran)
+                    self.assertFalse(output.exists())
+                    adds = [args for _, args in calls if args[:2] == ("worktree", "add")]
+                    removes = [args for _, args in calls if args[:2] == ("worktree", "remove")]
+                    self.assertEqual(len(adds), len(removes))
+                    self.assertTrue(all(not Path(args[-2]).exists() for args in adds))
                 for cwd, args in calls:
                     self.assertNotIn(args[0], {"clean", "reset", "stash", "checkout"})
                     if args[:2] == ("worktree", "remove"):
@@ -434,12 +474,282 @@ class OwnerTests(unittest.TestCase):
                 if defect in {"analysis", "markers", "hash_changed", "status_changed", "stale", "missing", "candidate", "source_preflight", "path", "external"}:
                     self.assertNotIn("collection", events)
                 if defect in {"path", "external"}: self.assertFalse(ran)
+                if defect in {"materialization", "staging"} or (defect and defect.startswith("lineage_")):
+                    self.assertFalse(ran)
+                    self.assertNotIn("collection", events)
         return result, events, outdir
+
+
+    def materialization_fixture(self, root):
+        directory = root / "materialization"; directory.mkdir()
+        f1 = [{"alias": k, "setting_id": k, "source_file_sha256": v,
+               "setting": {"kinematic_token": owner.KINEMATIC}} for k,v in owner.F1_SHA256.items()]
+        comparison = {"schema_version": "method_a_current_baseline_authority_comparison/v1",
+            "non_authoritative": True, "accepted_file_sha256": owner.HISTORICAL_INPUT_SHA256,
+            "candidate_serialized_sha256": {}, "diagnostic_f3_authority_override": deepcopy(owner.F3_RECONSTRUCTION),
+            "f1_inputs": f1, "summary": dict(owner.SCIENTIFIC_GATE)}
+        payloads, pins, outputs = {}, {}, {}
+        for stage, body_name, fpkey in (("f2","representation","representation_fingerprint"),
+                ("f3","acceptance_map","map_fingerprint"),("f4","correction","correction_fingerprint")):
+            fp = owner.CANDIDATE_FINGERPRINTS[stage]
+            body = {"fingerprint": fp[fpkey]}
+            if stage == "f3": body["algorithm_fingerprint"] = fp["algorithm_fingerprint"]
+            if stage == "f4":
+                body.update({"f3_source_file_sha256": "pending", **{"f3_"+k:v for k,v in owner.CANDIDATE_FINGERPRINTS["f3"].items()}})
+            payloads[stage] = {"non_authoritative": True, "artifact_fingerprint": fp["artifact_fingerprint"], body_name: body}
+            if stage == "f4": body["f3_source_file_sha256"] = pins["f3"]
+            path = directory / owner.MATERIALIZATION_NAMES[stage]
+            path.write_text(json.dumps(payloads[stage]),encoding="utf-8"); pins[stage] = owner.sha256(path)
+            outputs[stage] = {"basename": path.name, "raw_sha256": pins[stage], "non_authoritative": True, **fp}
+            if stage == "f4": outputs[stage].update({k:v for k,v in body.items() if k.startswith("f3_")})
+        comparison["candidate_serialized_sha256"] = {k:pins[k] for k in ("f2","f3")}
+        comparison["diagnostic_f3_authority_override"][owner.KINEMATIC]["source_file_sha256"] = pins["f3"]
+        path = directory / owner.MATERIALIZATION_NAMES["comparison"]
+        path.write_text(json.dumps(comparison),encoding="utf-8"); pins["comparison"] = owner.sha256(path)
+        manifest = {"schema_version": "method_a_current_baseline_authority_materialization/v1",
+            "source_head": owner.MATERIALIZATION_HEAD, "kinematic_token": owner.KINEMATIC,
+            "complete": True, "errors": [], "non_authoritative": True,
+            "accepted_authority_mutated": False, "production_objects_mutated": False,
+            "production_application_performed": False, "method_a_promoted": False,
+            "accepted_inputs": {k:{"raw_sha256":v} for k,v in owner.HISTORICAL_INPUT_SHA256.items()},
+            "comparison_input": {"raw_sha256": pins["comparison"],"copied_output_raw_sha256": pins["comparison"],
+                "copied_output_basename": path.name,"schema_version": comparison["schema_version"]},
+            "current_f1_inputs": deepcopy(f1), "scientific_gate": dict(owner.SCIENTIFIC_GATE),
+            "candidate_outputs": outputs, "diagnostic_f3_authority_override": {"accepted_authority": False,
+                "purpose": "diagnostic_candidate_construction_only", "record": comparison["diagnostic_f3_authority_override"]}}
+        path = directory / owner.MATERIALIZATION_NAMES["manifest"]
+        path.write_text(json.dumps(manifest),encoding="utf-8"); pins["manifest"] = owner.sha256(path)
+        return directory, pins, manifest, comparison
+
+    def materialization_patches(self, pins):
+        stack = ExitStack()
+        stack.enter_context(patch.object(owner,"MATERIALIZATION_SHA256",pins))
+        stack.enter_context(patch.object(owner,"CANDIDATES",{owner.MATERIALIZATION_NAMES[k]:pins[k] for k in ("f3","f4")}))
+        authority = deepcopy(owner.F3_RECONSTRUCTION)
+        authority[owner.KINEMATIC]["source_file_sha256"] = pins["f3"]
+        stack.enter_context(patch.object(owner,"F3_RECONSTRUCTION",authority))
+        return stack
+
+    def test_fresh_candidate_mapping_is_independent_of_historical_owner(self):
+        self.assertEqual(owner.CANDIDATES, {
+            owner.MATERIALIZATION_PREFIX+"acceptance-map-current-baseline-candidate.json": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
+            owner.MATERIALIZATION_PREFIX+"parent-preserving-correction-current-baseline-candidate.json": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7"})
+        self.assertEqual(owner.accepted.CANDIDATES, {
+            owner.MATERIALIZATION_NAMES["f3"]: "eeb480d9b7ddffab1e97c7f9f27c3099d0780c2bbb4d42a0ee68c077a5752b3d",
+            owner.MATERIALIZATION_NAMES["f4"]: "1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902"})
+        self.assertIsNot(owner.CANDIDATES, owner.accepted.CANDIDATES)
+
+    def test_reviewed_materialization_verifies_and_stages_only_f3_f4(self):
+        for previous in ("absent","old","fresh","unknown"):
+            with self.subTest(previous=previous), tempfile.TemporaryDirectory() as d:
+                root=Path(d); directory,pins,manifest,comparison=self.materialization_fixture(root)
+                outdir=root/"output";outdir.mkdir()
+                original={p.name:p.read_bytes() for p in directory.iterdir()}
+                old={}
+                for k in ("f3","f4"):
+                    name=owner.MATERIALIZATION_NAMES[k]; target=outdir/name
+                    if previous in {"old","unknown"}: target.write_bytes(b"known-old" if previous=="old" else b"unknown")
+                    if previous=="fresh": target.write_bytes((directory/name).read_bytes())
+                    old[name]=__import__("hashlib").sha256(b"known-old").hexdigest()
+                with self.materialization_patches(pins), patch.object(owner.accepted,"CANDIDATES",old):
+                    verification=owner.verify_candidate_materialization(directory)
+                    self.assertTrue(verification["passed"])
+                    if previous=="unknown":
+                        with self.assertRaisesRegex(ValueError,"unknown_candidate_target"):
+                            owner.stage_candidates(directory,outdir,verification)
+                        self.assertTrue(all(p.read_bytes()==b"unknown" for p in outdir.iterdir()))
+                    else:
+                        with patch.object(owner.os,"replace", wraps=os.replace) as replace:
+                            installed=owner.stage_candidates(directory,outdir,verification)
+                        self.assertEqual(replace.call_count,0 if previous=="fresh" else 2)
+                        self.assertEqual({p.name for p in outdir.iterdir()},set(owner.CANDIDATES))
+                        for row in installed["files"]:
+                            target=Path(row["path"])
+                            self.assertEqual(target.read_bytes(),original[target.name])
+                            self.assertEqual(row["action"],{"absent":"installed","old":"replaced","fresh":"no-op"}[previous])
+                self.assertEqual({p.name:p.read_bytes() for p in directory.iterdir()},original)
+
+    def test_materialization_rejects_bad_hashes_and_semantics(self):
+        mutations=(
+            ("source",lambda m:m.update(source_head="b"*40)),
+            ("gate",lambda m:m["scientific_gate"].update(f3_scientific_payload_match=False)),
+            ("f1",lambda m:m["current_f1_inputs"][0].update(source_file_sha256="b"*64)),
+            ("f3",lambda m:m["candidate_outputs"]["f3"].update(map_fingerprint="b"*64)),
+            ("f4",lambda m:m["candidate_outputs"]["f4"].update(artifact_fingerprint="b"*64)),
+            ("history",lambda m:m["accepted_inputs"]["f2"].update(raw_sha256="b"*64)),
+            ("sentinel",lambda m:m["diagnostic_f3_authority_override"]["record"][owner.KINEMATIC].update(farm_source_head="b"*40)))
+        for key in owner.MATERIALIZATION_NAMES:
+            with self.subTest(hash=key), tempfile.TemporaryDirectory() as d:
+                directory,pins,manifest,comparison=self.materialization_fixture(Path(d))
+                (directory/owner.MATERIALIZATION_NAMES[key]).write_bytes(b"wrong")
+                with self.materialization_patches(pins), self.assertRaisesRegex(ValueError,"hash_mismatch"):
+                    owner.verify_candidate_materialization(directory)
+        for label,change in mutations:
+            with self.subTest(semantic=label), tempfile.TemporaryDirectory() as d:
+                directory,pins,manifest,comparison=self.materialization_fixture(Path(d))
+                change(manifest);path=directory/owner.MATERIALIZATION_NAMES["manifest"]
+                path.write_text(json.dumps(manifest),encoding="utf-8");pins["manifest"]=owner.sha256(path)
+                with self.materialization_patches(pins), self.assertRaises(ValueError):
+                    owner.verify_candidate_materialization(directory)
+
+    def test_real_five_setting_lineage_preflight_loads_files_and_reconstructs_f4(self):
+        from testing import test_f6_3_parallel_full_procedure_method_a as scientific
+        fixture=type("LocalLineageFixture",(scientific.CandidateLineageTests,),{})
+        fixture.setUpClass()
+        module=scientific.f63
+        with tempfile.TemporaryDirectory() as d:
+            outdir=Path(d); paths=module.accepted_f6_3_artifact_paths(outdir,owner.KINEMATIC)
+            hashes={}
+            for artifact in fixture.artifacts:
+                setting=artifact["setting"]
+                sid=setting["phi_setting"]+"-"+setting["epsilon_filename_token"]
+                path=Path(paths["f1"][sid]);path.write_text(json.dumps(artifact,sort_keys=True),encoding="utf-8")
+                hashes[sid]=owner.sha256(path)
+            f3=scientific.f5_fixtures.f4_fixtures._f3(fixture.artifacts,hashes)
+            Path(paths["f3"]).write_text(json.dumps(f3,sort_keys=True),encoding="utf-8")
+            f3sha=owner.sha256(Path(paths["f3"]))
+            f3authority=scientific.f5_fixtures.f4_fixtures._authority(f3,f3sha)
+            f3authority[owner.KINEMATIC]["farm_source_head"]="0"*40
+            f4=scientific.f4.build_pion_hgcer_method_a_parent_preserving_correction_artifact(
+                fixture.artifacts,f3,f1_input_file_hashes=hashes,f3_input_file_sha256=f3sha,
+                accepted_f3_runtime_authority_by_kinematic=f3authority,input_paths={})
+            Path(paths["f4"]).write_text(json.dumps(f4,sort_keys=True),encoding="utf-8")
+            f4sha=owner.sha256(Path(paths["f4"]))
+            f4authority={owner.KINEMATIC:{"source_file_sha256":f4sha,
+                "correction_fingerprint":f4["correction"]["fingerprint"],
+                "artifact_fingerprint":f4["artifact_fingerprint"],"farm_source_head":owner.MATERIALIZATION_HEAD,
+                "f1_source_file_sha256":hashes,**{k:f4["correction"][k] for k in
+                    ("f3_source_file_sha256","f3_map_fingerprint","f3_algorithm_fingerprint","f3_artifact_fingerprint")}}}
+            before={p.name:p.read_bytes() for p in outdir.iterdir()}
+            def real_lineage(*args):
+                # The outer orchestration fixture owns different synthetic
+                # candidate bytes; restore this calculator fixture's identities.
+                with patch.object(owner,"CANDIDATES",{
+                        Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}):
+                    return owner.validate_candidate_lineage(outdir,module)
+            with patch.object(owner,"F1_SHA256",hashes), patch.object(owner,"CANDIDATES",{
+                    Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}), \
+                 patch.object(module,"F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256",hashes), \
+                 patch.object(module,"F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC",f3authority), \
+                 patch.object(module,"F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC",f4authority), \
+                 patch.object(module,"reconstruct_transient_factor_map",wraps=module.reconstruct_transient_factor_map) as reconstruct:
+                result=owner.validate_candidate_lineage(outdir,module)
+                self.assertTrue(result["passed"]);self.assertEqual(reconstruct.call_count,5)
+                self.assertEqual([r["setting_id"] for r in result["settings"]],list(hashes))
+                self.assertTrue(all(r["factor_count"]>0 and r["f4_shared_reproduction_passed"] for r in result["settings"]))
+                self.assertEqual(result["observed_sha256"],{**hashes,"f3":f3sha,"f4":f4sha})
+                with tempfile.TemporaryDirectory() as flow:
+                    receipt, events, _ = self.exercise(flow, lineage_override=real_lineage,
+                                                       preflight_only=True)
+                    transferred = json.loads(receipt.read_text())
+                    self.assertEqual(reconstruct.call_count, 10)
+                    self.assertEqual(transferred["f6_3_lineage_preflight"], result)
+                    self.assertFalse(transferred["analysis_started"])
+                    self.assertEqual(transferred["status"], "success")
+                    self.assertEqual(events, ["materialization_verify", "candidate_staging",
+                        "lineage_preflight", "preservation_check", "ltsep_preservation_check"])
+                for key in (next(iter(paths["f1"])),"f3","f4"):
+                    path=Path(paths[key] if key in {"f3","f4"} else paths["f1"][key])
+                    original=path.read_bytes();path.write_bytes(original+b" ")
+                    with self.subTest(hash=key),self.assertRaisesRegex(ValueError,"lineage_.*identity_mismatch"):
+                        owner.validate_candidate_lineage(outdir,module)
+                    for preflight_only in (False, True):
+                        with tempfile.TemporaryDirectory() as flow, self.assertRaisesRegex(ValueError,"lineage_.*identity_mismatch"):
+                            self.exercise(flow,"lineage_"+key, lineage_override=real_lineage, preflight_only=preflight_only)
+                    path.write_bytes(original)
+                invalid=deepcopy(f4authority);invalid[owner.KINEMATIC]["correction_fingerprint"]="b"*64
+                with patch.object(module,"F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC",invalid),self.assertRaises(Exception):
+                    owner.validate_candidate_lineage(outdir,module)
+                for preflight_only in (False, True):
+                    with patch.object(module,"F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC",invalid), tempfile.TemporaryDirectory() as flow, self.assertRaises(Exception):
+                        self.exercise(flow,"lineage_authority",lineage_override=real_lineage, preflight_only=preflight_only)
+                for preflight_only in (False, True):
+                    with patch.object(scientific.f4,"build_pion_hgcer_method_a_parent_preserving_correction_with_review_data",side_effect=ValueError("synthetic_reconstruction_failure")), tempfile.TemporaryDirectory() as flow, self.assertRaisesRegex(Exception,"synthetic_reconstruction_failure"):
+                        self.exercise(flow,"lineage_reconstruction",lineage_override=real_lineage, preflight_only=preflight_only)
+                real=module.reconstruct_transient_factor_map
+                def wrong_setting(*args,**kwargs):
+                    factors,provenance,rows=real(*args,**kwargs)
+                    provenance["selected_setting_id"]="Right-lowe"
+                    return factors,provenance,rows
+                with patch.object(module,"reconstruct_transient_factor_map",side_effect=wrong_setting), \
+                        self.assertRaisesRegex(ValueError,"setting_provenance_invalid"):
+                    owner.validate_candidate_lineage(outdir,module)
+                for preflight_only in (False, True):
+                    with patch.object(module,"reconstruct_transient_factor_map",side_effect=wrong_setting), tempfile.TemporaryDirectory() as flow, self.assertRaisesRegex(ValueError,"setting_provenance_invalid"):
+                        self.exercise(flow,"lineage_setting",lineage_override=real_lineage, preflight_only=preflight_only)
+                for value in (None, 0.0, -1.0, float("nan")):
+                    def invalid_factors(*args, **kwargs):
+                        factors, provenance, rows = real(*args, **kwargs)
+                        if value is None: factors = {}
+                        else: factors[next(iter(factors))] = value
+                        return factors, provenance, rows
+                    for preflight_only in (False, True):
+                        with self.subTest(factor=value), patch.object(module,"reconstruct_transient_factor_map",side_effect=invalid_factors), tempfile.TemporaryDirectory() as flow, self.assertRaisesRegex(ValueError,"factor_population_invalid"):
+                            self.exercise(flow,"lineage_setting",lineage_override=real_lineage, preflight_only=preflight_only)
+                for key in ("accepted_f4_correction_fingerprint", "accepted_f4_artifact_fingerprint"):
+                    def incomplete_provenance(*args, **kwargs):
+                        factors, provenance, rows = real(*args, **kwargs)
+                        provenance.pop(key)
+                        return factors, provenance, rows
+                    for preflight_only in (False, True):
+                        with self.subTest(missing=key), patch.object(module,"reconstruct_transient_factor_map",side_effect=incomplete_provenance), tempfile.TemporaryDirectory() as flow, self.assertRaisesRegex(ValueError,"setting_provenance_invalid"):
+                            self.exercise(flow,"lineage_setting",lineage_override=real_lineage, preflight_only=preflight_only)
+            self.assertEqual({p.name:p.read_bytes() for p in outdir.iterdir()},before)
+
+
+    def test_materialization_staging_and_all_lineage_failures_prevent_analysis(self):
+        for defect in ("materialization","staging","lineage_f1","lineage_f3","lineage_f4",
+                       "lineage_reconstruction","lineage_authority","lineage_setting"):
+            with self.subTest(defect=defect), tempfile.TemporaryDirectory() as d:
+                with self.assertRaisesRegex(ValueError,"synthetic_"):
+                    self.exercise(d,defect)
+                status=json.loads((Path(d)/"volatile/OUTPUT/Analysis/KaonLT/fresh-gate-status.json").read_text())
+                self.assertEqual(status["status"],"failed")
+                self.assertFalse(status["analysis_started"])
+
+    def test_preflight_only_cli_returns_final_receipt_without_full_run_operations(self):
+        with tempfile.TemporaryDirectory() as directory, redirect_stdout(io.StringIO()) as stdout:
+            receipt, events, outdir = self.exercise(directory, cli=True, preflight_only=True)
+            self.assertEqual(stdout.getvalue(), receipt.as_posix() + "\n")
+            status = json.loads(receipt.read_text())
+            self.assertEqual(status["source_commit"], SHA)
+            self.assertEqual(status["mode"], "lineage-preflight-only")
+            self.assertIn("not canonical-five runtime validation", status["role"])
+            self.assertFalse(status["canonical_five_runtime_validation"])
+            self.assertFalse(status["analysis_started"])
+            self.assertTrue(status["candidate_materialization"]["passed"])
+            self.assertTrue(status["candidate_installation"]["passed"])
+            self.assertTrue(status["f6_3_lineage_preflight"]["f4_shared_reproduction_passed"])
+            self.assertTrue(status["worktree_cleanup_completed"])
+            self.assertTrue(status["final_ordinary_checkout_preservation"]["passed"])
+            self.assertTrue(status["final_installed_ltsep_preservation"]["passed"])
+            self.assertEqual(events, ["materialization_verify", "candidate_staging",
+                "lineage_preflight", "preservation_check", "ltsep_preservation_check"])
+            self.assertEqual({p.name for p in outdir.iterdir()},
+                             set(owner.CANDIDATES) | {receipt.name})
+            for flag in ("analysis_completed", "artifact_verification_completed",
+                         "collection_completed", "zip_verification_completed"):
+                self.assertFalse(status[flag])
+
+    def test_preflight_only_fails_closed_including_final_preservation(self):
+        for defect in ("materialization", "staging", "path", "external", "lineage_f1",
+                       "lineage_f3", "lineage_f4", "lineage_reconstruction",
+                       "lineage_authority", "lineage_setting",
+                       "final_preservation", "final_ltsep"):
+            with self.subTest(defect=defect), tempfile.TemporaryDirectory() as directory:
+                with self.assertRaises(ValueError):
+                    self.exercise(directory, defect, preflight_only=True)
+                status = json.loads((Path(directory) /
+                    "volatile/OUTPUT/Analysis/KaonLT/fresh-gate-status.json").read_text())
+                self.assertEqual(status["status"], "failed")
+                self.assertFalse(status["analysis_started"])
+                self.assertEqual(status["mode"], "lineage-preflight-only")
 
     def test_success_real_generic_collection_order_and_zip(self):
         with tempfile.TemporaryDirectory() as directory:
             output, events, outdir = self.exercise(directory)
-            self.assertEqual(events, ["source_preflight", "isolated_analysis", "preservation_check",
+            self.assertEqual(events, ["materialization_verify", "source_preflight", "candidate_staging",
+                "lineage_preflight", "isolated_analysis", "preservation_check",
                 "five_setting_verify", "collection", "source_recheck", "preservation_check",
                 "zip_verify", "preservation_check", "deliver_log", "deliver_run_summary", "deliver_gate_status"])
             with zipfile.ZipFile(output) as archive:
@@ -457,6 +767,9 @@ class OwnerTests(unittest.TestCase):
             self.assertEqual(len(summary["ordinary_checkout_before"]["farm_local_sha256"]), 2)
             self.assertTrue(summary["ordinary_checkout_before"]["porcelain"])
             self.assertTrue(summary["ordinary_checkout_preservation"]["passed"])
+            self.assertTrue(summary["candidate_materialization"]["passed"])
+            self.assertTrue(summary["candidate_installation"]["passed"])
+            self.assertTrue(summary["f6_3_lineage_preflight"]["passed"])
             self.assertEqual((output.parent / "fresh-gate-status.json").read_bytes(),
                              (outdir / "fresh-gate-status.json").read_bytes())
             for name, source in (("log", outdir / "fresh.log"), ("run_summary", outdir / owner.SUMMARY)):
@@ -541,7 +854,8 @@ class OwnerTests(unittest.TestCase):
             stdout, stderr = io.StringIO(), io.StringIO()
             with patch.object(owner, "execute_gate", side_effect=ValueError("failed") if failure else None,
                               return_value=Path("/fresh.zip")), redirect_stdout(stdout), redirect_stderr(stderr):
-                rc = owner.main(["--source-commit", SHA, "--outdir", "artifacts", "--output", "fresh.zip"])
+                rc = owner.main(["--source-commit", SHA, "--outdir", "artifacts", "--output", "fresh.zip",
+                                 "--candidate-materialization-dir", "materialization"])
             self.assertEqual(rc, 1 if failure else 0)
             self.assertEqual(stdout.getvalue(), "" if failure else "/fresh.zip\n")
 

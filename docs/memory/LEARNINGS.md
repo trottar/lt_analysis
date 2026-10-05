@@ -115,6 +115,13 @@
   Import/path and external no-mutation gates precede analysis; ordinary checkout
   and installed-package preservation are proven afterward, never repaired.
 
+- A fresh F.1 provenance lineage can invalidate private F.3/F.4 pins even when
+  F.2/F.3 scientific payloads remain equal. Keep historical acceptance distinct
+  from refreshed detached candidate identity. Verify reviewed materialization,
+  stage candidate F.3/F.4 and run actual five-setting F.4/F.5 reconstruction before
+  expensive full analysis; synthetic orchestration tests alone do not prove
+  artifact compatibility or farm readiness.
+
 ## Gate admissibility and chat health
 
 - A failed downstream gate stops forward progression even if its analysis child

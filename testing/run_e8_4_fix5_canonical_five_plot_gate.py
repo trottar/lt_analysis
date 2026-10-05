@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import csv
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -39,7 +40,43 @@ BASE_HEAD = "ed378e0f30a357c6293da64f8f8f3bfbe187d1fe"
 PROFILE = "testing/pion_hgcer_validation_bundle_profile_e8_4_canonical_five.json"
 PROFILE_ID = "phase_e8_4_fix5_canonical_five_isolated_runtime/v1"
 SUMMARY = "Q4p4W2p74_e8_4_fix5_canonical_five_run-summary.json"
-CANDIDATES = accepted.CANDIDATES
+MATERIALIZATION_HEAD = "463d2657f696ecee33113edc3393ac51083a8944"
+MATERIALIZATION_PREFIX = KINEMATIC + "_kaon_pion-background_hgcer-method-a-"
+MATERIALIZATION_NAMES = {
+    "comparison": MATERIALIZATION_PREFIX + "current-baseline-authority-comparison-input.json",
+    "manifest": MATERIALIZATION_PREFIX + "current-baseline-authority-materialization-manifest.json",
+    "f2": MATERIALIZATION_PREFIX + "acceptance-representation-current-baseline-candidate.json",
+    "f3": MATERIALIZATION_PREFIX + "acceptance-map-current-baseline-candidate.json",
+    "f4": MATERIALIZATION_PREFIX + "parent-preserving-correction-current-baseline-candidate.json"}
+MATERIALIZATION_SHA256 = {
+    "comparison": "4c3fdab5d05965a1b3f1dc835c9d8c529896e6eaf2da8eb5c8ac8fc26e95257a",
+    "manifest": "e7c37f55b24739e8be0fb778a6c3491e17df746263e6d9d71a4f31ec65cd7908",
+    "f2": "2fa715b2b5c2d5077e38416fb9eceb814e013e72f308c43526fddff36ddd962e",
+    "f3": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
+    "f4": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7"}
+CANDIDATES = {MATERIALIZATION_NAMES[k]: MATERIALIZATION_SHA256[k] for k in ("f3", "f4")}
+F1_SHA256 = {
+    "Left-lowe": "eb6f659da0511f0f6ea867420fda0ee6feb77e6698509ccd31f80a92cc541c07",
+    "Left-highe": "544ea08f71e74b6b59bc33d05458d4acc051e96fb0327f54ec092a331245c01e",
+    "Center-lowe": "2b193dec46b10aebc74dfb51634d19a7fef29362fd0a252d940f2894d18a0a16",
+    "Center-highe": "c857911396bed03f9e418ca45a609509ebf1eadf8084d4c0ff2f9cc3a9980941",
+    "Right-highe": "e03245494d54a6f812c426d189b220417fdc0888ba1f58a961fbe250ff097652"}
+HISTORICAL_INPUT_SHA256 = {
+    "f2": "87e0a16870ea34a6611702e1bd4fc02c4dc6a8daa132e75b725a1b782a9a31da",
+    "f3": "04a9a576767ba3f81c8c03daab2461998894c655f0d875bd532ad30cb46c0d95",
+    "f4": "adcc01900b8adc211e296aaedaa314fdb86207d51483ebfd4b3edf69f558f188"}
+CANDIDATE_FINGERPRINTS = {
+    "f2": {"representation_fingerprint": "e9df6e09c31dda4d7d724792ce3c40125e27530c4c76e0dbe7f5b9861d0e6216",
+           "artifact_fingerprint": "87d9a8780cb2de9f2830afd9e388064151f796654ddb5c4a8e1938443806a0c6"},
+    "f3": {"map_fingerprint": "6042e9485827d9884d2a841d5c6cb5e23401e1026c8e2d4bd2022ede15843548",
+           "algorithm_fingerprint": "ba29630b2f40a87cbadbe751504ce48f23e2b17a08378a2c8a219f93131cb912",
+           "artifact_fingerprint": "e1cf0dd14644034f5d21df27d29f48355cde7c8e85c6123b709a6975c152a302"},
+    "f4": {"correction_fingerprint": "71527eecd5828766ebcb3b9ef5e4e1931eb242fabfc1059f04e4eec104f6cc98",
+           "artifact_fingerprint": "0b3899e5a3f24a34e04aa550ef162414c1d95af9a786e748612cbcb018dbcad4"}}
+F3_RECONSTRUCTION = {KINEMATIC: {"source_file_sha256": MATERIALIZATION_SHA256["f3"],
+    **CANDIDATE_FINGERPRINTS["f3"], "farm_source_head": "0" * 40}}
+SCIENTIFIC_GATE = {"f2_scientific_payload_match": True, "f3_scientific_payload_match": True,
+                   "f4_scientific_payload_match": False, "first_changed_stage": "F4"}
 FARM_OUTPUTS = accepted.FARM_OUTPUTS
 GATE_PATHS = ("src", "testing", "tools", "farm_env", "background_samples",
               "run_Prod_Analysis.sh", "set_SymLinks.sh")
@@ -55,6 +92,169 @@ PATH_FIELDS = ("VOLATILEPATH", "ANALYSISPATH", "HCANAPATH", "REPLAYPATH",
 
 def validate_settings(settings):
     require(settings == list(CANONICAL_SETTINGS), "canonical_five_inventory_invalid")
+
+
+def verify_candidate_materialization(directory):
+    directory = Path(directory).resolve()
+    require(directory.is_dir(), "candidate_materialization_directory_missing")
+    payloads, identities = {}, {}
+    for key, name in MATERIALIZATION_NAMES.items():
+        path = directory / name
+        require(path.is_file() and sha256(path) == MATERIALIZATION_SHA256[key],
+                "materialization_hash_mismatch:" + key)
+        payloads[key] = collector._strict_json_payload(path)
+        require(isinstance(payloads[key], dict), "materialization_payload_invalid:" + key)
+        identities[key] = {"path": str(path), "sha256": MATERIALIZATION_SHA256[key], "bytes": path.stat().st_size}
+    manifest, comparison = payloads["manifest"], payloads["comparison"]
+    require(manifest.get("schema_version") == "method_a_current_baseline_authority_materialization/v1" and
+            manifest.get("source_head") == MATERIALIZATION_HEAD and manifest.get("kinematic_token") == KINEMATIC,
+            "materialization_source_or_schema_mismatch")
+    for key, expected in {"complete": True, "non_authoritative": True, "accepted_authority_mutated": False,
+                          "production_objects_mutated": False, "production_application_performed": False,
+                          "method_a_promoted": False}.items():
+        require(manifest.get(key) is expected, "materialization_flag_mismatch:" + key)
+    require(manifest.get("errors") == [], "materialization_errors_present")
+    require(comparison.get("schema_version") == "method_a_current_baseline_authority_comparison/v1" and
+            comparison.get("non_authoritative") is True, "comparison_schema_invalid")
+    require(comparison.get("accepted_file_sha256") == HISTORICAL_INPUT_SHA256,
+            "materialization_historical_inputs_mismatch")
+    accepted_inputs = manifest.get("accepted_inputs", {})
+    require(set(accepted_inputs) == set(HISTORICAL_INPUT_SHA256) and
+            all(accepted_inputs[k].get("raw_sha256") == v for k, v in HISTORICAL_INPUT_SHA256.items()),
+            "materialization_historical_inputs_mismatch")
+    row = manifest.get("comparison_input", {})
+    require(row.get("raw_sha256") == MATERIALIZATION_SHA256["comparison"] and
+            row.get("copied_output_raw_sha256") == MATERIALIZATION_SHA256["comparison"] and
+            row.get("copied_output_basename") == MATERIALIZATION_NAMES["comparison"] and
+            row.get("schema_version") == comparison["schema_version"], "materialization_comparison_mismatch")
+    f1 = manifest.get("current_f1_inputs")
+    require(isinstance(f1, list) and len(f1) == 5 and f1 == comparison.get("f1_inputs") and
+            {r.get("setting_id"): r.get("source_file_sha256") for r in f1} == F1_SHA256,
+            "materialization_f1_inventory_mismatch")
+    require(all(r.get("alias") == r.get("setting_id") and
+                r.get("setting", {}).get("kinematic_token") == KINEMATIC for r in f1),
+            "materialization_f1_setting_mismatch")
+    for key, value in SCIENTIFIC_GATE.items():
+        for gate in (manifest.get("scientific_gate", {}), comparison.get("summary", {})):
+            require((gate.get(key) is value) if isinstance(value, bool) else gate.get(key) == value,
+                    "materialization_scientific_gate_mismatch")
+    require(comparison.get("candidate_serialized_sha256") ==
+            {k: MATERIALIZATION_SHA256[k] for k in ("f2", "f3")}, "comparison_candidate_identity_mismatch")
+    require(comparison.get("diagnostic_f3_authority_override") == F3_RECONSTRUCTION and
+            manifest.get("diagnostic_f3_authority_override") == {
+                "accepted_authority": False, "purpose": "diagnostic_candidate_construction_only",
+                "record": F3_RECONSTRUCTION}, "materialization_f3_reconstruction_mismatch")
+    outputs = manifest.get("candidate_outputs", {})
+    require(set(outputs) == {"f2", "f3", "f4"}, "materialization_candidate_inventory_mismatch")
+    for stage, body_name, fingerprint in (("f2", "representation", "representation_fingerprint"),
+            ("f3", "acceptance_map", "map_fingerprint"), ("f4", "correction", "correction_fingerprint")):
+        artifact, row = payloads[stage], outputs[stage]
+        body = artifact.get(body_name, {})
+        expected = {"basename": MATERIALIZATION_NAMES[stage], "raw_sha256": MATERIALIZATION_SHA256[stage],
+                    "non_authoritative": True, **CANDIDATE_FINGERPRINTS[stage]}
+        require(all(row.get(k) == v for k, v in expected.items()) and artifact.get("non_authoritative") is True and
+                artifact.get("artifact_fingerprint") == expected["artifact_fingerprint"] and
+                body.get("fingerprint") == expected[fingerprint], "materialization_candidate_identity_mismatch:" + stage)
+        if stage == "f3":
+            require(body.get("algorithm_fingerprint") == expected["algorithm_fingerprint"],
+                    "materialization_candidate_identity_mismatch:f3")
+        if stage == "f4":
+            inherited = {"f3_source_file_sha256": MATERIALIZATION_SHA256["f3"],
+                         **{"f3_" + k: v for k, v in CANDIDATE_FINGERPRINTS["f3"].items()}}
+            require(all(row.get(k) == v and body.get(k) == v for k, v in inherited.items()),
+                    "materialization_f4_inherited_identity_mismatch")
+    return {"passed": True, "source_head": MATERIALIZATION_HEAD, "files": identities,
+            "f1_sha256": dict(F1_SHA256), "scientific_gate": dict(SCIENTIFIC_GATE)}
+
+
+def stage_candidates(directory, outdir, verification, status=None):
+    require(verification.get("passed") is True, "candidate_materialization_not_verified")
+    require(not outdir.resolve().is_relative_to(Path(directory).resolve()), "candidate_destination_inside_materialization")
+    plans = []
+    for name, digest in CANDIDATES.items():
+        source, target = Path(directory).resolve() / name, outdir / name
+        require(source.resolve() != target.resolve() and not target.is_symlink(), "candidate_source_target_alias")
+        before = sha256(target) if target.is_file() else None
+        require(not target.exists() or target.is_file(), "candidate_target_not_file")
+        require(before in (None, accepted.CANDIDATES[name], digest), "unknown_candidate_target:" + name)
+        require(sha256(source) == digest, "materialization_source_changed:" + name)
+        plans.append((source, target, before, digest))
+    records = []
+    for source, target, before, digest in plans:
+        action = "no-op" if before == digest else "installed" if before is None else "replaced"
+        if before != digest:
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(prefix=".candidate-stage-", dir=outdir, delete=False) as handle:
+                    temporary = Path(handle.name)
+                    with source.open("rb") as stream: shutil.copyfileobj(stream, handle)
+                    handle.flush(); os.fsync(handle.fileno())
+                require(sha256(temporary) == digest, "candidate_staging_hash_mismatch")
+                require(not target.is_symlink() and (sha256(target) if target.is_file() else None) == before,
+                        "candidate_target_changed_during_staging")
+                os.replace(temporary, target)
+            finally:
+                if temporary is not None and temporary.exists(): temporary.unlink()
+        require(sha256(target) == digest, "candidate_installation_hash_mismatch")
+        records.append({"path": str(target), "before_sha256": before, "after_sha256": digest, "action": action})
+        if status is not None: status.update(candidate_installation={"passed": False, "files": list(records)})
+    return {"passed": True, "files": records}
+
+
+def validate_candidate_lineage(outdir, module):
+    """Read JSON and run the existing calculators; retain aggregate evidence only."""
+    paths = module.accepted_f6_3_artifact_paths(outdir, KINEMATIC)
+    f1, f3, f4, hashes = module.load_accepted_f6_3_authority(paths)
+    expected_f1 = module.F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256
+    require(expected_f1 == F1_SHA256 and
+            {k: hashes.get(k) for k in expected_f1} == expected_f1, "lineage_f1_identity_mismatch")
+    require(hashes.get("f3") == CANDIDATES[Path(paths["f3"]).name] and
+            hashes.get("f4") == CANDIDATES[Path(paths["f4"]).name], "lineage_f3_f4_identity_mismatch")
+    settings = []
+    for setting_id in F1_SHA256:
+        factors, provenance, rows = module.reconstruct_transient_factor_map(f1, f3, f4,
+            f1_input_file_hashes={k: hashes[k] for k in expected_f1}, f3_input_file_sha256=hashes["f3"],
+            f4_input_file_sha256=hashes["f4"], setting_id=setting_id)
+        require(factors and set(factors) == set(rows) and
+                all(math.isfinite(float(v)) and float(v) > 0 for v in factors.values()),
+                "lineage_factor_population_invalid:" + setting_id)
+        require(provenance.get("selected_setting_id") == setting_id and
+                provenance.get("schema_version") == module.F6_3_PARALLEL_SCHEMA_VERSION and
+                provenance.get("candidate_validation_source_head") == MATERIALIZATION_HEAD and
+                provenance.get("accepted_f1_source_file_sha256") == expected_f1 and
+                provenance.get("candidate_f3_source_file_sha256") == hashes["f3"] and
+                provenance.get("candidate_f4_source_file_sha256") == hashes["f4"] and
+                provenance.get("transient_factor_population_count") == len(factors) and
+                provenance.get("current_baseline_candidate_lineage") is True and
+                provenance.get("branch_role") == "parallel_nonproduction_method_a_full_analysis" and
+                provenance.get("candidate_f3_reconstruction_role") == "candidate_construction_sentinel_only" and
+                re.fullmatch(r"[0-9a-f]{64}", str(provenance.get("transient_factor_identity_fingerprint"))) is not None and
+                provenance.get("accepted_f4_runtime_authority", {}).get("accepted_authority_match") is True and
+                provenance.get("accepted_f3_source_file_sha256") == hashes["f3"] and
+                provenance.get("accepted_f4_source_file_sha256") == hashes["f4"] and
+                all(provenance.get("accepted_f4_" + k) ==
+                    module.F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC[KINEMATIC][k]
+                    for k in ("correction_fingerprint", "artifact_fingerprint")) and
+                all(provenance.get("accepted_f3_" + k) == v for k, v in
+                    module.F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC[KINEMATIC].items()
+                    if k in {"map_fingerprint", "algorithm_fingerprint", "artifact_fingerprint"}) and
+                provenance.get("production_promotion_performed") is False and
+                provenance.get("event_correction_persisted") is False,
+                "lineage_setting_provenance_invalid:" + setting_id)
+        settings.append({"setting_id": setting_id, "factor_count": len(factors),
+                         "f4_shared_reproduction_passed": True, "provenance": provenance})
+    return {"passed": True, "observed_sha256": hashes, "settings": settings,
+            "f4_shared_reproduction_passed": True}
+
+
+def lineage_preflight(worktree, outdir, env):
+    return python_json(worktree,
+        'import json,sys; from pathlib import Path; '
+        'sys.path[:0]=[str(Path.cwd()/"src/cuts"),str(Path.cwd()/"src/utility")]; '
+        'import pion_hgcer_method_a_parallel_full_procedure as f63; '
+        'from testing import run_e8_4_fix5_canonical_five_plot_gate as owner; '
+        'print(json.dumps(owner.validate_candidate_lineage(Path(sys.argv[1]),f63),allow_nan=False))',
+        (str(outdir),), env=env)
 
 
 def snapshot(repo):
@@ -508,24 +708,37 @@ def deliver_evidence(status, log_path, summary_path, output):
     copy_companion(status.path, destinations["gate_status"])
 
 
-def execute_gate(repo, outdir, output, source_commit):
+def execute_gate(repo, outdir, output, source_commit, candidate_materialization_dir,
+                 lineage_preflight_only=False):
     repo, outdir, output = Path(repo).resolve(), Path(outdir).resolve(), Path(output).resolve()
     status = GateStatus(outdir, output, source_commit)
     try:
+        if lineage_preflight_only:
+            status.update(mode="lineage-preflight-only",
+                          role="separate lineage gate; not canonical-five runtime validation",
+                          canonical_five_runtime_validation=False, analysis_started=False,
+                          expected_zip_path=None, analysis_log_path=None,
+                          receipt_path=str(status.path))
         require(not output.exists(), "output_zip_already_exists")
         require(output.parent.is_dir(), "output_directory_missing")
         provenance = preflight(repo, source_commit)
+        if lineage_preflight_only:
+            status.update(ordinary_checkout_before=provenance)
         profile = resolved_profile(repo, source_commit)
-        for name, digest in CANDIDATES.items():
-            require((outdir / name).is_file() and sha256(outdir / name) == digest,
-                    "candidate_identity_mismatch:" + name)
-        before = {name: (path.stat().st_mtime_ns, path.stat().st_size, sha256(path))
-                  for name in artifact_names(profile) if (path := outdir / name).is_file()}
-        log_path = outdir / (output.stem + ".log")
-        require(not log_path.exists(), "run_log_already_exists")
-        status.update("collector_source_preflight")
-        checks = collector_source_preflight(repo, source_commit, profile)
-        status.update(collector_source_preflight_completed=True, collector_source_checks=checks)
+        status.update("candidate_materialization_verification")
+        materialization = verify_candidate_materialization(candidate_materialization_dir)
+        status.update(candidate_materialization=materialization)
+        if not lineage_preflight_only:
+            before = {name: (path.stat().st_mtime_ns, path.stat().st_size, sha256(path))
+                      for name in artifact_names(profile) if (path := outdir / name).is_file()}
+            log_path = outdir / (output.stem + ".log")
+            require(not log_path.exists(), "run_log_already_exists")
+            status.update("collector_source_preflight")
+            checks = collector_source_preflight(repo, source_commit, profile)
+            status.update(collector_source_preflight_completed=True, collector_source_checks=checks)
+        status.update("candidate_staging")
+        installation = stage_candidates(candidate_materialization_dir, outdir, materialization, status=status)
+        status.update(candidate_installation=installation)
         with owned_worktree(repo, source_commit, "analysis") as worktree:
             status.update("path_isolation")
             env, overlay_record = prepare_runtime_overlay(repo, worktree)
@@ -537,65 +750,77 @@ def execute_gate(repo, outdir, output, source_commit):
             external = external_symlink_preflight(worktree, probes[0]["paths"])
             identity = {"path": str(worktree), "head": source_commit, "detached": True,
                         "clean_before_execution": True, "owner_created": True}
-            started_ns = time.time_ns()
-            status.update("analysis", analysis_started=True, analysis_worktree=identity,
-                          isolation_probes=probes, external_symlink_preflight=external)
-            # Always check the primary checkout after the child, including an
-            # exception/failure; never restore it or accept artifacts on mismatch.
-            try:
-                returncode = run_analysis(worktree, log_path, env)
-            finally:
-                status.update("ordinary_checkout_preservation")
+            status.update("f6_3_lineage_preflight")
+            lineage = lineage_preflight(worktree, outdir, env)
+            require(lineage.get("passed") is True and lineage.get("f4_shared_reproduction_passed") is True and
+                    [row.get("setting_id") for row in lineage.get("settings", [])] == list(F1_SHA256),
+                    "canonical_five_lineage_preflight_failed")
+            status.update(f6_3_lineage_preflight=lineage)
+            if lineage_preflight_only:
+                status.update("worktree_cleanup", analysis_worktree=identity,
+                              isolation_probes=probes, external_symlink_preflight=external)
+            else:
+                started_ns = time.time_ns()
+                status.update("analysis", analysis_started=True, analysis_worktree=identity,
+                              isolation_probes=probes, external_symlink_preflight=external)
+                # Always check the primary checkout after the child, including an
+                # exception/failure; never restore it or accept artifacts on mismatch.
                 try:
-                    preservation = verify_preservation(repo, provenance)
+                    returncode = run_analysis(worktree, log_path, env)
                 finally:
-                    ltsep_preservation = verify_ltsep_preservation(overlay_record)
-                    status.update(installed_ltsep_preservation=ltsep_preservation)
-                status.update(ordinary_checkout_preservation=preservation)
-            status.update("completion_markers", analysis_returncode=returncode)
-            verify_completion(log_path, returncode)
-            status.update(analysis_completed=True)
-            status.update("verify_artifacts")
-            records, setting_checks = verify_artifacts(outdir, profile, started_ns, before)
-            status.update(artifact_verification_completed=True)
-            summary = {"schema_version": "e8_4_fix5_canonical_five_run_summary/v1",
-                "source_commit": source_commit, "settings": list(CANONICAL_SETTINGS),
-                "analysis_command": COMMAND, "analysis_worktree": identity,
-                "isolation_probes": probes, "external_symlink_preflight": external,
-                "ltsep_runtime_overlay": overlay_record, "installed_ltsep_preservation": ltsep_preservation,
-                "ordinary_checkout_before": provenance, "ordinary_checkout_preservation": preservation,
-                "analysis_returncode": returncode, "log_sha256": sha256(log_path),
-                "setting_verification": setting_checks, "candidate_sha256": dict(CANDIDATES),
-                "collector_source_checks": checks, "artifacts": records,
-                # A packaged summary cannot contain its enclosing ZIP's own hash.
-                # The atomic success status supplies that final identity, without
-                # rewriting the immutable summary after collector hashing.
-                "zip_identity": {"path": str(output), "success_receipt": str(status.path)},
-                "boundaries": {"method_a": "detached/non-production", "method_b_numerically_excluded": True,
-                    "production_promotion": False, "absolute_pion_misid_claim": False,
-                    "absolute_simc_amplitude_claim": False}}
-            summary_path = outdir / SUMMARY
-            summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-            records[SUMMARY] = {"sha256": sha256(summary_path), "bytes": summary_path.stat().st_size}
-            status.update("collection")
-            with tempfile.TemporaryDirectory(prefix="kaonlt-canonical-five-profile-") as directory:
-                effective = Path(directory) / "profile.json"
-                effective.write_text(json.dumps(profile), encoding="utf-8")
-                with owned_worktree(repo, source_commit, "source") as source:
-                    with collection_module(source) as module, redirect_stdout(sys.stderr):
-                        result = module.collect_validation_bundle(outdir=outdir, kinematic=KINEMATIC,
-                            output=output, profile_path=effective, repo_root=source)
-                    require(result["returncode"] == 0, "collection_failed")
-                    status.update("source_recheck", collection_completed=True)
-                    final_checks = collector_source_preflight(repo, source_commit, profile)
-                    status.update(final_collector_source_checks=final_checks)
-                    verify_preservation(repo, provenance)
-                    verify_ltsep_preservation(overlay_record)
-                    status.update("verify_zip")
-                    verify_zip(output, source_commit, records)
-                    status.update("worktree_cleanup", zip_verification_completed=True,
-                                  zip_identity={"path": str(output), "sha256": sha256(output),
-                                                "bytes": output.stat().st_size})
+                    status.update("ordinary_checkout_preservation")
+                    try:
+                        preservation = verify_preservation(repo, provenance)
+                    finally:
+                        ltsep_preservation = verify_ltsep_preservation(overlay_record)
+                        status.update(installed_ltsep_preservation=ltsep_preservation)
+                    status.update(ordinary_checkout_preservation=preservation)
+                status.update("completion_markers", analysis_returncode=returncode)
+                verify_completion(log_path, returncode)
+                status.update(analysis_completed=True)
+                status.update("verify_artifacts")
+                records, setting_checks = verify_artifacts(outdir, profile, started_ns, before)
+                status.update(artifact_verification_completed=True)
+                summary = {"schema_version": "e8_4_fix5_canonical_five_run_summary/v1",
+                    "source_commit": source_commit, "settings": list(CANONICAL_SETTINGS),
+                    "analysis_command": COMMAND, "analysis_worktree": identity,
+                    "isolation_probes": probes, "external_symlink_preflight": external,
+                    "candidate_materialization": materialization, "candidate_installation": installation,
+                    "f6_3_lineage_preflight": lineage,
+                    "ltsep_runtime_overlay": overlay_record, "installed_ltsep_preservation": ltsep_preservation,
+                    "ordinary_checkout_before": provenance, "ordinary_checkout_preservation": preservation,
+                    "analysis_returncode": returncode, "log_sha256": sha256(log_path),
+                    "setting_verification": setting_checks, "candidate_sha256": dict(CANDIDATES),
+                    "collector_source_checks": checks, "artifacts": records,
+                    # A packaged summary cannot contain its enclosing ZIP's own hash.
+                    # The atomic success status supplies that final identity, without
+                    # rewriting the immutable summary after collector hashing.
+                    "zip_identity": {"path": str(output), "success_receipt": str(status.path)},
+                    "boundaries": {"method_a": "detached/non-production", "method_b_numerically_excluded": True,
+                        "production_promotion": False, "absolute_pion_misid_claim": False,
+                        "absolute_simc_amplitude_claim": False}}
+                summary_path = outdir / SUMMARY
+                summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                records[SUMMARY] = {"sha256": sha256(summary_path), "bytes": summary_path.stat().st_size}
+                status.update("collection")
+                with tempfile.TemporaryDirectory(prefix="kaonlt-canonical-five-profile-") as directory:
+                    effective = Path(directory) / "profile.json"
+                    effective.write_text(json.dumps(profile), encoding="utf-8")
+                    with owned_worktree(repo, source_commit, "source") as source:
+                        with collection_module(source) as module, redirect_stdout(sys.stderr):
+                            result = module.collect_validation_bundle(outdir=outdir, kinematic=KINEMATIC,
+                                output=output, profile_path=effective, repo_root=source)
+                        require(result["returncode"] == 0, "collection_failed")
+                        status.update("source_recheck", collection_completed=True)
+                        final_checks = collector_source_preflight(repo, source_commit, profile)
+                        status.update(final_collector_source_checks=final_checks)
+                        verify_preservation(repo, provenance)
+                        verify_ltsep_preservation(overlay_record)
+                        status.update("verify_zip")
+                        verify_zip(output, source_commit, records)
+                        status.update("worktree_cleanup", zip_verification_completed=True,
+                                      zip_identity={"path": str(output), "sha256": sha256(output),
+                                                    "bytes": output.stat().st_size})
         try:
             final_preservation = verify_preservation(repo, provenance)
         finally:
@@ -603,6 +828,11 @@ def execute_gate(repo, outdir, output, source_commit):
         status.update(final_ordinary_checkout_preservation=final_preservation,
                       final_installed_ltsep_preservation=final_ltsep_preservation,
                       worktree_cleanup_completed=True)
+        if lineage_preflight_only:
+            # This atomic status is the directly returnable preflight receipt.
+            # All cleanup and acceptance checks precede success publication.
+            status.update("success", status="success", failure_reason=None)
+            return status.path
         deliver_evidence(status, log_path, summary_path, output)
         return output
     except Exception as exc:
@@ -615,10 +845,15 @@ def main(argv=None):
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--outdir", type=Path, required=True, help="active external analysis artifact root")
-    parser.add_argument("--output", type=Path, required=True, help="fresh ZIP in the active external bundle root")
+    parser.add_argument("--output", type=Path, required=True, help="fresh attempt output name; preflight-only returns its status receipt without creating a ZIP")
+    parser.add_argument("--candidate-materialization-dir", type=Path, required=True,
+                        help="reviewed detached fresh-F1 candidate materialization directory")
+    parser.add_argument("--lineage-preflight-only", action="store_true",
+                        help="run the separate five-setting lineage gate and return its receipt; no analysis")
     args = parser.parse_args(argv)
     try:
-        result = execute_gate(args.repo, args.outdir, args.output, args.source_commit)
+        result = execute_gate(args.repo, args.outdir, args.output, args.source_commit, args.candidate_materialization_dir,
+                              lineage_preflight_only=args.lineage_preflight_only)
     except Exception as exc:
         print("Canonical-five gate failed: " + str(exc), file=sys.stderr)
         print("Owner gate status: " + str(accepted.gate_status_path(args.outdir, args.output)), file=sys.stderr)

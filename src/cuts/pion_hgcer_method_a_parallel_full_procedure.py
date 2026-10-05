@@ -22,7 +22,7 @@ _TOLERANCE = 1.0e-12
 
 # Detached F.6.3 current-baseline candidate lineage only. These records do not
 # replace the historical accepted F.3/F.4 authorities or promote Method A.
-F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD = "b349967c0d4210a78b144ce6134d3c1f15970245"
+F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD = "463d2657f696ecee33113edc3393ac51083a8944"
 F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC = {
     "Q4p4W2p74": {
         "f3": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
@@ -30,28 +30,28 @@ F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC = {
     },
 }
 F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256 = {
-    "Left-lowe": "10086d7d4c42389c9fdd16471c49d59cd189a30980767bcdb87b85914169ef95",
-    "Left-highe": "203f4c76f1a251e3e8f231fa3a5e50c9a4fa337420efffffd803205c6d7ea218",
-    "Center-lowe": "1593e22b55382b4a9e831d3a1114584e2e3057fcbc4aeeea4aa74c948edf39f8",
-    "Center-highe": "5de64b850735ebe70040a703bac999bdd1ac84dc821aba8e1a21ec86ae4b9db3",
-    "Right-highe": "77d98006ff81e772c466bf8d10ec83088509a0b8a4d430bded1172bc118bc15f",
+    "Left-lowe": "eb6f659da0511f0f6ea867420fda0ee6feb77e6698509ccd31f80a92cc541c07",
+    "Left-highe": "544ea08f71e74b6b59bc33d05458d4acc051e96fb0327f54ec092a331245c01e",
+    "Center-lowe": "2b193dec46b10aebc74dfb51634d19a7fef29362fd0a252d940f2894d18a0a16",
+    "Center-highe": "c857911396bed03f9e418ca45a609509ebf1eadf8084d4c0ff2f9cc3a9980941",
+    "Right-highe": "e03245494d54a6f812c426d189b220417fdc0888ba1f58a961fbe250ff097652",
 }
 # The zero farm head is a candidate-construction sentinel only, required to
 # reproduce the materialized candidate F.4 exactly. It is not farm F.3 authority.
 F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC = {
     "Q4p4W2p74": {
-        "source_file_sha256": "eeb480d9b7ddffab1e97c7f9f27c3099d0780c2bbb4d42a0ee68c077a5752b3d",
-        "map_fingerprint": "3a9787fc58d26cc0816012bd1b637ad0c8f201b448d54cb1625a841131154728",
+        "source_file_sha256": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
+        "map_fingerprint": "6042e9485827d9884d2a841d5c6cb5e23401e1026c8e2d4bd2022ede15843548",
         "algorithm_fingerprint": "ba29630b2f40a87cbadbe751504ce48f23e2b17a08378a2c8a219f93131cb912",
-        "artifact_fingerprint": "8d2d12068dfa98922d01dfafedbaa4b994bce0bf1e39ce23b1333872313ef121",
+        "artifact_fingerprint": "e1cf0dd14644034f5d21df27d29f48355cde7c8e85c6123b709a6975c152a302",
         "farm_source_head": "0000000000000000000000000000000000000000",
     },
 }
 F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC = {
     "Q4p4W2p74": {
-        "source_file_sha256": "1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902",
-        "correction_fingerprint": "bce0cc12ef283b0c361818b436c4e190fc4ea5165436f6c36912cfbb6de53368",
-        "artifact_fingerprint": "4c935271a0b2723b58b02cc34d82a1e7d5757f7cd36b7707f400c2b28893668a",
+        "source_file_sha256": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7",
+        "correction_fingerprint": "71527eecd5828766ebcb3b9ef5e4e1931eb242fabfc1059f04e4eec104f6cc98",
+        "artifact_fingerprint": "0b3899e5a3f24a34e04aa550ef162414c1d95af9a786e748612cbcb018dbcad4",
         "farm_source_head": F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
         "f3_source_file_sha256": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["source_file_sha256"],
         "f3_map_fingerprint": F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["map_fingerprint"],

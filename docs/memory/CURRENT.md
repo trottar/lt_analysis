@@ -11,20 +11,20 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The isolated current-lineage canonical-five orchestration candidate is
+The fresh-F1 refresh and separate preflight owner are
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
-[isolated-runtime contract](phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
-The user lifted canonical-five `DEFERRED`; accepted scientific authority required
-no Method-A redesign. The unchanged full Q4p4W2p74 launcher runs in a detached
-worktree under an owner-created sibling root. SOURCE VERIFIED: runtime cleanup,
-symlink setup and `set_sig_fortran` mutate local state. A copied imported ltsep
-overlay changes only LTANAPATH; import identity, three caller probes and external
-link no-mutation gates precede execution. Preserve ordinary checkout status/bytes
-and installed ltsep bytes, including after child failure.
-Five-setting freshness/page gates, clean detached collection, final rechecks,
-ZIP verification, bounded cleanup and companion delivery are owner gates.
-Local tests are synthetic. Canonical-five runtime remains NOT VERIFIED; source
-review and synchronization are workflow gates, not runtime evidence.
+[fresh-F1 contract](phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md).
+The first isolated canonical-five farm gate is `BLOCKED`: analysis completed,
+but all five E.8.4 manifests were unavailable from stale pins.
+The [supplied lineage evidence](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
+records F.2/F.3 equality, F.4 as first changed stage and detached materialization.
+Private pins identify that fresh lineage. The owner verifies/stages F.3/F.4;
+`--lineage-preflight-only` runs real five-setting reconstruction, cleanup and
+final preservation, then returns a receipt with analysis_started=false.
+The full run requires acceptance of this separate farm gate. Normal mode
+retains preflight before analysis and all artifact/ZIP/delivery gates.
+Canonical-five runtime remains NOT VERIFIED; source review and synchronization
+are workflow gates, not runtime evidence.
 
 The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
 parents t0/t1/t2, primary t1; its
@@ -73,8 +73,8 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
-- Isolated-owner implementation startup observation, 2026-10-05: branch `test`,
-  HEAD/local `origin/test` `ed378e0f30a357c6293da64f8f8f3bfbe187d1fe`.
+- Fresh-lineage implementation startup observation, 2026-10-05: branch `test`,
+  HEAD/local `origin/test` `463d2657f696ecee33113edc3393ac51083a8944`.
   This is a timestamped source observation, not a new farm identity.
 - Accepted diagnostic farm `git_head` and observed closure startup branch
   `test`, HEAD/local `origin/test`: `aad27a4d1639eef188dc61563fd3615682835835`.
@@ -86,7 +86,7 @@ lineages. No accepted authority is replaced.
   30851374 bytes; SHA-256
   `966e667b36b2626b5c16f00fc684a099a5d24e5d2015bb547612a1e63eb2a25e`.
 - Current F.6.3 F.4 candidate SHA-256:
-  `1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902`.
+  `79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
   Prior identities remain in canonical evidence and the
   [post-farm investigation](investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md).
 - Reviewed Fix.5.4 numerical source: `761fbb6c03d2d7a10bb911cf84e9ba898496fab6`;
@@ -109,10 +109,10 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff review, user commit/push, and pushed-state
-synchronization, perform the farm-readiness audit of the tracked isolated
-canonical-five owner/profile. Only a PASS may authorize one user-run
-Q4p4W2p74 canonical-five farm gate.
+NEXT — after actual-diff review, user commit/push and pushed-state synchronization,
+one fast lineage-preflight-only farm gate using the reviewed materialization
+directory -> evidence review. Full canonical-five analysis requires that
+gate's acceptance and later authorization.
 
 ## Success Criteria
 
