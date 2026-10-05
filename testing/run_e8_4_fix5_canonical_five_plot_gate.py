@@ -1,0 +1,631 @@
+#!/usr/bin/env python3
+"""Own isolated Q4p4W2p74 full analysis, five-setting verification and collection.
+
+Farm execution requires independent review, push, synchronization and readiness
+approval. --source-commit is the exact reviewed/pushed execution identity.
+Success stdout is one ZIP path; the per-attempt status owns final ZIP identity.
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from contextlib import contextmanager, redirect_stdout
+from datetime import datetime, timezone
+import csv
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import zipfile
+
+try:
+    from . import run_e8_4_fix5_left_lowe_plot_gate as accepted
+except ImportError:
+    import run_e8_4_fix5_left_lowe_plot_gate as accepted
+
+collector = accepted.collector
+require = accepted.require
+sha256 = accepted.sha256
+git = accepted.git
+collection_module = accepted.collection_module
+KINEMATIC = accepted.KINEMATIC
+BASE_HEAD = "ed378e0f30a357c6293da64f8f8f3bfbe187d1fe"
+PROFILE = "testing/pion_hgcer_validation_bundle_profile_e8_4_canonical_five.json"
+PROFILE_ID = "phase_e8_4_fix5_canonical_five_isolated_runtime/v1"
+SUMMARY = "Q4p4W2p74_e8_4_fix5_canonical_five_run-summary.json"
+CANDIDATES = accepted.CANDIDATES
+FARM_OUTPUTS = accepted.FARM_OUTPUTS
+GATE_PATHS = ("src", "testing", "tools", "farm_env", "background_samples",
+              "run_Prod_Analysis.sh", "set_SymLinks.sh")
+# The unchanged collector's schema fixes serialization order. The scientific
+# inventory is exactly these five pairs, with no Right/lowe.
+CANONICAL_SETTINGS = accepted.CANONICAL_SETTINGS
+COMMAND = ["./run_Prod_Analysis.sh", "4p4", "2p74"]
+PATH_FIELDS = ("VOLATILEPATH", "ANALYSISPATH", "HCANAPATH", "REPLAYPATH",
+               "UTILPATH", "PACKAGEPATH", "OUTPATH", "ROOTPATH", "SKIMPATH",
+               "REPORTPATH", "CUTPATH", "PARAMPATH", "SCRIPTPATH", "ANATYPE",
+               "USER", "HOST", "SIMCPATH", "LTANAPATH")
+
+
+def validate_settings(settings):
+    require(settings == list(CANONICAL_SETTINGS), "canonical_five_inventory_invalid")
+
+
+def snapshot(repo):
+    return {
+        "branch": git(repo, "branch", "--show-current"),
+        "head": git(repo, "rev-parse", "HEAD"),
+        "origin_test": git(repo, "rev-parse", "refs/remotes/origin/test"),
+        "porcelain": git(repo, "status", "--porcelain=v1", "--untracked-files=all"),
+        "farm_local_sha256": {name: sha256(repo / name) for name in sorted(FARM_OUTPUTS)
+                              if (repo / name).is_file()},
+    }
+
+
+def preflight(repo, source_commit):
+    require(re.fullmatch(r"[0-9a-f]{40}", source_commit) is not None,
+            "source_commit_requires_full_sha")
+    state = snapshot(repo)
+    require(state["branch"] == "test", "wrong_branch")
+    require(state["head"] == source_commit, "wrong_head")
+    require(state["origin_test"] == source_commit, "source_not_observed_pushed")
+    require(source_commit != BASE_HEAD, "owner_source_not_committed")
+    git(repo, "merge-base", "--is-ancestor", BASE_HEAD, source_commit)
+    for line in state["porcelain"].splitlines():
+        path = line[3:]
+        require(path in FARM_OUTPUTS or path.startswith("OUTPUT/") or
+                (line[:2] == "??" and re.fullmatch(r"kaonlt_review(?:\([^/]+\))?\.diff", path)),
+                "dirty_gate_source:" + line)
+    git(repo, "diff", "--check", "HEAD", "--", *GATE_PATHS,
+        *(":(exclude)" + name for name in sorted(FARM_OUTPUTS)))
+    return state
+
+
+def verify_preservation(repo, before):
+    after = snapshot(repo)
+    for key in before:
+        require(after[key] == before[key], "ordinary_checkout_changed:" + key)
+    return {"passed": True, "snapshot": after}
+
+
+def resolved_profile(repo, source_commit):
+    profile = collector.load_validation_profile(repo / PROFILE)
+    validate_settings(profile["settings"])
+    require(profile["validation_profile"] == PROFILE_ID and
+            profile["collection_mode"] == "generic_artifacts", "profile_mode_invalid")
+    require(profile["source_identity"] == {
+        "required_analysis_commit": BASE_HEAD, "allowed_committed_files": [],
+        "allowed_non_analysis_path_prefixes": ["docs/memory/"]}, "profile_source_identity_invalid")
+    profile["source_identity"]["required_analysis_commit"] = source_commit
+    return profile
+
+
+def cleanup_path(repo, parent, worktree, leaf):
+    parent = parent.resolve()
+    root = repo.resolve()
+    require(parent.parent == root.parent and parent != root and not parent.is_relative_to(root) and
+            not parent.is_symlink() and worktree.resolve() == parent / leaf and
+            worktree.resolve() != root and not worktree.resolve().is_relative_to(root),
+            "worktree_cleanup_path_invalid")
+
+
+@contextmanager
+def owned_worktree(repo, source_commit, leaf):
+    require(leaf in {"analysis", "source"}, "worktree_role_invalid")
+    with tempfile.TemporaryDirectory(prefix="kaonlt-e8-4-canonical-five-" + leaf + "-",
+                                     dir=repo.resolve().parent) as directory:
+        parent = Path(directory).resolve()
+        worktree = parent / leaf
+        cleanup_path(repo, parent, worktree, leaf)
+        git(repo, "worktree", "add", "--detach", str(worktree), source_commit)
+        try:
+            require(git(worktree, "rev-parse", "HEAD") == source_commit, "worktree_head_mismatch")
+            require(git(worktree, "branch", "--show-current") == "", "worktree_not_detached")
+            require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "",
+                    "worktree_dirty")
+            yield worktree
+        finally:
+            cleanup_path(repo, parent, worktree, leaf)
+            git(repo, "worktree", "remove", "--force", str(worktree))
+
+
+def collector_source_preflight(repo, source_commit, profile):
+    with owned_worktree(repo, source_commit, "source") as worktree:
+        with collection_module(worktree) as module, redirect_stdout(sys.stderr):
+            require(resolved_profile(worktree, source_commit) == profile, "collector_profile_mismatch")
+            _, checks = module.collect_source_checks(worktree,
+                required_analysis_commit=source_commit, allowed_committed_files=[])
+            for check in checks:
+                require(check["returncode"] == 0, "collector_source_check_failed:" +
+                        check["name"] + ":" + check["stderr"])
+            ancestor, _, unexpected = module._committed_identity(checks, [], ["docs/memory/"])
+            require(ancestor and not unexpected, "collector_source_identity_invalid")
+    return checks
+
+
+def python_json(cwd, code, arguments=(), env=None):
+    result = subprocess.run(["python3", "-B", "-c", code, *arguments], cwd=cwd,
+                            env=env, capture_output=True, text=True)
+    require(result.returncode == 0, "ltsep_python_probe_failed:" + result.stderr)
+    return json.loads(result.stdout)
+
+
+def import_identity(cwd, env=None):
+    return python_json(cwd, 'import json,ltsep,ltsep.pathing; '
+        'print(json.dumps({"package_file":ltsep.__file__,"pathing_file":ltsep.pathing.__file__}))', env=env)
+
+
+def path_fields(tree, caller, env=None):
+    result = subprocess.run(["python3", "-B", str(tree / "farm_env/print_ltsep_path_fields.py"),
+                             str(caller)], cwd=tree, env=env, capture_output=True, text=True)
+    require(result.returncode == 0, "ltsep_probe_failed:" + str(caller) + ":" + result.stderr)
+    fields = result.stdout.strip().split(",")
+    require(len(fields) == len(PATH_FIELDS), "ltsep_probe_fields_invalid")
+    return dict(zip(PATH_FIELDS, fields))
+
+
+def analysis_environment(overlay_parent, ambient=None):
+    env = dict(os.environ if ambient is None else ambient)
+    for key in ("LT_ANALYSIS_DEBUG_LEFT_LOW", "LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE",
+                "LT_ANALYSIS_ALLOW_UNPAIRED_CANONICAL_BINNING"):
+        env.pop(key, None)
+    previous = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = str(overlay_parent) + (os.pathsep + previous if previous else "")
+    return env
+
+
+def read_path_config(raw):
+    """Parse ltsep's plain KEY=value .path format without changing its bytes."""
+    values = {}
+    for line in raw.decode("utf-8").splitlines():
+        if not line.strip():
+            continue
+        key, separator, value = line.partition("=")
+        require(separator and key.strip() and key.strip() not in values, "ltsep_config_invalid")
+        values[key.strip()] = value.strip()
+    return values
+
+
+def prepare_runtime_overlay(repo, worktree):
+    identity = import_identity(repo)
+    package_file = Path(identity["package_file"]).resolve()
+    package = package_file.parent
+    pathing = Path(identity["pathing_file"]).resolve()
+    require(package_file.name == "__init__.py" and pathing.is_relative_to(package),
+            "ltsep_package_layout_invalid")
+    baseline = path_fields(repo, repo)
+    require(baseline["LTANAPATH"] and Path(baseline["LTANAPATH"]).is_absolute() and
+            Path(baseline["LTANAPATH"]).resolve() == repo.resolve(), "baseline_ltanapath_not_ordinary_repo")
+    parent = worktree.parent.resolve()
+    cleanup_path(repo, parent, worktree, "analysis")
+    overlay = parent / "runtime-python"
+    require(not overlay.exists(), "ltsep_overlay_already_exists")
+    overlay.mkdir()
+    copied = overlay / "ltsep"
+    shutil.copytree(package, copied, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    configs = []
+    for file in sorted((copied / "PATH_TO_DIR").glob("*.path")):
+        values = read_path_config(file.read_bytes())
+        if "LTANAPATH" not in values:
+            continue
+        # Use the installed package's own raw SetPath lookup to account for
+        # Root's derived OUTPATH/CUTPATH, without guessing those transformations.
+        observed = python_json(repo,
+            'import json,sys; from ltsep.pathing import SetPath; '
+            'p=SetPath(sys.argv[1]); '
+            'print(json.dumps({k:p.getPath(k) for k in json.loads(sys.argv[2])}))',
+            (str(repo), json.dumps(list(values))))
+        expanded = {key: value.replace("${USER}", baseline["USER"]) for key, value in values.items()}
+        if expanded == observed:
+            configs.append(file)
+    require(len(configs) == 1, "ltsep_matching_config_not_unique")
+    selected = configs[0]
+    original_config = package / selected.relative_to(copied)
+    original_bytes = selected.read_bytes()
+    require(original_config.read_bytes() == original_bytes, "ltsep_copy_identity_mismatch")
+    # Replace the value span only; keep all other fields, whitespace and line
+    # endings byte-for-byte. Never patch installed files or Python code.
+    matches = list(re.finditer(rb"(?m)^(LTANAPATH[ \t]*=[ \t]*)([^\r\n]*?)([ \t]*)(\r?$)", original_bytes))
+    require(len(matches) == 1, "ltsep_ltanapath_assignment_not_unique")
+    match = matches[0]
+    patched = original_bytes[:match.start(2)] + str(worktree).encode("utf-8") + original_bytes[match.end(2):]
+    selected.write_bytes(patched)
+    protected = {str(file): sha256(file) for file in (package_file, pathing, original_config)}
+    env = analysis_environment(overlay)
+    imported = import_identity(worktree, env)
+    require(Path(imported["package_file"]).resolve() == (copied / "__init__.py").resolve() and
+            Path(imported["pathing_file"]).resolve().is_relative_to(copied.resolve()),
+            "ltsep_overlay_import_identity_invalid")
+    record = {"original_package_identity": identity, "baseline_paths": baseline,
+        "overlay_parent": str(overlay), "selected_copied_config": str(selected),
+        "original_config_path": str(original_config), "original_copied_file_sha256": hashlib.sha256(original_bytes).hexdigest(),
+        "patched_copied_file_sha256": sha256(selected), "original_source_sha256": protected,
+        "child_import_identity": imported, "import_isolation_passed": True}
+    verify_ltsep_preservation(record)
+    return env, record
+
+
+def verify_ltsep_preservation(record):
+    for name, digest in record["original_source_sha256"].items():
+        require(Path(name).is_file() and sha256(name) == digest, "installed_ltsep_changed:" + name)
+    return {"passed": True, "original_source_sha256": record["original_source_sha256"]}
+
+
+def probe_paths(worktree, env=None, baseline=None):
+    probes = []
+    for caller in (worktree, worktree / "src/setup/set_sig_fortran.py",
+                   worktree / "set_SymLinks.sh"):
+        paths = path_fields(worktree, caller, env)
+        require(paths["LTANAPATH"] and Path(paths["LTANAPATH"]).is_absolute() and
+                Path(paths["LTANAPATH"]).resolve() == worktree.resolve(),
+                "ltanapath_not_isolated:" + str(caller))
+        require(all(paths[key] for key in ("SIMCPATH", "VOLATILEPATH", "ANATYPE")),
+                "ltsep_external_paths_missing")
+        probes.append({"caller": str(caller), "paths": paths, "isolation_passed": True})
+    require(all(item["paths"] == probes[0]["paths"] for item in probes), "ltsep_probe_paths_disagree")
+    if baseline is not None:
+        stable = set(PATH_FIELDS) - {"LTANAPATH", "OUTPATH"}
+        require(all(item["paths"][key] == baseline[key] for item in probes for key in stable),
+                "ltsep_stable_fields_changed")
+        expected_out = worktree / "OUTPUT/Analysis" / (baseline["ANATYPE"] + "LT")
+        require(all(Path(item["paths"]["OUTPATH"]).is_absolute() and
+                    Path(item["paths"]["OUTPATH"]).resolve() == expected_out.resolve()
+                    for item in probes), "ltsep_plot_ltsep_outpath_invalid")
+    return probes
+
+
+def external_symlink_preflight(worktree, paths):
+    """Read external links only; never invoke the mutation-bearing setup script."""
+    simc = Path(paths["SIMCPATH"])
+    require(simc.is_absolute() and simc.is_dir(), "simc_path_invalid")
+    records = []
+    for leaf in ("OUTPUTS", "input", "worksim"):
+        link = simc / leaf
+        require(link.is_symlink() and link.exists(), "external_simc_link_missing_or_broken:" + leaf)
+        records.append({"path": str(link), "literal_target": os.readlink(link),
+                        "resolved_target": str(link.resolve()), "mutation_required": False})
+    # Source the exact tracked Bash configuration, as set_SymLinks does. The
+    # current configuration contains assignments only; do not invent path values.
+    result = subprocess.run(["bash", "-c",
+        'source "$1" || exit; printf "%s" "${BACKGROUND_SIMC_PATH:-}"',
+        "kaonlt-background-path", str(worktree / "background_samples/background_samples.conf")],
+        cwd=worktree, env={**os.environ, "USER": paths["USER"]}, capture_output=True, text=True)
+    require(result.returncode == 0, "background_config_resolution_failed:" + result.stderr)
+    configured = result.stdout
+    background = Path(configured) if configured else None
+    if background is not None:
+        require(background.is_absolute(), "background_simc_path_not_absolute")
+        if background.is_dir():
+            link = background / "worksim"
+            expected = paths["VOLATILEPATH"] + "/worksim/"
+            require(link.is_symlink() and link.exists() and os.readlink(link) == expected,
+                    "background_simc_worksim_would_mutate")
+            records.append({"path": str(link), "literal_target": os.readlink(link),
+                            "resolved_target": str(link.resolve()), "mutation_required": False})
+    return {"passed": True, "background_simc_path": configured, "links": records}
+
+
+def run_analysis(worktree, log_path, env=None):
+    with log_path.open("xb") as log:
+        process = subprocess.Popen(COMMAND, cwd=worktree, env=env,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        for line in iter(process.stdout.readline, b""):
+            log.write(line)
+            log.flush()
+            sys.stderr.write(line.decode("utf-8", errors="replace"))
+            sys.stderr.flush()
+        return process.wait()
+
+
+def verify_completion(log_path, returncode):
+    require(returncode == 0, "analysis_failed")
+    text = log_path.read_text(encoding="utf-8", errors="replace")
+    require("Low Epsilon Completed!" in text and "High Epsilon Completed!" in text,
+            "full_analysis_completion_missing")
+    require("Left / lowe debug analysis completed." not in text, "debug_analysis_not_canonical_five")
+
+
+def pdf_name(phi, epsilon):
+    return f"{phi}_kaon_rand_sub_{KINEMATIC}_{epsilon}_full-background-subtraction.pdf"
+
+
+def verify_pages(payload, phi, epsilon):
+    require({"phi": phi, "epsilon": epsilon} in CANONICAL_SETTINGS, "setting_not_canonical")
+    require(payload.get("schema_version") == "full_background_subtraction_page_manifest/v1",
+            "page_manifest_schema_invalid")
+    expected = {"kinematic_token": KINEMATIC, "phi_setting": phi,
+                "epsilon_filename_token": epsilon, "particle_type": "kaon",
+                "epsilon_setting": {"lowe": "low", "highe": "high"}[epsilon]}
+    setting = payload.get("setting")
+    require(isinstance(setting, dict) and all(setting.get(k) == v for k, v in expected.items()),
+            "page_manifest_setting_invalid")
+    require(payload.get("pdf_basename") == pdf_name(phi, epsilon), "page_manifest_pdf_invalid")
+    require(payload.get("renderer_failures") == [], "renderer_failures_nonempty")
+    pages = payload.get("pages")
+    require(isinstance(pages, list) and all(isinstance(page, dict) for page in pages),
+            "page_inventory_invalid")
+    ids = Counter(page.get("page_id") for page in pages)
+    scopes = Counter((page.get("page_id"), page.get("scope")) for page in pages)
+    require(all(ids[key] == 1 for key in accepted.NEW_PAGE_IDS), "new_page_missing_or_duplicate")
+    require(all(scopes[key] == 1 for key in accepted.CRITICAL_PAGES), "critical_page_missing_or_duplicate")
+    for page in pages:
+        if page.get("page_id") == accepted.NEW_PAGE_IDS[-1]:
+            require(page.get("scope") == "setting", "parent_closure_scope_invalid")
+        elif page.get("page_id") in accepted.NEW_PAGE_IDS:
+            index = int(page["page_id"][-1]) - 1
+            require(page.get("scope") == "t" + str(index + 1), "new_page_scope_invalid")
+            require(page.get("t_index") == index, "new_page_t_identity_invalid")
+            require([child.get("phi_index") for child in page.get("represented_phi_inventory", [])]
+                    == list(range(9)), "new_page_child_inventory_invalid")
+    # These pages are emitted only after the unchanged producer has validated
+    # live parity, nonproduction/Method-B flags and candidate parent closure.
+    return len(pages)
+
+
+def artifact_names(profile):
+    names = set()
+    for scope in ("global", "settings"):
+        for entry in profile["artifacts"][scope]:
+            for setting in CANONICAL_SETTINGS:
+                names.add(entry["basename_template"].format(kinematic=KINEMATIC, **setting))
+    return names
+
+
+def verify_artifacts(outdir, profile, started_ns, before):
+    records = {}
+    for name in sorted(artifact_names(profile) - {SUMMARY}):
+        path = outdir / name
+        require(path.is_file() and path.stat().st_size > 0, "artifact_missing:" + name)
+        digest = sha256(path)
+        if name in CANDIDATES:
+            require(digest == CANDIDATES[name], "candidate_identity_mismatch:" + name)
+        else:
+            require(path.stat().st_mtime_ns >= started_ns and
+                    (path.stat().st_mtime_ns, path.stat().st_size, digest) != before.get(name),
+                    "artifact_stale:" + name)
+        if path.suffix == ".json":
+            collector._strict_json_payload(path)
+        records[name] = {"sha256": digest, "bytes": path.stat().st_size}
+    settings = []
+    for setting in CANONICAL_SETTINGS:
+        phi, epsilon = setting["phi"], setting["epsilon"]
+        pdf = outdir / pdf_name(phi, epsilon)
+        require(pdf.read_bytes().startswith(b"%PDF-"), "procedure_pdf_invalid:" + pdf.name)
+        pages = collector._strict_json_payload(pdf.with_name(pdf.stem + "-manifest.json"))
+        count = verify_pages(pages, phi, epsilon)
+        full = collector._strict_json_payload(outdir / f"kaon_FullAnalysis_{KINEMATIC}_{epsilon}.json")
+        inp = full.get("inpDict", {})
+        epsset = {"lowe": "low", "highe": "high"}[epsilon]
+        require(all(inp.get(key) == value for key, value in {
+            "ParticleType": "kaon", "EPSSET": epsset, "Q2": "4p4", "W": "2p74",
+            "OutFilename": f"FullAnalysis_{KINEMATIC}_{epsilon}"}.items()),
+            "full_analysis_identity_invalid")
+        histlist = full.get("histlist")
+        require(isinstance(histlist, list) and
+                Counter(hist.get("phi_setting") for hist in histlist) ==
+                Counter(s["phi"] for s in CANONICAL_SETTINGS if s["epsilon"] == epsilon),
+                "full_analysis_setting_inventory_invalid")
+        ledger = collector._strict_json_payload(outdir /
+            f"kaon_FullAnalysis_{KINEMATIC}_{epsilon}_correction_ledger_no_empirical_residual.json")
+        require(ledger.get("active_profile") == "no_empirical_residual" and
+                ledger.get("particle_type") == "kaon" and
+                ledger.get("epsset") == epsset and ledger.get("q2") == "4p4" and
+                ledger.get("w") == "2p74" and
+                Counter(row.get("phi_setting") for row in ledger.get("settings", [])) ==
+                Counter(s["phi"] for s in CANONICAL_SETTINGS if s["epsilon"] == epsilon),
+                "ledger_setting_inventory_invalid")
+        csv_path = outdir / f"kaon_FullAnalysis_{KINEMATIC}_{epsilon}_correction_ledger_no_empirical_residual.csv"
+        with csv_path.open(encoding="utf-8", newline="") as handle:
+            totals = [row["phi_setting"] for row in csv.DictReader(handle) if row.get("row_kind") == "setting_total"]
+        require(Counter(totals) == Counter(s["phi"] for s in CANONICAL_SETTINGS if s["epsilon"] == epsilon),
+                "ledger_csv_setting_inventory_invalid")
+        settings.append({**setting, "page_count": count, "renderer_failures": [],
+                         "producer_e8_4_authority_and_parent_gates_passed": True})
+    return records, settings
+
+
+def verify_zip(path, source_commit, records):
+    with zipfile.ZipFile(path) as archive:
+        require(archive.testzip() is None, "zip_integrity_failed")
+        manifest = json.loads(archive.read("manifest.json"))
+        require(manifest.get("complete") is True and manifest.get("errors") == [], "bundle_incomplete")
+        require(manifest.get("git_head") == source_commit and
+                manifest.get("required_analysis_commit") == source_commit, "bundle_source_identity_mismatch")
+        validate_settings(manifest.get("requested_settings"))
+        require(manifest.get("validation_profile") == PROFILE_ID, "bundle_profile_mismatch")
+        settings = manifest.get("settings", [])
+        validate_settings([{key: row.get(key) for key in ("phi", "epsilon")} for row in settings])
+        require(set(manifest.get("global_artifacts", {})) == {"candidate_f3", "candidate_f4", "run_summary"},
+                "bundle_global_inventory_invalid")
+        entries = list(manifest["global_artifacts"].values())
+        for row in settings:
+            require(set(row.get("artifacts", {})) == {"procedure_pdf", "page_manifest", "full_analysis",
+                    "correction_ledger_json", "correction_ledger_csv"}, "bundle_setting_inventory_invalid")
+            entries.extend(row["artifacts"].values())
+        seen = set()
+        for entry in entries:
+            name = Path(entry["archive_path"]).name
+            require(name in records, "bundle_artifact_inventory_invalid")
+            raw = archive.read(entry["archive_path"])
+            require(hashlib.sha256(raw).hexdigest() == entry["sha256"] == records[name]["sha256"]
+                    and len(raw) == entry["byte_size"] == records[name]["bytes"], "bundle_artifact_hash_mismatch:" + name)
+            seen.add(name)  # Epsilon-wide files intentionally occur in each phi directory.
+        require(seen == set(records), "bundle_artifact_missing")
+
+
+class GateStatus(accepted.GateStatus):
+    def __init__(self, outdir, output, source_commit):
+        self.path = accepted.gate_status_path(outdir, output)
+        now = datetime.now(timezone.utc).isoformat()
+        self.record = {
+            "schema_version": "e8_4_fix5_canonical_five_owner_gate_status/v1",
+            "source_commit": source_commit, "kinematic": KINEMATIC,
+            "settings": list(CANONICAL_SETTINGS), "expected_zip_path": output.as_posix(),
+            "analysis_log_path": (outdir / (output.stem + ".log")).as_posix(),
+            "started_at_utc": now, "updated_at_utc": now, "status": "running",
+            "stage": "preflight", "failure_reason": None,
+            "analysis_started": False, "analysis_completed": False,
+            "artifact_verification_completed": False, "collector_source_preflight_completed": False,
+            "collection_completed": False, "zip_verification_completed": False}
+        self._persist(initial=True)
+
+
+def copy_companion(source, destination):
+    """Exclusive delivery; a partial copy belongs to this failed attempt only."""
+    with source.open("rb") as src, destination.open("xb") as dst:
+        shutil.copyfileobj(src, dst)
+        dst.flush()
+        os.fsync(dst.fileno())
+
+
+def deliver_evidence(status, log_path, summary_path, output):
+    destinations = {
+        "log": output.with_name(output.stem + ".log"),
+        "run_summary": output.with_name(output.stem + "-run-summary.json"),
+        "gate_status": output.with_name(output.stem + "-gate-status.json")}
+    for destination in destinations.values():
+        require(not os.path.lexists(destination), "companion_destination_exists:" + str(destination))
+    status.update("companion_delivery")
+    identities = {}
+    for name, source in (("log", log_path), ("run_summary", summary_path)):
+        destination = destinations[name]
+        identity = {"path": str(destination), "sha256": sha256(source),
+                    "bytes": source.stat().st_size}
+        copy_companion(source, destination)
+        require(sha256(destination) == identity["sha256"] and
+                destination.stat().st_size == identity["bytes"], "companion_copy_identity_mismatch:" + name)
+        identities[name] = identity
+    status.update("complete", status="success", companion_evidence=identities,
+                  delivered_gate_status_path=str(destinations["gate_status"]))
+    # Final acceptance operation: transfer the already-published success receipt.
+    # Any copy failure propagates to execute_gate's failed source-status handler.
+    copy_companion(status.path, destinations["gate_status"])
+
+
+def execute_gate(repo, outdir, output, source_commit):
+    repo, outdir, output = Path(repo).resolve(), Path(outdir).resolve(), Path(output).resolve()
+    status = GateStatus(outdir, output, source_commit)
+    try:
+        require(not output.exists(), "output_zip_already_exists")
+        require(output.parent.is_dir(), "output_directory_missing")
+        provenance = preflight(repo, source_commit)
+        profile = resolved_profile(repo, source_commit)
+        for name, digest in CANDIDATES.items():
+            require((outdir / name).is_file() and sha256(outdir / name) == digest,
+                    "candidate_identity_mismatch:" + name)
+        before = {name: (path.stat().st_mtime_ns, path.stat().st_size, sha256(path))
+                  for name in artifact_names(profile) if (path := outdir / name).is_file()}
+        log_path = outdir / (output.stem + ".log")
+        require(not log_path.exists(), "run_log_already_exists")
+        status.update("collector_source_preflight")
+        checks = collector_source_preflight(repo, source_commit, profile)
+        status.update(collector_source_preflight_completed=True, collector_source_checks=checks)
+        with owned_worktree(repo, source_commit, "analysis") as worktree:
+            status.update("path_isolation")
+            env, overlay_record = prepare_runtime_overlay(repo, worktree)
+            status.update(ltsep_runtime_overlay=overlay_record)
+            probes = probe_paths(worktree, env, overlay_record["baseline_paths"])
+            require(outdir == (Path(probes[0]["paths"]["VOLATILEPATH"]) /
+                              "OUTPUT/Analysis/KaonLT").resolve(), "analysis_artifact_root_mismatch")
+            status.update("external_symlink_preflight")
+            external = external_symlink_preflight(worktree, probes[0]["paths"])
+            identity = {"path": str(worktree), "head": source_commit, "detached": True,
+                        "clean_before_execution": True, "owner_created": True}
+            started_ns = time.time_ns()
+            status.update("analysis", analysis_started=True, analysis_worktree=identity,
+                          isolation_probes=probes, external_symlink_preflight=external)
+            # Always check the primary checkout after the child, including an
+            # exception/failure; never restore it or accept artifacts on mismatch.
+            try:
+                returncode = run_analysis(worktree, log_path, env)
+            finally:
+                status.update("ordinary_checkout_preservation")
+                try:
+                    preservation = verify_preservation(repo, provenance)
+                finally:
+                    ltsep_preservation = verify_ltsep_preservation(overlay_record)
+                    status.update(installed_ltsep_preservation=ltsep_preservation)
+                status.update(ordinary_checkout_preservation=preservation)
+            status.update("completion_markers", analysis_returncode=returncode)
+            verify_completion(log_path, returncode)
+            status.update(analysis_completed=True)
+            status.update("verify_artifacts")
+            records, setting_checks = verify_artifacts(outdir, profile, started_ns, before)
+            status.update(artifact_verification_completed=True)
+            summary = {"schema_version": "e8_4_fix5_canonical_five_run_summary/v1",
+                "source_commit": source_commit, "settings": list(CANONICAL_SETTINGS),
+                "analysis_command": COMMAND, "analysis_worktree": identity,
+                "isolation_probes": probes, "external_symlink_preflight": external,
+                "ltsep_runtime_overlay": overlay_record, "installed_ltsep_preservation": ltsep_preservation,
+                "ordinary_checkout_before": provenance, "ordinary_checkout_preservation": preservation,
+                "analysis_returncode": returncode, "log_sha256": sha256(log_path),
+                "setting_verification": setting_checks, "candidate_sha256": dict(CANDIDATES),
+                "collector_source_checks": checks, "artifacts": records,
+                # A packaged summary cannot contain its enclosing ZIP's own hash.
+                # The atomic success status supplies that final identity, without
+                # rewriting the immutable summary after collector hashing.
+                "zip_identity": {"path": str(output), "success_receipt": str(status.path)},
+                "boundaries": {"method_a": "detached/non-production", "method_b_numerically_excluded": True,
+                    "production_promotion": False, "absolute_pion_misid_claim": False,
+                    "absolute_simc_amplitude_claim": False}}
+            summary_path = outdir / SUMMARY
+            summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            records[SUMMARY] = {"sha256": sha256(summary_path), "bytes": summary_path.stat().st_size}
+            status.update("collection")
+            with tempfile.TemporaryDirectory(prefix="kaonlt-canonical-five-profile-") as directory:
+                effective = Path(directory) / "profile.json"
+                effective.write_text(json.dumps(profile), encoding="utf-8")
+                with owned_worktree(repo, source_commit, "source") as source:
+                    with collection_module(source) as module, redirect_stdout(sys.stderr):
+                        result = module.collect_validation_bundle(outdir=outdir, kinematic=KINEMATIC,
+                            output=output, profile_path=effective, repo_root=source)
+                    require(result["returncode"] == 0, "collection_failed")
+                    status.update("source_recheck", collection_completed=True)
+                    final_checks = collector_source_preflight(repo, source_commit, profile)
+                    status.update(final_collector_source_checks=final_checks)
+                    verify_preservation(repo, provenance)
+                    verify_ltsep_preservation(overlay_record)
+                    status.update("verify_zip")
+                    verify_zip(output, source_commit, records)
+                    status.update("worktree_cleanup", zip_verification_completed=True,
+                                  zip_identity={"path": str(output), "sha256": sha256(output),
+                                                "bytes": output.stat().st_size})
+        try:
+            final_preservation = verify_preservation(repo, provenance)
+        finally:
+            final_ltsep_preservation = verify_ltsep_preservation(overlay_record)
+        status.update(final_ordinary_checkout_preservation=final_preservation,
+                      final_installed_ltsep_preservation=final_ltsep_preservation,
+                      worktree_cleanup_completed=True)
+        deliver_evidence(status, log_path, summary_path, output)
+        return output
+    except Exception as exc:
+        status.update(status="failed", failure_reason=str(exc))
+        raise
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-commit", required=True)
+    parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--outdir", type=Path, required=True, help="active external analysis artifact root")
+    parser.add_argument("--output", type=Path, required=True, help="fresh ZIP in the active external bundle root")
+    args = parser.parse_args(argv)
+    try:
+        result = execute_gate(args.repo, args.outdir, args.output, args.source_commit)
+    except Exception as exc:
+        print("Canonical-five gate failed: " + str(exc), file=sys.stderr)
+        print("Owner gate status: " + str(accepted.gate_status_path(args.outdir, args.output)), file=sys.stderr)
+        return 1
+    print(result.as_posix())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

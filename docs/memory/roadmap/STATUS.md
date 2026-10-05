@@ -248,7 +248,8 @@ See [Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10
 The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 `ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
 explanation and Method-A promotion do not follow. CURRENT owns the live gate;
-canonical-five expansion remains `DEFERRED` by user decision.
+current-lineage canonical-five expansion is now user-authorized; its isolated
+orchestration candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
@@ -264,23 +265,34 @@ Direct absolute mis-ID calibration, hardware cause and RF corroboration remain
 NOT VERIFIED. Historical closed F-stage, branch and owner/presentation scopes
 remain intact; absolute-SIMC units remain a separate blocker.
 
-Dependency: Gates 1–4 and external review consumed -> diagnostic implementation,
-narrow Left/lowe farm measurement and scientific interpretation consumed
-(no correction-design implementation warranted) -> later current-lineage
-canonical-five reconsideration (`DEFERRED` by user decision) -> final E.8
-(`BLOCKED`) -> F.6.4 explicit production-promotion decision (`BLOCKED`).
-CURRENT owns the exact next action. Lifting the expansion deferral requires
-explicit user authorization, then an exact five-setting current-lineage
-authority/validation audit before any implementation or farm contract. This
-closure authorizes no source/farm work or production promotion. Method A remains
-detached/non-production; Method B diagnostic/cross-check only and numerically
-excluded. RF is possible corroboration at low epsilon only, not a universal
-Method-A requirement.
+Dependency: Gates 1–4/external review and accepted Left/lowe diagnostic
+interpretation consumed -> user-authorized current-lineage canonical-five
+orchestration -> runtime evidence -> final E.8 (`BLOCKED`) -> F.6.4 explicit
+production-promotion decision (`BLOCKED`). Method A remains detached/non-production;
+Method B remains diagnostic/cross-check only and numerically excluded.
+
+#### Current-lineage canonical-five isolated orchestration
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the user lifted the expansion
+deferral under the [isolated-runtime contract](../phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
+The unchanged full launcher runs only in the owner-created detached analysis
+worktree under a sibling temporary root with a copied ltsep PYTHONPATH overlay;
+only copied LTANAPATH changes. Import/three-caller isolation, external-SIMC link
+no-mutation and ordinary-checkout/installed-ltsep preservation are mandatory
+gates. The dedicated generic profile uses
+exactly Left/lowe, Center/lowe, Left/highe, Center/highe and Right/highe (the
+unchanged collector retains its existing serialization order). No Right/lowe
+exists. Deterministic owner/profile tests and required regressions pass locally;
+actual-diff review, user synchronization and farm-readiness review remain
+required. Scientific source, historical accepted authorities and Left/lowe
+closures remain unchanged. Canonical-five runtime and actual PDF legibility
+remain NOT VERIFIED; absolute-SIMC interpretation is separately `BLOCKED` by
+`SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
 
 #### Final E.8 closure
 
 `BLOCKED` — final canonical-five validation is not supplied by the accepted
-Left/lowe scope; the existing canonical-five expansion remains `DEFERRED` by user decision.
+Left/lowe scope; current-lineage canonical-five runtime evidence remains pending.
 
 #### F.6.4 — explicit production-promotion decision
 
@@ -303,7 +315,8 @@ separate reconciliation. The narrow Refresh.2 materialization and Left/lowe curr
 reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
 Left/lowe owner and visual presentation gates are accepted. Broader numerical
 interpretation, absolute-SIMC units and the other four settings are not closed.
-Canonical-five expansion remains `DEFERRED` by user decision; final E.8 and F.6.4 remain `BLOCKED`.
+Canonical-five isolated orchestration is locally implemented, with runtime validation
+pending; final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Active-state ownership
 

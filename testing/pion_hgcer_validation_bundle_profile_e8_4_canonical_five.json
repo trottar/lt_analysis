@@ -1,0 +1,88 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_e8_4_fix5_canonical_five_isolated_runtime/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {
+      "phi": "Left",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Left",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Right",
+      "epsilon": "highe"
+    }
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "candidate_f3",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "candidate_f4",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-parent-preserving-correction-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "run_summary",
+        "basename_template": "{kinematic}_e8_4_fix5_canonical_five_run-summary.json",
+        "kind": "json",
+        "required": true
+      }
+    ],
+    "settings": [
+      {
+        "key": "procedure_pdf",
+        "basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "page_manifest",
+        "basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction-manifest.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "full_analysis",
+        "basename_template": "kaon_FullAnalysis_{kinematic}_{epsilon}.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "correction_ledger_json",
+        "basename_template": "kaon_FullAnalysis_{kinematic}_{epsilon}_correction_ledger_no_empirical_residual.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "correction_ledger_csv",
+        "basename_template": "kaon_FullAnalysis_{kinematic}_{epsilon}_correction_ledger_no_empirical_residual.csv",
+        "kind": "file",
+        "required": true
+      }
+    ]
+  },
+  "source_identity": {
+    "required_analysis_commit": "ed378e0f30a357c6293da64f8f8f3bfbe187d1fe",
+    "allowed_committed_files": [],
+    "allowed_non_analysis_path_prefixes": [
+      "docs/memory/"
+    ]
+  }
+}

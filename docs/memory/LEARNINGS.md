@@ -103,6 +103,18 @@
 - Publish per-attempt status atomically and refuse existing attempt files. Keep
   owner diagnostics out of a frozen scientific bundle inventory.
 
+- The user-identified canonical-five workflow failure exposed an incomplete
+  mutation audit: do not stop at top-level destructive Git commands. Recursively
+  trace invoked scripts and symlink targets, including model rewrites and
+  external link repair, before implementing a preservation contract.
+- When legitimate runtime mutation is broad, isolate the established runtime
+  as a unit in a bounded disposable worktree instead of adding successive
+  exceptions to preservation of the ordinary checkout. Fixed ltsep PATH_TO_DIR
+  values survive caller changes: use a disposable copied-package overlay,
+  patch only copied LTANAPATH and test actual imports/config resolution.
+  Import/path and external no-mutation gates precede analysis; ordinary checkout
+  and installed-package preservation are proven afterward, never repaired.
+
 ## Gate admissibility and chat health
 
 - A failed downstream gate stops forward progression even if its analysis child

@@ -16,14 +16,14 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8151,
+      "bytes": 8174,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "cd546e1acc45b3aa9d3464360eeda9fae57d1c4aba89f8b40f5789e18b258d54"
+      "sha256": "a103f53f6176969f408f32b497602a14965f155c42b72d9e8b981715d3369ea9"
     },
     {
-      "bytes": 7062,
+      "bytes": 8029,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "c0cffe15d6449b7da9952ff624a9f5d417463848999a5e339ce6ca8d45d3e648"
+      "sha256": "81f565120f6b833ce20e2d5998f4b5d3c6f456bea9eadd258d866dc2ae3f05f6"
     },
     {
       "bytes": 11088,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 18844,
+      "bytes": 20386,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "b54495bad1fd34d4fdb8197c63f1589cb7d46e35ebbfaca0c5f15d14ddef89a1"
+      "sha256": "7b01e4c2831315cebb4fe130aba3691b25f13a1446796f82382bbe68611b59c8"
     },
     {
       "bytes": 3606,
@@ -771,6 +771,11 @@
       "sha256": "692995fe00f4b0da7e6da7efb4cb393ac0a12dde7f5ec8dcef80a6e9e1763822"
     },
     {
+      "bytes": 24662,
+      "path": "docs/memory/phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md",
+      "sha256": "9e7ed1c4b2705c378b75d069a3264ab6ef651f8044a781c2058636067f43b62f"
+    },
+    {
       "bytes": 26240,
       "path": "docs/memory/phases/e8-4-production-impact-audit-task-contract.md",
       "sha256": "2140d5aed22729abfcd357b5065b19d62952747c018a13f8f562b33c31cd59dc"
@@ -1061,9 +1066,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 20937,
+      "bytes": 22140,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "baed4f0635b27383c9ba47217b02ed63bd4ab0f54e902f8f523f0139e99be39e"
+      "sha256": "be94b4b0a03014567a9403fd8654be040b4560f12f9d1d7f28d6c8c6229197fb"
     },
     {
       "bytes": 1698,

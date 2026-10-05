@@ -11,42 +11,43 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The detached current-lineage diagnostic is `CLOSED / RUNTIME VALIDATED` only
-for Q4p4W2p74 / Left / lowe, parents t0/t1/t2, primary target t1. The
+The isolated current-lineage canonical-five orchestration candidate is
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[isolated-runtime contract](phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
+The user lifted canonical-five `DEFERRED`; accepted scientific authority required
+no Method-A redesign. The unchanged full Q4p4W2p74 launcher runs in a detached
+worktree under an owner-created sibling root. SOURCE VERIFIED: runtime cleanup,
+symlink setup and `set_sig_fortran` mutate local state. A copied imported ltsep
+overlay changes only LTANAPATH; import identity, three caller probes and external
+link no-mutation gates precede execution. Preserve ordinary checkout status/bytes
+and installed ltsep bytes, including after child failure.
+Five-setting freshness/page gates, clean detached collection, final rechecks,
+ZIP verification, bounded cleanup and companion delivery are owner gates.
+Local tests are synthetic. Canonical-five runtime remains NOT VERIFIED; source
+review and synchronization are workflow gates, not runtime evidence.
+
+The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
+parents t0/t1/t2, primary t1; its
 [accepted evidence checkpoint](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
-records user-supplied JSON/PDF independently accepted by ChatGPT before this
-Codex closure; Codex did not rerun or independently revalidate the artifacts.
-The external research checkpoint, Gates 1–4, narrow farm measurement and
-scientific interpretation gate are consumed.
-
-RUNTIME VERIFIED (accepted review): exact current F.1/F.3/F.4 authority and
-shared F.4 reproduction passed, as did the eight-page PDF review. Training-control
-and physical-control identities match exactly (10716/18749/22356); t1 signed
-versus positive-support normalization differs by -1.02%, parent closure residual
-is 0.0, and only 21 of 19809 application records are OOD (~0.106%). Signed/absolute
-support, source decomposition, finite tails and child/MM/coordinate dependence
-are now measured.
-
-INFERENCE / scientific decision: these measurements do not support strong
-signed-normalization pathology, broad OOD or training/application mismatch as
-explanations of t1 redistribution. Accepted F.6.2 acceptance/MM/paired-bootstrap
-validation and comparator t1 continuity support the detached refinement picture.
-No correction redesign is warranted by this diagnostic. Direct absolute mis-ID
-calibration, unique weak-positive-to-zero-response proxy validity, hardware cause
-and production promotion remain NOT VERIFIED.
+records user-supplied JSON/PDF independently accepted by ChatGPT. RUNTIME VERIFIED
+(prior review): exact authority/shared F.4 reproduction and eight-page review
+passed; control identities match (10716/18749/22356), t1 normalization contrast
+is -1.02%, parent residual 0.0 and OOD 21/19809 (~0.106%). INFERENCE: together
+with accepted F.6.2 acceptance/MM/bootstrap validation and comparator t1
+continuity, no correction redesign is warranted. Direct absolute mis-ID,
+unique zero-response proxy validity, hardware cause and promotion remain
+NOT VERIFIED. Gates 1–4, external research and diagnostic interpretation remain
+consumed. No new farm artifact acceptance is claimed.
 
 ## Verified State
 
-SOURCE VERIFIED (current PID masks; Gate-3 ownership retained): NPE=0 is the
-kaon PID category, NPE>0 the pion tree, NPE>2 physical pion control. Training
-and application have distinct roles; P(NPE=0 | true pion,x) is pion-to-kaon HGC mis-ID into
-the kaon-selected sample, not an observed pion class. F.3
-`hgcer3` represents relative response, not absolute leakage probability. F.4
-preserves signed canonical-t parents, not each child or MM subregion. Baseline
-`w0` already owns the established pion-control-to-background transfer.
-The configured HGCer hole is excluded. Zero-photoelectron pion transfer remains
-non-authoritative/diagnostic-only, not an approved replacement. Slow-proton
-architecture is analogue-only, not a pion prescription.
+SOURCE VERIFIED (Gate-3 ownership retained): NPE=0 is kaon PID, NPE>0 the
+pion tree, NPE>2 physical pion control. F.3 `hgcer3` is relative response,
+not absolute leakage probability; F.4 preserves signed canonical-t parents,
+not children/MM subregions. Baseline `w0` owns pion-control-to-background
+transfer. The HGCer hole is excluded; zero-photoelectron transfer remains
+diagnostic-only and slow-proton architecture analogue-only. Detailed PID,
+training/application and scientific limits remain in the Gate-3 reference.
 
 RUNTIME VERIFIED (prior supplied accepted reviews, not new artifact inspection):
 the current-baseline comparator reproduced F.2/F.3 scientific payloads exactly;
@@ -59,11 +60,11 @@ F.4.Refresh.2 remains
 only for Left/lowe branch execution, live-cache parity, real child changes and
 signed parent preservation. See [branch evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
 
-Fix.5.7 remains `CLOSED / RUNTIME VALIDATED` only for Left/lowe owner/checker
-setting provenance through final ZIP; [Fix.5.8](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
-remains `CLOSED / RUNTIME VALIDATED` only for Left/lowe presentation legibility.
-Its 97-page bundle, structural checks, parent closure and visual review remain
-accepted at their recorded scope. External literature adds no runtime validation.
+Fix.5.7/Fix.5.8 remain `CLOSED / RUNTIME VALIDATED` only for Left/lowe
+owner provenance and presentation legibility, respectively. The accepted
+[Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
+retains its 97-page structural/parent/visual scope. External literature adds
+no runtime validation.
 
 Historical F.1-F.6.2 closures retain their accepted scopes in the
 [roadmap](roadmap/STATUS.md). E.8.2/E.8.3 and workflow hardening remain
@@ -72,6 +73,9 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
+- Isolated-owner implementation startup observation, 2026-10-05: branch `test`,
+  HEAD/local `origin/test` `ed378e0f30a357c6293da64f8f8f3bfbe187d1fe`.
+  This is a timestamped source observation, not a new farm identity.
 - Accepted diagnostic farm `git_head` and observed closure startup branch
   `test`, HEAD/local `origin/test`: `aad27a4d1639eef188dc61563fd3615682835835`.
   The local observation is timestamped 2026-10-04, not permanent live authority.
@@ -90,13 +94,11 @@ lineages. No accepted authority is replaced.
 
 ## Blockers
 
-The prior unmeasured t1 signed-normalization/support/population explanations are
-consumed by the accepted diagnostic and interpretation. This does not establish
-direct absolute pion mis-ID calibration, a specific PMT/mirror/optical/hardware
-cause or production correctness outside accepted detached scopes. RF corroboration
-was not performed; RF is additional information at low epsilon only, not a
-universal Method-A requirement. Canonical-five remains `DEFERRED` by user decision;
-final E.8 and F.6.4 production promotion remain `BLOCKED`.
+The accepted diagnostic consumes the prior unmeasured t1 normalization/support/
+population explanations. Absolute mis-ID, hardware cause and production
+correctness remain unproven. RF corroboration was not performed; it is optional
+at low epsilon, not universal. Canonical-five runtime remains unvalidated;
+final E.8 and F.6.4 remain `BLOCKED`.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
 `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. Existing
@@ -107,19 +109,17 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after independent closure diff review, user commit/push and pushed-state
-synchronization, return to the user-deferred current-lineage canonical-five
-reconsideration gate using accepted Left/lowe and prior F.6.2/F.6.3 evidence.
-Start no canonical-five source/farm work unless the user explicitly authorizes
-lifting `DEFERRED`. If authorized, first audit exact five-setting current-lineage
-authority/validation scope before any implementation or farm contract.
+NEXT — after ChatGPT actual-diff review, user commit/push, and pushed-state
+synchronization, perform the farm-readiness audit of the tracked isolated
+canonical-five owner/profile. Only a PASS may authorize one user-run
+Q4p4W2p74 canonical-five farm gate.
 
 ## Success Criteria
 
-Closure manifest, ordinary memory health, bootstrap, allowlist/provenance and
-complete-diff checks must pass. Local checks do not independently validate farm
-execution or science; actual-diff review and user-controlled synchronization remain
-required. This closure authorizes no scientific-source change or farm command.
+Deterministic owner/profile and required regressions, manifest, ordinary memory
+health, bootstrap, allowlist/byte-preservation and complete-diff checks must pass.
+Local implementation does not establish ROOT/farm or scientific acceptance.
+No staging, commit, push or farm execution is authorized for Codex.
 
 ## Do Not Reopen Without New Evidence
 

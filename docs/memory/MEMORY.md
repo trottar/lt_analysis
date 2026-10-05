@@ -278,6 +278,25 @@ is EXTERNAL LITERATURE and planning inference, not KaonLT runtime evidence:
   or warranting a replacement correction. Literature remains distinct from
   accepted KaonLT runtime evidence.
 
+### Full-analysis runtime isolation
+
+The ordinary full launcher intentionally mutates repository-local working
+state through `git clean`, symlink setup, `set_sig_fortran` model rewrites and
+generated model/cache files. Canonical validation must execute it only inside
+an owner-created detached disposable analysis worktree under a sibling temporary
+root, never in the ordinary farm checkout. Copy the actually imported ltsep
+package to a separate PYTHONPATH overlay; uniquely match its PATH_TO_DIR config
+against the ordinary baseline and change only copied LTANAPATH. Caller changes
+alone do not override fixed config values. Prove overlay import identity and
+equal launcher/set-sig/link-setup path dictionaries before execution. Preserve
+external environment except the three debug/bypass variables; source background
+config with resolved ltsep USER and require external links need no repair.
+Record and recheck ordinary identity/status/farm-local bytes and original ltsep
+path/config hashes even after child failure; never restore mismatches or copy
+runtime mutations back. Cleanup is bounded to owner-created siblings. The
+canonical-five owner/profile is a
+local orchestration candidate, not runtime acceptance or production promotion.
+
 ## Canonical record ownership
 
 - [CURRENT.md](CURRENT.md) owns the sole active objective, blockers, and exact
