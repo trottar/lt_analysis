@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8051,
+      "bytes": 8180,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4ad300b209d34f52cb8d557ab01cddd018afdb80bc099005ffa0e4551782a8ac"
+      "sha256": "c17155508da55054beac8ad3e3ebb896dbe6bfd3b1716be60852481521fc5e66"
     },
     {
       "bytes": 8484,
@@ -116,9 +116,9 @@
       "sha256": "ecfc8cdee4a30b3df084fb5ae8776b3aa76a23291bcc274c5e0d0b2382db4179"
     },
     {
-      "bytes": 5159,
+      "bytes": 5725,
       "path": "docs/memory/evidence/VALIDATION_HISTORY.md",
-      "sha256": "29d6421a235f6924c7c3bda9f450af0c1bb4b75bddb07460f047ccced971bfc0"
+      "sha256": "44fe00e66b505563d8489ef8f680d0282e8975edca1d4aa6b035cba12ea3c896"
     },
     {
       "bytes": 1300,
@@ -149,6 +149,11 @@
       "bytes": 5157,
       "path": "docs/memory/evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md",
       "sha256": "a8d63c5032cf64ee2e8129affc2b32cb3558234b122964c206125c55b01146ca"
+    },
+    {
+      "bytes": 6215,
+      "path": "docs/memory/evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md",
+      "sha256": "0f9034877b98c47c36f6bd2a02c8605faa2629d900c1fad6f9dd24a066f0117c"
     },
     {
       "bytes": 2720,
@@ -821,6 +826,11 @@
       "sha256": "2070bee0fbb136b71d5c770f882b2925759177f2de8059b51bf28f6d8b60af84"
     },
     {
+      "bytes": 23251,
+      "path": "docs/memory/phases/e8-science-first-reanchor-after-canonical-five-provenance-blocker-task-contract.md",
+      "sha256": "6e960ee3d7dd6dbdcd98983286001d1ee65175a88289047ef1b362c0aef98262"
+    },
+    {
       "bytes": 23544,
       "path": "docs/memory/phases/f4-refresh1-current-baseline-authority-comparison-task-contract.md",
       "sha256": "27cff133524e0aa340e1badb945d2ab38051d0a37c5b03119997ee027e66ee9f"
@@ -1086,9 +1096,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 22140,
+      "bytes": 23367,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "be94b4b0a03014567a9403fd8654be040b4560f12f9d1d7f28d6c8c6229197fb"
+      "sha256": "8e73663b034b6ae2160ebc6f2c660027caea0d54d159e03f7b5bcc5d9fb85b23"
     },
     {
       "bytes": 1698,

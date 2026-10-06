@@ -31,26 +31,32 @@ provenance review, and rendered-page inspection.
   canonical-five, F.6.4, production or absolute-SIMC interpretation closure.
   See [Fix.5.8 evidence](e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
 
-Accepted narrow evidence, prior arithmetic checks and current fail-closed
-identity validation support treating Left/lowe histogram/scalar bookkeeping as
-internally consistent for the present re-anchor. Stale scalar/wrong histogram
-is no longer the primary live scientific issue. Accepted Fix.5.7/Fix.5.8 and
-F.6.3/E.8.4 branch execution, real child changes and signed parent preservation
-retain their exact narrow scopes. These closures do not establish detector-
-response origin or scientific validity of the large low-t Method-A redistribution,
-including global-weight differences and t1 pion-background/yield impact. The
-[post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
-preserves earlier observations and audit chronology as history. No new farm
-evidence or causal explanation is claimed; absolute-SIMC units remain separate
-and no Method-A promotion follows. CURRENT owns the `ACTIVE` scientific-validity
-work item and the ordered pre-implementation gates. Gates 2 and 3 are completed;
-the repository-memory audit found no blocking contradiction, and the source/
-science audit supplied no new runtime evidence, detector cause or Method-A
-production validation. Accepted narrow runtime closures remain unchanged.
-Current scientific interpretation remains `BLOCKED` pending further evidence;
-absolute-SIMC provenance/units remain a separate limitation. Detailed findings
-and hypotheses belong in the [Gate-3 investigation](../investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md),
-not in farm-evidence history.
+Accepted Fix.5.7/Fix.5.8 and F.6.3/E.8.4 Left/lowe branch execution,
+real child changes and signed parent preservation retain their exact narrow
+scopes. The [accepted detached diagnostic](e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
+consumed the earlier scientific-validity investigation; no correction redesign,
+absolute mis-ID calibration, hardware cause or production promotion follows.
+The [post-farm investigation](../investigations/e8-4-fix5-left-lowe-post-farm-identity-lineage-visualization-2026-10-02.md)
+and [Gate-3 investigation](../investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
+preserve their original observations and chronology.
+
+## Canonical-five diagnostic history — 2026-10-05
+
+- The [first full-run failure and fresh-F1 materialization](e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
+  remain diagnostic history: F.2/F.3 matched, with F.4 the first changed stage
+  against the preceding lineage, not the second run's comparison result.
+- The [accepted separate lineage preflight](e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
+  is `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/reproduction/
+  preservation only; no analysis ran in that separate gate.
+- The [second full-run provenance blocker](e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md)
+  at `ace8688a71431d13b40ed19713a27746f3da6a8e` completed the analysis child
+  but failed owner artifact/page verification. All five E.8.4 manifests showed
+  unavailable pages with `f3_fingerprint_input_content_mismatch` after F.1
+  regeneration. RUNTIME VERIFIED (supplied diagnostic evidence): the tracked
+  post-run comparator found F.2=true, F.3=true, F.4=true and
+  `first_changed_stage = none`. This is not canonical-five closure or proof of
+  a new scientific defect. The full runtime gate is `BLOCKED`; provenance/
+  identity repair is `DEFERRED` by current user decision.
 
 ## Historical non-closures and their original scope
 
@@ -72,12 +78,14 @@ not in farm-evidence history.
   renderer-source commit. That source-only checkpoint predates the later
   accepted F-stage/E.8 evidence and is not current downstream work.
 
-CURRENT alone owns the live objective, blockers and NEXT. This file preserves
-evidence history and original scopes; the [roadmap](../roadmap/STATUS.md)
-holds accepted dependency/status structure. E.8 overall remains `ACTIVE`;
-canonical-five expansion is `DEFERRED` by user decision, final E.8/F.6.4
-`BLOCKED`, Method A
-detached/non-production and Method B numerically excluded. The accepted narrow
-Fix.5 gates do not resolve absolute-SIMC units or authorize another farm run.
+Canonical-five expansion/orchestration was user-authorized and attempted;
+the second full runtime gate is `BLOCKED`, and the narrow provenance/identity
+repair is now `DEFERRED` while E.8 science resumes. E.8 remains `ACTIVE`;
+final E.8/F.6.4 and absolute-SIMC interpretation remain `BLOCKED`. Method A
+remains detached/non-production and Method B diagnostic/cross-check only and
+numerically excluded. No farm run is authorized by this checkpoint.
 
 See sources/ARTIFACT_INDEX.md for recovered artifact classes and limitations.
+This file preserves evidence history and original scopes; the
+[roadmap](../roadmap/STATUS.md) holds dependency/status structure.
+[CURRENT.md](../CURRENT.md) alone owns the live objective, blockers and NEXT.

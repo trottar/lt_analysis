@@ -248,8 +248,8 @@ See [Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10
 The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 `ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
 explanation and Method-A promotion do not follow. CURRENT owns the live gate;
-current-lineage canonical-five expansion is now user-authorized; its isolated
-orchestration candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+current-lineage canonical-five expansion was user-authorized. Its second full
+runtime gate is `BLOCKED`; provenance/identity repair is now `DEFERRED`.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
@@ -266,33 +266,50 @@ NOT VERIFIED. Historical closed F-stage, branch and owner/presentation scopes
 remain intact; absolute-SIMC units remain a separate blocker.
 
 Dependency: Gates 1–4/external review and accepted Left/lowe diagnostic
-interpretation consumed -> user-authorized current-lineage canonical-five
-orchestration -> runtime evidence -> final E.8 (`BLOCKED`) -> F.6.4 explicit
-production-promotion decision (`BLOCKED`). Method A remains detached/non-production;
-Method B remains diagnostic/cross-check only and numerically excluded.
+interpretation consumed -> user-authorized canonical-five orchestration
+attempted -> second full runtime gate `BLOCKED`. Provenance/identity repair
+is `DEFERRED` while the E.8.2 baseline MM/stage-yield scientific audit resumes;
+that audit does not require immediate provenance repair. Subsequent E.8.3/E.8.4
+interpretation follows the approved roadmap unless fresh evidence establishes
+a blocker. Final E.8 and F.6.4 remain `BLOCKED`. Method A remains
+detached/non-production; Method B remains diagnostic/cross-check only and
+numerically excluded. CURRENT alone owns the exact next action.
 
 #### Current-lineage canonical-five isolated orchestration
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` — the user lifted the expansion
-deferral under the [isolated-runtime contract](../phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
-The unchanged full launcher runs only in the owner-created detached analysis
-worktree under a sibling temporary root with a copied ltsep PYTHONPATH overlay;
-only copied LTANAPATH changes. Import/three-caller isolation, external-SIMC link
-no-mutation and ordinary-checkout/installed-ltsep preservation are mandatory
-gates. The dedicated generic profile uses
-exactly Left/lowe, Center/lowe, Left/highe, Center/highe and Right/highe (the
-unchanged collector retains its existing serialization order). No Right/lowe
-exists. Deterministic owner/profile tests and required regressions pass locally;
-actual-diff review, user synchronization and farm-readiness review remain
-required. Scientific source, historical accepted authorities and Left/lowe
-closures remain unchanged. Canonical-five runtime and actual PDF legibility
-remain NOT VERIFIED; absolute-SIMC interpretation is separately `BLOCKED` by
-`SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
+`BLOCKED` — the second full runtime gate failed artifact/page verification.
+The user authorized expansion under the
+[isolated-runtime contract](../phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` describes the historical local
+implementation checkpoint, not the present full-run gate. The unchanged full
+launcher runs only in an owner-created detached worktree with a copied ltsep
+PYTHONPATH overlay. Import/three-caller isolation, external-SIMC no-mutation
+and ordinary-checkout/installed-ltsep preservation remain required. The profile
+retains exactly Left/lowe, Center/lowe, Left/highe, Center/highe and Right/highe;
+no Right/lowe exists, and collector serialization order is unchanged.
+
+The [separate lineage preflight](../evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
+remains `CLOSED / RUNTIME VALIDATED` only for pre-analysis lineage, isolation,
+reproduction and preservation. The
+[second full runtime gate](../evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md)
+is `BLOCKED`: analysis completed, but artifact/page verification failed after
+analysis regenerated a different F.1 identity set and made F.6.3 unavailable.
+RUNTIME VERIFIED (supplied diagnosis): the tracked post-run comparator found
+exact F.2/F.3/F.4 scientific payload equality, `first_changed_stage = none`.
+INFERENCE: this failure exposes provenance/identity coupling rather than a
+newly established Method-A scientific defect. Repair is `DEFERRED` by current
+user decision while science-first E.8 work resumes; it is not complete.
+
+Scientific source, historical accepted authorities and Left/lowe closures
+remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
+E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
+`BLOCKED` by `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
 
 #### Final E.8 closure
 
 `BLOCKED` — final canonical-five validation is not supplied by the accepted
-Left/lowe scope; current-lineage canonical-five runtime evidence remains pending.
+Left/lowe scope; the second canonical-five full runtime gate is `BLOCKED` and
+its provenance/identity repair is `DEFERRED`.
 
 #### F.6.4 — explicit production-promotion decision
 
@@ -315,8 +332,9 @@ separate reconciliation. The narrow Refresh.2 materialization and Left/lowe curr
 reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
 Left/lowe owner and visual presentation gates are accepted. Broader numerical
 interpretation, absolute-SIMC units and the other four settings are not closed.
-Canonical-five isolated orchestration is locally implemented, with runtime validation
-pending; final E.8 and F.6.4 remain `BLOCKED`.
+Canonical-five isolated orchestration was user-authorized and attempted; its
+second full runtime gate is `BLOCKED`, with provenance/identity repair `DEFERRED`
+while the E.8.2 scientific audit resumes. Final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Active-state ownership
 
