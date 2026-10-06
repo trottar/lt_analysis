@@ -11,20 +11,19 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The fresh-F1 refresh and separate preflight owner are
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
-[fresh-F1 contract](phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md).
-The first isolated canonical-five farm gate is `BLOCKED`: analysis completed,
-but all five E.8.4 manifests were unavailable from stale pins.
-The [supplied lineage evidence](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
-records F.2/F.3 equality, F.4 as first changed stage and detached materialization.
-Private pins identify that fresh lineage. The owner verifies/stages F.3/F.4;
-`--lineage-preflight-only` runs real five-setting reconstruction, cleanup and
-final preservation, then returns a receipt with analysis_started=false.
-The full run requires acceptance of this separate farm gate. Normal mode
-retains preflight before analysis and all artifact/ZIP/delivery gates.
-Canonical-five runtime remains NOT VERIFIED; source review and synchronization
-are workflow gates, not runtime evidence.
+The separate fresh-F1 canonical-five lineage preflight is
+`CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
+The [accepted preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
+records reviewed materialization/staging, five real F.4/F.5 reconstructions,
+cleanup and final preservation with analysis_started=false. Acceptance is
+attributed to the supplied receipt and prior review, not a Codex farm rerun.
+
+Full canonical-five validation remains
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; full runtime is NOT VERIFIED.
+The first full-run failure from stale pins remains
+[historical diagnostic evidence](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md).
+Normal mode retains preflight before analysis and all artifact/ZIP/delivery
+gates. Full-run readiness still requires its final audit.
 
 The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
 parents t0/t1/t2, primary t1; its
@@ -73,9 +72,11 @@ lineages. No accepted authority is replaced.
 
 ## Source / Evidence Identity
 
-- Fresh-lineage implementation startup observation, 2026-10-05: branch `test`,
-  HEAD/local `origin/test` `463d2657f696ecee33113edc3393ac51083a8944`.
-  This is a timestamped source observation, not a new farm identity.
+- Accepted lineage-preflight farm source and closure startup observation,
+  2026-10-05, branch `test`, HEAD/local `origin/test`:
+  `b8bafd3f2853523ca9deb7aa7d6b572357584d6f`.
+  Receipt SHA-256: `3bad694fa000e34d502b73d9124309c24884a5d6a5746ef9a863cb65e6238ba4`.
+  This narrow preflight source identity does not establish full-run validation.
 - Accepted diagnostic farm `git_head` and observed closure startup branch
   `test`, HEAD/local `origin/test`: `aad27a4d1639eef188dc61563fd3615682835835`.
   The local observation is timestamped 2026-10-04, not permanent live authority.
@@ -109,16 +110,15 @@ No incorrect normalization, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after actual-diff review, user commit/push and pushed-state synchronization,
-one fast lineage-preflight-only farm gate using the reviewed materialization
-directory -> evidence review. Full canonical-five analysis requires that
-gate's acceptance and later authorization.
+NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
+synchronization of this checkpoint, perform the final farm-readiness audit of
+the normal canonical-five owner at the pushed source. Only a PASS may authorize
+one full Q4p4W2p74 canonical-five farm run.
 
 ## Success Criteria
 
-Deterministic owner/profile and required regressions, manifest, ordinary memory
-health, bootstrap, allowlist/byte-preservation and complete-diff checks must pass.
-Local implementation does not establish ROOT/farm or scientific acceptance.
+Manifest, ordinary memory health, bootstrap, allowlist/byte-preservation and
+complete-diff checks must pass. Memory-only checks add no runtime acceptance.
 No staging, commit, push or farm execution is authorized for Codex.
 
 ## Do Not Reopen Without New Evidence

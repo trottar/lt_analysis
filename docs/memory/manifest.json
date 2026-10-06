@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8163,
+      "bytes": 8051,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "17749a64c615181962ec99c1cf8189c39518a255ea51c3e994d61546db542a86"
+      "sha256": "4ad300b209d34f52cb8d557ab01cddd018afdb80bc099005ffa0e4551782a8ac"
     },
     {
       "bytes": 8484,
@@ -144,6 +144,11 @@
       "bytes": 4422,
       "path": "docs/memory/evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md",
       "sha256": "9e7096e5ecc2e2caf7c3f05c171c2c667a97aff339274005f2bf573c13a1c19f"
+    },
+    {
+      "bytes": 5157,
+      "path": "docs/memory/evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md",
+      "sha256": "a8d63c5032cf64ee2e8129affc2b32cb3558234b122964c206125c55b01146ca"
     },
     {
       "bytes": 2720,
@@ -589,6 +594,11 @@
       "bytes": 19917,
       "path": "docs/memory/phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md",
       "sha256": "4966cf6c4b3ad40c4ab3dd0f1c5748f8447b35da8763a28da66a8360e77d6727"
+    },
+    {
+      "bytes": 8676,
+      "path": "docs/memory/phases/e8-4-canonical-five-lineage-preflight-runtime-closure-task-contract.md",
+      "sha256": "666a846b0430e056bed0c301df75f9d67a81e171f18412be5ac575865df5a887"
     },
     {
       "bytes": 11174,
