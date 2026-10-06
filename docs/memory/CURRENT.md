@@ -11,22 +11,31 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
+The [E.8.2 Left/lowe audit owner](phases/e8-2-left-lowe-runtime-scientific-audit-owner.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under its
+[revised contract](phases/e8-2-left-lowe-runtime-scientific-audit-owner-task-contract.md).
+SOURCE VERIFIED: no new E.8.2 scientific implementation is justified;
+the existing traversal, proton bookkeeping, production prune boundary and
+baseline pion/final-yield chain remain unchanged. Actual stage magnitudes
+require one narrow runtime gate. The frozen v4 collector still requires all
+five profile declarations; the new isolated owner requests only Left/lowe.
+Local checks validate infrastructure, not farm integration or PDF legibility.
+
 The fresh-F1 canonical-five lineage preflight is
 `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
 The [accepted preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
 records reviewed materialization/staging, five real F.4/F.5 reconstructions,
-cleanup and final preservation with analysis_started=false. Acceptance comes from the supplied receipt and prior review; Codex ran no farm gate.
+cleanup and final preservation with analysis_started=false; the supplied
+receipt/prior review owns acceptance, not this local task.
 
 The second full canonical-five runtime gate is `BLOCKED`: analysis completed
 (returncode 0), but artifact/page verification failed. All five fresh manifests
 contained only `full_background.e8_4.unavailable` for E.8.4, with
 `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
-RUNTIME VERIFIED (supplied diagnosis): analysis regenerated different F.1
-raw/stable identities after successful pre-analysis reproduction; the tracked
-post-run comparator reconstructed matching F.2/F.3/F.4 scientific payloads,
-`first_changed_stage = none`. INFERENCE: this gate exposes provenance/identity
-coupling, not a newly established Method-A scientific defect. See the
-[second-run diagnostic evidence](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md).
+RUNTIME VERIFIED (supplied diagnosis): regenerated F.1 identities differed;
+post-run F.2/F.3/F.4 scientific payloads matched (`first_changed_stage = none`).
+INFERENCE: provenance/identity coupling, not a newly established Method-A
+scientific defect. See the [second-run diagnosis](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md).
 
 Canonical-five provenance/identity repair is `DEFERRED` by user decision.
 Full runtime/PDF closure and the low-level cause remain NOT VERIFIED. The
@@ -41,7 +50,7 @@ reproduction and eight-page review. Control identities match
 OOD 21/19809 (~0.106%). INFERENCE: with accepted F.6.2 acceptance/MM/bootstrap
 validation and comparator t1 continuity, no correction redesign is warranted.
 Absolute mis-ID, unique zero-response proxy validity, hardware cause and
-promotion remain NOT VERIFIED. Gates 1–4, external research and diagnostic interpretation are consumed.
+promotion remain NOT VERIFIED. Prior investigation/interpretation is consumed.
 
 ## Verified State
 
@@ -71,8 +80,9 @@ replaced.
 
 ## Source / Evidence Identity
 
-- Second full-run farm source and this checkpoint's startup observation,
-  2026-10-05, branch `test`, HEAD/local `origin/test`:
+- This implementation startup, 2026-10-06: branch `test`, HEAD/local
+  `origin/test` `7b8eb3cb231d289d18de9c168960ddddcaa39254`.
+- Historical second full-run farm source, 2026-10-05:
   `ace8688a71431d13b40ed19713a27746f3da6a8e`.
   Failed gate-status SHA-256:
   `ddfadaf9946e262c35795689ab8d2d52a306ede9e775d98fb05df4e15924e91f`.
@@ -89,10 +99,8 @@ and dirty farm provenance; no global farm cleanliness is claimed.
 ## Blockers
 
 Canonical-five full runtime gate is `BLOCKED`; provenance/identity repair is
-`DEFERRED`. Final E.8 and F.6.4 remain `BLOCKED`. The accepted diagnostic
-consumes prior unmeasured t1 normalization/support/population explanations;
-absolute mis-ID, hardware cause and production correctness remain unproven.
-RF was not performed; it is optional at low epsilon, not universal.
+`DEFERRED`. Final E.8 and F.6.4 remain `BLOCKED`. Absolute mis-ID, hardware cause and production correctness remain unproven.
+RF was not performed; it is optional at low epsilon.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
 `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
@@ -103,16 +111,12 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after actual-diff review, user commit/push and pushed-state
-synchronization, resume the E.8.2 scientific audit of the authoritative
-Q4p4W2p74 baseline kaon missing-mass and stage-yield chain. Trace prompt/random
--> dummy -> slow-proton cleaning -> baseline pion subtraction -> final
-canonical clean-kaon missing mass and Y0(t,phi); identify where actual
-spectrum/yield changes occur before deciding whether new implementation or a
-farm gate is required. This is science/audit work, not a new maintenance phase.
-Canonical-five provenance repair stays `DEFERRED`; this checkpoint authorizes
-no farm command or new Method-A design. Subsequent E.8.3/E.8.4 interpretation
-follows the approved roadmap unless fresh evidence establishes a blocker.
+NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
+synchronization/farm-readiness review, run one isolated Q4p4W2p74 Left/lowe
+E.8.2 scientific-audit farm gate and return its ZIP/companions for scientific
+review. Canonical-five provenance repair stays `DEFERRED`; subsequent
+E.8.3/E.8.4 interpretation follows the approved roadmap. This local task
+issues no farm command or new Method-A design.
 
 ## Success Criteria
 
