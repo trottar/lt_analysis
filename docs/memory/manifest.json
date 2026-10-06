@@ -16,14 +16,14 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8180,
+      "bytes": 8041,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c17155508da55054beac8ad3e3ebb896dbe6bfd3b1716be60852481521fc5e66"
+      "sha256": "3d7cefff483ddc87993a98295a02821cf4a8f5737edf599d004a9ec394356ebc"
     },
     {
-      "bytes": 8484,
+      "bytes": 8339,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "9e64e84685ee16bc5beea54b6f05c471ad118fae4c020b1a4494e669e97d1f53"
+      "sha256": "dc0432253853c822dccb79c1d63538a579b37aa66fda7729046ba11a4a3559c3"
     },
     {
       "bytes": 11088,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 20386,
+      "bytes": 20085,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "7b01e4c2831315cebb4fe130aba3691b25f13a1446796f82382bbe68611b59c8"
+      "sha256": "ac8bac01e02214e9f90438e635e661f76bed874b7681d26f6f6c93fe09e69bc2"
     },
     {
       "bytes": 3606,
@@ -141,9 +141,9 @@
       "sha256": "06ef27c2f2e4993c22981a4154974227fbdee57b59e870d061467ac021d1f64f"
     },
     {
-      "bytes": 4422,
+      "bytes": 4337,
       "path": "docs/memory/evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md",
-      "sha256": "9e7096e5ecc2e2caf7c3f05c171c2c667a97aff339274005f2bf573c13a1c19f"
+      "sha256": "157766c72ef85b2001248e8a5320a0561e16a9896de0b423caf667afd062a591"
     },
     {
       "bytes": 5157,
@@ -596,9 +596,9 @@
       "sha256": "27bbabe10dadab2990389124ccacbd4411aba3f697140ddc979a9d476a6a4b6a"
     },
     {
-      "bytes": 19917,
+      "bytes": 19866,
       "path": "docs/memory/phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md",
-      "sha256": "4966cf6c4b3ad40c4ab3dd0f1c5748f8447b35da8763a28da66a8360e77d6727"
+      "sha256": "437442648b8ac5305eae893b3de48cbe2c43d193235dc2a2d50c2396db648dcd"
     },
     {
       "bytes": 8676,
@@ -1036,6 +1036,11 @@
       "sha256": "9bef86e7ee28eb2b64cf2958ce0f51b83f78b7f378f80d05c8e050a9541d8019"
     },
     {
+      "bytes": 14588,
+      "path": "docs/memory/phases/memory-manifest-line-ending-integrity-repair-task-contract.md",
+      "sha256": "8d6848c3873498740aa872cb0ee57b22964be7dfb1e143091f29e7b11398c9c5"
+    },
+    {
       "bytes": 3052,
       "path": "docs/memory/phases/phase-f1-method-a-acceptance-farm-gate.md",
       "sha256": "4f35863ef5bd85edc1fb9f139d289cb40e079375d8e624914f8ebb6744527adb"
@@ -1096,9 +1101,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 23367,
+      "bytes": 23026,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "8e73663b034b6ae2160ebc6f2c660027caea0d54d159e03f7b5bcc5d9fb85b23"
+      "sha256": "a5f8e1ff6e2596e38f3b50a50cb780153e16bb1e5dfe50ee73c282588d16190f"
     },
     {
       "bytes": 1698,
