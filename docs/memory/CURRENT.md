@@ -30,16 +30,19 @@ records reviewed materialization/staging, five real F.4/F.5 reconstructions,
 cleanup and final preservation with analysis_started=false; the supplied
 receipt/prior review owns acceptance, not this local task.
 
-The second full canonical-five runtime gate is `BLOCKED`: analysis completed
-(returncode 0), but artifact/page verification failed. All five fresh manifests
-contained only `full_background.e8_4.unavailable` for E.8.4, with
+The second canonical-five runtime gate is `BLOCKED`: child returncode 0,
+artifact/page gate failed; all five E.8.4 manifests were unavailable with
 `f6_3_f4_shared_reproduction_failed:f3_fingerprint_input_content_mismatch`.
 RUNTIME VERIFIED (supplied diagnosis): regenerated F.1 identities differed;
 post-run F.2/F.3/F.4 scientific payloads matched (`first_changed_stage = none`).
-INFERENCE: provenance/identity coupling, not a newly established Method-A
-scientific defect. See the [second-run diagnosis](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md).
+INFERENCE: provenance/identity coupling; see the [second-run diagnosis](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md).
 
-Canonical-five provenance/identity repair is `DEFERRED` by user decision.
+Reopened under the
+[repair contract](phases/e8-4-canonical-five-provenance-identity-repair-task-contract.md).
+Repair remains `BLOCKED`: owner omits reviewed F.2 needed for exact three-stage
+equivalence. [Audit](phases/e8-4-canonical-five-provenance-identity-repair.md)
+records supplied ChatGPT actual-diff acceptance and approved narrow follow-up:
+owner handoff of reviewed/hash-pinned F.2 alongside F.3/F.4. No repair implemented.
 Full runtime/PDF closure and the low-level cause remain NOT VERIFIED. The
 [first-run failure/materialization](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
 is historical diagnostic evidence with a distinct F.4 comparison result.
@@ -98,13 +101,12 @@ replaced.
 - Current F.6.3 F.4 SHA-256:
   `79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
 
-Linked evidence owns receipt/artifact identities, prior timestamped observations
-and dirty farm provenance; no global farm cleanliness is claimed.
+Linked evidence owns farm provenance; no global cleanliness claim.
 
 ## Blockers
 
-Canonical-five full runtime gate is `BLOCKED`; provenance/identity repair is
-`DEFERRED`. Final E.8 and F.6.4 remain `BLOCKED`. Absolute mis-ID, hardware cause and production correctness remain unproven.
+Canonical-five full runtime gate and provenance/identity repair are `BLOCKED`.
+Final E.8 and F.6.4 remain `BLOCKED`. Absolute mis-ID, hardware cause and production correctness remain unproven.
 RF was not performed; it is optional at low epsilon.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
@@ -116,16 +118,14 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — decide whether to explicitly reopen the deferred canonical-five
-provenance/identity repair required for final E.8 closure. Until that decision,
-keep final E.8 and F.6.4 `BLOCKED`; do not rerun the farm, redesign Method A,
-or promote Method A automatically.
+NEXT — after user commit/push and ChatGPT pushed-state synchronization of this
+blocked-audit checkpoint, establish one new narrow source-changing
+canonical-five owner/F.2-handoff repair contract.
 
 ## Success Criteria
 
-Manifest, ordinary memory health, bootstrap, allowlist/byte-preservation and
-complete-diff checks must pass. Memory-only checks add no runtime acceptance.
-No staging, commit, push or farm execution is authorized for Codex.
+Manifest, health, bootstrap, preservation and complete-diff checks must pass;
+they add no runtime acceptance. No staging, commit, push or farm for Codex.
 
 ## Do Not Reopen Without New Evidence
 

@@ -255,7 +255,8 @@ The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 `ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
 explanation and Method-A promotion do not follow. CURRENT owns the live gate;
 current-lineage canonical-five expansion was user-authorized. Its second full
-runtime gate is `BLOCKED`; provenance/identity repair is now `DEFERRED`.
+runtime gate is `BLOCKED`; the reopened provenance/identity repair is `BLOCKED`
+at its mandatory source audit (reviewed F.2 runtime handoff absent).
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
 
@@ -274,7 +275,7 @@ remain intact; absolute-SIMC units remain a separate blocker.
 Dependency: Gates 1–4/external review and accepted Left/lowe diagnostic
 interpretation consumed -> user-authorized canonical-five orchestration
 attempted -> second full runtime gate `BLOCKED`. Provenance/identity repair
-is `DEFERRED`; the narrow Left/lowe E.8.2 and E.8.3 audits are now accepted.
+is reopened but `BLOCKED` at source audit; the narrow Left/lowe E.8.2 and E.8.3 audits are now accepted.
 Existing F.6.3/E.8.4 Left/lowe closures retain their scope. Final E.8 and F.6.4
 remain `BLOCKED` by the canonical-five runtime/provenance situation. Method A remains
 detached/non-production; Method B remains diagnostic/cross-check only and
@@ -302,8 +303,18 @@ analysis regenerated a different F.1 identity set and made F.6.3 unavailable.
 RUNTIME VERIFIED (supplied diagnosis): the tracked post-run comparator found
 exact F.2/F.3/F.4 scientific payload equality, `first_changed_stage = none`.
 INFERENCE: this failure exposes provenance/identity coupling rather than a
-newly established Method-A scientific defect. Repair is `DEFERRED` by current
-user decision while science-first E.8 work resumes; it is not complete.
+newly established Method-A scientific defect. The user reopened repair under
+the [repair contract](../phases/e8-4-canonical-five-provenance-identity-repair-task-contract.md).
+Its [mandatory source audit](../phases/e8-4-canonical-five-provenance-identity-repair.md)
+is `BLOCKED`: the frozen owner verifies F.2 externally but stages only F.3/F.4;
+the required exact F.2/F.3/F.4 scientific-equivalence gate needs a reviewed F.2
+runtime handoff. The contract requires stopping before that owner change.
+No source repair was implemented. Supplied ChatGPT actual-diff review accepted
+the audit conclusion and approved a narrow follow-up for the owner's handoff
+of already reviewed/hash-pinned candidate F.2 alongside F.3/F.4. Repair remains
+`BLOCKED`; a new narrow source-changing owner/F.2-handoff repair contract is
+required after checkpoint commit/push and pushed-state synchronization.
+Existing closed scopes and scientific boundaries remain intact; CURRENT owns NEXT.
 
 Scientific source, historical accepted authorities and Left/lowe closures
 remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
@@ -314,7 +325,7 @@ E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
 
 `BLOCKED` — final canonical-five validation is not supplied by the accepted
 Left/lowe scope; the second canonical-five full runtime gate is `BLOCKED` and
-its provenance/identity repair is `DEFERRED`.
+its reopened provenance/identity repair is `BLOCKED` at source audit.
 
 #### F.6.4 — explicit production-promotion decision
 
@@ -338,7 +349,7 @@ reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
 Left/lowe owner and visual presentation gates are accepted. Broader numerical
 interpretation, absolute-SIMC units and the other four settings are not closed.
 Canonical-five isolated orchestration was user-authorized and attempted; its
-second full runtime gate is `BLOCKED`, with provenance/identity repair `DEFERRED`
+second full runtime gate is `BLOCKED`, with reopened provenance/identity repair `BLOCKED` at source audit
 after accepted narrow Left/lowe E.8.2/E.8.3 audits. Final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Active-state ownership

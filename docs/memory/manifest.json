@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8183,
+      "bytes": 8186,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "347b45614133625f3e78cf1a0ba704fce43aa7c612d519c0ba5e759420a02aa7"
+      "sha256": "305ba10401da5a43b1162628af5d1b93c0f708c5b8e86564181159204cf92cc9"
     },
     {
       "bytes": 8339,
@@ -681,6 +681,16 @@
       "sha256": "666a846b0430e056bed0c301df75f9d67a81e171f18412be5ac575865df5a887"
     },
     {
+      "bytes": 20893,
+      "path": "docs/memory/phases/e8-4-canonical-five-provenance-identity-repair-task-contract.md",
+      "sha256": "c81e14040950b5c3d42fb53fd5a3c19c840021c873bb12a9d4477bb3f543bfca"
+    },
+    {
+      "bytes": 9800,
+      "path": "docs/memory/phases/e8-4-canonical-five-provenance-identity-repair.md",
+      "sha256": "5ffe7bc5e7ffcc505e084f70f42560f6be53cb2c4ffd70e43ac6035547ae431f"
+    },
+    {
       "bytes": 11174,
       "path": "docs/memory/phases/e8-4-final-pre-push-source-review-reconciliation-task-contract.md",
       "sha256": "08b88cfab6f7018d24cbe361b944eac8eadf426f3544e5fcda35fc340a91a7e8"
@@ -1176,9 +1186,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 23495,
+      "bytes": 24464,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "801568830235bd49bdc9bf261c7ae0ca16e0ef9939bf79657246fb39aa4063ec"
+      "sha256": "2a74241d40ef11cb3e38059e90c67d1268014f749bcfd6736ef842c742ab42a6"
     },
     {
       "bytes": 1698,
