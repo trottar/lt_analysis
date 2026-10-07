@@ -298,9 +298,22 @@ class OwnerTests(unittest.TestCase):
     @contextmanager
     def flow(self, failure=None):
         worktree = self.directory / "owned-analysis"
+        worktree.mkdir(exist_ok=True)
         overlay = {"baseline_paths": {}, "fixture": "copied-ltsep"}
-        probe = [{"paths": {"VOLATILEPATH": str(self.directory / "volatile")}}]
+        probe = [{"paths": {"VOLATILEPATH": str(self.directory / "volatile"),
+            "LTANAPATH": str(worktree), "ANATYPE": "Kaon",
+            "OUTPATH": str(worktree / "OUTPUT/Analysis/KaonLT")}}]
         events = []
+        def runtime_overlay(*args):
+            events.append("overlay")
+            return {"fixture": "overlay"}, overlay
+        def path_probes(*args):
+            events.append("probe")
+            return probe
+        def external_preflight(*args):
+            events.append("external")
+            self.assertTrue((worktree / "OUTPUT").is_symlink())
+            return {"passed": True}
         @contextmanager
         def owned(repo, sha, kind):
             events.append("enter:" + kind)
@@ -308,14 +321,23 @@ class OwnerTests(unittest.TestCase):
                 yield worktree
             finally:
                 events.append("cleanup:" + kind)
+                if kind == "analysis" and (worktree / "OUTPUT").is_symlink():
+                    (worktree / "OUTPUT").unlink()
                 if failure == "cleanup" and kind == "analysis":
                     raise RuntimeError("owned_cleanup_failed")
         def run(cwd, log, env):
             self.assertEqual(cwd, worktree)
             self.assertNotEqual(cwd, ROOT)
             self.assertEqual(env, {"fixture": "overlay"})
+            self.assertTrue((cwd / "OUTPUT").is_symlink())
+            receipt = json.loads(owner.isolation.accepted.gate_status_path(self.outdir, self.output).read_text())
+            self.assertIs(receipt["debug_output_link"]["passed"], True)
             events.append("analysis")
             artifacts(self.outdir)
+            # Explicit fresh fixture timestamps avoid filesystem clock rounding.
+            fixture_ns = time.time_ns() + 10**9
+            for name in owner.artifact_names(self.profile) - {owner.SUMMARY}:
+                os.utime(self.outdir / name, ns=(fixture_ns, fixture_ns))
             log.write_text(MARKERS)
             return 1 if failure == "child" else 0
         def preserve(*args):
@@ -329,9 +351,17 @@ class OwnerTests(unittest.TestCase):
                 raise RuntimeError("installed_ltsep_changed")
             return {"passed": True}
         with ExitStack() as stack:
+            original_output_link = owner.prepare_debug_output_link
+            def output_link(*args):
+                events.append("output-link")
+                if failure == "link":
+                    raise ValueError("debug_output_path_already_exists")
+                return original_output_link(*args)
             for name, value in (("preflight", Mock(return_value={"head": SHA})),
-                ("owned_worktree", owned), ("prepare_runtime_overlay", Mock(return_value=({"fixture": "overlay"}, overlay))),
-                ("probe_paths", Mock(return_value=probe)), ("external_symlink_preflight", Mock(return_value={"passed": True})),
+                ("owned_worktree", owned), ("prepare_runtime_overlay", Mock(side_effect=runtime_overlay)),
+                ("probe_paths", Mock(side_effect=path_probes)),
+                ("prepare_debug_output_link", Mock(side_effect=output_link)),
+                ("external_symlink_preflight", Mock(side_effect=external_preflight)),
                 ("collector_source_preflight", Mock(side_effect=RuntimeError("source_check_failed")) if failure == "source" else Mock(return_value=[])),
                 ("run_analysis", Mock(side_effect=run)), ("verify_preservation", Mock(side_effect=preserve)),
                 ("verify_ltsep_preservation", Mock(side_effect=ltsep))):
@@ -351,6 +381,10 @@ class OwnerTests(unittest.TestCase):
         with self.flow() as (events, collection):
             self.assertEqual(owner.execute_gate(ROOT, self.outdir, self.output, SHA), self.output)
             owner.run_analysis.assert_called_once()
+            owner.prepare_debug_output_link.assert_called_once()
+        self.assertEqual([event for event in events if event in
+            ("overlay", "probe", "output-link", "external", "analysis")],
+            ["overlay", "probe", "output-link", "external", "analysis"])
         self.assertLess(events.index("cleanup:analysis"), events.index("preserve"))
         self.assertLess(events.index("ltsep"), events.index("enter:source"))
         collection.assert_called_once()
@@ -365,6 +399,84 @@ class OwnerTests(unittest.TestCase):
             self.assertTrue(self.output.with_name(self.output.stem + suffix).is_file())
         summary = json.loads((self.outdir / owner.SUMMARY).read_text())
         self.assertEqual(summary["boundaries"], owner.BOUNDARIES)
+        self.assertEqual(summary["debug_output_link"], status["debug_output_link"])
+        self.assertIs(summary["debug_output_link"]["passed"], True)
+
+    def output_paths(self):
+        worktree = self.directory / "fake-worktree"
+        worktree.mkdir(exist_ok=True)
+        return worktree, {"LTANAPATH": str(worktree),
+            "VOLATILEPATH": str(self.directory / "volatile"), "ANATYPE": "Kaon",
+            "OUTPATH": str(worktree / "OUTPUT/Analysis/KaonLT")}
+
+    def test_debug_output_link_and_launcher_mkdir_keep_external_input_visible(self):
+        worktree, paths = self.output_paths()
+        fixture = self.outdir / "Center_kaon_Q4p4W2p74_input.fixture"
+        fixture.write_bytes(b"filesystem visibility fixture only")
+        record = owner.prepare_debug_output_link(worktree, paths, self.outdir)
+        link, child = worktree / "OUTPUT", Path(paths["OUTPATH"])
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(os.readlink(link), str(self.directory / "volatile/OUTPUT"))
+        self.assertEqual(child.resolve(), self.outdir)
+        self.assertEqual((child / fixture.name).read_bytes(), fixture.read_bytes())
+        child.mkdir(parents=True, exist_ok=True)  # launcher's mkdir -p
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), (self.directory / "volatile/OUTPUT").resolve())
+        self.assertEqual(child.resolve(), self.outdir)
+        self.assertEqual((child / fixture.name).read_bytes(), fixture.read_bytes())
+        self.assertEqual(record, {"link_path": str(link),
+            "literal_target": str(self.directory / "volatile/OUTPUT"),
+            "resolved_target": str((self.directory / "volatile/OUTPUT").resolve()),
+            "resolved_child_outpath": str(self.outdir), "passed": True})
+
+    def test_debug_output_link_never_replaces_preexisting_paths(self):
+        worktree, paths = self.output_paths()
+        for kind in ("directory", "file", "wrong", "dangling", "correct"):
+            with self.subTest(kind=kind):
+                link = worktree / "OUTPUT"
+                if kind == "directory":
+                    link.mkdir()
+                elif kind == "file":
+                    link.write_bytes(b"untouched")
+                else:
+                    target = self.directory / ("missing" if kind == "dangling" else
+                             "volatile/OUTPUT" if kind == "correct" else "volatile")
+                    link.symlink_to(target, target_is_directory=True)
+                before = os.readlink(link) if link.is_symlink() else None
+                with self.assertRaisesRegex(ValueError, "path_already_exists"):
+                    owner.prepare_debug_output_link(worktree, paths, self.outdir)
+                self.assertTrue(os.path.lexists(link))
+                if before is not None:
+                    self.assertTrue(link.is_symlink())
+                    self.assertEqual(os.readlink(link), before)
+                    link.unlink()  # remove this test's fixture only
+                elif kind == "directory":
+                    self.assertTrue(link.is_dir())
+                    link.rmdir()
+                else:
+                    self.assertEqual(link.read_bytes(), b"untouched")
+                    link.unlink()
+
+    def test_debug_output_link_rejects_unvalidated_path_authority(self):
+        worktree, paths = self.output_paths()
+        cases = [("LTANAPATH", str(self.directory), "ltanapath_mismatch"),
+            ("OUTPATH", str(self.outdir), "lexical_outpath_mismatch"),
+            ("VOLATILEPATH", "relative", "not_absolute"),
+            ("VOLATILEPATH", "", "not_absolute"),
+            ("VOLATILEPATH", str(self.directory / "missing"), "external_output_missing"),
+            ("ANATYPE", "../Kaon", "anatype_invalid")]
+        for key, value, reason in cases:
+            bad = {**paths, key: value}
+            if key == "VOLATILEPATH" and value == "":
+                del bad[key]
+            with self.subTest(key=key, value=value), self.assertRaisesRegex(ValueError, reason):
+                owner.prepare_debug_output_link(worktree, bad, self.outdir)
+            self.assertFalse(os.path.lexists(worktree / "OUTPUT"))
+        with self.assertRaisesRegex(ValueError, "artifact_root_mismatch"):
+            owner.prepare_debug_output_link(worktree, paths, self.directory)
+        with self.assertRaisesRegex(ValueError, "worktree_invalid"):
+            owner.prepare_debug_output_link(Path("relative"), paths, self.outdir)
+        self.assertFalse(os.path.lexists(worktree / "OUTPUT"))
 
     def test_child_failure_checks_preservation_and_does_not_collect(self):
         with self.flow("child") as (events, collection), self.assertRaisesRegex((ValueError, RuntimeError), "analysis_failed"):
@@ -391,6 +503,18 @@ class OwnerTests(unittest.TestCase):
             owner.execute_gate(ROOT, self.outdir, self.output, SHA)
         self.assertNotIn("analysis", events)
         collection.assert_not_called()
+
+    def test_output_link_failure_precedes_child_and_preserves_checkout(self):
+        with self.flow("link") as (events, collection), self.assertRaisesRegex(ValueError, "path_already_exists"):
+            owner.execute_gate(ROOT, self.outdir, self.output, SHA)
+        self.assertNotIn("external", events)
+        self.assertNotIn("analysis", events)
+        self.assertIn("preserve", events)
+        self.assertIn("ltsep", events)
+        collection.assert_not_called()
+        receipt = json.loads(owner.isolation.accepted.gate_status_path(self.outdir, self.output).read_text())
+        self.assertIs(receipt["analysis_started"], False)
+        self.assertEqual(receipt["status"], "failed")
 
     def test_preflight_identity_and_dirty_source(self):
         good = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}

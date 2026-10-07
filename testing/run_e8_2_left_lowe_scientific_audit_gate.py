@@ -127,6 +127,43 @@ def collector_source_preflight(repo, source_commit, profile):
     return checks
 
 
+def prepare_debug_output_link(worktree, paths, outdir):
+    """Link OUTPUT only in the caller's owned disposable analysis worktree.
+
+    Use the existing probe's authority before the debug launcher's early mkdir.
+    Never replace an existing path or discover alternate runtime paths.
+    """
+    worktree, outdir = Path(worktree), Path(outdir)
+    require(worktree.is_absolute() and worktree.is_dir() and not worktree.is_symlink(),
+            "debug_output_worktree_invalid")
+    require(worktree.resolve() == worktree and
+            Path(paths.get("LTANAPATH", "")).resolve() == worktree,
+            "debug_output_ltanapath_mismatch")
+    volatile = Path(paths.get("VOLATILEPATH", ""))
+    require(volatile.is_absolute(), "debug_output_volatilepath_not_absolute")
+    anatype = paths.get("ANATYPE")
+    require(isinstance(anatype, str) and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", anatype),
+            "debug_output_anatype_invalid")
+    child = Path(paths.get("OUTPATH", ""))
+    require(child.is_absolute() and child == worktree / "OUTPUT/Analysis" / (anatype + "LT"),
+            "debug_output_lexical_outpath_mismatch")
+    target = volatile / "OUTPUT"
+    require(target.is_dir(), "debug_output_external_output_missing")
+    require(outdir.is_absolute() and
+            (target / "Analysis" / (anatype + "LT")).resolve() == outdir,
+            "debug_output_artifact_root_mismatch")
+    link = worktree / "OUTPUT"
+    require(not os.path.lexists(link), "debug_output_path_already_exists")
+    link.symlink_to(target, target_is_directory=True)
+    require(link.is_symlink() and link.is_dir(), "debug_output_link_invalid")
+    require(link.resolve() == target.resolve() and os.readlink(link) == str(target),
+            "debug_output_link_target_mismatch")
+    require(child.resolve() == outdir, "debug_output_child_resolution_mismatch")
+    return {"link_path": str(link), "literal_target": str(target),
+            "resolved_target": str(link.resolve()), "resolved_child_outpath": str(child.resolve()),
+            "passed": True}
+
+
 def run_analysis(worktree, log_path, env):
     with log_path.open("xb") as log:
         process = subprocess.Popen(COMMAND, cwd=worktree, env=env,
@@ -293,6 +330,8 @@ def execute_gate(repo, outdir, output, source_commit):
                 probes = probe_paths(worktree, env, overlay["baseline_paths"])
                 require(outdir == (Path(probes[0]["paths"]["VOLATILEPATH"]) /
                                   "OUTPUT/Analysis/KaonLT").resolve(), "analysis_artifact_root_mismatch")
+                output_link = prepare_debug_output_link(worktree, probes[0]["paths"], outdir)
+                status.update(debug_output_link=output_link)
                 external = external_symlink_preflight(worktree, probes[0]["paths"])
                 identity = {"path": str(worktree), "head": source_commit, "detached": True, "owner_created": True}
                 started_ns = time.time_ns()
@@ -321,6 +360,7 @@ def execute_gate(repo, outdir, output, source_commit):
             "e8_2_page_verification_passed": True, "active_profile": "no_empirical_residual",
             "profile_declared_settings": DECLARED_SETTINGS, "requested_settings": REQUESTED_SETTINGS,
             "analysis_worktree": identity, "isolation_probes": probes, "external_symlink_preflight": external,
+            "debug_output_link": output_link,
             "ordinary_checkout_preservation": preservation, "installed_ltsep_preservation": ltsep,
             "worktree_cleanup_completed": True, "collector_source_checks": checks,
             "artifacts": records, "boundaries": BOUNDARIES}

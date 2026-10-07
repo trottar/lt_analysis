@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8174,
+      "bytes": 8190,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "f5cabb45e341d27921432749ac84081622875ef50c115821a1a4aac132b8ed16"
+      "sha256": "9875e8e275ce7e7b89f03d69da5e681ea64758504f9eabbf590af4edac047e62"
     },
     {
       "bytes": 8339,
@@ -544,6 +544,16 @@
       "bytes": 16116,
       "path": "docs/memory/phases/e8-2-baseline-stage-audit.md",
       "sha256": "c1f4157951394cc0a4252dc8129e86244e137a705e06d5ddee97930bc1045627"
+    },
+    {
+      "bytes": 18118,
+      "path": "docs/memory/phases/e8-2-left-lowe-runtime-owner-output-isolation-repair-task-contract.md",
+      "sha256": "72d61fdfdce1c485464f026b23b7b31f8ce5f7d848a0b5f636606ca0f8089ef7"
+    },
+    {
+      "bytes": 4939,
+      "path": "docs/memory/phases/e8-2-left-lowe-runtime-owner-output-isolation-repair.md",
+      "sha256": "45502f2b3708a0ec2727fbaa5b619db38583dc0f9bf4302888bb1b6f697905aa"
     },
     {
       "bytes": 29920,
