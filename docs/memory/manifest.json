@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8192,
+      "bytes": 8190,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "233b79e754506c5e8f472b2c92f9150203653f60179ca5ad52a5cee79e24e267"
+      "sha256": "2fb3259be2e450a4fb9b54f5d12a98faeea76003a1f405c7257dbb9372a87772"
     },
     {
       "bytes": 8339,
@@ -149,6 +149,11 @@
       "bytes": 6061,
       "path": "docs/memory/evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md",
       "sha256": "7b1d1c9bf5eb0542d28a34b870b60846e8913e5e8973e89e09cf96f8b96472aa"
+    },
+    {
+      "bytes": 4830,
+      "path": "docs/memory/evidence/e8-3-left-lowe-runtime-readiness-visual-blocker-2026-10-07.md",
+      "sha256": "17bd7efacafca995363d824e5eb4146fc17fc73594bbe5b3fd42d5953eb6a9bd"
     },
     {
       "bytes": 4337,
@@ -599,6 +604,16 @@
       "bytes": 14543,
       "path": "docs/memory/phases/e8-2-post-push-memory-reconciliation-task-contract.md",
       "sha256": "dbd1baca66182a4a7aff7a45eb7d0cb0f8f6ce41f62ae4cd6d5120d25d53e935"
+    },
+    {
+      "bytes": 20563,
+      "path": "docs/memory/phases/e8-3-authority-page-provenance-legibility-repair-task-contract.md",
+      "sha256": "8a3aad7bea462e83bbc9880dc6cdc12f98e98f2775b55c33c14355f66b52c3f4"
+    },
+    {
+      "bytes": 6101,
+      "path": "docs/memory/phases/e8-3-authority-page-provenance-legibility-repair.md",
+      "sha256": "eb17a508f077a7a27624924717ea2280cf3814fb2ec3396ffe498f7d8602607d"
     },
     {
       "bytes": 17399,

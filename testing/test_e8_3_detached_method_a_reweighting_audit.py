@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
+import re
 from pathlib import Path
 import sys
 import tempfile
@@ -525,6 +526,88 @@ class DetachedMethodAReweightingAuditTests(unittest.TestCase):
         self.assertFalse(payload["production_application_performed"])
         self.assertFalse(payload["method_b_numerical_dependency"])
         self.assertFalse(payload["empirical_residual_dependency"])
+
+    def _captured_authority_lines(self, payload):
+        with patch.object(plots, "_e8_text_page", return_value=True) as text_page:
+            self.assertTrue(plots._e8_3_render_authority_page(
+                object(), "ignored.pdf", payload,
+            ))
+        text_page.assert_called_once()
+        return text_page.call_args.args[4]
+
+    def test_authority_page_preserves_each_complete_provenance_value_exactly_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            payload = self._payload(directory)
+        self.assertTrue(payload["available"])
+        lines = self._captured_authority_lines(payload)
+        values = [payload["input_sha256"][key] for key in ("f4", "f5", "f6_1", "f6_2")]
+        values.extend(payload["accepted_fingerprints"][key] for key in (
+            "f4_correction_fingerprint", "f5_propagation_fingerprint",
+            "f6_1_validation_fingerprint",
+        ))
+        self.assertEqual(len(set(values)), 7)
+        for value in values:
+            with self.subTest(value=value):
+                self.assertRegex(value, r"^[0-9a-f]{64}$")
+                self.assertEqual(sum(line.count(value) for line in lines), 1)
+
+    def test_authority_page_provenance_lines_are_bounded_and_never_combine_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            payload = self._payload(directory)
+        lines = self._captured_authority_lines(payload)
+        for line in lines:
+            with self.subTest(line=line):
+                self.assertLessEqual(len(re.findall(r"(?<![0-9a-f])[0-9a-f]{64}(?![0-9a-f])", line)), 1)
+                self.assertLessEqual(len(line), 90)
+
+    def test_authority_page_retains_lineage_ownership_and_current_setting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            payload = self._payload(directory)
+        lines = self._captured_authority_lines(payload)
+        text = chr(10).join(lines)
+        for statement in (
+            "Historical accepted F.6.1 lineage",
+            "not the current F.6.3/E.8.4 candidate lineage",
+            "Detached presentation only",
+            "Method B has no numerical input",
+            "Legacy empirical residual Fit 1 / Fit 2 are inactive",
+            "F.6.3 alone constructs the private parallel branch",
+            "Method A is not production-promoted",
+            "F.6.4 remains the sole promotion decision",
+            "Current setting: Left-lowe",
+            "b_j^0 = s_j * w0_j",
+            "b_j^A = s_j * w0_j * C_j",
+            "No phi child is independently normalized",
+        ):
+            with self.subTest(statement=statement):
+                self.assertIn(statement, text)
+
+    def test_authority_renderer_uses_one_existing_page_and_does_not_mutate_payload(self):
+        with tempfile.TemporaryDirectory() as directory:
+            payload = self._payload(directory)
+        before = deepcopy(payload)
+        lines = plots._e8_3_authority_lines(payload)
+        self.assertIsInstance(lines, tuple)
+        with patch.object(plots, "_e8_text_page", return_value=True) as text_page:
+            self.assertTrue(plots._e8_3_render_authority_page(
+                _FakeRoot, "ignored.pdf", payload,
+            ))
+        text_page.assert_called_once_with(
+            _FakeRoot, "ignored.pdf", "C_full_background_e8_3_authority",
+            "E.8.3 historical accepted F.6.1 lineage", lines, size=0.023,
+        )
+        _FakeCanvas.printed[:] = []
+        _FakePaveText.instances[:] = []
+        self.assertTrue(plots._e8_3_render_authority_page(
+            _FakeRoot, "ignored.pdf", payload,
+        ))
+        self.assertEqual(_FakeCanvas.printed, ["ignored.pdf"])
+        self.assertEqual(
+            _FakePaveText.instances[-1].lines,
+            ["E.8.3 historical accepted F.6.1 lineage", ""] + list(lines),
+        )
+        self.assertEqual(payload, before)
+
 
 
 if __name__ == "__main__":

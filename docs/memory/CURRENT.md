@@ -11,17 +11,17 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-E.8.2 Q4p4W2p74 / Left / lowe is `CLOSED / RUNTIME VALIDATED` from the
-[accepted fresh evidence](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
-and prior review: owner/provenance/artifact/ZIP gates and all 18 pages
-passed, closing the [visual repair](phases/e8-2-left-lowe-pdf-legibility-repair.md).
-Codex records prior acceptance.
+E.8.2 Q4p4W2p74 / Left / lowe remains `CLOSED / RUNTIME VALIDATED`.
+[Accepted closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
+owns its narrow visual/scientific conclusions; diagnostic integrals are not final yields.
 
-Accepted diagnostic Lambda-window stage reductions: random <1%, dummy up to
-about 2.6%, slow proton about 6.5–8.1%, baseline pion about 19–21% at t1/t2
-and 4.8% at t3; `prune_hist` is negligible. These are narrow Left/lowe
-conclusions. Diagnostic integrals are distinct from stored final yields;
-their difference is not another subtraction stage.
+E.8.3 remains `SOURCE REVIEWED`. [Supplied evidence](evidence/e8-3-left-lowe-runtime-readiness-visual-blocker-2026-10-07.md)
+at `706ae708ae69be0585472982a4df3d87c63f186f` exercises the Left/lowe
+route: all eight pages, no renderer failures, pages 66–72 visually accepted.
+Page 65 is `BLOCKED` only by clipped provenance SHA-256 text.
+The [authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+No scientific redesign or E.8.3 runtime closure follows.
 
 The fresh-F1 canonical-five lineage preflight is
 `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
@@ -114,13 +114,11 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — audit the existing E.8.3 detached Method-A reweighting audit against
-current source and accepted authorities, then determine its narrow
-Q4p4W2p74 / Left / lowe runtime-validation readiness. Do not redesign Method A
-or reopen closed E.8.2/F-stage work without new evidence.
-
-ChatGPT actual-diff review, user commit/push and pushed-state review precede
-that audit. No farm execution is authorized.
+NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
+synchronization/farm-readiness review, run exactly one fresh isolated
+Q4p4W2p74 / Left / lowe procedure owner gate and visually inspect E.8.3 pages
+65–72, especially the full provenance values on the authority page, before
+any E.8.3 runtime closure.
 
 ## Success Criteria
 

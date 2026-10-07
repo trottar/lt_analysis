@@ -6930,29 +6930,38 @@ def _e8_3_signed_histogram(ROOT, name, title, edges, values, color):
     return histogram
 
 
-def _e8_3_render_authority_page(ROOT, pdf_name, payload):
+def _e8_3_authority_lines(payload):
+    """Format persisted authority values intact, one value per bounded line."""
     fingerprints = _mapping(payload.get("accepted_fingerprints"))
     hashes = _mapping(payload.get("input_sha256"))
+    return (
+        "Historical accepted F.6.1 lineage; not the current F.6.3/E.8.4 candidate lineage.",
+        "b_j^0 = s_j * w0_j",
+        "b_j^A = s_j * w0_j * C_j",
+        "C_j is the accepted F.4 parent-preserving correction; parent normalization",
+        "preserves each signed canonical-t parent sum. No phi child is independently normalized.",
+        "Detached presentation only: no production application, yield, or cross section is changed.",
+        "Method B has no numerical input. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
+        "F.6.3 alone constructs the private parallel branch; E.8.4 consumes it for impact display.",
+        "Method A is not production-promoted; F.6.4 remains the sole promotion decision.",
+        "Current setting: {}".format(payload.get("setting_id")),
+        "Accepted input SHA-256:",
+        "F.4: {}".format(hashes.get("f4")),
+        "F.5: {}".format(hashes.get("f5")),
+        "F.6.1: {}".format(hashes.get("f6_1")),
+        "F.6.2: {}".format(hashes.get("f6_2")),
+        "Accepted fingerprints:",
+        "F.4 correction: {}".format(fingerprints.get("f4_correction_fingerprint")),
+        "F.5 propagation: {}".format(fingerprints.get("f5_propagation_fingerprint")),
+        "F.6.1 validation: {}".format(fingerprints.get("f6_1_validation_fingerprint")),
+    )
+
+
+def _e8_3_render_authority_page(ROOT, pdf_name, payload):
     return _e8_text_page(
         ROOT, pdf_name, "C_full_background_e8_3_authority",
         "E.8.3 historical accepted F.6.1 lineage",
-        (
-            "Historical accepted F.6.1 lineage; not the current F.6.3/E.8.4 candidate lineage.",
-            "b_j^0 = s_j * w0_j",
-            "b_j^A = s_j * w0_j * C_j",
-            "C_j is the accepted F.4 parent-preserving correction; parent normalization",
-            "preserves each signed canonical-t parent sum. No phi child is independently normalized.",
-            "Detached presentation only: no production application, yield, or cross section is changed.",
-            "Method B has no numerical input. Legacy empirical residual Fit 1 / Fit 2 are inactive.",
-            "F.6.3 alone constructs the private parallel branch; E.8.4 consumes it for impact display.",
-            "Method A is not production-promoted; F.6.4 remains the sole promotion decision.",
-            "Current setting: {}".format(payload.get("setting_id")),
-            "Accepted input SHA-256: F.4={} F.5={}".format(hashes.get("f4"), hashes.get("f5")),
-            "F.6.1={} F.6.2={}".format(hashes.get("f6_1"), hashes.get("f6_2")),
-            "F.4 correction fingerprint: {}".format(fingerprints.get("f4_correction_fingerprint")),
-            "F.5 propagation fingerprint: {}".format(fingerprints.get("f5_propagation_fingerprint")),
-            "F.6.1 validation fingerprint: {}".format(fingerprints.get("f6_1_validation_fingerprint")),
-        ), size=0.023,
+        _e8_3_authority_lines(payload), size=0.023,
     )
 
 
