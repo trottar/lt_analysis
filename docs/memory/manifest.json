@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8163,
+      "bytes": 8192,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "0f4640790f8380dc2cd5650068985835ad6a69c446e95a8feeecabd15f607222"
+      "sha256": "233b79e754506c5e8f472b2c92f9150203653f60179ca5ad52a5cee79e24e267"
     },
     {
       "bytes": 8339,
@@ -144,6 +144,11 @@
       "bytes": 3444,
       "path": "docs/memory/evidence/e8-2-left-lowe-runtime-owner-pass-visual-blocker-2026-10-06.md",
       "sha256": "c353da27042d712efc04de92de57effd4d3a4247bc5e240989766e7d132db6f8"
+    },
+    {
+      "bytes": 6061,
+      "path": "docs/memory/evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md",
+      "sha256": "7b1d1c9bf5eb0542d28a34b870b60846e8913e5e8973e89e09cf96f8b96472aa"
     },
     {
       "bytes": 4337,
@@ -556,9 +561,9 @@
       "sha256": "7d54889866d0a9b7fd8ad625fec3e75bcebf5d58d64d312cc5335c9db75f3d1e"
     },
     {
-      "bytes": 4537,
+      "bytes": 4860,
       "path": "docs/memory/phases/e8-2-left-lowe-pdf-legibility-repair.md",
-      "sha256": "ae325deddcd09cf474b29eb227e00db25f36ed24f62b4d37c25d2c31beb0a5cc"
+      "sha256": "07b0382e9c6ea1e056371fe6bbab373570995b8190bbcb73a95bb04cdaaa82ed"
     },
     {
       "bytes": 18118,
@@ -579,6 +584,16 @@
       "bytes": 5319,
       "path": "docs/memory/phases/e8-2-left-lowe-runtime-scientific-audit-owner.md",
       "sha256": "8db60b395e0cb570d6b291bd86d1aef1bcf9f903789c951bc8a3efb0518ad428"
+    },
+    {
+      "bytes": 15192,
+      "path": "docs/memory/phases/e8-2-left-lowe-runtime-scientific-closure-task-contract.md",
+      "sha256": "172f2cd6df984d21687554b7596c2038c4159c940a062d2c4f89e757ebe3cf6c"
+    },
+    {
+      "bytes": 2584,
+      "path": "docs/memory/phases/e8-2-left-lowe-runtime-scientific-closure.md",
+      "sha256": "cca5d6adf977751b958a2088865218c3efa69e0705c573466444f0eea384e0b9"
     },
     {
       "bytes": 14543,
@@ -1136,9 +1151,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 23026,
+      "bytes": 23213,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "a5f8e1ff6e2596e38f3b50a50cb780153e16bb1e5dfe50ee73c282588d16190f"
+      "sha256": "6ee050e1531ccd0b846a8e0bc7d9ad39ad5c4db5751ec1c0339de29cc86cfc8b"
     },
     {
       "bytes": 1698,

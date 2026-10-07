@@ -84,11 +84,13 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 #### E.8.2 — baseline full-analysis stage audit
 
-`SOURCE REVIEWED` — presents the existing baseline before/component/after chain through
-prompt/random, dummy, slow proton, baseline pion, final canonical `(t,phi)`
-missing mass, and stage/final yields. The accepted `no_empirical_residual`
-profile keeps legacy empirical residual Fit 1/Fit 2 disabled. This has no
-production-physics ownership.
+`CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe at farm source
+`706ae708ae69be0585472982a4df3d87c63f186f`. Fresh owner/provenance/artifact/ZIP
+gates and all 18 rendered E.8.2 pages passed. Baseline diagnostic-window stage
+interpretation is accepted only for this scope; see the
+[closure evidence](../evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
+The existing before/component/after chain and `no_empirical_residual` remain
+unchanged. No canonical-five closure or production promotion follows.
 
 #### E.8.3 — detached Method-A reweighting audit
 

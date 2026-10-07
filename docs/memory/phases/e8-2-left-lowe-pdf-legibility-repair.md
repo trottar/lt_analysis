@@ -1,6 +1,10 @@
 # E.8.2 Left/lowe PDF-legibility repair
 
-Status: `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for presentation only.
+Status: `CLOSED / RUNTIME VALIDATED` for Q4p4W2p74 / Left / lowe visual
+legibility only. The [fresh closure evidence](../evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
+records prior ChatGPT acceptance of all 18 rendered E.8.2 pages at farm source
+`706ae708ae69be0585472982a4df3d87c63f186f`. The implementation chronology and
+then-pending acceptance boundary below remain historical.
 
 ## Authority and cause
 

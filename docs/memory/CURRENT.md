@@ -11,16 +11,17 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The [accepted Left/lowe run](evidence/e8-2-left-lowe-runtime-owner-pass-visual-blocker-2026-10-06.md)
-records owner/isolation/provenance `CLOSED / RUNTIME VALIDATED` from supplied
-farm evidence and prior ChatGPT review. Artifact/page-manifest/ZIP gates
-passed, but the E.8.2
-scientific audit is `BLOCKED` at rendered-page visual acceptance: clipped
-subtraction rows, final-MM header overlap and stage-yield truncation.
-The [presentation-only repair](phases/e8-2-left-lowe-pdf-legibility-repair.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Scientific values,
-schemas/page IDs and owner/profile/collector remain unchanged. No scientific
-stage-magnitude/prune interpretation is accepted before fresh visual review.
+E.8.2 Q4p4W2p74 / Left / lowe is `CLOSED / RUNTIME VALIDATED` from the
+[accepted fresh evidence](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
+and prior review: owner/provenance/artifact/ZIP gates and all 18 pages
+passed, closing the [visual repair](phases/e8-2-left-lowe-pdf-legibility-repair.md).
+Codex records prior acceptance.
+
+Accepted diagnostic Lambda-window stage reductions: random <1%, dummy up to
+about 2.6%, slow proton about 6.5–8.1%, baseline pion about 19–21% at t1/t2
+and 4.8% at t3; `prune_hist` is negligible. These are narrow Left/lowe
+conclusions. Diagnostic integrals are distinct from stored final yields;
+their difference is not another subtraction stage.
 
 The fresh-F1 canonical-five lineage preflight is
 `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
@@ -74,15 +75,16 @@ See [branch evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md
 Fix.5.7/Fix.5.8 remain `CLOSED / RUNTIME VALIDATED` only for Left/lowe owner
 provenance and presentation legibility respectively. [Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
 retains its 97-page structural/parent/visual scope. Earlier F-stage closures
-retain their scopes in the [roadmap](roadmap/STATUS.md). E.8.2/E.8.3 and workflow
+retain their scopes in the [roadmap](roadmap/STATUS.md). E.8.3 and workflow
 hardening remain `SOURCE REVIEWED`; historical E.8.3 F.6.1 and current F.6.3/E.8.4
 are distinct lineages. Literature adds no runtime validation; no authority is
 replaced.
 
 ## Source / Evidence Identity
 
-- Legibility-repair startup, 2026-10-06: branch `test`, HEAD/local
-  `origin/test` `8ae17e18e480527cf470a93a7a8fb6f0747308fd`.
+- Accepted fresh E.8.2 farm source and closure startup, 2026-10-07:
+  branch `test`, HEAD/local `origin/test`
+  `706ae708ae69be0585472982a4df3d87c63f186f`.
 - Historical second full-run farm source, 2026-10-05:
   `ace8688a71431d13b40ed19713a27746f3da6a8e`.
   Failed gate-status SHA-256:
@@ -112,11 +114,13 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
-synchronization/farm-readiness review, rerun exactly one isolated Q4p4W2p74
-Left/lowe E.8.2 owner gate. Inspect all 18 fresh rendered pages before any
-scientific stage-magnitude/prune interpretation. Canonical-five provenance
-repair stays `DEFERRED`; later interpretation follows the approved roadmap.
+NEXT — audit the existing E.8.3 detached Method-A reweighting audit against
+current source and accepted authorities, then determine its narrow
+Q4p4W2p74 / Left / lowe runtime-validation readiness. Do not redesign Method A
+or reopen closed E.8.2/F-stage work without new evidence.
+
+ChatGPT actual-diff review, user commit/push and pushed-state review precede
+that audit. No farm execution is authorized.
 
 ## Success Criteria
 
