@@ -11,16 +11,16 @@ authorities and detached Method-A/Method-B boundaries.
 
 ## Current Work Item
 
-The first E.8.2 Left/lowe farm attempt is `BLOCKED` at owner isolation:
-the detached debug worktree exposed an empty local OUTPATH to Center
-DiamondPlot; the child failed without acceptance.
-The [owner-only OUTPUT-link repair](phases/e8-2-left-lowe-runtime-owner-output-isolation-repair.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, awaiting actual-diff
-review. SOURCE VERIFIED: validated OUTPUT indirection precedes launch;
-production/scientific source is unchanged.
-No new E.8.2 scientific implementation is justified. Actual stage magnitudes,
-pruning impact, PDF legibility and farm integration remain NOT VERIFIED.
-Canonical-five profile declarations and Left/lowe-only collection are unchanged.
+The [accepted Left/lowe run](evidence/e8-2-left-lowe-runtime-owner-pass-visual-blocker-2026-10-06.md)
+records owner/isolation/provenance `CLOSED / RUNTIME VALIDATED` from supplied
+farm evidence and prior ChatGPT review. Artifact/page-manifest/ZIP gates
+passed, but the E.8.2
+scientific audit is `BLOCKED` at rendered-page visual acceptance: clipped
+subtraction rows, final-MM header overlap and stage-yield truncation.
+The [presentation-only repair](phases/e8-2-left-lowe-pdf-legibility-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Scientific values,
+schemas/page IDs and owner/profile/collector remain unchanged. No scientific
+stage-magnitude/prune interpretation is accepted before fresh visual review.
 
 The fresh-F1 canonical-five lineage preflight is
 `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
@@ -81,8 +81,8 @@ replaced.
 
 ## Source / Evidence Identity
 
-- OUTPUT-repair startup, 2026-10-06: branch `test`, HEAD/local
-  `origin/test` `f860f832f3e4b05f468cb6bb636f82f4a26d726b`.
+- Legibility-repair startup, 2026-10-06: branch `test`, HEAD/local
+  `origin/test` `8ae17e18e480527cf470a93a7a8fb6f0747308fd`.
 - Historical second full-run farm source, 2026-10-05:
   `ace8688a71431d13b40ed19713a27746f3da6a8e`.
   Failed gate-status SHA-256:
@@ -114,10 +114,9 @@ No normalization error, conversion or amplitude conclusion is established.
 
 NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
 synchronization/farm-readiness review, rerun exactly one isolated Q4p4W2p74
-Left/lowe E.8.2 scientific-audit owner gate and return fresh ZIP/companions
-for review. Canonical-five provenance repair stays `DEFERRED`; subsequent
-E.8.3/E.8.4 interpretation follows the approved roadmap. This local task
-issues no farm command or new Method-A design.
+Left/lowe E.8.2 owner gate. Inspect all 18 fresh rendered pages before any
+scientific stage-magnitude/prune interpretation. Canonical-five provenance
+repair stays `DEFERRED`; later interpretation follows the approved roadmap.
 
 ## Success Criteria
 

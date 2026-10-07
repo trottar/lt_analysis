@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8190,
+      "bytes": 8163,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "9875e8e275ce7e7b89f03d69da5e681ea64758504f9eabbf590af4edac047e62"
+      "sha256": "0f4640790f8380dc2cd5650068985835ad6a69c446e95a8feeecabd15f607222"
     },
     {
       "bytes": 8339,
@@ -139,6 +139,11 @@
       "bytes": 2912,
       "path": "docs/memory/evidence/e8-1-fix6-left-lowe-runtime-closure.md",
       "sha256": "06ef27c2f2e4993c22981a4154974227fbdee57b59e870d061467ac021d1f64f"
+    },
+    {
+      "bytes": 3444,
+      "path": "docs/memory/evidence/e8-2-left-lowe-runtime-owner-pass-visual-blocker-2026-10-06.md",
+      "sha256": "c353da27042d712efc04de92de57effd4d3a4247bc5e240989766e7d132db6f8"
     },
     {
       "bytes": 4337,
@@ -544,6 +549,16 @@
       "bytes": 16116,
       "path": "docs/memory/phases/e8-2-baseline-stage-audit.md",
       "sha256": "c1f4157951394cc0a4252dc8129e86244e137a705e06d5ddee97930bc1045627"
+    },
+    {
+      "bytes": 25178,
+      "path": "docs/memory/phases/e8-2-left-lowe-pdf-legibility-repair-task-contract.md",
+      "sha256": "7d54889866d0a9b7fd8ad625fec3e75bcebf5d58d64d312cc5335c9db75f3d1e"
+    },
+    {
+      "bytes": 4537,
+      "path": "docs/memory/phases/e8-2-left-lowe-pdf-legibility-repair.md",
+      "sha256": "ae325deddcd09cf474b29eb227e00db25f36ed24f62b4d37c25d2c31beb0a5cc"
     },
     {
       "bytes": 18118,

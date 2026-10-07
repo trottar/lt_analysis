@@ -6632,25 +6632,68 @@ def _e8_2_draw_lambda_window(ROOT, histogram, window):
     return tuple(lines)
 
 
+def _e8_2_page_regions(ROOT, canvas, heading, group):
+    """Bounded E.8.2 page: retain a header outside the printable content grid."""
+    canvas.cd()
+    header = ROOT.TPad(canvas.GetName() + "_header", "E.8.2 header", 0.0, 0.90, 1.0, 1.0)
+    content = ROOT.TPad(canvas.GetName() + "_content", "E.8.2 content", 0.0, 0.02, 1.0, 0.89)
+    header.Draw()
+    content.Draw()
+    header.cd()
+    text = _e8_add_text(
+        ROOT, (0.02, 0.08, 0.98, 0.92), (heading, _t_context(group)),
+        size=0.18, align=22,
+    )
+    if text is None:
+        raise RuntimeError("E.8.2 header unavailable")
+    content.cd()
+    return content, [header, content, text]
+
+
+_E8_2_STAGE_DISPLAY_LABELS = (
+    ("PP", "prompt_pre_proton"), ("AR", "after_random_pre_proton"),
+    ("AD", "after_dummy_pre_proton"), ("PRE", "after_proton_pre_prune"),
+    ("POST", "after_proton_post_prune"), ("PI", "after_pion_final"),
+)
+
+
+def _e8_2_stage_yield_lines(child):
+    """Format persisted values in three compact rows; never integrate or extract."""
+    phi = int(child["phi_index"]) + 1
+    if not child.get("valid"):
+        return ("phi {} unavailable: {}".format(phi, child.get("reason")),)
+    values = {row["stage"]: row["value"] for row in child["stage_window_integrals"]}
+    fields = ["{}={:.5g}".format(label, float(values[stage]))
+              for label, stage in _E8_2_STAGE_DISPLAY_LABELS]
+    return (
+        "phi {} [{:.1f}, {:.1f}] deg: {}".format(
+            phi, float(child["phi_low"]), float(child["phi_high"]), "; ".join(fields[:3])),
+        "    " + "; ".join(fields[3:]),
+        "    authoritative Y_0={:.5g}; stat={:.3g}; total={:.3g}".format(
+            float(child["final_yield"]), float(child["statistical_error"]), float(child["total_error"])),
+    )
+
+
 def _e8_2_render_subtraction_page(ROOT, pdf_name, payload, group, *, page_id,
                                   semantic_stage, title, columns, manifest):
     children = tuple(group.get("children") or ())
-    if not children or not hasattr(ROOT, "TCanvas"):
+    if not children or not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPad"):
         return False
     canvas = ROOT.TCanvas(
         "C_{}_t{}".format(page_id.replace(".", "_"), int(group["t_index"]) + 1),
-        title, 1800, max(600, 360 * len(children)),
+        title, 2400, 2400,
     )
-    canvas.Divide(len(columns), len(children))
     retained = []
     try:
+        grid, retained = _e8_2_page_regions(ROOT, canvas, title, group)
+        grid.Divide(len(columns), len(children))
         for row_index, child in enumerate(children):
             stage_hists = _mapping(child.get("stages"))
             y_range = _combined_histogram_y_range(
                 [stage_hists.get(stage) for _label, stage in columns]
             )
             for column_index, (label, stage) in enumerate(columns):
-                canvas.cd(row_index * len(columns) + column_index + 1)
+                grid.cd(row_index * len(columns) + column_index + 1)
                 if not child.get("valid"):
                     retained.append(_e8_2_draw_unavailable(ROOT, child.get("reason")))
                     continue
@@ -6680,7 +6723,6 @@ def _e8_2_render_subtraction_page(ROOT, pdf_name, payload, group, *, page_id,
                     ),
                 )
                 retained.append(note)
-        retained.append(_draw_page_header(ROOT, canvas, title, group))
         canvas._full_background_e8_2_draw_objects = tuple(retained)
         canvas.Print(pdf_name)
     finally:
@@ -6691,19 +6733,22 @@ def _e8_2_render_subtraction_page(ROOT, pdf_name, payload, group, *, page_id,
 
 def _e8_2_render_final_mm_page(ROOT, pdf_name, payload, group, manifest):
     children = tuple(group.get("children") or ())
-    if not children or not hasattr(ROOT, "TCanvas"):
+    if not children or not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPad"):
         return False
     columns = min(3, len(children))
     rows = int(math.ceil(float(len(children)) / float(columns)))
     canvas = ROOT.TCanvas(
         "C_full_background_e8_2_final_mm_t{}".format(int(group["t_index"]) + 1),
-        "E.8.2 final baseline missing mass", 1600, max(700, 500 * rows),
+        "E.8.2 final baseline missing mass", 2400, 2400,
     )
-    canvas.Divide(columns, rows)
     retained = []
     try:
+        grid, retained = _e8_2_page_regions(
+            ROOT, canvas, "E.8.2 final baseline clean kaon MM_0", group,
+        )
+        grid.Divide(columns, rows)
         for index, child in enumerate(children):
-            canvas.cd(index + 1)
+            grid.cd(index + 1)
             if not child.get("valid"):
                 retained.append(_e8_2_draw_unavailable(ROOT, child.get("reason")))
                 continue
@@ -6722,16 +6767,20 @@ def _e8_2_render_final_mm_page(ROOT, pdf_name, payload, group, manifest):
             histogram.Draw("hist e")
             retained.append(histogram)
             retained.extend(_e8_2_draw_lambda_window(ROOT, histogram, payload["lambda_window"]))
-            note = _draw_small_note(
-                ROOT,
-                "phi {} [{:.1f}, {:.1f}] deg; Y_0={:.5g}; stat={:.3g}; total={:.3g}".format(
+            note = _e8_add_text(
+                ROOT, (0.10, 0.76, 0.94, 0.92), (
+                "phi {} [{:.1f}, {:.1f}] deg".format(
                     int(child["phi_index"]) + 1, float(child["phi_low"]),
-                    float(child["phi_high"]), float(child["final_yield"]),
-                    float(child["statistical_error"]), float(child["total_error"]),
+                    float(child["phi_high"]),
                 ),
+                "Y_0={:.5g}; stat={:.3g}; total={:.3g}".format(
+                    float(child["final_yield"]), float(child["statistical_error"]),
+                    float(child["total_error"]),
+                )), size=0.033, align=22,
             )
+            if note is None:
+                return False
             retained.append(note)
-        retained.append(_draw_page_header(ROOT, canvas, "E.8.2 final baseline clean kaon MM_0", group))
         canvas._full_background_e8_2_draw_objects = tuple(retained)
         canvas.Print(pdf_name)
     finally:
@@ -6744,41 +6793,32 @@ def _e8_2_render_final_mm_page(ROOT, pdf_name, payload, group, manifest):
 
 
 def _e8_2_render_stage_yield_page(ROOT, pdf_name, payload, group, manifest):
-    if not hasattr(ROOT, "TCanvas") or not hasattr(ROOT, "TPaveText"):
+    if not all(hasattr(ROOT, name) for name in ("TCanvas", "TPad", "TPaveText")):
         return False
     canvas = ROOT.TCanvas(
         "C_full_background_e8_2_stage_yields_t{}".format(int(group["t_index"]) + 1),
-        "E.8.2 baseline stage-window audit", 1700, 1000,
+        "E.8.2 baseline stage-window audit", 2400, 2400,
     )
     text = None
     try:
+        content, retained = _e8_2_page_regions(
+            ROOT, canvas, "E.8.2 baseline stage-yield audit", group,
+        )
+        content.cd()
         text = ROOT.TPaveText(0.02, 0.04, 0.98, 0.94, "NDC")
         text.SetFillStyle(0)
         text.SetBorderSize(0)
         text.SetTextAlign(12)
-        text.SetTextSize(0.028)
+        text.SetTextSize(0.022)
         text.AddText("E.8.2 diagnostic Lambda-window integrals (not final extracted yields)")
+        for index in range(0, len(_E8_2_STAGE_DISPLAY_LABELS), 2):
+            text.AddText("; ".join("{} = {}".format(label, stage)
+                for label, stage in _E8_2_STAGE_DISPLAY_LABELS[index:index + 2]))
         for child in tuple(group.get("children") or ()):
-            if not child.get("valid"):
-                text.AddText("phi {} unavailable: {}".format(
-                    int(child["phi_index"]) + 1, child.get("reason")
-                ))
-                continue
-            fields = ", ".join(
-                "{}={:.5g}".format(row["stage"], float(row["value"]))
-                for row in tuple(child.get("stage_window_integrals") or ())
-            )
-            text.AddText("phi {} [{:.1f}, {:.1f}] deg: {}".format(
-                int(child["phi_index"]) + 1, float(child["phi_low"]),
-                float(child["phi_high"]), fields,
-            ))
-            text.AddText("  final authoritative Y_0={:.5g}; statistical={:.3g}; existing total={:.3g}".format(
-                float(child["final_yield"]), float(child["statistical_error"]),
-                float(child["total_error"]),
-            ))
+            for line in _e8_2_stage_yield_lines(child):
+                text.AddText(line)
         text.Draw()
-        header = _draw_page_header(ROOT, canvas, "E.8.2 baseline stage-yield audit", group)
-        canvas._full_background_e8_2_draw_objects = (text, header)
+        canvas._full_background_e8_2_draw_objects = tuple(retained + [text])
         canvas.Print(pdf_name)
     finally:
         canvas.Close()

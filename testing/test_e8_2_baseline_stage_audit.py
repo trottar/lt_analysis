@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+from copy import deepcopy
 import inspect
 import json
 import math
@@ -172,6 +173,116 @@ class _Histogram:
 
     def Integral(self):
         return sum(self.contents)
+
+
+class _LayoutObject:
+    def __init__(self, root, name, bounds=()):
+        self.root, self.name, self.bounds = root, name, bounds
+        self.lines, self.divisions, self.visits = [], [], []
+
+    def GetName(self):
+        return self.name
+
+    def cd(self, index=None):
+        self.root.active = (self, index)
+        if index is not None:
+            self.visits.append(index)
+
+    def Divide(self, columns, rows):
+        self.divisions.append((columns, rows))
+
+    def AddText(self, text):
+        self.lines.append(text)
+
+    def Draw(self):
+        self.drawn_on = self.root.active
+
+    def Print(self, name):
+        self.printed = name
+
+    def Close(self):
+        self.closed = True
+
+    def __getattr__(self, name):
+        if name.startswith("Set"):
+            return lambda value: setattr(self, name[3:], value)
+        raise AttributeError(name)
+
+
+class _LayoutRoot:
+    """Capture pad geometry and drawing without importing ROOT/PyROOT."""
+    def __init__(self):
+        self.canvases, self.pads, self.texts, self.markers, self.histograms = [], [], [], [], []
+        self.active = None
+
+    def TCanvas(self, name, _title, width, height):
+        canvas = _LayoutObject(self, name)
+        canvas.size = (width, height)
+        self.canvases.append(canvas)
+        return canvas
+
+    def TPad(self, name, _title, *bounds):
+        pad = _LayoutObject(self, name, bounds)
+        self.pads.append(pad)
+        return pad
+
+    def TPaveText(self, *args):
+        text = _LayoutObject(self, "text", args[:4])
+        self.texts.append(text)
+        return text
+
+    def TLine(self, *bounds):
+        line = _LayoutObject(self, "lambda marker", bounds)
+        self.markers.append(line)
+        return line
+
+
+class _DisplayHistogram(_Histogram):
+    def Clone(self, name):
+        clone = type(self)(self.contents, self.edges, self.errors)
+        clone.root, clone.stage, clone.name = self.root, self.stage, name
+        return clone
+
+    def SetTitle(self, title):
+        self.title = title
+
+    def SetMinimum(self, value):
+        self.minimum = value
+
+    def SetMaximum(self, value):
+        self.maximum = value
+
+    def GetMinimum(self):
+        return getattr(self, "minimum", min(self.contents))
+
+    def GetMaximum(self):
+        return getattr(self, "maximum", max(self.contents))
+
+    def Draw(self, option):
+        self.root.histograms.append((self, self.root.active, option))
+
+    def Integral(self):
+        raise AssertionError("renderer must consume persisted integrals")
+
+
+def _nine_child_layout_fixture(root):
+    prototype = _source()["children"][0]
+    children = []
+    for index in range(9):
+        child = deepcopy(prototype)
+        child.update(phi_index=index, phi_low=-180.0 + 40 * index, phi_high=-140.0 + 40 * index)
+        for stage, hist in child["stages"].items():
+            display = _DisplayHistogram(hist.contents, hist.edges, [0.25] * len(hist.errors))
+            display.root, display.stage = root, stage
+            child["stages"][stage] = display
+        for stage_index, row in enumerate(child["stage_window_integrals"]):
+            row["value"] = 100 * (index + 1) + stage_index + 1
+        child.update(final_yield=100 * (index + 1) + 7,
+                     statistical_error=100 * (index + 1) + 8,
+                     total_error=100 * (index + 1) + 9)
+        children.append(child)
+    group = {"t_index": 0, "t_low": 0.0, "t_high": 1.0, "children": children}
+    return {"setting": "Left", "epsilon": "lowe", "lambda_window": [1.08, 1.18], "per_t": [group]}
 
 
 class _SinglePassTree:
@@ -974,6 +1085,125 @@ class E82BaselineStageAuditTests(unittest.TestCase):
                 ("after existing production prune_hist; pion input state", "after_proton_post_prune"),
             ),
         )
+
+    def test_e82_bounded_geometry_all_children_columns_and_manifest(self):
+        root = _LayoutRoot()
+        payload = _nine_child_layout_fixture(root)
+        children = payload["per_t"][0]["children"]
+        sources = [(h, list(h.contents), list(h.errors), h.directory)
+                   for child in children for h in child["stages"].values()]
+        manifest, failures = [], []
+        plots._render_full_background_subtraction_e8_2_pages(root, "fixture.pdf", payload, manifest, failures)
+        self.assertEqual(failures, [])
+        suffixes = ("random", "dummy", "proton", "pion", "final_mm", "stage_yields")
+        self.assertEqual([r["page_id"] for r in manifest],
+            ["full_background.e8_2.{}.t1".format(s) for s in suffixes])
+        self.assertEqual([r["semantic_stage"] for r in manifest],
+            ["random_subtraction", "dummy_subtraction", "slow_proton_cleaning",
+             "baseline_pion_subtraction", "final_baseline_mm", "baseline_stage_yields"])
+        expected = (
+            ("prompt_pre_proton", "random_component_pre_proton", "after_random_pre_proton"),
+            ("after_random_pre_proton", "dummy_component_pre_proton", "after_dummy_pre_proton"),
+            ("after_dummy_pre_proton", "proton_component_removed", "after_proton_pre_prune", "after_proton_post_prune"),
+            ("pion_input", "pion_component_removed", "after_pion_final"), ("after_pion_final",),
+        )
+        for index, canvas in enumerate(root.canvases):
+            self.assertEqual(canvas.size, (2400, 2400))
+            self.assertEqual(canvas.divisions, [])  # no full-canvas grid/header collision
+            header, grid = root.pads[2 * index:2 * index + 2]
+            self.assertLess(grid.bounds[3], header.bounds[1])
+            for pad in (header, grid):
+                self.assertTrue(all(0.0 <= value <= 1.0 for value in pad.bounds))
+            header_text = next(t for t in root.texts if t.drawn_on == (header, None))
+            self.assertIn("|t|", header_text.lines[1])
+            if index == 2:
+                self.assertIn("prune_hist lies between columns 3 and 4", header_text.lines[0])
+            if index < 5:
+                stages = expected[index]
+                self.assertEqual(grid.divisions, [(len(stages), 9)] if index < 4 else [(3, 3)])
+                self.assertEqual(grid.visits, list(range(1, 9 * len(stages) + 1)))
+                draws = [h for h, (pad, _cell), _option in root.histograms if pad is grid]
+                self.assertEqual([h.stage for h in draws], list(stages) * 9)
+                markers = [m for m in root.markers if m.drawn_on[0] is grid]
+                self.assertEqual([m.bounds[0] for m in markers], payload["lambda_window"] * len(draws))
+                notes = [t.lines[0] for t in root.texts if t.drawn_on[0] is grid]
+                for phi in range(1, 10):
+                    self.assertEqual(sum(line.startswith("phi {} ".format(phi)) for line in notes), len(stages))
+                if index == 4:
+                    final_notes = [t for t in root.texts if t.drawn_on[0] is grid]
+                    for child, note in zip(children, final_notes):
+                        self.assertEqual(len(note.lines), 2)
+                        self.assertLessEqual(max(map(len, note.lines)), 70)
+                        self.assertEqual(note.lines[1], "Y_0={:.5g}; stat={:.3g}; total={:.3g}".format(
+                            child["final_yield"], child["statistical_error"], child["total_error"]))
+            self.assertTrue(canvas.closed)
+            self.assertEqual(canvas.printed, "fixture.pdf")
+            self.assertEqual([c["phi_index"] for c in manifest[index]["represented_phi_inventory"]], list(range(9)))
+        for h, contents, errors, directory in sources:
+            self.assertEqual(h.contents, contents)
+            self.assertEqual(h.errors, errors)
+            self.assertIs(h.directory, directory)
+            self.assertFalse(hasattr(h, "title"))
+            self.assertFalse(hasattr(h, "minimum"))
+            self.assertFalse(hasattr(h, "maximum"))
+            self.assertTrue(all(h is not drawn for drawn, _, _ in root.histograms))
+
+    def test_stage_yield_bounded_rows_complete_values_and_legend(self):
+        root = _LayoutRoot()
+        payload = _nine_child_layout_fixture(root)
+        group = payload["per_t"][0]
+        before = deepcopy([{k: v for k, v in c.items() if k != "stages"} for c in group["children"]])
+        manifest = []
+        self.assertTrue(plots._e8_2_render_stage_yield_page(root, "fixture.pdf", payload, group, manifest))
+        text = root.texts[-1]
+        self.assertEqual(text.drawn_on, (root.pads[1], None))
+        self.assertEqual(len(text.lines), 31)
+        self.assertIn("not final extracted yields", text.lines[0])
+        legend = "\n".join(text.lines[1:4])
+        for abbreviation, stage in plots._E8_2_STAGE_DISPLAY_LABELS:
+            self.assertEqual(legend.count("{} = {}".format(abbreviation, stage)), 1)
+        for index, child in enumerate(group["children"]):
+            rows = plots._e8_2_stage_yield_lines(child)
+            self.assertEqual(len(rows), 3)
+            self.assertEqual(tuple(text.lines[4 + index * 3:7 + index * 3]), rows)
+            self.assertTrue(all(len(line) <= 100 for line in rows))
+            combined = "\n".join(rows)
+            for row in child["stage_window_integrals"]:
+                self.assertEqual(combined.count("={:.5g}".format(row["value"])), 1)
+                self.assertNotIn(row["stage"], combined)
+            for field, label, fmt in (("final_yield", "Y_0", ".5g"),
+                                     ("statistical_error", "stat", ".3g"), ("total_error", "total", ".3g")):
+                token = label + "=" + format(child[field], fmt)
+                self.assertEqual(combined.count(token), 1)
+        self.assertEqual(before, [{k: v for k, v in c.items() if k != "stages"} for c in group["children"]])
+        for value in (-1.2345e308, -1.2345e-308):
+            extreme = deepcopy(group["children"][0])
+            for row in extreme["stage_window_integrals"]:
+                row["value"] = value
+            extreme.update(final_yield=value, statistical_error=abs(value), total_error=abs(value))
+            self.assertTrue(all(len(line) <= 100 for line in plots._e8_2_stage_yield_lines(extreme)))
+
+    def test_e82_invalid_children_and_exact_eighteen_page_inventory_retained(self):
+        root = _LayoutRoot()
+        payload = _nine_child_layout_fixture(root)
+        group = payload["per_t"][0]
+        for n in (1, 2):
+            other = dict(group, t_index=n, t_low=float(n), t_high=float(n + 1))
+            payload["per_t"].append(other)
+        manifest, failures = [], []
+        plots._render_full_background_subtraction_e8_2_pages(root, "fixture.pdf", payload, manifest, failures)
+        self.assertEqual(len(manifest), 18)
+        self.assertEqual(len({r["page_id"] for r in manifest}), 18)
+        self.assertEqual(failures, [])
+        group["children"][0].update(valid=False, reason="fixture unavailable")
+        root = _LayoutRoot()
+        manifest = []
+        self.assertTrue(plots._e8_2_render_final_mm_page(root, "fixture.pdf", payload, group, manifest))
+        self.assertEqual(manifest[0]["invalid_unavailable_children"],
+                         [{"phi_index": 0, "reason": "fixture unavailable"}])
+        self.assertIn("fixture unavailable", [line for text in root.texts for line in text.lines])
+        self.assertEqual(plots._e8_2_stage_yield_lines(group["children"][0]),
+                         ("phi 1 unavailable: fixture unavailable",))
 
     def test_finalization_replaces_only_a_complete_temporary_pair(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
