@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8190,
+      "bytes": 8183,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "2fb3259be2e450a4fb9b54f5d12a98faeea76003a1f405c7257dbb9372a87772"
+      "sha256": "347b45614133625f3e78cf1a0ba704fce43aa7c612d519c0ba5e759420a02aa7"
     },
     {
       "bytes": 8339,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 20085,
+      "bytes": 20623,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "ac8bac01e02214e9f90438e635e661f76bed874b7681d26f6f6c93fe09e69bc2"
+      "sha256": "195aac781b62ea244f193ca1c426e425ba681f9e8187075c8832508e9e598b4e"
     },
     {
       "bytes": 3606,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 12086,
+      "bytes": 12841,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "9250c0522d8f9db97a6c169f64362b4de22ad75ba8dad32a391a94f350d8d959"
+      "sha256": "e1eeb77f7a736a9d5deb587a7fbba59dfab1a567ebabd5f891c8e64cd1e58b6c"
     },
     {
       "bytes": 2363,
@@ -149,6 +149,11 @@
       "bytes": 6061,
       "path": "docs/memory/evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md",
       "sha256": "7b1d1c9bf5eb0542d28a34b870b60846e8913e5e8973e89e09cf96f8b96472aa"
+    },
+    {
+      "bytes": 5065,
+      "path": "docs/memory/evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md",
+      "sha256": "c71abec5c74ca519b685e8ccd14b9e4a67a259e78c203609b3487e9b7d1f9d1d"
     },
     {
       "bytes": 4830,
@@ -611,9 +616,9 @@
       "sha256": "8a3aad7bea462e83bbc9880dc6cdc12f98e98f2775b55c33c14355f66b52c3f4"
     },
     {
-      "bytes": 6101,
+      "bytes": 7323,
       "path": "docs/memory/phases/e8-3-authority-page-provenance-legibility-repair.md",
-      "sha256": "eb17a508f077a7a27624924717ea2280cf3814fb2ec3396ffe498f7d8602607d"
+      "sha256": "84d5170a6eae45af2ddfd11d48f3210ed904384c5a3942b0f64d788dcbe32820"
     },
     {
       "bytes": 17399,
@@ -634,6 +639,11 @@
       "bytes": 7498,
       "path": "docs/memory/phases/e8-3-final-pre-push-memory-cleanup-task-contract.md",
       "sha256": "18166ae12edb2c77c7da941183c0337f77364f6d881871f160f5c7dd2b594e00"
+    },
+    {
+      "bytes": 17242,
+      "path": "docs/memory/phases/e8-3-left-lowe-runtime-closure-task-contract.md",
+      "sha256": "45575b33ef9d2d2afc14c2360c8c09da794294e2d65038de82024fb8c94d0506"
     },
     {
       "bytes": 11188,
@@ -1166,9 +1176,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 23213,
+      "bytes": 23495,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "6ee050e1531ccd0b846a8e0bc7d9ad39ad5c4db5751ec1c0339de29cc86cfc8b"
+      "sha256": "801568830235bd49bdc9bf261c7ae0ca16e0ef9939bf79657246fb39aa4063ec"
     },
     {
       "bytes": 1698,

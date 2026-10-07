@@ -15,13 +15,13 @@ E.8.2 Q4p4W2p74 / Left / lowe remains `CLOSED / RUNTIME VALIDATED`.
 [Accepted closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
 owns its narrow visual/scientific conclusions; diagnostic integrals are not final yields.
 
-E.8.3 remains `SOURCE REVIEWED`. [Supplied evidence](evidence/e8-3-left-lowe-runtime-readiness-visual-blocker-2026-10-07.md)
-at `706ae708ae69be0585472982a4df3d87c63f186f` exercises the Left/lowe
-route: all eight pages, no renderer failures, pages 66–72 visually accepted.
-Page 65 is `BLOCKED` only by clipped provenance SHA-256 text.
-The [authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-No scientific redesign or E.8.3 runtime closure follows.
+E.8.3 Q4p4W2p74 / Left / lowe and its
+[authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
+are `CLOSED / RUNTIME VALIDATED`. [Accepted closure](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md)
+records supplied artifacts/prior ChatGPT acceptance: owner/provenance/preservation
+passed, page 65 shows all seven full provenance values, pages 66–72 are
+pixel-identical to the prior accepted render, with no renderer failures.
+This narrow runtime/presentation closure does not promote Method A.
 
 The fresh-F1 canonical-five lineage preflight is
 `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation only.
@@ -75,15 +75,17 @@ See [branch evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md
 Fix.5.7/Fix.5.8 remain `CLOSED / RUNTIME VALIDATED` only for Left/lowe owner
 provenance and presentation legibility respectively. [Fix.5.8 evidence](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
 retains its 97-page structural/parent/visual scope. Earlier F-stage closures
-retain their scopes in the [roadmap](roadmap/STATUS.md). E.8.3 and workflow
-hardening remain `SOURCE REVIEWED`; historical E.8.3 F.6.1 and current F.6.3/E.8.4
+retain their scopes in the [roadmap](roadmap/STATUS.md). Workflow hardening
+remains `SOURCE REVIEWED`; historical E.8.3 F.6.1 and current F.6.3/E.8.4
 are distinct lineages. Literature adds no runtime validation; no authority is
 replaced.
 
 ## Source / Evidence Identity
 
-- Accepted fresh E.8.2 farm source and closure startup, 2026-10-07:
+- Accepted E.8.3 farm source and closure startup, 2026-10-07:
   branch `test`, HEAD/local `origin/test`
+  `63eb2bf66d98baaffa39e88cf1db7ac37397d364`.
+- Accepted E.8.2 farm source:
   `706ae708ae69be0585472982a4df3d87c63f186f`.
 - Historical second full-run farm source, 2026-10-05:
   `ace8688a71431d13b40ed19713a27746f3da6a8e`.
@@ -114,11 +116,10 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff review, user commit/push and pushed-state
-synchronization/farm-readiness review, run exactly one fresh isolated
-Q4p4W2p74 / Left / lowe procedure owner gate and visually inspect E.8.3 pages
-65–72, especially the full provenance values on the authority page, before
-any E.8.3 runtime closure.
+NEXT — decide whether to explicitly reopen the deferred canonical-five
+provenance/identity repair required for final E.8 closure. Until that decision,
+keep final E.8 and F.6.4 `BLOCKED`; do not rerun the farm, redesign Method A,
+or promote Method A automatically.
 
 ## Success Criteria
 

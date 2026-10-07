@@ -105,6 +105,14 @@ current-baseline F.6.3/E.8.4 candidate are distinct; individual page correctness
 does not establish cross-page linkage. Renderer success does not establish
 scientific linkage consistency.
 
+E.8.3 has accepted direct farm evidence only for Q4p4W2p74 / Left / lowe at
+`63eb2bf6`: provenance/preservation passed,
+authority-page full-value legibility is repaired, and pages 66–72 are unchanged
+(pixel-identical). The [accepted closure](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md)
+attributes acceptance to supplied artifacts/prior ChatGPT review. This narrow
+runtime/presentation closure does not link historical F.6.1 to current F.6.3,
+promote Method A, validate absolute SIMC or close canonical-five/final E.8/F.6.4.
+
 Current-branch yield-impact presentations require explicit histogram-scalar
 closure against exact producer-owned integration semantics. When fractional
 signed-yield changes appear disproportionate to spectrum overlays, report

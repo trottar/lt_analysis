@@ -1,8 +1,8 @@
 # E.8.3 authority-page provenance-legibility repair
 
-Status: `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for the authority-page
-presentation repair. Existing E.8.3 remains `SOURCE REVIEWED`; this is not
-narrow runtime closure.
+Status: `CLOSED / RUNTIME VALIDATED` only for the Q4p4W2p74 / Left / lowe
+authority-page presentation repair and narrow E.8.3 runtime/presentation gate.
+The implementation history and local checks below precede this acceptance.
 
 ## Starting identity and accepted continuity
 
@@ -92,8 +92,23 @@ git diff --check
 Manifest write/check, ordinary memory health, bootstrap JSON, sole NEXT,
 function/byte/index preservation and git diff --check: PASS, no health warnings.
 CURRENT/MEMORY/CURRENT_HANDOFF sizes: 8190 / 20085 / 323 bytes.
-These deterministic checks establish SOURCE VERIFIED behavior only; physical
-PDF legibility remains NOT VERIFIED pending fresh farm validation.
+These deterministic checks established SOURCE VERIFIED behavior only; physical
+PDF legibility was then NOT VERIFIED pending fresh farm validation.
+
+## Accepted later farm closure — 2026-10-07
+
+RUNTIME VERIFIED by supplied artifacts/prior independent ChatGPT review at
+farm source `63eb2bf66d98baaffa39e88cf1db7ac37397d364`; see the
+[closure evidence](../evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
+Page 65 now passes full-provenance legibility, with four complete input hashes
+and three complete fingerprints visible without clipping or overlap. Pages
+66–72 are pixel-identical to the prior accepted render; page inventory and
+manifest are unchanged, with no renderer failures. Owner/provenance/artifact/
+ZIP and final preservation checks passed. Codex records this acceptance without
+rerunning or independently validating external farm artifacts.
+This closure changes documentation only; no scientific or production source
+changed. The accepted repair changed only authority-page presentation and
+does not establish whole-analysis JSON byte identity.
 
 ## Boundary and successor
 
@@ -103,9 +118,11 @@ collector change, production mutation, ROOT/PyROOT, analysis, farm execution,
 staging, commit, push or ref update occurs. Canonical-five provenance repair
 remains `DEFERRED`; final E.8/F.6.4 remain `BLOCKED`.
 
-After ChatGPT actual-diff review, user commit/push and pushed-state
+The implementation's then-required successor was: after ChatGPT actual-diff review, user commit/push and pushed-state
 synchronization/farm-readiness review, run one fresh isolated Q4p4W2p74 / Left /
 lowe procedure owner gate. Review E.8.3 pages 65–72, all four full hashes and
 three full fingerprints, no clipping/overlap and unchanged later-page values
-before any narrow E.8.3 runtime closure. CURRENT owns the sole ordinary NEXT;
-this task supplies no farm command.
+before any narrow E.8.3 runtime closure. That gate is now consumed by the
+accepted later farm evidence. CURRENT owns the sole ordinary NEXT: user decision
+on whether to explicitly reopen deferred canonical-five provenance/identity
+repair. No further automatic Left/lowe E.8.3 work or farm command is authorized.

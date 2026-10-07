@@ -94,11 +94,15 @@ unchanged. No canonical-five closure or production promotion follows.
 
 #### E.8.3 — detached Method-A reweighting audit
 
-`SOURCE REVIEWED` — independent ChatGPT actual-diff review accepted the local
-detached/non-production audit implementation of the parent-preserving
-`w0 -> w0*C` pion-background redistribution, baseline versus reweighted
-comparison, signed difference/defined ratio, all canonical children, and parent
-closure without child renormalization. This has no runtime acceptance claim.
+`CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe at farm source
+`63eb2bf66d98baaffa39e88cf1db7ac37397d364`. Supplied artifacts/prior independent
+ChatGPT review accept owner/provenance/preservation and all eight E.8.3 pages.
+The authority-page repair is closed: page 65 shows all seven full provenance
+values; pages 66–72 are pixel-identical to the prior accepted render. See the
+[closure evidence](../evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
+The detached/non-production parent-preserving `w0 -> w0*C` audit, historical
+F.6.1 lineage and no-child-renormalization boundary remain unchanged. No
+canonical-five closure, Method-A promotion or absolute-SIMC validation follows.
 
 #### F.6.3 — parallel full procedure plus Method A
 
@@ -198,7 +202,7 @@ Fix.5.5 contract. Deterministic checks pass; new farm closure remains pending. S
 absolute units are not source-proven; Fix.1 blocks only authoritative
 absolute-SIMC page families/claims, preserving the valid current-F.6.3 E.8.4
 payload without rescaling. No farm numerical closure, cancellation explanation or
-SIMC normalization error is established. E.8.3 retains `SOURCE REVIEWED` status for
+SIMC normalization error is established. E.8.3 then retained `SOURCE REVIEWED` status for
 the historical accepted F.6.1 aggregate lineage, not the current F.6.3 candidate
 explanation. The confirmed cross-page lineage mismatch does not invalidate
 historical accepted authorities. See the [Fix.5.4 phase](../phases/e8-4-fix5-4-current-lineage-identity-audit.md).
@@ -270,10 +274,9 @@ remain intact; absolute-SIMC units remain a separate blocker.
 Dependency: Gates 1–4/external review and accepted Left/lowe diagnostic
 interpretation consumed -> user-authorized canonical-five orchestration
 attempted -> second full runtime gate `BLOCKED`. Provenance/identity repair
-is `DEFERRED` while the E.8.2 baseline MM/stage-yield scientific audit resumes;
-that audit does not require immediate provenance repair. Subsequent E.8.3/E.8.4
-interpretation follows the approved roadmap unless fresh evidence establishes
-a blocker. Final E.8 and F.6.4 remain `BLOCKED`. Method A remains
+is `DEFERRED`; the narrow Left/lowe E.8.2 and E.8.3 audits are now accepted.
+Existing F.6.3/E.8.4 Left/lowe closures retain their scope. Final E.8 and F.6.4
+remain `BLOCKED` by the canonical-five runtime/provenance situation. Method A remains
 detached/non-production; Method B remains diagnostic/cross-check only and
 numerically excluded. CURRENT alone owns the exact next action.
 
@@ -336,7 +339,7 @@ Left/lowe owner and visual presentation gates are accepted. Broader numerical
 interpretation, absolute-SIMC units and the other four settings are not closed.
 Canonical-five isolated orchestration was user-authorized and attempted; its
 second full runtime gate is `BLOCKED`, with provenance/identity repair `DEFERRED`
-while the E.8.2 scientific audit resumes. Final E.8 and F.6.4 remain `BLOCKED`.
+after accepted narrow Left/lowe E.8.2/E.8.3 audits. Final E.8 and F.6.4 remain `BLOCKED`.
 
 ## Active-state ownership
 

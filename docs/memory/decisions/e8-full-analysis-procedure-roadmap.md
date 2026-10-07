@@ -68,9 +68,15 @@ recalculate a yield when its producer can persist or provide it.
 
 ## E.8.3 — detached Method-A reweighting audit
 
-`SOURCE REVIEWED` — detached/non-production audit consuming accepted
-F.4/F.5/F.6.1/F.6.2 results only. Independent ChatGPT actual-diff review
-passed; this is not runtime acceptance.
+`CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe at farm source
+`63eb2bf66d98baaffa39e88cf1db7ac37397d364`, from supplied artifacts/prior
+independent ChatGPT review. See the
+[closure evidence](../evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
+Owner/provenance/preservation passed; repaired authority page 65 shows all
+seven full provenance values, and pages 66–72 are pixel-identical to the prior
+accepted render. The detached/non-production audit still consumes accepted
+F.4/F.5/F.6.1/F.6.2 results only, separately from current F.6.3/E.8.4.
+No scientific redesign, canonical-five closure or Method-A promotion follows.
 
 Method A operates on the accepted pion background after the proton-cleaned
 baseline picture; it does not invoke legacy empirical residual fits.
@@ -170,16 +176,20 @@ New-page rendering and owner integration still require fresh farm evidence.
 
 ## Final E.8 closure and F.6.4
 
-Final E.8 is `BLOCKED` pending E.8.4 and later required runtime/visual
-validation. Closure requires prompt/random, dummy, slow proton, baseline pion,
+Final E.8 is `BLOCKED` by the second canonical-five full runtime gate's
+artifact/page provenance failure; provenance/identity repair remains `DEFERRED`
+unless explicitly reopened by user decision. Accepted narrow Left/lowe
+E.8.2/E.8.3 and F.6.3/E.8.4 scopes remain intact. Closure requires prompt/random, dummy, slow proton, baseline pion,
 final baseline canonical MM/yields and stage yields, explicit `w0 -> w0*C`,
 direct baseline-versus-reweighted pion background with signed difference/ratio,
 canonical redistribution/parent closure, F.6.2 explanation, actual F.6.3
 baseline-versus-Method-A clean-kaon MM comparison, final `Y0` versus `YA`, and
 absolute/fractional yield shifts, per-child Method-A/SIMC and baseline/Method-A/SIMC
 comparisons without renormalization, shareable yield-impact summaries and parent
-closure sanity presentation. Accepted existing Left/lowe evidence does not close
-these new pages or the canonical-five program.
+closure sanity presentation. Accepted existing Left/lowe evidence does not
+close the canonical-five program. Absolute-SIMC interpretation remains
+separately `BLOCKED` by
+`SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
 
 F.6.4 is `BLOCKED` pending completed F.6.3/E.8.4 production-impact evidence. It is the only phase that may decide whether Method A becomes production pion-background treatment. No automatic promotion follows from detached validation, presentation, or source review.
 
