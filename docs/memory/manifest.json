@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8192,
+      "bytes": 7782,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "ac2e5158bd1cfbe4a2d18236657c968456575c8bfb049c6b6f328b8d8bf76fa4"
+      "sha256": "d67302ee3d07fc47951a77bd8960a7716822dfca7599bb6496d9eaac6b048265"
     },
     {
       "bytes": 8339,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 20999,
+      "bytes": 21530,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "699c8b3b65f3c6fbaba4bf620dffbb3dd4dba55d960fd782de25d01f9a670a36"
+      "sha256": "adc4ca704c89162ca927c5f902a6a52d17621d12c40911260b7040050237ef9b"
     },
     {
       "bytes": 3606,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 12841,
+      "bytes": 14364,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "e1eeb77f7a736a9d5deb587a7fbba59dfab1a567ebabd5f891c8e64cd1e58b6c"
+      "sha256": "c21fd2c137bbf825b8318b6e7152203444d2233593afa86dec50c94ca375ebd8"
     },
     {
       "bytes": 2363,
@@ -184,6 +184,11 @@
       "bytes": 6215,
       "path": "docs/memory/evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md",
       "sha256": "0f9034877b98c47c36f6bd2a02c8605faa2629d900c1fad6f9dd24a066f0117c"
+    },
+    {
+      "bytes": 4134,
+      "path": "docs/memory/evidence/e8-4-f1-forensic-reproducibility-diagnostic-review-2026-10-08.md",
+      "sha256": "b7ca5bc008e35638f2c89c5f50b0f7654af254e33807f42c4c39902a207b805a"
     },
     {
       "bytes": 2720,
@@ -966,6 +971,11 @@
       "sha256": "6e960ee3d7dd6dbdcd98983286001d1ee65175a88289047ef1b362c0aef98262"
     },
     {
+      "bytes": 14802,
+      "path": "docs/memory/phases/e8-yield-first-memory-consistency-task-contract.md",
+      "sha256": "538810910fdb47d3dc958b3de9295c5b783956b2542c7992da5dfaa0c3874846"
+    },
+    {
       "bytes": 23544,
       "path": "docs/memory/phases/f4-refresh1-current-baseline-authority-comparison-task-contract.md",
       "sha256": "27cff133524e0aa340e1badb945d2ab38051d0a37c5b03119997ee027e66ee9f"
@@ -1236,9 +1246,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 26109,
+      "bytes": 27386,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "764ac89daa5299e76a7359bc16b308a01de3183b07de39fbd840ae5c373e579b"
+      "sha256": "904da2391cdfdfecc208a3877a7b48227c52004b950b857b628c2441fce7547c"
     },
     {
       "bytes": 1698,

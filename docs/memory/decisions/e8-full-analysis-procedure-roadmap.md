@@ -28,8 +28,13 @@ E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh 
 
 ## E.8.2 — baseline full-analysis stage audit
 
-`SOURCE REVIEWED` — exposes the complete existing baseline as a coherent
-before/component/after spectrum and yield chain without changing physics.
+`CLOSED / RUNTIME VALIDATED` only for Q4p4W2p74 / Left / lowe at
+`706ae708ae69be0585472982a4df3d87c63f186f`, from the
+[accepted narrow closure](../evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
+SOURCE VERIFIED: final canonical MM consumes after-baseline-pion
+`after_pion_final` / baseline `MM_0` with stored authoritative `Y0`.
+Diagnostic Lambda-window stage integrals, including `PI`, are not final
+extracted yields and do not identify a further subtraction stage.
 
 ### E.8.2a — prompt/random subtraction
 
@@ -154,7 +159,9 @@ For every canonical `(t,phi)` show `Y0(t,phi)`, `YA(t,phi)`, `DeltaY = YA - Y0`,
 ### E.8.4d — shareable SIMC and yield-impact presentation
 
 [Fix.5 / Fix.5.1 / Fix.5.2](../phases/e8-4-fix5-shareable-method-a-impact-pages.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. For each canonical t parent,
+records the historical `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`
+checkpoint. The later [Fix.5.8 closure](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md)
+accepts only the narrow Left/lowe owner/presentation scope. For each canonical t parent,
 show all nine children in final Method-A MM versus authoritative already-normalized
 per-child SIMC and baseline/Method-A/SIMC overlays. Clone the existing SIMC
 runtime support only after the single existing SIMC-yield producer; never reload,
@@ -172,13 +179,27 @@ fresh pages/artifacts, then collects only Left/lowe using the canonical-five
 profile and a temporary clean detached collector/source-check worktree at the
 exact reviewed/pushed SHA. Ordinary canonical farm artifacts are consumed
 without ordinary-checkout cleanup or a separate manual packaging step.
-New-page rendering and owner integration still require fresh farm evidence.
+The accepted Fix.5.8 evidence supplies narrow Left/lowe owner/presentation
+validation; other-setting rendering and integration remain unaccepted.
 
 ## Final E.8 closure and F.6.4
 
-Final E.8 is `BLOCKED` by the second canonical-five full runtime gate's
-artifact/page provenance failure; provenance/identity repair remains `DEFERRED`
-unless explicitly reopened by user decision. Accepted narrow Left/lowe
+Final E.8 is `BLOCKED` by the newer October 8 canonical-five owner failure
+before analysis at
+`f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`
+at `ebf3a0be2f50c788c22defe3601fd5b7fee48644`. F.2/F.3 exact PASS and
+F.4 exact FAIL are diagnostic evidence, not a roundoff exemption or a proven
+physics defect. The historical second full run failed page/artifact provenance
+after analysis; its reported equality does not accept this newer mismatch.
+Separate lineage preflight remains accepted pre-analysis only
+(`analysis_started=false`). The owner repairs retain
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; full-owner retry requires
+a separately reviewed admissible resolution of the exact invariant.
+See the [supplied forensic receipt](../evidence/e8-4-f1-forensic-reproducibility-diagnostic-review-2026-10-08.md).
+Full-procedure extracted-yield readiness has priority; further F.1 archaeology
+and further stage-yield/broader physics interpretation are `DEFERRED` under
+the user decision until material gate evidence/proper yields respectively.
+CURRENT owns the sole substantive next action. Accepted narrow Left/lowe
 E.8.2/E.8.3 and F.6.3/E.8.4 scopes remain intact. Closure requires prompt/random, dummy, slow proton, baseline pion,
 final baseline canonical MM/yields and stage yields, explicit `w0 -> w0*C`,
 direct baseline-versus-reweighted pion background with signed difference/ratio,

@@ -98,6 +98,14 @@ constraint, not the magnitude of the redistribution effect. See the
 [Left/lowe evidence](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md).
 No canonical-five closure or Method-A promotion follows.
 
+SOURCE VERIFIED at the yield-first checkpoint: E.8.2 final canonical MM
+consumes after-baseline-pion `after_pion_final` and stored baseline `Y0`;
+Lambda-window stage integrals (including `PI`) are diagnostics, not extracted
+yields or an additional subtraction stage. Historical E.8.3 F.6.1 is separate
+from private current F.6.3/E.8.4 `MM_0/MM_A` and stored `Y0/YA`. INFERENCE:
+cross-branch or diagnostic-integral comparisons may create apparent discrepancies;
+that possibility resolves none without exact producer-owned closure.
+
 E.8 shareable pages consume the existing normalized per-child SIMC MM support
 from `hist["_xsect_support_simc"]["mm"]` after the existing SIMC-yield producer.
 Clone only for display; never reload, refill, renormalize, or substitute a

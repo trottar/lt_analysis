@@ -5,64 +5,68 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: audit authoritative kaon missing-mass/signal-region yields.
-Preserve production, authorities and detached Method A/B.
+E.8 is `ACTIVE`: full-procedure and proper extracted-yield readiness first.
+Further stage-yield and broader physics interpretation are `DEFERRED` until
+proper yields are verified; accepted narrow interpretations remain intact.
+Keep production and authorities frozen.
 
 ## Current Work Item
 
 E.8.2 Q4p4W2p74 / Left / lowe remains `CLOSED / RUNTIME VALIDATED`.
 [Accepted closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
-owns its narrow visual/scientific conclusions; diagnostic integrals are not final yields.
+owns its narrow visual/scientific conclusions. SOURCE VERIFIED: the final
+canonical plot consumes after-baseline-pion `after_pion_final` / baseline
+`MM_0(t,phi)` and stored authoritative `Y0`. Stage-window integrals, including the after-pion diagnostic Lambda-window
+integral, are not authoritative final extracted baseline yields Y0 or a new
+subtraction stage. No legacy residual-fit stage is active.
 
 E.8.3 Left/lowe and its [authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
 are `CLOSED / RUNTIME VALIDATED`. [Closure](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md)
-owns supplied/prior ChatGPT acceptance: owner/provenance/preservation passed;
-page 65 displays seven full provenance values; pages 66–72 are pixel-identical,
-with no renderer failures. This narrow closure does not promote Method A.
+owns supplied/prior ChatGPT acceptance. Historical F.6.1 lineage remains
+separate from baseline E.8.2 and private current F.6.3/E.8.4.
+SOURCE VERIFIED: E.8.4 consumes explicit `MM_0/MM_A` and stored `Y0/YA`
+from that private branch. INFERENCE: a cross-branch or diagnostic-integral
+comparison could cause an apparent discrepancy; none is proved resolved.
 
 The [fresh-F1 canonical-five preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
-is `CLOSED / RUNTIME VALIDATED` only for pre-analysis lineage, isolation,
-staging, five F.4/F.5 reconstructions, cleanup and preservation;
-analysis_started=false. Supplied receipt/prior review owns acceptance.
+is `CLOSED / RUNTIME VALIDATED` pre-analysis only (analysis_started=false).
+Supplied receipt/prior review owns its lineage/isolation/preservation scope.
 
 The historical [second full run](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md)
-is `BLOCKED`: child returncode 0, five unavailable page manifests. Supplied
-post-run F.2/F.3/F.4 equality supported provenance coupling (INFERENCE) for
-that attempt only; it does not accept the newer F.4 mismatch.
+is `BLOCKED` by post-analysis page/artifact provenance. Its reported
+F.2/F.3/F.4 equality does not accept the newer F.4 mismatch.
 
 The [F.2 handoff/equivalence](phases/e8-4-canonical-five-f2-handoff-equivalence-repair.md),
 [F.2 staging](phases/e8-4-canonical-five-f2-staging-predecessor-repair.md) and
 [regenerated-F.1 preflight](phases/e8-4-canonical-five-f1-lineage-preflight-repair.md)
 repairs remain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-Exact gates, strict validators and reviewed/current provenance stay frozen.
-Only F.2 `182433...` may be replaced by `2fa715...`; unknown targets fail closed.
-The earlier
-[October 8 attempt](evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md)
-passed staging but stopped at `lineage_f1_identity_mismatch` before analysis.
-[Accepted audit](phases/e8-4-canonical-five-provenance-identity-repair.md) and
-[first-run diagnosis](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
-retain their distinct historical scopes; local checks add no farm acceptance.
+Strict validators and reviewed/current provenance stay frozen; unknown staging
+targets fail closed. Historical limits remain in the
+[October 8 attempt](evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md),
+[accepted audit](phases/e8-4-canonical-five-provenance-identity-repair.md) and
+[first-run diagnosis](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md).
+Local checks add no farm acceptance.
 
 The newer October 8 owner at `ebf3a0be2f50c788c22defe3601fd5b7fee48644`
 is `BLOCKED` before analysis at
 `f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`.
-Supplied diagnostic comparison: F.2/F.3 exact PASS; F.4 exact FAIL in Left-lowe's
-three parents. t0 absolute sum: reviewed `0.12072578658633845`, current
-`0.12072578661296547`. This is not equivalence acceptance or a local runtime check.
-The [diagnostic contract](phases/e8-4-f1-baseline-reproducibility-diagnostic-task-contract.md)
-owns the failed comparison basename/hashes and search limits. Reviewed raw
-Left-lowe F.1 `eb6f659d...` was not found in searched loose/archive locations;
-full availability and event-level cause remain NOT VERIFIED.
-The [detached diagnostic](phases/e8-4-f1-baseline-reproducibility-diagnostic.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, conditional on actual-diff
-review. Pinned forensic parsing never replaces the canonical equivalence gate.
+Supplied comparison: F.2/F.3 exact PASS; F.4 exact FAIL in three Left-lowe
+parents. The [diagnostic contract](phases/e8-4-f1-baseline-reproducibility-diagnostic-task-contract.md)
+owns the failed comparison/search limits. The
+[detached diagnostic](phases/e8-4-f1-baseline-reproducibility-diagnostic.md)
+retains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
+The pushed CLI at `6cdd2fca` has a
+[supplied diagnostic review](evidence/e8-4-f1-forensic-reproducibility-diagnostic-review-2026-10-08.md):
+three counts agree, all six signed/absolute sums differ exactly, reviewed F.1
+is absent. Prior ChatGPT review owns these observations; forensic parsing
+grants no canonical acceptance. Full F.1 availability/event-level cause are
+NOT VERIFIED. Further F.1 archaeology is `DEFERRED` unless concrete evidence
+makes it material or unavoidable for a required gate.
 
 The [accepted detached Left/lowe diagnostic](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
-remains `CLOSED / RUNTIME VALIDATED` for t0/t1/t2, primary t1: shared F.4
-reproduction/eight-page review; matched controls 10716/18749/22356; t1 contrast
--1.02%, residual 0.0, OOD 21/19809 (~0.106%). With F.6.2 validation/comparator
-t1 continuity, no redesign is warranted (INFERENCE). Absolute mis-ID,
-zero-response proxy validity, hardware cause and promotion are NOT VERIFIED.
+remains `CLOSED / RUNTIME VALIDATED` for t0/t1/t2, primary t1. With accepted
+F.6.2/comparator t1 continuity, no redesign is warranted (INFERENCE).
+Absolute mis-ID, proxy validity, hardware cause and promotion are NOT VERIFIED.
 
 ## Verified State
 
@@ -72,42 +76,28 @@ signed canonical-t parents, never independent children/MM regions. The HGCer
 hole is excluded; zero-response transfer is diagnostic-only; slow-proton
 architecture is analogue-only. The Gate-3 reference owns source evidence.
 
-Prior accepted comparator evidence reproduced F.2/F.3 exactly with F.4 first
-changed. Floating-point-scale t1 continuity does not extend to substantive
-t0/t2 changes. F.6.2 validates acceptance/MM correlation, not absolute HGC.
-F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`; [F.6.3/E.8.4 closure](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
+Prior comparator t1 continuity does not extend to substantive t0/t2 changes;
+F.6.2 validates acceptance/MM correlation, not absolute HGC.
+F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`;
+[F.6.3/E.8.4 closure](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
 is only Left/lowe execution, live-cache parity, real child changes and signed
 parent preservation. Fix.5.7/Fix.5.8 retain narrow Left/lowe provenance and
 [97-page legibility closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
 Earlier closures retain [roadmap](roadmap/STATUS.md) scopes. Workflow hardening
-is `SOURCE REVIEWED`. Historical E.8.3 F.6.1 and current F.6.3/E.8.4 remain
-distinct; literature adds no runtime evidence and no authority is replaced.
+is `SOURCE REVIEWED`; literature adds no runtime evidence or authority.
 
 ## Source / Evidence Identity
 
-- Accepted E.8.3 farm source, 2026-10-07:
-  `63eb2bf66d98baaffa39e88cf1db7ac37397d364`.
-- Accepted E.8.2 farm source:
-  `706ae708ae69be0585472982a4df3d87c63f186f`.
-- Historical second full-run farm source, 2026-10-05:
-  `ace8688a71431d13b40ed19713a27746f3da6a8e`.
-  Failed gate-status SHA-256:
-  `ddfadaf9946e262c35795689ab8d2d52a306ede9e775d98fb05df4e15924e91f`.
-  Diagnostic evidence only; no full-run acceptance.
-- Accepted separate preflight source: `b8bafd3f2853523ca9deb7aa7d6b572357584d6f`.
-- Accepted Left/lowe diagnostic source: `aad27a4d1639eef188dc61563fd3615682835835`.
-- Accepted Fix.5.8 source: `2ddeab47d55edb57d2f313022a948c4376730c19`.
-- Current F.6.3 F.4 SHA-256:
-  `79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
-
-Records own farm provenance.
+Linked records own farm sources/artifact identities; none asserts live HEAD.
+Current reviewed F.4 SHA-256:
+`79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
 
 ## Blockers
 
 Canonical-five full runtime remains `BLOCKED` by the newer exact F.4 mismatch;
 owner retry is unauthorized pending separately reviewed resolving evidence.
-Final E.8/F.6.4 remain `BLOCKED`. Absolute mis-ID, hardware cause and production
-correctness are unproven. Optional low-epsilon RF was not performed.
+Final E.8/F.6.4 remain `BLOCKED`; production correctness is unproven.
+Optional low-epsilon RF was not performed.
 
 Absolute-SIMC interpretation remains separately `BLOCKED`:
 `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
@@ -117,11 +107,14 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff review, user commit/push, and pushed-state
-synchronization, review detached reproducibility evidence from SHA-pinned
-Left-lowe F.1/reviewed F.4; distinct historical F.1 is context only. Review
-diagnostic invocation/farm readiness before prescribing a command. Owner
-retry remains unauthorized while exact F.4 equivalence is blocked.
+NEXT — after ChatGPT actual-diff acceptance, user commit/push, and pushed-state
+synchronization, audit the source/evidence chain producing and reporting baseline
+`MM_0/Y0` and separate private `MM_A/YA` across the full procedure. Identify
+the earliest actual gate preventing proper full-procedure yields and whether
+an independently valid baseline-only path exists. Deliver one narrowly evidenced
+readiness result or one scoped repair contract. Preserve the exact F.4
+canonical-five blocker; no full-owner retry, Method-A promotion or physics
+interpretation before their gates pass.
 
 ## Success Criteria
 

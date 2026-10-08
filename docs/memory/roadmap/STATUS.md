@@ -90,7 +90,9 @@ gates and all 18 rendered E.8.2 pages passed. Baseline diagnostic-window stage
 interpretation is accepted only for this scope; see the
 [closure evidence](../evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
 The existing before/component/after chain and `no_empirical_residual` remain
-unchanged. No canonical-five closure or production promotion follows.
+unchanged. SOURCE VERIFIED: final canonical `after_pion_final/MM_0` and
+stored `Y0` are baseline; diagnostic Lambda-window `PI` is not extracted
+`Y0` or a further subtraction stage. No canonical-five closure or promotion follows.
 
 #### E.8.3 — detached Method-A reweighting audit
 
@@ -132,7 +134,8 @@ establish ROOT/PyROOT, farm or runtime acceptance.
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source
 from Fix.5 `53fd262b730af8f1254e411a38231aebeb6a1da3` to pushed E.8.4
-`1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself remains `SOURCE REVIEWED` and no farm/runtime status changes.
+`1aa1fd4184a6f8b20043e00ebb1ed3e9505a4935`; E.8.4 itself was then
+`SOURCE REVIEWED`. That historical re-pin added no farm/runtime acceptance.
 
 E.8.4.Fix.3 — pion-alignment determinism repair is `SOURCE REVIEWED`: its
 independent actual-diff/source and pushed-state reviews passed for
@@ -254,8 +257,8 @@ See [Fix.5.8 evidence](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10
 The narrow Fix.5 owner plus visual presentation gate is accepted. E.8 remains
 `ACTIVE`; other-setting acceptance, absolute-SIMC interpretation, cancellation
 explanation and Method-A promotion do not follow. CURRENT owns the live gate;
-current-lineage canonical-five expansion was user-authorized. Its second full
-runtime gate remains `BLOCKED`; the F.2 handoff/equivalence repair is
+current-lineage canonical-five expansion was user-authorized. Its historical second full
+runtime gate was `BLOCKED`; the F.2 handoff/equivalence repair is
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` after local checks.
 
 #### E.8.4 / F.6.3 Left/lowe Method-A low-t scientific validity
@@ -277,13 +280,18 @@ interpretation consumed -> user-authorized canonical-five orchestration
 attempted -> second full runtime gate `BLOCKED`. Provenance/identity repair
 has local implementation complete, farm validation pending; the narrow Left/lowe E.8.2 and E.8.3 audits are accepted.
 Existing F.6.3/E.8.4 Left/lowe closures retain their scope. Final E.8 and F.6.4
-remain `BLOCKED` by the canonical-five runtime/provenance situation. Method A remains
+remain `BLOCKED` by the newer exact canonical-five F.4 pre-analysis failure. Method A remains
 detached/non-production; Method B remains diagnostic/cross-check only and
 numerically excluded. CURRENT alone owns the exact next action.
 
 #### Current-lineage canonical-five isolated orchestration
 
-`BLOCKED` — the second full runtime gate failed artifact/page verification.
+`BLOCKED` — the newer October 8 owner at
+`ebf3a0be2f50c788c22defe3601fd5b7fee48644` stopped before analysis at
+`f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`.
+F.2/F.3 exact PASS; F.4 exact FAIL for three Left-lowe parents. The historical
+second full run failed artifact/page verification after analysis; its equality
+observation cannot accept the newer mismatch.
 The user authorized expansion under the
 [isolated-runtime contract](../phases/e8-4-method-a-current-lineage-canonical-five-validation-orchestration-task-contract.md).
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` describes the historical local
@@ -316,7 +324,7 @@ before consuming reconstructed current-lineage factors. Candidate/current
 provenance stays separate, ordinary strict validators and scientific builders
 stay unchanged, and local deterministic checks passed. No canonical-five
 runtime/PDF acceptance follows. Existing closed scopes and scientific boundaries
-remain intact; CURRENT owns the conditional farm-readiness gate and sole NEXT.
+remain intact; CURRENT owns the sole substantive next action; no owner retry is authorized.
 
 The fresh attempt at `946b5512bb00d22bb446bd96d6ab9ee35f5f989b` stopped
 before analysis at candidate_staging; see the
@@ -327,7 +335,7 @@ is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: only the observed
 It is a staging predecessor, never authority. Unknown-target rejection,
 F.3/F.4 predecessor policy and scientific/runtime source remain unchanged.
 The earlier equivalence repair retains its pending-farm state; full runtime
-remains `BLOCKED`. CURRENT owns the conditional fresh farm-readiness gate.
+remains `BLOCKED`. The newer exact F.4 failure prevents owner retry.
 
 The [2026-10-08 F.1 preflight failure](../evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md)
 passed reviewed F.2 staging but stopped before analysis on changed raw F.1
@@ -338,6 +346,16 @@ acceptance: real current F.1 uses the unchanged source-owned exact scientific
 bridge, with reviewed/current lineage retained separately. Deterministic
 checks passed; no scientific source, historical pin or runtime closure changed.
 
+The already-pushed detached CLI at `6cdd2fca` has a
+[supplied diagnostic receipt](../evidence/e8-4-f1-forensic-reproducibility-diagnostic-review-2026-10-08.md),
+not canonical acceptance: reviewed F.1 is absent, parent counts match and
+all six signed/absolute sums differ exactly. Further F.1 archaeology is
+`DEFERRED` unless material or unavoidable for a gate. Full-procedure proper
+extracted-yield readiness has priority; further stage-yield/broader physics
+interpretation waits for verified proper yields. Baseline E.8.2, historical
+E.8.3 F.6.1 and private F.6.3/E.8.4 `MM_0/MM_A, Y0/YA` remain distinct.
+No bypass, tolerance change, owner retry or promotion is authorized.
+
 Scientific source, historical accepted authorities and Left/lowe closures
 remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
 E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
@@ -347,7 +365,8 @@ E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
 
 `BLOCKED` — final canonical-five validation is not supplied by the accepted
 Left/lowe scope; the second canonical-five full runtime gate is `BLOCKED` and
-its locally complete provenance-equivalence repair awaits farm validation.
+the newer exact F.4 pre-analysis failure remains unresolved. Local owner
+repairs retain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
 
 #### F.6.4 — explicit production-promotion decision
 
@@ -371,7 +390,7 @@ reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
 Left/lowe owner and visual presentation gates are accepted. Broader numerical
 interpretation, absolute-SIMC units and the other four settings are not closed.
 Canonical-five isolated orchestration was user-authorized and attempted; its
-second full runtime gate remains `BLOCKED`, with F.2 handoff/equivalence repair
+newer exact F.4 pre-analysis gate remains `BLOCKED`, with F.2 handoff/equivalence repair
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`
 after accepted narrow Left/lowe E.8.2/E.8.3 audits. Final E.8 and F.6.4 remain `BLOCKED`.
 
