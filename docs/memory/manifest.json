@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 9261,
+      "bytes": 8192,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "3412ace294fbc82b809e403b0650c13b43811610c0bdd7660f69d1bf7b0eafda"
+      "sha256": "ac2e5158bd1cfbe4a2d18236657c968456575c8bfb049c6b6f328b8d8bf76fa4"
     },
     {
       "bytes": 8339,
@@ -729,6 +729,16 @@
       "bytes": 9800,
       "path": "docs/memory/phases/e8-4-canonical-five-provenance-identity-repair.md",
       "sha256": "5ffe7bc5e7ffcc505e084f70f42560f6be53cb2c4ffd70e43ac6035547ae431f"
+    },
+    {
+      "bytes": 18316,
+      "path": "docs/memory/phases/e8-4-f1-baseline-reproducibility-diagnostic-task-contract.md",
+      "sha256": "e3d2612507ca95fdeb2c8d5f78a353751204b982cdb02afc1b598a32a579ddc7"
+    },
+    {
+      "bytes": 6233,
+      "path": "docs/memory/phases/e8-4-f1-baseline-reproducibility-diagnostic.md",
+      "sha256": "097e71ed5d97633041ca4016aae9bd8f89cb9241e96f849d670aef8804f8aa67"
     },
     {
       "bytes": 11174,
