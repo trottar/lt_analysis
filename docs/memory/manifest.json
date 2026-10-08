@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8590,
+      "bytes": 9261,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "14a52120d001b529a4f5521c13a3220b2adc78a4a98d3af953eb56ab3bc2647f"
+      "sha256": "3412ace294fbc82b809e403b0650c13b43811610c0bdd7660f69d1bf7b0eafda"
     },
     {
       "bytes": 8339,
@@ -159,6 +159,11 @@
       "bytes": 4830,
       "path": "docs/memory/evidence/e8-3-left-lowe-runtime-readiness-visual-blocker-2026-10-07.md",
       "sha256": "17bd7efacafca995363d824e5eb4146fc17fc73594bbe5b3fd42d5953eb6a9bd"
+    },
+    {
+      "bytes": 2604,
+      "path": "docs/memory/evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md",
+      "sha256": "032867c007a206665436f1845cf634528e57f8e7ae86ce99b83030c586a5de18"
     },
     {
       "bytes": 3978,
@@ -674,6 +679,16 @@
       "bytes": 5515,
       "path": "docs/memory/phases/e8-4-bundle-profile-repin.md",
       "sha256": "27bbabe10dadab2990389124ccacbd4411aba3f697140ddc979a9d476a6a4b6a"
+    },
+    {
+      "bytes": 14313,
+      "path": "docs/memory/phases/e8-4-canonical-five-f1-lineage-preflight-repair-task-contract.md",
+      "sha256": "47c4dafd0f87d084ae4cc2994df1ea5c7a348dbe3e15003240b45c7c41792145"
+    },
+    {
+      "bytes": 5927,
+      "path": "docs/memory/phases/e8-4-canonical-five-f1-lineage-preflight-repair.md",
+      "sha256": "7bd177b1bee5e0aa2305f701232cbc52990b7db151938353e6469274a71705ec"
     },
     {
       "bytes": 23783,
@@ -1211,9 +1226,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 25453,
+      "bytes": 26109,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "35a2375338670ccf3178d42c68936f93ebb142b284b210cec16cab80db1a7a7e"
+      "sha256": "764ac89daa5299e76a7359bc16b308a01de3183b07de39fbd840ae5c373e579b"
     },
     {
       "bytes": 1698,

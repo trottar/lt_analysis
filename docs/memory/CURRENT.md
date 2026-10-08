@@ -53,6 +53,15 @@ may be replaced by reviewed `2fa715...`; other unknown targets fail closed. The
 stopped at candidate_staging before analysis. Local checks passed; no authority
 or scientific/runtime source changed.
 
+The [regenerated-F.1 preflight repair](phases/e8-4-canonical-five-f1-lineage-preflight-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, conditional on ChatGPT
+actual-diff acceptance. The [2026-10-08 failed attempt](evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md)
+passed F.2 staging but stopped before analysis at `lineage_f1_identity_mismatch`.
+Observed farm F.1 scientific equivalence is NOT VERIFIED. The owner now uses
+the unchanged exact F.2/F.3/F.4 equivalence bridge for actual F.1, retaining
+reviewed/current provenance and strict identity/parent gates. Local checks
+passed; no scientific source or farm acceptance changed.
+
 The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
 parents t0/t1/t2, primary t1. Its [accepted checkpoint](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
 records prior ChatGPT acceptance of supplied JSON/PDF, exact shared F.4

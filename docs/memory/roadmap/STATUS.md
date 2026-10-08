@@ -329,6 +329,15 @@ F.3/F.4 predecessor policy and scientific/runtime source remain unchanged.
 The earlier equivalence repair retains its pending-farm state; full runtime
 remains `BLOCKED`. CURRENT owns the conditional fresh farm-readiness gate.
 
+The [2026-10-08 F.1 preflight failure](../evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md)
+passed reviewed F.2 staging but stopped before analysis on changed raw F.1
+identities. Equivalence of those farm payloads is NOT VERIFIED. The
+[owner preflight repair](../phases/e8-4-canonical-five-f1-lineage-preflight-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, conditional on actual-diff
+acceptance: real current F.1 uses the unchanged source-owned exact scientific
+bridge, with reviewed/current lineage retained separately. Deterministic
+checks passed; no scientific source, historical pin or runtime closure changed.
+
 Scientific source, historical accepted authorities and Left/lowe closures
 remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
 E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately

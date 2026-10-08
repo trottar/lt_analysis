@@ -791,7 +791,110 @@ class OwnerTests(unittest.TestCase):
                     self.assertEqual(transferred["status"], "success")
                     self.assertEqual(events, ["materialization_verify", "candidate_staging",
                         "lineage_preflight", "preservation_check", "ltsep_preservation_check"])
-                for key in (next(iter(paths["f1"])),"f2","f3","f4"):
+                self.assertTrue(all(r["scientific_equivalence_mode"] == "exact-lineage"
+                                    for r in result["settings"]))
+                original_f1 = {sid: Path(path).read_bytes() for sid, path in paths["f1"].items()}
+                first_sid = next(iter(paths["f1"]))
+                Path(paths["f1"][first_sid]).write_bytes(original_f1[first_sid] + b" ")
+                mixed = owner.validate_candidate_lineage(outdir, module)
+                self.assertTrue(all(r["scientific_equivalence_mode"] == "equivalent-new-lineage"
+                                    for r in mixed["settings"]))
+                self.assertEqual({sid for sid in hashes if
+                    mixed["observed_f1_source_file_sha256"][sid] != hashes[sid]}, {first_sid})
+                # Serialization alone changes every raw hash without changing
+                # any scientific object; the real bridge rebuilds all stages.
+                for sid, path in paths["f1"].items():
+                    Path(path).write_bytes(original_f1[sid] + b"\n ")
+                observed = {sid: owner.sha256(Path(path)) for sid, path in paths["f1"].items()}
+                regenerated = owner.validate_candidate_lineage(outdir, module)
+                self.assertTrue(all(observed[sid] != hashes[sid] for sid in hashes))
+                self.assertEqual(regenerated["reviewed_f1_source_file_sha256"], hashes)
+                self.assertEqual(regenerated["observed_f1_source_file_sha256"], observed)
+                for record in regenerated["settings"]:
+                    self.assertEqual(record["scientific_equivalence_mode"], "equivalent-new-lineage")
+                    provenance = record["provenance"]
+                    self.assertEqual(provenance["accepted_f1_source_file_sha256"], observed)
+                    self.assertEqual(provenance["current_runtime_lineage"]["f1_source_file_sha256"], observed)
+                    self.assertEqual(provenance["reviewed_candidate"]["f1_source_file_sha256"], hashes)
+                    self.assertTrue(all(provenance["scientific_equivalence"][stage] ==
+                        {"passed": True, "first_mismatch_path": None} for stage in ("f2", "f3", "f4")))
+                for preflight_only in (False, True):
+                    with tempfile.TemporaryDirectory() as flow:
+                        receipt, _, flow_outdir = self.exercise(flow, lineage_override=real_lineage,
+                                                               preflight_only=preflight_only)
+                        status_path = receipt if preflight_only else flow_outdir / "fresh-gate-status.json"
+                        self.assertEqual(json.loads(status_path.read_text())["f6_3_lineage_preflight"], regenerated)
+                real = module.reconstruct_transient_factor_map
+                def reject_in_both_modes(reason):
+                    with self.assertRaisesRegex(Exception, reason):
+                        owner.validate_candidate_lineage(outdir, module)
+                    for preflight_only in (False, True):
+                        with tempfile.TemporaryDirectory() as flow:
+                            with self.assertRaisesRegex(Exception, reason):
+                                self.exercise(flow, lineage_override=real_lineage, preflight_only=preflight_only)
+                            status = json.loads((Path(flow) / "volatile/OUTPUT/Analysis/KaonLT/fresh-gate-status.json").read_text())
+                            self.assertFalse(status["analysis_started"])
+                # Tamper only with returned evidence after real reconstruction;
+                # never patch scientific acceptance or builder results.
+                def altered(decision):
+                    def reconstruct_result(*args, **kwargs):
+                        factors, provenance, rows = real(*args, **kwargs)
+                        decision(factors, provenance, rows)
+                        return factors, provenance, rows
+                    return reconstruct_result
+                manipulations = (
+                    ("factor_parent_inventory_invalid", lambda f,p,r: r[next(iter(r))].update(t_index=99)),
+                    ("setting_provenance_invalid", lambda f,p,r: p.update(transient_factor_identity_fingerprint="a"*64)),
+                    ("setting_provenance_invalid", lambda f,p,r: p.update(accepted_f1_source_file_sha256=hashes)),
+                    ("roles_provenance_invalid", lambda f,p,r: p["reviewed_candidate"].update(f1_source_file_sha256=observed)),
+                    ("roles_provenance_invalid", lambda f,p,r: p["current_runtime_lineage"].update(f1_source_file_sha256=hashes)),
+                    ("roles_provenance_invalid", lambda f,p,r: p["current_runtime_lineage"].pop("f3")),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"].update(mode="exact-lineage")),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"].update(schema_version="stale")),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"].update(provenance_exclusions={})),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"]["f2"].update(first_mismatch_path="science")),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"]["f4"].update(passed=False)),
+                    ("scientific_equivalence_invalid", lambda f,p,r: p["scientific_equivalence"]["f3"].update(passed=1)),
+                )
+                for reason, manipulation in manipulations:
+                    with self.subTest(reason=reason), patch.object(module, "reconstruct_transient_factor_map",
+                            side_effect=altered(manipulation)):
+                        reject_in_both_modes(reason)
+                for sid, path in paths["f1"].items():
+                    Path(path).write_bytes(original_f1[sid])
+                first_sid = next(iter(paths["f1"]))
+                first_path = Path(paths["f1"][first_sid])
+                # A fully resealed scientific change is distinct from a raw
+                # serialization change and must fail the first exact stage.
+                changed = json.loads(original_f1[first_sid])
+                changed["contract"]["method_a_training_records"][0]["SHMS_delta"] += 0.5
+                scientific.f5_fixtures.f1_fixtures._seal_f1_artifact(changed)
+                scientific.f3_builder._validate_f1_artifacts([changed] + fixture.artifacts[1:])
+                first_path.write_bytes(module._writer_bytes(changed))
+                reject_in_both_modes("f6_3_scientific_equivalence_mismatch:f2:")
+                for malformed in (b'{"x":1,"x":2}', b'{"x":NaN}', b'{}'):
+                    first_path.write_bytes(malformed)
+                    reject_in_both_modes("f6_3_")
+                first_path.unlink()
+                reject_in_both_modes("accepted_artifact_load_failed")
+                first_path.write_bytes(original_f1[first_sid])
+                duplicate_sid = list(paths["f1"])[1]
+                first_path.write_bytes(original_f1[duplicate_sid])
+                reject_in_both_modes("f1_setting_duplicate")
+                first_path.write_bytes(original_f1[first_sid])
+                for inventory in (dict(list(paths["f1"].items())[1:]),
+                                  {**paths["f1"], "Right-lowe": str(first_path)}):
+                    with patch.object(module, "accepted_f6_3_artifact_paths",
+                                      return_value={**paths, "f1": inventory}):
+                        reject_in_both_modes("f1_path_inventory_invalid")
+                loader = module.load_accepted_f6_3_authority
+                for bad in ("", "g"*64, None):
+                    def bad_hashes(*args, **kwargs):
+                        loaded = loader(*args, **kwargs)
+                        return (*loaded[:-1], {**loaded[-1], first_sid: bad})
+                    with patch.object(module, "load_accepted_f6_3_authority", side_effect=bad_hashes):
+                        reject_in_both_modes("lineage_f1_hash_inventory_invalid")
+                for key in ("f2","f3","f4"):
                     path=Path(paths[key] if key in {"f2","f3","f4"} else paths["f1"][key])
                     original=path.read_bytes();path.write_bytes(original+b" ")
                     with self.subTest(hash=key),self.assertRaisesRegex(ValueError,"lineage_.*identity_mismatch"):

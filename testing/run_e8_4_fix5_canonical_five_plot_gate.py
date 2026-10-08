@@ -210,8 +210,12 @@ def validate_candidate_lineage(outdir, module):
     paths = module.accepted_f6_3_artifact_paths(outdir, KINEMATIC)
     f1, f2, f3, f4, hashes = module.load_accepted_f6_3_authority(paths, include_f2=True)
     expected_f1 = module.F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256
-    require(expected_f1 == F1_SHA256 and
-            {k: hashes.get(k) for k in expected_f1} == expected_f1, "lineage_f1_identity_mismatch")
+    require(expected_f1 == F1_SHA256, "lineage_f1_identity_mismatch")
+    require(set(hashes) == set(expected_f1) | {"f2", "f3", "f4"} and
+            all(isinstance(hashes[k], str) and re.fullmatch(r"[0-9a-f]{64}", hashes[k])
+                for k in expected_f1), "lineage_f1_hash_inventory_invalid")
+    observed_f1 = {k: hashes[k] for k in expected_f1}
+    mode = "exact-lineage" if observed_f1 == expected_f1 else "equivalent-new-lineage"
     require(hashes.get("f2") == CANDIDATES[Path(paths["f2"]).name] and
             hashes.get("f3") == CANDIDATES[Path(paths["f3"]).name] and
             hashes.get("f4") == CANDIDATES[Path(paths["f4"]).name], "lineage_f2_f3_f4_identity_mismatch")
@@ -219,25 +223,34 @@ def validate_candidate_lineage(outdir, module):
     for setting_id in F1_SHA256:
         factors, provenance, rows = module.reconstruct_transient_factor_map(f1, f3, f4,
             f2_artifact=f2, f2_input_file_sha256=hashes["f2"],
-            f1_input_file_hashes={k: hashes[k] for k in expected_f1}, f3_input_file_sha256=hashes["f3"],
+            f1_input_file_hashes=observed_f1, f3_input_file_sha256=hashes["f3"],
             f4_input_file_sha256=hashes["f4"], setting_id=setting_id)
         require(factors and set(factors) == set(rows) and
                 all(math.isfinite(float(v)) and float(v) > 0 for v in factors.values()),
                 "lineage_factor_population_invalid:" + setting_id)
+        application = [row for artifact in f1
+            if artifact["setting"]["phi_setting"] + "-" +
+               artifact["setting"]["epsilon_filename_token"] == setting_id
+            for row in artifact["contract"]["application_records"]]
+        require(set(factors) == {(str(row["source_label"]), int(row["entry_index"]))
+                                for row in application} and
+                {row["t_index"] for row in rows.values()} == {0, 1, 2} and
+                all(rows[(str(row["source_label"]), int(row["entry_index"]))]["t_index"] ==
+                    row["t_index"] for row in application),
+                "lineage_factor_parent_inventory_invalid:" + setting_id)
         require(provenance.get("selected_setting_id") == setting_id and
                 provenance.get("schema_version") == module.F6_3_PARALLEL_SCHEMA_VERSION and
                 provenance.get("candidate_validation_source_head") == MATERIALIZATION_HEAD and
-                provenance.get("accepted_f1_source_file_sha256") == expected_f1 and
+                provenance.get("accepted_f1_source_file_sha256") == observed_f1 and
                 provenance.get("candidate_f3_source_file_sha256") == hashes["f3"] and
                 provenance.get("candidate_f2_source_file_sha256") == hashes["f2"] and
-                provenance.get("scientific_equivalence", {}).get("all_stages_passed") is True and
-                provenance.get("scientific_equivalence", {}).get("mode") == "exact-lineage" and
                 provenance.get("candidate_f4_source_file_sha256") == hashes["f4"] and
                 provenance.get("transient_factor_population_count") == len(factors) and
                 provenance.get("current_baseline_candidate_lineage") is True and
                 provenance.get("branch_role") == "parallel_nonproduction_method_a_full_analysis" and
                 provenance.get("candidate_f3_reconstruction_role") == "candidate_construction_sentinel_only" and
-                re.fullmatch(r"[0-9a-f]{64}", str(provenance.get("transient_factor_identity_fingerprint"))) is not None and
+                provenance.get("transient_factor_identity_fingerprint") ==
+                    module._sha256_json(sorted((source, entry) for source, entry in factors)) and
                 provenance.get("accepted_f4_runtime_authority", {}).get("accepted_authority_match") is True and
                 provenance.get("accepted_f3_source_file_sha256") == hashes["f3"] and
                 provenance.get("accepted_f4_source_file_sha256") == hashes["f4"] and
@@ -250,9 +263,40 @@ def validate_candidate_lineage(outdir, module):
                 provenance.get("production_promotion_performed") is False and
                 provenance.get("event_correction_persisted") is False,
                 "lineage_setting_provenance_invalid:" + setting_id)
+        equivalence = provenance.get("scientific_equivalence", {})
+        require(equivalence.get("schema_version") == module.SCIENTIFIC_EQUIVALENCE_SCHEMA and
+                equivalence.get("mode") == mode and equivalence.get("all_stages_passed") is True and
+                equivalence.get("provenance_exclusions") == {
+                    stage: sorted(fields) for stage, fields in module.SCIENTIFIC_PROVENANCE_EXCLUSIONS.items()} and
+                all(set(equivalence.get(stage, {})) == {"passed", "first_mismatch_path"} and
+                    equivalence[stage].get("passed") is True and
+                    equivalence[stage].get("first_mismatch_path") is None
+                    for stage in ("f2", "f3", "f4")),
+                "lineage_scientific_equivalence_invalid:" + setting_id)
+        reviewed = provenance.get("reviewed_candidate", {})
+        current = provenance.get("current_runtime_lineage", {})
+        require(reviewed == {
+                    "validation_materialization_source_head": MATERIALIZATION_HEAD,
+                    "f1_source_file_sha256": expected_f1,
+                    "f2": module.F6_3_CANDIDATE_F2_AUTHORITY,
+                    "f3": module.F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC[KINEMATIC],
+                    "f4": module.F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC[KINEMATIC]} and
+                current.get("reconstruction_role") == "transient_current_lineage_no_farm_authority" and
+                current.get("f1_source_file_sha256") == observed_f1 and
+                set(current.get("f1_stable_content_fingerprints", {})) == set(expected_f1) and
+                all(re.fullmatch(r"[0-9a-f]{64}", str(value)) is not None
+                    for value in current.get("f1_stable_content_fingerprints", {}).values()) and
+                all(set(current.get(stage, {})) == {
+                        "source_file_sha256", "scientific_fingerprint", "artifact_fingerprint"} and
+                    all(re.fullmatch(r"[0-9a-f]{64}", str(value)) is not None
+                        for value in current[stage].values()) for stage in ("f2", "f3", "f4")),
+                "lineage_roles_provenance_invalid:" + setting_id)
         settings.append({"setting_id": setting_id, "factor_count": len(factors),
+                         "scientific_equivalence_mode": mode,
                          "f4_shared_reproduction_passed": True, "provenance": provenance})
     return {"passed": True, "observed_sha256": hashes, "settings": settings,
+            "reviewed_f1_source_file_sha256": dict(expected_f1),
+            "observed_f1_source_file_sha256": observed_f1,
             "f4_shared_reproduction_passed": True}
 
 
