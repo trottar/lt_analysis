@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8187,
+      "bytes": 8590,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "5ea2ffb946de16c3e5a38d4bc0e15e346e74bee23fcd99b62987200cfcba1103"
+      "sha256": "14a52120d001b529a4f5521c13a3220b2adc78a4a98d3af953eb56ab3bc2647f"
     },
     {
       "bytes": 8339,
@@ -159,6 +159,11 @@
       "bytes": 4830,
       "path": "docs/memory/evidence/e8-3-left-lowe-runtime-readiness-visual-blocker-2026-10-07.md",
       "sha256": "17bd7efacafca995363d824e5eb4146fc17fc73594bbe5b3fd42d5953eb6a9bd"
+    },
+    {
+      "bytes": 3978,
+      "path": "docs/memory/evidence/e8-4-canonical-five-f2-staging-predecessor-blocker-2026-10-07.md",
+      "sha256": "90a4eb68e77a0707b762ebe803e4e6f0810cd963a4a6133f89c8ea638b74bb61"
     },
     {
       "bytes": 4337,
@@ -681,6 +686,16 @@
       "sha256": "3969343636e5b79ee06136d17ed63428f15d6ecca10fee41acfc59643082ba27"
     },
     {
+      "bytes": 17055,
+      "path": "docs/memory/phases/e8-4-canonical-five-f2-staging-predecessor-repair-task-contract.md",
+      "sha256": "6d906335d5fd9a407e8e2986197fc5f9d94f94a41788f80070e59c5a720b4916"
+    },
+    {
+      "bytes": 5423,
+      "path": "docs/memory/phases/e8-4-canonical-five-f2-staging-predecessor-repair.md",
+      "sha256": "e9cb337b9f0420fb4de2c3b65180b7d0e5c743faa7d0506f400b902ff88968c8"
+    },
+    {
       "bytes": 19866,
       "path": "docs/memory/phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md",
       "sha256": "437442648b8ac5305eae893b3de48cbe2c43d193235dc2a2d50c2396db648dcd"
@@ -1196,9 +1211,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 24687,
+      "bytes": 25453,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "8dc82883295e93cc8ce3dd4c0c9311b5ce0a930711371fd291d1381907924baf"
+      "sha256": "35a2375338670ccf3178d42c68936f93ebb142b284b210cec16cab80db1a7a7e"
     },
     {
       "bytes": 1698,

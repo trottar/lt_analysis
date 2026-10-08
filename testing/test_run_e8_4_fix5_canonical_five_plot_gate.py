@@ -597,6 +597,139 @@ class OwnerTests(unittest.TestCase):
                 with self.materialization_patches(pins), self.assertRaises(ValueError):
                     owner.verify_candidate_materialization(directory)
 
+    def test_f2_predecessor_policy_is_one_exact_staging_only_identity(self):
+        predecessor = "182433ccd2d13d3f7af80b963e69190ad8f2eb4e295c8216b36585e8ee7409b2"
+        name = owner.MATERIALIZATION_NAMES["f2"]
+        self.assertEqual(owner.RECOGNIZED_STAGING_PREDECESSORS, {name: predecessor})
+        self.assertEqual(owner.CANDIDATES[name],
+                         "2fa715b2b5c2d5077e38416fb9eceb814e013e72f308c43526fddff36ddd962e")
+        self.assertNotIn(predecessor, owner.MATERIALIZATION_SHA256.values())
+        self.assertNotIn(predecessor, owner.CANDIDATES.values())
+        self.assertNotIn(predecessor, owner.HISTORICAL_INPUT_SHA256.values())
+        self.assertNotIn(predecessor, owner.accepted.CANDIDATES.values())
+
+    def test_observed_f2_predecessor_replaced_with_real_copy_and_final_hash(self):
+        # Observed farm bytes are not local. Mock only the pre-existing target's
+        # planning/recheck hashes; synthetic reviewed sources, temporary copies
+        # and final destinations use the real hash reader and fixture pins.
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            directory, pins, _, _ = self.materialization_fixture(root)
+            outdir = root / "output"; outdir.mkdir()
+            name = owner.MATERIALIZATION_NAMES["f2"]
+            target = outdir / name
+            marker = b"synthetic predecessor; not the observed farm bytes"
+            target.write_bytes(marker)
+            predecessor = owner.RECOGNIZED_STAGING_PREDECESSORS[name]
+            real_sha = owner.sha256
+            predecessor_reads = []
+            original = {p.name: p.read_bytes() for p in directory.iterdir()}
+            def observed_hash(path):
+                if Path(path) == target and target.read_bytes() == marker:
+                    predecessor_reads.append(str(path))
+                    return predecessor
+                return real_sha(path)
+            status = Mock()
+            with self.materialization_patches(pins), patch.object(owner, "sha256", side_effect=observed_hash), \
+                    patch.object(owner.os, "replace", wraps=os.replace) as replace:
+                verification = owner.verify_candidate_materialization(directory)
+                result = owner.stage_candidates(directory, outdir, verification, status=status)
+            self.assertTrue(result["passed"])
+            self.assertEqual(len(predecessor_reads), 2)
+            self.assertEqual(replace.call_count, 3)
+            self.assertEqual(result["files"][0], {"path": str(target),
+                "before_sha256": predecessor, "after_sha256": pins["f2"], "action": "replaced"})
+            self.assertEqual([r["action"] for r in result["files"]], ["replaced", "installed", "installed"])
+            self.assertEqual(status.update.call_args.kwargs["candidate_installation"]["files"], result["files"])
+            for stage in ("f2", "f3", "f4"):
+                destination = outdir / owner.MATERIALIZATION_NAMES[stage]
+                self.assertEqual(destination.read_bytes(), original[destination.name])
+                self.assertEqual(real_sha(destination), pins[stage])
+            self.assertEqual({p.name: p.read_bytes() for p in directory.iterdir()}, original)
+
+    def test_other_f2_hashes_still_fail_before_any_replacement(self):
+        predecessor = owner.RECOGNIZED_STAGING_PREDECESSORS[owner.MATERIALIZATION_NAMES["f2"]]
+        for unknown in (predecessor[:-1] + "3", "0" * 64,
+                        owner.HISTORICAL_INPUT_SHA256["f2"],
+                        owner.accepted.CANDIDATES[owner.MATERIALIZATION_NAMES["f3"]]):
+            with self.subTest(hash=unknown), tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                directory, pins, _, _ = self.materialization_fixture(root)
+                outdir = root / "output"; outdir.mkdir()
+                target = outdir / owner.MATERIALIZATION_NAMES["f2"]
+                target.write_bytes(b"unknown synthetic target")
+                real_sha = owner.sha256
+                def unknown_hash(path):
+                    return unknown if Path(path) == target else real_sha(path)
+                with self.materialization_patches(pins), patch.object(owner, "sha256", side_effect=unknown_hash), \
+                        patch.object(owner.os, "replace") as replace:
+                    verification = owner.verify_candidate_materialization(directory)
+                    with self.assertRaisesRegex(ValueError, "unknown_candidate_target:" + target.name):
+                        owner.stage_candidates(directory, outdir, verification)
+                replace.assert_not_called()
+                self.assertEqual(list(outdir.iterdir()), [target])
+                self.assertEqual(target.read_bytes(), b"unknown synthetic target")
+
+    def test_staging_rejects_changed_source_without_replacement(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            directory, pins, _, _ = self.materialization_fixture(root)
+            outdir = root / "output"; outdir.mkdir()
+            with self.materialization_patches(pins), patch.object(owner.os, "replace") as replace:
+                verification = owner.verify_candidate_materialization(directory)
+                source = directory / owner.MATERIALIZATION_NAMES["f2"]
+                source.write_bytes(source.read_bytes() + b"changed")
+                with self.assertRaisesRegex(ValueError, "materialization_source_changed:" + source.name):
+                    owner.stage_candidates(directory, outdir, verification)
+            replace.assert_not_called()
+            self.assertEqual(list(outdir.iterdir()), [])
+
+    def test_predecessor_target_change_during_copy_prevents_replacement(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            directory, pins, _, _ = self.materialization_fixture(root)
+            outdir = root / "output"; outdir.mkdir()
+            target = outdir / owner.MATERIALIZATION_NAMES["f2"]
+            target.write_bytes(b"synthetic predecessor")
+            real_sha = owner.sha256
+            reads = []
+            def observed_then_changed(path):
+                if Path(path) == target:
+                    reads.append(str(path))
+                    if len(reads) == 1:
+                        return owner.RECOGNIZED_STAGING_PREDECESSORS[target.name]
+                    target.write_bytes(b"concurrent change")
+                return real_sha(path)
+            with self.materialization_patches(pins), patch.object(owner, "sha256", side_effect=observed_then_changed), \
+                    patch.object(owner.os, "replace") as replace:
+                verification = owner.verify_candidate_materialization(directory)
+                with self.assertRaisesRegex(ValueError, "candidate_target_changed_during_staging"):
+                    owner.stage_candidates(directory, outdir, verification)
+            replace.assert_not_called()
+            self.assertEqual(len(reads), 2)
+            self.assertEqual(list(outdir.iterdir()), [target])
+            self.assertEqual(target.read_bytes(), b"concurrent change")
+
+    def test_staging_rejects_symlink_nonfile_and_source_target_alias(self):
+        for defect in ("symlink", "nonfile", "alias"):
+            with self.subTest(defect=defect), tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                directory, pins, _, _ = self.materialization_fixture(root)
+                original = {p.name: p.read_bytes() for p in directory.iterdir()}
+                outdir = root / "output"; outdir.mkdir()
+                target = outdir / owner.MATERIALIZATION_NAMES["f2"]
+                if defect == "symlink": target.symlink_to(directory / target.name)
+                if defect == "nonfile": target.mkdir()
+                if defect == "alias": outdir = directory
+                reason = {"symlink": "candidate_source_target_alias", "nonfile": "candidate_target_not_file",
+                          "alias": "candidate_destination_inside_materialization"}[defect]
+                with self.materialization_patches(pins), patch.object(owner.os, "replace") as replace:
+                    verification = owner.verify_candidate_materialization(directory)
+                    with self.assertRaisesRegex(ValueError, reason):
+                        owner.stage_candidates(directory, outdir, verification)
+                replace.assert_not_called()
+                self.assertEqual({p.name: p.read_bytes() for p in directory.iterdir()}, original)
+
     def test_real_five_setting_lineage_preflight_loads_files_and_reconstructs_f4(self):
         from testing import test_f6_3_parallel_full_procedure_method_a as scientific
         fixture=type("LocalLineageFixture",(scientific.CandidateLineageTests,),{})

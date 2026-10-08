@@ -46,6 +46,13 @@ remain NOT VERIFIED; the
 [first-run diagnosis](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
 owns its F.4 result.
 
+The [F.2 staging repair](phases/e8-4-canonical-five-f2-staging-predecessor-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: only observed `182433...`
+may be replaced by reviewed `2fa715...`; other unknown targets fail closed. The
+[supplied failed attempt](evidence/e8-4-canonical-five-f2-staging-predecessor-blocker-2026-10-07.md)
+stopped at candidate_staging before analysis. Local checks passed; no authority
+or scientific/runtime source changed.
+
 The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
 parents t0/t1/t2, primary t1. Its [accepted checkpoint](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
 records prior ChatGPT acceptance of supplied JSON/PDF, exact shared F.4
@@ -118,9 +125,9 @@ No normalization error, conversion or amplitude conclusion is established.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff review, user commit/push, and pushed-state
-synchronization, perform the farm-readiness audit for one fresh isolated
-Q4p4W2p74 canonical-five owner gate using the reviewed F.2/F.3/F.4
-provenance-equivalence repair. Only Farm readiness: PASS may authorize that run.
+synchronization, perform a fresh farm-readiness audit for one isolated
+Q4p4W2p74 canonical-five owner retry. Only Farm readiness: PASS may authorize
+the retry.
 
 ## Success Criteria
 

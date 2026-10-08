@@ -318,6 +318,17 @@ stay unchanged, and local deterministic checks passed. No canonical-five
 runtime/PDF acceptance follows. Existing closed scopes and scientific boundaries
 remain intact; CURRENT owns the conditional farm-readiness gate and sole NEXT.
 
+The fresh attempt at `946b5512bb00d22bb446bd96d6ab9ee35f5f989b` stopped
+before analysis at candidate_staging; see the
+[supplied predecessor diagnosis](../evidence/e8-4-canonical-five-f2-staging-predecessor-blocker-2026-10-07.md).
+The [owner staging repair](../phases/e8-4-canonical-five-f2-staging-predecessor-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: only the observed
+`182433...` F.2 target is additionally replaceable by reviewed `2fa715...`.
+It is a staging predecessor, never authority. Unknown-target rejection,
+F.3/F.4 predecessor policy and scientific/runtime source remain unchanged.
+The earlier equivalence repair retains its pending-farm state; full runtime
+remains `BLOCKED`. CURRENT owns the conditional fresh farm-readiness gate.
+
 Scientific source, historical accepted authorities and Left/lowe closures
 remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
 E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately

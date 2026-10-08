@@ -55,6 +55,9 @@ MATERIALIZATION_SHA256 = {
     "f3": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
     "f4": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7"}
 CANDIDATES = {MATERIALIZATION_NAMES[k]: MATERIALIZATION_SHA256[k] for k in ("f2", "f3", "f4")}
+# Observed target state only: replace with reviewed bytes, never use as authority.
+RECOGNIZED_STAGING_PREDECESSORS = {
+    MATERIALIZATION_NAMES["f2"]: "182433ccd2d13d3f7af80b963e69190ad8f2eb4e295c8216b36585e8ee7409b2"}
 F1_SHA256 = {
     "Left-lowe": "eb6f659da0511f0f6ea867420fda0ee6feb77e6698509ccd31f80a92cc541c07",
     "Left-highe": "544ea08f71e74b6b59bc33d05458d4acc051e96fb0327f54ec092a331245c01e",
@@ -176,7 +179,8 @@ def stage_candidates(directory, outdir, verification, status=None):
         require(source.resolve() != target.resolve() and not target.is_symlink(), "candidate_source_target_alias")
         before = sha256(target) if target.is_file() else None
         require(not target.exists() or target.is_file(), "candidate_target_not_file")
-        require(before in (None, accepted.CANDIDATES.get(name), digest), "unknown_candidate_target:" + name)
+        require(before in (None, accepted.CANDIDATES.get(name), digest,
+                           RECOGNIZED_STAGING_PREDECESSORS.get(name)), "unknown_candidate_target:" + name)
         require(sha256(source) == digest, "materialization_source_changed:" + name)
         plans.append((source, target, before, digest))
     records = []
