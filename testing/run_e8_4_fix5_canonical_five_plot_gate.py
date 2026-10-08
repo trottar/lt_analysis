@@ -54,7 +54,7 @@ MATERIALIZATION_SHA256 = {
     "f2": "2fa715b2b5c2d5077e38416fb9eceb814e013e72f308c43526fddff36ddd962e",
     "f3": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
     "f4": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7"}
-CANDIDATES = {MATERIALIZATION_NAMES[k]: MATERIALIZATION_SHA256[k] for k in ("f3", "f4")}
+CANDIDATES = {MATERIALIZATION_NAMES[k]: MATERIALIZATION_SHA256[k] for k in ("f2", "f3", "f4")}
 F1_SHA256 = {
     "Left-lowe": "eb6f659da0511f0f6ea867420fda0ee6feb77e6698509ccd31f80a92cc541c07",
     "Left-highe": "544ea08f71e74b6b59bc33d05458d4acc051e96fb0327f54ec092a331245c01e",
@@ -176,7 +176,7 @@ def stage_candidates(directory, outdir, verification, status=None):
         require(source.resolve() != target.resolve() and not target.is_symlink(), "candidate_source_target_alias")
         before = sha256(target) if target.is_file() else None
         require(not target.exists() or target.is_file(), "candidate_target_not_file")
-        require(before in (None, accepted.CANDIDATES[name], digest), "unknown_candidate_target:" + name)
+        require(before in (None, accepted.CANDIDATES.get(name), digest), "unknown_candidate_target:" + name)
         require(sha256(source) == digest, "materialization_source_changed:" + name)
         plans.append((source, target, before, digest))
     records = []
@@ -204,15 +204,17 @@ def stage_candidates(directory, outdir, verification, status=None):
 def validate_candidate_lineage(outdir, module):
     """Read JSON and run the existing calculators; retain aggregate evidence only."""
     paths = module.accepted_f6_3_artifact_paths(outdir, KINEMATIC)
-    f1, f3, f4, hashes = module.load_accepted_f6_3_authority(paths)
+    f1, f2, f3, f4, hashes = module.load_accepted_f6_3_authority(paths, include_f2=True)
     expected_f1 = module.F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256
     require(expected_f1 == F1_SHA256 and
             {k: hashes.get(k) for k in expected_f1} == expected_f1, "lineage_f1_identity_mismatch")
-    require(hashes.get("f3") == CANDIDATES[Path(paths["f3"]).name] and
-            hashes.get("f4") == CANDIDATES[Path(paths["f4"]).name], "lineage_f3_f4_identity_mismatch")
+    require(hashes.get("f2") == CANDIDATES[Path(paths["f2"]).name] and
+            hashes.get("f3") == CANDIDATES[Path(paths["f3"]).name] and
+            hashes.get("f4") == CANDIDATES[Path(paths["f4"]).name], "lineage_f2_f3_f4_identity_mismatch")
     settings = []
     for setting_id in F1_SHA256:
         factors, provenance, rows = module.reconstruct_transient_factor_map(f1, f3, f4,
+            f2_artifact=f2, f2_input_file_sha256=hashes["f2"],
             f1_input_file_hashes={k: hashes[k] for k in expected_f1}, f3_input_file_sha256=hashes["f3"],
             f4_input_file_sha256=hashes["f4"], setting_id=setting_id)
         require(factors and set(factors) == set(rows) and
@@ -223,6 +225,9 @@ def validate_candidate_lineage(outdir, module):
                 provenance.get("candidate_validation_source_head") == MATERIALIZATION_HEAD and
                 provenance.get("accepted_f1_source_file_sha256") == expected_f1 and
                 provenance.get("candidate_f3_source_file_sha256") == hashes["f3"] and
+                provenance.get("candidate_f2_source_file_sha256") == hashes["f2"] and
+                provenance.get("scientific_equivalence", {}).get("all_stages_passed") is True and
+                provenance.get("scientific_equivalence", {}).get("mode") == "exact-lineage" and
                 provenance.get("candidate_f4_source_file_sha256") == hashes["f4"] and
                 provenance.get("transient_factor_population_count") == len(factors) and
                 provenance.get("current_baseline_candidate_lineage") is True and
@@ -641,7 +646,7 @@ def verify_zip(path, source_commit, records):
         require(manifest.get("validation_profile") == PROFILE_ID, "bundle_profile_mismatch")
         settings = manifest.get("settings", [])
         validate_settings([{key: row.get(key) for key in ("phi", "epsilon")} for row in settings])
-        require(set(manifest.get("global_artifacts", {})) == {"candidate_f3", "candidate_f4", "run_summary"},
+        require(set(manifest.get("global_artifacts", {})) == {"candidate_f2", "candidate_f3", "candidate_f4", "run_summary"},
                 "bundle_global_inventory_invalid")
         entries = list(manifest["global_artifacts"].values())
         for row in settings:

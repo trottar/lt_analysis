@@ -29,6 +29,12 @@ invalidate an older reviewed analysis source; reconcile the intervening diff
 and re-review only when the relevant analysis source or test scope changed.
 Never collapse provenance roles merely for convenience.
 
+Exact serialized lineage identity and scientific-equivalence identity are
+distinct. A permitted bridge reconstructs the current lineage through the
+same public scientific builders, compares an explicit closed scientific
+projection exactly, preserves both provenance roles, and consumes only
+current-lineage transient factors. It never silently interchanges those identities.
+
 ## Scientific ownership and production ordering
 
 Preserve separate scientific owners for random subtraction, slow-proton PID

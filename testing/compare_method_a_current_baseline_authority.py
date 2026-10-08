@@ -15,9 +15,9 @@ import pion_hgcer_method_a_acceptance_map as f3  # noqa: E402
 import pion_hgcer_method_a_parent_preserving_correction as f4  # noqa: E402
 
 ALIASES = ("Left-lowe", "Left-highe", "Center-lowe", "Center-highe", "Right-highe")
-F2_PROVENANCE = frozenset(("input_fingerprints", "fingerprint_inputs", "fingerprint"))
-F3_PROVENANCE = F2_PROVENANCE | frozenset(("f2_representation_fingerprint", "f2_source_file_sha256"))
-F4_PROVENANCE = F2_PROVENANCE | frozenset(("f3_source_file_sha256", "f3_map_fingerprint", "f3_artifact_fingerprint", "f3_runtime_authority"))
+from pion_hgcer_method_a_parallel_full_procedure import (
+    F2_PROVENANCE, F3_PROVENANCE, F4_PROVENANCE, scientific_projection, first_mismatch,
+)
 REQUIRED = {
     "representation": ("candidate_definitions", "algorithm_config", "algorithm_fingerprint", "response_support", "groups", "candidate_summaries", "recommendation"),
     "acceptance_map": ("accepted_basis", "ordered_features", "algorithm_config", "algorithm_fingerprint", "models"),
@@ -69,36 +69,6 @@ def _body(artifact, name):
     if name == "acceptance_map" and (not isinstance(body["models"], list) or len(body["models"]) != 15):
         raise ValueError("F.3 model inventory must contain 15 models")
     return body
-
-
-def scientific_projection(body, excluded):
-    """Drop only the declared provenance fields; retain future scientific fields."""
-    return {key: value for key, value in body.items() if key not in excluded}
-
-
-def first_mismatch(left, right, path="$"):
-    if type(left) is not type(right):
-        return {"path": path, "accepted": left, "candidate": right}
-    if isinstance(left, dict):
-        for key in sorted(left.keys() | right.keys()):
-            child = f"{path}.{key}"
-            if key not in left or key not in right:
-                return {"path": child, "accepted": left.get(key), "candidate": right.get(key), "missing_side": "accepted" if key not in left else "candidate"}
-            found = first_mismatch(left[key], right[key], child)
-            if found:
-                return found
-        return None
-    if isinstance(left, list):
-        if len(left) != len(right):
-            return {"path": f"{path}.length", "accepted": len(left), "candidate": len(right)}
-        for index, (a, b) in enumerate(zip(left, right)):
-            found = first_mismatch(a, b, f"{path}[{index}]")
-            if found:
-                return found
-        return None
-    if left != right:
-        return {"path": path, "accepted": left, "candidate": right}
-    return None
 
 
 def _delta(accepted, candidate):

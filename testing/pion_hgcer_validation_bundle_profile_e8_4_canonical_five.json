@@ -27,6 +27,12 @@
   "artifacts": {
     "global": [
       {
+        "key": "candidate_f2",
+        "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-acceptance-representation-current-baseline-candidate.json",
+        "kind": "json",
+        "required": true
+      },
+      {
         "key": "candidate_f3",
         "basename_template": "{kinematic}_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
         "kind": "json",

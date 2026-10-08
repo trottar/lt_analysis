@@ -25,10 +25,61 @@ _TOLERANCE = 1.0e-12
 F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD = "463d2657f696ecee33113edc3393ac51083a8944"
 F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC = {
     "Q4p4W2p74": {
+        "f2": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-acceptance-representation-current-baseline-candidate.json",
         "f3": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-acceptance-map-current-baseline-candidate.json",
         "f4": "Q4p4W2p74_kaon_pion-background_hgcer-method-a-parent-preserving-correction-current-baseline-candidate.json",
     },
 }
+F6_3_CANDIDATE_F2_AUTHORITY = {
+    "source_file_sha256": "2fa715b2b5c2d5077e38416fb9eceb814e013e72f308c43526fddff36ddd962e",
+    "representation_fingerprint": "e9df6e09c31dda4d7d724792ce3c40125e27530c4c76e0dbe7f5b9861d0e6216",
+    "artifact_fingerprint": "87d9a8780cb2de9f2830afd9e388064151f796654ddb5c4a8e1938443806a0c6",
+}
+
+# Closed, top-level provenance exclusions audited against the public builders.
+# Fingerprint inputs duplicate scientific body fields as well as lineage IDs.
+# Unknown fields stay compared. This is shared with the detached comparator.
+SCIENTIFIC_EQUIVALENCE_SCHEMA = "f6_3_scientific_equivalence/v1"
+F2_PROVENANCE = frozenset(("input_fingerprints", "fingerprint_inputs", "fingerprint"))
+F3_PROVENANCE = F2_PROVENANCE | frozenset(("f2_representation_fingerprint", "f2_source_file_sha256"))
+F4_PROVENANCE = F2_PROVENANCE | frozenset(("f3_source_file_sha256", "f3_map_fingerprint", "f3_artifact_fingerprint", "f3_runtime_authority"))
+SCIENTIFIC_PROVENANCE_EXCLUSIONS = {"f2": F2_PROVENANCE, "f3": F3_PROVENANCE, "f4": F4_PROVENANCE}
+
+
+def scientific_projection(body, excluded):
+    """Remove only named top-level provenance; retain every other field."""
+    return {key: value for key, value in body.items() if key not in excluded}
+
+
+def first_mismatch(left, right, path="$"):
+    """Exact recursive equality, including types, inventory and unknown fields."""
+    if type(left) is not type(right):
+        return {"path": path, "accepted": left, "candidate": right}
+    if isinstance(left, dict):
+        for key in sorted(left.keys() | right.keys()):
+            child = f"{path}.{key}"
+            if key not in left or key not in right:
+                return {"path": child, "accepted": left.get(key), "candidate": right.get(key), "missing_side": "accepted" if key not in left else "candidate"}
+            found = first_mismatch(left[key], right[key], child)
+            if found:
+                return found
+        return None
+    if isinstance(left, list):
+        if len(left) != len(right):
+            return {"path": f"{path}.length", "accepted": len(left), "candidate": len(right)}
+        for index, (a, b) in enumerate(zip(left, right)):
+            found = first_mismatch(a, b, f"{path}[{index}]")
+            if found:
+                return found
+        return None
+    if left != right:
+        return {"path": path, "accepted": left, "candidate": right}
+    return None
+
+
+def _writer_bytes(artifact):
+    """Match public artifact writers; transient serialization is never persisted."""
+    return (json.dumps(artifact, sort_keys=True, indent=2, allow_nan=False) + "\n").replace("\n", os.linesep).encode("utf-8")
 F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256 = {
     "Left-lowe": "eb6f659da0511f0f6ea867420fda0ee6feb77e6698509ccd31f80a92cc541c07",
     "Left-highe": "544ea08f71e74b6b59bc33d05458d4acc051e96fb0327f54ec092a331245c01e",
@@ -90,11 +141,22 @@ def _f4_scaled_close(left: float, right: float) -> bool:
 
 
 def _load_json(path: str) -> tuple[dict[str, object], str]:
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate JSON key")
+            result[key] = value
+        return result
+
+    def bad_constant(value):
+        raise ValueError("nonfinite JSON constant:" + value)
+
     try:
         with open(path, "rb") as handle:
             raw = handle.read()
-        payload = json.loads(raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        payload = json.loads(raw.decode("utf-8"), object_pairs_hook=pairs, parse_constant=bad_constant)
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise MethodAParallelFullProcedureError("f6_3_accepted_artifact_load_failed:{}".format(os.path.basename(path))) from exc
     if not isinstance(payload, dict):
         raise MethodAParallelFullProcedureError("f6_3_accepted_artifact_payload_invalid")
@@ -109,7 +171,7 @@ def _setting_id(phi_setting: object, epsilon_token: object) -> str:
 
 
 def accepted_f6_3_artifact_paths(outpath: object, kinematic_token: object) -> dict[str, object]:
-    """Return current F.1 and exact candidate F.3/F.4 paths; never fallback."""
+    """Return current F.1 and exact candidate F.2/F.3/F.4 paths; never fallback."""
     root = os.fspath(outpath)
     token = str(kinematic_token)
     candidate = F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC.get(token)
@@ -125,13 +187,14 @@ def accepted_f6_3_artifact_paths(outpath: object, kinematic_token: object) -> di
     }
     return {
         "f1": f1,
+        "f2": os.path.join(root, candidate["f2"]),
         "f3": os.path.join(root, candidate["f3"]),
         "f4": os.path.join(root, candidate["f4"]),
     }
 
 
-def load_accepted_f6_3_authority(paths: Mapping[str, object]) -> tuple[list[dict[str, object]], dict[str, object], dict[str, object], dict[str, str]]:
-    """Load the exact accepted authority set with its observed file hashes."""
+def load_accepted_f6_3_authority(paths: Mapping[str, object], *, include_f2: bool = False):
+    """Load exact paths; F.6.3 opts into F.2, older read-only diagnostics keep their API."""
     raw_f1 = paths.get("f1")
     if not isinstance(raw_f1, Mapping) or set(raw_f1) != {"{}-{}".format(*item) for item in _CANONICAL_SETTINGS}:
         raise MethodAParallelFullProcedureError("f6_3_f1_path_inventory_invalid")
@@ -142,7 +205,128 @@ def load_accepted_f6_3_authority(paths: Mapping[str, object]) -> tuple[list[dict
         f1.append(payload); f1_hashes[setting_id] = digest
     f3, f3_hash = _load_json(os.fspath(paths.get("f3", "")))
     f4, f4_hash = _load_json(os.fspath(paths.get("f4", "")))
+    if include_f2:
+        f2, f2_hash = _load_json(os.fspath(paths.get("f2", "")))
+        return f1, f2, f3, f4, {**f1_hashes, "f2": f2_hash, "f3": f3_hash, "f4": f4_hash}
     return f1, f3, f4, {**f1_hashes, "f3": f3_hash, "f4": f4_hash}
+
+
+def _validate_candidate_f2_f3(f2_artifact, f3_artifact, f2_sha, f3_sha, f4):
+    """Authenticate reviewed wrappers independently of regenerated F.1 lineage."""
+    f3 = f4._f3
+    definitions = (
+        ("f2", f2_artifact, f2_sha, F6_3_CANDIDATE_F2_AUTHORITY,
+         "representation", "representation_fingerprint", f3._F2_ARTIFACT_SCHEMA,
+         f3._F2_SCHEMA, f3._F2_FINGERPRINT_SCHEMA,
+         {"probe_only": True, "probability_map_constructed": False, "basis_frozen": False}),
+        ("f3", f3_artifact, f3_sha, F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"],
+         "acceptance_map", "map_fingerprint", f4._F3_ARTIFACT_SCHEMA,
+         f4._F3_SCHEMA, f4._F3_FINGERPRINT_SCHEMA,
+         {"map_constructed": True, "map_applied": False, "absolute_probability_constructed": False,
+          "parent_normalization_constructed": False, "correction_constructed": False, "basis_frozen": True}),
+    )
+    common = {"non_authoritative": True, "manual_review_required": True,
+              "production_objects_mutated": False, "production_application_performed": False,
+              "method_b_numerical_dependency": False, "event_probability_persisted": False,
+              "event_application_performed": False}
+    for stage, artifact, raw_sha, pin, body_name, fp_name, schema, body_schema, fp_schema, flags in definitions:
+        def require(value, reason):
+            if not value:
+                raise MethodAParallelFullProcedureError(f"{stage}_runtime_authority_{reason}_mismatch")
+        require(isinstance(artifact, Mapping), "wrapper")
+        body = artifact.get(body_name)
+        require(isinstance(body, Mapping), "body")
+        require(raw_sha == pin["source_file_sha256"], "source_file_sha256")
+        require(artifact.get("schema_version") == schema, "schema")
+        require(body.get("schema_version") == body_schema and body.get("fingerprint_schema_version") == fp_schema, "body_schema")
+        for name, expected in (common | flags).items():
+            require(artifact.get(name) is expected and body.get(name) is expected, name)
+        require(body.get("available") is True and body.get("status") == "available" and
+                body.get("diagnostic_stage") == "complete", "available")
+        require(body.get("fingerprint") == pin[fp_name], fp_name)
+        require(artifact.get("artifact_fingerprint") == pin["artifact_fingerprint"], "artifact_fingerprint")
+        inputs = body.get("fingerprint_inputs")
+        require(isinstance(inputs, Mapping) and _sha256_json(inputs) == body["fingerprint"], "fingerprint_inputs")
+        bound = ("candidate_definitions", "algorithm_config", "algorithm_fingerprint", "response_support", "groups", "candidate_summaries", "recommendation") if stage == "f2" else ("algorithm_config", "algorithm_fingerprint", "f2_representation_fingerprint", "f2_algorithm_fingerprint", "f2_source_file_sha256", "models")
+        require(all(inputs.get(name) == body.get(name) for name in bound), "fingerprint_content")
+        provenance = artifact.get("provenance")
+        require(isinstance(provenance, Mapping), "provenance")
+        require(_sha256_json({"schema_version": schema, fp_name: body["fingerprint"],
+                             "input_paths": provenance.get("input_paths")}) == artifact["artifact_fingerprint"], "artifact_fingerprint")
+        if stage == "f3":
+            require(body.get("algorithm_fingerprint") == pin["algorithm_fingerprint"], "algorithm_fingerprint")
+            require(body.get("f2_source_file_sha256") == f2_sha and
+                    body.get("f2_representation_fingerprint") == f2_artifact["representation"]["fingerprint"] and
+                    body.get("f2_algorithm_fingerprint") == f2_artifact["representation"]["algorithm_fingerprint"], "f2_identity")
+
+
+def _compare_stage(stage, reviewed, current):
+    exclusions = SCIENTIFIC_PROVENANCE_EXCLUSIONS[stage]
+    mismatch = first_mismatch(scientific_projection(reviewed, exclusions),
+                              scientific_projection(current, exclusions))
+    if mismatch is not None:
+        raise MethodAParallelFullProcedureError(f"f6_3_scientific_equivalence_mismatch:{stage}:{mismatch['path']}")
+    return {"passed": True, "first_mismatch_path": None}
+
+
+def _lineage_reconstruction(f1_artifacts, f2_artifact, f3_artifact, persisted, parsed,
+                            hashes, f2_sha, f3_sha, f4):
+    """Sequential exact science gates; factors remain private until all pass."""
+    f3 = f4._f3
+    import pion_hgcer_method_a_acceptance_representation as f2
+    expected = F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["f1_source_file_sha256"]
+    exact = hashes == expected
+    decision = {"schema_version": SCIENTIFIC_EQUIVALENCE_SCHEMA,
+                "mode": "exact-lineage" if exact else "equivalent-new-lineage",
+                "provenance_exclusions": {stage: sorted(fields) for stage, fields in SCIENTIFIC_PROVENANCE_EXCLUSIONS.items()}}
+    if exact:
+        # Keep the ordinary persisted-lineage validators and original F.4 path.
+        f3._validate_f2_artifact(f2_artifact, parsed,
+                               [{"setting_id": item["setting_id"], "sha256": hashes[item["setting_id"]]} for item in parsed])
+        current2, current3 = f2_artifact, f3_artifact
+        decision["f2"] = _compare_stage("f2", f2_artifact["representation"], current2["representation"])
+        decision["f3"] = _compare_stage("f3", f3_artifact["acceptance_map"], current3["acceptance_map"])
+        correction, review = f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data(
+            f1_artifacts, f3_artifact, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha,
+            accepted_f3_runtime_authority_by_kinematic=F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC)
+        if correction != persisted or correction.get("fingerprint") != persisted.get("fingerprint"):
+            raise MethodAParallelFullProcedureError("f6_3_f4_shared_reproduction_mismatch")
+        current4 = f4._artifact_wrapper(correction, input_paths={}, generated_at_utc=None, git_head=None, git_status_short=None)
+    else:
+        current2 = f2.build_pion_hgcer_method_a_acceptance_representation_artifact(
+            f1_artifacts, input_file_hashes=hashes, input_paths={})
+        f2_sha = _sha256_bytes(_writer_bytes(current2))
+        decision["f2"] = _compare_stage("f2", f2_artifact["representation"], current2["representation"])
+        current3 = f3.build_pion_hgcer_method_a_acceptance_map_artifact(
+            f1_artifacts, current2, f1_input_file_hashes=hashes, f2_input_file_sha256=f2_sha, input_paths={})
+        f3_sha = _sha256_bytes(_writer_bytes(current3))
+        decision["f3"] = _compare_stage("f3", f3_artifact["acceptance_map"], current3["acceptance_map"])
+        body3 = current3["acceptance_map"]
+        # Explicit construction sentinel, not accepted farm F.3 authority.
+        transient_authority = {"Q4p4W2p74": {"source_file_sha256": f3_sha,
+            "map_fingerprint": body3["fingerprint"], "algorithm_fingerprint": body3["algorithm_fingerprint"],
+            "artifact_fingerprint": current3["artifact_fingerprint"], "farm_source_head": "0" * 40}}
+        current4, review = f4.build_pion_hgcer_method_a_parent_preserving_correction_artifact_with_review_data(
+            f1_artifacts, current3, f1_input_file_hashes=hashes, f3_input_file_sha256=f3_sha,
+            accepted_f3_runtime_authority_by_kinematic=transient_authority, input_paths={})
+    correction = current4["correction"]
+    decision["f4"] = _compare_stage("f4", persisted, correction)
+    expected_parents = {(sid, index) for sid in hashes for index in range(3)}
+    parents = correction.get("parents", [])
+    if len(parents) != 15 or {(p.get("setting_id"), p.get("canonical_t_index")) for p in parents} != expected_parents:
+        raise MethodAParallelFullProcedureError("f6_3_current_parent_inventory_invalid")
+    if len(review) != 15 or {(p.get("setting_id"), p.get("canonical_t_index")) for p in review} != expected_parents:
+        raise MethodAParallelFullProcedureError("f6_3_current_review_inventory_invalid")
+    decision["all_stages_passed"] = True
+    current = {"reconstruction_role": "transient_current_lineage_no_farm_authority",
+               "f1_source_file_sha256": dict(sorted(hashes.items())),
+               "f1_stable_content_fingerprints": {p["setting_id"]: p["stable_content_fingerprint"] for p in parsed}}
+    for stage, artifact, body_name, sha in (("f2", current2, "representation", f2_sha),
+            ("f3", current3, "acceptance_map", f3_sha),
+            ("f4", current4, "correction", _sha256_bytes(_writer_bytes(current4)))):
+        current[stage] = {"source_file_sha256": sha, "scientific_fingerprint": artifact[body_name]["fingerprint"],
+                          "artifact_fingerprint": artifact["artifact_fingerprint"]}
+    return correction, review, current, decision
 
 
 def reconstruct_transient_factor_map(
@@ -150,6 +334,8 @@ def reconstruct_transient_factor_map(
     f3_artifact: Mapping[str, object],
     f4_artifact: Mapping[str, object],
     *,
+    f2_artifact: Mapping[str, object],
+    f2_input_file_sha256: str,
     f1_input_file_hashes: Mapping[str, object],
     f3_input_file_sha256: str,
     f4_input_file_sha256: str,
@@ -172,13 +358,12 @@ def reconstruct_transient_factor_map(
         hashes = {str(key): str(value) for key, value in f1_input_file_hashes.items()}
         if set(hashes) != {str(item["setting_id"]) for item in parsed}:
             raise MethodAParallelFullProcedureError("f6_3_f1_hash_inventory_invalid")
-        recomputed, review_data = _f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data(
-            f1_artifacts,
-            f3_artifact,
-            f1_input_file_hashes=hashes,
-            f3_input_file_sha256=str(f3_input_file_sha256),
-            accepted_f3_runtime_authority_by_kinematic=F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC,
-        )
+        if set(hashes) != {"{}-{}".format(*item) for item in _CANONICAL_SETTINGS} or any(p["setting"]["kinematic_token"] != "Q4p4W2p74" for p in parsed):
+            raise MethodAParallelFullProcedureError("f6_3_f1_setting_inventory_invalid")
+        _validate_candidate_f2_f3(f2_artifact, f3_artifact, str(f2_input_file_sha256), str(f3_input_file_sha256), _f4)
+        recomputed, review_data, current_lineage, equivalence = _lineage_reconstruction(
+            f1_artifacts, f2_artifact, f3_artifact, persisted, parsed, hashes,
+            str(f2_input_file_sha256), str(f3_input_file_sha256), _f4)
         rows_by_parent = _f4._raw_application_rows(f1_artifacts, parsed, _TOLERANCE)
         # F.4's sanitized calculation rows deliberately omit these baseline
         # coordinates. Join them from the same fully audited raw F.1 population
@@ -198,9 +383,6 @@ def reconstruct_transient_factor_map(
         raise
     except Exception as exc:
         raise MethodAParallelFullProcedureError("f6_3_f4_shared_reproduction_failed:{}".format(exc)) from exc
-    if recomputed != persisted or recomputed.get("fingerprint") != persisted.get("fingerprint"):
-        raise MethodAParallelFullProcedureError("f6_3_f4_shared_reproduction_mismatch")
-
     factors: dict[tuple[str, int], float] = {}
     accepted_rows: dict[tuple[str, int], dict[str, object]] = {}
     for review in review_data:
@@ -237,6 +419,7 @@ def reconstruct_transient_factor_map(
         "candidate_validation_source_head": F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
         "candidate_f3_reconstruction_role": "candidate_construction_sentinel_only",
         "candidate_f3_source_file_sha256": str(f3_input_file_sha256),
+        "candidate_f2_source_file_sha256": str(f2_input_file_sha256),
         "candidate_f4_source_file_sha256": str(f4_input_file_sha256),
         "production_promotion_performed": False,
         "selected_setting_id": setting_id,
@@ -252,6 +435,15 @@ def reconstruct_transient_factor_map(
         "transient_factor_population_count": len(factors),
         "transient_factor_identity_fingerprint": _sha256_json(identities),
         "event_correction_persisted": False,
+        "reviewed_candidate": {
+            "validation_materialization_source_head": F6_3_CANDIDATE_VALIDATION_SOURCE_HEAD,
+            "f1_source_file_sha256": dict(F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]["f1_source_file_sha256"]),
+            "f2": dict(F6_3_CANDIDATE_F2_AUTHORITY),
+            "f3": dict(F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]),
+            "f4": dict(F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC["Q4p4W2p74"]),
+        },
+        "current_runtime_lineage": current_lineage,
+        "scientific_equivalence": equivalence,
     }
     return factors, provenance, accepted_rows
 

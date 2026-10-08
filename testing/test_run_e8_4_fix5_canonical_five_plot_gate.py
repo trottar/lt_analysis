@@ -9,6 +9,7 @@ import subprocess
 import shutil
 import sys
 import tempfile
+import time
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch, Mock
@@ -371,6 +372,9 @@ class OwnerTests(unittest.TestCase):
                     else:
                         content = ("row_kind,phi_setting\n" + "".join("setting_total," + phi + "\n" for phi in phis)).encode()
                 (outdir / name).write_bytes(content)
+                # Synthetic freshness is test-owned; avoid filesystem clock skew.
+                fresh_ns = time.time_ns() + 1_000_000_000
+                os.utime(outdir / name, ns=(fresh_ns, fresh_ns))
             target = outdir / owner.pdf_name("Center", "highe")
             if defect == "stale": os.utime(target, (1, 1))
             if defect == "missing": target.unlink()
@@ -524,7 +528,7 @@ class OwnerTests(unittest.TestCase):
     def materialization_patches(self, pins):
         stack = ExitStack()
         stack.enter_context(patch.object(owner,"MATERIALIZATION_SHA256",pins))
-        stack.enter_context(patch.object(owner,"CANDIDATES",{owner.MATERIALIZATION_NAMES[k]:pins[k] for k in ("f3","f4")}))
+        stack.enter_context(patch.object(owner,"CANDIDATES",{owner.MATERIALIZATION_NAMES[k]:pins[k] for k in ("f2","f3","f4")}))
         authority = deepcopy(owner.F3_RECONSTRUCTION)
         authority[owner.KINEMATIC]["source_file_sha256"] = pins["f3"]
         stack.enter_context(patch.object(owner,"F3_RECONSTRUCTION",authority))
@@ -532,6 +536,7 @@ class OwnerTests(unittest.TestCase):
 
     def test_fresh_candidate_mapping_is_independent_of_historical_owner(self):
         self.assertEqual(owner.CANDIDATES, {
+            owner.MATERIALIZATION_NAMES["f2"]: owner.MATERIALIZATION_SHA256["f2"],
             owner.MATERIALIZATION_PREFIX+"acceptance-map-current-baseline-candidate.json": "c5b86452b790ecbaf5b8f0df05da67efa2fa92aab157b12b153ed7e491a38228",
             owner.MATERIALIZATION_PREFIX+"parent-preserving-correction-current-baseline-candidate.json": "79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7"})
         self.assertEqual(owner.accepted.CANDIDATES, {
@@ -539,18 +544,18 @@ class OwnerTests(unittest.TestCase):
             owner.MATERIALIZATION_NAMES["f4"]: "1d545924eba89c7f9ffa28028e307aca9b434a89beec06863cf2893887b6b902"})
         self.assertIsNot(owner.CANDIDATES, owner.accepted.CANDIDATES)
 
-    def test_reviewed_materialization_verifies_and_stages_only_f3_f4(self):
+    def test_reviewed_materialization_verifies_and_stages_exact_f2_f3_f4(self):
         for previous in ("absent","old","fresh","unknown"):
             with self.subTest(previous=previous), tempfile.TemporaryDirectory() as d:
                 root=Path(d); directory,pins,manifest,comparison=self.materialization_fixture(root)
                 outdir=root/"output";outdir.mkdir()
                 original={p.name:p.read_bytes() for p in directory.iterdir()}
                 old={}
-                for k in ("f3","f4"):
+                for k in ("f2","f3","f4"):
                     name=owner.MATERIALIZATION_NAMES[k]; target=outdir/name
                     if previous in {"old","unknown"}: target.write_bytes(b"known-old" if previous=="old" else b"unknown")
-                    if previous=="fresh": target.write_bytes((directory/name).read_bytes())
-                    old[name]=__import__("hashlib").sha256(b"known-old").hexdigest()
+                    if previous=="fresh" or (previous=="old" and k=="f2"): target.write_bytes((directory/name).read_bytes())
+                    if k != "f2": old[name]=__import__("hashlib").sha256(b"known-old").hexdigest()
                 with self.materialization_patches(pins), patch.object(owner.accepted,"CANDIDATES",old):
                     verification=owner.verify_candidate_materialization(directory)
                     self.assertTrue(verification["passed"])
@@ -561,12 +566,12 @@ class OwnerTests(unittest.TestCase):
                     else:
                         with patch.object(owner.os,"replace", wraps=os.replace) as replace:
                             installed=owner.stage_candidates(directory,outdir,verification)
-                        self.assertEqual(replace.call_count,0 if previous=="fresh" else 2)
+                        self.assertEqual(replace.call_count,0 if previous=="fresh" else 2 if previous=="old" else 3)
                         self.assertEqual({p.name for p in outdir.iterdir()},set(owner.CANDIDATES))
                         for row in installed["files"]:
                             target=Path(row["path"])
                             self.assertEqual(target.read_bytes(),original[target.name])
-                            self.assertEqual(row["action"],{"absent":"installed","old":"replaced","fresh":"no-op"}[previous])
+                            self.assertEqual(row["action"], "no-op" if previous=="old" and target.name==owner.MATERIALIZATION_NAMES["f2"] else {"absent":"installed","old":"replaced","fresh":"no-op"}[previous])
                 self.assertEqual({p.name:p.read_bytes() for p in directory.iterdir()},original)
 
     def test_materialization_rejects_bad_hashes_and_semantics(self):
@@ -605,7 +610,11 @@ class OwnerTests(unittest.TestCase):
                 sid=setting["phi_setting"]+"-"+setting["epsilon_filename_token"]
                 path=Path(paths["f1"][sid]);path.write_text(json.dumps(artifact,sort_keys=True),encoding="utf-8")
                 hashes[sid]=owner.sha256(path)
-            f3=scientific.f5_fixtures.f4_fixtures._f3(fixture.artifacts,hashes)
+            f2=scientific.f2.build_pion_hgcer_method_a_acceptance_representation_artifact(fixture.artifacts,input_file_hashes=hashes,input_paths={})
+            Path(paths["f2"]).write_bytes(module._writer_bytes(f2))
+            f2sha=owner.sha256(Path(paths["f2"]))
+            f2authority={"source_file_sha256":f2sha,"representation_fingerprint":f2["representation"]["fingerprint"],"artifact_fingerprint":f2["artifact_fingerprint"]}
+            f3=scientific.f3_builder.build_pion_hgcer_method_a_acceptance_map_artifact(fixture.artifacts,f2,f1_input_file_hashes=hashes,f2_input_file_sha256=f2sha,input_paths={})
             Path(paths["f3"]).write_text(json.dumps(f3,sort_keys=True),encoding="utf-8")
             f3sha=owner.sha256(Path(paths["f3"]))
             f3authority=scientific.f5_fixtures.f4_fixtures._authority(f3,f3sha)
@@ -625,11 +634,12 @@ class OwnerTests(unittest.TestCase):
                 # The outer orchestration fixture owns different synthetic
                 # candidate bytes; restore this calculator fixture's identities.
                 with patch.object(owner,"CANDIDATES",{
-                        Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}):
+                        Path(paths["f2"]).name:f2sha,Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}):
                     return owner.validate_candidate_lineage(outdir,module)
             with patch.object(owner,"F1_SHA256",hashes), patch.object(owner,"CANDIDATES",{
-                    Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}), \
+                    Path(paths["f2"]).name:f2sha,Path(paths["f3"]).name:f3sha,Path(paths["f4"]).name:f4sha}), \
                  patch.object(module,"F6_3_CANDIDATE_F1_SOURCE_FILE_SHA256",hashes), \
+                 patch.object(module,"F6_3_CANDIDATE_F2_AUTHORITY",f2authority), \
                  patch.object(module,"F6_3_CANDIDATE_F3_RECONSTRUCTION_AUTHORITY_BY_KINEMATIC",f3authority), \
                  patch.object(module,"F6_3_CANDIDATE_F4_VALIDATION_AUTHORITY_BY_KINEMATIC",f4authority), \
                  patch.object(module,"reconstruct_transient_factor_map",wraps=module.reconstruct_transient_factor_map) as reconstruct:
@@ -637,7 +647,7 @@ class OwnerTests(unittest.TestCase):
                 self.assertTrue(result["passed"]);self.assertEqual(reconstruct.call_count,5)
                 self.assertEqual([r["setting_id"] for r in result["settings"]],list(hashes))
                 self.assertTrue(all(r["factor_count"]>0 and r["f4_shared_reproduction_passed"] for r in result["settings"]))
-                self.assertEqual(result["observed_sha256"],{**hashes,"f3":f3sha,"f4":f4sha})
+                self.assertEqual(result["observed_sha256"],{**hashes,"f2":f2sha,"f3":f3sha,"f4":f4sha})
                 with tempfile.TemporaryDirectory() as flow:
                     receipt, events, _ = self.exercise(flow, lineage_override=real_lineage,
                                                        preflight_only=True)
@@ -648,8 +658,8 @@ class OwnerTests(unittest.TestCase):
                     self.assertEqual(transferred["status"], "success")
                     self.assertEqual(events, ["materialization_verify", "candidate_staging",
                         "lineage_preflight", "preservation_check", "ltsep_preservation_check"])
-                for key in (next(iter(paths["f1"])),"f3","f4"):
-                    path=Path(paths[key] if key in {"f3","f4"} else paths["f1"][key])
+                for key in (next(iter(paths["f1"])),"f2","f3","f4"):
+                    path=Path(paths[key] if key in {"f2","f3","f4"} else paths["f1"][key])
                     original=path.read_bytes();path.write_bytes(original+b" ")
                     with self.subTest(hash=key),self.assertRaisesRegex(ValueError,"lineage_.*identity_mismatch"):
                         owner.validate_candidate_lineage(outdir,module)
@@ -757,6 +767,8 @@ class OwnerTests(unittest.TestCase):
                 self.assertTrue(manifest["complete"])
                 self.assertEqual(len(manifest["settings"]), 5)
                 self.assertEqual(manifest["requested_settings"], list(owner.CANONICAL_SETTINGS))
+                self.assertEqual(set(manifest["global_artifacts"]),
+                                 {"candidate_f2", "candidate_f3", "candidate_f4", "run_summary"})
             status = json.loads((outdir / "fresh-gate-status.json").read_text())
             self.assertEqual(status["status"], "success")
             self.assertEqual(status["zip_identity"]["sha256"], owner.sha256(output))
@@ -769,6 +781,8 @@ class OwnerTests(unittest.TestCase):
             self.assertTrue(summary["ordinary_checkout_preservation"]["passed"])
             self.assertTrue(summary["candidate_materialization"]["passed"])
             self.assertTrue(summary["candidate_installation"]["passed"])
+            self.assertEqual(set(summary["candidate_sha256"]), set(owner.CANDIDATES))
+            self.assertIn(owner.MATERIALIZATION_NAMES["f2"], summary["candidate_sha256"])
             self.assertTrue(summary["f6_3_lineage_preflight"]["passed"])
             self.assertEqual((output.parent / "fresh-gate-status.json").read_bytes(),
                              (outdir / "fresh-gate-status.json").read_bytes())

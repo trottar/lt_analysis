@@ -3926,10 +3926,11 @@ def _build_f6_3_parallel_method_a_source(hist, processed_dict, sub_event_cache, 
         if not (str(inpDict.get("ParticleType", "")).strip().lower() == "kaon" and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components" and resolve_pion_subtraction_scope(inpDict) == "t_bin"):
             return unavailable_parallel_source("f6_3_kinematic_or_mode_unsupported", setting_id=setting_id)
         paths = accepted_f6_3_artifact_paths(OUTPATH, get_particle_subtraction_setting_key(inpDict))
-        f1, f3, f4, observed = load_accepted_f6_3_authority(paths)
-        f1_hashes = {key: value for key, value in observed.items() if key not in ("f3", "f4")}
+        f1, f2, f3, f4, observed = load_accepted_f6_3_authority(paths, include_f2=True)
+        f1_hashes = {key: value for key, value in observed.items() if key not in ("f2", "f3", "f4")}
         multipliers, authority, accepted_rows = reconstruct_transient_factor_map(
             f1, f3, f4, f1_input_file_hashes=f1_hashes,
+            f2_artifact=f2, f2_input_file_sha256=observed["f2"],
             f3_input_file_sha256=observed["f3"], f4_input_file_sha256=observed["f4"],
             setting_id=setting_id,
         )

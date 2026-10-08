@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8186,
+      "bytes": 8187,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "305ba10401da5a43b1162628af5d1b93c0f708c5b8e86564181159204cf92cc9"
+      "sha256": "5ea2ffb946de16c3e5a38d4bc0e15e346e74bee23fcd99b62987200cfcba1103"
     },
     {
       "bytes": 8339,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 20623,
+      "bytes": 20999,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "195aac781b62ea244f193ca1c426e425ba681f9e8187075c8832508e9e598b4e"
+      "sha256": "699c8b3b65f3c6fbaba4bf620dffbb3dd4dba55d960fd782de25d01f9a670a36"
     },
     {
       "bytes": 3606,
@@ -671,6 +671,16 @@
       "sha256": "27bbabe10dadab2990389124ccacbd4411aba3f697140ddc979a9d476a6a4b6a"
     },
     {
+      "bytes": 23783,
+      "path": "docs/memory/phases/e8-4-canonical-five-f2-handoff-equivalence-repair-task-contract.md",
+      "sha256": "448857739afda4899e8487c1ab646348613a46580a8fd653c46b33d4d9bf5208"
+    },
+    {
+      "bytes": 6729,
+      "path": "docs/memory/phases/e8-4-canonical-five-f2-handoff-equivalence-repair.md",
+      "sha256": "3969343636e5b79ee06136d17ed63428f15d6ecca10fee41acfc59643082ba27"
+    },
+    {
       "bytes": 19866,
       "path": "docs/memory/phases/e8-4-canonical-five-fresh-f1-candidate-lineage-refresh-task-contract.md",
       "sha256": "437442648b8ac5305eae893b3de48cbe2c43d193235dc2a2d50c2396db648dcd"
@@ -1186,9 +1196,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 24464,
+      "bytes": 24687,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "2a74241d40ef11cb3e38059e90c67d1268014f749bcfd6736ef842c742ab42a6"
+      "sha256": "8dc82883295e93cc8ce3dd4c0c9311b5ce0a930711371fd291d1381907924baf"
     },
     {
       "bytes": 1698,

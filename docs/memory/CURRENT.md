@@ -37,15 +37,14 @@ RUNTIME VERIFIED (supplied diagnosis): regenerated F.1 identities differed;
 post-run F.2/F.3/F.4 scientific payloads matched (`first_changed_stage = none`).
 INFERENCE: provenance/identity coupling; see the [second-run diagnosis](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md).
 
-Reopened under the
-[repair contract](phases/e8-4-canonical-five-provenance-identity-repair-task-contract.md).
-Repair remains `BLOCKED`: owner omits reviewed F.2 needed for exact three-stage
-equivalence. [Audit](phases/e8-4-canonical-five-provenance-identity-repair.md)
-records supplied ChatGPT actual-diff acceptance and approved narrow follow-up:
-owner handoff of reviewed/hash-pinned F.2 alongside F.3/F.4. No repair implemented.
-Full runtime/PDF closure and the low-level cause remain NOT VERIFIED. The
-[first-run failure/materialization](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
-is historical diagnostic evidence with a distinct F.4 comparison result.
+The [F.2 handoff/equivalence repair](phases/e8-4-canonical-five-f2-handoff-equivalence-repair.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: pinned F.2/F.3/F.4 handoff,
+exact science gates before current factors, separate provenance,
+strict validators unchanged; checks passed. [Accepted audit](phases/e8-4-canonical-five-provenance-identity-repair.md)
+owns the missing-F.2 diagnosis. Full runtime/PDF and identity-change cause
+remain NOT VERIFIED; the
+[first-run diagnosis](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md)
+owns its F.4 result.
 
 The detached Left/lowe diagnostic remains `CLOSED / RUNTIME VALIDATED` for
 parents t0/t1/t2, primary t1. Its [accepted checkpoint](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md)
@@ -105,7 +104,7 @@ Linked evidence owns farm provenance; no global cleanliness claim.
 
 ## Blockers
 
-Canonical-five full runtime gate and provenance/identity repair are `BLOCKED`.
+Canonical-five full runtime gate remains `BLOCKED`; local repair awaits farm validation.
 Final E.8 and F.6.4 remain `BLOCKED`. Absolute mis-ID, hardware cause and production correctness remain unproven.
 RF was not performed; it is optional at low epsilon.
 
@@ -118,9 +117,10 @@ No normalization error, conversion or amplitude conclusion is established.
 
 ## Next Action
 
-NEXT — after user commit/push and ChatGPT pushed-state synchronization of this
-blocked-audit checkpoint, establish one new narrow source-changing
-canonical-five owner/F.2-handoff repair contract.
+NEXT — after ChatGPT actual-diff review, user commit/push, and pushed-state
+synchronization, perform the farm-readiness audit for one fresh isolated
+Q4p4W2p74 canonical-five owner gate using the reviewed F.2/F.3/F.4
+provenance-equivalence repair. Only Farm readiness: PASS may authorize that run.
 
 ## Success Criteria
 

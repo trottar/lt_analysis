@@ -33,6 +33,14 @@ def parents(normalization=1.0):
 
 
 class ComparisonTests(unittest.TestCase):
+    def test_projection_is_owned_by_runtime_and_preserves_types_and_unknown_fields(self):
+        import pion_hgcer_method_a_parallel_full_procedure as runtime
+        self.assertIs(audit.scientific_projection, runtime.scientific_projection)
+        self.assertIs(audit.first_mismatch, runtime.first_mismatch)
+        for name in ("F2_PROVENANCE", "F3_PROVENANCE", "F4_PROVENANCE"):
+            self.assertIs(getattr(audit, name), getattr(runtime, name))
+        self.assertEqual(runtime.first_mismatch({"new_field": 1}, {"new_field": True})["path"], "$.new_field")
+
     def test_inventory(self):
         entries = [f"{name}=x{i}.json" for i, name in enumerate(audit.ALIASES)]
         self.assertEqual(len(audit._f1_inputs(entries)), 5)

@@ -21,14 +21,14 @@ class ProfileTests(unittest.TestCase):
             owner.collector.resolve_settings("Right", "lowe", profile)
         self.assertEqual(profile["collection_mode"], "generic_artifacts")
         self.assertEqual({e["key"] for e in profile["artifacts"]["global"]},
-                         {"candidate_f3", "candidate_f4", "run_summary"})
+                         {"candidate_f2", "candidate_f3", "candidate_f4", "run_summary"})
         self.assertEqual({e["key"] for e in profile["artifacts"]["settings"]},
                          {"procedure_pdf", "page_manifest", "full_analysis",
                           "correction_ledger_json", "correction_ledger_csv"})
         names = owner.artifact_names(profile)
         self.assertIn(owner.SUMMARY, names)
         self.assertNotIn(owner.accepted.SUMMARY, names)
-        self.assertEqual(len(names), 19)  # 3 globals + 10 per-phi + 6 per-epsilon
+        self.assertEqual(len(names), 20)  # 4 globals + 10 per-phi + 6 per-epsilon
         self.assertTrue(all(e["required"] for scope in profile["artifacts"].values() for e in scope))
 
     def test_effective_source_pin_does_not_rewrite_template(self):
