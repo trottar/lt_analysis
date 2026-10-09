@@ -1,0 +1,118 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "phase_e8_2_canonical_five_baseline_yields/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {
+      "phi": "Left",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Left",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Right",
+      "epsilon": "highe"
+    }
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "run_summary",
+        "basename_template": "Q4p4W2p74_e8_2_baseline-five_OWNER_ATTEMPT_yield-receipt.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "full_analysis_lowe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_lowe.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "ledger_json_lowe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_lowe_correction_ledger_no_empirical_residual.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "ledger_csv_lowe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_lowe_correction_ledger_no_empirical_residual.csv",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "mm_support_lowe",
+        "basename_template": "kaon_xsect_support_Q4p4W2p74_lowe.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "full_analysis_highe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_highe.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "ledger_json_highe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_highe_correction_ledger_no_empirical_residual.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "ledger_csv_highe",
+        "basename_template": "kaon_FullAnalysis_Q4p4W2p74_highe_correction_ledger_no_empirical_residual.csv",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "mm_support_highe",
+        "basename_template": "kaon_xsect_support_Q4p4W2p74_highe.npz",
+        "kind": "file",
+        "required": true
+      }
+    ],
+    "settings": [
+      {
+        "key": "procedure_pdf",
+        "basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "page_manifest",
+        "basename_template": "{phi}_kaon_rand_sub_{kinematic}_{epsilon}_full-background-subtraction-manifest.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "yield_data",
+        "basename_template": "{kinematic}_e8_2_baseline_OWNER_ATTEMPT_{phi}_{epsilon}_yield_data.dat",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "yield_simc",
+        "basename_template": "{kinematic}_e8_2_baseline_OWNER_ATTEMPT_{phi}_{epsilon}_yield_simc.dat",
+        "kind": "file",
+        "required": true
+      }
+    ]
+  },
+  "source_identity": {
+    "required_analysis_commit": "af45126899c0d89707b29b95f7138b3388d432cd",
+    "allowed_committed_files": [],
+    "allowed_non_analysis_path_prefixes": [
+      "docs/memory/"
+    ]
+  }
+}

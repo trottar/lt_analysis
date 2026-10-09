@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7782,
+      "bytes": 8063,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "d67302ee3d07fc47951a77bd8960a7716822dfca7599bb6496d9eaac6b048265"
+      "sha256": "c74e81efd03c2de31b2eed13080f5db30d0a5623cc047a2338c8031dab996fdc"
     },
     {
       "bytes": 8339,
@@ -579,6 +579,11 @@
       "bytes": 16116,
       "path": "docs/memory/phases/e8-2-baseline-stage-audit.md",
       "sha256": "c1f4157951394cc0a4252dc8129e86244e137a705e06d5ddee97930bc1045627"
+    },
+    {
+      "bytes": 15225,
+      "path": "docs/memory/phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md",
+      "sha256": "b0246f3c5e2447c1b71646da1a7094d8da347a92b3b499bfc64b1e4a7bb4aa18"
     },
     {
       "bytes": 25178,
@@ -1246,9 +1251,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 27386,
+      "bytes": 28158,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "904da2391cdfdfecc208a3877a7b48227c52004b950b857b628c2441fce7547c"
+      "sha256": "77cfa1e7985c71555c06387613179b48a1257d0fdb871ca5b027e3e21ed04b60"
     },
     {
       "bytes": 1698,

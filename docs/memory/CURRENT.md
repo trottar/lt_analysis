@@ -68,6 +68,11 @@ remains `CLOSED / RUNTIME VALIDATED` for t0/t1/t2, primary t1. With accepted
 F.6.2/comparator t1 continuity, no redesign is warranted (INFERENCE).
 Absolute mis-ID, proxy validity, hardware cause and promotion are NOT VERIFIED.
 
+The independent [baseline-five owner](phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Synthetic isolation,
+producer-table/MM consistency and collection checks passed. No canonical-five
+runtime acceptance follows; the original Method-A owner/F.4 gate stays frozen.
+
 ## Verified State
 
 Gate-3 ownership: NPE=0 kaon PID, NPE>0 pion tree, NPE>2 physical control.
@@ -107,14 +112,13 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff acceptance, user commit/push, and pushed-state
-synchronization, audit the source/evidence chain producing and reporting baseline
-`MM_0/Y0` and separate private `MM_A/YA` across the full procedure. Identify
-the earliest actual gate preventing proper full-procedure yields and whether
-an independently valid baseline-only path exists. Deliver one narrowly evidenced
-readiness result or one scoped repair contract. Preserve the exact F.4
-canonical-five blocker; no full-owner retry, Method-A promotion or physics
-interpretation before their gates pass.
+NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
+synchronization, perform the authorized narrow baseline-five farm gate using
+`testing/run_e8_2_canonical_five_baseline_yield_gate.py`. Review its authentic
+data/SIMC yield tables, cut-selected MM support and baseline procedure evidence
+to determine extracted-yield readiness. Preserve the exact Method-A F.4 blocker,
+independent absolute-SIMC blocker and accepted narrow closures; no original-owner
+retry, promotion or physics interpretation follows.
 
 ## Success Criteria
 

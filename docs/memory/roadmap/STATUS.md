@@ -94,6 +94,16 @@ unchanged. SOURCE VERIFIED: final canonical `after_pion_final/MM_0` and
 stored `Y0` are baseline; diagnostic Lambda-window `PI` is not extracted
 `Y0` or a further subtraction stage. No canonical-five closure or promotion follows.
 
+The independent [baseline canonical-five owner contract](../phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Its new
+[owner](../../../testing/run_e8_2_canonical_five_baseline_yield_gate.py) and
+[generic profile](../../../testing/pion_hgcer_validation_bundle_profile_e8_2_canonical_five_yields.json)
+capture existing downstream data/K-Lambda SIMC tables and cut-selected MM support
+without Method-A candidate preflight or scientific-source changes. Deterministic
+local owner/profile and existing producer/isolation/collector regressions passed.
+Baseline-five runtime acceptance awaits reviewed, published source and applicable
+farm evidence. The original exact F.4 gate and absolute-SIMC blocker remain.
+
 #### E.8.3 — detached Method-A reweighting audit
 
 `CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe at farm source
