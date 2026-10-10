@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8063,
+      "bytes": 8169,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c74e81efd03c2de31b2eed13080f5db30d0a5623cc047a2338c8031dab996fdc"
+      "sha256": "0f9ce05caf03c8d4046feea7f6d87201c5d2259a2151fa5457c8c1a7ccd94d6e"
     },
     {
       "bytes": 8339,
@@ -139,6 +139,11 @@
       "bytes": 2912,
       "path": "docs/memory/evidence/e8-1-fix6-left-lowe-runtime-closure.md",
       "sha256": "06ef27c2f2e4993c22981a4154974227fbdee57b59e870d061467ac021d1f64f"
+    },
+    {
+      "bytes": 6172,
+      "path": "docs/memory/evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md",
+      "sha256": "576ab16ef85d11a838f5b68bbe49189ddc1a7accea80ac5be852bf16c579709d"
     },
     {
       "bytes": 3444,
@@ -584,6 +589,11 @@
       "bytes": 15225,
       "path": "docs/memory/phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md",
       "sha256": "b0246f3c5e2447c1b71646da1a7094d8da347a92b3b499bfc64b1e4a7bb4aa18"
+    },
+    {
+      "bytes": 12820,
+      "path": "docs/memory/phases/e8-2-canonical-five-baseline-yield-runtime-closure-task-contract.md",
+      "sha256": "7a52cf1c01551c331cbe51facce1d7324ff1c5cdd1851b45c9c6afc15384c05a"
     },
     {
       "bytes": 25178,
@@ -1251,9 +1261,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 28158,
+      "bytes": 29102,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "77cfa1e7985c71555c06387613179b48a1257d0fdb871ca5b027e3e21ed04b60"
+      "sha256": "6806171c3f582d64e28009a69e4e2ccf6a015957aa2bfb4af8924cfee9c7b52e"
     },
     {
       "bytes": 1698,

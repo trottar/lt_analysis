@@ -5,10 +5,9 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: full-procedure and proper extracted-yield readiness first.
-Further stage-yield and broader physics interpretation are `DEFERRED` until
-proper yields are verified; accepted narrow interpretations remain intact.
-Keep production and authorities frozen.
+E.8 is `ACTIVE`: baseline-five extracted-yield scientific QA follows runtime
+closure. Further stage-yield/broader interpretation stays `DEFERRED`; accepted
+narrow interpretations, production and authorities remain frozen.
 
 ## Current Work Item
 
@@ -68,10 +67,10 @@ remains `CLOSED / RUNTIME VALIDATED` for t0/t1/t2, primary t1. With accepted
 F.6.2/comparator t1 continuity, no redesign is warranted (INFERENCE).
 Absolute mis-ID, proxy validity, hardware cause and promotion are NOT VERIFIED.
 
-The independent [baseline-five owner](phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Synthetic isolation,
-producer-table/MM consistency and collection checks passed. No canonical-five
-runtime acceptance follows; the original Method-A owner/F.4 gate stays frozen.
+Independent E.8.2 baseline-five `Y0/MM_0` is `CLOSED / RUNTIME VALIDATED`:
+[evidence](evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md)
+owns farm identity, prior ChatGPT acceptance, 135/135 data and SIMC table/MM
+gates and representative PDF inspection limits. Private `YA/MM_A`/F.4 stays blocked.
 
 ## Verified State
 
@@ -99,7 +98,7 @@ Current reviewed F.4 SHA-256:
 
 ## Blockers
 
-Canonical-five full runtime remains `BLOCKED` by the newer exact F.4 mismatch;
+Private Method-A canonical-five runtime remains `BLOCKED` by the exact F.4 mismatch;
 owner retry is unauthorized pending separately reviewed resolving evidence.
 Final E.8/F.6.4 remain `BLOCKED`; production correctness is unproven.
 Optional low-epsilon RF was not performed.
@@ -113,17 +112,19 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, perform the authorized narrow baseline-five farm gate using
-`testing/run_e8_2_canonical_five_baseline_yield_gate.py`. Review its authentic
-data/SIMC yield tables, cut-selected MM support and baseline procedure evidence
-to determine extracted-yield readiness. Preserve the exact Method-A F.4 blocker,
-independent absolute-SIMC blocker and accepted narrow closures; no original-owner
-retry, promotion or physics interpretation follows.
+synchronization, perform E.8 baseline-five extracted-yield scientific QA of
+accepted `Y0/MM_0` and K-Lambda SIMC cut-selected MM: per-setting/parent `(t,phi)`
+distributions, uncertainty/reporting, four signed-negative data cells and 36 zero
+SIMC cells. Establish meaningful baseline shape/coverage comparisons and extra
+evidence needed for private `YA/MM_A`; return one physics-oriented plot/yield
+comparison/readiness result or evidenced blocker. No data adjustment, SIMC
+amplitude normalization, stage-integral yield substitution or private F.4/YA
+comparison before its independent gate resolves.
 
 ## Success Criteria
 
 Manifest, health, bootstrap, preservation and diff must pass.
-No runtime acceptance, staging, commit, push or farm for Codex.
+Codex records prior acceptance only; no staging, commit, push or farm.
 
 ## Do Not Reopen Without New Evidence
 

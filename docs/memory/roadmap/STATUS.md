@@ -92,17 +92,27 @@ interpretation is accepted only for this scope; see the
 The existing before/component/after chain and `no_empirical_residual` remain
 unchanged. SOURCE VERIFIED: final canonical `after_pion_final/MM_0` and
 stored `Y0` are baseline; diagnostic Lambda-window `PI` is not extracted
-`Y0` or a further subtraction stage. No canonical-five closure or promotion follows.
+`Y0` or a further subtraction stage. That historical narrow closure alone
+does not establish canonical-five coverage or promotion.
 
-The independent [baseline canonical-five owner contract](../phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Its new
-[owner](../../../testing/run_e8_2_canonical_five_baseline_yield_gate.py) and
+The independent baseline canonical-five yield/MM gate is
+`CLOSED / RUNTIME VALIDATED` at farm source
+`8e68d2acae91fd97622793df563aba0296403a48`. The [accepted evidence](../evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md)
+attributes acceptance to user farm artifacts and independent ChatGPT review:
+29 required artifacts, five 97-page PDFs with 90 E.8.2 page records, and exact
+135/135 data and 135/135 SIMC table-to-cut-selected-MM gates. Representative
+pages were inspected; all 485 pages did not receive exhaustive visual acceptance.
+Four signed-negative data yields and 36 zero SIMC cells retain producer values.
+Under the [owner contract](../phases/e8-2-canonical-five-baseline-yield-gate-task-contract.md),
+the [owner](../../../testing/run_e8_2_canonical_five_baseline_yield_gate.py) and
 [generic profile](../../../testing/pion_hgcer_validation_bundle_profile_e8_2_canonical_five_yields.json)
 capture existing downstream data/K-Lambda SIMC tables and cut-selected MM support
 without Method-A candidate preflight or scientific-source changes. Deterministic
 local owner/profile and existing producer/isolation/collector regressions passed.
-Baseline-five runtime acceptance awaits reviewed, published source and applicable
-farm evidence. The original exact F.4 gate and absolute-SIMC blocker remain.
+This closes baseline `Y0/MM_0` numerical/procedure runtime coverage only;
+private `YA/MM_A`, original exact Method-A F.4 equivalence, absolute-SIMC
+amplitude/units, final E.8 and F.6.4 remain blocked. Prior Left/lowe scientific
+interpretation and all unrelated closed phases retain their scopes.
 
 #### E.8.3 — detached Method-A reweighting audit
 
@@ -367,15 +377,16 @@ E.8.3 F.6.1 and private F.6.3/E.8.4 `MM_0/MM_A, Y0/YA` remain distinct.
 No bypass, tolerance change, owner retry or promotion is authorized.
 
 Scientific source, historical accepted authorities and Left/lowe closures
-remain unchanged. Canonical-five runtime/PDF closure is NOT VERIFIED; final
-E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
+remain unchanged. Private Method-A canonical-five runtime/PDF closure is
+NOT VERIFIED; final E.8 and F.6.4 remain `BLOCKED`. Absolute-SIMC interpretation is separately
 `BLOCKED` by `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
 
 #### Final E.8 closure
 
-`BLOCKED` — final canonical-five validation is not supplied by the accepted
-Left/lowe scope; the second canonical-five full runtime gate is `BLOCKED` and
-the newer exact F.4 pre-analysis failure remains unresolved. Local owner
+`BLOCKED` — accepted baseline-five yield/MM and narrow Left/lowe scopes do
+not supply final private Method-A canonical-five validation. The second full
+runtime gate is `BLOCKED` and the newer exact F.4 pre-analysis failure remains
+unresolved. Local owner
 repairs retain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
 
 #### F.6.4 — explicit production-promotion decision
@@ -398,7 +409,9 @@ milestones; concrete source/provenance/active-state blockers alone warrant
 separate reconciliation. The narrow Refresh.2 materialization and Left/lowe current-baseline
 reweighting/yield gates now have accepted evidence. The later Fix.5.7/Fix.5.8
 Left/lowe owner and visual presentation gates are accepted. Broader numerical
-interpretation, absolute-SIMC units and the other four settings are not closed.
+interpretation, absolute-SIMC units and private Method-A coverage of the other
+four settings are not closed. Independent E.8.2 baseline-five yield/MM runtime
+coverage is accepted separately; no private-branch or final E.8 closure follows.
 Canonical-five isolated orchestration was user-authorized and attempted; its
 newer exact F.4 pre-analysis gate remains `BLOCKED`, with F.2 handoff/equivalence repair
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`
