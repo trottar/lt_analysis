@@ -91,6 +91,14 @@ fit, factor, correction, normalization, or yield for plotting. Method-A
 reweighting remains parent-preserving (`w0 -> w0*C`) with no independent child
 normalization; Method B remains numerically excluded.
 
+The [user-clarified four-way yield/MM requirement](decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
+requests baseline, Method A, separate reweighted baseline and K+Lambda SIMC.
+`Y_rw`/`MM_rw` are request notation only; separate authority, producer and
+independence are NOT VERIFIED. Current E.8.4 MM overlays remain three-way,
+with `Y0`/`YA` yield summaries. Reweighted pion background `B_pi^A` is not
+automatically a fourth final result; do not forge one or merge the requested
+label into Method A. CURRENT retains the sole NEXT; this creates no new phase.
+
 The current-baseline F.6.3 Method-A full-analysis path has accepted direct
 runtime evidence for Q4p4W2p74 / Left / lowe only: real canonical child yields
 change while signed parent-t normalization is preserved. Parent equality is a

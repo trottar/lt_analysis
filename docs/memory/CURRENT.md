@@ -8,15 +8,18 @@ memory_schema: 3
 E.8 is `ACTIVE`: baseline-five QA is recorded; private F.4 equivalence is next.
 Broader interpretation stays `DEFERRED`; accepted scopes and science stay frozen.
 
+[Four-way presentation](decisions/e8-full-analysis-procedure-roadmap.md):
+separate reweighted-baseline yield/MM authority is NOT VERIFIED; NEXT unchanged.
+
 ## Current Work Item
 
 E.8.2 Q4p4W2p74 / Left / lowe remains `CLOSED / RUNTIME VALIDATED`.
 [Accepted closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md)
 owns its narrow visual/scientific conclusions. SOURCE VERIFIED: the final
 canonical plot consumes after-baseline-pion `after_pion_final` / baseline
-`MM_0(t,phi)` and stored authoritative `Y0`. Stage-window integrals, including the after-pion diagnostic Lambda-window
-integral, are not authoritative final extracted baseline yields Y0 or a new
-subtraction stage. No legacy residual-fit stage is active.
+`MM_0(t,phi)` and stored authoritative `Y0`. Diagnostic Lambda-window stage
+integrals (including after pion) are not final `Y0` or a new subtraction stage.
+No legacy residual-fit stage is active.
 
 E.8.3 Left/lowe and its [authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
 are `CLOSED / RUNTIME VALIDATED`. [Closure](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md)
@@ -140,4 +143,3 @@ branch. Failed artifacts cannot close a gate; owner success is insufficient.
 - [Gate-3 source/science investigation](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
 - [Current-baseline comparator](evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md)
 - [Prior Fix.5.7 evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
-- [E.8 procedure roadmap](decisions/e8-full-analysis-procedure-roadmap.md)

@@ -155,6 +155,11 @@ sidecar Lambda-window/child-inventory fail-closed behavior. Codex-reported
 checks were `NOT RUN by ChatGPT`; that historical source review did not
 establish ROOT/PyROOT, farm or runtime acceptance.
 
+The [four-way final yield/MM request](../decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
+adds a future presentation constraint; separate reweighted-baseline authority
+is NOT VERIFIED. Existing three-way MM and `Y0`/`YA` pages, phase order/statuses
+and CURRENT's sole NEXT remain unchanged.
+
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source
 from Fix.5 `53fd262b730af8f1254e411a38231aebeb6a1da3` to pushed E.8.4

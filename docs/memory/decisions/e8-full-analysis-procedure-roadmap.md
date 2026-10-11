@@ -182,6 +182,50 @@ without ordinary-checkout cleanup or a separate manual packaging step.
 The accepted Fix.5.8 evidence supplies narrow Left/lowe owner/presentation
 validation; other-setting rendering and integration remain unaccepted.
 
+### User-clarified final presentation requirement
+
+User requirement, clarified October 11, 2026: eventual final presentation has
+four named slots for every canonical `(t,phi)` cell, in both extracted yields
+and missing-mass spectra:
+
+| Requested category | Yield notation | MM notation |
+| --- | --- | --- |
+| Baseline | `Y0(t,phi)` | `MM_0(t,phi)` |
+| Method A | `YA(t,phi)` | `MM_A(t,phi)` |
+| Reweighted baseline | `Y_rw(t,phi)` | `MM_rw(t,phi)` |
+| K+Lambda SIMC | `Y_SIMC(t,phi)` | `MM_SIMC(t,phi)` |
+
+These are requested presentation slots, not four established producer results.
+`Y_rw`/`MM_rw` are request notation only, not existing output keys, files,
+formulas or authority objects. Separate reweighted-baseline authority, producer
+and independence are NOT VERIFIED. A future source/definition audit must
+determine whether it is separately supported, overlaps Method A's `w0 -> w0*C`,
+or needs a further user-reviewed scientific definition. Preserve the separate
+requested label without manufacturing or assuming a distinct final branch.
+`B_pi^A` is the reweighted pion-background component; it is not automatically
+an independent final `MM_rw`/`Y_rw` result.
+
+SOURCE VERIFIED at this checkpoint: the reviewed
+[renderer](../../../src/cuts/full_background_subtraction_plots.py) implements
+baseline/Method-A/SIMC three-way MM overlays and `Y0`/`YA` plus `DeltaY` yield
+summaries; the reviewed [producer](../../../src/binning/calculate_yield.py)
+supplies `MM_0`/`MM_A` and `Y0`/`YA`, with no separately defined/consumed
+`Y_rw`/`MM_rw` final output in those paths. E.8.4c/d above retain their current
+implemented two-/three-series scope. Prior validated pages are not relabeled
+four-way or failed by this future request. Four-way implementation and farm
+validation are NOT VERIFIED; this checkpoint implements neither.
+
+When authoritative, scientifically comparable outputs exist, the eventual
+renderer must show four MM curves with common canonical geometry and Lambda
+window, four extracted-yield series versus phi per canonical t, and summaries
+across t/settings. Retain existing uncertainties without fabricated `DeltaY`
+errors. Impact differences, defined fractions and their exact reference names
+must follow identification of the reweighted-baseline source. Show unavailable/
+undefined states instead of substituting lookalikes or independently scaling
+SIMC. Absolute-SIMC units remain blocked; no four-way amplitude agreement is
+authorized. This future presentation constraint creates no phase, correction,
+acceptance change or farm gate and does not alter CURRENT's sole F.4 audit NEXT.
+
 ## Final E.8 closure and F.6.4
 
 Final E.8 is `BLOCKED` by the newer October 8 canonical-five owner failure
