@@ -91,13 +91,24 @@ fit, factor, correction, normalization, or yield for plotting. Method-A
 reweighting remains parent-preserving (`w0 -> w0*C`) with no independent child
 normalization; Method B remains numerically excluded.
 
-The [user-clarified four-way yield/MM requirement](decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
-requests baseline, Method A, separate reweighted baseline and K+Lambda SIMC.
-`Y_rw`/`MM_rw` are request notation only; separate authority, producer and
-independence are NOT VERIFIED. Current E.8.4 MM overlays remain three-way,
-with `Y0`/`YA` yield summaries. Reweighted pion background `B_pi^A` is not
-automatically a fourth final result; do not forge one or merge the requested
-label into Method A. CURRENT retains the sole NEXT; this creates no new phase.
+The [four-category presentation intent](decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
+requests baseline, Method A, reweighted baseline and K+Lambda SIMC. Their
+scientific roles differ: F.3 independently derives relative detector response
+`r` from positive-response training on accepted `hgcer3`, not an absolute
+pion-mis-ID probability or extracted kaon yield. F.4 uses signed baseline
+`b_j=s_j*w0_j`, `B=sum b_j`, `U=sum b_j*r_j`, and valid-parent
+`C_j=r_j/(U/B)` to preserve `sum b_j*C_j=B`. Parent-normalized `C` depends
+explicitly on `w0` and signed source coefficients; no child normalization.
+F.6.3 fills `B_pi_A` with `s_j*w0_j*C_j`, forms `MM_A=pion_input-B_pi_A`,
+and extracts `YA` with the existing uncertainty helper. Existing `YA/MM_A`
+already is the Method-A-reweighted baseline final branch; do not invent a
+missing independent reweighted-baseline producer or treat it as Method-A-only.
+A standalone Method-A-only final yield/MM is NOT VERIFIED. `Y_rw/MM_rw`
+remain request notation, not new keys. `B_pi_A` is background, not final kaon
+signal. Current E.8.4 MM overlays remain three-way with `Y0/YA` summaries;
+Method-A response/weight evidence may be shown as diagnostics, without false
+yield units or a promise of four independent final series. CURRENT retains
+the sole NEXT; this semantic correction creates no phase or runtime acceptance.
 
 The current-baseline F.6.3 Method-A full-analysis path has accepted direct
 runtime evidence for Q4p4W2p74 / Left / lowe only: real canonical child yields

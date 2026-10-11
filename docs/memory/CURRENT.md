@@ -5,8 +5,9 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: [four final yields/MM](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
-have priority. Independent reweighted-baseline source ownership is `BLOCKED`.
+E.8 is `ACTIVE`: correct the [Method-A/reweighted-baseline roles](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit).
+Existing private `YA/MM_A` is the Method-A-reweighted baseline, not a
+Method-A-only final kaon result. Detached weight/response review has priority.
 Microscopic F.4 discrepancy investigation and F.1 archaeology are `DEFERRED`;
 accepted scopes, exact failed gates and frozen science remain intact.
 
@@ -25,7 +26,16 @@ are `CLOSED / RUNTIME VALIDATED`. [Closure](evidence/e8-3-left-lowe-runtime-clos
 owns supplied/prior ChatGPT acceptance. Historical F.6.1 lineage remains
 separate from baseline E.8.2 and private current F.6.3/E.8.4.
 SOURCE VERIFIED: E.8.4 consumes explicit `MM_0/MM_A` and stored `Y0/YA`
-from that private branch. INFERENCE: a cross-branch or diagnostic-integral
+from that private branch. F.3 independently derives relative response `r`, not
+absolute mis-ID probability. F.4 uses signed baseline `b_j=s_j*w0_j`,
+`B=sum b_j`, `U=sum b_j*r_j`, and valid-parent `C_j=r_j/(U/B)` to preserve
+`sum b_j*C_j=B`; normalized `C` depends on baseline support, without child
+renormalization. F.6.3 fills `B_pi_A` with `s_j*w0_j*C_j`, subtracts it from
+`pion_input` to form `MM_A`, and extracts the stored yield with the existing error helper.
+Thus `YA/MM_A` already owns the final reweighted-baseline result. Standalone
+Method-A-only final yield/MM is NOT VERIFIED; four-category presentation intent
+must distinguish response/weight diagnostics from final yield/MM curves.
+INFERENCE: a cross-branch or diagnostic-integral
 comparison could cause an apparent discrepancy; none is proved resolved.
 
 The [fresh-F1 canonical-five preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
@@ -116,11 +126,13 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, establish the independent reweighted-baseline final yield/MM
-producer or approved scientific definition, then complete the four-way E.8
-presentation with authoritative stored yields/errors and corresponding MM.
-F.4 microscopic investigation and F.1 archaeology stay `DEFERRED`; exact
-owner and absolute-SIMC blockers remain binding. No owner retry or farm work.
+synchronization, scientifically review the existing detached Method-A weights:
+distinguish relative response `r` from parent-normalized `C`; trace input
+populations, range, shape, uncertainties/support and connection to `w0`;
+identify standalone weight diagnostics comparable with baseline without
+inventing a final-yield producer. F.4 microscopic investigation and F.1
+archaeology stay `DEFERRED`; exact owner and absolute-SIMC blockers remain
+binding. No automatic correction implementation, owner retry or farm work.
 
 ## Success Criteria
 

@@ -184,56 +184,59 @@ validation; other-setting rendering and integration remain unaccepted.
 
 ### User-clarified final presentation requirement
 
-User requirement, clarified October 11, 2026: eventual final presentation has
-four named slots for every canonical `(t,phi)` cell, in both extracted yields
-and missing-mass spectra:
+User intent, clarified October 11, 2026, retains four named presentation
+categories: baseline, Method A, reweighted baseline and K+Lambda SIMC.
+The subsequent user correction establishes their distinct scientific roles;
+these are not four established independent extracted-yield/MM pairs.
 
-| Requested category | Yield notation | MM notation |
+| Requested category | Established object / final-yield meaning | Availability and limits |
 | --- | --- | --- |
-| Baseline | `Y0(t,phi)` | `MM_0(t,phi)` |
-| Method A | `YA(t,phi)` | `MM_A(t,phi)` |
-| Reweighted baseline | `Y_rw(t,phi)` | `MM_rw(t,phi)` |
-| K+Lambda SIMC | `Y_SIMC(t,phi)` | `MM_SIMC(t,phi)` |
+| Baseline | `Y0(t,phi)` / `MM_0(t,phi)` after baseline pion subtraction with `w0` | Baseline-five numerical/procedure runtime closure remains accepted. |
+| Method A | Independently derived relative response `r` and detached response/weight diagnostics; F.4 parent-normalized `C` | Not absolute mis-ID probability or standalone kaon yield. Standalone Method-A-only final yield/MM is NOT VERIFIED. |
+| Reweighted baseline | Existing private `YA(t,phi)` / `MM_A(t,phi)` after applying `w0*C` | Already produced by F.6.3; narrow Left/lowe accepted scope only. `Y_rw/MM_rw` were request notation, not extra output keys or a missing producer. |
+| K+Lambda SIMC | Existing stored SIMC yield/error and per-cell MM support | Baseline-five numerical-support matching accepted; absolute units remain blocked. |
 
-These are requested presentation slots, not four established producer results.
-`Y_rw`/`MM_rw` are request notation only, not existing output keys, files,
-formulas or authority objects. The live audit below finds no independently
-owned final pair in the traced producer paths; a separate approved scientific
-definition/producer is missing.
-Independence is NOT VERIFIED. Resolve that ownership before implementation,
-without inferring identity from Method A's `w0 -> w0*C`. Preserve the separate
-requested label without manufacturing or assuming a distinct final branch.
-`B_pi^A` is the reweighted pion-background component; it is not automatically
-an independent final `MM_rw`/`Y_rw` result.
+SOURCE VERIFIED: F.3 derives relative HGCer response `r` from its own
+positive-response training on accepted `hgcer3`. F.4 forms signed baseline
+`b_j=s_j*w0_j`, `B=sum b_j`, `U=sum b_j*r_j`, and valid-parent
+`C_j=r_j/(U/B)`, preserving `sum b_j*C_j=B`. Independent relative-response
+derivation does not make normalized `C` independent of baseline `w0` and
+signed source coefficients. No independent `(t,phi)` child normalization.
+F.6.3 fills `B_pi_A` using `s_j*w0_j*C_j`, forms
+`MM_A=pion_input-B_pi_A`, and extracts `YA` with the existing uncertainty
+helper. `YA/MM_A` is the final Method-A-reweighted baseline in source/API
+naming, not a separate Method-A-only final kaon result. `B_pi_A` is the
+pion-background component, never an extracted final signal yield.
 
-SOURCE VERIFIED at this checkpoint: the reviewed
-[renderer](../../../src/cuts/full_background_subtraction_plots.py) implements
-baseline/Method-A/SIMC three-way MM overlays and `Y0`/`YA` plus `DeltaY` yield
-summaries; the reviewed [producer](../../../src/binning/calculate_yield.py)
-supplies `MM_0`/`MM_A` and `Y0`/`YA`, with no separately defined/consumed
-`Y_rw`/`MM_rw` final output in those paths. E.8.4c/d above retain their current
-implemented two-/three-series scope. Prior validated pages are not relabeled
-four-way or failed by this future request. Four-way implementation and farm
-validation are NOT VERIFIED; this checkpoint implements neither.
+The [renderer](../../../src/cuts/full_background_subtraction_plots.py) still
+implements baseline/private-reweighted-baseline/SIMC three-way MM overlays
+and stored `Y0/YA` plus `DeltaY` summaries. Its existing Method-A labels and
+API names are unchanged by this memory correction. E.8.4c/d retain their
+implemented two-/three-series scope. Prior validated pages are neither
+relabeled four-way nor failed by this intent; no new page or runtime claim.
 
-When authoritative, scientifically comparable outputs exist, the eventual
-renderer must show four MM curves with common canonical geometry and Lambda
-window, four extracted-yield series versus phi per canonical t, and summaries
-across t/settings. Retain existing uncertainties without fabricated `DeltaY`
-errors. Impact differences, defined fractions and their exact reference names
-must follow identification of the reweighted-baseline source. Show unavailable/
-undefined states instead of substituting lookalikes or independently scaling
-SIMC. Absolute-SIMC units remain blocked; no four-way amplitude agreement is
-authorized. This presentation requirement creates no phase, correction, acceptance
-change or farm gate. The user now prioritizes four-way readiness; CURRENT owns
-the sole substantive NEXT. Microscopic F.4 discrepancy investigation and F.1
-archaeology are `DEFERRED` without bypassing the exact failed owner gate.
+Only genuine comparable final products may appear as final-yield/MM series,
+with common canonical geometry and Lambda window and existing uncertainties.
+Method-A relative response/weight diagnostics may occupy their own diagnostic
+category without false yield units. Four independent final curves cannot be
+promised until genuinely distinct final objects are defined; no unrelated
+new reweighted-baseline formula is required. Retain unavailable/undefined
+states, exact impact references and no fabricated `DeltaY` errors or SIMC
+scaling. Absolute-SIMC units remain blocked; no amplitude agreement is
+authorized. This correction creates no phase, correction, acceptance change
+or farm gate. CURRENT owns the sole substantive NEXT; microscopic F.4
+investigation and F.1 archaeology remain `DEFERRED` and the exact owner gate
+remains binding.
 
 ### Live four-way producer audit
 
 SOURCE VERIFIED against live `bfb0ae21ee0645f1c30cbec877a74979350f4548` under
 [the implementation contract](../phases/e8-four-way-final-yield-mm-implementation-task-contract.md).
-This is a bounded source audit, not new runtime acceptance. Producer paths
+This historical bounded source audit is not new runtime acceptance. Its literal
+key inventory was valid, but the inference from naming was wrong: `YA/MM_A`
+already owns the final reweighted baseline. The role correction is traced
+against live `78ecadbacf58ab25b6a3670137633b3124074fe7`, without changing
+source, historical runtime identities or accepted scopes. Producer paths
 below are in [calculate_yield.py](../../../src/binning/calculate_yield.py);
 the [E.8.4 consumer](../../../src/cuts/full_background_subtraction_plots.py)
 remains unchanged. No four-populated-series result or new page is implemented.
@@ -242,7 +245,7 @@ remains unchanged. No four-populated-series result or new page is implemented.
 | --- | --- | --- | --- |
 | `Y0/MM_0` | `calculate_yield_data()` stores `e8_2_yield_measurements[(j,k)]`: `yield`, `statistical_error`, `total_error`, `final_histogram`. `find_yield_data()` returns `binned_DATA[phi_setting]["yield"][(j,k)]["yield"/"yield_err"]`. `_build_f6_3_parallel_method_a_source()` copies the measurement to `children[].Y0` and clones `H_MM_after_pion_subtraction` to `MM_0`; its identity audit checks the actual measured final histogram. | Final baseline after pion subtraction; no active empirical-residual stage. `_measure_yield_with_current_uncertainty()` supplies statistical and total errors, copied as `Y0_statistical_error/Y0_total_error`. Wider E.8.2 `after_pion_final` stage snapshots/window diagnostics are not replacement extracted-yield authority. | Effective-data-charge normalized, with existing dummy target/charge normalization. Baseline-five numerical/procedure closure accepted at `8e68d2acae91fd97622793df563aba0296403a48`; all five settings. E.8.4's two-branch consumer still requires an available private source, not baseline acceptance alone. |
 | `YA/MM_A` | `_build_f6_3_parallel_method_a_source()` returns the source attached by `calculate_yield_data()` at `hist["_f6_3_parallel_method_a_source"]`, schema `f6_3_parallel_method_a_source/v1`, branch `parallel_nonproduction_method_a_full_analysis`; `children[].YA/MM_A`. | Same proton-cleaned `pion_input` minus producer-owned `B_pi_A` filled with accepted `w0*C`; no child renormalization. Same measurement helper supplies `YA_statistical_error/YA_total_error`. `B_pi_A` itself is background, not another final clean spectrum. | Same data normalization as baseline. Narrow Left/lowe adoption/impact closure at `da38444e7aa60efd62d6638780776344daf40276` remains accepted. Newer private canonical-five owner is `BLOCKED` before analysis by exact F.4 equivalence; no five-setting availability follows. |
-| `Y_rw/MM_rw` | No independent final pair, storage key, branch role or approved distinct definition found in the traced data/private producers or E.8.4 payload. Exact request symbols are absent from `src/`; absence of those names alone is not the semantic argument: the final data builders actually expose only baseline and private Method A. | Final-stage meaning, errors, window and normalization are unowned. Neither `B_pi_A` nor renaming `YA/MM_A` supplies an independent pair. | `BLOCKED` for complete four-populated-series output. Supply the owning producer artifact or an approved definition distinguishing this final branch from Method A and SIMC model reweighting. No accepted runtime scope. |
+| Reweighted-baseline request `Y_rw/MM_rw` | Existing `children[].YA/MM_A` in `_build_f6_3_parallel_method_a_source()` already owns this role; request symbols are not extra keys. The preceding `YA/MM_A` row describes the same final branch, not an independent fourth pair. | Same `pion_input-B_pi_A`, with `B_pi_A` filled using signed `w0*C`, and existing stored `YA` errors. A standalone Method-A-only final pair is NOT VERIFIED; detached response/weights are diagnostics. | Same normalization and narrow accepted Left/lowe scope as `YA/MM_A`. No missing reweighted-baseline producer. Private canonical-five owner remains `BLOCKED` by exact F.4 equivalence; no four-independent-series claim. |
 | `Y_SIMC/MM_SIMC` | `process_hist_simc()` fills cut-selected per-cell `H_MM_SIMC` from `h10.missmass` with `iter_weight`, scales once by `normfac_simc`, and detaches `support_hist_dict["mm"][j][k]`. `calculate_yield_simc()` attaches `hist["_xsect_support_simc"]["mm"]` and returns stored `yield/yield_err` via `find_yield_simc()` at `binned_SIMC[phi_setting]["yield"][(j,k)]`. E.8.4 currently clones the MM support under `histograms.SIMC`, not the stored yield. | Existing producer integrates normal bins with statistical Sumw2 error; negative-yield or nonfinite yield/error cases retain its existing zero convention. No separate total-error field. `normalization_audit.children[].SIMC_integral_in_the_same_lambda_window` is diagnostic, not the stored clamped yield/error authority. | `iter_weight * normfac / Ncontribute`; `get_eff_charge.find_events()` reads SIMC normfac/Ncontribute. `src/simc_ana/iter_weight.py:iter_weight()` changes SIMC model event weights, not data baseline yields. Five-setting numerical-support matching accepted by the baseline closure; absolute data/SIMC units remain `BLOCKED` by `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. Stored scalar/error handoff to E.8.4 is not presently implemented. |
 
 Geometry/error ownership: internal `(j,k) = (t_index,phi_index)` is zero-based;
@@ -264,15 +267,16 @@ remain zero. E.8.4 yield summaries copy stored statistical errors, retain signed
 DeltaY uncertainty. SIMC absolute-comparison-unavailable remains effective.
 Existing page IDs, schemas, inventories, science and narrow closures are intact.
 
-**Source stop:** Four distinct final physical pairs cannot be presented from
-these producers. No additive unavailable-only page was added: it would expose
-no additional authoritative final result and cannot complete this deliverable.
-The single actionable ownership question is: which producer artifact or
-approved scientific definition owns a reweighted-baseline final yield/MM pair
-independent of Method A and SIMC model reweighting? If that requires an upstream
-producer, use a separately reviewed narrow scientific-source contract; this
-contract freezes `calculate_yield.py`. Four-way readiness remains substantive
-NEXT; this audit is not physics completion, farm readiness or gate acceptance.
+**Historical source stop and corrected interpretation:** The bounded audit
+correctly found no separate `Y_rw/MM_rw` keys and no fourth independent final
+pair. Its conclusion that an independent reweighted-baseline producer was
+missing was incorrect: F.6.3 already applies Method A to baseline and produces
+`YA/MM_A`. No standalone Method-A-only final kaon yield/MM has been established.
+No additive page or source change was made by that audit or this correction.
+The user's intent is retained by distinguishing weight/response diagnostics
+from final-yield products, not by manufacturing another curve. CURRENT owns
+the next substantive detached Method-A weight/response science review; this
+memory correction is not physics completion, farm readiness or gate acceptance.
 
 ## Final E.8 closure and F.6.4
 

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8124,
+      "bytes": 9034,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "d35e76e6ca403905bb591bb8cf37ec77af4d76ce9f8d0bcbb1445bcac72e1a65"
+      "sha256": "d423991fe4adcd4fb39beeb029d751198c2d4a3d36cea056f3706ff172aa0d58"
     },
     {
       "bytes": 8339,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 22135,
+      "bytes": 22938,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "0260709b19a13f585d5f680ba156cda726dc4b0ef5dc50211c1f11bf6f4c5d4a"
+      "sha256": "ef2e91a46d27ff1a1eb5a683ed723fd8ed6f771c7f2ed67020f7e201cbe9b9a5"
     },
     {
       "bytes": 3606,
@@ -71,9 +71,9 @@
       "sha256": "e1cc5ae313526d2f31c1c13d2fd71ff395a8f646e066dcb1098c045d7a4fba14"
     },
     {
-      "bytes": 23665,
+      "bytes": 24559,
       "path": "docs/memory/decisions/e8-full-analysis-procedure-roadmap.md",
-      "sha256": "632e0c33d53260fdef6567e72cf801d3359484870eb05054d63bb21cab9736e5"
+      "sha256": "a2dc87cc733cb4fddb1dc925f711f511b0ffda703a59af1563094ac0d65d1bdb"
     },
     {
       "bytes": 2363,
@@ -996,6 +996,11 @@
       "sha256": "d6b7cd358bcaaa255b62afab1f4e3f9b9984cc802958f655558700b055e3aa88"
     },
     {
+      "bytes": 12735,
+      "path": "docs/memory/phases/e8-method-a-reweighted-baseline-role-memory-correction-task-contract.md",
+      "sha256": "7aa9a8f85a83a4562fb5c7f476e52c3b64b2a0822c8609148628a22bbda11030"
+    },
+    {
       "bytes": 17122,
       "path": "docs/memory/phases/e8-no-empirical-residual-memory-correction-task-contract.md",
       "sha256": "2070bee0fbb136b71d5c770f882b2925759177f2de8059b51bf28f6d8b60af84"
@@ -1281,9 +1286,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 29963,
+      "bytes": 30159,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "6224d17b38f3582efbd0027d6e602c81008f4beb6f0f9423df90963f9cf1c20a"
+      "sha256": "76c2a23dd7a051af1a280ec45e05586a09a0743f24396345081e95a6ed1e330a"
     },
     {
       "bytes": 1698,

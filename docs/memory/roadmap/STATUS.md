@@ -155,12 +155,15 @@ sidecar Lambda-window/child-inventory fail-closed behavior. Codex-reported
 checks were `NOT RUN by ChatGPT`; that historical source review did not
 establish ROOT/PyROOT, farm or runtime acceptance.
 
-The [four-way final yield/MM request](../decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
-has user-directed priority; the [live producer audit](../decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
-finds independent reweighted-baseline source ownership `BLOCKED`. Four-way
-physics completion/runtime are NOT VERIFIED. Microscopic F.4 investigation
-and F.1 archaeology are `DEFERRED`; the exact private owner gate remains
-`BLOCKED`. Existing pages, phase order/statuses stay intact; CURRENT owns sole NEXT.
+The [four-category presentation intent](../decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
+retains user-directed priority; the [corrected producer interpretation](../decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
+identifies existing `YA/MM_A` as the Method-A-reweighted baseline (`w0*C`).
+Detached relative response `r` is independently derived; parent-normalized `C`
+uses signed baseline support. Standalone Method-A-only final yield/MM and
+four independent final-series completion/runtime are NOT VERIFIED. Microscopic
+F.4 investigation and F.1 archaeology are `DEFERRED`; the exact private owner
+gate remains `BLOCKED`. Existing pages, phase order/statuses stay intact;
+CURRENT owns sole NEXT.
 
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source
