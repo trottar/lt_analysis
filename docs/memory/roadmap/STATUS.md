@@ -114,6 +114,10 @@ private `YA/MM_A`, original exact Method-A F.4 equivalence, absolute-SIMC
 amplitude/units, final E.8 and F.6.4 remain blocked. Prior Left/lowe scientific
 interpretation and all unrelated closed phases retain their scopes.
 
+The [baseline-five scientific QA checkpoint](../evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md)
+records consumed detached descriptive inspection and caveats only; it adds no
+physics acceptance, phase or wider closure and preserves the E.8 dependency order.
+
 #### E.8.3 — detached Method-A reweighting audit
 
 `CLOSED / RUNTIME VALIDATED` — only for Q4p4W2p74 / Left / lowe at farm source

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8169,
+      "bytes": 8166,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "0f9ce05caf03c8d4046feea7f6d87201c5d2259a2151fa5457c8c1a7ccd94d6e"
+      "sha256": "cf857edd260fdb91aea79d52e83e5b7bdaf212ccda0dc865ab6324f98e368611"
     },
     {
       "bytes": 8339,
@@ -224,6 +224,11 @@
       "bytes": 1987,
       "path": "docs/memory/evidence/e8-4-left-lowe-pion-alignment-determinism-blocker.md",
       "sha256": "81e7dc85156e483f23c53dcb90a643eb58e49b89d36fad6bc2cdec12c3defa3c"
+    },
+    {
+      "bytes": 6987,
+      "path": "docs/memory/evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md",
+      "sha256": "69ca61bae5e54d3fd972eb5d7458dc122cd19913771c0a852cdbc68e53705929"
     },
     {
       "bytes": 1489,
@@ -966,6 +971,11 @@
       "sha256": "82df0e95a8e181dc5aa210da03a0ce707141861030a2878623e80723f65b811f"
     },
     {
+      "bytes": 14126,
+      "path": "docs/memory/phases/e8-baseline-five-scientific-qa-checkpoint-task-contract.md",
+      "sha256": "5d5639835ef32991751bfe205cefca98578d1c3e88d70da69779cb4eb496de5e"
+    },
+    {
       "bytes": 9799,
       "path": "docs/memory/phases/e8-full-analysis-roadmap-memory-reconciliation-fix1-task-contract.md",
       "sha256": "e861e905a0a15e81d62499355af70d3af92879d7346ecc73a07674b33648763d"
@@ -1261,9 +1271,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 29102,
+      "bytes": 29383,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "6806171c3f582d64e28009a69e4e2ccf6a015957aa2bfb4af8924cfee9c7b52e"
+      "sha256": "1c2c06caedf2d61e82d847716946f11f743b6dddb504789a267b55bdc94d4deb"
     },
     {
       "bytes": 1698,

@@ -5,9 +5,8 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: baseline-five extracted-yield scientific QA follows runtime
-closure. Further stage-yield/broader interpretation stays `DEFERRED`; accepted
-narrow interpretations, production and authorities remain frozen.
+E.8 is `ACTIVE`: baseline-five QA is recorded; private F.4 equivalence is next.
+Broader interpretation stays `DEFERRED`; accepted scopes and science stay frozen.
 
 ## Current Work Item
 
@@ -72,6 +71,9 @@ Independent E.8.2 baseline-five `Y0/MM_0` is `CLOSED / RUNTIME VALIDATED`:
 owns farm identity, prior ChatGPT acceptance, 135/135 data and SIMC table/MM
 gates and representative PDF inspection limits. Private `YA/MM_A`/F.4 stays blocked.
 
+[Baseline-five QA](evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md)
+records detached inspection/caveats only, with no new phase or physics acceptance.
+
 ## Verified State
 
 Gate-3 ownership: NPE=0 kaon PID, NPE>0 pion tree, NPE>2 physical control.
@@ -112,14 +114,12 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, perform E.8 baseline-five extracted-yield scientific QA of
-accepted `Y0/MM_0` and K-Lambda SIMC cut-selected MM: per-setting/parent `(t,phi)`
-distributions, uncertainty/reporting, four signed-negative data cells and 36 zero
-SIMC cells. Establish meaningful baseline shape/coverage comparisons and extra
-evidence needed for private `YA/MM_A`; return one physics-oriented plot/yield
-comparison/readiness result or evidenced blocker. No data adjustment, SIMC
-amplitude normalization, stage-integral yield substitution or private F.4/YA
-comparison before its independent gate resolves.
+synchronization, audit the first blocking exact private F.4 scientific-equivalence
+invariant and available admissible evidence against the existing roadmap contract;
+determine the earliest valid resolution gate. Preserve exact acceptance criteria;
+no owner retry or tolerance relaxation. Further F.1 archaeology stays `DEFERRED`
+unless this prerequisite audit proves it materially unavoidable. This checkpoint
+does not execute or authorize the successor investigation or farm work.
 
 ## Success Criteria
 
