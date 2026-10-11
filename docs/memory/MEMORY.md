@@ -110,6 +110,12 @@ Method-A response/weight evidence may be shown as diagnostics, without false
 yield units or a promise of four independent final series. CURRENT retains
 the sole NEXT; this semantic correction creates no phase or runtime acceptance.
 
+Correction-factor percentile tails alone do not measure tail dominance of
+`s*w0*C`. Compare signed and absolute baseline/adjusted contributions; assess
+effective statistics with an explicit nonnegative support measure and moment
+definitions, retaining signed cancellation context. Marginal factor percentiles
+cannot reconstruct joint event-level `(phi,MM)` support or an uncertainty.
+
 The current-baseline F.6.3 Method-A full-analysis path has accepted direct
 runtime evidence for Q4p4W2p74 / Left / lowe only: real canonical child yields
 change while signed parent-t normalization is preserved. Parent equality is a
