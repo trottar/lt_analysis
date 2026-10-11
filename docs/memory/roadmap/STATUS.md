@@ -156,9 +156,11 @@ checks were `NOT RUN by ChatGPT`; that historical source review did not
 establish ROOT/PyROOT, farm or runtime acceptance.
 
 The [four-way final yield/MM request](../decisions/e8-full-analysis-procedure-roadmap.md#user-clarified-final-presentation-requirement)
-adds a future presentation constraint; separate reweighted-baseline authority
-is NOT VERIFIED. Existing three-way MM and `Y0`/`YA` pages, phase order/statuses
-and CURRENT's sole NEXT remain unchanged.
+has user-directed priority; the [live producer audit](../decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
+finds independent reweighted-baseline source ownership `BLOCKED`. Four-way
+physics completion/runtime are NOT VERIFIED. Microscopic F.4 investigation
+and F.1 archaeology are `DEFERRED`; the exact private owner gate remains
+`BLOCKED`. Existing pages, phase order/statuses stay intact; CURRENT owns sole NEXT.
 
 The E.8.4 validation-bundle profile provenance re-pin is `SOURCE REVIEWED`. It
 changes only the profile/test required analysis source

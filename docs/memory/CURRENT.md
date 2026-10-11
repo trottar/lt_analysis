@@ -5,11 +5,10 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: baseline-five QA is recorded; private F.4 equivalence is next.
-Broader interpretation stays `DEFERRED`; accepted scopes and science stay frozen.
-
-[Four-way presentation](decisions/e8-full-analysis-procedure-roadmap.md):
-separate reweighted-baseline yield/MM authority is NOT VERIFIED; NEXT unchanged.
+E.8 is `ACTIVE`: [four final yields/MM](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
+have priority. Independent reweighted-baseline source ownership is `BLOCKED`.
+Microscopic F.4 discrepancy investigation and F.1 archaeology are `DEFERRED`;
+accepted scopes, exact failed gates and frozen science remain intact.
 
 ## Current Work Item
 
@@ -117,17 +116,16 @@ yield/parent-closure payloads remain available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, audit the first blocking exact private F.4 scientific-equivalence
-invariant and available admissible evidence against the existing roadmap contract;
-determine the earliest valid resolution gate. Preserve exact acceptance criteria;
-no owner retry or tolerance relaxation. Further F.1 archaeology stays `DEFERRED`
-unless this prerequisite audit proves it materially unavoidable. This checkpoint
-does not execute or authorize the successor investigation or farm work.
+synchronization, establish the independent reweighted-baseline final yield/MM
+producer or approved scientific definition, then complete the four-way E.8
+presentation with authoritative stored yields/errors and corresponding MM.
+F.4 microscopic investigation and F.1 archaeology stay `DEFERRED`; exact
+owner and absolute-SIMC blockers remain binding. No owner retry or farm work.
 
 ## Success Criteria
 
 Manifest, health, bootstrap, preservation and diff must pass.
-Codex records prior acceptance only; no staging, commit, push or farm.
+Source audit is not four-way physics completion; no staging, commit, push or farm.
 
 ## Do Not Reopen Without New Evidence
 

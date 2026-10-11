@@ -197,10 +197,11 @@ and missing-mass spectra:
 
 These are requested presentation slots, not four established producer results.
 `Y_rw`/`MM_rw` are request notation only, not existing output keys, files,
-formulas or authority objects. Separate reweighted-baseline authority, producer
-and independence are NOT VERIFIED. A future source/definition audit must
-determine whether it is separately supported, overlaps Method A's `w0 -> w0*C`,
-or needs a further user-reviewed scientific definition. Preserve the separate
+formulas or authority objects. The live audit below finds no independently
+owned final pair in the traced producer paths; a separate approved scientific
+definition/producer is missing.
+Independence is NOT VERIFIED. Resolve that ownership before implementation,
+without inferring identity from Method A's `w0 -> w0*C`. Preserve the separate
 requested label without manufacturing or assuming a distinct final branch.
 `B_pi^A` is the reweighted pion-background component; it is not automatically
 an independent final `MM_rw`/`Y_rw` result.
@@ -223,8 +224,55 @@ errors. Impact differences, defined fractions and their exact reference names
 must follow identification of the reweighted-baseline source. Show unavailable/
 undefined states instead of substituting lookalikes or independently scaling
 SIMC. Absolute-SIMC units remain blocked; no four-way amplitude agreement is
-authorized. This future presentation constraint creates no phase, correction,
-acceptance change or farm gate and does not alter CURRENT's sole F.4 audit NEXT.
+authorized. This presentation requirement creates no phase, correction, acceptance
+change or farm gate. The user now prioritizes four-way readiness; CURRENT owns
+the sole substantive NEXT. Microscopic F.4 discrepancy investigation and F.1
+archaeology are `DEFERRED` without bypassing the exact failed owner gate.
+
+### Live four-way producer audit
+
+SOURCE VERIFIED against live `bfb0ae21ee0645f1c30cbec877a74979350f4548` under
+[the implementation contract](../phases/e8-four-way-final-yield-mm-implementation-task-contract.md).
+This is a bounded source audit, not new runtime acceptance. Producer paths
+below are in [calculate_yield.py](../../../src/binning/calculate_yield.py);
+the [E.8.4 consumer](../../../src/cuts/full_background_subtraction_plots.py)
+remains unchanged. No four-populated-series result or new page is implemented.
+
+| Requested pair | Exact producer and storage/object authority | Final stage and existing errors | Units and accepted scope / missing dependency |
+| --- | --- | --- | --- |
+| `Y0/MM_0` | `calculate_yield_data()` stores `e8_2_yield_measurements[(j,k)]`: `yield`, `statistical_error`, `total_error`, `final_histogram`. `find_yield_data()` returns `binned_DATA[phi_setting]["yield"][(j,k)]["yield"/"yield_err"]`. `_build_f6_3_parallel_method_a_source()` copies the measurement to `children[].Y0` and clones `H_MM_after_pion_subtraction` to `MM_0`; its identity audit checks the actual measured final histogram. | Final baseline after pion subtraction; no active empirical-residual stage. `_measure_yield_with_current_uncertainty()` supplies statistical and total errors, copied as `Y0_statistical_error/Y0_total_error`. Wider E.8.2 `after_pion_final` stage snapshots/window diagnostics are not replacement extracted-yield authority. | Effective-data-charge normalized, with existing dummy target/charge normalization. Baseline-five numerical/procedure closure accepted at `8e68d2acae91fd97622793df563aba0296403a48`; all five settings. E.8.4's two-branch consumer still requires an available private source, not baseline acceptance alone. |
+| `YA/MM_A` | `_build_f6_3_parallel_method_a_source()` returns the source attached by `calculate_yield_data()` at `hist["_f6_3_parallel_method_a_source"]`, schema `f6_3_parallel_method_a_source/v1`, branch `parallel_nonproduction_method_a_full_analysis`; `children[].YA/MM_A`. | Same proton-cleaned `pion_input` minus producer-owned `B_pi_A` filled with accepted `w0*C`; no child renormalization. Same measurement helper supplies `YA_statistical_error/YA_total_error`. `B_pi_A` itself is background, not another final clean spectrum. | Same data normalization as baseline. Narrow Left/lowe adoption/impact closure at `da38444e7aa60efd62d6638780776344daf40276` remains accepted. Newer private canonical-five owner is `BLOCKED` before analysis by exact F.4 equivalence; no five-setting availability follows. |
+| `Y_rw/MM_rw` | No independent final pair, storage key, branch role or approved distinct definition found in the traced data/private producers or E.8.4 payload. Exact request symbols are absent from `src/`; absence of those names alone is not the semantic argument: the final data builders actually expose only baseline and private Method A. | Final-stage meaning, errors, window and normalization are unowned. Neither `B_pi_A` nor renaming `YA/MM_A` supplies an independent pair. | `BLOCKED` for complete four-populated-series output. Supply the owning producer artifact or an approved definition distinguishing this final branch from Method A and SIMC model reweighting. No accepted runtime scope. |
+| `Y_SIMC/MM_SIMC` | `process_hist_simc()` fills cut-selected per-cell `H_MM_SIMC` from `h10.missmass` with `iter_weight`, scales once by `normfac_simc`, and detaches `support_hist_dict["mm"][j][k]`. `calculate_yield_simc()` attaches `hist["_xsect_support_simc"]["mm"]` and returns stored `yield/yield_err` via `find_yield_simc()` at `binned_SIMC[phi_setting]["yield"][(j,k)]`. E.8.4 currently clones the MM support under `histograms.SIMC`, not the stored yield. | Existing producer integrates normal bins with statistical Sumw2 error; negative-yield or nonfinite yield/error cases retain its existing zero convention. No separate total-error field. `normalization_audit.children[].SIMC_integral_in_the_same_lambda_window` is diagnostic, not the stored clamped yield/error authority. | `iter_weight * normfac / Ncontribute`; `get_eff_charge.find_events()` reads SIMC normfac/Ncontribute. `src/simc_ana/iter_weight.py:iter_weight()` changes SIMC model event weights, not data baseline yields. Five-setting numerical-support matching accepted by the baseline closure; absolute data/SIMC units remain `BLOCKED` by `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. Stored scalar/error handoff to E.8.4 is not presently implemented. |
+
+Geometry/error ownership: internal `(j,k) = (t_index,phi_index)` is zero-based;
+producer processed keys `t_bin{j+1}phi_bin{k+1}` and printed bin numbers are
+one-based. Canonical-five inventory is Left/lowe, Left/highe, Center/lowe,
+Center/highe, Right/highe, each 3 t parents x 9 phi children. Final numerical
+MM objects have 100 normal bins in `inpDict["mm_min"]` to `inpDict["mm_max"]`
+(accepted baseline-five window 1.10–1.16 GeV). Wider stage displays remain
+separate. `build_full_background_subtraction_e8_4_payload()` validates setting,
+branch/authority/flags, complete coordinates, common Lambda window, identical
+analysis-MM edges, finite contents/errors and stored baseline scalar identity;
+it clones display objects and never supplies a fourth producer.
+
+The data statistical error is the square root of summed normal-bin error
+squares; total error additionally retains existing data-charge, dummy-charge
+and residual-fit terms from the shared producer helper. Active residual scales
+remain zero. E.8.4 yield summaries copy stored statistical errors, retain signed
+`DeltaY = YA-Y0`, and leave `DeltaY/Y0` undefined when `Y0=0`; no new
+DeltaY uncertainty. SIMC absolute-comparison-unavailable remains effective.
+Existing page IDs, schemas, inventories, science and narrow closures are intact.
+
+**Source stop:** Four distinct final physical pairs cannot be presented from
+these producers. No additive unavailable-only page was added: it would expose
+no additional authoritative final result and cannot complete this deliverable.
+The single actionable ownership question is: which producer artifact or
+approved scientific definition owns a reweighted-baseline final yield/MM pair
+independent of Method A and SIMC model reweighting? If that requires an upstream
+producer, use a separately reviewed narrow scientific-source contract; this
+contract freezes `calculate_yield.py`. Four-way readiness remains substantive
+NEXT; this audit is not physics completion, farm readiness or gate acceptance.
 
 ## Final E.8 closure and F.6.4
 
