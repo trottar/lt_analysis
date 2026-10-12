@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8092,
+      "bytes": 8113,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "e3c35b38c0e56944e3cc160117e7b72599b2ac505e51697a56e1e7a8743ea6f2"
+      "sha256": "0dd5ba13caf68bb08cdcf803a723c69c2de494ed609b499194cdc63ee42cfe0c"
     },
     {
       "bytes": 8339,
@@ -979,6 +979,11 @@
       "bytes": 14126,
       "path": "docs/memory/phases/e8-baseline-five-scientific-qa-checkpoint-task-contract.md",
       "sha256": "5d5639835ef32991751bfe205cefca98578d1c3e88d70da69779cb4eb496de5e"
+    },
+    {
+      "bytes": 15581,
+      "path": "docs/memory/phases/e8-current-snapshot-method-a-contribution-debug-task-contract.md",
+      "sha256": "bc3c227b6e21ec0e0b3874691a8f0d4f0b57f1ac7d538c174c5a84012cfd2a50"
     },
     {
       "bytes": 11680,

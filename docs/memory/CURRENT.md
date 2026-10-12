@@ -11,10 +11,10 @@ identifies private `YA/MM_A` as the reweighted baseline, not Method-A-only.
 Microscopic F.4/F.1 investigations are `DEFERRED`;
 Accepted scopes, failed gates and frozen science remain intact.
 
-[Contribution debug](phases/e8-method-a-reweighted-contribution-debug-task-contract.md):
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; exact October 4 lineage after
-valid Step-1 stop. Live pins frozen; seven original inputs' farm availability
-NOT VERIFIED.
+[Current-snapshot debug](phases/e8-current-snapshot-method-a-contribution-debug-task-contract.md):
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; seven-file farm coherence
+NOT VERIFIED. [Historical implementation](phases/e8-method-a-reweighted-contribution-debug-task-contract.md)
+and accepted October 4 diagnostic remain unchanged; no owner equivalence granted.
 
 ## Current Work Item
 
@@ -121,11 +121,9 @@ closure remains available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, verify seven original October 4 input paths/hashes via the
-detached CLI preflight; only after PASS, run and review one targeted historical
-contribution diagnostic under the linked corrected contract. No full owner
-retry or automatic farm work; owner/absolute-SIMC blockers and `DEFERRED` work
-stay binding.
+synchronization, run only the detached current-snapshot seven-input preflight.
+Review its receipt before a separate full diagnostic gate. No owner retry or
+automatic farm work; owner/absolute-SIMC blockers and `DEFERRED` work stay binding.
 
 ## Success Criteria
 
