@@ -410,7 +410,7 @@ def validate_summary(s):
     for field in ("sum_b2", "sum_b_rw2", "sum_w0", "sum_w_rw", "sum_w02", "sum_w_rw2"):
         require(s[field] >= 0, "nonnegative_moment_invalid")
     for name, total, square in (("w0", "sum_w0", "sum_w02"), ("w_rw", "sum_w_rw", "sum_w_rw2"), ("abs_b", "A", "sum_b2"), ("abs_b_rw", "A_rw", "sum_b_rw2")):
-        expected = {"count": s["count"], **metric(s[total]**2, s[square])}
+        expected = {"count": s["count"], **metric(s[total] * s[total], s[square])}
         require(s["neff"][name] == expected, "neff_moment_mismatch")
         if expected["available"]:
             require(expected["value"] <= s["count"] + 1e-9, "neff_exceeds_count")

@@ -15,8 +15,12 @@ Accepted scopes, failed gates and frozen science remain intact.
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Supplied preflight: FAIL at
 `snapshot_failed:f3_fingerprint_input_content_mismatch`, outputs_written=false.
 [Detached materialization](phases/e8-current-f1-coherent-detached-materialization-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, conditional on independent
-actual-diff review and user publication.
+is `BLOCKED`: supplied farm failure at `snapshot_failed:neff_moment_mismatch`.
+No materialization ZIP or downstream preflight accepted; failed setting/tuple
+and successful farm F.2/F.3/F.4 acceptance are NOT VERIFIED.
+[Checker parity repair](phases/e8-neff-moment-validator-parity-repair-task-contract.md)
+is `ACTIVE` until local checks and independent actual-diff acceptance, then
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Scientific definitions stay frozen.
 Current farm coherence NOT VERIFIED; October 4 acceptance and historical
 implementation remain unchanged. No canonical-owner equivalence granted.
 
@@ -125,8 +129,9 @@ closure remains available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, perform one detached coherent-current-F.1 materialization farm
-gate. Review its manifest/ZIP before the separate current-snapshot seven-input
+synchronization, perform one user-controlled detached current-F.1 materialization
+farm gate using the existing tracked owner. Review its manifest/ZIP before the
+separate current-snapshot seven-input
 preflight. No owner retry or automatic farm work; owner/absolute-SIMC blockers
 and `DEFERRED` work stay binding.
 

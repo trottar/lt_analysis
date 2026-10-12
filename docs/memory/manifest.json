@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8402,
+      "bytes": 8789,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "145afa3536525ef56f7e85f461e59059eeea572cf9af47e3ee64bb7ffc9b435b"
+      "sha256": "2fb360ed710bdf74e12d23283c9a84559418455493a353ea5bc946614637e919"
     },
     {
       "bytes": 8339,
@@ -1024,6 +1024,11 @@
       "bytes": 18254,
       "path": "docs/memory/phases/e8-method-a-weight-findings-memory-and-reweighting-next-task-contract.md",
       "sha256": "40afe9fdb0fd365545ec72a899979802aefe71fcf33097a1675694c064d398a7"
+    },
+    {
+      "bytes": 11306,
+      "path": "docs/memory/phases/e8-neff-moment-validator-parity-repair-task-contract.md",
+      "sha256": "77f71e1e9e1b710cca8d7a8331c16575cc06f41e88f4e69e2cff4aee80909121"
     },
     {
       "bytes": 17122,

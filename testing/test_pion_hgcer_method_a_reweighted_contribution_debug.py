@@ -27,6 +27,82 @@ import test_pion_hgcer_method_a_current_lineage_diagnostic as fixtures
 import pion_hgcer_method_a_parallel_full_procedure as lineage
 
 
+class NeffMomentParityTests(unittest.TestCase):
+    def test_one_event_multiplication_and_power_are_discriminating(self):
+        supplied = 55.83414573673653
+        s = debug.summary([supplied], [1.0], [supplied])
+        debug.validate_summary(s)
+        self.assertEqual(s["neff"]["w0"]["value"], 1.0)
+        # The supplied sample is not discriminating on Windows CPython 3.12.10.
+        # Verified alternate: multiply=2917.54439736457, power=2917.5443973645697.
+        x = supplied if supplied * supplied != supplied**2 else 54.014298082679645
+        self.assertNotEqual(x * x, x**2)
+        s = debug.summary([x], [1.0], [x])
+        debug.validate_summary(s)
+        for name in ("w0", "w_rw", "abs_b", "abs_b_rw"):
+            self.assertEqual(s["neff"][name]["value"], 1.0)
+            self.assertEqual(s["neff"][name]["numerator"], x * x)
+
+    def test_positive_reweighted_support(self):
+        s = debug.summary([1.0, 2.0, 3.0], [2.0, 0.5, 3.0], [2.0, 4.0, 1.0])
+        debug.validate_summary(s)
+        self.assertEqual(s["neff"]["w_rw"], debug.effective([2.0, 1.0, 9.0]))
+        self.assertEqual(s["neff"]["abs_b_rw"], debug.effective([4.0, 2.0, 3.0]))
+
+    def test_zero_support_and_signed_cancellation(self):
+        for weights in ([], [0.0, 0.0]):
+            with self.subTest(weights=weights):
+                s = debug.summary(weights, [1.0] * len(weights), weights)
+                debug.validate_summary(s)
+                for measure in s["neff"].values():
+                    self.assertFalse(measure["available"])
+                    self.assertIsNone(measure["value"])
+                    self.assertEqual(measure["reason"], "zero_support")
+        s = debug.summary([1.0, 1.0], [2.0, 2.0], [1.0, -1.0])
+        debug.validate_summary(s)
+        self.assertEqual((s["B"], s["B_rw"], s["negative"]), (0.0, 0.0, -1.0))
+        self.assertFalse(s["signed_relative_delta"]["available"])
+        for measure in s["neff"].values():
+            self.assertEqual(measure["value"], 2.0)
+
+    def test_one_ulp_metric_tampering_is_rejected_exactly(self):
+        s = debug.summary([1.0, 2.0], [2.0, 3.0], [1.0, -2.0])
+        debug.validate_summary(s)
+        for name in s["neff"]:
+            for field in ("value", "numerator", "denominator"):
+                changed = copy.deepcopy(s)
+                changed["neff"][name][field] = math.nextafter(s["neff"][name][field], math.inf)
+                with self.subTest(name=name, field=field), self.assertRaisesRegex(
+                        debug.ContributionDebugError, "^neff_moment_mismatch$"):
+                    debug.validate_summary(changed)
+
+    def test_negative_and_nonfinite_moments_remain_rejected(self):
+        s = debug.summary([1.0], [1.0], [1.0])
+        for field in ("sum_b2", "sum_b_rw2", "sum_w0", "sum_w_rw", "sum_w02", "sum_w_rw2"):
+            changed = copy.deepcopy(s)
+            changed[field] = -1.0
+            with self.subTest(field=field), self.assertRaisesRegex(
+                    debug.ContributionDebugError, "^nonnegative_moment_invalid$"):
+                debug.validate_summary(changed)
+            for value in (math.nan, math.inf, -math.inf):
+                changed[field] = value
+                # Persisted diagnostics guard every moment before validation.
+                with self.subTest(field=field, value=value), self.assertRaisesRegex(
+                        debug.ContributionDebugError, "^persisted_nonfinite$"):
+                    debug.seal(changed)
+        for value in (-1.0, math.nan, math.inf):
+            with self.subTest(value=value), self.assertRaisesRegex(
+                    debug.ContributionDebugError, "^neff_measure_invalid$"):
+                debug.effective([value])
+
+    def test_neff_exceeding_count_is_rejected_even_with_matching_metric(self):
+        s = debug.summary([1.0], [1.0], [1.0])
+        s["sum_w02"] = 0.25
+        s["neff"]["w0"] = {"count": 1, **debug.metric(1.0, 0.25)}
+        with self.assertRaisesRegex(debug.ContributionDebugError, "^neff_exceeds_count$"):
+            debug.validate_summary(s)
+
+
 class ContributionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
