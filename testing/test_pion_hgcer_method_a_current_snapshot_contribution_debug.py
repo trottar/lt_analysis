@@ -326,17 +326,79 @@ class SnapshotTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "digest"): cli.verify_zip(bad)
 
     def test_persisted_only_renderer_uses_candidate_labels(self):
+        import matplotlib
+        matplotlib.use("Agg", force=True)
+        from matplotlib.backends.backend_pdf import PdfPages
+        import numpy as np
+        figures = []
+        original_save = PdfPages.savefig
+        def capture(pdf, figure, *args, **kwargs):
+            figures.append(figure)
+            return original_save(pdf, figure, *args, **kwargs)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory); js = root/"diagnostic.json"; pdf = root/"diagnostic.pdf"
             js.write_bytes(cli.json_bytes(self.diagnostic))
-            with mock.patch.object(debug, "reproduce_snapshot", side_effect=AssertionError("no transient inputs")):
+            before = js.read_bytes()
+            with mock.patch.object(debug, "reproduce_snapshot", side_effect=AssertionError("no transient inputs")), \
+                 mock.patch.object(cli, "load_inputs", side_effect=AssertionError("no input reload")), \
+                 mock.patch.object(debug.f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data",
+                                   side_effect=AssertionError("no factor rebuild")), \
+                 mock.patch.object(PdfPages, "savefig", new=capture):
                 receipt = cli.write_review_pdf(pdf, js)
+            self.assertEqual(js.read_bytes(), before)
             self.assertEqual(cli.check_pdf(pdf.read_bytes()), 8)
-            self.assertEqual(receipt["pages"], 8)
+            self.assertEqual(receipt, {"pages": 8, "page_titles": list(cli.PAGE_TITLES),
+                                       "renderer_input": "persisted aggregates only"})
+            self.assertEqual([fig._suptitle.get_text() for fig in figures],
+                             [f"{i+1}. {title}" for i, title in enumerate(cli.PAGE_TITLES)])
+            edges = self.diagnostic["display_geometry"]["mm_edges"]
+            centers, limits, flows = cli.mm_display_geometry(edges)
+            self.assertEqual(len(centers), 40)
+            self.assertAlmostEqual(centers[0], .8075)
+            self.assertAlmostEqual(centers[-1], 1.3925)
+            for t, parent in enumerate(self.diagnostic["parents"]):
+                axis = figures[4].axes[2*t+1]
+                for j, field in enumerate(("B", "B_rw", "signed_delta")):
+                    normal, flow = axis.lines[2*j:2*j+2]
+                    np.testing.assert_array_equal(normal.get_xdata(), centers)
+                    np.testing.assert_array_equal(normal.get_ydata(), [s[field] for s in parent["mm"][1:-1]])
+                    np.testing.assert_array_equal(flow.get_xdata(), flows)
+                    np.testing.assert_array_equal(flow.get_ydata(), [parent["mm"][0][field], parent["mm"][-1][field]])
+                    self.assertEqual(flow.get_linestyle(), "None")
+                    self.assertEqual(len(normal.get_ydata())+len(flow.get_ydata()), 42)
+                self.assert_mm_axis(axis, edges, limits)
+                for axis, field in zip(figures[5+t].axes[:4], ("signed_delta", "A_rw", "neff", "count")):
+                    image, = axis.images
+                    expected = [[s["neff"]["abs_b_rw"]["value"] if s["neff"]["abs_b_rw"]["available"] else np.nan
+                                 for s in row] for row in parent["joint"]] if field == "neff" else [[s[field] for s in row] for row in parent["joint"]]
+                    self.assertEqual(image.get_array().shape, (9, 42))
+                    np.testing.assert_array_equal(image.get_array().filled(np.nan), expected)
+                    np.testing.assert_allclose(image.get_extent(), (*limits, -.5, 8.5))
+                    # Every interior pixel boundary maps to its persisted physical edge.
+                    np.testing.assert_allclose(np.linspace(*limits, 43)[1:-1], edges, atol=1e-15)
+                    self.assertEqual(image.get_interpolation(), "nearest")
+                    self.assertEqual(image.origin, "lower")
+                    if field == "signed_delta":
+                        limit = max(float(np.max(np.abs(expected))), 1e-30)
+                        self.assertEqual(image.get_clim(), (-limit, limit))
+                        self.assertEqual(image.get_cmap().name, "RdBu_r")
+                    self.assert_mm_axis(axis, edges, limits)
             import inspect
             renderer = inspect.getsource(cli.write_review_pdf)
             self.assertIn("current-snapshot candidate — detached diagnostic", renderer)
             self.assertNotIn("October 4", renderer)
+
+    def assert_mm_axis(self, axis, edges, limits):
+        import numpy as np
+        np.testing.assert_allclose(axis.get_xlim(), limits)
+        np.testing.assert_allclose(axis.get_xticks(), [.8, .9, 1., 1.1, 1.2, 1.3, 1.4])
+        self.assertEqual([tick.get_text() for tick in axis.get_xticklabels()],
+                         ["0.8", "0.9", "1.0", "1.1", "1.2", "1.3", "1.4"])
+        self.assertEqual([text.get_text() for text in axis.texts], ["UF", "OF"])
+        self.assertIn("Analysis missing mass [GeV]", axis.get_xlabel())
+        self.assertIn("outside-range categories", axis.get_xlabel())
+        np.testing.assert_array_equal(axis.lines[-2].get_xdata(), [edges[0]]*2)
+        np.testing.assert_array_equal(axis.lines[-1].get_xdata(), [edges[-1]]*2)
 
     def test_failed_pdf_or_final_zip_gate_cleans_only_owned_outputs(self):
         for mode in ("pdf", "final"):

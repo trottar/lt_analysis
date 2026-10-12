@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8789,
+      "bytes": 9002,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "2fb360ed710bdf74e12d23283c9a84559418455493a353ea5bc946614637e919"
+      "sha256": "52b08dd635846646b4792ecc65da2039d5104a0e2790d23f5963297aaf5eff41"
     },
     {
       "bytes": 8339,
@@ -229,6 +229,11 @@
       "bytes": 6987,
       "path": "docs/memory/evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md",
       "sha256": "69ca61bae5e54d3fd972eb5d7458dc122cd19913771c0a852cdbc68e53705929"
+    },
+    {
+      "bytes": 8975,
+      "path": "docs/memory/evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md",
+      "sha256": "c6d69f5758efbf7552e38096bff3056c4a9a711b590e59e1b9becd3f75fb1d40"
     },
     {
       "bytes": 8737,
@@ -986,9 +991,19 @@
       "sha256": "22fff0f41e6f0d6a15ccf64e21c9da20da127d41b0e3d1a9fc7b13bc5c242816"
     },
     {
+      "bytes": 13401,
+      "path": "docs/memory/phases/e8-current-snapshot-contribution-runtime-evidence-checkpoint-task-contract.md",
+      "sha256": "19ed72b9451f376d5bfe1dfe60a34ce5d8c95c135817c0133e454bce79540b87"
+    },
+    {
       "bytes": 15581,
       "path": "docs/memory/phases/e8-current-snapshot-method-a-contribution-debug-task-contract.md",
       "sha256": "bc3c227b6e21ec0e0b3874691a8f0d4f0b57f1ac7d538c174c5a84012cfd2a50"
+    },
+    {
+      "bytes": 9575,
+      "path": "docs/memory/phases/e8-current-snapshot-mm-gev-axis-presentation-task-contract.md",
+      "sha256": "8aacc362e9809a53e20a9684c00e0e016bf42100fdc00be5c81b13a61cdfda5c"
     },
     {
       "bytes": 11680,

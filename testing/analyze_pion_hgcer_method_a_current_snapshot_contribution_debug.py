@@ -190,6 +190,28 @@ def run(args):
     return str(final)
 
 
+def mm_display_geometry(mm_edges):
+    """Coordinates from validated persisted edges; flow strips are categorical."""
+    centers = [(a+b)/2 for a, b in zip(mm_edges, mm_edges[1:])]
+    width = mm_edges[1]-mm_edges[0]
+    return centers, (mm_edges[0]-width, mm_edges[-1]+width), (
+        mm_edges[0]-width/2, mm_edges[-1]+width/2)
+
+
+def label_mm_axis(axis, mm_edges):
+    """Mark physical boundaries separately from the UF/OF display strips."""
+    _, limits, flows = mm_display_geometry(mm_edges)
+    axis.set_xlim(*limits)
+    ticks = [mm_edges[0] + i*(mm_edges[-1]-mm_edges[0])/6 for i in range(7)]
+    axis.set_xticks(ticks, [f"{x:.1f}" for x in ticks], fontsize=7)
+    for boundary in (mm_edges[0], mm_edges[-1]):
+        axis.axvline(boundary, color="black", linewidth=.7, linestyle="--")
+    for x, label in zip(flows, ("UF", "OF")):
+        axis.text(x, 1.02, label, transform=axis.get_xaxis_transform(),
+                  ha="center", va="bottom", fontsize=7, rotation=90)
+    axis.set_xlabel("Analysis missing mass [GeV]\nUF/OF: outside-range categories", fontsize=8)
+
+
 def write_review_pdf(path, persisted_json):
     """Only read serialized aggregates; never accepts factors or F.1 objects."""
     value = parse_json(Path(persisted_json).read_bytes())
@@ -272,17 +294,26 @@ def write_review_pdf(path, persisted_json):
 
         fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
         phi_edges = value["display_geometry"]["phi_edges"]
+        mm_edges = value["display_geometry"]["mm_edges"]
+        mm_centers, mm_limits, mm_flows = mm_display_geometry(mm_edges)
         labels = [f"{a:g}:{b:g}" for a, b in zip(phi_edges, phi_edges[1:])]
         for t, p in enumerate(parents):
             for col, marginal in enumerate((p["phi"], p["mm"])):
                 for field, style in (("B", "-"), ("B_rw", "--"), ("signed_delta", ":")):
-                    axes[t, col].plot(range(len(marginal)), [s[field] for s in marginal], style, label=field)
+                    if col == 0:
+                        axes[t, col].plot(range(len(marginal)), [s[field] for s in marginal], style, label=field)
+                    else:
+                        line, = axes[t, col].plot(mm_centers, [s[field] for s in marginal[1:-1]], style, label=field)
+                        axes[t, col].plot(mm_flows, [marginal[0][field], marginal[-1][field]],
+                                          linestyle="none", marker="o", markersize=3, color=line.get_color())
                 axes[t, col].set_ylabel(f"t{t} signed background units"); axes[t, col].legend(fontsize=7)
                 if col == 0:
                     axes[t, col].set_xticks(range(9), labels, rotation=35, fontsize=6)
                     axes[t, col].set_xlabel("canonical phi [degrees]")
                 else:
-                    axes[t, col].set_xlabel("MM bin: 0=UF, 1..40=[0.8,1.4] GeV, 41=OF")
+                    label_mm_axis(axes[t, col], mm_edges)
+                    for low, high in ((mm_limits[0], mm_edges[0]), (mm_edges[-1], mm_limits[1])):
+                        axes[t, col].axvspan(low, high, color="grey", alpha=.12)
         save(fig, 4)
 
         for t, p in enumerate(parents):
@@ -294,11 +325,12 @@ def write_review_pdf(path, persisted_json):
                 if field == "signed_delta":
                     limit = max(float(np.max(np.abs(array))), 1e-30)
                     options = {"vmin": -limit, "vmax": limit, "cmap": "RdBu_r"}
-                image = axis.imshow(array, aspect="auto", origin="lower", **options)
+                image = axis.imshow(array, aspect="auto", origin="lower", interpolation="nearest",
+                                    extent=(*mm_limits, -.5, 8.5), **options)
                 label = {"signed_delta": "Delta B [signed background units]", "A_rw": "sum |b_rw| [support units]", "neff": "Neff(|b_rw|); empty/zero cells unavailable", "count": "application records"}[field]
                 axis.set_title(label, fontsize=8); fig.colorbar(image, ax=axis, shrink=.7)
                 axis.set_yticks(range(9), labels, fontsize=6)
-                axis.set_ylabel("phi [degrees]"); axis.set_xlabel("MM bin 0=UF, 1..40 normal, 41=OF")
+                axis.set_ylabel("phi [degrees]"); label_mm_axis(axis, mm_edges)
             save(fig, 5+t)
     return {"pages": len(PAGE_TITLES), "page_titles": list(PAGE_TITLES), "renderer_input": "persisted aggregates only"}
 
