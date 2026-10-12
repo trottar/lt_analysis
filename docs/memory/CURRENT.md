@@ -12,9 +12,13 @@ Microscopic F.4/F.1 investigations are `DEFERRED`;
 Accepted scopes, failed gates and frozen science remain intact.
 
 [Current-snapshot debug](phases/e8-current-snapshot-method-a-contribution-debug-task-contract.md):
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; seven-file farm coherence
-NOT VERIFIED. [Historical implementation](phases/e8-method-a-reweighted-contribution-debug-task-contract.md)
-and accepted October 4 diagnostic remain unchanged; no owner equivalence granted.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. Supplied preflight: FAIL at
+`snapshot_failed:f3_fingerprint_input_content_mismatch`, outputs_written=false.
+[Detached materialization](phases/e8-current-f1-coherent-detached-materialization-task-contract.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, conditional on independent
+actual-diff review and user publication.
+Current farm coherence NOT VERIFIED; October 4 acceptance and historical
+implementation remain unchanged. No canonical-owner equivalence granted.
 
 ## Current Work Item
 
@@ -121,9 +125,10 @@ closure remains available. No scale/amplitude conclusion.
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-synchronization, run only the detached current-snapshot seven-input preflight.
-Review its receipt before a separate full diagnostic gate. No owner retry or
-automatic farm work; owner/absolute-SIMC blockers and `DEFERRED` work stay binding.
+synchronization, perform one detached coherent-current-F.1 materialization farm
+gate. Review its manifest/ZIP before the separate current-snapshot seven-input
+preflight. No owner retry or automatic farm work; owner/absolute-SIMC blockers
+and `DEFERRED` work stay binding.
 
 ## Success Criteria
 
