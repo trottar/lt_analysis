@@ -96,8 +96,9 @@ def validate_snapshot_record(record):
             "snapshot_fingerprint_mismatch")
 
 
-def reproduce_snapshot(f1_artifacts, f3_artifact, f4_artifact, *, hashes):
+def reproduce_snapshot(f1_artifacts, f3_artifact, f4_artifact, *, hashes, _paired_parents=None):
     """Validate transient pairs; return aggregates after exact, bound reproduction."""
+    require(_paired_parents is None or _paired_parents == {}, "paired_selection_invalid")
     check_hashes(hashes)
     before = fingerprint([f1_artifacts, f3_artifact, f4_artifact])
     try:
@@ -167,6 +168,8 @@ def reproduce_snapshot(f1_artifacts, f3_artifact, f4_artifact, *, hashes):
                 p["support"] = {k: parents[key][k] for k in
                                 ("in_support_count", "ood_count", "ood_fraction", "ood_final_correction")}
                 validate_parent(p)
+                if _paired_parents is not None and setting in PAIRED_SETTINGS:
+                    _paired_parents.setdefault(setting, []).append(copy.deepcopy(p))
                 if setting == SETTING:
                     measured[t] = p
             require(accounted == set(raw_by_id), "snapshot_original_records_not_accounted:" + setting)
@@ -305,4 +308,92 @@ def validate_parent(p):
         require(len(histogram["edges"]) == 41 and all(a < b for a, b in zip(histogram["edges"], histogram["edges"][1:])), "histogram_edges_invalid")
         for name in ("baseline_counts", "reweighted_counts"):
             require(len(histogram[name]) == 42 and all(type(x) is int and x >= 0 for x in histogram[name]) and sum(histogram[name]) == count, "histogram_count_invalid")
+    return True
+
+
+PAIRED_SETTINGS = ("Left-lowe", "Center-lowe")
+SETTING_SCHEMA = "pion_hgcer_method_a_current_snapshot_setting_contribution_debug/v1"
+PAIRED_SCHEMA = "pion_hgcer_method_a_current_snapshot_paired_lowe_contribution_debug/v1"
+PAIRED_ROLE = "paired low-epsilon current-snapshot candidate — detached diagnostic; separate setting-local background contributions, no final yields"
+
+
+def reproduce_paired_snapshot(f1_artifacts, f3_artifact, f4_artifact, *, hashes):
+    """Retain two of the already measured settings from one all-15-parent pass."""
+    selected = {}
+    snapshot, _ = reproduce_snapshot(f1_artifacts, f3_artifact, f4_artifact,
+                                    hashes=hashes, _paired_parents=selected)
+    require(tuple(selected) == PAIRED_SETTINGS, "paired_selection_inventory_invalid")
+    return snapshot, selected
+
+
+def build_setting_diagnostic(snapshot, parents, *, setting_id, provenance):
+    """New leaf schema with explicit setting/t identity; v1 numerical body unchanged."""
+    require(setting_id in PAIRED_SETTINGS, "paired_setting_invalid")
+    value = build_diagnostic(snapshot, copy.deepcopy(parents), provenance=provenance)
+    value["schema_version"] = SETTING_SCHEMA
+    value["scope"]["setting_id"] = setting_id
+    for parent in value["parents"]:
+        parent["setting_id"] = setting_id
+    value = seal({k: v for k, v in value.items() if k != "fingerprint"})
+    validate_setting_diagnostic(value, setting_id=setting_id)
+    return value
+
+
+def validate_setting_diagnostic(value, *, setting_id):
+    """Check leaf identities, then reuse the unchanged v1 aggregate validator."""
+    require(setting_id in PAIRED_SETTINGS, "paired_setting_invalid")
+    require(value["schema_version"] == SETTING_SCHEMA and
+            value["scope"]["setting_id"] == setting_id, "paired_leaf_scope_invalid")
+    require(value["fingerprint"] == fingerprint({k: v for k, v in value.items() if k != "fingerprint"}),
+            "paired_leaf_fingerprint_invalid")
+    projected = copy.deepcopy(value)
+    for parent in projected["parents"]:
+        require(parent.pop("setting_id") == setting_id, "paired_parent_setting_invalid")
+    projected["schema_version"] = SCHEMA
+    projected["scope"]["setting_id"] = SETTING
+    projected = seal({k: v for k, v in projected.items() if k != "fingerprint"})
+    validate_diagnostic(projected)
+    return True
+
+
+def build_paired_diagnostic(snapshot, parents_by_setting, *, provenance):
+    require(tuple(parents_by_setting) == PAIRED_SETTINGS, "paired_parent_settings_invalid")
+    leaves = [build_setting_diagnostic(snapshot, parents_by_setting[s], setting_id=s,
+                                      provenance=provenance) for s in PAIRED_SETTINGS]
+    value = seal({"schema_version": PAIRED_SCHEMA, "status": "non_authoritative",
+        "non_authoritative": True, "role": PAIRED_ROLE,
+        "scope": {"kinematic": KINEMATIC, "setting_ids": list(PAIRED_SETTINGS)},
+        "snapshot": copy.deepcopy(snapshot), "provenance": copy.deepcopy(provenance),
+        "settings": leaves, "canonical_owner_equivalence": "BLOCKED",
+        "production_objects_mutated": False, "method_b_numerical_dependency": False,
+        "cross_setting_sum_or_normalization_performed": False})
+    validate_paired_diagnostic(value)
+    return value
+
+
+def validate_paired_diagnostic(value):
+    aggregate.guard(value)
+    require(set(value) == {"schema_version", "status", "non_authoritative", "role", "scope",
+            "snapshot", "provenance", "settings", "canonical_owner_equivalence",
+            "production_objects_mutated", "method_b_numerical_dependency",
+            "cross_setting_sum_or_normalization_performed", "fingerprint"}, "paired_inventory_invalid")
+    require(value["schema_version"] == PAIRED_SCHEMA and value["status"] == "non_authoritative"
+            and value["non_authoritative"] is True and value["role"] == PAIRED_ROLE,
+            "paired_schema_or_role_invalid")
+    require(value["fingerprint"] == fingerprint({k: v for k, v in value.items() if k != "fingerprint"}),
+            "paired_fingerprint_invalid")
+    require(value["scope"] == {"kinematic": KINEMATIC, "setting_ids": list(PAIRED_SETTINGS)},
+            "paired_scope_invalid")
+    require(value["canonical_owner_equivalence"] == "BLOCKED" and
+            all(value[k] is False for k in ("production_objects_mutated", "method_b_numerical_dependency",
+                                           "cross_setting_sum_or_normalization_performed")),
+            "paired_frozen_role_invalid")
+    validate_snapshot_record(value["snapshot"])
+    require(len(value["settings"]) == 2, "paired_leaf_inventory_invalid")
+    for setting_id, leaf in zip(PAIRED_SETTINGS, value["settings"]):
+        validate_setting_diagnostic(leaf, setting_id=setting_id)
+        require(leaf["snapshot"] == value["snapshot"] and leaf["provenance"] == value["provenance"],
+                "paired_common_snapshot_or_provenance_invalid")
+    require(value["settings"][0]["display_geometry"] == value["settings"][1]["display_geometry"],
+            "paired_geometry_mismatch")
     return True

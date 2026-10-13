@@ -434,5 +434,221 @@ class SnapshotTests(unittest.TestCase):
         self.assertTrue(debug.lineage.F6_3_CANDIDATE_BASENAMES_BY_KINEMATIC[debug.KINEMATIC]["f3"].endswith("current-baseline-candidate.json"))
 
 
+class PairedSnapshotTests(unittest.TestCase):
+    """New paired wrapper/owner checks with unchanged real scientific fixtures."""
+    @classmethod
+    def setUpClass(cls):
+        SnapshotTests.setUpClass()
+        cls.base = SnapshotTests()
+        cls.snapshot = SnapshotTests.snapshot
+        cls.provenance = SnapshotTests.provenance
+        cls.temporary = tempfile.TemporaryDirectory()
+        cls.root = Path(cls.temporary.name)
+        cls.locator = cls.base.prepare(cls.root)
+        cls.figures = []
+        from matplotlib.backends.backend_pdf import PdfPages
+        original_save = PdfPages.savefig
+        original_render = cli.write_review_pdf
+        def capture(pdf, figure, *args, **kwargs):
+            cls.figures.append(figure)
+            return original_save(pdf, figure, *args, **kwargs)
+        def persisted_render(path, js):
+            with mock.patch.object(cli, "load_inputs", side_effect=AssertionError("no input reload")), \
+                 mock.patch.object(debug.f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data",
+                                   side_effect=AssertionError("no factor rebuild")):
+                return original_render(path, js)
+        args = cli.parser().parse_args(cls.base.args(cls.root, cls.locator)+["--setting-scope", "paired-lowe"])
+        with mock.patch.object(PdfPages, "savefig", new=capture), \
+             mock.patch.object(cli, "write_review_pdf", side_effect=persisted_render):
+            cls.bundle = Path(cli.run(args))
+        with zipfile.ZipFile(cls.bundle) as archive:
+            cls.members = {name: archive.read(name) for name in cli.MEMBERS}
+        cls.paired = cli.parse_json(cls.members["diagnostic.json"])
+        cls.manifest = cli.parse_json(cls.members["manifest.json"])
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temporary.cleanup()
+
+    def reseal(self, value):
+        return debug.seal({k: v for k, v in value.items() if k != "fingerprint"})
+
+    def test_one_reproduction_keeps_left_aggregates_exact_and_both_settings_separate(self):
+        shared = debug.f4.build_pion_hgcer_method_a_parent_preserving_correction_with_review_data
+        with mock.patch.object(debug.f4, "build_pion_hgcer_method_a_parent_preserving_correction_with_review_data",
+                               wraps=shared) as builder:
+            snapshot, selected = debug.reproduce_paired_snapshot(SnapshotTests.f.inputs,
+                SnapshotTests.f.map, SnapshotTests.f.correction, hashes=SnapshotTests.hashes)
+        self.assertEqual(builder.call_count, 1)
+        self.assertEqual(snapshot, self.snapshot)
+        self.assertEqual(tuple(selected), debug.PAIRED_SETTINGS)
+        self.assertEqual(selected["Left-lowe"], SnapshotTests.parents)
+        wrapper = debug.build_paired_diagnostic(snapshot, selected, provenance=self.provenance)
+        self.assertTrue(debug.validate_paired_diagnostic(wrapper))
+        for setting, leaf in zip(debug.PAIRED_SETTINGS, wrapper["settings"]):
+            self.assertEqual(leaf["scope"]["setting_id"], setting)
+            self.assertEqual([p["canonical_t_index"] for p in leaf["parents"]], [0, 1, 2])
+            self.assertTrue(all(p["setting_id"] == setting for p in leaf["parents"]))
+        self.assertFalse(wrapper["cross_setting_sum_or_normalization_performed"])
+        self.assertNotEqual(wrapper["settings"][0]["fingerprint"], wrapper["settings"][1]["fingerprint"])
+        with self.assertRaises(ValueError): debug.validate_diagnostic(wrapper["settings"][0])
+        # Center cannot silently extend the old Left-only schema.
+        with self.assertRaises(ValueError): debug.validate_diagnostic(wrapper["settings"][1])
+        with self.assertRaises(ValueError):
+            debug.build_setting_diagnostic(snapshot, selected["Left-lowe"], setting_id="Center-highe", provenance=self.provenance)
+
+    def test_pair_inventory_parent_identity_snapshot_and_role_corruptions_fail_closed(self):
+        def absent(v): v["settings"].pop()
+        def duplicate(v): v["settings"][1] = copy.deepcopy(v["settings"][0])
+        def swapped(v): v["settings"].reverse()
+        def order(v): v["settings"][1]["parents"].reverse()
+        def count(v): v["settings"][1]["parents"].pop()
+        def parent_setting(v): v["settings"][1]["parents"][0]["setting_id"] = "Left-lowe"
+        def cell(v): v["settings"][1]["parents"][0]["joint"][0][0]["sum_b2"] += 1
+        def snapshot(v):
+            leaf=v["settings"][1]
+            leaf["snapshot"]["input_file_hashes"]["f4"] = "a"*64
+            leaf["snapshot"] = self.reseal(leaf["snapshot"])
+        def owner(v): v["settings"][1]["canonical_owner_equivalence"] = "PASS"
+        def promotion(v): v["production_objects_mutated"] = True
+        def pooled(v): v["cross_setting_sum_or_normalization_performed"] = True
+        def provenance(v): v["settings"][1]["provenance"]["git_head"] = "a"*40
+        def geometry(v): v["settings"][1]["display_geometry"]["mm_edges"][1] += .001
+        def raw(v): v["settings"][1]["rows"] = []
+        for change in (absent, duplicate, swapped, order, count, parent_setting, cell, snapshot,
+                       owner, promotion, pooled, provenance, geometry, raw):
+            value=copy.deepcopy(self.paired); change(value)
+            with self.subTest(change=change.__name__), self.assertRaises((ValueError, KeyError)):
+                value["settings"] = [self.reseal(leaf) for leaf in value["settings"]]
+                debug.validate_paired_diagnostic(self.reseal(value))
+        value=copy.deepcopy(self.paired); value["settings"][1]["fingerprint"] = "a"*64
+        with self.assertRaisesRegex(ValueError, "leaf_fingerprint"):
+            debug.validate_paired_diagnostic(self.reseal(value))
+
+    def test_paired_preflight_receipt_equal_and_no_outputs_in_either_mode(self):
+        before={p.name:p.read_bytes() for p in self.root.glob("*.json")}
+        for scope in ("left-lowe", "paired-lowe"):
+            with redirect_stdout(io.StringIO()) as stdout, mock.patch.object(cli, "write_review_pdf") as renderer:
+                self.assertEqual(cli.main(["--inputs-manifest",str(self.locator),"--preflight-only",
+                                           "--setting-scope",scope]),0)
+            renderer.assert_not_called()
+            receipt=cli.parse_json(stdout.getvalue().encode())
+            self.assertEqual(receipt["snapshot_fingerprint"],self.snapshot["fingerprint"])
+            self.assertFalse(receipt["outputs_written"])
+            if scope == "left-lowe": left=receipt
+            else: self.assertEqual(receipt,left)
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.root.glob("*.json")})
+        for argv in (["--setting-scope","Center-lowe"],
+                     ["--setting-scope","paired-lowe","--setting-scope","paired-lowe"]):
+            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                cli.parser().parse_args(["--inputs-manifest",str(self.locator),*argv])
+        self.assertEqual(cli.parser().parse_args(["--inputs-manifest",str(self.locator)]).setting_scope,"left-lowe")
+
+    def test_real_paired_pdf_titles_labels_geometry_and_persisted_values(self):
+        import numpy as np
+        self.assertEqual(cli.check_paired_pdf(self.members["diagnostic.pdf"]),16)
+        self.assertEqual(len(self.figures),16)
+        self.assertEqual([fig._suptitle.get_text() for fig in self.figures],
+                         [f"{i+1}. {title}" for i,title in enumerate(cli.PAIRED_PAGE_TITLES)])
+        for index, leaf in enumerate(self.paired["settings"]):
+            setting=debug.PAIRED_SETTINGS[index]
+            section=self.figures[8*index:8*(index+1)]
+            for fig in section:
+                self.assertIn(setting.split("-")[0]+" / lowe",fig.texts[0].get_text() if len(fig.texts)==1 else " ".join(t.get_text() for t in fig.texts))
+                self.assertIn("not full acceptance"," ".join(t.get_text() for t in fig.texts))
+            edges=leaf["display_geometry"]["mm_edges"]
+            centers,limits,flows=cli.mm_display_geometry(edges)
+            for t,parent in enumerate(leaf["parents"]):
+                phi_axis=section[4].axes[2*t]
+                self.assertIn(str([c["count"] for c in parent["phi"]]),phi_axis.get_title())
+                mm_axis=section[4].axes[2*t+1]
+                self.base.assert_mm_axis(mm_axis,edges,limits)
+                for j,field in enumerate(("B","B_rw","signed_delta")):
+                    normal,flow=mm_axis.lines[2*j:2*j+2]
+                    np.testing.assert_array_equal(normal.get_xdata(),centers)
+                    np.testing.assert_array_equal(normal.get_ydata(),[c[field] for c in parent["mm"][1:-1]])
+                    np.testing.assert_array_equal(flow.get_xdata(),flows)
+                    np.testing.assert_array_equal(flow.get_ydata(),[parent["mm"][0][field],parent["mm"][-1][field]])
+                for axis,field in zip(section[5+t].axes[:4],("signed_delta","A_rw","neff","count")):
+                    image,=axis.images
+                    expected=[[c["neff"]["abs_b_rw"]["value"] if c["neff"]["abs_b_rw"]["available"] else np.nan
+                               for c in row] for row in parent["joint"]] if field=="neff" else [[c[field] for c in row] for row in parent["joint"]]
+                    np.testing.assert_array_equal(image.get_array().filled(np.nan),expected)
+                    self.assertEqual(image.get_array().shape,(9,42))
+                    self.assertEqual(image.get_interpolation(),"nearest")
+                    self.base.assert_mm_axis(axis,edges,limits)
+        for change in (lambda raw: raw.replace(b"/Count 16",b"/Count 15"),
+                       lambda raw: raw.replace(b"KaonLT paired page 9: Center-lowe",b"KaonLT paired page 9: Left-lowe")):
+            with self.assertRaises(ValueError): cli.check_paired_pdf(change(self.members["diagnostic.pdf"]))
+
+    def test_staged_final_zip_dispatch_digests_receipts_and_leaf_tamper(self):
+        self.assertEqual(cli.verify_zip(self.bundle,self.members,setting_scope="paired-lowe"),self.manifest)
+        with self.assertRaises(ValueError): cli.verify_zip(self.bundle)
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/"staged.zip"; cli.create_zip(path,self.members)
+            self.assertEqual(cli.verify_zip(path,self.members,setting_scope="paired-lowe"),self.manifest)
+            for key, replacement in (("schema_version",cli.BUNDLE_SCHEMA),("setting_ids",list(reversed(debug.PAIRED_SETTINGS))),
+                    ("leaf_fingerprints",["a"*64,"a"*64]),("canonical_owner_equivalence","PASS"),
+                    ("pdf",{**self.manifest["pdf"],"page_titles":list(cli.PAGE_TITLES)})):
+                manifest=copy.deepcopy(self.manifest); manifest[key]=replacement
+                members={**self.members,"manifest.json":cli.json_bytes(self.reseal(manifest))}
+                path=Path(directory)/(key+".zip")
+                cli.create_zip(path,members)
+                with self.subTest(key=key),self.assertRaises(ValueError):
+                    cli.verify_zip(path,setting_scope="paired-lowe")
+            path=Path(directory)/"bad-digest.zip"
+            cli.create_zip(path,{**self.members,"diagnostic.json":b"{}"})
+            with self.assertRaisesRegex(ValueError,"digest"):
+                cli.verify_zip(path,setting_scope="paired-lowe")
+            # Even resealed member hashes cannot hide missing Center.
+            altered=copy.deepcopy(self.paired); altered["settings"].pop()
+            members={**self.members,"diagnostic.json":cli.json_bytes(self.reseal(altered))}
+            manifest=copy.deepcopy(self.manifest)
+            manifest["members"]["diagnostic.json"]={"bytes":len(members["diagnostic.json"]),"sha256":cli.sha256(members["diagnostic.json"])}
+            members["manifest.json"]=cli.json_bytes(self.reseal(manifest))
+            path=Path(directory)/"missing-center.zip"; cli.create_zip(path,members)
+            with self.assertRaises(ValueError): cli.verify_zip(path,setting_scope="paired-lowe")
+
+    def mock_paired_pdf(self,path,persisted):
+        debug.validate_paired_diagnostic(cli.parse_json(Path(persisted).read_bytes()))
+        path.write_bytes(self.members["diagnostic.pdf"])
+        return self.manifest["pdf"]
+
+    def test_failed_paired_gates_collision_and_cleanup_preserve_inputs_and_old_bundle(self):
+        for mode in ("preflight","changed","pdf","final","collision"):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as directory:
+                root=Path(directory); locator=self.base.prepare(root)
+                keep=root/"bundles"/"accepted.zip"; keep.write_bytes(b"old accepted bundle")
+                before={p.name:p.read_bytes() for p in root.glob("*.json")}
+                args=self.base.args(root,locator)+["--setting-scope","paired-lowe"]
+                old_verify=cli.verify_zip; old_provenance=cli.git_provenance
+                def verify(path,expected=None,**kwargs):
+                    if mode=="final" and path.parent==root/"bundles": raise ValueError("final_tamper")
+                    return old_verify(path,expected,**kwargs)
+                def render(path,persisted):
+                    receipt=self.mock_paired_pdf(path,persisted)
+                    if mode=="pdf":path.write_bytes(path.read_bytes().replace(b"/Count 16",b"/Count 15"))
+                    return receipt
+                def provenance(names):
+                    if mode=="changed":
+                        with (root/self.base.names["f3"]).open("ab") as f:f.write(b" ")
+                    return old_provenance(names)
+                if mode=="preflight":
+                    with (root/self.base.names["Center-lowe"]).open("ab") as f:f.write(b" ")
+                if mode=="collision":
+                    (root/"bundles"/"kaonlt-current-snapshot-paired-lowe-contribution-fixed.zip").write_bytes(b"keep")
+                with mock.patch.object(cli.uuid,"uuid4",return_value=mock.Mock(hex="fixed")), \
+                     mock.patch.object(cli,"write_review_pdf",side_effect=render), \
+                     mock.patch.object(cli,"verify_zip",side_effect=verify), \
+                     mock.patch.object(cli,"git_provenance",side_effect=provenance),redirect_stderr(io.StringIO()):
+                    self.assertEqual(cli.main(args),1)
+                self.assertEqual(keep.read_bytes(),b"old accepted bundle")
+                self.assertEqual(list((root/"artifacts").iterdir()),[])
+                self.assertEqual(len(list((root/"bundles").iterdir())),2 if mode=="collision" else 1)
+                if mode not in ("changed","preflight"):
+                    self.assertEqual(before,{p.name:p.read_bytes() for p in root.glob("*.json")})
+        with self.assertRaises(ValueError): cli.roots(ROOT,self.root/"bundles")
+
+
 if __name__ == "__main__":
     unittest.main()

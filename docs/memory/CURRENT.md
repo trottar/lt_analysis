@@ -28,6 +28,12 @@ RUNTIME VERIFIED (attributed): supplied ZIP/prior ChatGPT review at
 5–8 show physical 0.8–1.4 GeV coordinates and distinct UF/OF. Numerical objects
 and October 12 acceptance are preserved; no Center/lowe MM/PDF closure.
 
+The [paired extension](phases/e8-current-snapshot-paired-lowe-phi-mm-extension-task-contract.md)
+local candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
+explicit `paired-lowe` selects separate Left/Center lowe aggregates from one
+validated snapshot; 16 detached pages. Center joint MM/PDF farm behavior remains
+NOT VERIFIED; default eight-page Left-only path and all science are preserved.
+
 ## Current Work Item
 
 E.8.2 Left/lowe is `CLOSED / RUNTIME VALIDATED` under its
@@ -125,25 +131,23 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 
 ## Next Action
 
-NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-review, perform read-only paired low-epsilon phi-coverage and baseline/reweighted
-pion-contribution inspection using the already accepted five-setting F.4
-materialization, starting Q4p4W2p74 / Left/lowe + Center/lowe with each setting's
-t0/t1/t2 source-owned phi cells. Report actual populated phi coverage and
-within-setting results separately; inspect cross-setting overlap cautiously.
-Left/lowe has restricted phi support; Center/lowe covers a wider phi range,
-not proven complete acceptance or equal normalization. Infer or sum no event
-populations across settings without independent authority. If physical
-MM-resolution Center aggregates are missing, report the precise missing
-source-owned data/owner gate; invent no result or producer, reconstruct no Y0/YA.
-Baseline October 9 `8e68d2acae91fd97622793df563aba0296403a48` differs from
-detached October 12 `75756d7b32767f18949386c4c5864c756d5e85f6`; assume no
-numerical equivalence, common population or direct subtractability. Verify
-matching keys, cuts/windows/bins, run/lineage provenance and weighting units;
-separate exact same-lineage comparison from qualitative juxtaposition.
-Microscopic F.1/F.4 forensic work stays `DEFERRED`; canonical-five owner and
-absolute SIMC stay `BLOCKED`. No owner retry, other-setting/high-epsilon
-expansion or farm operation is authorized.
+NEXT — after independent ChatGPT actual-diff review, user commit/push and
+ChatGPT pushed-state synchronization, user-controlled single paired seven-input
+diagnostic farm validation through the existing tracked owner with explicit
+`paired-lowe` scope and expected snapshot fingerprint
+`3644eb1b91932519a6a92f08107e77350d558ef7c1bb376cbcd15781df7085e7`.
+Then inspect returned JSON/PDF/ZIP identities, all 16 pages and each setting's
+t0/t1/t2 phi–MM contributions before paired science. Report actual populated phi
+cells/records and within-setting results separately; overlap is descriptive,
+not equal acceptance/normalization or a merged estimate. Compare final-baseline
+objects only after matching keys, cuts/windows/bins, run/lineage and units:
+October 9 baseline `8e68d2acae91fd97622793df563aba0296403a48` differs from
+October 12 detached `75756d7b32767f18949386c4c5864c756d5e85f6`; assume no
+common population, numerical equivalence or direct subtractability. Report
+missing source-owned objects/owner gates; invent no producer or final Y0/YA.
+Microscopic F.1/F.4 forensics stay `DEFERRED`; canonical-five owner and absolute
+SIMC stay `BLOCKED`. No farm command/execution, owner retry or scope expansion
+is authorized by this local task.
 
 ## Success Criteria
 

@@ -10,6 +10,7 @@ external --outdir and --bundle-dir. No input generation or directory search.
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -83,7 +84,8 @@ def git_provenance(basenames):
             "input_basenames": basenames}
 
 
-def preflight(locator):
+def preflight(locator, *, setting_scope="left-lowe"):
+    debug.require(setting_scope in ("left-lowe", "paired-lowe"), "setting_scope_invalid")
     observations = {role: {"basename": None, "sha256": None, "observed_fingerprint": None,
                            "fingerprint_validated": False} for role in debug.ROLES}
     receipt = {"schema_version": PREFLIGHT_SCHEMA, "non_authoritative": True,
@@ -93,7 +95,8 @@ def preflight(locator):
                "first_failure": None, "outputs_written": False}
     try:
         payloads, hashes, basenames, paths = load_inputs(locator, observations)
-        snapshot, parents = debug.reproduce_snapshot([payloads[s] for s in debug.SETTINGS],
+        reproduce = debug.reproduce_paired_snapshot if setting_scope == "paired-lowe" else debug.reproduce_snapshot
+        snapshot, parents = reproduce([payloads[s] for s in debug.SETTINGS],
             payloads["f3"], payloads["f4"], hashes=hashes)
         # Retain no paths in the receipt. Raw file replacement during preflight also fails.
         for role, path in paths.items():
@@ -111,7 +114,10 @@ def preflight(locator):
     return receipt, None
 
 
-def verify_zip(path, expected=None):
+def verify_zip(path, expected=None, *, setting_scope="left-lowe"):
+    debug.require(setting_scope in ("left-lowe", "paired-lowe"), "setting_scope_invalid")
+    if setting_scope == "paired-lowe":
+        return verify_paired_zip(path, expected)
     with zipfile.ZipFile(path) as archive:
         debug.require(archive.namelist() == list(MEMBERS) and archive.testzip() is None,
                       "zip_member_inventory_or_crc_invalid")
@@ -140,49 +146,71 @@ def verify_zip(path, expected=None):
 
 
 def run(args):
+    scope = getattr(args, "setting_scope", "left-lowe")
+    debug.require(scope in ("left-lowe", "paired-lowe"), "setting_scope_invalid")
+    paired = scope == "paired-lowe"
+    validate = debug.validate_paired_diagnostic if paired else debug.validate_diagnostic
+    pdf_check = check_paired_pdf if paired else check_pdf
+    titles = PAIRED_PAGE_TITLES if paired else PAGE_TITLES
     debug.require(args.expected_snapshot_fingerprint is not None, "passed_preflight_fingerprint_required")
     debug.digest(args.expected_snapshot_fingerprint)
     debug.require(args.outdir is not None and args.bundle_dir is not None, "external_output_roots_required")
     artifact_root, bundle_root = roots(args.outdir, args.bundle_dir)
-    attempt = "kaonlt-current-snapshot-contribution-" + uuid.uuid4().hex
+    attempt = ("kaonlt-current-snapshot-paired-lowe-contribution-" if paired else
+               "kaonlt-current-snapshot-contribution-") + uuid.uuid4().hex
     final = bundle_root/(attempt+".zip")
     debug.require(not final.exists(), "output_already_exists")
-    receipt, data = preflight(args.inputs_manifest)
+    receipt, data = (preflight(args.inputs_manifest, setting_scope=scope) if paired else
+                     preflight(args.inputs_manifest))
     debug.require(data is not None, receipt["first_failure"])
     snapshot, parents, basenames, paths = data
     debug.require(snapshot["fingerprint"] == args.expected_snapshot_fingerprint,
                   "expected_snapshot_fingerprint_mismatch")
-    diagnostic = debug.build_diagnostic(snapshot, parents, provenance=git_provenance(basenames))
+    build = debug.build_paired_diagnostic if paired else debug.build_diagnostic
+    diagnostic = build(snapshot, parents, provenance=git_provenance(basenames))
     # Recheck the immutable bytes/bindings used above immediately before writing.
     for role, path in paths.items():
         debug.require(sha256(path.read_bytes()) == snapshot["input_file_hashes"][role],
                       "snapshot_changed_before_production:" + role)
-    debug.validate_diagnostic(diagnostic)
+    validate(diagnostic)
     created = False
     with tempfile.TemporaryDirectory(dir=artifact_root, prefix="."+attempt+"-") as temporary:
         stage = Path(temporary)
         js, pdf = stage/"diagnostic.json", stage/"diagnostic.pdf"
         js.write_bytes(json_bytes(diagnostic))
-        debug.validate_diagnostic(parse_json(js.read_bytes()))
+        validate(parse_json(js.read_bytes()))
         pdf_receipt = write_review_pdf(pdf, js)
-        debug.require(pdf_receipt == {"pages": check_pdf(pdf.read_bytes()), "page_titles": list(PAGE_TITLES),
+        debug.require(pdf_receipt == {"pages": pdf_check(pdf.read_bytes()), "page_titles": list(titles),
                                      "renderer_input": "persisted aggregates only"}, "renderer_receipt_mismatch")
         members = {"diagnostic.json": js.read_bytes(), "diagnostic.pdf": pdf.read_bytes()}
-        manifest = debug.seal({"schema_version": BUNDLE_SCHEMA, "status": "non_authoritative",
+        manifest_body = {"schema_version": PAIRED_BUNDLE_SCHEMA if paired else BUNDLE_SCHEMA, "status": "non_authoritative",
             "diagnostic_fingerprint": diagnostic["fingerprint"], "snapshot_fingerprint": snapshot["fingerprint"],
             "members": {name: {"bytes": len(raw), "sha256": sha256(raw)} for name, raw in members.items()},
             "pdf": pdf_receipt, "checks": {"persisted_json": True, "numerical_closure": True, "pdf_completeness": True},
-            "manifest_self_digest": "canonical fingerprint excluding fingerprint; raw self-hash cannot be embedded"})
+            "manifest_self_digest": "canonical fingerprint excluding fingerprint; raw self-hash cannot be embedded"}
+        if paired:
+            manifest_body.update(setting_scope="paired-lowe", setting_ids=list(debug.PAIRED_SETTINGS),
+                role=debug.PAIRED_ROLE, production_objects_mutated=False,
+                method_b_numerical_dependency=False, canonical_owner_equivalence="BLOCKED",
+                cross_setting_sum_or_normalization_performed=False,
+                leaf_fingerprints=[leaf["fingerprint"] for leaf in diagnostic["settings"]])
+        manifest = debug.seal(manifest_body)
         members["manifest.json"] = json_bytes(manifest)
         staged_zip = stage/"bundle.zip"
         create_zip(staged_zip, members)
-        verify_zip(staged_zip, members)
+        if paired:
+            verify_zip(staged_zip, members, setting_scope=scope)
+        else:
+            verify_zip(staged_zip, members)
         try:
             with final.open("xb") as destination:
                 created = True
                 with staged_zip.open("rb") as source:
                     shutil.copyfileobj(source, destination)
-            verify_zip(final, members)
+            if paired:
+                verify_zip(final, members, setting_scope=scope)
+            else:
+                verify_zip(final, members)
         except Exception:
             if created:
                 final.unlink()
@@ -213,132 +241,233 @@ def label_mm_axis(axis, mm_edges):
 
 
 def write_review_pdf(path, persisted_json):
-    """Only read serialized aggregates; never accepts factors or F.1 objects."""
+    """Persisted-only current-snapshot candidate — detached diagnostic renderer."""
     value = parse_json(Path(persisted_json).read_bytes())
-    debug.validate_diagnostic(value)
+    paired = value.get("schema_version") == debug.PAIRED_SCHEMA
+    (debug.validate_paired_diagnostic if paired else debug.validate_diagnostic)(value)
     import matplotlib
     matplotlib.use("Agg", force=True)
-    import matplotlib.pyplot as plt
     from matplotlib.backends.backend_pdf import PdfPages
-    import numpy as np
-
-    parents = value["parents"]
-    lineage = "current-snapshot candidate — detached diagnostic; Q4p4W2p74 / Left / lowe"
-    units = "signed/absolute pion-background weight units (not final kaon yield)"
     with PdfPages(path, metadata={"Title": "Current-snapshot candidate contribution debug",
                                 "Author": "KaonLT", "CreationDate": None, "ModDate": None}) as pdf:
-        def save(fig, number):
-            fig.suptitle(f"{number+1}. {PAGE_TITLES[number]}", fontsize=13)
-            fig.text(.04, .025, lineage + "\nDetached, non-authoritative. Neff is descriptive; no yield uncertainty or absolute mis-ID calibration.", fontsize=7)
-            fig.tight_layout(rect=(.02, .08, .98, .94))
-            pdf.savefig(fig); plt.close(fig)
+        if paired:
+            for index, leaf in enumerate(value["settings"]):
+                _write_setting_pages(pdf, leaf, paired=True, offset=8*index)
+        else:
+            _write_setting_pages(pdf, value)
+    titles = PAIRED_PAGE_TITLES if paired else PAGE_TITLES
+    return {"pages": len(titles), "page_titles": list(titles), "renderer_input": "persisted aggregates only"}
 
-        fig = plt.figure(figsize=(11.7, 8.3))
-        lines = ["Primary focus t0/t2; t1 internal reference. Exact shared F.4 reproduction; no child normalization.",
-                 "B=sum(s*w0); B_rw=sum(s*w0*C); A=sum|b|; A_rw=sum|b_rw|; zeros retained.",
-                 "Signed estimates and nonnegative support are distinct. Neither is an extracted kaon yield.",
-                 "Neff=(sum nonnegative measure)^2/sum measure^2; not errors/covariance/Poisson counts.",
-                 "Observed F.4 SHA: " + value["snapshot"]["input_file_hashes"]["f4"],
-                 "Internally reproduced correction: " + value["snapshot"]["scientific_fingerprints"]["f4"]["body"],
-                 "Observed diagnostic Git HEAD: " + value["provenance"]["git_head"],
-                 "Snapshot seven input hashes and F.1 fingerprints are in diagnostic.json; paths omitted.",
-                 "parent  count       B              B_rw           A              A_rw          |B|/A"]
-        for p in parents:
-            s = p["totals"]
-            lines.append(f"t{p['canonical_t_index']}   {s['count']:6d}  " + "  ".join(f"{s[k]:.8g}" for k in ("B", "B_rw", "A", "A_rw")) + f"  {s['cancellation']['value']:.5g}")
-            lines.append(f"     signed delta={s['signed_delta']:.8g}; sum b^2={s['sum_b2']:.8g}; sum b_rw^2={s['sum_b_rw2']:.8g}")
-        lines.extend(["MM display: 40 fixed bins [0.8,1.4] GeV plus underflow/overflow; nine frozen phi children.",
-                      "No clipping, weight cap, adaptive physics binning, alternate factor, production mutation or Method B.",
-                      "Private canonical-five F.4 mismatch and absolute-SIMC units blockers remain unchanged."])
-        fig.text(.04, .90, "\n\n".join(lines), va="top", family="monospace", fontsize=8)
-        save(fig, 0)
 
-        fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
-        for t, p in enumerate(parents):
-            for col, name in enumerate(("weights", "contributions")):
-                h = p["histograms"][name]; edges = h["edges"]
-                for field, label in (("baseline_counts", "baseline"), ("reweighted_counts", "reweighted")):
-                    axes[t, col].stairs(h[field][1:-1], edges, label=label)
-                axes[t, col].set_yscale("symlog", linthresh=1)
-                axes[t, col].set_ylabel(f"t{t} records")
-                axes[t, col].set_xlabel("w0 / w0*C" if col == 0 else "|b| / |b_rw| [background weight units]")
-                axes[t, col].set_title("Common full-range bins; no clipping", fontsize=8)
-                axes[t, col].legend(fontsize=7)
-        save(fig, 1)
+def _write_setting_pages(pdf, value, *, paired=False, offset=0):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    parents = value["parents"]
+    setting_id = value["scope"]["setting_id"]
+    phi_setting, epsilon = setting_id.split("-")
+    lineage = f"current-snapshot candidate — detached diagnostic; Q4p4W2p74 / {phi_setting} / {epsilon}"
+    if paired:
+        lineage += "; setting-local occupation, not full acceptance; no cross-setting normalization"
+    title_prefix = setting_id + " / " if paired else ""
+    units = "signed/absolute pion-background weight units (not final kaon yield)"
+    def save(fig, number):
+        fig.suptitle(f"{offset+number+1}. {title_prefix}{PAGE_TITLES[number]}", fontsize=13)
+        if paired:
+            pdf.attach_note(f"KaonLT paired page {offset+number+1}: {setting_id}: {PAGE_TITLES[number]}")
+        fig.text(.04, .025, lineage + "\nDetached, non-authoritative. Neff is descriptive; no yield uncertainty or absolute mis-ID calibration.", fontsize=7)
+        fig.tight_layout(rect=(.02, .08, .98, .94))
+        pdf.savefig(fig); plt.close(fig)
 
-        fig, axes = plt.subplots(2, 2, figsize=(11.7, 8.3))
-        for rank, style in (("C", "o-"), ("abs_b_rw", "s--"), ("abs_b", "^:")):
-            for j, q in enumerate((.01, .05)):
-                axes[0, j].plot(range(3), [p["tails"][rank][j]["reweighted_abs_share"]["value"] for p in parents], style, label="rank by " + rank)
-                axes[0, j].set_title(f"Largest {q:.0%} records: share of total |b_rw|")
-                axes[0, j].set_ylabel("nonnegative support share")
-                axes[0, j].legend(fontsize=7)
-        for axis, names in zip(axes[1], (("w0", "w_rw"), ("abs_b", "abs_b_rw"))):
-            for name in names:
-                axis.plot(range(3), [p["totals"]["neff"][name]["value"] for p in parents], "o-", label=name)
-            axis.set_ylabel("descriptive nonnegative Neff"); axis.legend(fontsize=7)
-        for axis in axes.flat:
-            axis.set_xticks(range(3), ("t0", "t1", "t2")); axis.grid(alpha=.2)
-        save(fig, 2)
+    fig = plt.figure(figsize=(11.7, 8.3))
+    lines = ["Primary focus t0/t2; t1 internal reference. Exact shared F.4 reproduction; no child normalization.",
+             "B=sum(s*w0); B_rw=sum(s*w0*C); A=sum|b|; A_rw=sum|b_rw|; zeros retained.",
+             "Signed estimates and nonnegative support are distinct. Neither is an extracted kaon yield.",
+             "Neff=(sum nonnegative measure)^2/sum measure^2; not errors/covariance/Poisson counts.",
+             "Observed F.4 SHA: " + value["snapshot"]["input_file_hashes"]["f4"],
+             "Internally reproduced correction: " + value["snapshot"]["scientific_fingerprints"]["f4"]["body"],
+             "Observed diagnostic Git HEAD: " + value["provenance"]["git_head"],
+             "Snapshot seven input hashes and F.1 fingerprints are in diagnostic.json; paths omitted.",
+             "parent  count       B              B_rw           A              A_rw          |B|/A"]
+    for p in parents:
+        s = p["totals"]
+        lines.append(f"t{p['canonical_t_index']}   {s['count']:6d}  " + "  ".join(f"{s[k]:.8g}" for k in ("B", "B_rw", "A", "A_rw")) + f"  {s['cancellation']['value']:.5g}")
+        lines.append(f"     signed delta={s['signed_delta']:.8g}; sum b^2={s['sum_b2']:.8g}; sum b_rw^2={s['sum_b_rw2']:.8g}")
+    lines.extend(["MM display: 40 fixed bins [0.8,1.4] GeV plus underflow/overflow; nine frozen phi children.",
+                  "No clipping, weight cap, adaptive physics binning, alternate factor, production mutation or Method B.",
+                  "Private canonical-five F.4 mismatch and absolute-SIMC units blockers remain unchanged."])
+    fig.text(.04, .90, "\n\n".join(lines), va="top", family="monospace", fontsize=8)
+    save(fig, 0)
 
-        fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
-        for t, p in enumerate(parents):
-            for col, fields in enumerate((("B", "B_rw"), ("A", "A_rw"))):
-                for j, field in enumerate(fields):
-                    axes[t, col].bar(np.arange(4)+(j-.5)*.35, [p["sources"][s]["totals"][field] for s in debug.SOURCES], width=.35, label=field)
-                axes[t, col].set_xticks(range(4), debug.SOURCES, fontsize=7)
-                axes[t, col].set_ylabel(f"t{t} " + ("signed estimate" if col == 0 else "absolute support"))
-                axes[t, col].axhline(0, color="black", linewidth=.5); axes[t, col].legend(fontsize=7)
-        fig.text(.04, .065, units, fontsize=7)
-        save(fig, 3)
+    fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
+    for t, p in enumerate(parents):
+        for col, name in enumerate(("weights", "contributions")):
+            h = p["histograms"][name]; edges = h["edges"]
+            for field, label in (("baseline_counts", "baseline"), ("reweighted_counts", "reweighted")):
+                axes[t, col].stairs(h[field][1:-1], edges, label=label)
+            axes[t, col].set_yscale("symlog", linthresh=1)
+            axes[t, col].set_ylabel(f"t{t} records")
+            axes[t, col].set_xlabel("w0 / w0*C" if col == 0 else "|b| / |b_rw| [background weight units]")
+            axes[t, col].set_title("Common full-range bins; no clipping", fontsize=8)
+            axes[t, col].legend(fontsize=7)
+    save(fig, 1)
 
-        fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
-        phi_edges = value["display_geometry"]["phi_edges"]
-        mm_edges = value["display_geometry"]["mm_edges"]
-        mm_centers, mm_limits, mm_flows = mm_display_geometry(mm_edges)
-        labels = [f"{a:g}:{b:g}" for a, b in zip(phi_edges, phi_edges[1:])]
-        for t, p in enumerate(parents):
-            for col, marginal in enumerate((p["phi"], p["mm"])):
-                for field, style in (("B", "-"), ("B_rw", "--"), ("signed_delta", ":")):
-                    if col == 0:
-                        axes[t, col].plot(range(len(marginal)), [s[field] for s in marginal], style, label=field)
-                    else:
-                        line, = axes[t, col].plot(mm_centers, [s[field] for s in marginal[1:-1]], style, label=field)
-                        axes[t, col].plot(mm_flows, [marginal[0][field], marginal[-1][field]],
-                                          linestyle="none", marker="o", markersize=3, color=line.get_color())
-                axes[t, col].set_ylabel(f"t{t} signed background units"); axes[t, col].legend(fontsize=7)
+    fig, axes = plt.subplots(2, 2, figsize=(11.7, 8.3))
+    for rank, style in (("C", "o-"), ("abs_b_rw", "s--"), ("abs_b", "^:")):
+        for j, q in enumerate((.01, .05)):
+            axes[0, j].plot(range(3), [p["tails"][rank][j]["reweighted_abs_share"]["value"] for p in parents], style, label="rank by " + rank)
+            axes[0, j].set_title(f"Largest {q:.0%} records: share of total |b_rw|")
+            axes[0, j].set_ylabel("nonnegative support share")
+            axes[0, j].legend(fontsize=7)
+    for axis, names in zip(axes[1], (("w0", "w_rw"), ("abs_b", "abs_b_rw"))):
+        for name in names:
+            axis.plot(range(3), [p["totals"]["neff"][name]["value"] for p in parents], "o-", label=name)
+        axis.set_ylabel("descriptive nonnegative Neff"); axis.legend(fontsize=7)
+    for axis in axes.flat:
+        axis.set_xticks(range(3), ("t0", "t1", "t2")); axis.grid(alpha=.2)
+    save(fig, 2)
+
+    fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
+    for t, p in enumerate(parents):
+        for col, fields in enumerate((("B", "B_rw"), ("A", "A_rw"))):
+            for j, field in enumerate(fields):
+                axes[t, col].bar(np.arange(4)+(j-.5)*.35, [p["sources"][s]["totals"][field] for s in debug.SOURCES], width=.35, label=field)
+            axes[t, col].set_xticks(range(4), debug.SOURCES, fontsize=7)
+            axes[t, col].set_ylabel(f"t{t} " + ("signed estimate" if col == 0 else "absolute support"))
+            axes[t, col].axhline(0, color="black", linewidth=.5); axes[t, col].legend(fontsize=7)
+    fig.text(.04, .065, units, fontsize=7)
+    save(fig, 3)
+
+    fig, axes = plt.subplots(3, 2, figsize=(11.7, 8.3))
+    phi_edges = value["display_geometry"]["phi_edges"]
+    mm_edges = value["display_geometry"]["mm_edges"]
+    mm_centers, mm_limits, mm_flows = mm_display_geometry(mm_edges)
+    labels = [f"{a:g}:{b:g}" for a, b in zip(phi_edges, phi_edges[1:])]
+    for t, p in enumerate(parents):
+        for col, marginal in enumerate((p["phi"], p["mm"])):
+            for field, style in (("B", "-"), ("B_rw", "--"), ("signed_delta", ":")):
                 if col == 0:
-                    axes[t, col].set_xticks(range(9), labels, rotation=35, fontsize=6)
-                    axes[t, col].set_xlabel("canonical phi [degrees]")
+                    axes[t, col].plot(range(len(marginal)), [s[field] for s in marginal], style, label=field)
                 else:
-                    label_mm_axis(axes[t, col], mm_edges)
-                    for low, high in ((mm_limits[0], mm_edges[0]), (mm_edges[-1], mm_limits[1])):
-                        axes[t, col].axvspan(low, high, color="grey", alpha=.12)
-        save(fig, 4)
+                    line, = axes[t, col].plot(mm_centers, [s[field] for s in marginal[1:-1]], style, label=field)
+                    axes[t, col].plot(mm_flows, [marginal[0][field], marginal[-1][field]],
+                                      linestyle="none", marker="o", markersize=3, color=line.get_color())
+            axes[t, col].set_ylabel(f"t{t} signed background units"); axes[t, col].legend(fontsize=7)
+            if col == 0:
+                axes[t, col].set_xticks(range(9), labels, rotation=35, fontsize=6)
+                axes[t, col].set_xlabel("canonical phi [degrees]")
+                if paired:
+                    occupied = [i for i, cell in enumerate(p["phi"]) if cell["count"] > 0]
+                    counts = [cell["count"] for cell in p["phi"]]
+                    axes[t, col].set_title(f"Occupied cells {occupied}; records {counts}", fontsize=6)
+            else:
+                label_mm_axis(axes[t, col], mm_edges)
+                for low, high in ((mm_limits[0], mm_edges[0]), (mm_edges[-1], mm_limits[1])):
+                    axes[t, col].axvspan(low, high, color="grey", alpha=.12)
+    save(fig, 4)
 
-        for t, p in enumerate(parents):
-            fig, axes = plt.subplots(2, 2, figsize=(11.7, 8.3))
-            for axis, field in zip(axes.flat, ("signed_delta", "A_rw", "neff", "count")):
-                matrix = [[s["neff"]["abs_b_rw"]["value"] if s["neff"]["abs_b_rw"]["available"] else np.nan for s in row] for row in p["joint"]] if field == "neff" else [[s[field] for s in row] for row in p["joint"]]
-                array = np.asarray(matrix)
-                options = {}
-                if field == "signed_delta":
-                    limit = max(float(np.max(np.abs(array))), 1e-30)
-                    options = {"vmin": -limit, "vmax": limit, "cmap": "RdBu_r"}
-                image = axis.imshow(array, aspect="auto", origin="lower", interpolation="nearest",
-                                    extent=(*mm_limits, -.5, 8.5), **options)
-                label = {"signed_delta": "Delta B [signed background units]", "A_rw": "sum |b_rw| [support units]", "neff": "Neff(|b_rw|); empty/zero cells unavailable", "count": "application records"}[field]
-                axis.set_title(label, fontsize=8); fig.colorbar(image, ax=axis, shrink=.7)
-                axis.set_yticks(range(9), labels, fontsize=6)
-                axis.set_ylabel("phi [degrees]"); label_mm_axis(axis, mm_edges)
-            save(fig, 5+t)
-    return {"pages": len(PAGE_TITLES), "page_titles": list(PAGE_TITLES), "renderer_input": "persisted aggregates only"}
+    for t, p in enumerate(parents):
+        fig, axes = plt.subplots(2, 2, figsize=(11.7, 8.3))
+        for axis, field in zip(axes.flat, ("signed_delta", "A_rw", "neff", "count")):
+            matrix = [[s["neff"]["abs_b_rw"]["value"] if s["neff"]["abs_b_rw"]["available"] else np.nan for s in row] for row in p["joint"]] if field == "neff" else [[s[field] for s in row] for row in p["joint"]]
+            array = np.asarray(matrix)
+            options = {}
+            if field == "signed_delta":
+                limit = max(float(np.max(np.abs(array))), 1e-30)
+                options = {"vmin": -limit, "vmax": limit, "cmap": "RdBu_r"}
+            image = axis.imshow(array, aspect="auto", origin="lower", interpolation="nearest",
+                                extent=(*mm_limits, -.5, 8.5), **options)
+            label = {"signed_delta": "Delta B [signed background units]", "A_rw": "sum |b_rw| [support units]", "neff": "Neff(|b_rw|); empty/zero cells unavailable", "count": "application records"}[field]
+            axis.set_title(label, fontsize=8); fig.colorbar(image, ax=axis, shrink=.7)
+            axis.set_yticks(range(9), labels, fontsize=6)
+            axis.set_ylabel("phi [degrees]"); label_mm_axis(axis, mm_edges)
+        save(fig, 5+t)
+
+
+
+
+PAIRED_BUNDLE_SCHEMA = "pion_hgcer_method_a_current_snapshot_paired_lowe_contribution_debug_bundle/v1"
+PAIRED_PAGE_TITLES = tuple(s + " / " + title for s in debug.PAIRED_SETTINGS for title in PAGE_TITLES)
+
+
+class UniqueScope(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if getattr(namespace, "_setting_scope_seen", False):
+            parser.error("--setting-scope must occur exactly once when supplied")
+        namespace._setting_scope_seen = True
+        setattr(namespace, self.dest, values)
+
+
+def check_paired_pdf(raw):
+    """Matplotlib page tree plus page-linked title/setting annotations; no external tools."""
+    debug.require(raw.startswith(b"%PDF-") and raw.rstrip().endswith(b"%%EOF"), "pdf_container_invalid")
+    count = len(re.findall(rb"/Type\s*/Page\b", raw))
+    trees = re.findall(rb"/Type\s*/Pages\b[^>]*?/Count\s+(\d+)", raw, re.S)
+    debug.require(count == 16 and trees == [b"16"], "paired_pdf_page_completeness_failed")
+    objects = {int(m[1]): m[2] for m in re.finditer(rb"(\d+) 0 obj\s*(.*?)\s*endobj", raw, re.S)}
+    tree = next(body for body in objects.values() if re.search(rb"/Type\s*/Pages\b", body))
+    kids = re.search(rb"/Kids\s*\[(.*?)\]", tree, re.S)
+    debug.require(kids is not None, "paired_pdf_tree_invalid")
+    page_ids = re.findall(rb"(\d+) 0 R", kids[1])
+    debug.require(len(page_ids) == 16 and len(set(page_ids)) == 16, "paired_pdf_page_order_invalid")
+    for index, page_id in enumerate(page_ids):
+        page = objects[int(page_id)]
+        debug.require(re.search(rb"/Type\s*/Page\b", page) is not None, "paired_pdf_page_invalid")
+        annotation = re.search(rb"/Annots\s+(\d+) 0 R", page)
+        debug.require(annotation is not None, "paired_pdf_title_missing")
+        note = objects[int(annotation[1])]
+        expected = f"KaonLT paired page {index+1}: {debug.PAIRED_SETTINGS[index//8]}: {PAGE_TITLES[index%8]}".encode("ascii")
+        debug.require(re.findall(rb"/Contents\s*\(([^)]*)\)", note) == [expected],
+                      "paired_pdf_title_inventory_invalid")
+    return count
+
+
+def verify_paired_zip(path, expected=None):
+    with zipfile.ZipFile(path) as archive:
+        debug.require(archive.namelist() == list(MEMBERS) and archive.testzip() is None,
+                      "zip_member_inventory_or_crc_invalid")
+        members = {name: archive.read(name) for name in MEMBERS}
+    if expected is not None:
+        debug.require(members == expected, "zip_member_bytes_mismatch")
+    manifest = parse_json(members["manifest.json"])
+    debug.require(set(manifest) == {"schema_version", "status", "diagnostic_fingerprint", "snapshot_fingerprint",
+        "members", "pdf", "checks", "manifest_self_digest", "setting_scope", "setting_ids", "role",
+        "production_objects_mutated", "method_b_numerical_dependency", "canonical_owner_equivalence",
+        "cross_setting_sum_or_normalization_performed", "leaf_fingerprints", "fingerprint"},
+        "paired_manifest_inventory_invalid")
+    debug.require(manifest["schema_version"] == PAIRED_BUNDLE_SCHEMA and
+                  manifest["setting_scope"] == "paired-lowe" and
+                  manifest["setting_ids"] == list(debug.PAIRED_SETTINGS) and
+                  manifest["status"] == "non_authoritative" and manifest["role"] == debug.PAIRED_ROLE,
+                  "paired_manifest_scope_or_role_invalid")
+    debug.require(manifest["canonical_owner_equivalence"] == "BLOCKED" and
+                  all(manifest[k] is False for k in ("production_objects_mutated", "method_b_numerical_dependency",
+                       "cross_setting_sum_or_normalization_performed")), "paired_manifest_role_invalid")
+    debug.require(manifest["fingerprint"] == debug.fingerprint({k: v for k, v in manifest.items() if k != "fingerprint"}),
+                  "bundle_manifest_fingerprint_invalid")
+    debug.require(set(manifest["members"]) == {"diagnostic.json", "diagnostic.pdf"}, "bundle_digest_inventory_invalid")
+    for name, record in manifest["members"].items():
+        debug.require(record == {"sha256": sha256(members[name]), "bytes": len(members[name])},
+                      "bundle_member_digest_invalid:" + name)
+    diagnostic = parse_json(members["diagnostic.json"])
+    debug.validate_paired_diagnostic(diagnostic)
+    pages = check_paired_pdf(members["diagnostic.pdf"])
+    debug.require(manifest["diagnostic_fingerprint"] == diagnostic["fingerprint"] and
+                  manifest["snapshot_fingerprint"] == diagnostic["snapshot"]["fingerprint"] and
+                  manifest["leaf_fingerprints"] == [leaf["fingerprint"] for leaf in diagnostic["settings"]] and
+                  manifest["pdf"] == {"pages": pages, "page_titles": list(PAIRED_PAGE_TITLES),
+                                      "renderer_input": "persisted aggregates only"}, "bundle_receipt_invalid")
+    debug.require(manifest["checks"] == {"persisted_json": True, "numerical_closure": True, "pdf_completeness": True},
+                  "bundle_checks_invalid")
+    return manifest
 
 
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--inputs-manifest", type=Path, required=True)
     result.add_argument("--preflight-only", action="store_true")
+    result.add_argument("--setting-scope", choices=("left-lowe", "paired-lowe"),
+                        default="left-lowe", action=UniqueScope,
+                        help="left-lowe (default): eight pages; paired-lowe: separate Left/Center sections, 16 pages")
     result.add_argument("--expected-snapshot-fingerprint")
     result.add_argument("--outdir", type=Path)
     result.add_argument("--bundle-dir", type=Path)
@@ -348,7 +477,7 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     if args.preflight_only:
-        receipt, _ = preflight(args.inputs_manifest)
+        receipt, _ = preflight(args.inputs_manifest, setting_scope=args.setting_scope)
         print(debug.canonical_json(receipt))
         return 0 if receipt["preflight"] == "PASS" else 1
     try:
