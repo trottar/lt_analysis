@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 9002,
+      "bytes": 9456,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "52b08dd635846646b4792ecc65da2039d5104a0e2790d23f5963297aaf5eff41"
+      "sha256": "ddab227883a1ed82b75f8368476adf66dd81b2758ff6e17d6fb0557826f926b2"
     },
     {
       "bytes": 8339,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 7322,
+      "bytes": 7940,
       "path": "docs/memory/USER.md",
-      "sha256": "6fb3cdc02f6aebdd9364a287fabfcdb96a4a14e7848793b7cd7ef7aaca047f64"
+      "sha256": "d0d2c143d006ca42d280f346cd65e496a46fdb557bcfefbf937ec75966b26794"
     },
     {
       "bytes": 1157,
@@ -231,9 +231,9 @@
       "sha256": "69ca61bae5e54d3fd972eb5d7458dc122cd19913771c0a852cdbc68e53705929"
     },
     {
-      "bytes": 8975,
+      "bytes": 11104,
       "path": "docs/memory/evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md",
-      "sha256": "c6d69f5758efbf7552e38096bff3056c4a9a711b590e59e1b9becd3f75fb1d40"
+      "sha256": "d125619129104e87bdba91def285ddf9f8172d0359baea73861df753d7a11b0f"
     },
     {
       "bytes": 8737,
@@ -1049,6 +1049,11 @@
       "bytes": 17122,
       "path": "docs/memory/phases/e8-no-empirical-residual-memory-correction-task-contract.md",
       "sha256": "2070bee0fbb136b71d5c770f882b2925759177f2de8059b51bf28f6d8b60af84"
+    },
+    {
+      "bytes": 6980,
+      "path": "docs/memory/phases/e8-paired-lowe-scientific-scope-memory-checkpoint-task-contract.md",
+      "sha256": "ed3dab4009cf27e486c415ffc2528c513f8731d205f6755d79ca98ae4e7ad0aa"
     },
     {
       "bytes": 23251,

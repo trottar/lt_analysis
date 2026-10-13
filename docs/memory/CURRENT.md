@@ -5,7 +5,9 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 is `ACTIVE`: audit actual Method-A-reweighted baseline contributions.
+E.8 scientific work is `ACTIVE`: audit actual Method-A-reweighted baseline
+contributions. Default forthcoming paired quick-debug scope:
+**Left/lowe + Center/lowe**; earlier Left-only conclusions remain setting-local.
 The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
 identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
 [October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
@@ -19,11 +21,12 @@ are resolved only here; [debug](phases/e8-current-snapshot-method-a-contribution
 and [repair](phases/e8-neff-moment-validator-parity-repair-task-contract.md)
 retain history. No authority replacement or production closure.
 The [GeV-axis presentation contract](phases/e8-current-snapshot-mm-gev-axis-presentation-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: pages 5–8 use persisted
-physical MM coordinates and separate UF/OF. All 73 local tests pass; local pages
-5–8 inspected, pages 1–4 pixel-identical. October 12 acceptance covers the
-original PDF only; new farm visual inspection is pending. Numerical/scientific
-content and the accepted evidence are frozen.
+is `CLOSED / RUNTIME VALIDATED` for Left/lowe presentation only under the
+[October 13 addendum](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md#gev-axis-farm-visual-acceptance-addendum---2026-10-13).
+RUNTIME VERIFIED (attributed): supplied ZIP/prior ChatGPT review at
+`c8e830f38cf59a22b7b6d9753b1a847fe1124e70`; all eight pages inspected,
+5–8 show physical 0.8–1.4 GeV coordinates and distinct UF/OF. Numerical objects
+and October 12 acceptance are preserved; no Center/lowe MM/PDF closure.
 
 ## Current Work Item
 
@@ -123,21 +126,24 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 ## Next Action
 
 NEXT — after ChatGPT actual-diff acceptance, user commit/push and pushed-state
-review, perform one source-owned detached current-snapshot diagnostic rerun
-after verifying the same seven inputs, exact passed preflight fingerprint and
-existing external output roots. Review ZIP manifest/JSON identity and GeV-axis
-PDF pages 5–8 for visual acceptance only; no numerical reinterpretation or
-canonical-owner retry. Then audit the read-only E.8 baseline-to-detached-background scientific
-crosswalk, starting Q4p4W2p74 / Left / lowe t0/t1/t2: source-owned matching keys,
-cuts/windows/bins, run/lineage provenance and weighting units for detached
-`b/b_rw`, baseline `MM_0/Y0` and stored private `MM_A/YA` where applicable.
+review, perform read-only paired low-epsilon phi-coverage and baseline/reweighted
+pion-contribution inspection using the already accepted five-setting F.4
+materialization, starting Q4p4W2p74 / Left/lowe + Center/lowe with each setting's
+t0/t1/t2 source-owned phi cells. Report actual populated phi coverage and
+within-setting results separately; inspect cross-setting overlap cautiously.
+Left/lowe has restricted phi support; Center/lowe covers a wider phi range,
+not proven complete acceptance or equal normalization. Infer or sum no event
+populations across settings without independent authority. If physical
+MM-resolution Center aggregates are missing, report the precise missing
+source-owned data/owner gate; invent no result or producer, reconstruct no Y0/YA.
 Baseline October 9 `8e68d2acae91fd97622793df563aba0296403a48` differs from
 detached October 12 `75756d7b32767f18949386c4c5864c756d5e85f6`; assume no
-numerical equivalence, common population or direct subtractability. Separate
-redistribution from attributable stage/yield changes, exact same-lineage
-comparison from qualitative juxtaposition. Report the first missing comparable
-source-owned object/accepted artifact; invent no producer, reconstruct no Y0/YA,
-retry no owner. Start with source/available-evidence audit; no farm authorized.
+numerical equivalence, common population or direct subtractability. Verify
+matching keys, cuts/windows/bins, run/lineage provenance and weighting units;
+separate exact same-lineage comparison from qualitative juxtaposition.
+Microscopic F.1/F.4 forensic work stays `DEFERRED`; canonical-five owner and
+absolute SIMC stay `BLOCKED`. No owner retry, other-setting/high-epsilon
+expansion or farm operation is authorized.
 
 ## Success Criteria
 

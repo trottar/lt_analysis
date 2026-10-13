@@ -11,6 +11,15 @@ for each task rather than treating workstation configuration as project truth.
 
 ## Collaboration preferences
 
+For forthcoming E.8 quick-debug science, use **Left/lowe + Center/lowe**
+together by default: adjacent low-epsilon runs are quick to analyze. Left/lowe
+has restricted phi support; Center/lowe covers a wider phi range. Report actual
+populated phi coverage and within-setting results separately; compare overlap
+with acceptance and normalization limits explicit. Preserve earlier Left-only
+conclusions as setting-local. This preference implies neither complete physical
+acceptance, equal cross-setting normalization, pooled event populations nor
+other-setting/high-epsilon analysis; preserve existing cuts and sources.
+
 Use one narrow phase or fix at a time. Inspect actual source and diffs rather
 than trusting summaries. Preserve frozen scientific interfaces unless the task
 contract explicitly owns a change. Do not request information already present

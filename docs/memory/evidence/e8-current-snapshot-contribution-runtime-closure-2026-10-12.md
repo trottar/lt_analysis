@@ -104,3 +104,35 @@ and distinguish exact same-lineage comparisons from qualitative juxtaposition.
 Report the first missing comparable source-owned object/accepted artifact;
 invent no producer, reconstruct no Y0/YA and retry no blocked owner.
 No farm command or successor scientific implementation is authorized here.
+
+## GeV-axis farm visual-acceptance addendum - 2026-10-13
+
+Status: `CLOSED / RUNTIME VALIDATED` for **Left/lowe presentation only**.
+RUNTIME VERIFIED (attributed): the user-supplied October 13 ZIP and prior
+independent ChatGPT review own acceptance; Codex records it under the
+[paired-scope checkpoint contract](../phases/e8-paired-lowe-scientific-scope-memory-checkpoint-task-contract.md),
+without farm execution or independent raw-artifact validation.
+
+- ZIP: `kaonlt-current-snapshot-contribution-b7719f070b9048debd28d3c1ba666c13.zip`.
+- ZIP SHA-256: `610c6414a1ea9a59219516b4e2473348a702d794ecfbdbfb71ea45347aeb3e6d`.
+- Farm source HEAD: `c8e830f38cf59a22b7b6d9753b1a847fe1124e70`.
+- Seven-input snapshot fingerprint: `3644eb1b91932519a6a92f08107e77350d558ef7c1bb376cbcd15781df7085e7`.
+- Manifest fingerprint: `d94df1fc25f7acd255e219546897a528436bb7bce4a1d439a75a6b32103b42ab`.
+- Diagnostic fingerprint: `2faa10d6532297082ac312c93e0e243fc8ebe238eebbaec15027ad6b3f9b4584`.
+- PDF SHA-256: `753df68284f7dfc85a1f3949ca4ff281d15bfe4406d5a806ceadf9eb1bfed9b1`.
+
+Prior review rechecked exact identities from the ZIP: exactly three members,
+CRC/member digest/manifest gates PASS; all eight PDF pages inspected. Pages 5–8
+show physical 0.8–1.4 GeV coordinates and distinct UF/OF categories. Diagnostic
+numerical objects are identical to the accepted `c6392716...` original except
+new Git provenance and consequent digest. All October 12 Left-only numbers,
+scientific interpretation and earlier scoped closures above remain unchanged.
+
+This closes only the GeV-axis presentation rerun. It supplies no Center/lowe
+MM/PDF farm validation, new same-lineage final `YA/MM_A`, correction promotion
+or production closure. Forthcoming paired Left/lowe + Center/lowe quick-debug
+science is the default preference, not historical coverage of Left-only
+artifacts. CURRENT owns the sole paired scientific NEXT; the successor wording
+above records the October 12 checkpoint. Microscopic F.1/F.4 forensics remain
+`DEFERRED`; canonical-five owner/final E.8/F.6.4 and absolute SIMC remain
+`BLOCKED`, with the existing failed invariants unchanged.
