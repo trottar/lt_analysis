@@ -5,9 +5,13 @@ memory_schema: 3
 
 ## Active Objective
 
-E.8 scientific work is `ACTIVE`: audit actual Method-A-reweighted baseline
-contributions. Default forthcoming paired quick-debug scope:
-**Left/lowe + Center/lowe**; earlier Left-only conclusions remain setting-local.
+`ACTIVE`: read-only baseline pion-control neutron-anchor regression
+investigation for **Q4p4W2p74 / Center / lowe / canonical t2**, comparing Center
+t1 where relevant. The [October 14 investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
+anchors the question to the first staged `B_n=0`; its cause is NOT VERIFIED.
+This user-directed priority precedes interpreted Method-A production impact
+and F.6.4 promotion, without reopening accepted closures. Paired E.8 diagnostics
+remain separate; earlier Left-only conclusions remain setting-local.
 The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
 identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
 [October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
@@ -33,6 +37,11 @@ local candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
 explicit `paired-lowe` selects separate Left/Center lowe aggregates from one
 validated snapshot; 16 detached pages. Center joint MM/PDF farm behavior remains
 NOT VERIFIED; default eight-page Left-only path and all science are preserved.
+
+MEMORY ONLY (attributed prior chat): later paired progress was reported after
+tracked CURRENT was published; no independent paired closure is recorded here.
+The prior paired-farm NEXT is superseded as the immediate priority, not failed.
+No new receipt, hashes or 16-page visual acceptance are inferred.
 
 ## Current Work Item
 
@@ -132,22 +141,18 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, user-controlled single paired seven-input
-diagnostic farm validation through the existing tracked owner with explicit
-`paired-lowe` scope and expected snapshot fingerprint
-`3644eb1b91932519a6a92f08107e77350d558ef7c1bb376cbcd15781df7085e7`.
-Then inspect returned JSON/PDF/ZIP identities, all 16 pages and each setting's
-t0/t1/t2 phi–MM contributions before paired science. Report actual populated phi
-cells/records and within-setting results separately; overlap is descriptive,
-not equal acceptance/normalization or a merged estimate. Compare final-baseline
-objects only after matching keys, cuts/windows/bins, run/lineage and units:
-October 9 baseline `8e68d2acae91fd97622793df563aba0296403a48` differs from
-October 12 detached `75756d7b32767f18949386c4c5864c756d5e85f6`; assume no
-common population, numerical equivalence or direct subtractability. Report
-missing source-owned objects/owner gates; invent no producer or final Y0/YA.
-Microscopic F.1/F.4 forensics stay `DEFERRED`; canonical-five owner and absolute
-SIMC stay `BLOCKED`. No farm command/execution, owner retry or scope expansion
-is authorized by this local task.
+ChatGPT pushed-state synchronization, audit existing applicable records and
+source-backed diagnostics to determine whether the original Center/lowe t2
+neutron-anchor nonnegative solve reached zero from the signed weighted numerator
+or absent/invalid template/fit-bin support. Match cut, bin, coordinate,
+signed-source and SIMC-template identities; record prompt/random/dummy/
+dummy-random anchor contributions, `fit_bin_indices`, `fit_y`, `fit_sigma`,
+`fit_template`, `weighted_numerator`, `weighted_denominator`, `success/message`,
+effective joint prior and populated-phi SIMC inputs. Compare Center t1 where
+relevant. Only if existing evidence lacks these inputs, define a separate narrow
+diagnostic-only source contract. No farm command, production correction or
+blocked-owner retry is authorized here; microscopic F.1/F.4 forensics remain
+`DEFERRED`, canonical-five owner and absolute SIMC remain `BLOCKED`.
 
 ## Success Criteria
 

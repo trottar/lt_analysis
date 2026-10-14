@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 9690,
+      "bytes": 10098,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c17261bf064ee2348fbab65aa85f679242faa2d407372d790b7286e987c6da92"
+      "sha256": "e1cb2d60965fa0a2f2749a60474d7b4208d2bec822a61570650be689ef8483b6"
     },
     {
       "bytes": 8339,
@@ -414,6 +414,11 @@
       "bytes": 385,
       "path": "docs/memory/investigations/README.md",
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
+    },
+    {
+      "bytes": 9953,
+      "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
+      "sha256": "f6d320c8ed31e5a74cb98b2572e98eff769e3b3ceca69d629b07949cfa0a3ba8"
     },
     {
       "bytes": 23507,
@@ -1206,6 +1211,11 @@
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
     },
     {
+      "bytes": 14922,
+      "path": "docs/memory/phases/kaonlt-baseline-pion-memory-reanchor-2026-10-14.md",
+      "sha256": "3c0ce1a3ec3c3d402160cd25383ac1fbb0af3c355f5d0ee9b9664493c9298d5f"
+    },
+    {
       "bytes": 14192,
       "path": "docs/memory/phases/memory-bracketed-scientific-throughput-policy-surface-fix-task-contract.md",
       "sha256": "c34e4bc3aa5893c813606adf0d75f967ad7c54637b8724926016d5944b784f4c"
@@ -1341,9 +1351,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 30159,
+      "bytes": 30708,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "76c2a23dd7a051af1a280ec45e05586a09a0743f24396345081e95a6ed1e330a"
+      "sha256": "8a4ca787332ff18dc3d861f57c9e0421b75981418e0b73fed860953f88253fff"
     },
     {
       "bytes": 1698,

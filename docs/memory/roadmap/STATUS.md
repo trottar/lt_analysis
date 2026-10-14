@@ -80,6 +80,13 @@ Fix.1 is also `SOURCE REVIEWED` by that review; no farm/runtime claim follows. S
 
 `ACTIVE` — E.8 is the presentation-only visual audit of the complete kaon missing-mass and signal-region yield chain. It consumes authoritative upstream objects/snapshots and never recomputes a fit, factor, correction, normalization, or yield. The baseline production branch remains unchanged; Method B remains diagnostic/cross-check only and Method A remains detached until F.6.4.
 
+Dependency (October 14): scientific baseline fit/transfer validity is an explicit
+prerequisite to further interpreted full E.8 production-impact claims and any
+F.6.4 promotion decision; see the [baseline neutron-anchor investigation](../investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md).
+This adds no phase or F.1/F.4 recategorization and reopens no accepted status.
+Baseline-five owner/identity/numerical gates retain their limited acceptance;
+they do not establish all component-decomposition physics. CURRENT owns NEXT.
+
 E.8.1.Fix.5 and E.8.1.Fix.6 are `CLOSED / RUNTIME VALIDATED` only for the fresh `Q4p4W2p74 / Left / lowe` persisted-overlay geometry and profile/provenance gate at bundle/profile commit `0ec29d4e1bb345eb37e8cca35b8b7e5cbe1b4d5b`, requiring distinct Fix.5 source `53fd262b730af8f1254e411a38231aebeb6a1da3`. See [Fix.6 Left/lowe runtime evidence](../evidence/e8-1-fix6-left-lowe-runtime-closure.md). The remaining E.8.1 canonical-five expansion is `DEFERRED` by user decision, not failed or closed.
 
 #### E.8.2 — baseline full-analysis stage audit
