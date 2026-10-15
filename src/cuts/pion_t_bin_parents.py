@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import textwrap
 
+from pion_control_anchor_audit import observe_anchor_audit
+
 from background_config import (
     get_particle_subtraction_setting_key,
     resolve_particle_subtraction_mode,
@@ -542,6 +544,9 @@ def build_setting_t_bin_pion_parents(
                     "current": current_provenance,
                 })
         if reusable:
+            observe_anchor_audit(
+                hist, inp_dict, existing_parents, pion_component_shape_payload, alignment_outpath
+            )
             return _finalize_frozen_parent_collection(
                 hist,
                 inp_dict,
@@ -778,6 +783,9 @@ def build_setting_t_bin_pion_parents(
     # that parent for the lifetime of the setting, but Step 6/yield/average
     # code cannot append, remove, or replace parent slots.
     frozen_parents = tuple(parents)
+    observe_anchor_audit(
+        hist, inp_dict, frozen_parents, pion_component_shape_payload, alignment_outpath
+    )
     # Keep the producer-owned freeze visible at the particle-stage boundary;
     # the shared finalizer only derives scalar summaries and global products.
     hist["_pion_t_bin_parent_results"] = frozen_parents

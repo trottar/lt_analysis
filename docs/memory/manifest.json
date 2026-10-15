@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 10098,
+      "bytes": 10293,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "e1cb2d60965fa0a2f2749a60474d7b4208d2bec822a61570650be689ef8483b6"
+      "sha256": "8f73f7a57132165c945272ec3e213911d3d3b10c0d64bb8b850cd564bfb0225b"
     },
     {
       "bytes": 8339,
@@ -449,6 +449,11 @@
       "bytes": 462,
       "path": "docs/memory/phases/README.md",
       "sha256": "1f715dee22cba79dcadb0382e593977d37500317dea8d2e9965a1b7d37f8e397"
+    },
+    {
+      "bytes": 13489,
+      "path": "docs/memory/phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md",
+      "sha256": "db64744037709a7c8d6bb1e6325cbbbcf1a53e6c44f2e09185476a76f2f15461"
     },
     {
       "bytes": 8577,

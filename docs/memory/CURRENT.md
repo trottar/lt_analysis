@@ -12,6 +12,11 @@ anchors the question to the first staged `B_n=0`; its cause is NOT VERIFIED.
 This user-directed priority precedes interpreted Method-A production impact
 and F.6.4 promotion, without reopening accepted closures. Paired E.8 diagnostics
 remain separate; earlier Left-only conclusions remain setting-local.
+The [neutron-anchor capture contract](phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md)
+local diagnostic candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
+read-only same-run t2/t1 solver/cache observations, no refit or physics change.
+Deterministic local checks establish extraction behavior only; the current-run
+result and historical first-failure cause remain NOT VERIFIED.
 The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
 identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
 [October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
@@ -141,18 +146,15 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, audit existing applicable records and
-source-backed diagnostics to determine whether the original Center/lowe t2
-neutron-anchor nonnegative solve reached zero from the signed weighted numerator
-or absent/invalid template/fit-bin support. Match cut, bin, coordinate,
-signed-source and SIMC-template identities; record prompt/random/dummy/
-dummy-random anchor contributions, `fit_bin_indices`, `fit_y`, `fit_sigma`,
-`fit_template`, `weighted_numerator`, `weighted_denominator`, `success/message`,
-effective joint prior and populated-phi SIMC inputs. Compare Center t1 where
-relevant. Only if existing evidence lacks these inputs, define a separate narrow
-diagnostic-only source contract. No farm command, production correction or
-blocked-owner retry is authorized here; microscopic F.1/F.4 forensics remain
-`DEFERRED`, canonical-five owner and absolute SIMC remain `BLOCKED`.
+ChatGPT pushed-state synchronization, audit the analyzed-source identity,
+startup owner, existing analysis-output role, packaging/provenance and collection
+path for a separately authorized narrow neutron-anchor capture. Then review
+applicable captured solver moments, signed-source bin closure, prior and SIMC
+provenance to distinguish a nonpositive numerator from unsupported inputs.
+The original Center/lowe t2 first-failure cause remains NOT VERIFIED; a current
+capture cannot retroactively validate August 26. No farm command, production
+correction or blocked-owner retry is authorized here. Microscopic F.1/F.4 remains
+`DEFERRED`; canonical-five owner and absolute SIMC remain `BLOCKED`.
 
 ## Success Criteria
 
