@@ -5,13 +5,22 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: read-only baseline pion-control neutron-anchor regression
-investigation for **Q4p4W2p74 / Center / lowe / canonical t2**, comparing Center
-t1 where relevant. The [October 14 investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
-anchors the question to the first staged `B_n=0`; its cause is NOT VERIFIED.
-This user-directed priority precedes interpreted Method-A production impact
-and F.6.4 promotion, without reopening accepted closures. Paired E.8 diagnostics
-remain separate; earlier Left-only conclusions remain setting-local.
+`ACTIVE`: **TEMPORARY roadmap interruption** for a read-only investigation of
+the existing baseline pion-subtraction fitted-versus-applied discrepancy at
+**Q4p4W2p74 / Center / lowe / canonical t2**, comparing adjacent Center t1 and
+setting-wide controls with their scopes kept distinct. The
+[read-only-first contract](phases/baseline-pion-regression-readonly-first-task-contract.md)
+and [October 14 investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
+bound the audit. Earliest reported anomaly: staged `B_n=0` (MEMORY ONLY);
+its cause and a last-good/first-bad same-scope numerical comparison remain
+NOT VERIFIED. Local source/history establishes a possible amplification
+mechanism, not the historical cause. This is not a new phase or replacement
+roadmap. Mandatory return to [the normal roadmap](roadmap/STATUS.md) at the
+interrupted E.8 position follows explanation and validation of the existing
+subtraction, or independent review, user push and user-farm validation of a
+necessary minimum correction. Preserve all accepted, active, deferred, blocked
+and pending items. Paired E.8 diagnostics remain separate; earlier Left-only
+conclusions remain setting-local.
 The [neutron-anchor capture contract](phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md)
 local diagnostic candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
 read-only same-run t2/t1 solver/cache observations, no refit or physics change.
@@ -23,8 +32,10 @@ SOURCE VERIFIED: the reused overlay preserves the volatile path; the normal
 launcher runs `git clean -fdx` then recreates the output link through
 `set_SymLinks.sh` into volatile output, not an owner-created attempt output.
 The Left-only debug route cannot capture Center. No owner/checker/profile was
-implemented and no farm operation occurred; a narrow output-isolation contract
-is required before executable implementation can proceed.
+implemented and no farm operation occurred. Isolation is a prerequisite only
+for a future run that needs the normal launcher; the existing separate proposal
+is preserved, not launched. Read-only comparison takes priority over further
+isolation or owner/checker/collection engineering.
 The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
 identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
 [October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
@@ -154,14 +165,16 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, define an explicit narrow contract that
-owns normal-launcher attempt-output isolation while preserving external inputs
-and accepted artifacts. Resolve that source boundary before resuming the
-neutron-anchor owner/checker/collection implementation. The required normal
-Q4p4W2p74 low/high run must not be described as Center-only execution.
-The original Center/lowe t2 first-failure cause remains NOT VERIFIED; a current
-capture cannot retroactively validate August 26. No farm command, production
-correction or blocked-owner retry is authorized here. Microscopic F.1/F.4 remains
+ChatGPT pushed-state synchronization, continue the read-only first-divergence
+comparison: locate the original August 26 Center/lowe t2 first neutron-anchor
+solve record with source/input identity, signed bin contents/errors, selected
+SIMC template and solver outcome. This is the earliest missing decisive
+artifact; a same-scope last-good comparator is also NOT VERIFIED. Do not infer
+it from a setting-wide PDF or retroactively substitute a current capture.
+Remain `ACTIVE` until evidence explains the discrepancy; no isolation
+engineering, diagnostic implementation, farm command, physics correction or
+blocked-owner retry is authorized by this task. Then return mandatorily to the
+normal roadmap under the validation condition above. Microscopic F.1/F.4 remains
 `DEFERRED`; canonical-five owner and absolute SIMC remain `BLOCKED`.
 
 ## Success Criteria

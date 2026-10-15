@@ -165,3 +165,180 @@ Method B stays independent diagnostic/cross-check only and numerically excluded.
 All random/dummy/slow-proton/pion handling, HGCer roles, SIMC inputs, cuts,
 models, priors, templates, numerical ratios, weights, errors, yields, L/T,
 cross sections, provenance and `no_empirical_residual` remain unchanged.
+
+## Read-only-first audit addendum — October 14
+
+### Temporary interruption and return condition
+
+`ACTIVE`: this is an explicit **TEMPORARY interruption** of the normal
+[roadmap](../roadmap/STATUS.md), not a new phase or replacement program.
+The [read-only-first contract](../phases/baseline-pion-regression-readonly-first-task-contract.md)
+owns this local audit. Once the discrepancy is explained and the existing
+subtraction validated, or a necessary minimum correction is independently
+reviewed, user-pushed and user-farm validated, return mandatorily to the
+interrupted E.8 roadmap position. Preserve every closed, active, deferred,
+blocked and pending item and existing scientific role. CURRENT alone owns NEXT.
+The farm-owner output-isolation blocker remains real, but applies only to a
+future operation requiring the normal launcher. The separate isolation proposal
+is preserved; neither isolation engineering nor owner implementation proceeds
+under this task. No source, fit, configuration, physics or acceptance changed.
+
+### Local identity, available evidence and comparison limits
+
+SOURCE VERIFIED: this audit inspected local `test` HEAD
+`d860eeafbb889bcc04cfddb1ff6019cfcff50922`. Following the user's correction,
+continuation uses local files and local Git objects only; remote checks are
+outside the continued task. No farm, ROOT, fit or procedure rendering ran.
+The existing unrelated `.M` entries have equal HEAD/index/Git-filtered-worktree
+blob identities; their raw bytes and existing review bundles were preserved.
+
+The local workspace search (including ignored files) found no ROOT file, log,
+or applicable Center/full-analysis/pion procedure PDF containing the original
+solve. Local Git history of ROOT, FullAnalysis/rand_sub PDF and log paths yielded
+only unrelated historical log filenames, not a matching numerical record.
+Exact quoted historical integrals occur in the existing investigation and the
+two baseline memory/read-only contracts, not an independently available raw
+fit artifact. No external artifact directory was supplied or guessed.
+
+| Comparison | Supported identity and scope | Numerical conclusion |
+| --- | --- | --- |
+| Current source audit | Exact local HEAD above; configured Q4p4W2p74 runtime defaults and explicit canonical-t parent path | SOURCE VERIFIED code behavior only; no current numerical fit/application |
+| Reported August 26 anomaly | MEMORY ONLY: Center/lowe, historical canonical t2 approximately 0.567–0.733 GeV^2, phi-integrated parent | Staged zero precedes tiny refined denominator and large application; original SHA, run lineage, exact cuts, normalization, binning and resolved configuration NOT VERIFIED |
+| Adjacent Center t1 | MEMORY ONLY: reported event/model ratio approximately 4.32 | Comparison control, not a demonstrated good same-scope predecessor; exact inputs NOT VERIFIED |
+| Archived 67-page Center/lowe reference | MEMORY ONLY: setting-wide, 0.5967 model versus 0.6010 event-weighted | Different fit scope; no proof of earlier per-t correctness or historical working SHA |
+
+Thus a last demonstrably good / first bad **same-scope numerical pair is NOT
+VERIFIED**. The earliest reported internal anomaly is staged `B_n=0`; the
+earliest independently verified historical numerical divergence cannot be
+located from these local records. A code authority transition is not that datum.
+
+### Actual source/history comparison
+
+SOURCE VERIFIED from actual diffs, not commit subjects:
+
+- Immediately before `f924a95c55f601546316de7b78185df653f3b0c0` is
+  `fe967c2eb08c25830a96525deee012a5c4e57fa8`. Per-t fitting/application
+  already existed in `src/binning/ave_per_bin.py::process_hist_data`.
+  `f924a95` adds the `t_bin` runtime default, makes the setting-wide result
+  diagnostic-only in `rand_sub`, and builds RF-restored authoritative parents
+  in `src/main.py` before child yield/average consumers. The averages path
+  reuses those parent fit results instead of refitting them at that point.
+  This is the earliest authority/consumer difference in the requested pair
+  of transitions, not proof that it initiated the numerical pathology.
+- Immediately before `ee9e29251865acd1d78b4cbbef1223bfae67565c` is
+  `5ad24e044f76aff933f83a3b59ea4d2b12033910`. `ee9e292` moves normal parent
+  construction/freezing to `src/cuts/pion_t_bin_parents.py` during `rand_sub`,
+  still calling the shared integrated input builder. It adds an explicit
+  half-open t-edge filter to the detached parent event-application diagnostic
+  and makes downstream consumers validate the frozen collection. These are
+  real producer/selection changes; no original numerical inputs establish an
+  erroneous boundary choice or a first-bad result there.
+- AST comparisons across both commits and their immediate predecessors find
+  identical `_solve_nonnegative_template_amplitude`,
+  `_run_staged_component_pass`, `_fit_staged_anchor_templates`,
+  `_run_joint_template_refinement`, `_apply_joint_component_refinement`,
+  `_build_regularization_width_map`, `_resolve_component_scope_hist` and
+  `_resolve_single_scope_hist` in `pion_component_fits.py`, and identical
+  `build_simc_shape_pion_control_weights` in `pion_component_subtraction.py`.
+  `pion_component_shapes.py` has no diff across this bounded transition range.
+  This excludes a change to those routines in that range, not changes to
+  their callers, inputs, configuration or later history.
+
+Current lineage was independently traced at the stated HEAD:
+`pion_t_bin_parents.py:561–626` consumes producer-owned kaon and signed pion
+inputs, resolves t-specific shapes/alignment and calls the component fitter.
+It is no longer the original August shared-averages construction path.
+`rand_sub.py:1261–1326` builds the parent event diagnostic from those frozen
+records. Historical input equivalence to that current path is NOT VERIFIED.
+
+### Model versus event application
+
+SOURCE VERIFIED: `pion_component_subtraction.py:745–894` constructs
+`P_model=sum B_i*T_i` and `K_model=sum A_i*T_i` over the active pion background
+components, excluding signal templates. Final/staged amplitude dictionaries
+and protected kaon applied amplitudes determine the selected model. In normal
+supported, finite, unclipped bins it uses
+`w(M)=K_model(M)/P_model(M)`, hence `w*P_model=K_model`.
+
+The event product is instead `w(M)*P_signed_data(M)` under the same MM bins
+and selection. `rand_sub.py:1217–1258` multiplies each authoritative record's
+signed coefficient by the bin weight; `pion_component_subtraction.py:977–1010`
+preserves prompt/random/dummy/dummy-random coefficients
+`(+norm_data, -norm_data/nWindows, -norm_dummy, +norm_dummy/nWindows)`.
+Its cached-event path (`1078–1094`, `1114–1187`) retains cached coefficients
+and scope masks; baseline Method-A multiplier defaults to one. Source/mask,
+MM-coordinate and optional downstream treatment identities must match before
+comparing any particular histogram or integral.
+
+For those matched, supported/unclipped bins the model/event difference is
+`w(M)*(P_signed_data(M)-P_model(M))`. A small positive fitted denominator can
+amplify a control fit/data mismatch even when the model-ratio closure passes.
+This is a SOURCE VERIFIED mechanism, not a demonstrated historical root cause.
+Denominator at/below the configured floor produces zero weight; nonfinite
+weights become zero; clip bounds apply afterward. Flow bins and unsupported
+or clipped bins do not inherit `w*P_model=K_model`. An amplitude ratio alone
+does not determine the full multi-component weight or its integral.
+
+### Earliest staged solve and template checks
+
+SOURCE VERIFIED at this HEAD: `background_config.py:357–434` fits control
+`pi_n` first, one staged pass, neutron anchor 0.88–0.94 GeV with configured
+data-MM offset. Only `k_sigma0_signal` has the explicit `window_integral`
+mode/window; neutron resolves to `least_squares` through
+`pion_component_fits.py:3925–3998`. Initial other amplitudes are zero, so the
+first neutron solve sees the signed control target, before joint refinement
+or the later protected kaon delta fit. Actual historical overrides and shifted
+window/bin identities are NOT VERIFIED.
+
+`pion_component_fits.py:620–840` selects bins by center, windows and finite
+target content; invalid/nonpositive errors use `max(sqrt(abs(y)),1)`.
+The LS solution is `max(sum(T*y/sigma^2)/sum(T^2/sigma^2),0)` only after valid
+template/bin/support checks. Missing/mismatched/nonpositive-integral template,
+no valid bins or invalid/nonpositive denominator can also return zero with a
+failure message. The alternative window-integral mode uses a different target/
+template sum estimator. Therefore the original zero cannot be assigned to a
+nonpositive LS numerator without its estimator, arrays and success/message.
+The `1e-3` reference floor (`3222–3238`) constructs regularization widths;
+it does not impose a lower fitted amplitude or explain the observed zero.
+
+SOURCE VERIFIED: `pion_component_shapes.py:657–722` fills SIMC with
+`iter_weight`, `-evt.t` and phi converted to degrees, using SIMC cuts and the
+kaon hole exclusion, then independently normalizes setting/full and each
+`(t,phi)` shape. `pion_component_fits.py:5893–5985` sums the normalized phi
+shapes for a parent and renormalizes, falling back to setting-wide shape if
+t support is unusable. Consequently this aggregation does not retain raw phi
+population weights. Its relevance to the historical t2 solve is INFERENCE:
+original populated slices, raw integrals, selected fallback and aligned/scaled
+template are absent. No template reweighting, normalization or fit change is
+authorized or validated by this observation.
+
+### Findings matrix and one decisive missing artifact
+
+| Evidence label | Finding |
+| --- | --- |
+| SOURCE VERIFIED | Authority/ownership changes and unchanged bounded solver routines; separate fitted-model and signed-event products; possible denominator amplification; multiple zero-producing solver paths; normalized-phi aggregation |
+| MEMORY ONLY | August 26 staged zero, refined approximately 0.0002021, A_n approximately 0.0369527, maximum weight approximately 183 and 0.2529 versus 6.556; setting-wide and t1 comparisons |
+| INFERENCE | Signed cancellation, template mixture/support, prior-constrained recovery or an amplified control-model mismatch may matter; none is an accepted cause |
+| NOT VERIFIED | Same-scope working predecessor, first-bad numerical identity, original estimator/solver branch and input decomposition, historical root cause, current farm reproduction |
+
+**One earliest missing decisive artifact:** the original August 26
+Q4p4W2p74 / Center / lowe / t2 **first neutron-anchor solve record**, including
+source/run/configuration and coordinate/selection identity, prompt/random/
+dummy/dummy-random contributions and errors, selected SIMC shape/support,
+fit bins/y/sigma/template, estimator, numerator/denominator (or integral-mode
+sums), and success/message. This one record distinguishes clipped LS from
+invalid/absent support before any downstream explanation. A matched good
+predecessor remains necessary to date a regression, but is not substituted
+for this earlier unresolved solve. Stay `ACTIVE`; no diagnostic implementation
+or farm run follows from the evidence gap.
+
+Local integrity note: the initial manifest mismatch consisted solely of the
+two pre-existing untracked baseline contracts, with no changed listed-file
+hashes. The ordinary generator inventories both tracked and nonignored
+untracked memory files; regeneration therefore also records the preserved
+isolation proposal. Its presence in integrity metadata is not execution or
+publication authorization. Actual-diff review must account for that untracked
+dependency before using the contract's publication block; do not silently
+publish a manifest referencing an absent file. The existing CURRENT soft-size
+warning is nonblocking and scheduled for the next meaningful memory checkpoint;
+no accepted-status compaction is part of this task.

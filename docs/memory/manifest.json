@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 10888,
+      "bytes": 11813,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c9adbae3891aa7245936ab1df6d1a9eff9bf32218ad0572f6f48f3d463849560"
+      "sha256": "6d022ebaf4a693088e568c8712d75c08b977a33365a5b3eb0756b5c7a5da8dcb"
     },
     {
       "bytes": 8339,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 9953,
+      "bytes": 21934,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "f6d320c8ed31e5a74cb98b2572e98eff769e3b3ceca69d629b07949cfa0a3ba8"
+      "sha256": "dc43b7e7d50ce13124ddd6b37afa77f3d410553051e23ebdd252d3c105a27745"
     },
     {
       "bytes": 23507,
@@ -456,9 +456,19 @@
       "sha256": "994532cbd3d3be775359266703723493d47faa225a6d1586e09439db80275e90"
     },
     {
+      "bytes": 14405,
+      "path": "docs/memory/phases/baseline-pion-center-t2-attempt-output-isolation-task-contract.md",
+      "sha256": "4c4535c1384da4d5a3d069b4a0f3726d76edf805cafc03462593c070a712afa9"
+    },
+    {
       "bytes": 13489,
       "path": "docs/memory/phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md",
       "sha256": "db64744037709a7c8d6bb1e6325cbbbcf1a53e6c44f2e09185476a76f2f15461"
+    },
+    {
+      "bytes": 8853,
+      "path": "docs/memory/phases/baseline-pion-regression-readonly-first-task-contract.md",
+      "sha256": "8b2ca579cc4dc7d35ae1ea61b3b803b5448436de3955c9165c936fb091fc0d55"
     },
     {
       "bytes": 8577,
