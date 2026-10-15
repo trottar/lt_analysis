@@ -17,6 +17,14 @@ local diagnostic candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
 read-only same-run t2/t1 solver/cache observations, no refit or physics change.
 Deterministic local checks establish extraction behavior only; the current-run
 result and historical first-failure cause remain NOT VERIFIED.
+The [farm-owner contract](phases/baseline-pion-center-t2-anchor-farm-owner-task-contract.md)
+is `BLOCKED` at the required pre-implementation output-isolation audit.
+SOURCE VERIFIED: the reused overlay preserves the volatile path; the normal
+launcher runs `git clean -fdx` then recreates the output link through
+`set_SymLinks.sh` into volatile output, not an owner-created attempt output.
+The Left-only debug route cannot capture Center. No owner/checker/profile was
+implemented and no farm operation occurred; a narrow output-isolation contract
+is required before executable implementation can proceed.
 The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
 identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
 [October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
@@ -146,11 +154,11 @@ page families unavailable, not data/identity/yield/parent closure. No scale clai
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, audit the analyzed-source identity,
-startup owner, existing analysis-output role, packaging/provenance and collection
-path for a separately authorized narrow neutron-anchor capture. Then review
-applicable captured solver moments, signed-source bin closure, prior and SIMC
-provenance to distinguish a nonpositive numerator from unsupported inputs.
+ChatGPT pushed-state synchronization, define an explicit narrow contract that
+owns normal-launcher attempt-output isolation while preserving external inputs
+and accepted artifacts. Resolve that source boundary before resuming the
+neutron-anchor owner/checker/collection implementation. The required normal
+Q4p4W2p74 low/high run must not be described as Center-only execution.
 The original Center/lowe t2 first-failure cause remains NOT VERIFIED; a current
 capture cannot retroactively validate August 26. No farm command, production
 correction or blocked-owner retry is authorized here. Microscopic F.1/F.4 remains
