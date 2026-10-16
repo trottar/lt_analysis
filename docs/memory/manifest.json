@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7767,
+      "bytes": 8161,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "48b2771098914a93c0ed4b18b92e1199aabccef34258782de00de20ffd8e9805"
+      "sha256": "59042092c6b930efec10122222a742700760e8a11a97f34c121e48683b890a57"
     },
     {
       "bytes": 8339,
@@ -1244,6 +1244,11 @@
       "bytes": 14922,
       "path": "docs/memory/phases/kaonlt-baseline-pion-memory-reanchor-2026-10-14.md",
       "sha256": "3c0ce1a3ec3c3d402160cd25383ac1fbb0af3c355f5d0ee9b9664493c9298d5f"
+    },
+    {
+      "bytes": 12579,
+      "path": "docs/memory/phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md",
+      "sha256": "64e1d8aa324173b8b860a841884b6801a9f66e46efa3ad6cc02f9322b1de561c"
     },
     {
       "bytes": 14192,

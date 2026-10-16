@@ -36,6 +36,12 @@ Prior evidence/reviews own acceptance.
   no capture, procedure-PDF, farm or scientific acceptance. Independent
   actual-diff review is the current gate; normal-launcher isolation stays blocked.
 
+- [Attempt-output isolation](phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
+  `BLOCKED`: `post_clean_background_output_mkdir_outside_attempt`.
+  Synthetic clean/setup reproduced shared writes; 10 new/11 existing local
+  tests pass. Source checks retain the frozen ancestor and record current HEAD.
+  No safe normal-launcher proof or farm readiness.
+
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
   [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
   Final baseline `after_pion_final/MM_0`, stored `Y0`; stage integrals are diagnostics.
@@ -107,9 +113,9 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, review the blocked normal-launcher output
-isolation and tracked owner/checker/collector route before any farm operation.
+NEXT — independently review the repaired isolation diff and shared-write blocker.
+Any change to frozen path interfaces needs a separate explicit contract; user
+commit/push and ChatGPT pushed-state synchronization precede later owner work.
 No owner resume or farm command is authorized by the diagnostic implementation.
 Only an independently reviewed, pushed, pushed-state-reviewed owner proving
 attempt-owned resolved write targets can precede a user-operated capture.
