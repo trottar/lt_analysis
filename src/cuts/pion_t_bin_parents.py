@@ -11,6 +11,7 @@ from __future__ import annotations
 import textwrap
 
 from pion_control_anchor_audit import observe_anchor_audit
+from pion_background_chain_audit import observe_chain_audit
 
 from background_config import (
     get_particle_subtraction_setting_key,
@@ -547,6 +548,9 @@ def build_setting_t_bin_pion_parents(
             observe_anchor_audit(
                 hist, inp_dict, existing_parents, pion_component_shape_payload, alignment_outpath
             )
+            observe_chain_audit(
+                hist, inp_dict, existing_parents, pion_component_shape_payload, alignment_outpath
+            )
             return _finalize_frozen_parent_collection(
                 hist,
                 inp_dict,
@@ -784,6 +788,9 @@ def build_setting_t_bin_pion_parents(
     # code cannot append, remove, or replace parent slots.
     frozen_parents = tuple(parents)
     observe_anchor_audit(
+        hist, inp_dict, frozen_parents, pion_component_shape_payload, alignment_outpath
+    )
+    observe_chain_audit(
         hist, inp_dict, frozen_parents, pion_component_shape_payload, alignment_outpath
     )
     # Keep the producer-owned freeze visible at the particle-stage boundary;

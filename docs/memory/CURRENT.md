@@ -30,6 +30,12 @@ All existing statuses/scopes remain intact.
 
 Prior evidence/reviews own acceptance.
 
+- [Full-chain diagnostic](phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; read-only companion JSON/PDF
+  for Center/lowe t1/t2/t3, t2 primary. Local scalar/fake-ROOT checks only;
+  no capture, procedure-PDF, farm or scientific acceptance. Independent
+  actual-diff review is the current gate; normal-launcher isolation stays blocked.
+
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
   [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
   Final baseline `after_pion_final/MM_0`, stored `Y0`; stage integrals are diagnostics.
@@ -102,16 +108,15 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, conduct a read-only **PDF-first** comparison
-of earlier well-behaved component/model procedure and problematic full/final
-subtraction pages. Establish scope, run/input/cut, normalization, MM-coordinate/bin
-and provenance identities; trace all three SIMC templates -> staged/joint/protected
-fits -> final control/kaon models -> MM transfer ratio -> signed pion-control event
-application -> full subtracted MM/yields. Locate the earliest supported discrepancy.
-`B_n=0`/protected-delta failure are candidates only. If PDFs/numerical records are
-unavailable after searching accessible sources, identify the single earliest decisive
-missing evidence. No default farm/implementation, plotting or isolation work. Remain `ACTIVE`
-until resolved; return under the validation condition above.
+ChatGPT pushed-state synchronization, review the blocked normal-launcher output
+isolation and tracked owner/checker/collector route before any farm operation.
+No owner resume or farm command is authorized by the diagnostic implementation.
+Only an independently reviewed, pushed, pushed-state-reviewed owner proving
+attempt-owned resolved write targets can precede a user-operated capture.
+Then review fresh source-bound t1/t2/t3 JSON/PDF evidence across all three
+components, fits, transfer and signed application; retain historical PDF scope
+and identity limits. `B_n=0` and protected-delta failure remain candidates.
+Stay `ACTIVE` until baseline resolution; return under the validation condition above.
 
 ## Success Criteria
 
