@@ -43,10 +43,11 @@ Prior evidence/reviews own acceptance.
   No safe normal-launcher proof or farm readiness.
 
 - [Safe path interface](phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md):
-  `BLOCKED` before implementation: `effective_charge_default_root_outpath_not_verified`.
-  `findEffectiveCharge.py` writes CSVs via no-mode `ltsep.Root`,
-  outside existing Plot_LTSep probe coverage. Both local Pythons lack ltsep;
-  caller attestation is NOT VERIFIED. No interface/PASS.
+  `BLOCKED`: `effective_charge_default_root_outpath_not_verified`.
+  [Resolver attestation](phases/kaonlt-pion-full-chain-ltsep-default-root-attestation-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; 25 synthetic/18 existing tests
+  pass; caller/cwd and receipt exclusions repaired. Installed behavior NOT VERIFIED;
+  both isolation blockers remain.
 
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
   [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
@@ -119,11 +120,10 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — prove no-mode effective-charge OUTPATH routing under the safe-interface
-contract; preserve inputs. Review the blocker diff. Actual-diff review, user push
-and pushed-state review precede separate full-chain owner/checker/collector work
-and source-bound t1/t2/t3 JSON/PDF capture/review of all components through signed
-application. No farm command; baseline resolution and roadmap return remain required.
+NEXT — review the resolver-attestation diff; after user publication and
+pushed-state review, evaluate separate read-only attestation readiness. Review
+direct installed-package evidence before resuming safe-interface work. No farm
+command; baseline resolution and roadmap return remain required.
 
 ## Success Criteria
 
