@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8161,
+      "bytes": 8187,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "59042092c6b930efec10122222a742700760e8a11a97f34c121e48683b890a57"
+      "sha256": "2d373992b39689ef22521ad043232e90b642dbac96f384b84f7f91b998c70d29"
     },
     {
       "bytes": 8339,
@@ -1249,6 +1249,11 @@
       "bytes": 12579,
       "path": "docs/memory/phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md",
       "sha256": "64e1d8aa324173b8b860a841884b6801a9f66e46efa3ad6cc02f9322b1de561c"
+    },
+    {
+      "bytes": 16153,
+      "path": "docs/memory/phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md",
+      "sha256": "964fb963a1ee00b966558b33b3effb6c09e1406bd3f66e4af2d88eeb9f2ab06d"
     },
     {
       "bytes": 14192,

@@ -42,6 +42,12 @@ Prior evidence/reviews own acceptance.
   tests pass. Source checks retain the frozen ancestor and record current HEAD.
   No safe normal-launcher proof or farm readiness.
 
+- [Safe path interface](phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md):
+  `BLOCKED` before implementation: `effective_charge_default_root_outpath_not_verified`.
+  `findEffectiveCharge.py` writes CSVs via no-mode `ltsep.Root`,
+  outside existing Plot_LTSep probe coverage. Both local Pythons lack ltsep;
+  caller attestation is NOT VERIFIED. No interface/PASS.
+
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
   [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
   Final baseline `after_pion_final/MM_0`, stored `Y0`; stage integrals are diagnostics.
@@ -113,16 +119,11 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — independently review the repaired isolation diff and shared-write blocker.
-Any change to frozen path interfaces needs a separate explicit contract; user
-commit/push and ChatGPT pushed-state synchronization precede later owner work.
-No owner resume or farm command is authorized by the diagnostic implementation.
-Only an independently reviewed, pushed, pushed-state-reviewed owner proving
-attempt-owned resolved write targets can precede a user-operated capture.
-Then review fresh source-bound t1/t2/t3 JSON/PDF evidence across all three
-components, fits, transfer and signed application; retain historical PDF scope
-and identity limits. `B_n=0` and protected-delta failure remain candidates.
-Stay `ACTIVE` until baseline resolution; return under the validation condition above.
+NEXT — prove no-mode effective-charge OUTPATH routing under the safe-interface
+contract; preserve inputs. Review the blocker diff. Actual-diff review, user push
+and pushed-state review precede separate full-chain owner/checker/collector work
+and source-bound t1/t2/t3 JSON/PDF capture/review of all components through signed
+application. No farm command; baseline resolution and roadmap return remain required.
 
 ## Success Criteria
 
