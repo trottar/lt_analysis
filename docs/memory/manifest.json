@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 11813,
+      "bytes": 7469,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "6d022ebaf4a693088e568c8712d75c08b977a33365a5b3eb0756b5c7a5da8dcb"
+      "sha256": "729408998cacad3d36d2aca440d7409ba8488dad0e5bb42e30d86deaeaa9ecc6"
     },
     {
       "bytes": 8339,
@@ -31,9 +31,9 @@
       "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
     },
     {
-      "bytes": 23323,
+      "bytes": 24105,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "a071245e9aba69423fa4e9769525acd378bf0f283a73cf7a2835c8bb30f3f8cc"
+      "sha256": "3562775f6aba8943e52c828d2b0bb905adc92c4024069cce2b49733bd480eb3d"
     },
     {
       "bytes": 3606,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 21934,
+      "bytes": 29147,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "dc43b7e7d50ce13124ddd6b37afa77f3d410553051e23ebdd252d3c105a27745"
+      "sha256": "5f5ee8618324a51fbe452ac3a84d235db7a4b789a2c79fdb82f8119eeff5fd38"
     },
     {
       "bytes": 23507,
@@ -464,6 +464,11 @@
       "bytes": 13489,
       "path": "docs/memory/phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md",
       "sha256": "db64744037709a7c8d6bb1e6325cbbbcf1a53e6c44f2e09185476a76f2f15461"
+    },
+    {
+      "bytes": 20125,
+      "path": "docs/memory/phases/baseline-pion-full-model-memory-reanchor-2026-10-15-task-contract.md",
+      "sha256": "9b1211ad2966656d6f76eda059251442d53d6cae7565c33bee021dc02f5c938e"
     },
     {
       "bytes": 8853,
@@ -1371,9 +1376,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 30708,
+      "bytes": 30989,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "8a4ca787332ff18dc3d861f57c9e0421b75981418e0b73fed860953f88253fff"
+      "sha256": "ed08f7a24d399f1e3b0c07c7cd83f5874125a033cec0262d871c462271a7ee34"
     },
     {
       "bytes": 1698,

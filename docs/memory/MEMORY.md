@@ -76,6 +76,17 @@ not become production merely because they are accepted.
 
 ## Diagnostics and runtime validation
 
+Preserve the full scientific question when narrowing a diagnostic: the user's
+baseline concern compared an apparently good pion-component/model PDF with a
+broken full/final subtraction PDF and reported earlier working behavior.
+That historical observation matters without proving identical canonical-t
+inputs or a working SHA. Audit all three SIMC components through final model,
+transfer and signed application; one amplitude (`B_n=0`) or differently scoped
+PDFs cannot establish the initiating regression or root cause. The
+[investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
+retains attributed evidence and uncertainties; [CURRENT](CURRENT.md) owns active
+scope and priority. No code change or physics acceptance follows from this lesson.
+
 When applicable, trace persisted diagnostics through producer ->
 serializer/checkpoint -> checkpoint-first payload -> consumer -> renderer.
 Local deterministic tests do not establish farm integration. Farm, ROOT/PyROOT,

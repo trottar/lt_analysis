@@ -1,10 +1,113 @@
-# Baseline pion-control Center/lowe neutron-anchor regression — October 14
+# Full baseline pion-SIMC model-to-application discrepancy — October 14–15
 
-Status: `ACTIVE`. This bounded read-only investigation concerns the existing
-production baseline at Q4p4W2p74 / Center / low epsilon / canonical `t2`,
-approximately `0.567 <= |t| <= 0.733 GeV^2`; compare adjacent Center `t1` where
-relevant. It starts at the first staged pion-control `B_n=0`, before downstream
-transfer amplification. [CURRENT](../CURRENT.md) alone owns the exact NEXT.
+Status: `ACTIVE`. This temporary roadmap interruption concerns the entire
+existing baseline SIMC-derived pion-background construction, final model and
+signed event application. Initial focus: Q4p4W2p74 / Center / lowe / canonical
+`t2`, approximately `0.567 <= |t| <= 0.733 GeV^2`; adjacent t1/t3 and setting-wide
+results remain scoped controls. The candidate staged `B_n=0` does not define
+the scientific objective or an established first historical defect.
+[CURRENT](../CURRENT.md) alone owns the exact NEXT; the historical filename
+is retained for provenance/link stability.
+
+## Scientific-memory correction / re-anchor — October 15
+
+The [October 15 documentation contract](../phases/baseline-pion-full-model-memory-reanchor-2026-10-15-task-contract.md)
+restores the user's full-model versus full-subtraction question. The recovered
+Library excerpts from `Pasted text(9).txt` and `Pasted text(10).txt` are supplied
+historical chat evidence, not locally available raw PDFs or new farm receipts.
+At local `test` HEAD `06b4573e6879fd2cd619f179a703afb85d1e6aae`, this task changes
+memory only; it neither reruns nor independently validates those artifacts.
+
+The user's recovered words were:
+
+> "So the issue is with baseline. Something fundamentally wrong has occured here. This is from Center_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf"
+>
+> "The second plot is from Center_kaon_rand_sub_Q4p4W2p74_lowe.pdf  this looks correct, but something breaks between the two. We have a good background model. I fear this may be happening across the board. We need a detailed audit"
+
+The recovered procedure description was:
+
+> "The way, it should, work is we have 3 pion channels (neutron, sidis, delta). Each simc model is used to build the background, in particular, pi-n and pi-sidis are used. Then using this two channel model it should be improved with the pi-delta look. Then this initial pion model should be checked and adjusted to account for decomposition."
+
+The earlier Q4p4 Center/lowe reference was identified in that discussion as
+`Center_kaon_rand_sub_Q4p4W2p74_lowe(8).pdf`. The user said:
+
+> "See it use to work fine, something broke the baseline at some point"
+
+Preserve these observations even without a last-good SHA. They do not prove
+that the exact same canonical-t producer, cuts, population or normalization
+previously passed. The concern about broader failure is a user-reported lead,
+not a verified across-kinematics defect. The original component-model versus
+full-background page contrast requires its own scope/run/coordinate crosswalk.
+
+### Historical PDF evidence matrix
+
+All quantities/page identifiers below are MEMORY ONLY, recovered historical
+supplied-PDF descriptions. No raw PDF was newly rendered or farm validated.
+
+| Reference | Fitted/model | Applied/event-weighted | Maximum weight; reported scope/pages |
+| --- | ---: | ---: | --- |
+| Q3p0W3p14 Center/lowe well-behaved procedure | ~0.3164 | ~0.3190 | ~0.0381; setting-wide, pp. 54–57; staged pp. 42–44, joint p. 35 |
+| Earlier Q4p4W2p74 Center/lowe 67-page reference | ~0.5967 | ~0.6010 | ~0.0819; setting-wide, pp. 54–59 in recovered discussion |
+| Later Q4p4W2p74 Center/lowe problematic parent | ~0.2529 | ~6.556 | ~183; canonical t2, later 115-page procedure, component pp. 78–91 |
+
+The setting-wide and canonical-t rows are not an identical-input regression
+pair. Adjacent Center t1/t3 event/model ratios ~4.32/~1.84, staged `B_n=0`,
+joint `B_n≈0.0002021`, `A_n≈0.0369527`, rejected protected-delta candidate and
+final `A_delta=0` remain historical reports/candidates. Recovered chat also
+describes abrupt t1/t2 final-MM features and events in bins with zero inherited
+`w0`, distinguishing stored-weight discontinuities from display-scale effects.
+Their physical interpretation and cross-setting extent remain NOT VERIFIED.
+
+### Full-chain priority and superseded narrowing
+
+The progressive narrowing to a neutron-anchor regression was the memory error.
+`pi_n` is one component; its fit window is an implementation detail. The
+historical first-zero exploration, source/history findings, numeric reports
+and uncertainties below remain preserved as candidate-level audit history.
+In particular, **the conclusion that the first neutron solve is the single
+decisive artifact is superseded as the sole NEXT**, not proved false as a
+component observation. Neither that solve nor protected-delta failure is an
+accepted root cause or authority for a new global refit. The later historical
+instruction to define a diagnostic contract is not a current authorization.
+
+The full read-only, PDF-first comparison establishes scope, run/input/cut,
+normalization, MM-coordinate/bin and provenance identities, then traces:
+all three SIMC templates (`pi_n`, `pi_sidis`, `pi_delta`) -> staged and any
+joint/protected fits -> final pion-control and kaon-side decompositions ->
+composite model and `w0(MM)` -> signed pion-control event application -> actual
+applied background -> resulting full-subtracted kaon MM/yields. Keep protected
+kaon-signal treatment separate. Locate the earliest supported discrepancy;
+if original PDFs or numerical records are unavailable after searching accessible
+sources, identify the single earliest decisive missing evidence for that chain.
+This memory correction does not perform that subsequent scientific audit.
+
+| Evidence label | Retained meaning |
+| --- | --- |
+| SOURCE VERIFIED (prior bounded review, not newly rerun here) | Multi-component configuration and distinct control/kaon models; supported finite unclipped `w0=K_model/P_model` versus applied `w0*P_signed_data`; zero-support/clipping behavior, potentially unset quality limits; protected kaon delta fallback can leave `A_delta=0` without final readjustment of the first two kaon amplitudes |
+| MEMORY ONLY | User's PDF contrast, previously working observations, table/page reports, abrupt MM/zero-inherited-weight descriptions |
+| INFERENCE | In common supported unclipped bins, `w0*(P_signed_data-P_model)` is a possible difference mechanism; small denominators, template mixture, decomposition or fallback may matter; no culprit accepted |
+| NOT VERIFIED | Matched first-good/first-bad identity, original initiating defect, root cause, across-kinematics failure, current reproduction or physical correctness |
+
+Distinct zero-producing solver paths prohibit inferring cancellation from
+`B_n=0`. August 19/20 authority changes remain context, not a demonstrated
+initiator; by reported chronology, the August 27 RF-tree change cannot initiate
+the August 26 anomaly. Supported-bin identities do not extend universally to
+masked, flow, unsupported or clipped bins.
+
+This remains a **TEMPORARY** interruption, not a phase. Prospective Method-A
+development/promotion and normal E.8/F.6 forward implementation/interpretation
+are paused. Accepted completed scopes, pending local candidates, independent
+F.4/absolute-SIMC/final-E.8/F.6.4 blockers and deferred F.1/F.4 archaeology remain
+unchanged. The component diagnostic stays
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, without verified capture;
+farm owner stays `BLOCKED` on isolation,
+and the tracked isolation proposal remains preserved, not launched. No code,
+diagnostic widening, plotting repair, farm run or new physical hypothesis is
+authorized. After explanation and validation of the existing subtraction, or
+independently reviewed, user-pushed and user-farm-validated minimum correction,
+return mandatorily to the approved roadmap at its interrupted position.
+
+## Historical October 14 exploration (retained; narrower priority superseded)
 
 ## Evidence classes and recording boundary
 

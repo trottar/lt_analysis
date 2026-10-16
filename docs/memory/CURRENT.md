@@ -5,192 +5,125 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: **TEMPORARY roadmap interruption** for a read-only investigation of
-the existing baseline pion-subtraction fitted-versus-applied discrepancy at
-**Q4p4W2p74 / Center / lowe / canonical t2**, comparing adjacent Center t1 and
-setting-wide controls with their scopes kept distinct. The
-[read-only-first contract](phases/baseline-pion-regression-readonly-first-task-contract.md)
-and [October 14 investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
-bound the audit. Earliest reported anomaly: staged `B_n=0` (MEMORY ONLY);
-its cause and a last-good/first-bad same-scope numerical comparison remain
-NOT VERIFIED. Local source/history establishes a possible amplification
-mechanism, not the historical cause. This is not a new phase or replacement
-roadmap. Mandatory return to [the normal roadmap](roadmap/STATUS.md) at the
-interrupted E.8 position follows explanation and validation of the existing
-subtraction, or independent review, user push and user-farm validation of a
-necessary minimum correction. Preserve all accepted, active, deferred, blocked
-and pending items. Paired E.8 diagnostics remain separate; earlier Left-only
-conclusions remain setting-local.
-The [neutron-anchor capture contract](phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md)
-local diagnostic candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
-read-only same-run t2/t1 solver/cache observations, no refit or physics change.
-Deterministic local checks establish extraction behavior only; the current-run
-result and historical first-failure cause remain NOT VERIFIED.
-The [farm-owner contract](phases/baseline-pion-center-t2-anchor-farm-owner-task-contract.md)
-is `BLOCKED` at the required pre-implementation output-isolation audit.
-SOURCE VERIFIED: the reused overlay preserves the volatile path; the normal
-launcher runs `git clean -fdx` then recreates the output link through
-`set_SymLinks.sh` into volatile output, not an owner-created attempt output.
-The Left-only debug route cannot capture Center. No owner/checker/profile was
-implemented and no farm operation occurred. Isolation is a prerequisite only
-for a future run that needs the normal launcher; the existing separate proposal
-is preserved, not launched. Read-only comparison takes priority over further
-isolation or owner/checker/collection engineering.
-The [role correction](decisions/e8-full-analysis-procedure-roadmap.md#live-four-way-producer-audit)
-identifies `YA/MM_A` as reweighted baseline. Microscopic F.4/F.1 work `DEFERRED`.
-[October 12 evidence](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
-`CLOSED / RUNTIME VALIDATED` only for five-F.1 candidate materialization,
-read-only seven-input preflight and eight-page Left/lowe t0/t1/t2 diagnostic.
-RUNTIME VERIFIED (attributed): supplied artifacts/prior ChatGPT review at
-`75756d7b32767f18949386c4c5864c756d5e85f6`; internal coherence PASS,
-canonical-owner equivalence BLOCKED. Predecessor fingerprint/Neff failures
-are resolved only here; [debug](phases/e8-current-snapshot-method-a-contribution-debug-task-contract.md),
-[materialization](phases/e8-current-f1-coherent-detached-materialization-task-contract.md)
-and [repair](phases/e8-neff-moment-validator-parity-repair-task-contract.md)
-retain history. No authority replacement or production closure.
-The [GeV-axis presentation contract](phases/e8-current-snapshot-mm-gev-axis-presentation-task-contract.md)
-is `CLOSED / RUNTIME VALIDATED` for Left/lowe presentation only under the
-[October 13 addendum](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md#gev-axis-farm-visual-acceptance-addendum---2026-10-13).
-RUNTIME VERIFIED (attributed): supplied ZIP/prior ChatGPT review at
-`c8e830f38cf59a22b7b6d9753b1a847fe1124e70`; all eight pages inspected,
-5–8 show physical 0.8–1.4 GeV coordinates and distinct UF/OF. Numerical objects
-and October 12 acceptance are preserved; no Center/lowe MM/PDF closure.
+`ACTIVE`: **TEMPORARY roadmap interruption** to explain the full existing
+baseline SIMC pion-background model versus final signed-event subtraction
+discrepancy. Focus: **Q4p4W2p74 / Center / lowe / canonical t2**; adjacent t1/t3
+and setting-wide controls retain their distinct scopes. The user compared
+`Center_kaon_rand_sub_Q4p4W2p74_lowe.pdf` (apparently reasonable model) with
+`Center_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf` (problematic
+final subtraction), and reported earlier working behavior. MEMORY ONLY:
+no matched canonical-t regression pair, historical culprit or wider failure verified.
 
-The [paired extension](phases/e8-current-snapshot-paired-lowe-phi-mm-extension-task-contract.md)
-local candidate is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`:
-explicit `paired-lowe` selects separate Left/Center lowe aggregates from one
-validated snapshot; 16 detached pages. Center joint MM/PDF farm behavior remains
-NOT VERIFIED; default eight-page Left-only path and all science are preserved.
+The [October 15 contract](phases/baseline-pion-full-model-memory-reanchor-2026-10-15-task-contract.md)
+and [investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
+restore the full `pi_n`/`pi_sidis`/`pi_delta` question. `B_n=0` and protected-delta failure are candidates, not an established
+first historical defect, root cause or sole target.
 
-MEMORY ONLY (attributed prior chat): later paired progress was reported after
-tracked CURRENT was published; no independent paired closure is recorded here.
-The prior paired-farm NEXT is superseded as the immediate priority, not failed.
-No new receipt, hashes or 16-page visual acceptance are inferred.
+Prospective Method-A development/promotion and normal E.8/F.6 forward work and
+interpretation are paused pending baseline resolution; no new phase. After
+explanation and validation of the existing subtraction, or a necessary minimum
+correction independently reviewed, user-pushed and user-farm validated,
+**resume [the roadmap](roadmap/STATUS.md) at its interrupted position**.
+All existing statuses/scopes remain intact.
 
 ## Current Work Item
 
-E.8.2 Left/lowe is `CLOSED / RUNTIME VALIDATED` under its
-[closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
-Final MM uses `after_pion_final` / `MM_0` and stored `Y0`;
-Lambda-window stage integrals are diagnostics, not yields.
+Prior evidence/reviews own acceptance.
 
-E.8.3 Left/lowe and its [authority-page repair](phases/e8-3-authority-page-provenance-legibility-repair.md)
-are `CLOSED / RUNTIME VALIDATED` per [prior acceptance](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
-F.6.1 remains separate from baseline E.8.2/current F.6.3/E.8.4.
-F.4 preserves `sum b*C=sum b`, `b=s*w0`, without child normalization.
-F.6.3 fills `B_pi_A` with `s*w0*C`, forms `MM_A=pion_input-B_pi_A` and
-stores YA with existing errors; E.8.4 consumes `MM_0/MM_A`, `Y0/YA`.
-Background contributions are not final yields; standalone Method-A-only final
-kaon yield/MM is NOT VERIFIED.
-
-[October 11 inspection](evidence/e8-method-a-weight-aggregate-json-inspection-2026-10-11.md)
-records marginal inspection only. October 12 measures actual `abs(s*w0*C)`
-tails, Neff and joint phi/MM relocation; preserved parents imply neither
-per-cell conservation nor final-yield closure.
-
-The [fresh-F1 canonical-five preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md)
-is `CLOSED / RUNTIME VALIDATED` for pre-analysis lineage/isolation/preservation
-only (analysis_started=false).
-
-Historical [second full run](evidence/e8-4-canonical-five-second-full-run-provenance-blocker-2026-10-05.md)
-is `BLOCKED` by post-analysis page/artifact provenance. Its reported
-F.2/F.3/F.4 equality does not accept the newer F.4 mismatch.
-
-The [F.2 handoff/equivalence](phases/e8-4-canonical-five-f2-handoff-equivalence-repair.md),
-[F.2 staging](phases/e8-4-canonical-five-f2-staging-predecessor-repair.md) and
-[regenerated-F.1 preflight](phases/e8-4-canonical-five-f1-lineage-preflight-repair.md)
-repairs remain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-Provenance/staging fails closed; limits in the
-[October 8 attempt](evidence/e8-4-canonical-five-f1-lineage-preflight-blocker-2026-10-08.md),
-[accepted audit](phases/e8-4-canonical-five-provenance-identity-repair.md) and
-[first-run diagnosis](evidence/e8-4-canonical-five-fresh-f1-lineage-materialization-2026-10-05.md).
-
-October 8 owner `ebf3a0be2f50c788c22defe3601fd5b7fee48644`
-is `BLOCKED` before analysis at
-`f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`.
-F.2/F.3 exact PASS; F.4 exact FAIL in three Left-lowe parents.
-[Contract](phases/e8-4-f1-baseline-reproducibility-diagnostic-task-contract.md)
-owns search limits; [diagnostic](phases/e8-4-f1-baseline-reproducibility-diagnostic.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`.
-[Prior review](evidence/e8-4-f1-forensic-reproducibility-diagnostic-review-2026-10-08.md):
-three counts agree, six sums differ exactly; reviewed F.1 absent, event cause
-NOT VERIFIED. F.1 archaeology `DEFERRED` unless material to a required gate.
-
-[Detached Left/lowe diagnostic](evidence/e8-4-left-lowe-method-a-current-lineage-diagnostic-runtime-closure-2026-10-04.md):
-`CLOSED / RUNTIME VALIDATED` for t0/t1/t2, primary t1; comparator continuity
-warrants no redesign (INFERENCE). Absolute mis-ID, proxy validity, hardware
-cause and promotion are NOT VERIFIED.
-
-E.8.2 baseline-five `Y0/MM_0` is `CLOSED / RUNTIME VALIDATED`:
-[evidence](evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md)
-owns identity, 135/135 data/SIMC gates and PDF limits. Private canonical-five
-`YA/MM_A`/F.4 stays `BLOCKED`.
-
-[Baseline-five QA](evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md)
-records QA only, no physics acceptance.
+- E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
+  [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
+  Final baseline `after_pion_final/MM_0`, stored `Y0`; stage integrals are diagnostics.
+- E.8.3 Left/lowe and authority-page repair: `CLOSED / RUNTIME VALIDATED` per
+  [closure](evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
+  Historical F.6.1 is separate from current F.6.3/E.8.4.
+- E.8.2 baseline-five `Y0/MM_0`: `CLOSED / RUNTIME VALIDATED` per
+  [October 9](evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md):
+  135/135 data and SIMC gates, original PDF limits. The
+  [QA](evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md)
+  adds no physics acceptance or proof of all component-decomposition physics.
+- F.4.Refresh.2 and Left/lowe F.6.3/E.8.4: `CLOSED / RUNTIME VALIDATED` within
+  [accepted scopes](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md):
+  live-cache parity, real child changes, signed parent preservation.
+  Fix.5.7/Fix.5.8 retain provenance and
+  [97-page legibility closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
+  Earlier F-stage closures and source-reviewed hardening remain in the roadmap.
+- [October 12 and October 13 addendum](evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
+  `CLOSED / RUNTIME VALIDATED` only for five-F.1 candidate materialization,
+  read-only seven-input preflight, eight-page Left/lowe t0/t1/t2 diagnostic at
+  `75756d7b32767f18949386c4c5864c756d5e85f6`; internal coherence PASS,
+  canonical-owner equivalence BLOCKED. Fingerprint/Neff failures resolved only
+  here; no authority replacement. October 13 at
+  `c8e830f38cf59a22b7b6d9753b1a847fe1124e70`: Left/lowe presentation only,
+  eight pages inspected, 5–8 physical 0.8–1.4 GeV/distinct UF/OF; numerical
+  objects/October 12 acceptance unchanged, no Center MM/PDF closure.
+- [Paired extension](phases/e8-current-snapshot-paired-lowe-phi-mm-extension-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; separate Left/Center lowe
+  aggregates, 16 pages, default eight-page Left-only path preserved. Later paired
+  progress MEMORY ONLY; no independent closure/receipts/hashes/16-page acceptance.
+  Left-only conclusions stay setting-local; priority interrupted, not failed.
+- [Component diagnostic](phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; capture/cause NOT VERIFIED.
+  [Farm-owner](phases/baseline-pion-center-t2-anchor-farm-owner-task-contract.md)
+  stays `BLOCKED` before implementation on output isolation; the tracked
+  [isolation proposal](phases/baseline-pion-center-t2-attempt-output-isolation-task-contract.md)
+  is preserved, not launched, prerequisite only for a future normal-launcher run.
+  These contracts do not define NEXT.
 
 ## Verified State
 
-Gate-3: NPE=0 kaon PID, NPE>0 pion tree, NPE>2 physical control.
-F.3 `hgcer3` is relative response; `w0` owns baseline transfer. HGCer hole
-excluded; zero-response transfer diagnostic-only; slow-proton analogue-only.
-
-F.6.2 validates acceptance/MM correlation, not absolute HGC;
-comparator t1 continuity does not extend to
-substantive t0/t2 changes.
-F.4.Refresh.2 remains `CLOSED / RUNTIME VALIDATED`;
-[F.6.3/E.8.4 closure](evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md)
-is only Left/lowe execution, live-cache parity, real child changes and signed
-parent preservation. Fix.5.7/Fix.5.8 retain narrow Left/lowe provenance and
-[97-page legibility closure](evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
-[Roadmap](roadmap/STATUS.md) scopes remain; hardening `SOURCE REVIEWED`;
-literature adds no runtime authority.
+[Durable rules](MEMORY.md) retain Gate-3/HGCer/transfer roles, F.6.2 acceptance/MM
+scope and t1-only continuity. Absolute mis-ID/proxy/hardware/RF remain NOT VERIFIED.
+`YA/MM_A` is reweighted baseline; standalone Method-A-only final yield/MM is
+NOT VERIFIED. Signed parents, no child normalization, existing errors and
+`MM_0/MM_A`, `Y0/YA` consumers are frozen; no child/yield closure inferred.
 
 ## Source / Evidence Identity
 
-Linked records own farm/artifact identities. Frozen reviewed F.4 SHA-256:
+Linked records retain source/farm/artifact identities. Frozen reviewed F.4 SHA-256:
 `79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
 
 ## Blockers
 
-Private canonical-five Method A and final E.8/F.6.4 remain `BLOCKED`.
-Exact F.4 mismatch forbids owner retry pending reviewed resolving evidence.
-Production correctness unproven; optional RF not performed.
+Private canonical-five Method A and final E.8/F.6.4 remain `BLOCKED`:
+`f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`.
+October 8 owner `ebf3a0be2f50c788c22defe3601fd5b7fee48644`: F.2/F.3 exact PASS,
+F.4 exact FAIL in three Left-lowe parents before analysis; no retry.
+Roadmap retains the historical second-full-run page/artifact failure
+and separate [lineage-only preflight](evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md),
+`CLOSED / RUNTIME VALIDATED` (`analysis_started=false`). F.2 handoff/staging, F.1 preflight repairs and detached
+reproducibility diagnostic remain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
+microscopic F.1/F.4 archaeology `DEFERRED`. Production correctness unproven.
 
-Absolute-SIMC interpretation remains separately `BLOCKED`:
+Absolute SIMC separately `BLOCKED`:
 `SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
-`iter_weight * normfac / Ncontribute` units unproven; only two absolute-SIMC
-page families unavailable, not data/identity/yield/parent closure. No scale claim.
+`iter_weight * normfac / Ncontribute` units unproven; two absolute-SIMC page
+families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff review, user commit/push and
-ChatGPT pushed-state synchronization, continue the read-only first-divergence
-comparison: locate the original August 26 Center/lowe t2 first neutron-anchor
-solve record with source/input identity, signed bin contents/errors, selected
-SIMC template and solver outcome. This is the earliest missing decisive
-artifact; a same-scope last-good comparator is also NOT VERIFIED. Do not infer
-it from a setting-wide PDF or retroactively substitute a current capture.
-Remain `ACTIVE` until evidence explains the discrepancy; no isolation
-engineering, diagnostic implementation, farm command, physics correction or
-blocked-owner retry is authorized by this task. Then return mandatorily to the
-normal roadmap under the validation condition above. Microscopic F.1/F.4 remains
-`DEFERRED`; canonical-five owner and absolute SIMC remain `BLOCKED`.
+ChatGPT pushed-state synchronization, conduct a read-only **PDF-first** comparison
+of earlier well-behaved component/model procedure and problematic full/final
+subtraction pages. Establish scope, run/input/cut, normalization, MM-coordinate/bin
+and provenance identities; trace all three SIMC templates -> staged/joint/protected
+fits -> final control/kaon models -> MM transfer ratio -> signed pion-control event
+application -> full subtracted MM/yields. Locate the earliest supported discrepancy.
+`B_n=0`/protected-delta failure are candidates only. If PDFs/numerical records are
+unavailable after searching accessible sources, identify the single earliest decisive
+missing evidence. No default farm/implementation, plotting or isolation work. Remain `ACTIVE`
+until resolved; return under the validation condition above.
 
 ## Success Criteria
 
-Local checks only; no physics completion, staging, publication or farm.
+Local integrity; no physics acceptance.
 
 ## Do Not Reopen Without New Evidence
 
-Keep `no_empirical_residual`, zero legacy scales, private/non-production
-Method A and independent, numerically excluded diagnostic Method B. Freeze
-all subtraction, SIMC, weights, yields/errors, cuts, templates, priors, binning,
-efficiencies, acceptance, L/T and cross sections. No child normalization,
-authority replacement or promotion; owner success alone cannot close a gate.
+Keep `no_empirical_residual`, zero legacy scales, detached/non-production Method A
+and independent diagnostic/cross-check, numerically excluded Method B. Freeze
+all subtraction, SIMC, cuts, templates, priors, binning, weights, efficiencies,
+acceptance, yields/errors, L/T and cross sections; no promotion.
 
 ## Relevant References
 
-- [Gate-3 source/science investigation](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)
-- [Current-baseline comparator](evidence/f4-refresh1-current-baseline-authority-comparator-runtime-closure.md)
-- [Prior Fix.5.7 evidence](evidence/e8-4-fix5-7-left-lowe-runtime-and-fix5-visual-gate-2026-10-03.md)
+See [roadmap](roadmap/STATUS.md).
