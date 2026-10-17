@@ -41,9 +41,11 @@ It is detached from farm science and clears no runtime gate.
   Normal-launcher isolation stays blocked.
 
 - [Attempt-output isolation](phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
-  `BLOCKED`: `post_clean_background_output_mkdir_outside_attempt`.
-  Synthetic clean/setup reproduced shared writes; 10 new/11 existing local
-  tests pass. Source checks retain the frozen ancestor and record current HEAD.
+  `BLOCKED`: the historical helper reports
+  `post_clean_background_output_mkdir_outside_attempt` unconditionally for an
+  external background directory. The revised owner audit below distinguishes
+  existing input setup from actual writers; this negative helper grants no PASS.
+  Source checks retain the frozen ancestor and record current HEAD.
   No safe normal-launcher proof or farm readiness.
 
 - [Safe path interface](phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md):
@@ -134,42 +136,73 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — after independent actual-diff acceptance, user publication and pushed-state
-synchronization of [this correction](phases/kaonlt-center-lowe-concrete-next-memory-2026-10-17-task-contract.md),
-perform one read-only source audit of the complete executable path to
-`observe_chain_audit` for fresh farm-generated **Q4p4W2p74 / Center / lowe
-seven-stage companion JSON/PDF**, canonical t2 primary, separate t1/t3 controls.
-First inspect `run_Prod_Analysis.sh`, `set_SymLinks.sh`,
-`farm_env/ltsep_paths.py`, `farm_env/print_ltsep_path_fields.py`,
-`testing/pion_chain_attempt_output_isolation.py`,
-`testing/attest_pion_chain_ltsep_default_root.py`,
-`testing/run_e8_4_fix5_canonical_five_plot_gate.py`,
-`src/cuts/pion_t_bin_parents.py` and `src/cuts/pion_background_chain_audit.py`;
-follow only directly invoked files needed to prove reachability and write safety.
-Do not assume the E.8 owner reaches the observer or that a detached worktree
-confines external writes. A read-only resolver attestation clears neither blocker.
+NEXT — independent ChatGPT actual-diff review of the
+[all-low debug correction](phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md),
+then user publication and pushed-state synchronization, followed by the narrow
+farm-readiness decision for fresh Center/lowe seven-stage companion JSON/PDF
+(canonical t2 primary, separate t1/t3). No farm command before that decision.
+The user-supplied replacement contract supersedes the abandoned, unimplemented
+Center/lowe owner contract at the same path. `DEVELOPMENT COMPLETE, FARM
+VALIDATION PENDING`: launcher `-d` clears the legacy Left-only selector on the
+single full low-epsilon child, uses ordinary available-setting selection and
+exits before full high epsilon. Paired low/high capture and shared preflight
+remain unchanged; scientific source and normal mode are frozen.
 
-Return one decision: **PASS** only for a named tracked, reviewed/pushed owner/CLI
-that reaches the Center/lowe observer, independently confines every launcher,
-external-background, effective-charge and other write target, and proves the
-invocation/collection/provenance path. Then seek independent farm-readiness
-review of that exact published path before supplying only the reviewed
-user-operated `tcsh` invocation for one narrow gate. Otherwise **BLOCKED**:
-name the first non-bypassable failed invariant and one exact missing execution
-capability. Current evidence favors the absence of a safely output-confined
-single-command full-chain owner/checker/collector invoking the existing hook;
-this is INFERENCE pending the complete live source audit, not a verified verdict.
+SOURCE VERIFIED at `1c7c4714344a0d9245071b87d4abe74de1c50682`:
+`run_Prod_Analysis.sh` normal low/high, Right/Left/Center route reaches
+`src/main.py` -> `rand_sub.py` -> `build_setting_t_bin_pion_parents` ->
+`observe_chain_audit` (including parent reuse), with `alignment_outpath=OUTPATH`.
+At that HEAD, `-d` was Left/lowe only; the local correction above changes it.
+Background manifest -> component file map ->
+`pion_component_shapes.py` opens template ROOT inputs in read mode; the existing
+background directory's `mkdir -p` can be idempotent. This traced consumer is
+input-only, not proof of all consumers or safe launcher execution. The old
+helper remains a negative historical diagnostic, not an input classifier.
 
-Both `post_clean_background_output_mkdir_outside_attempt` and
-`effective_charge_default_root_outpath_not_verified` remain `BLOCKED`.
-If blocked, request/implement one strictly bounded execution-path repair for
-precisely the failed invariant: contract -> Codex -> deterministic local checks
--> independent actual-diff review -> user commit/push -> pushed-state review
--> user farm run -> fresh JSON/PDF, logs, provenance, checker and page evidence.
-No ordinary-checkout run, blocker bypass or further memory/attestation/history
-cycle; full launcher execution stays prohibited until its actual shared-write
-and resolver invariants are proved. No farm command is authorized here.
-Resolve the baseline discrepancy before returning to the interrupted roadmap.
+Separate historical normal-launcher isolation blocker, not an all-low debug
+acceptance gate cleared here: when `-c` is enabled, launcher merge calls
+(first populated low-epsilon merge branch) pass
+`${LTANAPATH}/log/<setting>_kaon_Analysed_<sample>_Q4p4W2p74_lowe.err` to
+`src/setup/mergeRootFiles.py:44`, whose `open(err_fout, 'w')` truncates/creates
+the log. After clean/setup, `log` resolves to `${VOLATILEPATH}/log`, outside
+the attempt. Failure invariant: `merge_error_log_outside_attempt`.
+Earlier setup is independently unsafe if external `simc_gfortran` children or
+configured background `worksim` need link repair; those link paths are external.
+That isolation path lacks an attempt-owned log destination that survives
+launcher cleanup and is respected by setup; LTANAPATH-only overlay cannot
+provide it. Plain `-d` does not enable `-c`: the existing merge/delete block is
+skipped by its flag guard, not by detection of existing ROOT inputs. Combining
+`-c` with `-d` still deletes/remerges populated inputs and writes merge logs.
+Setup and path configuration remain unchanged.
+
+Local synthetic checks executed unchanged setup with pre-existing background
+inputs for both epsilons/all phi settings, valid external SIMC links and
+idempotent background mkdir; input bytes and external links were preserved.
+Executing the actual merge log-write AST then overwrote an external synthetic
+log on success and before injected child failure. This is local filesystem/source
+evidence only; actual farm realpaths, installed default/no-mode Root behavior,
+full downstream write coverage and ROOT rendering remain NOT VERIFIED.
+`effective_charge_default_root_outpath_not_verified` and
+`normal_launcher_downstream_write_coverage_unproven` remain `BLOCKED`;
+no historical shared-output safety gate is cleared by the corrected classification.
+
+Plain `-d` still resolves ltsep paths, creates skim/output directories, validates
+external Sigma0 paths, runs `set_SymLinks.sh` (including possible external link
+repair/background mkdir), reads both epsilon run lists/efficiencies/effective
+charges, runs `set_sig_fortran.py` model rewrites, and performs both raw captures
+and shared canonical preflight before the full low analysis. Existing ROOT
+inputs do not remove these dependencies. Local source/stub tests establish
+selection, inherited-selector neutralization, failure propagation and normal
+low/high preservation only; ROOT, farm realpaths, downstream write coverage and
+companion rendering remain NOT VERIFIED. Historical isolation/effective-charge
+blockers remain separate and `BLOCKED`; this change grants no farm readiness.
+
+No owner implementation, pathing redesign, or attestation/history cycle is
+authorized here. Requested evidence remains
+fresh farm-generated **Q4p4W2p74 / Center / lowe seven-stage companion JSON/PDF**,
+canonical t2 primary and separate t1/t3 controls, with reviewed source, logs,
+provenance, checker and page evidence. Resolve the baseline discrepancy before
+returning to the interrupted roadmap.
 
 ## Success Criteria
 

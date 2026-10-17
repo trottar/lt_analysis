@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 11639,
+      "bytes": 13782,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "87fb6c03ea501d69e526ee3682c4031d03649c24cef035f44c9ad039ba812d26"
+      "sha256": "92efeff47f3e143eebaec201638e97a913f3d31e083bb94ed38723c71cd1de8b"
     },
     {
       "bytes": 10506,
@@ -1254,6 +1254,11 @@
       "bytes": 7733,
       "path": "docs/memory/phases/kaonlt-center-lowe-concrete-next-memory-2026-10-17-task-contract.md",
       "sha256": "a7da640c9dd71630a16b0521e8e28b27330b439f5ab6de7748dea21122292776"
+    },
+    {
+      "bytes": 9065,
+      "path": "docs/memory/phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md",
+      "sha256": "fab2a557ba34d9a9421c96b4061e8edaabead8fbec719b7c19cba5b21fccb382"
     },
     {
       "bytes": 12579,

@@ -1,4 +1,4 @@
-"""Static contract coverage for the narrow Left/lowe launcher debug mode."""
+"""Local contract coverage for all-low launcher debug and legacy Left-only control."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
     def test_debug_option_is_documented_and_uses_its_own_state(self):
         self.assertRegex(self.launcher, r"while getopts '[^']*d[^']*' flag; do")
         self.assertIn("d) d_flag='true' ;;", self.launcher)
-        self.assertIn("fast kaon Left / lowe debug mode", self.launcher)
+        self.assertIn("fast kaon debug mode for all available low-epsilon settings", self.launcher)
         self.assertIn("$d_flag = \"true\" && $ParticleType != \"kaon\"", self.launcher)
         self.assertNotRegex(self.launcher, r"d\)\s+DEBUG=")
 
@@ -123,11 +123,11 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
         self.assertLess(low_capture, high_capture)
         self.assertLess(high_capture, shared_preflight)
         self.assertNotIn("LT_ANALYSIS_DEBUG_LEFT_LOW", preflight)
-        self.assertLess(shared_preflight, self.launcher.index("LT_ANALYSIS_DEBUG_LEFT_LOW=1", full_loop_start))
+        self.assertLess(shared_preflight, self.launcher.index("LT_ANALYSIS_DEBUG_LEFT_LOW=", full_loop_start))
 
     def test_debug_control_applies_only_to_full_low_and_stops_before_full_high(self):
         full_loop = self._full_low_high_loop()
-        debug_low = 'LT_ANALYSIS_DEBUG_LEFT_LOW=1 python3 main.py "${main_args_low[@]}" || exit 1'
+        debug_low = 'LT_ANALYSIS_DEBUG_LEFT_LOW= python3 main.py "${main_args_low[@]}" || exit 1'
         full_high = 'python3 main.py "${main_args_high[@]}" || exit 1'
         self.assertIn(debug_low, full_loop)
         self.assertNotIn("LT_ANALYSIS_DEBUG_LEFT_LOW=1 python3 main.py \"${main_args_high[@]}\"", full_loop)
@@ -135,7 +135,7 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
         self.assertRegex(
             full_loop,
             re.escape(debug_low)
-            + r"\s+echo\s+echo \"Left / lowe debug analysis completed\.\""
+            + r"\s+echo\s+echo \"All available low-epsilon settings completed in debug mode\.\""
             + r"\s+echo \"Full high-epsilon processing is intentionally skipped in -d debug mode\.\""
             + r"\s+exit 0",
         )
@@ -144,7 +144,7 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
     def test_debug_low_failure_is_not_converted_to_success(self):
         full_loop = self._full_low_high_loop()
         self.assertIn(
-            'LT_ANALYSIS_DEBUG_LEFT_LOW=1 python3 main.py "${main_args_low[@]}" || exit 1',
+            'LT_ANALYSIS_DEBUG_LEFT_LOW= python3 main.py "${main_args_low[@]}" || exit 1',
             full_loop,
         )
         self.assertNotIn("|| true", full_loop)
@@ -156,6 +156,78 @@ class RunProdAnalysisDebugLeftLowTests(unittest.TestCase):
             r"fi\s+python3 main\.py \"\$\{main_args_low\[@\]\}\" \|\| exit 1",
         )
         self.assertIn('python3 main.py "${main_args_high[@]}" || exit 1', full_loop)
+
+    def _exercise_full_loop(self, debug, inherited_selector, low_status=0, high_status=0):
+        """Run only the final orchestration loop; every external call is a stub."""
+        bash = self._bash()
+        if bash is None:
+            self.skipTest("a local Bash executable is required for loop coverage")
+        harness = (
+            'd_flag="$1"; export LT_ANALYSIS_DEBUG_LEFT_LOW="$2"\n'
+            'main_args_low=("low input"); main_args_high=("high input")\n'
+            'export_background_sample_paths() { :; }\n'
+            'python3() {\n'
+            '  printf "CALL:%s:%s:%s\\n" "$EPSILON" "$LT_ANALYSIS_DEBUG_LEFT_LOW" "$2"\n'
+            '  if [[ "$EPSILON" = low ]]; then return ' + str(low_status) + '; fi\n'
+            '  return ' + str(high_status) + '\n'
+            '}\n'
+        )
+        return subprocess.run(
+            [bash, "-c", harness + self._full_low_high_loop(), "loop-test", debug, inherited_selector],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_debug_neutralizes_inherited_selector_and_runs_full_low_once(self):
+        for inherited in ("", "1", "true", "invalid"):
+            with self.subTest(inherited=inherited):
+                result = self._exercise_full_loop("true", inherited)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                calls = [line for line in result.stdout.splitlines() if line.startswith("CALL:")]
+                self.assertEqual(calls, ["CALL:low::low input"])
+                self.assertIn("All available low-epsilon settings completed", result.stdout)
+
+    def test_full_loop_failures_stop_before_success_or_next_epsilon(self):
+        for debug in ("true", "false"):
+            with self.subTest(debug=debug):
+                result = self._exercise_full_loop(debug, "", low_status=7)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                self.assertEqual(result.stdout.splitlines(), ["CALL:low::low input"])
+        result = self._exercise_full_loop("false", "", high_status=9)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertNotIn("High Epsilon Completed!", result.stdout)
+
+    def test_ordinary_loop_keeps_both_calls_and_inherited_environment(self):
+        for inherited in ("", "1"):
+            with self.subTest(inherited=inherited):
+                result = self._exercise_full_loop("false", inherited)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                calls = [line for line in result.stdout.splitlines() if line.startswith("CALL:")]
+                self.assertEqual(calls, [
+                    "CALL:low:{}:low input".format(inherited),
+                    "CALL:high:{}:high input".format(inherited),
+                ])
+
+    def test_main_ordinary_population_uses_existing_availability_gate(self):
+        """Evaluate the actual selector/filter AST without importing ROOT or main."""
+        nodes = ast.parse(self.main).body
+        ordinary = next(node for node in nodes if isinstance(node, ast.Assign)
+                        and any(isinstance(t, ast.Name) and t.id == "phisetlist" for t in node.targets))
+        restriction = next(node for node in nodes if isinstance(node, ast.If)
+                           and isinstance(node.test, ast.Name) and node.test.id == "debug_left_low"
+                           and any(isinstance(n, ast.Assign) and any(
+                               isinstance(t, ast.Name) and t.id == "phisetlist" for t in n.targets
+                           ) for n in node.body))
+        availability = next(node for node in nodes if isinstance(node, ast.Assign)
+                            and any(isinstance(t, ast.Name) and t.id == "available_phisetlist"
+                                    for t in node.targets))
+        code = compile(ast.Module(body=[ordinary, restriction, availability], type_ignores=[]),
+                       str(MAIN_PATH), "exec")
+        for populated in (["Center", "Left"], ["Center", "Left", "Right"]):
+            with self.subTest(populated=populated):
+                scope = {"debug_left_low": "", "mm_shift_summary": dict.fromkeys(populated),
+                         "kaon_data_coordinate_summary": dict.fromkeys(populated)}
+                exec(code, scope)
+                self.assertEqual(scope["available_phisetlist"], populated)
 
     def test_main_debug_selector_preserves_diamond_before_left_only_downstream_work(self):
         ast.parse(self.main, filename=str(MAIN_PATH))

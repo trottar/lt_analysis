@@ -270,7 +270,7 @@ while getopts 'hci:pad' flag; do
 	echo "    -iN, 'N' iterations of SIMC to find proper weight"
 	echo "    -p, specify particle type (kaon, pion, or proton). Otherwise runs for default (i.e., kaon)."
 	echo "    -a, run automated iteration algorithm (uses -i flag internally)."
-	echo "    -d, fast kaon Left / lowe debug mode; stop before full high-epsilon processing."
+	echo "    -d, fast kaon debug mode for all available low-epsilon settings; stop before full high-epsilon processing."
 	echo
 	echo " Avaliable Kinematics..."	
 	echo "                      Q2=5p5, W=3p02"
@@ -1725,9 +1725,9 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
 		if [ "$j" = "low" ]; then
 		    if [[ $d_flag = "true" ]]; then
-			LT_ANALYSIS_DEBUG_LEFT_LOW=1 python3 main.py "${main_args_low[@]}" || exit 1
+			LT_ANALYSIS_DEBUG_LEFT_LOW= python3 main.py "${main_args_low[@]}" || exit 1
 			echo
-			echo "Left / lowe debug analysis completed."
+			echo "All available low-epsilon settings completed in debug mode."
 			echo "Full high-epsilon processing is intentionally skipped in -d debug mode."
 			exit 0
 		    fi
