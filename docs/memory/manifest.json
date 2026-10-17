@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 9572,
+      "bytes": 11639,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "124ab5b432d10114b71123be4ba830afc65e03f55ae3677a6e14e4ab112e72d8"
+      "sha256": "87fb6c03ea501d69e526ee3682c4031d03649c24cef035f44c9ad039ba812d26"
     },
     {
       "bytes": 10506,
@@ -1249,6 +1249,11 @@
       "bytes": 14922,
       "path": "docs/memory/phases/kaonlt-baseline-pion-memory-reanchor-2026-10-14.md",
       "sha256": "3c0ce1a3ec3c3d402160cd25383ac1fbb0af3c355f5d0ee9b9664493c9298d5f"
+    },
+    {
+      "bytes": 7733,
+      "path": "docs/memory/phases/kaonlt-center-lowe-concrete-next-memory-2026-10-17-task-contract.md",
+      "sha256": "a7da640c9dd71630a16b0521e8e28b27330b439f5ab6de7748dea21122292776"
     },
     {
       "bytes": 12579,

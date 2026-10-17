@@ -36,8 +36,9 @@ It is detached from farm science and clears no runtime gate.
 - [Full-chain diagnostic](phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
   `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; read-only companion JSON/PDF
   for Center/lowe t1/t2/t3, t2 primary. Local scalar/fake-ROOT checks only;
-  no capture, procedure-PDF, farm or scientific acceptance. Independent
-  actual-diff review is the current gate; normal-launcher isolation stays blocked.
+  no capture, procedure-PDF, farm or scientific acceptance. Observer source is
+  published; the next gate is the execution-path source audit below.
+  Normal-launcher isolation stays blocked.
 
 - [Attempt-output isolation](phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
   `BLOCKED`: `post_clean_background_output_mkdir_outside_attempt`.
@@ -57,7 +58,9 @@ It is detached from farm science and clears no runtime gate.
   successor lists repair the committed-history rejection without changing frozen
   source checks. Pre-existing local report: 47 WSL synthetic/history/isolation tests plus eight
   Windows Python owner regressions passed (55 total); initial WSL import lacked
-  NumPy. Not rerun by memory correction; unpublished, actual-diff review pending.
+  NumPy. Not rerun by this memory correction. The October 17 receipt/history
+  repair is published at `dceaadb87f303c0c406978b2d85a2728b5bd2056`;
+  publication establishes no farm readiness or completed execution owner.
   Supplied JLab attempt stopped at `receipt_directory_symlink`; no resolver acceptance.
 
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
@@ -131,15 +134,42 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — evaluate the earliest reviewed/pushed safe path to fresh Center/lowe
-seven-stage JSON/PDF (t2 primary, t1/t3 controls), after independent combined
-actual-diff acceptance, user publication and pushed-state synchronization.
-First establish whether an existing reviewed execution path can reach the observer;
-if none, name one exact missing capability. The separate read-only resolver
-attestation requires invocation/receipt approval and direct evidence; it cannot
-clear normal-launcher shared writes. Both isolation blockers remain; no farm
-command or further memory reconciliation is implied. Resolve baseline before
-returning to the interrupted roadmap.
+NEXT — after independent actual-diff acceptance, user publication and pushed-state
+synchronization of [this correction](phases/kaonlt-center-lowe-concrete-next-memory-2026-10-17-task-contract.md),
+perform one read-only source audit of the complete executable path to
+`observe_chain_audit` for fresh farm-generated **Q4p4W2p74 / Center / lowe
+seven-stage companion JSON/PDF**, canonical t2 primary, separate t1/t3 controls.
+First inspect `run_Prod_Analysis.sh`, `set_SymLinks.sh`,
+`farm_env/ltsep_paths.py`, `farm_env/print_ltsep_path_fields.py`,
+`testing/pion_chain_attempt_output_isolation.py`,
+`testing/attest_pion_chain_ltsep_default_root.py`,
+`testing/run_e8_4_fix5_canonical_five_plot_gate.py`,
+`src/cuts/pion_t_bin_parents.py` and `src/cuts/pion_background_chain_audit.py`;
+follow only directly invoked files needed to prove reachability and write safety.
+Do not assume the E.8 owner reaches the observer or that a detached worktree
+confines external writes. A read-only resolver attestation clears neither blocker.
+
+Return one decision: **PASS** only for a named tracked, reviewed/pushed owner/CLI
+that reaches the Center/lowe observer, independently confines every launcher,
+external-background, effective-charge and other write target, and proves the
+invocation/collection/provenance path. Then seek independent farm-readiness
+review of that exact published path before supplying only the reviewed
+user-operated `tcsh` invocation for one narrow gate. Otherwise **BLOCKED**:
+name the first non-bypassable failed invariant and one exact missing execution
+capability. Current evidence favors the absence of a safely output-confined
+single-command full-chain owner/checker/collector invoking the existing hook;
+this is INFERENCE pending the complete live source audit, not a verified verdict.
+
+Both `post_clean_background_output_mkdir_outside_attempt` and
+`effective_charge_default_root_outpath_not_verified` remain `BLOCKED`.
+If blocked, request/implement one strictly bounded execution-path repair for
+precisely the failed invariant: contract -> Codex -> deterministic local checks
+-> independent actual-diff review -> user commit/push -> pushed-state review
+-> user farm run -> fresh JSON/PDF, logs, provenance, checker and page evidence.
+No ordinary-checkout run, blocker bypass or further memory/attestation/history
+cycle; full launcher execution stays prohibited until its actual shared-write
+and resolver invariants are proved. No farm command is authorized here.
+Resolve the baseline discrepancy before returning to the interrupted roadmap.
 
 ## Success Criteria
 
