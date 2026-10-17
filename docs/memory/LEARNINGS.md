@@ -136,6 +136,38 @@
 - Full in-chat health checks, periodic health pulses and explicit evidence
   labels expose stale state and unverified assumptions before silent drift.
 
+## October 2026 science-displacement incident
+
+The [October 15–17 incident](investigations/kaonlt-science-gate-displacement-2026-10-17.md)
+was assistant goal substitution despite existing rules. Apply the
+[throughput decision](decisions/memory-bracketed-scientific-throughput.md):
+
+- Start with the exact requested fresh artifact, scope and runtime source.
+  For each support gate, state whether that artifact requires it now.
+- After two consecutive supporting gates without an evidence-producing action,
+  stop new supporting work, perform the professional re-anchor, name the first
+  non-bypassable blocker and choose one minimal safe next operation. An exact
+  evidenced blocker is progress, never permission for an indefinite repair chain.
+- Inspect pending diffs, contracts and bundles first. Never issue a competing
+  contract or silently replace pending work.
+- Separate hard safety/provenance failure at the operation from related,
+  independent and nonblocking failures. SSH authentication is not identity drift;
+  history-guard incompatibility is not a physics change; a receipt is not full
+  launcher safety; a soft size warning is not a hard integrity failure.
+- For a missing library, detect an existing suitable interpreter only for the
+  relevant test. Report an import failure as unexecuted, not failed assertions.
+  No dependency installation, fake imports or indefinite environment exploration.
+- Old PDFs, model algebra, synthetic/fake-ROOT plots and unrelated illustrations
+  never replace requested fresh signed-event farm JSON/PDF evidence.
+- On explicit user correction, acknowledge the specific error and immediately
+  re-anchor; do not rationalize or extend the disputed workflow.
+- Deliver one task contract, its exact direct move command using active external
+  path values, and one short inline Codex launch prompt. A comprehensive memory
+  correction updates the governing record roles as well as incident provenance.
+- Never invent a safety bypass or farm command around a known failed gate.
+  Stop supporting work when the bounded correction is complete and return to
+  evaluating the safe path to the original scientific artifact.
+
 ## Repository memory and provenance
 
 - Current source and diff outrank stale summaries for implementation.

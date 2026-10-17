@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import uuid
@@ -117,7 +118,9 @@ def source_identity(repo, commit):
         require(git(repo, "rev-parse", ref).decode().strip() == commit, "source_identity_mismatch:" + ref)
     git(repo, "merge-base", "--is-ancestor", BASELINE, commit)
     changed = git(repo, "diff", "--name-only", "--no-renames", "-z", BASELINE, commit)
-    require(all(n in {TOOL, TEST} or n.startswith("docs/memory/")
+    require(all(n in {TOOL, TEST,
+                      "testing/pion_chain_attempt_output_isolation.py",
+                      "testing/test_pion_chain_attempt_output_isolation.py"} or n.startswith("docs/memory/")
                 for n in changed.decode().split("\0") if n), "unapproved_source_successor")
     identities = {}
     for name in (*FROZEN, TOOL, TEST):
@@ -401,7 +404,7 @@ def attest(repo, source_commit):
     return receipt
 
 
-def protected_receipt_locations(repo, receipt):
+def protected_receipt_locations(repo, receipt, canonical=None):
     """Establish exclusions from real probe evidence, never from output strings.
 
     On incomplete discovery no receipt is published. Include both observed and
@@ -412,11 +415,27 @@ def protected_receipt_locations(repo, receipt):
     baseline = receipt.get("baseline_callers", [])
     require(package and len(baseline) == len(CALLERS), "receipt_protected_paths_not_verified")
     locations = {real(Path(repo)), real(Path(package))}
+    exceptions = set()
     for record in [*baseline, *(r["overlay"] for r in receipt["callers"])]:
         for field in FIELDS:
             if field in {"USER", "HOST", "ANATYPE"}:
                 continue
             value = record["paths"].get(field)
+            if field == "VOLATILEPATH" and canonical is not None:
+                # Only the independently pinned bundle role can waive this
+                # broad storage ancestor. Its scientific/output children still
+                # have their own exclusions, including the standard artifacts.
+                storage = real(Path(value))
+                require(canonical.is_relative_to(storage) and canonical != storage,
+                        "receipt_canonical_volatile_role_mismatch")
+                observed = record.get("input_realpaths", {}).get(field)
+                baseline_storage = {r["input_realpaths"]["VOLATILEPATH"] for r in baseline}
+                require(str(storage) in baseline_storage and
+                        (observed is None or real(Path(observed)) == storage),
+                        "receipt_volatile_identity_changed")
+                exceptions.add(str(storage))
+                locations.add(real(storage / "OUTPUT"))
+                continue
             if value is not None:
                 locations.add(real(Path(value)))
             observed = record.get("input_realpaths", {}).get(field)
@@ -443,20 +462,88 @@ def protected_receipt_locations(repo, receipt):
         require(not any(c in value for c in "$`\n\r"), "receipt_background_config_not_verified")
         if value:
             locations.add(real(Path(value)))
+    if canonical is not None:
+        # Copied package and detached checkout are protected even when a probe
+        # stops before returning all overlay caller records.
+        copied = receipt.get("overlay_package", {}).get("path")
+        if copied:
+            locations.add(real(Path(copied)))
+            locations.add(real(Path(copied)).parent.parent)
+        receipt["receipt_destination"]["broad_storage_exceptions"] = sorted(exceptions)
+    receipt.setdefault("receipt_destination", {})["protected_realpaths"] = [str(p) for p in sorted(locations)]
     return sorted(locations)
 
 
-def output_directory(directory, repo, protected=()):
+def canonical_bundle_directory():
+    # Reuse the already tracked farm-owner role, not a basename, environment
+    # override, or a second hard-coded facility path. source_identity freezes
+    # this owner along with the other provenance primitives.
+    return primitives.accepted.GLOBUS
+
+
+def directory_identity(path):
+    info = path.stat()
+    return (info.st_dev, info.st_ino)
+
+
+def output_directory(directory, repo, protected=(), expected=None):
     path = Path(directory)
     require(path.is_absolute() and ".." not in path.parts, "receipt_directory_invalid")
-    require(all(not p.is_symlink() for p in (path, *path.parents)), "receipt_directory_symlink")
+    require(not path.is_symlink(), "receipt_directory_symlink")
     require(path.is_dir() and not real(path).is_relative_to(real(repo)), "receipt_directory_not_external")
     resolved = real(path)
+    authority = Path(canonical_bundle_directory())
+    canonical = None
+    if authority.exists() and not authority.is_symlink():
+        canonical = real(authority)
+    is_canonical = canonical is not None and path in {authority, canonical}
+    aliases = {}
+    if is_canonical:
+        require(resolved == canonical and directory_identity(path) == directory_identity(authority),
+                "receipt_canonical_identity_mismatch")
+        pending = [authority, *authority.parents, canonical, *canonical.parents]
+        seen = set()
+        while pending:
+            node = pending.pop()
+            if node in seen:
+                continue
+            seen.add(node)
+            info = node.lstat()
+            if stat.S_ISLNK(info.st_mode):
+                require(info.st_uid == 0, "receipt_infrastructure_alias_not_root_owned")
+                raw_target = os.readlink(node)
+                target = Path(raw_target)
+                aliases[str(node)] = [info.st_dev, info.st_ino, raw_target]
+                if not target.is_absolute():
+                    target = node.parent / target
+                # Include intermediate aliases hidden by resolve(), such as
+                # a link in the target of another infrastructure link.
+                pending.extend((target, *target.parents))
+            else:
+                require(stat.S_ISDIR(info.st_mode), "receipt_ancestor_not_directory")
+                # A root-owned sticky temporary parent is permitted for local
+                # fixtures; writable non-sticky ancestry is never trusted.
+                require(not info.st_mode & 0o002 or
+                        (info.st_uid == 0 and info.st_mode & stat.S_ISVTX),
+                        "receipt_ancestor_world_writable")
+    else:
+        require(all(not p.is_symlink() for p in path.parents), "receipt_directory_symlink")
     for location in protected:
-        require(not resolved.is_relative_to(location), "receipt_directory_protected_input:" + str(location))
-    require(hasattr(os, "getuid") and path.stat().st_uid == os.getuid(), "receipt_directory_not_owned")
-    require(path.stat().st_mode & 0o022 == 0, "receipt_directory_shared_writable")
-    return path
+        require(not resolved.is_relative_to(location) and not location.is_relative_to(resolved),
+                "receipt_directory_protected_input:" + str(location))
+    info = path.stat()
+    require(stat.S_ISDIR(info.st_mode), "receipt_directory_not_directory")
+    require(hasattr(os, "getuid") and info.st_uid == os.getuid(), "receipt_directory_not_owned")
+    mode = stat.S_IMODE(info.st_mode)
+    require(not mode & 0o022 or (is_canonical and mode == 0o2775), "receipt_directory_shared_writable")
+    policy = {"role": "canonical_globus_bundle_root" if is_canonical else "private_external_directory",
+              "logical_authority": str(authority) if is_canonical else None,
+              "requested_path": str(path), "resolved_target": str(resolved),
+              "identity": [info.st_dev, info.st_ino], "owner_uid": info.st_uid,
+              "mode": oct(mode), "infrastructure_aliases": aliases}
+    if expected is not None:
+        require(policy == expected, "receipt_directory_replaced")
+    return policy
 
 
 def main(argv=None):
@@ -468,18 +555,23 @@ def main(argv=None):
     fd = None
     receipt = None
     try:
-        directory = output_directory(args.output_dir, args.repo)
+        directory = args.output_dir
+        destination = output_directory(directory, args.repo)
         fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         identity = os.fstat(fd)
+        require([identity.st_dev, identity.st_ino] == destination["identity"], "receipt_directory_replaced")
         attempt_id = uuid.uuid4().hex
         name = "pion-ltsep-default-root-" + attempt_id + ".json"
         require(not os.path.lexists(directory / name), "receipt_collision")
         receipt = attest(args.repo, args.source_commit)
-        protected = protected_receipt_locations(args.repo, receipt)
+        receipt["receipt_destination"] = dict(destination)
+        canonical = (Path(destination["resolved_target"])
+                     if destination["role"] == "canonical_globus_bundle_root" else None)
+        protected = protected_receipt_locations(args.repo, receipt, canonical)
         receipt["attempt_id"] = attempt_id
         receipt["status"] = "PASS" if receipt["passed"] else "BLOCKED"
         payload = (json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()
-        output_directory(directory, args.repo, protected)
+        output_directory(directory, args.repo, protected, expected=destination)
         after = directory.stat()
         require((identity.st_dev, identity.st_ino) == (after.st_dev, after.st_ino), "receipt_directory_replaced")
         out = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=fd)

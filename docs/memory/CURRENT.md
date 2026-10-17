@@ -28,7 +28,10 @@ All existing statuses/scopes remain intact.
 
 ## Current Work Item
 
-Prior evidence/reviews own acceptance.
+Prior evidence/reviews own acceptance. The user-requested
+[memory correction](phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md)
+records the [assistant's October 15–17 workflow failure](investigations/kaonlt-science-gate-displacement-2026-10-17.md).
+It is detached from farm science and clears no runtime gate.
 
 - [Full-chain diagnostic](phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
   `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; read-only companion JSON/PDF
@@ -45,9 +48,17 @@ Prior evidence/reviews own acceptance.
 - [Safe path interface](phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md):
   `BLOCKED`: `effective_charge_default_root_outpath_not_verified`.
   [Resolver attestation](phases/kaonlt-pion-full-chain-ltsep-default-root-attestation-2026-10-16-task-contract.md):
-  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; 25 synthetic/18 existing tests
-  pass; caller/cwd and receipt exclusions repaired. Installed behavior NOT VERIFIED;
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; installed behavior NOT VERIFIED;
   both isolation blockers remain.
+  [Receipt repair](phases/kaonlt-pion-ltsep-receipt-canonical-globus-repair-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; canonical-role policy preserved.
+  [History compatibility](phases/kaonlt-pion-receipt-regression-history-compatibility-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; explicit mutual helper/test
+  successor lists repair the committed-history rejection without changing frozen
+  source checks. Pre-existing local report: 47 WSL synthetic/history/isolation tests plus eight
+  Windows Python owner regressions passed (55 total); initial WSL import lacked
+  NumPy. Not rerun by memory correction; unpublished, actual-diff review pending.
+  Supplied JLab attempt stopped at `receipt_directory_symlink`; no resolver acceptance.
 
 - E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
   [closure](evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
@@ -120,10 +131,15 @@ families unavailable, not data/identity/yield/parent closure. No scale claim.
 
 ## Next Action
 
-NEXT — review the resolver-attestation diff; after user publication and
-pushed-state review, evaluate separate read-only attestation readiness. Review
-direct installed-package evidence before resuming safe-interface work. No farm
-command; baseline resolution and roadmap return remain required.
+NEXT — evaluate the earliest reviewed/pushed safe path to fresh Center/lowe
+seven-stage JSON/PDF (t2 primary, t1/t3 controls), after independent combined
+actual-diff acceptance, user publication and pushed-state synchronization.
+First establish whether an existing reviewed execution path can reach the observer;
+if none, name one exact missing capability. The separate read-only resolver
+attestation requires invocation/receipt approval and direct evidence; it cannot
+clear normal-launcher shared writes. Both isolation blockers remain; no farm
+command or further memory reconciliation is implied. Resolve baseline before
+returning to the interrupted roadmap.
 
 ## Success Criteria
 

@@ -1,5 +1,5 @@
 """Synthetic packages/repositories only; never attest the real JLab package."""
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
+from contextlib import contextmanager, ExitStack, redirect_stdout, redirect_stderr
 from copy import deepcopy
 import hashlib
 import io
@@ -7,22 +7,151 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from testing import attest_pion_chain_ltsep_default_root as tool
+from testing import pion_chain_attempt_output_isolation as isolation
 
 ROOT = Path(__file__).resolve().parents[1]
+PUBLISHED = "3ba464006090c2cea14978e31d39f715c9f95fa6"
+HISTORY_HELPERS = (tool.TOOL, tool.TEST,
+                   "testing/pion_chain_attempt_output_isolation.py",
+                   "testing/test_pion_chain_attempt_output_isolation.py")
 
 
 def run(repo, *args):
     return subprocess.run(args, cwd=repo, check=True, capture_output=True).stdout
 
 
+def history_commit(repo, *paths):
+    """Mutate only the newly created synthetic repository, never ROOT."""
+    run(repo, "git", "add", "--", *paths)
+    run(repo, "git", "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
+        "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null",
+        "commit", "-qm", "synthetic history successor")
+    sha = tool.git(repo, "rev-parse", "HEAD").decode().strip()
+    run(repo, "git", "update-ref", "refs/remotes/origin/test", sha)
+    return sha
+
+
 @contextmanager
-def fixture(behavior="", pathing_extra="", duplicate=False):
+def history_fixture(published=False):
+    """Real Git history; optionally descend from the exact published commit.
+
+    The published fixture borrows objects read-only. Its refs, index, commits
+    and checkout live entirely in TemporaryDirectory; no fetch or parent
+    checkout/index/ref mutation is performed.
+    """
+    with tempfile.TemporaryDirectory(prefix="kaonlt-receipt-history-") as name, ExitStack() as stack:
+        repo = Path(name)
+        run(repo, "git", "init", "-q", "-b", "test")
+        if published:
+            objects = Path(tool.git(ROOT, "rev-parse", "--git-path", "objects").decode().strip())
+            if not objects.is_absolute():
+                objects = ROOT / objects
+            (repo / ".git/objects/info/alternates").write_text(str(objects.resolve()) + "\n")
+            run(repo, "git", "update-ref", "refs/heads/test", PUBLISHED)
+            run(repo, "git", "read-tree", PUBLISHED)
+            names = run(repo, "git", "ls-files", "-z", "--", "src", "farm_env", "testing",
+                        "background_samples", "run_Prod_Analysis.sh", "set_SymLinks.sh")
+            subprocess.run(["git", "checkout-index", "-z", "--stdin"], cwd=repo,
+                           input=names, check=True, capture_output=True)
+            pin = PUBLISHED
+        else:
+            for source in set((*tool.FROZEN, *isolation.SOURCE_PATHS, *HISTORY_HELPERS)):
+                target = repo / source
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((ROOT / source).read_bytes())
+            pin = history_commit(repo, ".")
+            stack.enter_context(patch.object(tool, "BASELINE", pin))
+            stack.enter_context(patch.object(isolation, "SOURCE_HEAD", pin))
+        yield repo, pin
+
+
+class HistoryCompatibilityTests(unittest.TestCase):
+    def test_committed_isolation_helper_and_test_successors(self):
+        with history_fixture() as (repo, _):
+            expected = tool.source_identity(repo, tool.git(repo, "rev-parse", "HEAD").decode().strip())
+            for name in HISTORY_HELPERS[2:]:
+                path = repo / name
+                path.write_bytes(path.read_bytes() + b"\n# synthetic isolation-only successor\n")
+                sha = history_commit(repo, name)
+                before = tool.repository_state(repo)
+                self.assertEqual(tool.source_identity(repo, sha), expected)
+                isolation.checked_source(repo)
+                self.assertEqual(tool.repository_state(repo), before)
+
+    def test_combined_successor_from_published_baseline(self):
+        with history_fixture(published=True) as (repo, _):
+            for name in HISTORY_HELPERS:
+                (repo / name).write_bytes((ROOT / name).read_bytes())
+            sha = history_commit(repo, *HISTORY_HELPERS)
+            self.assertNotEqual(sha, PUBLISHED)
+            run(repo, "git", "merge-base", "--is-ancestor", PUBLISHED, sha)
+            changed = set(tool.git(repo, "diff", "--name-only", PUBLISHED, sha).decode().splitlines())
+            self.assertEqual(changed, set(HISTORY_HELPERS))
+            before = tool.repository_state(repo)
+            identities = tool.source_identity(repo, sha)
+            _, protected_hashes, head = isolation.checked_source(repo)
+            self.assertEqual(head, sha)
+            for name in isolation.SOURCE_PATHS:
+                self.assertEqual(protected_hashes[name], tool.digest(tool.git(repo, "show", isolation.SOURCE_HEAD + ":" + name)))
+            self.assertTrue(set(tool.FROZEN).issubset(identities))
+            attempt = repo / "attempt"; attempt.mkdir()
+            receipt = isolation.preflight(repo, attempt, {
+                "LTANAPATH": str(attempt / "analysis"), "OUTPATH": str(attempt / "analysis/OUTPUT"),
+                "SKIMPATH": str(attempt / "skim"), "VOLATILEPATH": str(repo.parent / "shared"),
+                "ANATYPE": "Kaon"})
+            self.assertEqual(receipt["failed_invariant"], isolation.FIRST_SHARED_WRITE)
+            self.assertFalse(receipt["passed"])
+            self.assertFalse(receipt["farm_execution_authorized"])
+            self.assertEqual(tool.repository_state(repo), before)
+
+    def test_unauthorized_committed_sources_remain_rejected_by_both(self):
+        for name in ("src/unapproved.py", "set_SymLinks.sh", "farm_env/ltsep_paths.py",
+                     "testing/unrelated.py"):
+            with self.subTest(name=name), history_fixture() as (repo, _):
+                path = repo / name
+                path.write_bytes((path.read_bytes() if path.exists() else b"") + b"\n# forbidden\n")
+                sha = history_commit(repo, name)
+                with self.assertRaisesRegex(ValueError, "unapproved_source_successor"):
+                    tool.source_identity(repo, sha)
+                with self.assertRaisesRegex(ValueError, "protected_source_changed|unapproved_source_change"):
+                    isolation.checked_source(repo)
+
+    def test_protected_worktree_and_index_remain_rejected_by_both(self):
+        for indexed in (False, True):
+            with self.subTest(indexed=indexed), history_fixture() as (repo, pin):
+                path = repo / "set_SymLinks.sh"
+                original = path.read_bytes()
+                path.write_bytes(original + b"\n# forbidden\n")
+                if indexed:
+                    run(repo, "git", "add", "--", "set_SymLinks.sh")
+                    path.write_bytes(original)  # Dirty index alone cannot hide.
+                with self.assertRaisesRegex(ValueError, "source_index_changed" if indexed else "source_worktree_changed"):
+                    tool.source_identity(repo, pin)
+                with self.assertRaisesRegex(ValueError, "protected_source_changed"):
+                    isolation.checked_source(repo)
+
+    def test_wrong_ancestry_remains_rejected_by_both(self):
+        with history_fixture() as (repo, _):
+            run(repo, "git", "checkout", "--orphan", "unrelated")
+            (repo / "docs").mkdir()
+            (repo / "docs/orphan.md").write_text("unrelated history\n")
+            sha = history_commit(repo, ".")
+            run(repo, "git", "branch", "-M", "test")
+            with self.assertRaises(subprocess.CalledProcessError):
+                tool.source_identity(repo, sha)
+            with self.assertRaisesRegex(ValueError, "scientific_source_not_verified_ancestor"):
+                isolation.checked_source(repo)
+
+
+@contextmanager
+def fixture(behavior="", pathing_extra="", duplicate=False, volatile=None):
     with tempfile.TemporaryDirectory(prefix="kaonlt-ltsep-synthetic-") as name, tempfile.TemporaryDirectory(prefix="kaonlt-ltsep-installed-") as installed_name:
         root = Path(name).resolve()
         repo = root / "ordinary"
@@ -64,6 +193,8 @@ def fixture(behavior="", pathing_extra="", duplicate=False):
         fields = {k: str(root / "inputs" / k) for k in tool.FIELDS}
         fields.update(LTANAPATH=str(repo), ANALYSISPATH=str(root), USER="fixture-user",
                       HOST="fixture-host", ANATYPE="Kaon")
+        if volatile is not None:
+            fields["VOLATILEPATH"] = str(volatile)
         for key in fields:
             if key not in {"LTANAPATH", "OUTPATH", "USER", "HOST", "ANATYPE"}:
                 Path(fields[key]).mkdir(parents=True, exist_ok=True)
@@ -85,6 +216,160 @@ def fixture(behavior="", pathing_extra="", duplicate=False):
 
 
 class AttestationTests(unittest.TestCase):
+    @contextmanager
+    def canonical_destination(self):
+        with tempfile.TemporaryDirectory(prefix="kaonlt-canonical-storage-") as name:
+            root = Path(name).resolve()
+            physical = root / "physical"
+            physical.mkdir()
+            out = physical / "globus"
+            out.mkdir()
+            out.chmod(0o2775)
+            alias = root / "infrastructure"
+            alias.symlink_to(physical, target_is_directory=True)
+            logical = alias / "globus"
+            original = Path.lstat
+
+            def facility_lstat(path, *args, **kwargs):
+                info = original(path, *args, **kwargs)
+                if path == alias:
+                    # Analogue of facility-owned infrastructure: no actual
+                    # privileged ownership/permission changes in the fixture.
+                    values = list(info)
+                    values[4] = 0
+                    return os.stat_result(values)
+                return info
+
+            with patch.object(tool.primitives.accepted, "GLOBUS", logical), patch.object(Path, "lstat", facility_lstat):
+                yield root, logical, out, alias
+
+    def test_canonical_infrastructure_and_2775_publication(self):
+        with self.canonical_destination() as (storage, logical, physical, _):
+            metadata = physical.stat()
+            sentinel = physical / "existing.zip"
+            sentinel.write_bytes(b"preserved bundle")
+            with fixture(volatile=storage) as (_, repo, _, sha):
+                # One resolver attestation per CLI, including publication.
+                for destination in (logical, physical):
+                    stdout = io.StringIO()
+                    with patch.object(tool, "attest", wraps=tool.attest) as attest, redirect_stdout(stdout):
+                        self.assertEqual(tool.main(["--repo", str(repo), "--source-commit", sha,
+                                                    "--output-dir", str(destination)]), 0)
+                    attest.assert_called_once()
+                    summary = json.loads(stdout.getvalue())
+                    path = Path(summary["receipt"])
+                    raw = path.read_bytes()
+                    receipt = json.loads(raw)
+                    self.assertEqual(summary["sha256"], hashlib.sha256(raw).hexdigest())
+                    self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+                    self.assertFalse(receipt["farm_execution_authorized"])
+                    policy = receipt["receipt_destination"]
+                    self.assertEqual(policy["role"], "canonical_globus_bundle_root")
+                    self.assertEqual(policy["resolved_target"], str(physical))
+                    self.assertEqual(policy["identity"], [metadata.st_dev, metadata.st_ino])
+                    self.assertEqual(policy["broad_storage_exceptions"], [str(storage)])
+                    self.assertIn(str(storage / "OUTPUT"), policy["protected_realpaths"])
+            self.assertEqual(sentinel.read_bytes(), b"preserved bundle")
+            after = physical.stat()
+            self.assertEqual((after.st_dev, after.st_ino, after.st_mode, after.st_uid, after.st_gid),
+                             (metadata.st_dev, metadata.st_ino, metadata.st_mode, metadata.st_uid, metadata.st_gid))
+
+    def test_canonical_alias_negative_controls(self):
+        with self.canonical_destination() as (root, logical, out, alias):
+            other = root / "other"; other.mkdir(); other.chmod(0o2775)
+            alternate = root / "alternate"; alternate.symlink_to(out.parent, target_is_directory=True)
+            leaf = root / "leaf"; leaf.symlink_to(out, target_is_directory=True)
+            dangling = root / "dangling"; dangling.symlink_to(root / "absent", target_is_directory=True)
+            cycle = root / "cycle"; cycle.symlink_to(cycle, target_is_directory=True)
+            for path in (other, alternate / "globus", leaf, dangling / "globus", cycle / "globus",
+                         logical / ".." / "globus", root / "missing"):
+                with self.subTest(path=path), redirect_stderr(io.StringIO()), patch.object(tool, "attest") as attest:
+                    self.assertEqual(tool.main(["--repo", str(ROOT), "--source-commit", "a" * 40,
+                                                "--output-dir", str(path)]), 1)
+                    attest.assert_not_called()
+            self.assertFalse(list(out.iterdir()))
+            # An unprivileged alias is not an approved facility ancestor.
+            original = Path.lstat
+            def untrusted(path, *args, **kwargs):
+                info = original(path, *args, **kwargs)
+                if path == alias:
+                    values = list(info); values[4] = os.getuid() + 1
+                    return os.stat_result(values)
+                return info
+            with patch.object(Path, "lstat", untrusted), self.assertRaisesRegex(ValueError, "alias_not_root_owned"):
+                tool.output_directory(logical, ROOT)
+
+    def test_canonical_protected_roles_never_inherit_storage_exception(self):
+        with self.canonical_destination() as (storage, logical, out, _), fixture(volatile=storage) as (_, repo, _, sha):
+            receipt = tool.attest(repo, sha)
+            self.assertTrue(receipt["passed"])
+            receipt["receipt_destination"] = tool.output_directory(logical, repo)
+            for field in tool.FIELDS:
+                if field in {"VOLATILEPATH", "USER", "HOST", "ANATYPE"}:
+                    continue
+                candidate = deepcopy(receipt)
+                candidate["baseline_callers"][0]["paths"][field] = str(out)
+                with self.subTest(field=field):
+                    protected = tool.protected_receipt_locations(repo, candidate, out)
+                    with self.assertRaisesRegex(ValueError, "protected_input"):
+                        tool.output_directory(logical, repo, protected)
+            for role in ("installed_package", "overlay_package"):
+                candidate = deepcopy(receipt)
+                candidate[role] = {"path": str(out)}
+                protected = tool.protected_receipt_locations(repo, candidate, out)
+                with self.subTest(role=role), self.assertRaisesRegex(ValueError, "protected_input"):
+                    tool.output_directory(logical, repo, protected)
+            # An actual background input under the canonical root blocks it,
+            # including alias resolution and ancestor/descendant overlap.
+            link = storage / "input-alias"; link.symlink_to(out, target_is_directory=True)
+            candidate = deepcopy(receipt)
+            candidate["configured_external_inputs"] = {"LT_BG_SAMPLE_BASE": str(link / "science")}
+            with self.assertRaisesRegex(ValueError, "protected_input"):
+                tool.output_directory(logical, repo, tool.protected_receipt_locations(repo, candidate, out))
+            sibling = storage / "unrelated"; sibling.mkdir(mode=0o700)
+            with self.assertRaisesRegex(ValueError, "protected_input"):
+                tool.output_directory(sibling, repo, tool.protected_receipt_locations(repo, deepcopy(receipt)))
+            self.assertFalse(list(out.iterdir()))
+
+    def test_canonical_owner_inode_and_alias_rechecks(self):
+        with self.canonical_destination() as (_, logical, out, alias):
+            policy = tool.output_directory(logical, ROOT)
+            original = Path.stat
+            def wrong_owner(path, *args, **kwargs):
+                info = original(path, *args, **kwargs)
+                if path == logical:
+                    values = list(info); values[4] = os.getuid() + 1
+                    return os.stat_result(values)
+                return info
+            with patch.object(Path, "stat", wrong_owner), self.assertRaisesRegex(ValueError, "not_owned"):
+                tool.output_directory(logical, ROOT)
+            out.rename(out.with_name("previous"))
+            out.mkdir(); out.chmod(0o2775)
+            with self.assertRaisesRegex(ValueError, "directory_replaced"):
+                tool.output_directory(logical, ROOT, expected=policy)
+            policy = tool.output_directory(logical, ROOT)
+            alias.unlink(); alias.symlink_to(str(out.parent) + "/.", target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "directory_replaced"):
+                tool.output_directory(logical, ROOT, expected=policy)
+
+    def test_canonical_race_and_interruption_publish_no_receipt(self):
+        with self.canonical_destination() as (storage, logical, out, _), fixture(volatile=storage) as (_, repo, _, sha):
+            original = tool.attest
+            def replace(*args):
+                receipt = original(*args)
+                out.rename(out.with_name("previous"))
+                out.mkdir(); out.chmod(0o2775)
+                return receipt
+            with patch.object(tool, "attest", side_effect=replace), redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(tool.main(["--repo", str(repo), "--source-commit", sha,
+                                            "--output-dir", str(logical)]), 1)
+            self.assertIn("receipt_directory_replaced", stderr.getvalue())
+            self.assertFalse(list(out.iterdir()))
+            self.assertFalse(list(out.with_name("previous").iterdir()))
+            with patch.object(tool, "attest", side_effect=KeyboardInterrupt), self.assertRaises(KeyboardInterrupt):
+                tool.main(["--repo", str(repo), "--source-commit", sha, "--output-dir", str(logical)])
+            self.assertFalse(list(out.iterdir()))
+
     def test_equal_default_and_plot_resolver_only_pass(self):
         with fixture() as (_, repo, _, sha):
             receipt = tool.attest(repo, sha)

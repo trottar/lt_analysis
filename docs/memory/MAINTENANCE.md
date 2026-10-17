@@ -158,6 +158,29 @@ reconciliation before substantive implementation. Cosmetic/historical drift
 remains nonblocking and follows the existing batching policy. A failed gate
 stops progression independently of whether memory itself is consistent.
 
+## Science-gate displacement alarm
+
+Trigger this mandatory professional re-anchor after two consecutive supporting
+gates without new scientific evidence or an evidence-producing action; repeated
+assistant-created contracts for the same blocker; a user saying the goal is
+being displaced; proposed historical substitutions for requested fresh results;
+or confusion of auxiliary receipt/test gates with full-runtime readiness.
+An exact evidenced blocker must be recorded but cannot reset the alarm to
+justify another indefinite support chain.
+
+Stop initiating new supporting work. Immediately state the requested scientific
+artifact and runtime source, separate required hard safety/provenance constraints
+from optional, independent or unrelated gates, identify the first non-bypassable
+invariant, and select one minimal next operation with its required evidence.
+State what has not been validated. Read the live identity/startup core and
+relevant CURRENT references under root AGENTS; acknowledge any specific assistant
+error. The receipt remains subordinate to action and creates no phase, status
+label or farm execution time limit. No known failed gate may be bypassed.
+Ordinary manifest/publication health remains required; soft warnings alone are
+recorded and batched rather than generating recursive cleanup. See the
+[incident](investigations/kaonlt-science-gate-displacement-2026-10-17.md) and
+[throughput decision](decisions/memory-bracketed-scientific-throughput.md).
+
 ## Size and semantic triggers
 
 | Record | Soft warning | Hard failure |

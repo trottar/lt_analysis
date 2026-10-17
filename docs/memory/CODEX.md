@@ -35,6 +35,26 @@ complete additions for intended new/untracked files. Preserve unrelated state
 and unrelated review bundles. At a failed contract hard stop, return `BLOCKED`;
 do not invent a workaround, reset, stash, clean or overwrite local work.
 
+## Incident and memory implementation controls
+
+Memory/incident work follows the same one-contract, exact direct move command,
+short inline launch prompt and independent actual-diff review flow. Before any
+edit, inventory the complete dirty tree, index, pending patches, contracts and
+review bundles. Preserve their bytes; never resolve competing contracts implicitly
+by implementing a replacement. Report the first conflicting invariant and its
+narrow resolution under the existing authority.
+
+Anchor supporting work to the requested artifact. Apply the MAINTENANCE
+science-gate displacement alarm after two consecutive non-evidence support gates
+or explicit user correction; do not generate another phase to perform the re-anchor.
+When a test import lacks NumPy, classify only that test as unexecuted, state
+whether it is a relevant contract hard gate and detect an existing suitable
+interpreter only if needed. Do not fake dependencies, install tools, bypass source
+checks or turn unrelated tests into recursive blockers. Standard-library memory
+checks do not require NumPy-dependent owner regressions. A separately required
+owner/farm gate remains unverified until its own applicable checks pass.
+User-owned Git publication and farm execution rules remain unchanged.
+
 ## Task classes
 
 1. **Implementation task:** make the approved source change, run local checks,

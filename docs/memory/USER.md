@@ -71,6 +71,21 @@ source-changing Codex workflow and farm-rendered from repository source.
 ChatGPT-generated/extracted plots are inspection aids only when explicitly
 requested, never substitutes for tracked E.8 deliverables.
 
+## Scientific output and correction requirements
+
+Scientific tasks must produce the requested evidence. The user does not accept
+multi-day support-contract spirals, historical PDFs or illustrations in place of
+requested fresh farm results. After two consecutive non-evidence support gates,
+stop new support work and apply the MAINTENANCE science-gate displacement alarm.
+Preserve pending local work; inspect available source and contracts before asking
+for genuinely missing information. A user correction requires an immediate
+professional re-anchor and the shortest justified action, not rationalization.
+A comprehensive durable memory correction must update the appropriate governing
+records as well as the investigation; a standalone incident write-up is incomplete.
+Always supply the exact direct task-contract move command using active external
+configuration and one short inline Codex launch prompt; keep personal paths out
+of tracked memory. These requirements authorize no unsafe farm operation.
+
 ## Delivery preferences
 
 For a source-changing task, ChatGPT provides exactly one standalone Markdown

@@ -31,7 +31,8 @@ def git(root: Path, *args: str) -> bytes:
 def checked_source(root: Path) -> tuple[dict, dict, str]:
     """Bind the current commit to the frozen ancestor and protected contents.
 
-    Only repository-memory and this helper/test may advance after the pin.
+    Only repository-memory and the isolation/attestation helpers/tests may
+    advance after the pin.
     Protected committed and index bytes must match the pin exactly; worktree
     comparison permits only Git's Windows CRLF/LF checkout conversion.
     """
@@ -55,7 +56,9 @@ def checked_source(root: Path) -> tuple[dict, dict, str]:
         texts[name] = raw.decode("utf-8").replace("\r\n", "\n")
         hashes[name] = hashlib.sha256(raw).hexdigest()
     allowed = {"testing/pion_chain_attempt_output_isolation.py",
-               "testing/test_pion_chain_attempt_output_isolation.py"}
+               "testing/test_pion_chain_attempt_output_isolation.py",
+               "testing/attest_pion_chain_ltsep_default_root.py",
+               "testing/test_attest_pion_chain_ltsep_default_root.py"}
     changed = git(root, "diff", "--name-only", "--no-renames", "-z", SOURCE_HEAD, head)
     for name in changed.decode("utf-8").split("\0"):
         if name and name not in allowed and not name.startswith("docs/memory/"):

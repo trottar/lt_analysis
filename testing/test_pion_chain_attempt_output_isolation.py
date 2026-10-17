@@ -200,6 +200,31 @@ class IsolationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "protected_source_changed:" + name):
                 isolation.checked_source(repo)
 
+    def test_committed_attestation_helper_and_test_successors(self):
+        with source_history() as (repo, _):
+            baseline_texts, baseline_hashes, _ = isolation.checked_source(repo)
+            for name in ("testing/attest_pion_chain_ltsep_default_root.py",
+                         "testing/test_attest_pion_chain_ltsep_default_root.py"):
+                (repo / name).write_text("# reviewed read-only attestation successor\n")
+                head = commit_fixture(repo, "synthetic attestation successor")
+                index = (repo / ".git/index").read_bytes()
+                before = files(repo)
+                texts, hashes, checked = isolation.checked_source(repo)
+                self.assertEqual((texts, hashes, checked), (baseline_texts, baseline_hashes, head))
+                self.assertEqual((repo / ".git/index").read_bytes(), index)
+                self.assertEqual(files(repo), before)
+
+    def test_other_testing_setup_and_farm_successors_remain_rejected(self):
+        for name in ("testing/unrelated.py", "set_SymLinks.sh", "farm_env/ltsep_paths.py"):
+            with self.subTest(name=name), source_history() as (repo, _):
+                path = repo / name
+                path.write_bytes((path.read_bytes() if path.exists() else b"") + b"\n# forbidden\n")
+                commit_fixture(repo, "synthetic forbidden successor")
+                expected = ("protected_source_changed:" if name in isolation.SOURCE_PATHS
+                            else "unapproved_source_change:") + name
+                with self.assertRaisesRegex(ValueError, expected):
+                    isolation.checked_source(repo)
+
     def test_unapproved_other_source_commit_is_rejected(self):
         with source_history() as (repo, _):
             path = repo / "src/unapproved.py"

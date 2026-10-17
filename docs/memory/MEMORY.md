@@ -266,6 +266,20 @@ comparison, accepted runtime artifact, or one directly evidenced scientific/
 runtime blocker with one coherent repair. Documentation alone is not scientific
 completion. See the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 
+### Science priority and evidence admissibility
+
+A real safety/provenance hard gate stops the specific unsafe operation; it
+neither authorizes unrelated repair cycles nor automatically blocks independent
+safe evidence collection. Anchor every support gate to the exact requested
+fresh artifact. After two consecutive non-evidence supporting gates, stop new
+support work and professionally re-anchor: name that artifact, the first
+non-bypassable blocker and one minimal safe operation. Preserve failed gates;
+no bypass or speculative farm command follows. Model algebra, historical plots,
+synthetic tests, installed-package attestations and fresh farm signed-event
+science are distinct evidence classes. The [October 15–17 incident](investigations/kaonlt-science-gate-displacement-2026-10-17.md)
+records the assistant's failure to apply these existing priorities; it changes
+no scientific ownership, acceptance or Method-A/Method-B role.
+
 ### Method-A detector-response scientific lessons
 
 The [Gate-3 source/science audit](investigations/e8-4-left-lowe-method-a-detector-response-source-science-audit-2026-10-03.md)

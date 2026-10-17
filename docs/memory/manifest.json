@@ -6,9 +6,9 @@
       "sha256": "de71043f446b7c84b77ce37c805f410512dbf61100f744691d450266f30c1da7"
     },
     {
-      "bytes": 9020,
+      "bytes": 10292,
       "path": "docs/memory/CODEX.md",
-      "sha256": "5f98b601ae5aee45ac931001f6b30df7c4753b9ec19cf3da1c026e98d6964e10"
+      "sha256": "aca2826875916f96908581518813a213ac0ff9090bf5b3edf2bd78331f1c6871"
     },
     {
       "bytes": 6131,
@@ -16,24 +16,24 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8167,
+      "bytes": 9572,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "8055adb91df5fe686f1ecf9925af2a078571cabc6f423e30f4232eb139a651e7"
+      "sha256": "124ab5b432d10114b71123be4ba830afc65e03f55ae3677a6e14e4ab112e72d8"
     },
     {
-      "bytes": 8339,
+      "bytes": 10506,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "dc0432253853c822dccb79c1d63538a579b37aa66fda7729046ba11a4a3559c3"
+      "sha256": "0611e9c1088b645f11f984e472272754aee5d0bc8e8dc76872b0ee4326f69442"
     },
     {
-      "bytes": 11088,
+      "bytes": 12564,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "79459e5fe5e99ecfc7a2acbba760ae5eebe4e258329cd299bf7e9c22fd7d0f52"
+      "sha256": "f92de8626796efa9e6deb38a1db6784087143c7114eb9ebb30eaddebcf2b0029"
     },
     {
-      "bytes": 24105,
+      "bytes": 25045,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "3562775f6aba8943e52c828d2b0bb905adc92c4024069cce2b49733bd480eb3d"
+      "sha256": "a905d997183c44beec324a07f432e121134db118a9cd77a7200b73342472a13a"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 7940,
+      "bytes": 8946,
       "path": "docs/memory/USER.md",
-      "sha256": "d0d2c143d006ca42d280f346cd65e496a46fdb557bcfefbf937ec75966b26794"
+      "sha256": "8699e615878792f12082464e6f2523ca0fbb0d6513ad57c6fa482bd6ca628279"
     },
     {
       "bytes": 1157,
@@ -439,6 +439,11 @@
       "bytes": 2081,
       "path": "docs/memory/investigations/f4-refresh2-validation1-operational-readiness-failure.md",
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
+    },
+    {
+      "bytes": 28637,
+      "path": "docs/memory/investigations/kaonlt-science-gate-displacement-2026-10-17.md",
+      "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
     },
     {
       "bytes": 2348,
@@ -1259,6 +1264,21 @@
       "bytes": 16153,
       "path": "docs/memory/phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md",
       "sha256": "964fb963a1ee00b966558b33b3effb6c09e1406bd3f66e4af2d88eeb9f2ab06d"
+    },
+    {
+      "bytes": 11234,
+      "path": "docs/memory/phases/kaonlt-pion-ltsep-receipt-canonical-globus-repair-2026-10-16-task-contract.md",
+      "sha256": "46611892dd23a08c93c0c9f281f337fb6bf1a5058444354d7dd42052a647186f"
+    },
+    {
+      "bytes": 10313,
+      "path": "docs/memory/phases/kaonlt-pion-receipt-regression-history-compatibility-2026-10-16-task-contract.md",
+      "sha256": "d7eeb2d3100646f03ec9fdeae5e70cc86b1a6dcf40958a4f815b6baca67ac597"
+    },
+    {
+      "bytes": 21459,
+      "path": "docs/memory/phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md",
+      "sha256": "bbaeee09e9da54e71d8c1463af7cbbfe51ccfc92793de72cf015c58530e0ef84"
     },
     {
       "bytes": 14192,
