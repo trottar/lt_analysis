@@ -11,8 +11,10 @@ discrepancy. Focus: **Q4p4W2p74 / Center / lowe / canonical t2**; adjacent t1/t3
 and setting-wide controls retain their distinct scopes. The user compared
 `Center_kaon_rand_sub_Q4p4W2p74_lowe.pdf` (apparently reasonable model) with
 `Center_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf` (problematic
-final subtraction), and reported earlier working behavior. MEMORY ONLY:
-no matched canonical-t regression pair, historical culprit or wider failure verified.
+final subtraction), and reported earlier working behavior. The October 17–18
+farm evidence and prior review are now recorded in the
+[investigation checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#low-epsilon-farm-evidence-and-scientific-checkpoint--october-1718).
+No matched canonical-t regression pair, historical culprit or wider failure verified.
 
 The [October 15 contract](phases/baseline-pion-full-model-memory-reanchor-2026-10-15-task-contract.md)
 and [investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
@@ -34,11 +36,19 @@ records the [assistant's October 15–17 workflow failure](investigations/kaonlt
 It is detached from farm science and clears no runtime gate.
 
 - [Full-chain diagnostic](phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
-  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; read-only companion JSON/PDF
-  for Center/lowe t1/t2/t3, t2 primary. Local scalar/fake-ROOT checks only;
-  no capture, procedure-PDF, farm or scientific acceptance. Observer source is
-  published; the next gate is the execution-path source audit below.
-  Normal-launcher isolation stays blocked.
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for independent validation.
+  RUNTIME VERIFIED (supplied artifacts/prior review, recorded through the
+  [October 18 contract](phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md)):
+  published all-low debug source `f1d1984b5e0fca9ba3c5666477996af783423db7`
+  ran on the farm with `DEBUG_EXIT_STATUS=0`; Center/Left lowe PDFs and a
+  Center canonical t1/t2/t3 seven-stage JSON/PDF (19 pages) were captured.
+  No populated Right/lowe result established. Producer status remains
+  `captured_pending_independent_validation`, completeness `captured`, PDF
+  `available`, `observed_source_HEAD=not_provided`. Farm checkout HEAD was
+  explicitly verified before the run; that does not fill the artifact's
+  missing identity. The reviewed eight-member `KaonLT_loweps_20261018_093137.zip`
+  is not full independent provenance/checker or production acceptance.
+  Normal-launcher isolation remains separately blocked.
 
 - [Attempt-output isolation](phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
   `BLOCKED`: the historical helper reports
@@ -134,75 +144,50 @@ Absolute SIMC separately `BLOCKED`:
 `iter_weight * normfac / Ncontribute` units unproven; two absolute-SIMC page
 families unavailable, not data/identity/yield/parent closure. No scale claim.
 
+Historical normal-launcher/attempt isolation remains separately `BLOCKED`:
+`merge_error_log_outside_attempt` (`-c` merge writes through external `log`),
+`effective_charge_default_root_outpath_not_verified`, and
+`normal_launcher_downstream_write_coverage_unproven`. External SIMC/background
+link repair can also write outside an attempt. Plain `-d` does not invoke
+`-c`; its successful observed run does not clear those broader gates. Setup,
+path configuration and all scientific source remain frozen. The prior
+[debug contract](phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md)
+and [workflow investigation](investigations/kaonlt-science-gate-displacement-2026-10-17.md)
+retain historical scope; no owner/pathing/attestation cycle is authorized here.
+
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the
-[all-low debug correction](phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md),
-then user publication and pushed-state synchronization, followed by the narrow
-farm-readiness decision for fresh Center/lowe seven-stage companion JSON/PDF
-(canonical t2 primary, separate t1/t3). No farm command before that decision.
-The user-supplied replacement contract supersedes the abandoned, unimplemented
-Center/lowe owner contract at the same path. `DEVELOPMENT COMPLETE, FARM
-VALIDATION PENDING`: launcher `-d` clears the legacy Left-only selector on the
-single full low-epsilon child, uses ordinary available-setting selection and
-exits before full high epsilon. Paired low/high capture and shared preflight
-remain unchanged; scientific source and normal mode are frozen.
+NEXT — read-only audit of canonical-t and `(t,phi)` statistical/SIMC support
+for Q4p4W2p74 Center/Left lowe, using existing evidence first. Quantify signed
+and absolute counts, Sumw2, cancellation, effective statistical support where
+meaningful, per-child SIMC occupancy, parent fit quality, component support
+and under-Lambda residuals. Identify actual missing evidence and test the
+justification for hierarchical refinement; no implementation or farm rerun
+is authorized by this checkpoint. After independent ChatGPT actual-diff review,
+user publication and pushed-state synchronization, return directly to this
+audit; no additional contract or farm-readiness project follows here.
 
-SOURCE VERIFIED at `1c7c4714344a0d9245071b87d4abe74de1c50682`:
-`run_Prod_Analysis.sh` normal low/high, Right/Left/Center route reaches
-`src/main.py` -> `rand_sub.py` -> `build_setting_t_bin_pion_parents` ->
-`observe_chain_audit` (including parent reuse), with `alignment_outpath=OUTPATH`.
-At that HEAD, `-d` was Left/lowe only; the local correction above changes it.
-Background manifest -> component file map ->
-`pion_component_shapes.py` opens template ROOT inputs in read mode; the existing
-background directory's `mkdir -p` can be idempotent. This traced consumer is
-input-only, not proof of all consumers or safe launcher execution. The old
-helper remains a negative historical diagnostic, not an input classifier.
+RUNTIME VERIFIED (supplied October 17–18 evidence/prior review): Center/t1 has
+staged-anchor versus full-range SIDIS tension; Center/t2 has a high-leverage
+negative random contribution, negative neutron LS numerator (~-61.674), staged
+`B_n=0`, refined `B_n~0.000202` and `w0~182.82`. Its model pion integral
+~0.2529 versus event-applied background ~6.5562 illustrates failed signed-event/
+model agreement in each Center t bin despite model algebra/subtraction arithmetic
+closure. These are full-range integrals, not extracted yields or cross sections.
+Left's setting-wide neutron amplitude is positive but fit quality is poor;
+matching source-resolved Left canonical-t diagnostics remain NOT VERIFIED.
+See the investigation for the transition-specific findings and limits.
 
-Separate historical normal-launcher isolation blocker, not an all-low debug
-acceptance gate cleared here: when `-c` is enabled, launcher merge calls
-(first populated low-epsilon merge branch) pass
-`${LTANAPATH}/log/<setting>_kaon_Analysed_<sample>_Q4p4W2p74_lowe.err` to
-`src/setup/mergeRootFiles.py:44`, whose `open(err_fout, 'w')` truncates/creates
-the log. After clean/setup, `log` resolves to `${VOLATILEPATH}/log`, outside
-the attempt. Failure invariant: `merge_error_log_outside_attempt`.
-Earlier setup is independently unsafe if external `simc_gfortran` children or
-configured background `worksim` need link repair; those link paths are external.
-That isolation path lacks an attempt-owned log destination that survives
-launcher cleanup and is respected by setup; LTANAPATH-only overlay cannot
-provide it. Plain `-d` does not enable `-c`: the existing merge/delete block is
-skipped by its flag guard, not by detection of existing ROOT inputs. Combining
-`-c` with `-d` still deletes/remerges populated inputs and writes merge logs.
-Setup and path configuration remain unchanged.
-
-Local synthetic checks executed unchanged setup with pre-existing background
-inputs for both epsilons/all phi settings, valid external SIMC links and
-idempotent background mkdir; input bytes and external links were preserved.
-Executing the actual merge log-write AST then overwrote an external synthetic
-log on success and before injected child failure. This is local filesystem/source
-evidence only; actual farm realpaths, installed default/no-mode Root behavior,
-full downstream write coverage and ROOT rendering remain NOT VERIFIED.
-`effective_charge_default_root_outpath_not_verified` and
-`normal_launcher_downstream_write_coverage_unproven` remain `BLOCKED`;
-no historical shared-output safety gate is cleared by the corrected classification.
-
-Plain `-d` still resolves ltsep paths, creates skim/output directories, validates
-external Sigma0 paths, runs `set_SymLinks.sh` (including possible external link
-repair/background mkdir), reads both epsilon run lists/efficiencies/effective
-charges, runs `set_sig_fortran.py` model rewrites, and performs both raw captures
-and shared canonical preflight before the full low analysis. Existing ROOT
-inputs do not remove these dependencies. Local source/stub tests establish
-selection, inherited-selector neutralization, failure propagation and normal
-low/high preservation only; ROOT, farm realpaths, downstream write coverage and
-companion rendering remain NOT VERIFIED. Historical isolation/effective-charge
-blockers remain separate and `BLOCKED`; this change grants no farm readiness.
-
-No owner implementation, pathing redesign, or attestation/history cycle is
-authorized here. Requested evidence remains
-fresh farm-generated **Q4p4W2p74 / Center / lowe seven-stage companion JSON/PDF**,
-canonical t2 primary and separate t1/t3 controls, with reviewed source, logs,
-provenance, checker and page evidence. Resolve the baseline discrepancy before
-returning to the interrupted roadmap.
+SOURCE VERIFIED at the source above: plain `-d` uses ordinary available lowe
+settings, skips `-c` merge and exits before full highe. Analysis physics is
+unchanged. `src/main.py` calls the pion-shape loader without `t_bins/phi_bins`;
+canonical-t scopes can fall back to setting-wide shapes. The Center artifact
+reports no constructed t-binned SIMC shapes (supplied evidence). This possible
+limitation is not a proven cause or permission to activate new shapes.
+INFERENCE: support-gated parent fits with conditional parent-anchored child
+refinement may help, but covariance, Sumw2, cancellations and SIMC support
+must be examined first. Preserve the initially useful staged three-component
+model, all normalization/weights/cuts/priors/templates and signed events.
 
 ## Success Criteria
 

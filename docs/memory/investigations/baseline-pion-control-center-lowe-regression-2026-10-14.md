@@ -445,3 +445,88 @@ dependency before using the contract's publication block; do not silently
 publish a manifest referencing an absent file. The existing CURRENT soft-size
 warning is nonblocking and scheduled for the next meaningful memory checkpoint;
 no accepted-status compaction is part of this task.
+
+## Low-epsilon farm evidence and scientific checkpoint — October 17–18
+
+`ACTIVE`: temporary baseline-pion investigation; CURRENT alone owns NEXT.
+The [October 18 memory-only contract](../phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md)
+carries the supplied farm artifacts and prior ChatGPT scientific review.
+The RUNTIME VERIFIED findings below are attributed to that supplied evidence
+and review, not a local rerun, raw-artifact revalidation or new farm closure
+by this checkpoint. Historical sections above retain their original dates
+and uncertainty labels; the new capture supersedes their no-current-capture
+statements only for the explicit scope below.
+
+SOURCE VERIFIED locally at `test` HEAD
+`f1d1984b5e0fca9ba3c5666477996af783423db7`: the published launcher `-d` clears
+the legacy Left-only selector on its single full low-epsilon child, selects
+ordinary available settings, and exits before full high epsilon. Plain `-d`
+does not invoke the `-c` merge block. This debug selection change did not
+alter analysis physics. The supplied checkpoint records GitHub `test` at that
+same HEAD and explicit verification of farm checkout HEAD before execution;
+no live remote query was performed by this memory-only task.
+
+RUNTIME VERIFIED (supplied farm invocation/review):
+`./run_Prod_Analysis.sh -d 4p4 2p74` ended with `DEBUG_EXIT_STATUS=0`, reporting
+all available low-epsilon settings complete and full high epsilon skipped.
+Center and Left lowe produced analysis and full-subtraction PDFs; no populated
+Right/lowe result is established. One Center/lowe canonical t1/t2/t3 seven-stage
+JSON/PDF pair was captured; the PDF has 19 pages. Producer status remains
+`captured_pending_independent_validation`, completeness `captured`, PDF
+`available`, and `observed_source_HEAD=not_provided`. Verified checkout identity
+does not repair that missing producer identity or imply full independent
+provenance/checker acceptance or broader production scientific validation.
+The reviewed `KaonLT_loweps_20261018_093137.zip` has eight intact members: six
+Center/Left analysis, full-subtraction and pion-fit-debug PDFs plus the Center
+JSON/PDF pair. The desired future handoff is one ZIP per farm run, preserving
+original evidence and checksums; no new hashes or receipts are invented here.
+
+RUNTIME VERIFIED (supplied scientific review), retaining setting/t scope:
+
+- Center/t1: staged SIDIS normalization describes its local anchor well, but
+  joint full-range refinement heavily suppresses SIDIS and underpredicts pion
+  control around Lambda. The staged fit itself overpredicts portions of the
+  high-MM tail. This is transition-specific fit/model tension, not proof of
+  a broken optimizer or acceptance of the staged fit over the entire range.
+- Center/t2: one high-leverage negative signed random contribution near
+  0.910–0.916 GeV contributes to a negative neutron least-squares numerator
+  (~-61.674). Initial staged `B_n=0`, refined `B_n~0.000202`, and the ratio
+  reaches `w0~182.82`. The `K_model` pion integral is ~0.2529 versus event-applied
+  background ~6.5562. Model algebra and after-subtraction arithmetic close,
+  while signed-event/model agreement fails in each Center t bin. Do not drop
+  the negative event or identify it as the sole root cause. These full-range
+  integrals are neither Lambda cross sections nor extracted yields.
+- Left: setting-wide neutron amplitude stays positive, but fit shape quality
+  is poor and production canonical-t plots show concerns. Setting-wide model
+  closure is not canonical-t signed-event/model closure. Matching source-resolved
+  Left canonical-t diagnostics are NOT VERIFIED.
+
+SOURCE VERIFIED: `src/main.py` calls `load_setting_pion_component_shapes`
+without `t_bins` or `phi_bins`; their loader defaults are `None`, and the scope
+resolver can fall back to setting-wide component shapes. RUNTIME VERIFIED
+(supplied Center artifact): no constructed t-binned SIMC shapes are reported.
+This is a possible limitation, not a proven cause or permission to activate
+new shapes. It does not validate the historical normalized-phi mixture
+hypothesis for this run.
+
+INFERENCE: statistical-support-gated fits per t followed by conditional
+parent-anchored `(t,phi)` refinement could be useful. No such physics change
+is accepted or implemented. First inspect existing Center/Left lowe evidence
+for signed/absolute counts, Sumw2, cancellations, meaningful effective support,
+parent-child event covariance, per-child SIMC occupancy, parent fit quality,
+component support and under-Lambda residuals; identify actual missing evidence.
+The audit tests justification, without implementing refinement or rerunning
+the farm under this checkpoint.
+
+Preserve the initially useful staged `pi_n`/`pi_sidis`/`pi_delta` model,
+normalization, signed events, weights, cuts, priors, templates and all frozen
+analysis source. No first-bad historical commit or sole cause is established.
+Method A remains detached/non-production; Method B remains independent,
+diagnostic/cross-check only and numerically excluded. Earlier accepted phase
+closures and their original scopes, separate private canonical-five/F.4 and
+absolute-SIMC blockers, and historical normal-launcher/attempt-isolation
+blockers remain unchanged. Successful plain `-d` is distinct from those
+broader blocked operations. After this checkpoint's independent actual-diff
+review, user publication and pushed-state synchronization, return directly
+to CURRENT's read-only support audit; no new phase, source contract or
+farm-readiness project follows from this documentation update.

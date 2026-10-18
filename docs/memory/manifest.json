@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 13782,
+      "bytes": 13284,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "92efeff47f3e143eebaec201638e97a913f3d31e083bb94ed38723c71cd1de8b"
+      "sha256": "fd04a708e6967a7ce6ff368d741a8ff9b1046ef0d230f4b2c6feb3171db42240"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 29147,
+      "bytes": 34842,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "5f5ee8618324a51fbe452ac3a84d235db7a4b789a2c79fdb82f8119eeff5fd38"
+      "sha256": "f8e426b7ca2da0f424981553b5fad157624949fc7b0eb0ac58b6973a53fe2c42"
     },
     {
       "bytes": 23507,
@@ -1259,6 +1259,11 @@
       "bytes": 9065,
       "path": "docs/memory/phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md",
       "sha256": "fab2a557ba34d9a9421c96b4061e8edaabead8fbec719b7c19cba5b21fccb382"
+    },
+    {
+      "bytes": 7858,
+      "path": "docs/memory/phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md",
+      "sha256": "fa9ec458d9d5a89ac334f8557c5621eceaf6d4380bea9f5197bea49a2609781f"
     },
     {
       "bytes": 12579,
