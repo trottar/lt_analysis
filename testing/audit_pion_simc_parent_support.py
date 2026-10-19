@@ -513,7 +513,7 @@ def scan(config, settings, children=False, center_evidence=None, *, historical_i
     root = Path(__file__).resolve().parents[1]
     source_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     validate_config(config, source_head, historical_input=historical_input)
-    source_paths = [Path(__file__), root / "src/utility/background_config.py",
+    source_paths = [Path(__file__).resolve(), root / "src/utility/background_config.py",
                     root / "src/binning/find_bins.py", root / "src/cuts/apply_cuts.py",
                     root / "src/cuts/hgcer_hole.py", root / "src/utility/pion_component_shapes.py",
                     root / "src/cuts/pion_component_subtraction.py",

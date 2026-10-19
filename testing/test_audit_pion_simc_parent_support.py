@@ -208,6 +208,31 @@ class ClosureAndShapes(unittest.TestCase):
 
 
 class ProvenanceAndCLI(unittest.TestCase):
+    def test_scan_source_integrity_accepts_resolved_repository_alias(self):
+        script = Path(audit.__file__).resolve()
+        root = script.parents[1]
+        alias = root.with_name(root.name + "-alias") / "testing" / script.name
+        resolve = Path.resolve
+
+        def resolve_alias(path, *args, **kwargs):
+            return script if path == alias else resolve(path, *args, **kwargs)
+
+        # Model /group -> /u/group without requiring symlink privileges.
+        # Stop at the unchanged integrity guard, before any ROOT import.
+        with patch.object(audit, "__file__", str(alias)), \
+                patch.object(Path, "resolve", autospec=True, side_effect=resolve_alias), \
+                patch.object(audit.subprocess, "check_output", return_value="fixture-head\n"), \
+                patch.object(audit.subprocess, "run", side_effect=RuntimeError("integrity guard reached")) as guard:
+            with self.assertRaisesRegex(RuntimeError, "integrity guard reached"):
+                audit.scan(config(), ["Center"])
+        guard.assert_called_once_with(
+            ["git", "diff", "--quiet", "HEAD", "--", str(Path("testing") / script.name),
+             str(Path("src/utility/background_config.py")), str(Path("src/binning/find_bins.py")),
+             str(Path("src/cuts/apply_cuts.py")), str(Path("src/cuts/hgcer_hole.py")),
+             str(Path("src/utility/pion_component_shapes.py")),
+             str(Path("src/cuts/pion_component_subtraction.py")),
+             str(Path("src/binning/binning_helpers.py")), str(Path("src/main.py"))], cwd=root)
+
     def test_population_selection_default_weight_hole_and_phi_units(self):
         def event(mm=1., **kwargs):
             return SimpleNamespace(missmass=mm, t=-.5, phipq=math.pi / 2,
