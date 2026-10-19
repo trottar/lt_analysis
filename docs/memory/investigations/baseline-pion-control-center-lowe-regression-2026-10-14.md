@@ -530,3 +530,96 @@ broader blocked operations. After this checkpoint's independent actual-diff
 review, user publication and pushed-state synchronization, return directly
 to CURRENT's read-only support audit; no new phase, source contract or
 farm-readiness project follows from this documentation update.
+
+## Global-to-fine-bin procedure audit and user correction — October 19
+
+`ACTIVE`: memory-only checkpoint under the
+[October 19 contract](../phases/kaonlt-pion-hierarchy-audit-memory-checkpoint-2026-10-19-task-contract.md).
+CURRENT alone owns NEXT. Source was inspected at local `test` HEAD
+`1975c3d8656253e262ff7e18306a93ca800b6027`; no scientific source, fit,
+configuration, farm run or accepted status changed. Earlier October 17–18
+findings remain bounded diagnostics, not canonical-t model acceptance.
+
+### PDF location and observed onset
+
+MEMORY ONLY (user correction/supplied display comparison): the full historical
+setting-wide component procedure and diagnostic plots are still present in
+`Center_kaon_rand_sub_Q4p4W2p74_lowe_pion-fit-debug.pdf`. The earlier reference
+had 67 pages and October's main rand-sub PDF had 30; this presentation routing
+change does not show that global fit machinery vanished. SOURCE VERIFIED:
+`src/cuts/rand_sub.py:6733,6980–7015` routes setting-wide component pages to
+`pdf_destinations["pion_fit_debug"]`.
+
+The user finds the setting-wide model substantially more sensible and places
+visible deterioration during canonical-t construction/refinement, before final
+pion subtraction. This corrects the earlier framing of final subtraction as
+the apparent first failure. It is a visual observation, not independently
+accepted global model quality, an exact first-bad operation or a historical
+culprit. No raw PDF was newly inspected or rendered by this checkpoint.
+
+### Live source audit
+
+SOURCE VERIFIED at the HEAD above:
+
+- `src/main.py:789–794` calls `load_setting_pion_component_shapes()` without
+  `t_bins/phi_bins`. `src/utility/pion_component_shapes.py:313–330,679–690,801–806`
+  constructs/fills binned shapes only with supplied edges. The component scope
+  resolver (`src/cuts/pion_component_fits.py:5951–5987`) falls back to
+  `setting_shape_full` when t support is unavailable. Separately, RUNTIME
+  VERIFIED (supplied October Center artifact/prior review, not rechecked here):
+  no constructed t-binned SIMC shapes were reported. This neither proves
+  t-dependent SIMC defective nor authorizes activating new shapes.
+- In active `t_bin` scope, `src/cuts/rand_sub.py:5149–5167` marks the setting-wide
+  fit `diagnostic_only`, clears its subtraction payload and explicitly excludes
+  it from later weight/spectrum authority. `src/cuts/pion_t_bin_parents.py:566–636`
+  calls the same full `build_particle_subtraction_component_result()` with
+  t-restricted pion-control and post-proton kaon inputs. It inherits parent
+  alignment, without global fitted amplitudes/covariance as hierarchical
+  constraints. Frozen parent identity and producer-fingerprint checks
+  (`pion_t_bin_parents.py:503–534`) remain real and required.
+- `src/cuts/pion_component_fits.py:3611–3628,3728–3740` passes that fit's local
+  staged amplitudes to joint refinement. When enabled, regularization centers
+  on those coefficients (`3442–3474`), not a transferred global expectation.
+  Local-stage validation and `_promote_sparse_zero_solution_if_applicable`
+  (`427–501,7333–7357`) are separate from parent-conditioned model adequacy.
+- `src/binning/calculate_yield.py:2437–2466` assigns
+  `component_fit_results[j][k] = scope_result` from the authoritative t parent
+  and applies its accepted event weight to local `(t,phi)` control events;
+  it does not run a complete local component refit. Frozen-parent application
+  acceptance/fallback policy is retained. The separate free local-fit branch
+  (`2510–2571`) is outside authoritative `t_bin` scope; merely enabling it
+  unchanged is not the requested hierarchy or an approved correction.
+
+### Scientific intent and evidence limits
+
+User-requested future scientific intent: preserve the complete setting-wide
+staged `pi_n`/`pi_delta`/`pi_sidis` procedure at t and, later, `(t,phi)`.
+The global solution should anchor t without suppressing genuine potentially
+large t dependence. Each child refinement should be anchored to its own t
+parent and conditional on meaningful local support and covariance. Shared-event
+parent/child correlations preclude treating the parent as independent Gaussian
+evidence. No fixed percentage clamp, prior width, new covariance model or
+automatic fallback algorithm is authorized or validated by this checkpoint.
+
+The October 19 SIMC support/shape report establishes only its reported local
+support/shape information, not model acceptance or a first-bad commit (MEMORY
+ONLY here; report not independently revalidated). High parent SIMC totals,
+local tests, frozen-source consistency and accepted model algebra/subtraction
+arithmetic do not establish canonical-t scientific fit goodness. INFERENCE:
+local selection/normalization, global-shape fallback versus candidate genuine
+t-shapes, and unconstrained staged/joint amplitudes need comparison against
+existing October 17–19 evidence before choosing an intervention. Keep global
+and t acceptance/normalization conventions separate. Historical culprit,
+changed-model root cause, hierarchy efficacy and full farm acceptance remain
+NOT VERIFIED.
+
+After actual-diff review, user publication and pushed-state synchronization,
+proceed directly to CURRENT's read-only global-versus-t comparison (Center lowe
+t1/t2/t3, Left lowe control), establishing what changes before subtraction and
+the smallest directly evidenced intervention. Any warranted t-level correction
+requires a separate scientific implementation contract; only after t-level
+scientific fit agreement and farm validation consider conditional full child
+refinement. No source edit, child-fitter promotion, final-subtraction/yield
+change, farm command, owner/pathing cycle or new phase follows here. Preserve
+all prior accepted scopes, independent blockers, frozen physics and Method-A/
+Method-B roles, and return to the interrupted roadmap after baseline resolution.

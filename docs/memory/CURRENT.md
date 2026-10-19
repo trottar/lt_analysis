@@ -8,10 +8,16 @@ memory_schema: 3
 `ACTIVE`: **TEMPORARY roadmap interruption** to explain the full existing
 baseline SIMC pion-background model versus final signed-event subtraction
 discrepancy. Focus: **Q4p4W2p74 / Center / lowe / canonical t2**; adjacent t1/t3
-and setting-wide controls retain their distinct scopes. The user compared
-`Center_kaon_rand_sub_Q4p4W2p74_lowe.pdf` (apparently reasonable model) with
-`Center_kaon_rand_sub_Q4p4W2p74_lowe_full-background-subtraction.pdf` (problematic
-final subtraction), and reported earlier working behavior. The October 17–18
+and setting-wide controls retain their distinct scopes. The user's visual
+comparison places deterioration during canonical-t model construction/refinement,
+before final pion subtraction; the setting-wide model appears substantially more
+sensible. This is a user observation, not independently accepted model quality
+or an exact first-bad operation. The full setting-wide procedure remains in
+`Center_kaon_rand_sub_Q4p4W2p74_lowe_pion-fit-debug.pdf`: the older 67-page
+reference versus October's 30-page main PDF reflects presentation routing,
+not disappearance of global fit machinery. See the
+[October 19 correction](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#global-to-fine-bin-procedure-audit-and-user-correction--october-19).
+The user also reported earlier working behavior. The October 17–18
 farm evidence and prior review are now recorded in the
 [investigation checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#low-epsilon-farm-evidence-and-scientific-checkpoint--october-1718).
 No matched canonical-t regression pair, historical culprit or wider failure verified.
@@ -157,15 +163,16 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — read-only audit of canonical-t and `(t,phi)` statistical/SIMC support
-for Q4p4W2p74 Center/Left lowe, using existing evidence first. Quantify signed
-and absolute counts, Sumw2, cancellation, effective statistical support where
-meaningful, per-child SIMC occupancy, parent fit quality, component support
-and under-Lambda residuals. Identify actual missing evidence and test the
-justification for hierarchical refinement; no implementation or farm rerun
-is authorized by this checkpoint. After independent ChatGPT actual-diff review,
-user publication and pushed-state synchronization, return directly to this
-audit; no additional contract or farm-readiness project follows here.
+NEXT — read-only comparison of setting-wide versus canonical-t production
+input populations, template-source/shape fallbacks, amplitude scales and
+fit-stage/validation outputs for Q4p4W2p74 Center lowe t1/t2/t3, with Left lowe
+as control, using existing October 17–19 evidence first. Establish what changes
+before subtraction; discriminate local selection/normalization, global-shape
+fallback versus candidate genuine t-shapes, and unconstrained staged/joint
+amplitudes. Quantify available support/covariance and identify missing evidence
+and the smallest directly evidenced intervention. No source edit or farm command
+is authorized. After independent ChatGPT actual-diff review, user publication
+and pushed-state synchronization, proceed directly to this same audit.
 
 RUNTIME VERIFIED (supplied October 17–18 evidence/prior review): Center/t1 has
 staged-anchor versus full-range SIDIS tension; Center/t2 has a high-leverage
@@ -178,16 +185,24 @@ Left's setting-wide neutron amplitude is positive but fit quality is poor;
 matching source-resolved Left canonical-t diagnostics remain NOT VERIFIED.
 See the investigation for the transition-specific findings and limits.
 
-SOURCE VERIFIED at the source above: plain `-d` uses ordinary available lowe
+SOURCE VERIFIED at `1975c3d8656253e262ff7e18306a93ca800b6027`: plain `-d` uses ordinary available lowe
 settings, skips `-c` merge and exits before full highe. Analysis physics is
 unchanged. `src/main.py` calls the pion-shape loader without `t_bins/phi_bins`;
 canonical-t scopes can fall back to setting-wide shapes. The Center artifact
 reports no constructed t-binned SIMC shapes (supplied evidence). This possible
 limitation is not a proven cause or permission to activate new shapes.
-INFERENCE: support-gated parent fits with conditional parent-anchored child
-refinement may help, but covariance, Sumw2, cancellations and SIMC support
-must be examined first. Preserve the initially useful staged three-component
-model, all normalization/weights/cuts/priors/templates and signed events.
+SOURCE VERIFIED: the setting-wide fit is diagnostic-only in active `t_bin`
+scope; canonical-t runs the full fitter on local inputs with parent alignment,
+without transferred global amplitude/covariance constraints. Enabled joint
+regularization centers on that fit's local staged coefficients. Authoritative
+`(t,phi)` consumers apply the t-parent event weight without a full local refit.
+User-requested future intent: preserve the complete staged three-component
+procedure, anchor t to global while allowing genuine large t dependence, then
+consider support/covariance-conditional children anchored to their own t parent.
+INFERENCE: this may help; shared-event dependence and model adequacy require
+audit. No hierarchy, prior width or fallback algorithm is approved. Numerical
+cause, efficacy and full farm acceptance remain NOT VERIFIED. All existing
+normalization/weights/cuts/priors/templates and signed events remain frozen.
 
 ## Success Criteria
 

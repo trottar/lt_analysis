@@ -77,15 +77,30 @@ not become production merely because they are accepted.
 ## Diagnostics and runtime validation
 
 Preserve the full scientific question when narrowing a diagnostic: the user's
-baseline concern compared an apparently good pion-component/model PDF with a
-broken full/final subtraction PDF and reported earlier working behavior.
-That historical observation matters without proving identical canonical-t
-inputs or a working SHA. Audit all three SIMC components through final model,
-transfer and signed application; one amplitude (`B_n=0`) or differently scoped
-PDFs cannot establish the initiating regression or root cause. The
+visual comparison places deterioration during canonical-t model construction/
+refinement, before final pion subtraction; the setting-wide model appears more
+sensible. This observation and the report of earlier working behavior establish
+neither accepted model quality, an exact first-bad operation, identical canonical-t
+inputs nor a working SHA. The setting-wide full procedure remains in the October
+`pion-fit-debug` PDF; fewer main-PDF pages reflect presentation routing, not
+removal of global fitting. Audit all three SIMC components through model,
+transfer and signed application; one amplitude (`B_n=0`), algebraic closure,
+large SIMC totals or statistical support cannot establish scientific model
+adequacy or the initiating regression/root cause. The
 [investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
 retains attributed evidence and uncertainties; [CURRENT](CURRENT.md) owns active
 scope and priority. No code change or physics acceptance follows from this lesson.
+
+User-requested future scientific intent, not an accepted correction: preserve
+the complete setting-wide staged `pi_n`/`pi_delta`/`pi_sidis` procedure at t and
+later `(t,phi)`. Anchor t fits to global without suppressing genuine potentially
+large t dependence; consider full child refinement anchored to its own t parent
+only with meaningful local support and covariance. Parent and child share events,
+so the parent fit cannot be treated as an independent measurement. Current
+parent alignment, local-stage regularization and inherited parent event weights
+are distinct from such amplitude/covariance conditioning. No fixed percentage
+clamp, numerical prior width, covariance model or automatic fallback algorithm
+is approved; hierarchy efficacy and production acceptance remain NOT VERIFIED.
 
 When applicable, trace persisted diagnostics through producer ->
 serializer/checkpoint -> checkpoint-first payload -> consumer -> renderer.
