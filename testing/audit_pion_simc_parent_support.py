@@ -1,9 +1,14 @@
 """Detached existing-SIMC support measurement; never a production correction.
 
-CLI: --config PATH --config-sha256 SHA --settings Center Left --report NEW.json
-The explicit config is the resolved production inpDict *after* DiamondPlot,
-not the early zeroth-iteration input bundle (which lacks the polygon). It must
-carry analysis_runtime_config/hash, source_head, and the original input roles.
+CLI: --analysis-json PATH --analysis-json-sha256 SHA --settings Center Left
+     --children --report NEW.json
+Read the original combined FullAnalysis JSON's resolved inpDict directly,
+discarding histlist and private caches while parsing. Historical producer HEAD
+is recorded only if supplied, always NOT VERIFIED; today's checkout identifies
+the new measurement only. Compatibility with current source-owned runtime
+configuration and canonical sidecars is mandatory, independently of that HEAD.
+Legacy --config PATH --config-sha256 SHA accepts a flat resolved inpDict after
+DiamondPlot, with source_head matching the diagnostic checkout as before.
 No config, interval, cache, or ROOT input is written. Missing config provenance
 is a prerequisite failure, never an invitation to reconstruct cuts by fitting.
 Optional --center-evidence is the existing seven-stage JSON, not a template.
@@ -20,6 +25,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -44,6 +50,117 @@ def file_identity(path):
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return {"path": str(path), "bytes": path.stat().st_size, "sha256": digest.hexdigest()}
+
+
+class _JSONTokens:
+    """Bounded token buffer; the 255 MiB artifact is never a Python DOM."""
+    pattern = re.compile(r'"(?:[^"\\\x00-\x1f]|\\.)*"|[{}\[\]:,]|'
+                         r'-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|'
+                         r'true|false|null|NaN|-?Infinity')
+
+    def __init__(self, stream):
+        self.stream, self.buffer, self.position, self.eof = stream, "", 0, False
+        self.retained_bytes = 0
+
+    def next(self):
+        while True:
+            while self.position < len(self.buffer) and self.buffer[self.position] in " \t\r\n":
+                self.position += 1
+            match = self.pattern.match(self.buffer, self.position)
+            if match:
+                token, end = match.group(), match.end()
+                # A regex match can be only a scalar prefix (e.g. "1" in
+                # "1." or "1e+"). Require a separator or confirmed EOF before
+                # accepting it; otherwise refill and retry the whole token.
+                delimited = end < len(self.buffer) and self.buffer[end] in " \t\r\n,]}"
+                if token[0] in '"{}[]:,' or delimited or (self.eof and end == len(self.buffer)):
+                    self.position = end
+                    return token
+            if self.eof:
+                require(self.position == len(self.buffer), "invalid/truncated analysis JSON token")
+                return None
+            block = self.stream.read(65536)
+            self.buffer = self.buffer[self.position:] + block
+            self.position = 0
+            self.eof = not block
+            if not self.eof and len(self.buffer) > 1024 * 1024:
+                raise ValueError("analysis JSON token exceeds 1 MiB")
+
+
+def read_analysis_config(path):
+    """Validate JSON syntax, retain inpDict public fields, never use cache events.
+
+    Retained scalar text is capped at 16 MiB and nesting at 128. Every public
+    inpDict field is retained, including overrides used by source-owned cuts,
+    windows, parent identity and path resolvers. No intermediate file is made.
+    """
+    with Path(path).open(encoding="utf-8") as stream:
+        tokens = _JSONTokens(stream)
+        top_keys = set()
+
+        def value(token, keep, location=(), depth=0):
+            require(depth <= 128 and token is not None, "invalid analysis JSON depth/value")
+            if token in ("{", "["):
+                is_object = token == "{"
+                end = "}" if is_object else "]"
+                result = ({} if is_object else []) if keep else None
+                seen = set() if keep and is_object else None
+                token = tokens.next()
+                if token == end:
+                    return result
+                while True:
+                    key = None
+                    if is_object:
+                        require(token is not None and token.startswith('"'), "analysis JSON object key missing")
+                        key = json.loads(token)
+                        if seen is not None:
+                            require(key not in seen, "duplicate analysis JSON key: " + key)
+                            seen.add(key)
+                        require(tokens.next() == ":", "analysis JSON colon missing")
+                        token = tokens.next()
+                        if location == ():
+                            top_keys.add(key)
+                            if key == "histlist":
+                                require(token == "[", "combined analysis JSON histlist must be an array")
+                    child_keep = keep
+                    if is_object and location == ():
+                        child_keep = keep and key in ("inpDict", "source_head", "source_HEAD")
+                    elif is_object and location == ("inpDict",):
+                        child_keep = keep and not key.startswith("_")
+                    child = value(token, child_keep, location + (key,), depth + 1)
+                    if child_keep:
+                        if is_object:
+                            result[key] = child
+                        else:
+                            result.append(child)
+                    token = tokens.next()
+                    if token == end:
+                        return result
+                    require(token == ",", "analysis JSON delimiter missing")
+                    token = tokens.next()
+            require(token not in ("}", "]", ":", ","), "invalid analysis JSON value")
+            decoded = json.loads(token)
+            if keep:
+                tokens.retained_bytes += len(token.encode("utf-8"))
+                require(tokens.retained_bytes <= 16 * 1024 * 1024, "resolved inpDict exceeds 16 MiB")
+                return decoded
+
+        first = tokens.next()
+        require(first == "{", "combined analysis JSON must be an object containing inpDict")
+        document = value(first, True)
+        require(tokens.next() is None, "trailing analysis JSON content")
+        require("histlist" in top_keys, "combined analysis JSON histlist missing")
+    config = document.get("inpDict")
+    require(isinstance(config, dict), "combined analysis JSON inpDict missing/not an object")
+    recorded = [node[key] for node in (document, config) for key in ("source_head", "source_HEAD")
+                if key in node]
+    for head in recorded:
+        require(isinstance(head, str) and re.fullmatch(r"[0-9a-fA-F]{40}", head),
+                "invalid recorded producer HEAD; fabricated labels are not producer evidence")
+    require(len(set(recorded)) <= 1, "conflicting recorded producer HEADs")
+    return config, {"recorded_producer_HEAD": recorded[0] if recorded else "NOT VERIFIED",
+                    "producer_HEAD_status": "NOT VERIFIED",
+                    "meaning": "input hash verifies bytes, not historical producer HEAD"}
 
 
 def edges(values):
@@ -238,22 +355,73 @@ class Population:
                 "coverage_limit": "rightmost t/phi edge excluded; unassigned support retained"}
 
 
-def validate_config(config, source_head):
+def validate_config(config, source_head, *, historical_input=False):
+    require(isinstance(config, dict), "resolved production configuration must be an object")
     required = ("Q2", "W", "EPSSET", "POL", "ParticleType", "tmin", "tmax", "mm_min", "mm_max",
                 "NumtBins", "NumPhiBins", "cut_mode", "poly_points", "analysis_runtime_config",
-                "analysis_runtime_config_hash", "source_head")
+                "analysis_runtime_config_hash")
     require(all(k in config for k in required), "missing resolved production configuration/provenance")
-    require(config["source_head"] == source_head, "configuration source HEAD mismatch")
+    if not historical_input:
+        require(config.get("source_head") == source_head, "configuration source HEAD mismatch")
     require(config["Q2"] == "4p4" and config["W"] == "2p74" and config["EPSSET"] == "low"
             and config["ParticleType"] == "kaon", "outside contract setting scope")
     require(config["cut_mode"] == "poly" and len(config["poly_points"]) >= 3, "missing production polygon")
     for point in config["poly_points"]:
         require(len(point) == 2 and all(math.isfinite(float(v)) for v in point), "invalid polygon")
     runtime = config["analysis_runtime_config"]
-    require(runtime.get("config_hash") == config["analysis_runtime_config_hash"]
+    require(isinstance(runtime, dict) and runtime.get("config_hash") == config["analysis_runtime_config_hash"]
             and bool(config["analysis_runtime_config_hash"]), "runtime config identity mismatch")
     for lo, hi in (("tmin", "tmax"), ("mm_min", "mm_max")):
         edges([config[lo], config[hi]])
+
+
+def validate_input_compatibility(config, bg, find_bins, *, historical_input=False):
+    """Use the original science owners; reject stale artifacts before scanning."""
+    if historical_input:
+        require(config.get("particle_subtraction_mode") == "simc_shape_components",
+                "original production mode missing/mismatch")
+    require(bg.resolve_particle_subtraction_mode(config) == "simc_shape_components", "wrong production mode")
+    require(config.get("bg_active_profile") == "no_empirical_residual", "active profile missing/mismatch")
+    require(config["analysis_runtime_config"] == bg.resolve_analysis_runtime_config(config["Q2"], config["W"]),
+            "runtime configuration differs from current authoritative configuration")
+    tcheck = find_bins._validate_authoritative_t_interval(config, "low")
+    require(tcheck["valid"], "canonical t identity NOT VERIFIED: " + str(tcheck["validation_rejection_reasons"]))
+    pcheck = find_bins._validate_authoritative_phi_interval(config, "low")
+    require(pcheck["valid"], "canonical phi identity NOT VERIFIED: " + str(pcheck["validation_rejection_reasons"]))
+    pair = find_bins._validate_canonical_interval_pair(tcheck, pcheck)
+    require(pair["valid"], "canonical pair identity NOT VERIFIED: " + str(pair["validation_rejection_reasons"]))
+    t_axis, phi_axis = edges(tcheck["t_edges"]), edges(pcheck["phi_edges"])
+    canonical = config.get("canonical_t_binning") or {}
+    require(isinstance(canonical, dict), "analysis JSON canonical metadata must be an object")
+    if historical_input:
+        require(canonical.get("canonical_interval_pair_id"), "analysis JSON canonical pair ID missing")
+    for key, axis in (("t_bins", t_axis), ("phi_bins", phi_axis)):
+        if historical_input or key in config:
+            require(edges(config.get(key, [])) == axis, "analysis JSON " + key + " differs from authoritative sidecar")
+    for key, axis in (("t_edges", t_axis), ("phi_edges", phi_axis)):
+        if historical_input or key in canonical:
+            require(edges(canonical.get(key, [])) == axis, "analysis JSON canonical " + key + " mismatch")
+    for node in (canonical, canonical.get("authoritative_metadata") or {},
+                 canonical.get("authoritative_phi_metadata") or {}):
+        require(isinstance(node, dict), "analysis JSON authoritative metadata must be an object")
+        for key in ("canonical_interval_pair_id", "canonical_interval_pair_hash"):
+            if key in node:
+                require(node[key] == pair[key], "analysis JSON " + key + " differs from authoritative sidecar")
+    if historical_input:
+        require(config.get("simc_tree_name") == "h10", "original SIMC tree missing/mismatch")
+        original_paths = config.get("simc_pion_component_files")
+        require(isinstance(original_paths, dict), "original SIMC path map missing/not an object")
+        for setting in ("Center", "Left"):
+            require(isinstance(original_paths.get(setting), dict), "original SIMC setting map missing: " + setting)
+            resolved = bg.resolve_simc_pion_component_files(config, setting)
+            for component in COMPONENTS:
+                original = original_paths[setting].get(component)
+                require(isinstance(original, str) and bool(original.strip()),
+                        "original SIMC path missing: " + setting + "/" + component)
+                require(resolved.get(component) == original,
+                        "resolved SIMC path differs from original: " + setting + "/" + component)
+                require(Path(original).is_file(), "original SIMC input missing: " + original)
+    return tcheck, pcheck, pair
 
 
 def validate_branches(available, *, phi):
@@ -340,11 +508,20 @@ def accumulate_events(tree, config, full, mmcut, hole, cuts, subcuts, finder, mi
     return counters
 
 
-def scan(config, settings, children=False, center_evidence=None):
+def scan(config, settings, children=False, center_evidence=None, *, historical_input=False):
     """Farm-only read-only adapter; never import main or invoke a fitting owner."""
     root = Path(__file__).resolve().parents[1]
     source_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-    validate_config(config, source_head)
+    validate_config(config, source_head, historical_input=historical_input)
+    source_paths = [Path(__file__), root / "src/utility/background_config.py",
+                    root / "src/binning/find_bins.py", root / "src/cuts/apply_cuts.py",
+                    root / "src/cuts/hgcer_hole.py", root / "src/utility/pion_component_shapes.py",
+                    root / "src/cuts/pion_component_subtraction.py",
+                    root / "src/binning/binning_helpers.py", root / "src/main.py"]
+    require(subprocess.run(["git", "diff", "--quiet", "HEAD", "--",
+                            *[str(p.relative_to(root)) for p in source_paths]], cwd=root).returncode == 0,
+            "diagnostic/scientific source differs from checkout HEAD")
+    source_files = [file_identity(path) for path in source_paths]
     for part in ("utility", "cuts", "binning"):
         sys.path.insert(0, str(root / "src" / part))
     import ROOT
@@ -356,15 +533,18 @@ def scan(config, settings, children=False, center_evidence=None):
     from pion_component_shapes import load_pion_simc_component_shape, _make_component_hist
     from pion_component_subtraction import build_t_bin_pion_parent_identity
 
-    require(bg.resolve_particle_subtraction_mode(config) == "simc_shape_components", "wrong production mode")
-    require(config.get("bg_active_profile") == "no_empirical_residual", "active profile missing/mismatch")
-    require(config["analysis_runtime_config"] == bg.resolve_analysis_runtime_config(config["Q2"], config["W"]),
-            "runtime configuration differs from current authoritative configuration")
-    tcheck = find_bins._validate_authoritative_t_interval(config, "low")
-    require(tcheck["valid"], "canonical t identity NOT VERIFIED: " + str(tcheck["validation_rejection_reasons"]))
-    pcheck = find_bins._validate_authoritative_phi_interval(config, "low")
-    pair = find_bins._validate_canonical_interval_pair(tcheck, pcheck)
-    require(pcheck["valid"] and pair["valid"], "canonical pair identity NOT VERIFIED")
+    for name, expected in (("background_config", "src/utility/background_config.py"),
+                           ("find_bins", "src/binning/find_bins.py"),
+                           ("apply_cuts", "src/cuts/apply_cuts.py"),
+                           ("binning_helpers", "src/binning/binning_helpers.py"),
+                           ("hgcer_hole", "src/cuts/hgcer_hole.py"),
+                           ("pion_component_shapes", "src/utility/pion_component_shapes.py"),
+                           ("pion_component_subtraction", "src/cuts/pion_component_subtraction.py")):
+        require(Path(sys.modules[name].__file__).resolve() == (root / expected).resolve(),
+                "imported source outside diagnostic checkout: " + name)
+
+    tcheck, pcheck, pair = validate_input_compatibility(config, bg, find_bins,
+                                                       historical_input=historical_input)
     t_axis, phi_axis = edges(tcheck["t_edges"]), edges(pcheck["phi_edges"])
     config = dict(config, canonical_t_binning=dict(tcheck["metadata"], phi_edges=phi_axis))
     axis_files = [file_identity(p) for p in find_bins._interval_paths(config).values()]
@@ -374,15 +554,14 @@ def scan(config, settings, children=False, center_evidence=None):
     require(n > 0, "invalid MM bin count")
     mm_axis = edges([lo + (hi - lo) * i / n for i in range(n + 1)])
     report = {"schema": SCHEMA, "source_HEAD": source_head,
-              "source_files": [file_identity(path) for path in
-                               [Path(__file__), Path(bg.__file__), Path(find_bins.__file__),
-                                root / "src/cuts/apply_cuts.py", root / "src/cuts/hgcer_hole.py",
-                                root / "src/utility/pion_component_shapes.py",
-                                root / "src/cuts/pion_component_subtraction.py",
-                                root / "src/binning/binning_helpers.py"]],
+              "source_files": source_files,
               "worktree_inventory": subprocess.check_output(
                   ["git", "status", "--porcelain=v2", "--untracked-files=all"], cwd=root, text=True),
               "config_digest": hashlib.sha256(encoded(config)).hexdigest(),
+              "runtime_configuration": config["analysis_runtime_config"],
+              "runtime_configuration_hash": config["analysis_runtime_config_hash"],
+              "polygon_input": {"points": config["poly_points"],
+                                "sha256": hashlib.sha256(encoded(config["poly_points"])).hexdigest()},
               "canonical_inputs": axis_files, "canonical_pair": pair,
               "status": "NOT VERIFIED", "scientific_adequacy": "NOT VERIFIED", "settings": {},
               "limits": ["SIMC support only; no fit-data or subtraction validation",
@@ -458,37 +637,80 @@ def scan(config, settings, children=False, center_evidence=None):
         require(file_identity(identity["path"]) == identity, "source changed during scan")
     require(subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip() == source_head,
             "HEAD changed during scan")
+    require(subprocess.check_output(["git", "status", "--porcelain=v2", "--untracked-files=all"],
+                                    cwd=root, text=True) == report["worktree_inventory"],
+            "worktree changed during scan")
+    report["diagnostic_checkout"] = {"HEAD": source_head, "source_files": source_files,
+                                     "worktree_status": report["worktree_inventory"],
+                                     "meaning": "current measurement source, not historical artifact producer"}
     report["measurement_status"] = "SOURCE VERIFIED"
     return report
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--config-sha256", required=True)
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--config", type=Path)
+    inputs.add_argument("--analysis-json", type=Path)
+    parser.add_argument("--config-sha256")
+    parser.add_argument("--analysis-json-sha256")
     parser.add_argument("--settings", nargs="+", choices=("Center", "Left"), required=True)
     parser.add_argument("--children", action="store_true")
     parser.add_argument("--center-evidence", type=Path)
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args(argv)
+    historical = args.analysis_json is not None
+    if historical:
+        if not args.analysis_json_sha256 or args.config_sha256 is not None:
+            parser.error("--analysis-json requires only --analysis-json-sha256")
+    elif not args.config_sha256 or args.analysis_json_sha256 is not None:
+        parser.error("--config requires only --config-sha256")
     try:
         require(not args.report.exists(), "report already exists; overwrite forbidden")
-        identity = file_identity(args.config)
-        require(identity["sha256"] == args.config_sha256, "config SHA256 mismatch")
-        config = json.loads(args.config.read_text(encoding="utf-8"))
+        source_path = args.analysis_json if historical else args.config
+        identity = file_identity(source_path)
+        expected_sha = args.analysis_json_sha256 if historical else args.config_sha256
+        require(identity["sha256"] == expected_sha,
+                ("analysis JSON" if historical else "config") + " SHA256 mismatch")
+        if historical:
+            config, producer = read_analysis_config(source_path)
+        else:
+            config = json.loads(source_path.read_text(encoding="utf-8"))
         evidence_id = file_identity(args.center_evidence) if args.center_evidence else None
         evidence = json.loads(args.center_evidence.read_text(encoding="utf-8")) if evidence_id else None
-        report = scan(config, list(dict.fromkeys(args.settings)), args.children, evidence)
-        require(file_identity(args.config) == identity, "config changed during scan")
+        options = {"historical_input": True} if historical else {}
+        report = scan(config, list(dict.fromkeys(args.settings)), args.children, evidence, **options)
+        require(file_identity(source_path) == identity, "input JSON changed during scan")
         if evidence_id:
             require(file_identity(args.center_evidence) == evidence_id, "optional evidence changed during scan")
-        report.update(config_input=identity, optional_center_evidence=evidence_id)
-        with args.report.open("x", encoding="utf-8") as stream:
-            stream.write(json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n")
+        report.update(input_mode="analysis-json" if historical else "config",
+                      optional_center_evidence=evidence_id)
+        if historical:
+            report["original_analysis_input"] = dict(identity, **producer)
+        else:
+            report["config_input"] = identity
+        write_report(args.report, report)
+        print(str(args.report.resolve()))
         return 0
     except (ValueError, OSError, ImportError, KeyError, TypeError, RuntimeError) as exc:
         print("NOT VERIFIED: " + str(exc), file=sys.stderr)
         return 1
+
+
+def write_report(path, report):
+    """One direct transferable JSON, exclusively created only after all gates.
+
+    Serialize before creation; remove our own new file on a failed write so a
+    partial report cannot be mistaken for evidence. Never create directories.
+    """
+    payload = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    stream = Path(path).open("x", encoding="utf-8")
+    try:
+        with stream:
+            stream.write(payload)
+    except BaseException:
+        Path(path).unlink()
+        raise
 
 
 if __name__ == "__main__":
