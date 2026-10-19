@@ -5377,6 +5377,18 @@ def rand_sub(
                     coordinate_contract=coordinate_contract,
                     diagnostic_application_builder=_build_parent_diagnostic_application,
                 )
+                # Detached template-shape experiment. Environment opt-in is
+                # inherited by the existing launcher; default path does nothing.
+                if os.environ.get("LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON") == "1":
+                    from pion_t_template_comparison import observe_template_comparison
+                    observe_template_comparison(
+                        histDict, inpDict, t_edges=frozen_t_bins, phi_edges=frozen_phi_bins,
+                        component_payload=scope_payload,
+                        signal_payload=kaon_signal_shape_payload,
+                        sigma0_payload=kaon_sigma0_shape_payload, outpath=OUTPATH,
+                        hgcer_cutg=hgcer_cutg,
+                        original_inputs={"data": rootFileData, "dummy": rootFileDummy},
+                    )
                 try:
                     pion_hgcer_event_contract = build_pion_hgcer_event_contract(
                         pion_control_cache=pion_control_cache,

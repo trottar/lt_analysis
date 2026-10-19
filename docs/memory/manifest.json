@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 14555,
+      "bytes": 15322,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "f364596d18ada5715202fca5fdd1cf336f0276acb414afcc28233255870e88a8"
+      "sha256": "b10026b20dedbebe61eb7d2721ed090bff721f4c974563a031feb0464a759147"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 40758,
+      "bytes": 45007,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "04840c631c7e78f3020b022de4018546f97e61052352bb8330f9d1a706dd37d5"
+      "sha256": "832fc6e1964388bbed92ca6e8c07223a3fbfb79024d5194007cc440475cca019"
     },
     {
       "bytes": 23507,
@@ -1309,6 +1309,11 @@
       "bytes": 10313,
       "path": "docs/memory/phases/kaonlt-pion-receipt-regression-history-compatibility-2026-10-16-task-contract.md",
       "sha256": "d7eeb2d3100646f03ec9fdeae5e70cc86b1a6dcf40958a4f815b6baca67ac597"
+    },
+    {
+      "bytes": 11227,
+      "path": "docs/memory/phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md",
+      "sha256": "b145fcfb8dc2d6d1d6faa9e265685c8e5a56ad5b40ec80a8bcd80c92ee54abcc"
     },
     {
       "bytes": 21459,

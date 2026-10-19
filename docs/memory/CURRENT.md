@@ -36,6 +36,16 @@ All existing statuses/scopes remain intact.
 
 ## Current Work Item
 
+The [controlled t-template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` locally. The preceding
+read-only source comparison is `SOURCE REVIEWED` at `4007d8a43a604628e5b74aca54229d3e6bd48848`;
+it establishes global-template fallback and equal-phi aggregation semantics,
+not the numerical cause. The disabled-by-default diagnostic reuses fixed parent
+alignment and the existing fitter on cloned inputs, with raw-weighted canonical-t
+SIMC shapes normalized once. Baseline fits, existing PDFs and subtraction stay
+authoritative. See the investigation's implementation checkpoint for local checks
+and runtime limits; no new farm or scientific acceptance.
+
 Prior evidence/reviews own acceptance. The user-requested
 [memory correction](phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md)
 records the [assistant's October 15–17 workflow failure](investigations/kaonlt-science-gate-displacement-2026-10-17.md).
@@ -163,16 +173,15 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — read-only comparison of setting-wide versus canonical-t production
-input populations, template-source/shape fallbacks, amplitude scales and
-fit-stage/validation outputs for Q4p4W2p74 Center lowe t1/t2/t3, with Left lowe
-as control, using existing October 17–19 evidence first. Establish what changes
-before subtraction; discriminate local selection/normalization, global-shape
-fallback versus candidate genuine t-shapes, and unconstrained staged/joint
-amplitudes. Quantify available support/covariance and identify missing evidence
-and the smallest directly evidenced intervention. No source edit or farm command
-is authorized. After independent ChatGPT actual-diff review, user publication
-and pushed-state synchronization, proceed directly to this same audit.
+NEXT — after independent ChatGPT actual-diff acceptance, user publication and
+pushed-state synchronization, one controlled farm comparison of baseline A
+versus fixed-alignment candidate B for Q4p4W2p74 Center lowe t1/t2/t3, with Left
+lowe as a separate control. Inspect detached JSON/PDF model construction before
+subtraction. This local implementation supplies no farm command or readiness
+acceptance; ROOT, runtime and PDF legibility are NOT VERIFIED. The diagnostic
+uses the single `LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON=1` environment opt-in;
+ordinary analysis remains disabled. Hierarchical amplitude constraints and
+child refitting remain deferred pending t-level scientific evidence.
 
 RUNTIME VERIFIED (supplied October 17–18 evidence/prior review): Center/t1 has
 staged-anchor versus full-range SIDIS tension; Center/t2 has a high-leverage
@@ -190,7 +199,8 @@ settings, skips `-c` merge and exits before full highe. Analysis physics is
 unchanged. `src/main.py` calls the pion-shape loader without `t_bins/phi_bins`;
 canonical-t scopes can fall back to setting-wide shapes. The Center artifact
 reports no constructed t-binned SIMC shapes (supplied evidence). This possible
-limitation is not a proven cause or permission to activate new shapes.
+limitation is not a proven cause or permission to activate production shapes.
+The contracted detached comparison is the sole opt-in template-shape exception.
 SOURCE VERIFIED: the setting-wide fit is diagnostic-only in active `t_bin`
 scope; canonical-t runs the full fitter on local inputs with parent alignment,
 without transferred global amplitude/covariance constraints. Enabled joint

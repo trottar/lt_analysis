@@ -798,6 +798,97 @@ def load_pion_simc_component_shape(
     return _clone_component_payload(payload) if cache_key is not None else payload
 
 
+def load_raw_t_pion_comparison_shapes(inp_dict, phi_setting, t_edges, phi_edges, *, hgcer_cutg):
+    """Detached raw-weighted t shapes; never reads/writes the production cache.
+
+    Uses exactly the pion loader's nommcuts, hole selection, coordinates and
+    weight expression. Only completed raw t histograms are normalized, once.
+    The ordinary loader and its independently normalized children are untouched.
+    """
+    from pion_t_template_comparison import file_identity, integrate_raw_templates
+
+    component_files = resolve_simc_pion_component_files(inp_dict, phi_setting)
+    tree_name = resolve_simc_tree_name(inp_dict)
+    mm_min, mm_max = float(inp_dict["mm_min"]), float(inp_dict["mm_max"])
+    n = int(inp_dict.get("bg_opt_mm_plot_nbins", BG_OPT_MM_PLOT_NBINS))
+    low = float(inp_dict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
+    high = float(inp_dict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
+    axis_hist = _make_component_hist("axis", phi_setting, "comparison", "H_detached_t_axis", n, low, high)
+    mm_edges = [float(axis_hist.GetXaxis().GetBinLowEdge(i)) for i in range(1, n + 2)]
+    # Called beside the cuts-stage parents: reuse its already initialized cut
+    # state. set_val here would reset live data-coordinate/shift globals.
+    import apply_cuts as active_cuts
+    selection_state = {key: deepcopy(getattr(active_cuts, key)) for key in
+                       ("W", "Q2", "EPSSET", "POL", "ParticleType", "tmin", "tmax",
+                        "cut_poly", "TMIN_RESOLUTION_THRESHOLD")}
+    is_kaon = str(inp_dict.get("ParticleType", "")).strip().lower() == "kaon"
+    hole = hgcer_cutg
+    if is_kaon and hole is None:
+        raise RuntimeError("template_comparison_requires_existing_hgcer_hole")
+    hole_points = ([[float(hole.GetX()[i]), float(hole.GetY()[i])] for i in range(hole.GetN())]
+                   if hole is not None else None)
+    result = {}
+    for component in SIMC_PION_COMPONENT_BACKGROUND_MAP:
+        filename = component_files.get(component)
+        provenance = file_identity(filename) if filename else {"status": "unavailable", "reason": "missing_source"}
+        provenance.update(tree_name=tree_name, weight_expression="getattr(evt, 'iter_weight', 1.0)",
+                          coordinate="missmass; -t; phipq*180/pi", selection="apply_simc_sub_cuts; existing HGCer hole for kaon")
+        provenance.update(active_selection_state=selection_state, hgcer_hole_points=hole_points)
+        input_file = None
+        directory = ROOT.gDirectory
+        try:
+            if provenance["status"] != "available":
+                raise ValueError("missing_or_unreadable_source")
+            input_file = ROOT.TFile.Open(filename, "READ")
+            if not input_file or input_file.IsZombie():
+                raise ValueError("root_open_failed")
+            tree = input_file.Get(tree_name)
+            if not tree:
+                raise ValueError("missing_tree")
+            required = list(_KAON_SIMC_REQUIRED_BRANCHES) + ["phipq"]
+            provenance["missing_branches"] = [b for b in required if not tree.GetBranch(b) and not tree.GetLeaf(b)]
+            if provenance["missing_branches"]:
+                raise ValueError("missing_selection_or_coordinate_branches")
+            provenance["tree_entries"] = int(tree.GetEntries())
+            provenance["weight_branch_present"] = bool(tree.GetBranch("iter_weight") or tree.GetLeaf("iter_weight"))
+            provenance["weight_equivalence"] = "same iter_weight branch, or same unit default as production loader; no normfac/Ncontribute applied by either shape loader"
+
+            def records():
+                for evt in tree:
+                    if not apply_simc_sub_cuts(evt, mm_min, mm_max):
+                        continue
+                    if is_kaon and hole.IsInside(evt.phgcer_x_det, evt.phgcer_y_det):
+                        continue
+                    yield (evt.missmass, -evt.t, float(evt.phipq) * (180. / math.pi),
+                           float(getattr(evt, "iter_weight", 1.0)))
+
+            payload = integrate_raw_templates(records(), t_edges, phi_edges, mm_edges, provenance)
+            if file_identity(filename) != {k: provenance[k] for k in ("path", "status", "bytes", "sha256")}:
+                raise ValueError("source_changed_during_read")
+        except Exception as exc:
+            provenance.update(status="unavailable", reason=str(exc))
+            payload = integrate_raw_templates((), t_edges, phi_edges, mm_edges, provenance)
+        finally:
+            if input_file:
+                input_file.Close()
+            if directory:
+                directory.cd()
+        parents = []
+        for evidence in payload.pop("parents"):
+            hist = None
+            if evidence["status"] == "genuinely_local":
+                hist = _make_component_hist(component, phi_setting, "raw_t{}".format(evidence["t_bin_index"]),
+                                            "H_detached_t_template", n, low, high)
+                hist.Sumw2()
+                for i, (value, variance) in enumerate(zip(evidence["normalized_values"], evidence["normalized_variances"])):
+                    hist.SetBinContent(i, value)
+                    hist.SetBinError(i, math.sqrt(variance))
+                hist.SetEntries(evidence["raw"]["count"])
+            parents.append({"hist": hist, "evidence": evidence})
+        result[component] = dict(payload, parents=parents)
+    return result
+
+
 def load_setting_pion_component_shapes(
     inpDict,
     phi_setting,

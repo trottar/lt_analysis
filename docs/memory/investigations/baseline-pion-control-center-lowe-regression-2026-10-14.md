@@ -623,3 +623,65 @@ refinement. No source edit, child-fitter promotion, final-subtraction/yield
 change, farm command, owner/pathing cycle or new phase follows here. Preserve
 all prior accepted scopes, independent blockers, frozen physics and Method-A/
 Method-B roles, and return to the interrupted roadmap after baseline resolution.
+
+## Controlled canonical-t template comparison implementation — October 19
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[single comparison contract](../phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md).
+SOURCE VERIFIED against starting `test`/`origin/test`
+`4007d8a43a604628e5b74aca54229d3e6bd48848` and the local proposed diff:
+the prior read-only source comparison confirms the ordinary loader lacks t
+edges and the t resolver can inherit global shapes. Summing its independently
+normalized phi children would give an equal-phi mixture. This completes that
+source audit, without independent numerical revalidation of October farm inputs
+or a claim that template choice caused the observed deterioration.
+
+The additive cuts-stage observer uses only
+`LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON=1`, inherited by the unchanged launcher,
+and limits output to Q4p4W2p74 Center/Left lowe, three canonical t intervals.
+Baseline A remains the frozen parent by reference. Candidate B uses cloned
+original pion-control/post-proton kaon histograms, the same protected templates,
+configuration and existing full fitter, and the exact retained parent alignment
+map/windows. No alignment rescan/persistence, transferred global-amplitude prior,
+production weight, child refit or final subtraction is introduced.
+
+The detached raw loader reads original `iter_weight` (the same unit default
+when absent), raw `missmass`, `-t` and `phipq*180/pi`; it reuses the active
+SIMC cuts and existing HGCer cut without resetting selection globals or creating
+a replacement named cut. It accumulates raw canonical-t parents and raw phi
+children independently, with counts, signed/absolute sums, Sumw2 and flows.
+Weighted child/parent and selected/accepted/excluded closure precede one parent
+normalization. The raw selected stream must also reproduce the already-loaded
+global template contents and normalized Sumw2, preventing source/selection drift
+from confounding the t-shape comparison. Empty/nonpositive/negative-bin templates and normal-bin effective
+support <= 1 are unavailable, not global fallbacks. That support check is a
+minimal estimability guard, not a model-adequacy threshold or physics acceptance.
+Source SHA-256/tree, cut state, hole points, phi coverage, raw/normalized arrays
+and differences from global/baseline-selected shapes are retained.
+
+One separate JSON and six-page diagnostic PDF per setting retain all parent
+fit/solver diagnostics, staged/refined coefficients and uncertainties as provided
+by the existing fitter, histogram fingerprints and copied data/model/component
+arrays. The PDF compares staged/refined A/B with common data and display-only
+residuals. Original data/dummy file identities and relevant source-file hashes
+are recorded. Parent identity/content/error checks, candidate input/configuration/
+alignment checks, detached clones and restoration of the ownership-debug ledger,
+ROOT directory and drawing pad protect existing consumers/output routing.
+Candidate alignment metadata deliberately retains baseline provenance: it is
+reused fixed alignment, not a newly calibrated local map. Missing alignment,
+source/support or candidate fit produces explicit unavailable evidence.
+
+Local deterministic validation: 122 tests ran across the new comparison and
+existing parent-stage, chain/anchor audit, parent-integrity, launcher and dynamic
+alignment suites; 111 passed, 11 existing ROOT-dependent checks skipped.
+Scalar/fake-hist/AST and mocked PDF-command checks do not establish ROOT/PyROOT,
+real fitter integration, rendered page correctness, farm behavior or scientific
+acceptance. Windows Python with existing NumPy was used; WSL Python lacked
+NumPy. Runtime comparison JSON/PDF and any improvement/cause remain NOT VERIFIED.
+
+CURRENT retains the sole NEXT: after actual-diff acceptance, user publication
+and pushed-state synchronization, one controlled farm A/B comparison, without
+providing a farm command here. The existing CURRENT soft-size warning is
+nonblocking and scheduled for consolidation at the next memory checkpoint or
+milestone audit. Preserve all accepted scopes, independent blockers, ordinary
+PDFs, fits, weights, cuts, priors, subtraction and Method-A/Method-B roles.
