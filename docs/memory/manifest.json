@@ -1316,6 +1316,11 @@
       "sha256": "b145fcfb8dc2d6d1d6faa9e265685c8e5a56ad5b40ec80a8bcd80c92ee54abcc"
     },
     {
+      "bytes": 21848,
+      "path": "docs/memory/phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md",
+      "sha256": "1b0dde0fff7ca1040db9ef4160e35fec7bd311a3719a9d0450b0b7dfb5399905"
+    },
+    {
       "bytes": 21459,
       "path": "docs/memory/phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md",
       "sha256": "bbaeee09e9da54e71d8c1463af7cbbfe51ccfc92793de72cf015c58530e0ef84"
