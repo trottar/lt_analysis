@@ -486,6 +486,11 @@
       "sha256": "8b2ca579cc4dc7d35ae1ea61b3b803b5448436de3955c9165c936fb091fc0d55"
     },
     {
+      "bytes": 11219,
+      "path": "docs/memory/phases/baseline-pion-simc-parent-support-audit-task-contract.md",
+      "sha256": "e8578f549a7ccbab8d582586217ff121b65f26c9baf1905b3843d47ad7e71636"
+    },
+    {
       "bytes": 9882,
       "path": "docs/memory/phases/baseline-pion-transfer-validity-audit-task-contract.md",
       "sha256": "eb51796a74226ec898da08fa15e08f456b93c494d4cdf7f2e3a73ff34d82c833"
