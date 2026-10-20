@@ -76,6 +76,18 @@ not become production merely because they are accepted.
 
 ## Diagnostics and runtime validation
 
+Scientific evaluation starts with full-MM component reconstruction under verified
+common selection, coordinates, binning and charge/efficiency/acceptance
+normalization, then signal-region peak/width/tail/residual closure, then the
+unbiased background-subtracted K+Lambda data/SIMC yield ratio for matching
+`(t,phi,epsilon)` bins and established L/T extraction. Show spectra and
+signal-region zooms; background-fit chi2 or a large control-domain mismatch alone
+does not establish physical contamination or signal bias. Document any floated
+background amplitude or physically justified MM offset as diagnostic shape
+nuisances, distinct from authoritative absolute normalization. Never force unity
+by area-matching final signal SIMC. Unproven absolute SIMC units still block
+absolute interpretation; diagnostic shifts/scales authorize no production change.
+
 Preserve the full scientific question when narrowing a diagnostic: the user's
 visual comparison places deterioration during canonical-t model construction/
 refinement, before final pion subtraction; the setting-wide model appears more

@@ -685,3 +685,102 @@ providing a farm command here. The existing CURRENT soft-size warning is
 nonblocking and scheduled for consolidation at the next memory checkpoint or
 milestone audit. Preserve all accepted scopes, independent blockers, ordinary
 PDFs, fits, weights, cuts, priors, subtraction and Method-A/Method-B roles.
+
+
+## Full-MM reconstruction scientific checkpoint — October 20
+
+`ACTIVE`: memory-only checkpoint under the
+[October 20 contract](../phases/kaonlt-full-mm-reconstruction-scientific-memory-checkpoint-2026-10-20-task-contract.md),
+which carries the supplied artifacts, histogram crosswalk and prior ChatGPT
+review. Local `test` HEAD and local `origin/test` were independently checked at
+`6d13abb4681b938c56def2a1f455244b0880096c`; no live remote query or farm run.
+The following RUNTIME VERIFIED observations are attributed to those supplied
+artifacts/prior review, not independent local raw-artifact revalidation.
+Earlier sections retain their historical statuses; the former A/B farm-pending
+next step has been consumed only within the scope below. CURRENT alone owns NEXT.
+
+### Controlled comparison and bounded histogram crosswalk
+
+SOURCE VERIFIED / RUNTIME VERIFIED (scope only): the reviewed, user-pushed
+`6d13abb4681b938c56def2a1f455244b0880096c` gate produced the accepted October
+19–20 Center/Left lowe canonical t1/t2/t3 detached comparison JSON/PDFs and
+receipts. Exact comparison basenames are
+`Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json` / `.pdf` and
+`Left_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json` / `.pdf`, as declared
+in the [execution contract](../phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md).
+No unprovided receipt or archive hash is invented. Local source confirms the
+raw-weighted, normalized-once t-local candidate and fixed-parent-alignment,
+diagnostic-only/non-production boundary in `src/cuts/pion_t_template_comparison.py`.
+Template-comparison A uses inherited/global shapes; B uses those t-local shapes,
+with the same data/configuration and protected-signal references. Center/t2
+reported pion-control joint chi2/ndf worsens ~5.72 -> ~6.53; kaon-side **staged
+full-range validation** worsens ~18.33 -> ~41.66. The latter is not final
+protected-background chi2. Both protected-delta candidates are rejected with
+applied `pi_delta=0`; staged-fit totals are not finally applied spectra. B can
+improve diagnostics in other bins; no overall scientific preference or adoption.
+
+The earlier `KaonLT_loweps_20261018_093137.zip` contains the 19-page Center
+canonical t1/t2/t3 seven-stage JSON/PDF. Its producer still says
+`captured_pending_independent_validation`, `observed_source_HEAD=not_provided`.
+The supplied crosswalk found exact Center/t2 input/model histogram fingerprints
+and physical coordinate shifts matching newer baseline A. This bounded match
+does not upgrade the older owner/checker/HEAD provenance or establish a broader
+provenance bridge. Its earlier capture limitations remain intact.
+
+RUNTIME VERIFIED (supplied numerical crosswalk): Center/t2 fitted kaon pion-model
+integral ~0.25285 versus signed event-applied ~6.5562 are normal-bin full-MM
+integrals, not cross sections. About 94.6% of their ~6.303 difference lies at
+MM 0.94–1.03 GeV. Signed pion control there is largely prompt; the tiny fitted
+control denominator drives `w0` to ~182.82. Post-proton kaon data in that region
+are small: ~0.001661 versus full-range ~1.37076. This is a transfer-stability/
+accounting concern, not evidence of a major physical low-MM background or proven
+signal bias. The negative neutron-anchor LS numerator and tiny refined control
+neutron coefficient remain observations. INFERENCE: denominator amplification
+may matter; unique particle-level cause and distortion of the signal yield/error
+remain NOT VERIFIED. No weight clipping or removal of signed events is authorized.
+
+### Scientific evaluation and nomenclature
+
+The user's correction restores the overall L/T-separation objective: reconstruct
+full experimental MM after random/dummy subtraction from proton contamination,
+pion backgrounds and K+Lambda/K+Sigma0 SIMC under explicitly common selection,
+coordinate, binning and charge/efficiency/acceptance normalization. Inspect actual
+spectra, signal-region zooms, Lambda/Sigma0 positions, widths, tails, relative
+structures and residuals before choosing a model from background chi2. Then test
+the properly normalized background-subtracted K+Lambda data/SIMC yield ratio in
+matching `(t,phi,epsilon)` bins through established extraction. Movement toward
+unity is a consistent-model goal, never a constraint imposed by area-matching or
+arbitrary final-signal SIMC normalization. Diagnostic background amplitude and
+physically justified MM-offset nuisance fits may study shapes if documented;
+they authorize no production shifts/scales, template retuning to noise, changed
+weights or suppressed uncertainty. No new fit is made in this checkpoint.
+
+Template-comparison A/B are not HGCer Method A/B. HGCer Method A is a candidate
+reweighting independently validated only in limited scopes, preserving signed
+parent normalization rather than independently correcting it; it stays detached/
+non-production without explicit promotion. HGCer Method B stays diagnostic-only
+and numerically excluded. Kaon-side coefficient `A_n` and pion-control `B_n` are
+also distinct: `w0=K_model/P_model` correctly transfers pion control to kaon
+background and must not be inverted. Baseline remains authoritative.
+
+`SIMC_normfac_luminosity_and_charge_units_not_source_proven` still blocks the
+relevant absolute-SIMC interpretations/pages; full absolute data/MC closure or
+unity is not established. Canonical-five Method-A/F.6.4 lineage blockers and
+historical ordinary-launcher isolation blockers remain separately `BLOCKED`.
+All earlier E.8/F.6 closures retain their exact scopes. Preserve active
+`no_empirical_residual`, random/dummy -> proton -> pion ordering, signed events,
+SIMC, yields/errors, acceptance, kinematic bins, cuts, templates, priors and paths.
+Historical first-bad SHA, all-setting acceptance, a provenance bridge beyond the
+bounded fingerprint/coordinate comparison, final K-Lambda yield agreement and
+physical origin of low-MM pion control remain NOT VERIFIED.
+
+After this checkpoint's actual-diff review, user publication and pushed-state
+synchronization, return directly to the read-only existing-product full-MM
+component/source/normalization inventory and reconstruction feasibility audit
+specified in CURRENT: Center/lowe t2 first; Center t1/t3 and separate Left/lowe
+controls only after matching input identities. Show admissible existing MM plots
+and signal-region zooms, determine whether matched authoritative yield/SIMC
+objects support a credible comparison, and identify the first missing/blocked
+observable. Stop at the first failed evidence gate. This is the next substantive
+audit, not another documentation cycle, new fit, diagnostic implementation
+contract, promise of new farm artifacts or farm command.

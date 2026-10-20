@@ -5,46 +5,42 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: **TEMPORARY roadmap interruption** to explain the full existing
-baseline SIMC pion-background model versus final signed-event subtraction
-discrepancy. Focus: **Q4p4W2p74 / Center / lowe / canonical t2**; adjacent t1/t3
-and setting-wide controls retain their distinct scopes. The user's visual
-comparison places deterioration during canonical-t model construction/refinement,
-before final pion subtraction; the setting-wide model appears substantially more
-sensible. This is a user observation, not independently accepted model quality
-or an exact first-bad operation. The full setting-wide procedure remains in
-`Center_kaon_rand_sub_Q4p4W2p74_lowe_pion-fit-debug.pdf`: the older 67-page
-reference versus October's 30-page main PDF reflects presentation routing,
-not disappearance of global fit machinery. See the
-[October 19 correction](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#global-to-fine-bin-procedure-audit-and-user-correction--october-19).
-The user also reported earlier working behavior. The October 17–18
-farm evidence and prior review are now recorded in the
-[investigation checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#low-epsilon-farm-evidence-and-scientific-checkpoint--october-1718).
-No matched canonical-t regression pair, historical culprit or wider failure verified.
+`ACTIVE`: **TEMPORARY roadmap interruption** for the baseline-pion investigation,
+now evaluated through full missing-mass reconstruction and signal-region relevance
+for **Q4p4W2p74 / Center / lowe / canonical t2**. Establish common selection,
+coordinates, binning and charge/efficiency/acceptance normalization for data,
+proton contamination, baseline pion background and K+Lambda/K+Sigma0 SIMC.
+Inspect full-MM spectra, signal-region peaks/tails/residuals, then authoritative
+background-subtracted K+Lambda data/SIMC yields in corresponding `(t,phi,epsilon)`
+bins. Unity is a model goal, never an area-matching constraint. Absolute
+normalization remains separately blocked below.
 
-The [October 15 contract](phases/baseline-pion-full-model-memory-reanchor-2026-10-15-task-contract.md)
-and [investigation](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md)
-restore the full `pi_n`/`pi_sidis`/`pi_delta` question. `B_n=0` and protected-delta failure are candidates, not an established
-first historical defect, root cause or sole target.
+The [October 20 checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#full-mm-reconstruction-scientific-checkpoint--october-20)
+records supplied farm findings, the histogram crosswalk and the user's scientific
+correction. Large control/full-range disagreement alone does not establish large
+contamination under Lambda or signal bias. Historical first-bad SHA and physical
+root cause remain NOT VERIFIED. Earlier observations and procedure routing remain
+in the investigation; no earlier accepted scope is reopened.
 
-Prospective Method-A development/promotion and normal E.8/F.6 forward work and
-interpretation are paused pending baseline resolution; no new phase. After
-explanation and validation of the existing subtraction, or a necessary minimum
-correction independently reviewed, user-pushed and user-farm validated,
-**resume [the roadmap](roadmap/STATUS.md) at its interrupted position**.
-All existing statuses/scopes remain intact.
+Prospective Method-A development/promotion and normal E.8/F.6 forward work remain
+paused pending baseline resolution; no new phase. After explanation/validation
+of the existing subtraction, or an independently reviewed, user-pushed and
+user-farm-validated minimum correction, resume [the roadmap](roadmap/STATUS.md)
+at its interrupted position.
 
 ## Current Work Item
 
-The [controlled t-template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` locally. The preceding
-read-only source comparison is `SOURCE REVIEWED` at `4007d8a43a604628e5b74aca54229d3e6bd48848`;
-it establishes global-template fallback and equal-phi aggregation semantics,
-not the numerical cause. The disabled-by-default diagnostic reuses fixed parent
-alignment and the existing fitter on cloned inputs, with raw-weighted canonical-t
-SIMC shapes normalized once. Baseline fits, existing PDFs and subtraction stay
-authoritative. See the investigation's implementation checkpoint for local checks
-and runtime limits; no new farm or scientific acceptance.
+The [controlled template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
+and [execution gate](phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md)
+were source reviewed, user-pushed and farm-run at
+`6d13abb4681b938c56def2a1f455244b0880096c` (SOURCE VERIFIED / RUNTIME VERIFIED,
+scope attributed to supplied artifacts and prior review in the October 20
+contract). Center/Left lowe canonical t1/t2/t3 detached JSON/PDFs and receipts
+were accepted for that diagnostic scope. Candidate t-local templates do not
+establish a scientific preference or production adoption; baseline remains
+authoritative. Center/t2 staged validation worsens, and both protected-delta
+candidates are rejected with applied pi_delta zero. Detailed metrics, evidence
+limits and nomenclature are in the checkpoint. No local farm/artifact rerun.
 
 Prior evidence/reviews own acceptance. The user-requested
 [memory correction](phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md)
@@ -174,45 +170,24 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff acceptance, user publication and
-pushed-state synchronization, one controlled farm comparison of baseline A
-versus fixed-alignment candidate B for Q4p4W2p74 Center lowe t1/t2/t3, with Left
-lowe as a separate control. Inspect detached JSON/PDF model construction before
-subtraction. This local implementation supplies no farm command or readiness
-acceptance; ROOT, runtime and PDF legibility are NOT VERIFIED. The diagnostic
-uses the single `LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON=1` environment opt-in;
-ordinary analysis remains disabled. Hierarchical amplitude constraints and
-child refitting remain deferred pending t-level scientific evidence.
+pushed-state synchronization, proceed directly to the **read-only,
+signal-region-first full-MM component/source/normalization inventory and
+reconstruction feasibility audit** of existing accepted products for
+Q4p4W2p74 Center/lowe canonical t2. Verify matching input identities before using
+Center t1/t3 and Left/lowe as separate, scope-limited controls. Determine whether
+random/dummy-subtracted data, the proton component (applied/proposed contamination
+as appropriate), baseline pion, K+Lambda and K+Sigma0 SIMC share the correct
+selection, coordinate, binning and normalization. Show admissible existing full-MM
+plots and signal-region zooms; identify the first missing/blocked observable and
+whether matched authoritative data/SIMC yield objects suffice for a credible
+comparison. Stop at the first failed evidence gate. No forced unity, new fit,
+promised farm artifact or farm command follows from this checkpoint.
 
-RUNTIME VERIFIED (supplied October 17–18 evidence/prior review): Center/t1 has
-staged-anchor versus full-range SIDIS tension; Center/t2 has a high-leverage
-negative random contribution, negative neutron LS numerator (~-61.674), staged
-`B_n=0`, refined `B_n~0.000202` and `w0~182.82`. Its model pion integral
-~0.2529 versus event-applied background ~6.5562 illustrates failed signed-event/
-model agreement in each Center t bin despite model algebra/subtraction arithmetic
-closure. These are full-range integrals, not extracted yields or cross sections.
-Left's setting-wide neutron amplitude is positive but fit quality is poor;
-matching source-resolved Left canonical-t diagnostics remain NOT VERIFIED.
-See the investigation for the transition-specific findings and limits.
-
-SOURCE VERIFIED at `1975c3d8656253e262ff7e18306a93ca800b6027`: plain `-d` uses ordinary available lowe
-settings, skips `-c` merge and exits before full highe. Analysis physics is
-unchanged. `src/main.py` calls the pion-shape loader without `t_bins/phi_bins`;
-canonical-t scopes can fall back to setting-wide shapes. The Center artifact
-reports no constructed t-binned SIMC shapes (supplied evidence). This possible
-limitation is not a proven cause or permission to activate production shapes.
-The contracted detached comparison is the sole opt-in template-shape exception.
-SOURCE VERIFIED: the setting-wide fit is diagnostic-only in active `t_bin`
-scope; canonical-t runs the full fitter on local inputs with parent alignment,
-without transferred global amplitude/covariance constraints. Enabled joint
-regularization centers on that fit's local staged coefficients. Authoritative
-`(t,phi)` consumers apply the t-parent event weight without a full local refit.
-User-requested future intent: preserve the complete staged three-component
-procedure, anchor t to global while allowing genuine large t dependence, then
-consider support/covariance-conditional children anchored to their own t parent.
-INFERENCE: this may help; shared-event dependence and model adequacy require
-audit. No hierarchy, prior width or fallback algorithm is approved. Numerical
-cause, efficacy and full farm acceptance remain NOT VERIFIED. All existing
-normalization/weights/cuts/priors/templates and signed events remain frozen.
+Hierarchical amplitudes and child refitting remain deferred; no prior width,
+covariance model or fallback is approved. The investigation retains prior
+construction, transfer and signed-application findings and their limitations.
+The template diagnostic's single opt-in remains detached; it does not change
+production templates, alignment, fits, subtraction or yields.
 
 ## Success Criteria
 

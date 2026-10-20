@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 15322,
+      "bytes": 13035,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "b10026b20dedbebe61eb7d2721ed090bff721f4c974563a031feb0464a759147"
+      "sha256": "a88440330df77defd8c41a12b361ae367f7f3d79b5bd3ffc03f7f78717c2901c"
     },
     {
       "bytes": 10506,
@@ -31,9 +31,9 @@
       "sha256": "f92de8626796efa9e6deb38a1db6784087143c7114eb9ebb30eaddebcf2b0029"
     },
     {
-      "bytes": 26150,
+      "bytes": 27005,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "85e7b18658e9605995a89baf6d1d5153d7f084717f19a8b9443e5c5d8cf1581f"
+      "sha256": "f6e1542c537a2ce43c05120af33342967f7368b72fdbd876e7156483a26b7122"
     },
     {
       "bytes": 3606,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 45007,
+      "bytes": 51643,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "832fc6e1964388bbed92ca6e8c07223a3fbfb79024d5194007cc440475cca019"
+      "sha256": "5cac29eb2bef0e0176fe30ec6a95254c4f1593bd11b4d7ed77f4198d8b1dd6a0"
     },
     {
       "bytes": 23507,
@@ -1274,6 +1274,11 @@
       "bytes": 9065,
       "path": "docs/memory/phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md",
       "sha256": "fab2a557ba34d9a9421c96b4061e8edaabead8fbec719b7c19cba5b21fccb382"
+    },
+    {
+      "bytes": 12284,
+      "path": "docs/memory/phases/kaonlt-full-mm-reconstruction-scientific-memory-checkpoint-2026-10-20-task-contract.md",
+      "sha256": "ae67a5d70447015b3549cb03ce1bd0720f2556b740970aec4b0411509f6a8e46"
     },
     {
       "bytes": 7858,
