@@ -4066,6 +4066,15 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
+    if os.environ.get("LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION") == "1":
+        # Detached scalar observer; default path performs no diagnostic import.
+        import importlib.util
+        from pathlib import Path
+        observer_path = Path(__file__).resolve().parents[2] / "testing" / "pion_local_t_event_validation_capture.py"
+        observer_spec = importlib.util.spec_from_file_location("pion_local_t_event_validation_capture", observer_path)
+        observer = importlib.util.module_from_spec(observer_spec)
+        observer_spec.loader.exec_module(observer)
+        observer.observe(hist, inpDict, t_bins, phi_bins, OUTPATH)
     hist["_yield_data_processed_dict"] = binned_dict[kin_type]["processed_dict"]
     hist["_xsect_support_data"] = binned_dict[kin_type]["support_hist_dict"]
 

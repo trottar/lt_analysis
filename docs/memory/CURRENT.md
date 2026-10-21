@@ -30,14 +30,20 @@ at its interrupted position.
 
 ## Current Work Item
 
-`ACTIVE`: user-directed return to pion modeling under the
-[detached candidate-C contract](phases/kaonlt-pion-local-t-transfer-variance-candidate-c-2026-10-20-task-contract.md).
-The local histogram-only A/B/C comparator reproduces all six accepted B joint
-fits at lambda zero (maximum coefficient difference `1.27e-8`, limit `1e-7`).
-The predeclared seven-strength sweep converges in all six separate Center/Left
-lowe parents; no strength is selected. Local variance/shape results, provenance
-and limitations are recorded in the investigation addendum. This is neither
-farm execution nor scientific acceptance; production source remains frozen.
+`ACTIVE`: independent event-level bias-variance evidence before any adaptive
+lambda selector, under the [October 21 event-validation contract](phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md).
+The detached six-parent, seven-strength C feasibility comparison has been
+numerically and visually reviewed per that supplied contract; no strength is
+selected or promoted. A local default-off cache observer, ROOT-free signed-event
+replay and single-run capture owner are proposed for independent actual-diff
+review. Production fitting, weights and application remain frozen.
+
+SOURCE VERIFIED locally: the observer follows both yield-cache assignments;
+replay preserves separate signed sources, cut masks, parent/child support and
+fixed protected-applied K_B. Full-sample application is not held-out validation.
+Training-only staged/protected fits and priors are the first missing independent
+fitted-estimator step; bias truth and MSE selection remain unavailable. No
+farm packet, event-level acceptance, adaptive selector or production adoption.
 
 The [controlled template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
 and [execution gate](phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md)
@@ -179,17 +185,17 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff acceptance, user publication and
-pushed-state synchronization, independently run/review the **six-parent detached
-A/B/C variance-versus-shape comparison** on the accepted October 19–20 A/B JSON,
-retaining every predeclared lambda and meaningful full-MM/signal-region plots.
-The present local numerical/PDF output is proposed feasibility evidence, not an
-accepted choice. Check shape deterioration, fixed protected-applied K_B, support
-and conditional uncertainty limits before any scientific preference. No
-farm-integrated C or weight-rule change is authorized. The prior full-MM
-component/source/normalization inventory remains the broader scientific
-objective; this user-directed modeling test precedes that audit without changing
-its selection, normalization or signal-yield requirements. Stop at the first
-failed evidence gate; no forced unity or farm command.
+pushed-state synchronization, one owned Center/Left lowe six-parent event-record
+capture gate, followed by the tracked offline replay CLI against the accepted
+original `c_review_candidate_c.json` with its independently reviewed hash.
+The capture owner emits two verified packets and a collector ZIP plus receipts;
+the offline replay owns one detached JSON/PDF operation, source/parent/model
+joins and all seven unselected strengths. No C input is required on the farm.
+Independent evidence review must distinguish genuine signed-event application
+from unavailable held-out fitted-estimator evaluation and physical bias truth.
+No farm command or readiness claim follows from this local candidate. The broader
+full-MM/component/normalization and authoritative signal-yield objective remains;
+no Lambda/SIMC unity constraint. Stop at the first failed evidence gate.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior

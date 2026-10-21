@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 13593,
+      "bytes": 14045,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "05aca3701963796d1f113eea0fc293754f148d0e25d1a4d6da49de2f39143b6b"
+      "sha256": "674e41a1847808e52f56b7c63eabec2f4c7106250645e5d6d244ec8010f5a9fb"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 56219,
+      "bytes": 64693,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "3c3cfca5fcab87786278c8fe876663be8da594471af1e86872537b1f8a532c3a"
+      "sha256": "60fbe29e8adfa6437b8f6b9635ba2194f28079c8fe9db5c5105b4927e9b2ea57"
     },
     {
       "bytes": 23507,
@@ -1284,6 +1284,11 @@
       "bytes": 7858,
       "path": "docs/memory/phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md",
       "sha256": "fa9ec458d9d5a89ac334f8557c5621eceaf6d4380bea9f5197bea49a2609781f"
+    },
+    {
+      "bytes": 15957,
+      "path": "docs/memory/phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md",
+      "sha256": "bda621e2fcbeac59a113d1c5b270c951e30cb8addb31f2de92e62d3c67d7c970"
     },
     {
       "bytes": 12579,

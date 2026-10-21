@@ -855,3 +855,126 @@ Independent actual-diff acceptance, user publication and pushed-state review
 precede independent six-parent feasibility evidence review; any farm-integrated
 C or weight-rule change requires a later separately reviewed decision. Preserve
 all earlier closures, normalization/isolation blockers and Method-A/Method-B roles.
+
+## Detached signed-event validation implementation — October 21
+
+`ACTIVE` under the [single event-validation contract](../phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md).
+Starting local `test`, HEAD and local `origin/test` were
+`1eac918a58bb700e03deb89411e99a38befd3f95`; no live remote query or farm run.
+The supplied contract records the completed numerical/visual C feasibility
+review and establishes independent event-level evidence before any selector.
+That review attribution is not a new farm acceptance. CURRENT's consumed NEXT
+is corrected within this change, with broader science and blockers preserved.
+
+SOURCE VERIFIED against current source/proposed diff: the one default-off
+`LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION=1` observer follows both existing
+yield-cache assignments. It copies scalar canonical-t pion-control records
+(including outside-phi support), verifies their physical child-cache projection,
+and copies kaon-yield rows with original post-proton/RF factors. No ROOT event
+loop, cache construction change, new fit, physical selection or normalization.
+Data/dummy hashes, signed coefficients, source/tree-local entry identities,
+coordinate/PID/parent/source fingerprints and both cut flags are retained.
+Pion canonical endpoints are inclusive at the final edge; the existing yield
+cache excludes that final edge. Null phi children remain explicit outside
+acceptance. Duplicate source entries and population mixing fail closed.
+
+The standalone capture owner reuses the source-verified disposable-worktree,
+overlaid-ltsep, output-link and preservation helpers of the established A/B
+owner. One unchanged `-d` child writes two declared Center/Left packets. Freshness,
+source/data identities, six parents, finite values, input-histogram/source
+closure, ZIP CRC/inventory/hash checks and preservation precede successful
+delivery. Existing collector/profile/helper files are unchanged. Capture is
+`captured_pending_independent_validation`, never event-replay acceptance.
+The separate ROOT-free replay CLI consumes these packets and the accepted
+original C JSON; the C artifact need not be on the farm. It pins the supplied
+original C hash, accepted A/B hashes and capture HEAD, joins source/coordinate/
+canonical-edge/parent/model identities and never refits C. It retains A, B and
+all seven strengths; B/C hold the protected-applied K_B fixed. Source and phi
+spectra, signed/absolute/positive/negative support, quadratic Sumw2 and effective
+support are separate for actual allcuts and nommcuts. Normal full-MM,
+0.7–1.3, 1.10–1.16, 1.105–1.135 and 0.94–1.03 GeV use explicit normal-bin
+center windows. Flows are retained with zero application weight as in existing
+code. Unclipped diagnostic ratios and the captured production floor/clip
+convention are both labeled; no equivalence is inferred from rounding or
+unsupported support. These integrals are not authoritative extracted yields.
+
+Deterministic five-fold source-file-hash/label/entry partitions use a predeclared
+seed and retain source-weighted training/evaluation balance. They are disjoint
+record partitions, not held-out models: saved K_B, staged amplitudes/priors and
+protected signal fits consumed full-data events. The first missing independent
+fitted-estimator step is training-only staged/protected fits and priors; this
+change supplies no replacement fitter or full-data-prior fallback. Local SIMC
+shapes alone provide no independent kaon-PID leakage truth with source
+normalization. Report `bias_truth_unavailable` and `MSE_selection_unavailable`;
+no adaptive lambda choice. Fixed-weight Sumw2, parameter covariance and true
+repeated-training variance remain distinct. Synthetic injected-transfer controls
+are analytic test evidence only, not physical bias or runtime acceptance.
+
+Local deterministic tests include six-parent synthetic replay, negative
+provenance/support/population gates, default-off and ROOT-import isolation,
+original-module AST preservation outside the guard, owner failures and the real
+unchanged generic collector with synthetic packets. The prior local C JSON and
+accepted A/B archive are source/schema/numerical controls, not fresh signed
+events. Synthetic figure layouts were inspected as PNGs; actual PDF encoding/
+rendering, ROOT/PyROOT, full main.py integration and farm capture remain NOT
+VERIFIED. No original C artifact was altered, no farm executed and no strength
+selected. Independent actual-diff review remains pending. The initial manifest
+inventory discrepancy was solely this transferred contract; existing entries
+matched. CURRENT's soft-size warning is nonblocking and scheduled for the next
+checkpoint/milestone. All earlier science closures, absolute-normalization and
+ordinary-launcher blockers, Method-A/Method-B roles and production physics stay
+frozen. CURRENT alone owns the next evidence gate.
+
+Local validation receipt: 156 deterministic tests passed with no skips across
+the new capture/replay/owner suites and existing C, A/B comparison/owner, parent
+integrity, baseline-stage and pre-particle-subtraction binning suites. Six
+changed/new Python modules compile. This is local/source evidence only.
+
+### Enabled capture interface correction — October 21
+
+`ACTIVE`: the user's independent actual-diff review identified two capture
+adapter blockers missed by the initial 156-test suite: treating a source's
+GetName as a backing filename, and requiring parent_fit_configuration instead
+of observing the existing resolved production weight policy. The prior local
+checks did not establish enabled-observer viability. This correction remains
+inside the unchanged October 21 contract and eleven-path allowlist; CURRENT,
+its scientific NEXT, source observation HEAD and all science boundaries remain.
+
+SOURCE VERIFIED against current source/proposed diff: the adapter resolves a
+tree's GetCurrentFile, or an existing TFile's GetFile, checks the backing file's
+open/non-zombie state, and hashes its actual filename. A tree name is never a
+path fallback. Missing backing-file provenance fails before packet creation;
+no file opening, tree iteration, source mutation or ROOT directory change.
+The adapter captures only floor/clip values returned by the existing
+background_config production resolvers. It reads no parent_fit_configuration
+field, and checks any retained final/proposed application policy diagnostics
+for disagreement. Absent optional diagnostic payloads do not replace resolver
+values with guesses. Production configuration and application remain untouched.
+
+Accepted A/B data/dummy SHA-256 and byte-count projections were independently
+recovered locally from both original JSONs in the archive already identified
+above. Archive SHA-256 and both JSON SHA-256 identities were checked first;
+input source HEAD remains 6d13abb4681b938c56def2a1f455244b0880096c.
+The hash/size-only pins carry no machine paths. They are checked immediately
+after backing-file hashing, before parent serialization or packet output, and
+again by the owner before collection. No C file or guessed farm path is needed
+during capture; offline replay retains its independent accepted-C/input checks.
+
+Local validation: 163 deterministic tests passed, no skips, and six Python
+modules compile. Positive enabled-observer tests use realistic TTree/TFile and
+TH1 interfaces, parent records without parent_fit_configuration, actual retained
+histogram serializers, and actual production configuration resolvers. They
+verify identity/policy output and unchanged caches, parents, input dictionaries,
+source handles, backing-file state and bytes. Negative tests cover absent,
+closed and zombie backing files, path-looking tree names without provenance,
+accepted-input mismatch before parent serialization, retained floor/clip
+configuration disagreement, and self-consistent packets with nonaccepted source
+hashes rejected before owner collection. Synthetic tests explicitly substitute
+synthetic input pins; a separate archive test checks the real source-owned pins
+against both original accepted A/B JSONs. No synthetic test is farm evidence.
+
+Actual ROOT/PyROOT, full main.py integration, farm capture and scientific
+acceptance remain NOT VERIFIED. Independent actual-diff review is still the
+current workflow gate; user publication and pushed-state review precede the
+same owned six-parent capture/replay scientific NEXT. No commit, push, farm
+execution, new contract, selector, model choice or production change follows.
