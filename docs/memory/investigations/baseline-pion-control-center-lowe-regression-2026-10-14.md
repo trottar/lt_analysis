@@ -784,3 +784,74 @@ objects support a credible comparison, and identify the first missing/blocked
 observable. Stop at the first failed evidence gate. This is the next substantive
 audit, not another documentation cycle, new fit, diagnostic implementation
 contract, promise of new farm artifacts or farm command.
+
+## Detached local-t transfer-variance candidate C — October 20
+
+`ACTIVE`: the user explicitly directed the
+[candidate-C contract](../phases/kaonlt-pion-local-t-transfer-variance-candidate-c-2026-10-20-task-contract.md),
+returning to pion modeling before the previously recorded existing-product
+inventory. CURRENT alone owns the revised NEXT. This is template-comparison
+A/B/C, not HGCer Method A/B or fitted A_n/B_n; no new scientific phase.
+
+SOURCE VERIFIED at local `test` / local `origin/test`
+`52d8b44335efde614111f727d90fd7987f86d941`: the new detached reader uses the
+already-aligned B fitting columns, explicit signed-control Sumw2, original fit
+bins, nonnegative bounds, staged amplitudes and original joint prior widths.
+It holds `H_kaon_pion_bg_fit_total_refined` fixed, verifies protected-applied
+component closure and retains A/B input snapshots unchanged. No production
+source, configuration, authoritative fitting or event application changes.
+
+The locally found accepted A/B ZIP SHA-256 is
+`8bd71f9ab17fa456a86911b8b43eed9c2a1a9da3101cbbff776c56f66fa901ee`.
+Its four artifact hashes/sizes and manifest identity were checked before use;
+both JSON source HEADs are `6d13abb4681b938c56def2a1f455244b0880096c`.
+Center JSON SHA-256:
+`7e34ec134ef28378ffebf1686c47915a266478531d9910bbdd211f5392cb1f24`;
+Left JSON SHA-256:
+`f5c8cf2483ce77d74dc2e2a497d8b7c5f1b0aa3c96b4d76c3964d813e675b812`.
+Original acceptance remains attributed to prior supplied farm evidence/review;
+this local archive/array verification is not a new farm run.
+
+Local deterministic evidence: all six reconstructed B joint fits and their
+data/prior objective terms match recorded B within declared numerical tolerances.
+Maximum coefficient discrepancy is `1.2671e-8`, below `1e-7`. The predeclared
+lambda grid is `0, .01, .1, 1, 10, 100, 1000`; its added objective is
+`lambda * V_full(beta)/V_full(B)`, with the normalization fixed before the sweep.
+Full normal-bin MM includes 0.94–1.03 GeV. All 42 fits converge; no unsupported
+positive-kaon/Sumw2 normal bins are found in these results. Strengths are
+unselected; convergence is not model acceptance.
+
+SOURCE VERIFIED (deterministic local arrays only): Center/t2 full-MM risk changes from
+about `188.968` at lambda zero to `0.521317` at lambda 1000, while signal-window
+1.10–1.16 GeV risk stays approximately `3.63e-6`; data chi2/ndf changes from
+`6.52955` to `6.52510`. These values concern local-template B/C, not inherited
+baseline A or the historical maximum weight near 183. Several other parents
+show worse data chi2 at large strengths; for example Center/t1 changes from
+`4.01346` to `5.69835`. Retain the complete sweep and shape residuals; no
+strength is validated or selected, and no scientific preference follows.
+
+Outputs are detached local JSON and a 24-page local PDF, separate from accepted
+farm/analysis-procedure products. Risk, histogram-applied background integrals,
+weight tails, component contributions, bound hits, coefficient sensitivities and
+conditional covariance are retained by setting/parent/strength. Signal windows
+use explicit bin centers, not authoritative extracted-yield integration.
+All-cuts Lambda application, RF-restored yields, independent event replay,
+held-out validation and detailed shared-event/fit covariance remain NOT VERIFIED
+or explicitly unavailable. The fixed-denominator Sumw2 proxy and conditional
+curvature are not independent uncertainties or confidence intervals near bounds.
+No clipping, suppressed signed event, altered K_B or production adoption.
+
+Local validation: 27 deterministic tests pass, including the supplied-archive
+six-parent controls, analytic regularized solution, signed cancellation/Sumw2,
+unsupported support, solver nonconvergence, fixed K_B, covariance/bound limits,
+provenance/input/path rejection, unchanged A/B and PDF branch smoke checks.
+Both new modules compile without importing ROOT. These checks establish only
+detached local implementation behavior; independent actual-diff review remains.
+
+The initial memory integrity discrepancy was solely the transferred new contract;
+the authorized generator repairs its manifest inventory. The existing CURRENT
+soft-size warning is nonblocking and remains scheduled for the next checkpoint.
+Independent actual-diff acceptance, user publication and pushed-state review
+precede independent six-parent feasibility evidence review; any farm-integrated
+C or weight-rule change requires a later separately reviewed decision. Preserve
+all earlier closures, normalization/isolation blockers and Method-A/Method-B roles.

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 13035,
+      "bytes": 13593,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "a88440330df77defd8c41a12b361ae367f7f3d79b5bd3ffc03f7f78717c2901c"
+      "sha256": "05aca3701963796d1f113eea0fc293754f148d0e25d1a4d6da49de2f39143b6b"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 51643,
+      "bytes": 56219,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "5cac29eb2bef0e0176fe30ec6a95254c4f1593bd11b4d7ed77f4198d8b1dd6a0"
+      "sha256": "3c3cfca5fcab87786278c8fe876663be8da594471af1e86872537b1f8a532c3a"
     },
     {
       "bytes": 23507,
@@ -1304,6 +1304,11 @@
       "bytes": 9556,
       "path": "docs/memory/phases/kaonlt-pion-hierarchy-audit-memory-checkpoint-2026-10-19-task-contract.md",
       "sha256": "a936616afe9b9ac65f00e4a6ff81596ff2ccd7c8efd4fe07d911219ad52d8556"
+    },
+    {
+      "bytes": 13160,
+      "path": "docs/memory/phases/kaonlt-pion-local-t-transfer-variance-candidate-c-2026-10-20-task-contract.md",
+      "sha256": "20d0a896f9a9a35243d74a0a79e12c1a5a6aa0f33cdb55376f29f2b5d2de52c6"
     },
     {
       "bytes": 11234,

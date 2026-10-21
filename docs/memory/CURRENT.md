@@ -30,6 +30,15 @@ at its interrupted position.
 
 ## Current Work Item
 
+`ACTIVE`: user-directed return to pion modeling under the
+[detached candidate-C contract](phases/kaonlt-pion-local-t-transfer-variance-candidate-c-2026-10-20-task-contract.md).
+The local histogram-only A/B/C comparator reproduces all six accepted B joint
+fits at lambda zero (maximum coefficient difference `1.27e-8`, limit `1e-7`).
+The predeclared seven-strength sweep converges in all six separate Center/Left
+lowe parents; no strength is selected. Local variance/shape results, provenance
+and limitations are recorded in the investigation addendum. This is neither
+farm execution nor scientific acceptance; production source remains frozen.
+
 The [controlled template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
 and [execution gate](phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md)
 were source reviewed, user-pushed and farm-run at
@@ -170,18 +179,17 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 ## Next Action
 
 NEXT — after independent ChatGPT actual-diff acceptance, user publication and
-pushed-state synchronization, proceed directly to the **read-only,
-signal-region-first full-MM component/source/normalization inventory and
-reconstruction feasibility audit** of existing accepted products for
-Q4p4W2p74 Center/lowe canonical t2. Verify matching input identities before using
-Center t1/t3 and Left/lowe as separate, scope-limited controls. Determine whether
-random/dummy-subtracted data, the proton component (applied/proposed contamination
-as appropriate), baseline pion, K+Lambda and K+Sigma0 SIMC share the correct
-selection, coordinate, binning and normalization. Show admissible existing full-MM
-plots and signal-region zooms; identify the first missing/blocked observable and
-whether matched authoritative data/SIMC yield objects suffice for a credible
-comparison. Stop at the first failed evidence gate. No forced unity, new fit,
-promised farm artifact or farm command follows from this checkpoint.
+pushed-state synchronization, independently run/review the **six-parent detached
+A/B/C variance-versus-shape comparison** on the accepted October 19–20 A/B JSON,
+retaining every predeclared lambda and meaningful full-MM/signal-region plots.
+The present local numerical/PDF output is proposed feasibility evidence, not an
+accepted choice. Check shape deterioration, fixed protected-applied K_B, support
+and conditional uncertainty limits before any scientific preference. No
+farm-integrated C or weight-rule change is authorized. The prior full-MM
+component/source/normalization inventory remains the broader scientific
+objective; this user-directed modeling test precedes that audit without changing
+its selection, normalization or signal-yield requirements. Stop at the first
+failed evidence gate; no forced unity or farm command.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior
