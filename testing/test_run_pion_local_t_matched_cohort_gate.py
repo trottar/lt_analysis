@@ -8,6 +8,7 @@ import subprocess
 import sys
 import json
 import ast
+import errno
 from array import array
 import unittest
 from unittest.mock import patch
@@ -45,6 +46,100 @@ def external_fixture(worktree, private, volatile):
 
 
 class PrivateBoundary(unittest.TestCase):
+    def test_old_inventory_reproduces_all_cycle_shapes_without_traversal(self):
+        # Execute the actual audited pre-repair functions, not a conjectured mock.
+        source = subprocess.check_output(['git', 'show',
+            '842dab7a957a9823a51dcb484a765b4d11c6d9c1:' + owner.OWNER], cwd=ROOT).decode()
+        functions = [n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef)
+                     and n.name in ('inventory', 'link_inventory')]
+        namespace = dict(vars(owner))
+        exec(compile(ast.Module(body=functions, type_ignores=[]), '<old-owner>', 'exec'), namespace)
+        for shape in ('self', 'two_link', 'relative_ancestor'):
+            with self.subTest(shape=shape), tempfile.TemporaryDirectory() as d:
+                root = Path(d).resolve()
+                trial = root / 'cache_transfer/kaon/Q3p0W3p14/Trial_44'
+                trial.mkdir(parents=True)
+                link = trial / 'Trial_49'
+                literal = {'self': 'Trial_49', 'two_link': 'peer',
+                           'relative_ancestor': '../Trial_44/Trial_49'}[shape]
+                link.symlink_to(literal, target_is_directory=True)
+                if shape == 'two_link':
+                    (trial / 'peer').symlink_to('Trial_49', target_is_directory=True)
+                # A resolvable ancestor directory link is also never descended.
+                (trial / 'ancestor').symlink_to('..', target_is_directory=True)
+                walked = [Path(parent).relative_to(root).as_posix()
+                          for parent, _, _ in os.walk(root, followlinks=False)]
+                self.assertEqual(len(walked), 5)
+                self.assertFalse(any('/Trial_49/' in p or '/ancestor/' in p for p in walked))
+                with self.assertRaises((RuntimeError, OSError)):
+                    namespace['inventory'](root)
+                result = owner.inventory(root)
+                key = link.relative_to(root).as_posix()
+                self.assertEqual(result[key], {'link': literal, 'cyclic_target': True})
+                self.assertEqual(owner.inventory(root), result)
+                self.assertEqual(len(result), 6 + (shape == 'two_link'))
+
+    def test_loop_exception_forms_are_metadata_without_retry(self):
+        for error in (RuntimeError("Symlink loop from 'fixture'"), OSError(errno.ELOOP, 'cycle')):
+            with self.subTest(error=error), tempfile.TemporaryDirectory() as d:
+                link = Path(d) / 'link'
+                link.symlink_to('link')
+                with patch.object(Path, 'resolve', side_effect=error) as resolve, patch.object(
+                        Path, 'is_file', side_effect=AssertionError('cyclic referent must not be read')):
+                    self.assertEqual(owner.link_inventory(link), {'link': 'link', 'cyclic_target': True})
+                resolve.assert_called_once_with(strict=True)
+
+    def test_other_resolution_and_readlink_errors_propagate(self):
+        errors = (PermissionError(errno.EACCES, 'denied'), OSError(errno.EIO, 'IO'),
+                  OSError(errno.ENOTDIR, 'not directory'), RuntimeError('unrelated failure'))
+        with tempfile.TemporaryDirectory() as d:
+            link = Path(d) / 'link'
+            link.symlink_to('link')
+            for error in errors:
+                with self.subTest(error=error), patch.object(Path, 'resolve', side_effect=error):
+                    with self.assertRaises(type(error)) as caught:
+                        owner.link_inventory(link)
+                    self.assertIs(caught.exception, error)
+            with patch.object(os, 'readlink', side_effect=PermissionError('readlink denied')):
+                with self.assertRaisesRegex(PermissionError, 'readlink denied'):
+                    owner.link_inventory(link)
+            link.unlink()
+            target = Path(d) / 'regular'
+            target.write_bytes(b'live')
+            link.symlink_to(target)
+            with patch.object(owner, 'identity', side_effect=PermissionError('hash denied')):
+                with self.assertRaisesRegex(PermissionError, 'hash denied'):
+                    owner.link_inventory(link)
+
+    def test_all_cycle_inventory_callers_reach_exactly_one_child_for_both_forms(self):
+        for form in ('native', 'runtime', 'oserror'):
+            with self.subTest(form=form):
+                self.exercise_exact_preflight_sigma0('absent', cyclic=True, loop_form=form)
+
+    def test_cycle_and_live_link_changes_fail_after_child_failure(self):
+        for location in ('shared', 'CUTPATH', 'PARAMPATH'):
+            for change in ('retarget', 'remove', 'replace', 'resolve', 'bytes', 'live_bytes', 'live_cycle'):
+                with self.subTest(location=location, change=change):
+                    self.exercise_exact_preflight_sigma0('absent', (location, change), cyclic=True)
+
+    def test_required_cyclic_inputs_stop_before_child(self):
+        for role in ('sigma0_SIMC', 'neutron', 'delta', 'sidis'):
+            with self.subTest(role=role):
+                self.exercise_exact_preflight_sigma0('cycle', required_role=role)
+
+    def test_preflight_traceback_and_independent_preservation_failures(self):
+        self.exercise_exact_preflight_sigma0('absent', preflight_failure=True,
+                                            preservation_failure=True)
+
+    def test_completed_child_failed_artifact_gate_never_collects(self):
+        self.exercise_exact_preflight_sigma0('absent', cyclic=True, artifact_failure=True)
+
+    def test_completed_child_changed_cycle_never_collects(self):
+        for location in ('shared', 'CUTPATH', 'PARAMPATH'):
+            with self.subTest(location=location):
+                self.exercise_exact_preflight_sigma0('absent', (location, 'resolve'),
+                                                    cyclic=True, completed_child=True)
+
     def test_shared_dangling_link_metadata_and_preservation(self):
         for change in ('retarget', 'remove', 'replace', 'resolve', 'bytes'):
             with self.subTest(change=change), tempfile.TemporaryDirectory() as d:
@@ -240,7 +335,10 @@ class PrivateBoundary(unittest.TestCase):
                 with self.subTest(location=location, change=change):
                     self.exercise_exact_preflight_sigma0('absent', (location, change))
 
-    def exercise_exact_preflight_sigma0(self, sigma_case, mutation=None):
+    def exercise_exact_preflight_sigma0(self, sigma_case, mutation=None, *, cyclic=False,
+                                       loop_form='native', required_role='sigma0_SIMC',
+                                       preflight_failure=False, preservation_failure=False,
+                                       artifact_failure=False, completed_child=False):
         with tempfile.TemporaryDirectory() as d:
             parent = Path(d).resolve()
             repo, worktree, globus = parent / 'repo', parent / 'analysis', parent / 'globus'
@@ -266,6 +364,7 @@ class PrivateBoundary(unittest.TestCase):
             # Every exact preflight exercises both broad inventory callers.
             target = parent / 'volatile/OUTPUT/Analysis/HeeP'
             links = {}
+            peers, live_targets = {}, {}
             for location, directory in dict(shared=str(shared), **external_paths).items():
                 if location not in ('shared', 'CUTPATH', 'PARAMPATH'):
                     continue
@@ -273,9 +372,27 @@ class PrivateBoundary(unittest.TestCase):
                 directory.mkdir(exist_ok=True)
                 (directory / 'regular.bin').write_bytes(b'original')
                 links[location] = directory / 'unrelated'
-                links[location].symlink_to(target, target_is_directory=True)
+                if cyclic:
+                    peers[location] = parent / (location + '-peer')
+                    peers[location].symlink_to(links[location])
+                    links[location].symlink_to(peers[location], target_is_directory=True)
+                else:
+                    links[location].symlink_to(target, target_is_directory=True)
+                live_targets[location] = parent / (location + '-live.bin')
+                live_targets[location].write_bytes(b'live original')
+                (directory / 'live-link').symlink_to(live_targets[location])
             sigma_env = {}
-            if sigma_case != 'absent':
+            if sigma_case == 'cycle':
+                p = (parent / 'sigma-cycle.root' if required_role == 'sigma0_SIMC' else
+                     shared / 'background_samples' / required_role / 'Prod_Coin_Q4p4W2p74center_lowe.root')
+                if p.exists():
+                    p.unlink()
+                p.symlink_to(p.name)
+                if required_role == 'sigma0_SIMC':
+                    sigma_env['LT_BG_SIGMA0_CENTER_LOW_ROOT'] = str(p)
+                with self.assertRaises((OSError, RuntimeError)):
+                    owner.identity(p)
+            elif sigma_case != 'absent':
                 for s in owner.SETTINGS:
                     p = parent / (s + '-sigma.root')
                     if sigma_case == 'valid':
@@ -313,7 +430,16 @@ class PrivateBoundary(unittest.TestCase):
                 patched(owner.isolation.accepted, 'GLOBUS', new=globus)
                 patched(owner.isolation, 'snapshot', return_value=before)
                 patched(owner.ab, 'git', return_value='')
-                patched(owner.ab, 'GateStatus')
+                # Use the real atomic JSON status writer, including on failure.
+                real_resolve = Path.resolve
+                def resolve(path, *args, **kwargs):
+                    if path in links.values() and loop_form != 'native':
+                        if loop_form == 'runtime':
+                            raise RuntimeError('Symlink loop from ' + repr(str(path)))
+                        raise OSError(errno.ELOOP, 'cycle', str(path))
+                    return real_resolve(path, *args, **kwargs)
+                if cyclic:
+                    stack.enter_context(patch.object(Path, 'resolve', new=resolve))
                 patched(owner, 'toolchain', return_value={'synthetic': True})
                 patched(owner, 'audit_default_output_writer', return_value={})
                 patched(owner.isolation, 'owned_worktree', new=owned)
@@ -324,12 +450,31 @@ class PrivateBoundary(unittest.TestCase):
                     'baseline_paths': dict(paths, LTANAPATH=str(repo), OUTPATH=str(shared))}))
                 patched(owner.isolation, 'probe_paths', return_value=[{'paths': paths}])
                 patched(owner.isolation, 'external_symlink_preflight', return_value={'links': [], 'background_simc_path': ''})
-                inventory_call = patched(owner, 'external_input_inventory', wraps=owner.external_input_inventory)
+                captured = {}
+                real_inventory = owner.external_input_inventory
+                def capture_inventory(*args):
+                    records = real_inventory(*args)
+                    captured.update(records)
+                    return records
+                inventory_call = patched(owner, 'external_input_inventory', side_effect=capture_inventory)
+                if preflight_failure:
+                    def fail_source_caller(*args):
+                        raise PermissionError('synthetic preflight denied')
+                    inventory_call.side_effect = fail_source_caller
                 patched(owner, 'skim_paths', return_value={'launcher': str(shared), 'effective_charge': str(shared)})
                 patched(owner, 'probe_private_callers', return_value={})
                 patched(owner.event_owner, 'committed_identities', return_value={})
                 def failed_child(tree, log, env):
-                    Path(log).write_text('synthetic child failure; no analysis executed')
+                    Path(log).write_text('All available low-epsilon settings completed in debug mode.\n'
+                                         'Full high-epsilon processing is intentionally skipped in -d debug mode.'
+                                         if artifact_failure or completed_child else
+                                         'synthetic child failure; no analysis executed')
+                    if cyclic:
+                        for location in ('CUTPATH', 'PARAMPATH'):
+                            record = captured[str(links[location])]
+                            self.assertEqual(record, {'role': location, 'unresolved_link': {
+                                'link': str(peers[location]), 'cyclic_target': True}})
+                        owner.verify_external_inputs(captured)
                     if mutation:
                         location, change = mutation
                         link = links[location]
@@ -340,19 +485,48 @@ class PrivateBoundary(unittest.TestCase):
                         elif change == 'replace':
                             link.write_bytes(b'replacement')
                         elif change == 'resolve':
-                            target.mkdir()
+                            if cyclic:
+                                peers[location].unlink()
+                                peers[location].write_bytes(b'repaired referent')
+                            else:
+                                target.mkdir()
+                        elif change == 'live_bytes':
+                            live_targets[location].write_bytes(b'mutated referent')
+                        elif change == 'live_cycle':
+                            live_targets[location].unlink()
+                            live_targets[location].symlink_to(links[location])
                         elif change == 'bytes':
                             regular = (shared / 'Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root'
                                        if location == 'shared' else Path(external_paths[location]) / 'regular.bin')
                             regular.write_bytes(b'mutated')
-                    return 1
+                    return 0 if artifact_failure or completed_child else 1
                 child = patched(owner.ab.debug, 'run_analysis', side_effect=failed_child)
+                if artifact_failure:
+                    patched(owner.ab, 'committed_identities', return_value={})
+                    patched(owner, 'verify_joint', side_effect=ValueError('synthetic joint gate failure'))
+                elif completed_child:
+                    patched(owner.ab, 'committed_identities', return_value={})
+                    patched(owner, 'verify_joint', return_value=([], {}, {
+                        s: {'input_identity': {}} for s in owner.SETTINGS}))
                 checkout = patched(owner.isolation, 'verify_preservation', return_value={})
                 installed = patched(owner.isolation, 'verify_ltsep_preservation', return_value={})
-                invalid = sigma_case in ('invalid', 'dangling')
+                delivery = patched(owner.isolation, 'deliver_evidence')
+                if preservation_failure:
+                    checkout.side_effect = ValueError('checkout preservation failure')
+                    installed.side_effect = ValueError('installed preservation failure')
+                invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure
+                role = 'sigma0_SIMC' if required_role == 'sigma0_SIMC' else 'pion_SIMC_' + required_role
                 reason = ('preservation_failed' if mutation else
-                          'required_external_input_missing:sigma0_SIMC' if invalid else 'analysis_failed')
-                with self.assertRaisesRegex(ValueError, reason):
+                          'required_external_input_missing:' + role if invalid else
+                          'synthetic joint gate failure' if artifact_failure else 'analysis_failed')
+                expected = ValueError
+                if sigma_case == 'cycle':
+                    # is_file may propagate ELOOP on some Python versions.
+                    expected = (ValueError, OSError, RuntimeError)
+                    reason = 'required_external_input_missing:|[Ss]ymlink|[Ss]ymbolic'
+                if preservation_failure:
+                    reason = 'preservation_failed'
+                with self.assertRaisesRegex(expected, reason):
                     owner.execute_gate(repo, shared, globus / 'new.zip', head)
                 inventory_call.assert_called_once()
                 self.assertEqual(inventory_call.call_args.args[3], sigma_env)
@@ -364,11 +538,28 @@ class PrivateBoundary(unittest.TestCase):
                     self.assertEqual(child_env[owner.ab.ENABLE_ENV], child_env[cap.ENABLE_ENV])
                     self.assertEqual({k: child_env[k] for k in sigma_env}, sigma_env)
                 collect.assert_not_called()
+                delivery.assert_not_called()
+                self.assertFalse((globus / 'new.zip').exists())
+                self.assertFalse(owner.ab.destinations(shared, globus / 'new.zip')['summary'].exists())
+                status = json.loads(owner.isolation.accepted.gate_status_path(shared, globus / 'new.zip').read_text())
+                self.assertEqual(status['status'], 'failed')
+                self.assertFalse(status['evidence_admissible'])
+                self.assertTrue(status['failure_reason'])
+                self.assertIn('execute_gate', status['failure_traceback'])
+                self.assertLessEqual(len(status['failure_traceback']), 8192)
+                if preflight_failure:
+                    self.assertEqual(status['stage'], 'source_preflight')
+                    self.assertFalse(status['analysis_started'])
+                    self.assertIn('fail_source_caller', status['failure_traceback'])
+                    self.assertEqual(status['failure_reason'], 'synthetic preflight denied')
+                    self.assertIn('ordinary_checkout:', status['preservation_failure_reason'])
+                    self.assertIn('installed_ltsep:', status['preservation_failure_reason'])
                 self.assertGreaterEqual(checkout.call_count, 1)
                 self.assertGreaterEqual(installed.call_count, 1)
             self.assertIn('analysis', cleaned)
             if not mutation:
-                self.assertEqual({k: v for k, v in owner.inventory(shared).items() if k != 'new.log'}, original)
+                excluded = {p.name for p in owner.ab.destinations(shared, globus / 'new.zip').values()}
+                self.assertEqual({k: v for k, v in owner.inventory(shared).items() if k not in excluded}, original)
                 self.assertFalse(target.exists())
             self.assertEqual((shared / 'new.log').is_file(), not invalid)
 

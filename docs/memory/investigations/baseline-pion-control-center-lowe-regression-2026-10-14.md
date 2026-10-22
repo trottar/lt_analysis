@@ -1254,3 +1254,74 @@ is nonblocking and deferred to the next checkpoint/milestone audit. No farm,
 ROOT/PyROOT, real-input preservation, physical-PDF or scientific acceptance.
 CURRENT owns the conditional one-acquisition NEXT after independent actual-diff
 review, user publication and pushed-state review; no automatic retry or command.
+
+### Matched-cohort cyclic-link preflight repair — October 22
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[single repair contract](../phases/kaonlt-pion-matched-cohort-preflight-symlink-loop-fix-2026-10-22-task-contract.md),
+local `test`/`origin/test` anchor `842dab7a957a9823a51dcb484a765b4d11c6d9c1`.
+RUNTIME VERIFIED only as attributed to the contract's supplied terminal report:
+the `144029` attempt failed on a historical cache-transfer trial symlink loop.
+Its status JSON/traceback was not supplied: exact farm caller/stage remains
+NOT VERIFIED. No accepted ZIP, matched event evidence or fresh A/B/C science
+result follows; this and the earlier missing-HeeP failure remain inadmissible.
+
+SOURCE VERIFIED: executing the audited old owner functions on local synthetic
+self, two-link and relative-ancestor cycles reproduces the failure in
+`inventory -> link_inventory -> Path.resolve(strict=True)`. Linux Python 3.12
+raises the reported `RuntimeError` form. Metadata resolution now catches only
+the specific `Symlink loop from ` RuntimeError prefix or `OSError(errno.ELOOP)`,
+retaining lexical inventory key, exact readlink literal and `cyclic_target=true`.
+It returns without another dereference. Existing missing-target records, live
+file/referent hashes, directory modes and non-following walk remain unchanged.
+CUTPATH/PARAMPATH retain both unresolved states for post-child/failure checks;
+shared output retains them in the existing whole-inventory equality barrier.
+Other resolution, readlink, permission and hash failures propagate. Owner failure
+status adds a traceback bounded to 16 frames/8192 characters; original failure
+reason and independent preservation exceptions remain authoritative.
+
+Remaining source-preflight dereference audit (all unchanged except the narrow
+metadata resolver above):
+
+| Caller / operation | Role and retained behavior |
+| --- | --- |
+| `execute_gate` repo/outdir/bundle-parent/shared/OUTPATH resolution; `inventory(root).is_dir`; external CUTPATH/PARAMPATH root checks | Required-authority boundaries and declared role roots; never classified as cyclic metadata inputs. |
+| `toolchain` executable resolution | Required-authority interpreter/backend identity. |
+| Source checks, `reached_resolver_callers` source reads/import discovery | Required-authority tracked source; no broad external-output traversal. |
+| `owned_worktree`/cleanup path resolution; `prepare_private_output` worktree/LTANAPATH/OUTPUT/VOLATILEPATH resolution and parent stat | Required-authority confinement, collisions and permissions. |
+| Installed import/package resolution, package/config hashes, `tree_bytes`, overlay copying/probes | Required-authority package/config identity; `tree_bytes` rejects package symlinks before hashing. |
+| `probe_private_callers`, `probe_paths`, resolver `probe`/`real`/`module_identity` and read-only probe hook | Required-authority callers, cwd, executable, modules, configs and stable/private path roles; cycles still fail. |
+| `external_symlink_preflight`, background/skim directory checks | Required-authority live SIMC/background links and no-op setup directories; cycles never become metadata exemptions. |
+| `stage_input_files` availability checks, strict `identity`, source reads/copies/stats; diamond candidate identity | Required-input data/dummy/SIMC/diamond files and original/private inode/hash provenance. |
+| `external_input_inventory.add`, private-input selection, runlist reads, configured Sigma0 and neutron/delta/sidis identity | Required-input checks remain strict; optional skim/PID absence decisions retain existing policy, not cycle input acceptance. |
+| `inventory` shared-output walk and CUTPATH/PARAMPATH walks through `link_inventory`; ordinary file stat/hash and directory stat | Broad-metadata: all three callers use the repaired resolver; no directory-symlink descent. Resolvable regular referents still hash strictly. |
+| `verify_external_inputs` unresolved equality / ordinary identity / optional absence; `verify_external_links` live-link resolution | Post-child/failure preservation: unresolved metadata rechecked, actual inputs/authority links strict. |
+
+No other unhandled broad-metadata cycle route was found in this owner's
+preflight. Literal targets do not prove nested physical trials. No trial/cache,
+HeeP, shared path, installed package, launcher, frozen delegate or scientific
+source was changed. Collection/provenance, observer dispatch, historical pins,
+private-copy science and all A/B/C mathematics remain unchanged.
+
+Local validation: WSL Python 3.12.3 runs 52 owner tests (35 matched-cohort,
+17 template-owner) with no skips. Windows Python 3.12.10 runs 85 related
+event/C/cohort/template tests with nine archival-input skips, plus 14 event-owner
+tests with no skips: 151 total, 142 passed, nine skipped. The WSL event-owner
+suite could not import NumPy and is unexecuted there; the Windows run supplies
+its actual result. No dependencies were installed. New cases cover both loop
+exceptions at every broad caller, old-source cycle reproduction/non-traversal,
+unchanged metadata reaching exactly one simulated child, removal/retarget/file
+replacement/repaired referents/new cycles, regular/live-link byte changes,
+all four required Sigma0/neutron/delta/sidis cycle failures before child,
+real failure JSON, independent preservation failures, and no collection or
+delivery after failed child/preflight/artifact/preservation gates. The completed-child
+fixture initially failed on incomplete completion/source fixtures; those were
+corrected without weakening owner gates. Syntax, diff, manifest/bootstrap and
+health receipts accompany the review bundle. CURRENT's pre-existing soft-size
+warning is nonblocking, batched at the next checkpoint/milestone audit.
+
+NEXT remains one guarded fresh Center/Left acquisition after independent actual
+diff acceptance, user publication and pushed-state synchronization, then accepted
+owner/provenance/ZIP review and fresh offline seven-strength C/event MM/variance
+science. No farm command/run, ROOT acceptance, real-input preservation, physical
+PDF acceptance, strength selection or production promotion is established here.

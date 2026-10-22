@@ -31,14 +31,14 @@ at its interrupted position.
 ## Current Work Item
 
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
-[dangling-link preflight repair](phases/kaonlt-pion-matched-cohort-preflight-dangling-link-fix-2026-10-22-task-contract.md)
-at `test` anchor `30e029c744ca2638733a1f4c070a71968641f157`.
-Supplied October 22 farm status: `BLOCKED` at `source_preflight`, missing
-HeeP target, `analysis_started=false`, `evidence_admissible=false`.
-SOURCE VERIFIED: broad inventory reproduced this exception; missing-target
-links now remain metadata under before/after preservation checks. The actual
-farm inventory caller is NOT VERIFIED without a traceback. Required inputs
-remain strict; no shared link/directory repair or science change.
+[cyclic-link preflight repair](phases/kaonlt-pion-matched-cohort-preflight-symlink-loop-fix-2026-10-22-task-contract.md)
+at `test` anchor `842dab7a957a9823a51dcb484a765b4d11c6d9c1`.
+Supplied October 22 `144029` terminal failure reports a historical-cache cycle;
+it and the earlier missing-HeeP preflight failure are inadmissible event evidence.
+The current farm caller/stage is NOT VERIFIED without its status/traceback.
+SOURCE VERIFIED: old broad inventory reproduces the loop; both Python loop
+exception forms now retain literal-target metadata and preservation checks.
+Required inputs stay strict; no shared path repair or science change.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -50,22 +50,18 @@ joins/closure must pass before delivery. Launchers, isolation helpers, installed
 `ltsep` and production source remain unchanged. Local synthetic checks grant
 no farm readiness or scientific acceptance.
 
-The native input writer matters: frozen `shift_prep` replaces `MM_shift` and
-`t_shift` branches in ROOT containers. It operates on private copies here.
-Original shared-file hashes/inodes and private runtime-container identities are
-separate provenance roles; fresh A/B and packets must agree on the latter.
-Source/fake-tree checks are not real ROOT clone/update validation. Current farm
-inputs and preservation have NOT been independently verified in this chat.
+Frozen `shift_prep` writes `MM_shift`/`t_shift` only in private copies. Original
+hashes/inodes and runtime-container identities remain separate; fresh A/B and
+packets must match the latter. Real ROOT writes, current farm inputs and
+preservation remain NOT VERIFIED here.
 See the [October 22 source checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#matched-cohort-private-acquisition-source-checkpoint--october-22).
 
-The same CLI's explicit offline mode consumes a verified new-cohort bundle,
-reconstructs all six B controls before seven fresh C strengths per parent, and
-replays signed events with distinct A and fixed protected-applied `K_B` for B/C.
-It retains original/runtime hashes, all events/cut masks, templates, staged
-priors, fits/model IDs, source/phi-child closure, full/narrow-MM statistics,
-raw-ratio versus production conventions, tails and paired fixed-weight errors.
-The compact six-parent JSON/PDF is detached. Historical archive/CLI pins remain
-strict and unchanged; historical C is never substituted for a fresh fit.
+The same CLI's explicit offline mode verifies the new bundle, reconstructs six
+B controls, fits seven fresh C strengths per parent and replays signed events
+with distinct A and fixed protected-applied `K_B` for B/C. Original/runtime
+identities, event/cut/template/fit provenance, source/phi-child closure, MM/tail
+statistics, production conventions and paired fixed-weight errors remain in the
+detached six-parent JSON/PDF. Historical pins stay strict; no historical C reuse.
 
 No matched farm bundle or fresh physical C result is available here. Historical
 A/B/C remains immutable and cohort-specific. The earlier failed capture at

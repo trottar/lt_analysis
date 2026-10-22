@@ -12,6 +12,7 @@ from contextlib import redirect_stdout
 from copy import deepcopy
 import hashlib
 import glob
+import errno
 import json
 import os
 from pathlib import Path
@@ -22,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import uuid
 import zipfile
 
@@ -111,12 +113,23 @@ def identity(path):
 
 
 def link_inventory(path):
-    """Missing referents are preservation metadata, never available inputs."""
+    """Missing/cyclic referents are metadata, never available inputs."""
     record = {"link": os.readlink(path)}
     try:
         record["resolved_path"] = str(path.resolve(strict=True))
     except FileNotFoundError:
         record["missing_target"] = True
+        return record
+    except OSError as exc:
+        if exc.errno != errno.ELOOP:
+            raise
+        record["cyclic_target"] = True
+        return record
+    except RuntimeError as exc:
+        # pathlib before Python 3.13 translates ELOOP into this specific form.
+        if not str(exc).startswith("Symlink loop from "):
+            raise
+        record["cyclic_target"] = True
         return record
     if path.is_file():
         record["referent"] = identity(path)
@@ -387,7 +400,7 @@ def external_input_inventory(worktree, paths, private, env):
         if root.is_dir():
             for name, item in inventory(root).items():
                 p = root / name
-                if item.get('missing_target'):
+                if item.get('missing_target') or item.get('cyclic_target'):
                     records[str(p)] = {'role': role, 'unresolved_link': item}
                 elif p.is_file():
                     add(p, role)
@@ -753,7 +766,9 @@ def execute_gate(repo, outdir, output, source_commit):
         with destinations['summary'].open('xb') as stream:
             stream.write(capture.encoded(summary))
     except Exception as exc:
-        status.update(status='failed', failure_reason=str(exc), evidence_admissible=False)
+        status.update(status='failed', failure_reason=str(exc), evidence_admissible=False,
+                      failure_traceback=''.join(traceback.format_exception(type(exc), exc, exc.__traceback__,
+                                                                         limit=16))[:8192])
         raise
     finally:
         checks = [('ordinary_checkout', lambda: isolation.verify_preservation(repo, before))]
