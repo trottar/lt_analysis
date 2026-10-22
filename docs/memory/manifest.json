@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 14045,
+      "bytes": 14931,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "674e41a1847808e52f56b7c63eabec2f4c7106250645e5d6d244ec8010f5a9fb"
+      "sha256": "9b0b34edc30872ff265ba98c8df6dccc0c507764c77350fb4ac463c920afd6d2"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 64693,
+      "bytes": 69042,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "60fbe29e8adfa6437b8f6b9635ba2194f28079c8fe9db5c5105b4927e9b2ea57"
+      "sha256": "775a0093c87daff3291645c6f2522eb7e48adb48bcfcca3ade307fc6af881514"
     },
     {
       "bytes": 23507,
@@ -1289,6 +1289,11 @@
       "bytes": 15957,
       "path": "docs/memory/phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md",
       "sha256": "bda621e2fcbeac59a113d1c5b270c951e30cb8addb31f2de92e62d3c67d7c970"
+    },
+    {
+      "bytes": 8509,
+      "path": "docs/memory/phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md",
+      "sha256": "a8a5350149fd249d4a3d8fdc5dcf2731431bad96a0f63559d7ecc807705bbbb1"
     },
     {
       "bytes": 12579,

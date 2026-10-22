@@ -268,6 +268,16 @@ def observe(hist, inp, t_edges, phi_edges, outpath):
     """Runtime adapter called only after the single opt-in guard."""
     if os.environ.get(ENABLE_ENV) != "1":
         return
+    from background_config import (
+        BG_OPT_PREPASS_CONTEXT, resolve_particle_subtraction_mode,
+        resolve_pion_subtraction_scope,
+    )
+    if (bool(inp.get("bg_opt_prepass_mode"))
+            or str(inp.get("analysis_subtraction_context", "")).strip() == BG_OPT_PREPASS_CONTEXT
+            or str(inp.get("ParticleType", "")).strip().lower() != "kaon"
+            or resolve_particle_subtraction_mode(inp) != "simc_shape_components"
+            or resolve_pion_subtraction_scope(inp) != "t_bin"):
+        return
     if (str(inp.get("Q2")), str(inp.get("W")), str(inp.get("ParticleType")), str(inp.get("EPSSET"))) not in (
             ("4p4", "2p74", "kaon", "low"), ("4p4", "2p74", "kaon", "lowe")) or hist.get("phi_setting") not in ("Center", "Left"):
         return

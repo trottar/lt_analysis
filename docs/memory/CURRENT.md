@@ -30,7 +30,18 @@ at its interrupted position.
 
 ## Current Work Item
 
-`ACTIVE`: independent event-level bias-variance evidence before any adaptive
+`BLOCKED`: the first owned event-capture farm child at `04f1ec403a9555634e61c229aa347cb76d0c78d3`
+failed before packet/collection checks: the observer ran during
+`bg_optimizer_pre_parent` and raised `accepted_AB_input_identity_mismatch:Center:data`.
+The [prepass boundary repair](phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md)
+is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local dispatch now requires
+authoritative kaon component/t-bin application and excludes prepass flag/context
+before diagnostic import. Accepted A/B hashes and byte pins remain strict;
+a canonical-stage mismatch is still possible and must stop capture/replay.
+The failed attempt supplies no physical C event evidence. Independent
+actual-diff review is the current gate; no automatic rerun.
+
+The scientific objective remains independent event-level bias-variance evidence before any adaptive
 lambda selector, under the [October 21 event-validation contract](phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md).
 The detached six-parent, seven-strength C feasibility comparison has been
 numerically and visually reviewed per that supplied contract; no strength is
@@ -184,8 +195,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — after independent ChatGPT actual-diff acceptance, user publication and
-pushed-state synchronization, one owned Center/Left lowe six-parent event-record
+NEXT — after independent ChatGPT actual-diff acceptance of the boundary repair,
+user publication, pushed-state synchronization and farm-readiness checks, one
+new-attempt-owned Center/Left lowe six-parent event-record
 capture gate, followed by the tracked offline replay CLI against the accepted
 original `c_review_candidate_c.json` with its independently reviewed hash.
 The capture owner emits two verified packets and a collector ZIP plus receipts;

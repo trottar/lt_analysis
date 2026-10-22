@@ -13,6 +13,8 @@ import tempfile
 import unittest
 import zipfile
 from unittest.mock import patch
+from unittest.mock import Mock
+from types import SimpleNamespace
 
 from testing import pion_local_t_event_validation_capture as cap
 from testing import pion_local_t_event_validation_replay as replay
@@ -133,6 +135,7 @@ class EnabledObserverTests(unittest.TestCase):
         for role,path in self.paths.items(): path.write_bytes(("synthetic backing "+role).encode())
         self.identities = {role:cap.file_identity(path) for role,path in self.paths.items()}
         self.inp = {"Q2":"4p4","W":"2p74","ParticleType":"kaon","EPSSET":"low",
+                    "particle_subtraction_mode":"simc_shape_components","pion_subtraction_scope":"t_bin",
                     "particle_subtraction_weight_denom_floor":2.e-8,
                     "particle_subtraction_weight_clip_min":.02,"particle_subtraction_weight_clip_max":7.5}
         # Resolve real source modules, not mocked production policy functions.
@@ -168,6 +171,81 @@ class EnabledObserverTests(unittest.TestCase):
         cap.observe(hist,self.inp,packet["t_edges"],packet["phi_edges"],self.outdir)
         path=self.outdir/(hist["phi_setting"]+"_kaon_Q4p4W2p74_lowe_pion-local-t-events.json")
         return replay.strict_json(path.read_bytes())
+
+    def dispatch(self, hist, packet, inp, *, forbid_io=False):
+        # Execute the actual post-bin_data cache assignments and dispatch AST,
+        # without importing ROOT or running the scientific yield calculation.
+        import background_config as config
+        tree=ast.parse((ROOT/"src/binning/calculate_yield.py").read_text())
+        function=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=="calculate_yield_data")
+        index=next(i for i,n in enumerate(function.body) if isinstance(n,ast.If) and cap.ENABLE_ENV in ast.unparse(n.test))
+        self.assertIn("validate_frozen_t_bin_pion_parent_collection", ast.unparse(ast.Module(body=function.body[:index],type_ignores=[])))
+        code=compile(ast.Module(body=function.body[index-2:index+1],type_ignores=[]),str(ROOT/"src/binning/calculate_yield.py"),"exec")
+        namespace=dict(os=os,__file__=str(ROOT/"src/binning/calculate_yield.py"),hist=hist,inpDict=inp,
+                       t_bins=packet["t_edges"],phi_bins=packet["phi_edges"],OUTPATH=self.outdir,
+                       ave_event_cache=hist["_yield_data_event_cache"],sub_event_cache=hist["_yield_sub_event_cache"],
+                       BG_OPT_PREPASS_CONTEXT=config.BG_OPT_PREPASS_CONTEXT,
+                       resolve_particle_subtraction_mode=config.resolve_particle_subtraction_mode,
+                       resolve_pion_subtraction_scope=config.resolve_pion_subtraction_scope)
+        if forbid_io:
+            with patch.object(Path,"open",side_effect=AssertionError("unexpected file IO")), patch(
+                    "builtins.open",side_effect=AssertionError("unexpected file IO")):
+                exec(code,namespace)
+        else:
+            exec(code,namespace)
+
+    def test_prepass_dispatch_and_standalone_boundary_have_no_diagnostic_io(self):
+        import background_config as config
+        hist,packet=self.runtime_hist()
+        from pion_background_chain_audit import digest
+        before=digest(hist)
+        cases=[config.build_bg_optimization_prepass_config(self.inp),
+               dict(self.inp,bg_opt_prepass_mode=True),
+               dict(self.inp,analysis_subtraction_context=config.BG_OPT_PREPASS_CONTEXT),
+               dict(self.inp,particle_subtraction_mode="single_scale"),
+               dict(self.inp,pion_subtraction_scope="setting_wide"),dict(self.inp,ParticleType="pion")]
+        for inp in cases:
+            original=deepcopy(inp)
+            with self.subTest(inp=inp), patch("importlib.util.spec_from_file_location") as loader, patch.object(
+                    cap,"file_identity",side_effect=AssertionError("unexpected hashing")) as hashing, patch.object(
+                    Path,"open",side_effect=AssertionError("unexpected file IO")):
+                cap.observe(hist,inp,packet["t_edges"],packet["phi_edges"],self.outdir)
+                hashing.assert_not_called();loader.assert_not_called()
+            with patch("importlib.util.spec_from_file_location") as loader:
+                for _ in range(3): self.dispatch(hist,packet,inp,forbid_io=True)
+                loader.assert_not_called()
+            self.assertEqual(inp,original)
+        self.assertEqual(digest(hist),before)
+        self.assertFalse(list(self.outdir.iterdir()))
+
+    def test_authoritative_dispatch_once_per_setting_and_disabled_equivalence(self):
+        from pion_background_chain_audit import digest
+        for setting in ("Center","Left"):
+            hist,packet=self.runtime_hist(setting,trees=False);before=digest(hist)
+            call=Mock(wraps=cap.observe)
+            spec=SimpleNamespace(loader=SimpleNamespace(exec_module=lambda module:None))
+            with patch("importlib.util.spec_from_file_location",return_value=spec) as loader, patch(
+                    "importlib.util.module_from_spec",return_value=SimpleNamespace(observe=call)):
+                with patch.dict(os.environ,{cap.ENABLE_ENV:"0"}):self.dispatch(hist,packet,self.inp)
+                loader.assert_not_called();call.assert_not_called()
+                self.assertEqual(digest(hist),before)
+                self.dispatch(hist,packet,self.inp)
+                loader.assert_called_once();call.assert_called_once()
+            self.assertEqual(digest(hist),before)
+            result=replay.strict_json((self.outdir/(setting+"_kaon_Q4p4W2p74_lowe_pion-local-t-events.json")).read_bytes())
+            self.assertEqual(result["setting"],setting)
+
+    def test_eligible_missing_or_incoherent_parents_and_caches_fail(self):
+        mutations=[lambda h:h.pop("_pion_t_bin_parent_results"),
+                   lambda h:h["_pion_t_bin_parent_results"][0].pop("pion_parent_id"),
+                   lambda h:h.pop("_authoritative_pion_control_source_cache"),
+                   lambda h:h.pop("_yield_data_event_cache"),
+                   lambda h:h["_yield_sub_event_cache"]["prompt"]["adj_MM"].__setitem__(0,.9)]
+        for mutate in mutations:
+            hist,packet=self.runtime_hist();mutate(hist)
+            with self.subTest(mutate=mutate),self.assertRaises((KeyError,ValueError)):
+                self.observe(hist,packet)
+            self.assertFalse(list(self.outdir.iterdir()))
 
     def test_enabled_observer_uses_backing_files_and_real_resolved_policy(self):
         from pion_background_chain_audit import digest as source_digest
@@ -355,6 +433,9 @@ class EventTests(unittest.TestCase):
         self.assertFalse(any(isinstance(n,(ast.Import,ast.ImportFrom)) and "pion_local_t_event_validation" in ast.unparse(n)
                              for n in tree.body))
         original=ast.parse(subprocess.check_output(["git","show","HEAD:src/binning/calculate_yield.py"],cwd=ROOT).decode())
+        original_function=next(n for n in original.body if isinstance(n,ast.FunctionDef) and n.name=="calculate_yield_data")
+        original_function.body=[n for n in original_function.body if not (
+            isinstance(n,ast.If) and cap.ENABLE_ENV in ast.unparse(n.test))]
         function.body.remove(guard)
         self.assertEqual(ast.dump(tree),ast.dump(original))
 

@@ -4066,8 +4066,17 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     )
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
-    if os.environ.get("LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION") == "1":
+    if (
+        os.environ.get("LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION") == "1"
+        and not bool(inpDict.get("bg_opt_prepass_mode"))
+        and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT
+        and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
+        and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+    ):
         # Detached scalar observer; default path performs no diagnostic import.
+        # The frozen-parent collection was validated above. Prepass candidates
+        # must never import the observer, hash inputs or write a packet.
         import importlib.util
         from pathlib import Path
         observer_path = Path(__file__).resolve().parents[2] / "testing" / "pion_local_t_event_validation_capture.py"

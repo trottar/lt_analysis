@@ -978,3 +978,67 @@ acceptance remain NOT VERIFIED. Independent actual-diff review is still the
 current workflow gate; user publication and pushed-state review precede the
 same owned six-parent capture/replay scientific NEXT. No commit, push, farm
 execution, new contract, selector, model choice or production change follows.
+
+### Event-capture prepass boundary failure and repair — October 21
+
+`BLOCKED` at the first farm child for source
+`04f1ec403a9555634e61c229aa347cb76d0c78d3`. RUNTIME VERIFIED only as
+user-supplied failure evidence transcribed in the
+[repair contract](../phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md):
+owner `analysis_returncode=1`, `stage=completion_markers`,
+`failure_reason=analysis_failed`; packet and collection checks not reached.
+Ordinary-worktree and installed-ltsep preservation passed per that receipt.
+The child log identifies `bg_optimizer_pre_parent`, scalar `single_scale`,
+no required parent/free component fit, then
+`accepted_AB_input_identity_mismatch:Center:data` from the observer. Failed
+outputs/receipts remain immutable and inadmissible as physical C event evidence.
+
+SOURCE VERIFIED: optimizer candidates legitimately calculate preliminary yields;
+the opt-in-only hook incorrectly admitted that pre-parent stage. The narrow
+repair requires kaon `simc_shape_components`/`t_bin` and excludes either prepass
+flag or context before diagnostic import, hashing or output. The standalone
+observer enforces the same boundary. Existing frozen-parent validation and cache
+population remain unchanged; eligible missing/incoherent parents or caches fail
+rather than disappearing. All accepted A/B input SHA-256/byte pins and their
+fail-closed comparison remain unchanged. The mismatch is not established to be
+solely a prepass effect: a canonical mismatch must stop for independent
+scientific/provenance adjudication, with no override or replay.
+
+SOURCE VERIFIED file-identity derivation: `rand_sub.py` obtains `OUTPATH` from
+its existing ltsep Root configuration, and receives `InDATAFilename` and
+`InDUMMYFilename` through the main input dictionary (CLI arguments 6 and 7).
+For each Center/Left setting, the exact input paths are constructed as
+`OUTPATH / (phi_setting + "_" + ParticleType + "_" + InDATAFilename + ".root")`
+and the corresponding `InDUMMYFilename` expression. `open_root_file` returns
+`TFile.Open`; those handles are retained in `hist["InFile_DATA"]` and
+`hist["InFile_DUMMY"]`. Existing `GetFile`/`GetCurrentFile` resolution is
+preserved, with no tree-name fallback. An exact read-only check can use
+`file_identity` and `verify_accepted_input_identity` on those two derived paths
+per setting, given the actual active ltsep path dictionary, exact invocation
+filenames and readable unchanged farm files. Those external inputs are not
+available locally; current farm hashes/bytes are NOT VERIFIED. No farm path,
+pin replacement or physical-equivalence assumption is introduced.
+
+Local repair is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; validation
+receipts below are source/synthetic evidence only. Production physics, optimizer,
+parent fits, yields and published owner/profile/collector remain frozen.
+CURRENT alone retains the same six-parent capture and detached A/B/C replay
+NEXT, conditional on independent actual-diff review, user publication,
+pushed-state synchronization and readiness checks. No farm command or automatic
+retry is authorized; no lambda selection or production promotion.
+
+Local validation receipt: 170 tests ran across capture/replay, capture owner,
+optimizer prepass, frozen-parent integrity, pre-particle-subtraction binning,
+baseline-stage audit and existing C/A/B comparison/owner suites: 161 passed,
+nine skipped (two original-artifact controls not supplied and seven ROOT-dependent
+checks). After tightening the test's file-I/O tripwire, the affected 28-test suite
+was rerun: 26 passed, the same two original-artifact controls skipped. Three
+changed Python modules compile. Actual dispatch AST tests execute both normal
+cache assignments and the guard: repeated prepass flag/context/scalar candidates
+perform no diagnostic import or file I/O; canonical Center/Left dispatch once
+per setting and preserve the source handles, caches and parent histograms.
+Canonical wrong data/dummy identity still raises its precise invariant before
+parent serialization. Defective eligible parent/cache inputs fail with no
+packet. Disabled dispatch is equivalent. These checks establish no ROOT/farm
+integration, fresh event acceptance or scientific preference. CURRENT's soft-size
+warning remains nonblocking, scheduled for the next checkpoint/milestone audit.
