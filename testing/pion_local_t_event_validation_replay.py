@@ -52,20 +52,35 @@ def strict_json(raw):
     return result
 
 
-def moments(weights):
+def moments(weights, *, include_tails=False):
     positive = math.fsum(w for w in weights if w > 0)
     negative = math.fsum(w for w in weights if w < 0)
     signed = math.fsum(weights)
     absolute = math.fsum(abs(w) for w in weights)
     sumw2 = math.fsum(w*w for w in weights)
-    return {"count": len(weights), "signed": signed, "absolute": absolute, "positive": positive,
-            "negative": negative, "sumw2": sumw2, "fixed_weight_error": math.sqrt(sumw2),
-            "effective_absolute_support": absolute**2/sumw2 if sumw2 else 0.,
-            "effective_signed_support": signed**2/sumw2 if sumw2 else 0.,
-            "maximum_absolute_contribution": max(map(abs, weights), default=0.)}
+    result = {"count": len(weights), "signed": signed, "absolute": absolute, "positive": positive,
+              "negative": negative, "sumw2": sumw2, "fixed_weight_error": math.sqrt(sumw2),
+              "effective_absolute_support": absolute**2/sumw2 if sumw2 else 0.,
+              "effective_signed_support": signed**2/sumw2 if sumw2 else 0.,
+              "maximum_absolute_contribution": max(map(abs, weights), default=0.)}
+    if not include_tails:
+        return result
+    ordered = sorted(abs(w) for w in weights)
+    def quantile(fraction):
+        if not ordered:
+            return 0.
+        index = (len(ordered)-1)*fraction
+        lower = int(index)
+        return ordered[lower] + (ordered[min(lower+1, len(ordered)-1)]-ordered[lower])*(index-lower)
+    largest = ordered[-max(1, math.ceil(.01*len(ordered))):] if ordered else []
+    result.update(absolute_event_contribution_quantiles={str(p): quantile(p) for p in (.5, .9, .95, .99, .999)},
+            largest_one_percent_absolute_fraction=math.fsum(largest)/absolute if absolute else 0.,
+            largest_one_percent_Sumw2_fraction=math.fsum(w*w for w in largest)/sumw2 if sumw2 else 0.,
+            tail_policy="absolute signed-source contributions; linear unweighted event quantiles; ceil(1% of records)")
+    return result
 
 
-def spectrum(rows, edges, transfer=None):
+def spectrum(rows, edges, transfer=None, *, include_tails=False):
     """ROOT bin indexing; flows explicitly retained, transfer flow weights zero."""
     bins = [[] for _ in range(len(edges)+1)]
     for r in rows:
@@ -76,23 +91,23 @@ def spectrum(rows, edges, transfer=None):
             w *= transfer[i] if transfer[i] is not None else 0.
         require(math.isfinite(w), "nonfinite_application")
         bins[i].append(w)
-    cells = [moments(weights) for weights in bins]
+    cells = [moments(weights, include_tails=include_tails) for weights in bins]
     result = {k:[cell[k] for cell in cells] for k in cells[0]}
     result["domains"] = {}
     centers = [(a+b)/2 for a,b in zip(edges,edges[1:])]
     for name, window in DOMAINS.items():
         ix = [i+1 for i,x in enumerate(centers) if window is None or window[0] <= x <= window[1]]
-        result["domains"][name] = moments([w for i in ix for w in bins[i]])
+        result["domains"][name] = moments([w for i in ix for w in bins[i]], include_tails=include_tails)
     result["window_policy"] = "inclusive normal-bin centers; flow bins excluded from window totals"
     return result
 
 
-def split_spectra(rows, edges, weights=None):
-    parent = spectrum(rows, edges, weights)
-    sources = {s: spectrum([r for r in rows if r["source_label"] == s], edges, weights) for s in capture.SOURCES}
-    children = {str(pi):spectrum([r for r in rows if r["phi_index"] == pi], edges, weights)
+def split_spectra(rows, edges, weights=None, *, include_tails=False):
+    parent = spectrum(rows, edges, weights, include_tails=include_tails)
+    sources = {s: spectrum([r for r in rows if r["source_label"] == s], edges, weights, include_tails=include_tails) for s in capture.SOURCES}
+    children = {str(pi):spectrum([r for r in rows if r["phi_index"] == pi], edges, weights, include_tails=include_tails)
                 for pi in sorted({r["phi_index"] for r in rows if r["phi_index"] is not None})}
-    outside = spectrum([r for r in rows if r["phi_index"] is None], edges, weights)
+    outside = spectrum([r for r in rows if r["phi_index"] is None], edges, weights, include_tails=include_tails)
     for parts in (list(sources.values()), [*children.values(),outside]):
         for key in ("signed", "absolute", "positive", "negative", "sumw2", "count"):
             require(all(math.isclose(v, math.fsum(p[key][i] for p in parts), rel_tol=1e-11, abs_tol=1e-12)
@@ -115,20 +130,31 @@ def fold_report(events):
     return result
 
 
-def validate_candidate(candidate):
+def validate_candidate(candidate, *, matched_authority=None):
     require(candidate.get("schema_version") == c.SCHEMA and candidate.get("status") == "available"
             and candidate.get("inputs_unchanged") is True and candidate.get("diagnostic_only") is True
             and candidate.get("production_applied") is False and candidate.get("scientifically_accepted") is False,
             "accepted_C_schema_or_authority")
-    require(candidate.get("source_HEAD_of_input") == c.SOURCE and digest(candidate.get("policy")) == digest(c.POLICY), "accepted_C_policy")
+    require(candidate.get("source_HEAD_of_input") == (c.SOURCE if matched_authority is None else matched_authority['source_HEAD'])
+            and digest(candidate.get("policy")) == digest(c.POLICY), "accepted_C_policy")
     require(len(candidate.get("parents",[])) == 6
             and {(p["setting"],p["t_bin"]) for p in candidate["parents"]} == {(s,t) for s in c.SETTINGS for t in (1,2,3)}, "six_C_parents")
-    for s in c.SETTINGS:
-        require(candidate["provenance"][s]["sha256"] == ACCEPTED_AB[s], "original_AB_identity")
+    if matched_authority is None:
+        require('cohort_authority' not in candidate, 'matched_candidate_requires_explicit_mode')
+        for s in c.SETTINGS:
+            require(candidate["provenance"][s]["sha256"] == ACCEPTED_AB[s], "original_AB_identity")
+    else:
+        require(candidate.get('cohort_authority') == matched_authority, 'matched_C_authority_identity')
     for row in candidate["parents"]:
         c.validate_parent(row["A_B_unchanged"])
         require([v["lambda"] for v in row["C"]] == list(c.LAMBDAS), "seven_predeclared_strengths")
         require(all(v.get("status") == "available" and v.get("selected") is False for v in row["C"]), "unavailable_or_selected_C")
+        if matched_authority is not None:
+            for fit in row['C']:
+                expected = c.matched_fit_identity(fit, matched_authority, candidate['provenance'], row['setting'],
+                                                   row['A_B_unchanged'], candidate['implementation_sha256'])
+                require(fit.get('fit_identity') == expected and fit.get('model_identity') ==
+                        digest([expected, fit['model'], row['fixed_K_B']]), 'matched_fit_or_model_identity')
         edges = row["A_B_unchanged"]["frozen_inputs"]["pion"]["edges"]
         k = row["fixed_K_B"]
         require(k == row["A_B_unchanged"]["candidate_B"]["H_kaon_pion_bg_fit_total_refined"]["values"], "fixed_protected_K_B")
@@ -147,9 +173,10 @@ def validate_candidate(candidate):
     return candidate
 
 
-def replay(packets, candidate, *, expected_head):
+def replay(packets, candidate, *, expected_head, matched_authority=None):
     before = digest([packets,candidate])
-    validate_candidate(candidate)
+    detailed = matched_authority is not None
+    validate_candidate(candidate, matched_authority=matched_authority)
     require(set(packets) == set(c.SETTINGS), "both_settings_required")
     output = {"schema_version": "pion_local_t_event_validation_replay/v1", "diagnostic_only": True,
               "production_applied": False, "scientifically_accepted": False, "selected_lambda": None,
@@ -158,6 +185,16 @@ def replay(packets, candidate, *, expected_head):
         capture.validate_packet(packet)
         require(packet["source_HEAD"] == expected_head, "capture_source_HEAD_mismatch")
         require(packet["setting"] == s, "wrong_setting")
+        if matched_authority is not None:
+            auth = packet.get('cohort_authority', {})
+            expected_inputs = matched_authority['inputs'][s]
+            if matched_authority.get('private_input_policy') == 'frozen_shiftprep_private_copy':
+                require(auth.get('original_input_identity') == expected_inputs, 'matched_replay_original_inputs')
+                expected_inputs = candidate['provenance'][s]['runtime_input_identity']
+                require(auth.get('runtime_input_identity') == expected_inputs, 'matched_replay_runtime_inputs')
+            require(auth.get('mode') == 'matched_cohort' and auth.get('manifest_sha256') == digest(matched_authority)
+                    and auth.get('attempt_id') == matched_authority['attempt_id']
+                    and packet['input_identity'] == expected_inputs, 'matched_replay_authority')
         metadata = candidate["input_metadata"][s]
         require(packet["t_edges"] == metadata["canonical_t_edges"] and packet["phi_edges"] == metadata["canonical_phi_edges"], "canonical_edges_mismatch")
         for role in ("data", "dummy"):
@@ -177,9 +214,22 @@ def replay(packets, candidate, *, expected_head):
                 require(parent[key] == p["frozen_inputs"][side], "frozen_parent_input_mismatch")
             edges = p["frozen_inputs"]["pion"]["edges"]
             record = {"setting": s, "t_bin": ti+1, "edges": edges, "populations": {}, "models": {}, "support_failures": []}
+            if detailed:
+                record['pion_fit_models'] = {'A': p['baseline_A']['H_pion_fit_total_refined']['values'],
+                                             'B': p['candidate_B']['H_pion_fit_total_refined']['values']}
+                record['pion_fit_models'].update({'C_' + format(v['lambda'], 'g'): v['model'] for v in row['C']})
+                record['kaon_fit_models'] = {'A': p['baseline_A']['H_kaon_pion_bg_fit_total_refined']['values'],
+                                             'B_C': row['fixed_K_B']}
+                fit_bins = c.problem(p)['ix'].tolist() if matched_authority is not None else []
+                if fit_bins:
+                    observed_fit = p['frozen_inputs']['pion']
+                    record['common_fit_bins'] = fit_bins
+                    record['descriptive_data_chi2'] = {
+                        name: math.fsum((observed_fit['values'][i] - model[i])**2 / observed_fit['stored_sumw2'][i]
+                                        for i in fit_bins) for name, model in record['pion_fit_models'].items()}
             for population in ("pion","kaon"):
                 rows = [r for r in packet["events"][population] if r["t_index"] == ti]
-                record["populations"][population] = {cut:split_spectra([r for r in rows if r[cut]],edges) for cut in ("nommcuts","allcuts")}
+                record["populations"][population] = {cut:split_spectra([r for r in rows if r[cut]],edges,include_tails=detailed) for cut in ("nommcuts","allcuts")}
             # The pion parent uses all phi, including explicit outside-acceptance rows.
             control = record["populations"]["pion"]["nommcuts"]["parent"]
             reference = p["frozen_inputs"]["pion"]
@@ -210,11 +260,35 @@ def replay(packets, candidate, *, expected_head):
                     "numerical_fit": "saved full-sample model; no fit performed",
                     "fit_quality": fit.get("data_chi2_ndf", "stored A/B diagnostics in original C input"),
                     "shape_deterioration": fit.get("shape_fit_worsened", "see original A/B diagnostics"),
-                    "application": {cut:split_spectra([r for r in rows if r[cut]],edges,ratio) for cut in ("nommcuts","allcuts")},
-                    "production_convention_application": {cut:split_spectra([r for r in rows if r[cut]],edges,physical) for cut in ("nommcuts","allcuts")}}
+                    "application": {cut:split_spectra([r for r in rows if r[cut]],edges,ratio,include_tails=detailed) for cut in ("nommcuts","allcuts")},
+                    "production_convention_application": {cut:split_spectra([r for r in rows if r[cut]],edges,physical,include_tails=detailed) for cut in ("nommcuts","allcuts")}}
+            if detailed:
+                for name, model in record['models'].items():
+                    reference = record['models']['B']['application']
+                    model['paired_difference_from_B'] = {}
+                    for label, key in (('ratio', 'weights'), ('production_convention', 'production_convention_weights')):
+                        delta = [a-b for a, b in zip(model[key], record['models']['B'][key])]
+                        model['paired_difference_from_B'][label] = {
+                            cut: split_spectra([r for r in rows if r[cut]], edges, delta, include_tails=True)
+                            for cut in ('nommcuts', 'allcuts')}
+                    model['paired_difference_uncertainty'] = 'same-event difference weights squared; fitted-parameter uncertainty unavailable'
+                    if matched_authority is not None:
+                        model['numerical_fit'] = ('fresh same-cohort C sweep upstream; this replay performs no fit'
+                                                  if name.startswith('C_') else 'fresh same-run A/B upstream; this replay performs no fit')
+                    model['descriptive_flags'] = {
+                        'fit_degradation': model['shape_deterioration'],
+                        'variance_amplification_domains': {cut: [domain for domain in DOMAINS
+                            if model['application'][cut]['parent']['domains'][domain]['sumw2'] >
+                               reference[cut]['parent']['domains'][domain]['sumw2'] and not math.isclose(
+                                   model['application'][cut]['parent']['domains'][domain]['sumw2'],
+                                   reference[cut]['parent']['domains'][domain]['sumw2'], rel_tol=1e-10, abs_tol=1e-14)]
+                            for cut in ('nommcuts', 'allcuts')},
+                        'interpretation': 'descriptive full-sample comparisons only; no accepted or selected strength'}
             output["parents"].append(record)
     require(digest([packets,candidate]) == before, "replay_input_mutation")
     output["inputs_unchanged"] = True
+    if matched_authority is not None:
+        output['cohort_authority_sha256'] = digest(matched_authority)
     return output
 
 

@@ -13,6 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import re
 import struct
 import sys
 import zipfile
@@ -136,8 +137,10 @@ def load_inputs(*, archive=None, center_json=None, left_json=None):
     return docs, provenance
 
 
-def validate_document(d, setting):
-    require(d.get("schema_version") == "pion_t_template_comparison/v1" and d.get("source_HEAD") == SOURCE,
+def validate_document(d, setting, *, matched_head=None):
+    expected_head = SOURCE if matched_head is None else matched_head
+    require(isinstance(expected_head, str) and re.fullmatch('[0-9a-f]{40}', expected_head) is not None and
+            d.get("schema_version") == "pion_t_template_comparison/v1" and d.get("source_HEAD") == expected_head,
             "JSON source/schema provenance differs")
     require(d.get("status") == "available" and d.get("diagnostic_only") is True
             and d.get("production_applied") is False and not d.get("source_identity_rejection_reasons"),
@@ -367,12 +370,21 @@ def fit_candidate(q, lam, b_control, normalization, *, max_nfev=None):
     return result
 
 
-def compare(docs, provenance):
+def matched_fit_identity(fit, authority, provenance, setting, parent, implementation_hash):
+    """Cohort-specific attempt identity, never a model-quality certificate."""
+    payload = {k: v for k, v in fit.items() if k not in ('fit_identity', 'model_identity')}
+    return digest({'cohort': digest(authority), 'AB_sha256': provenance[setting]['sha256'],
+                   'setting': setting, 't_bin_index': parent['t_bin_index'],
+                   'parent_fingerprint': parent['baseline_parent_fingerprint'],
+                   'policy_sha256': digest(POLICY), 'implementation_sha256': implementation_hash, 'fit': payload})
+
+
+def compare(docs, provenance, *, matched_authority=None):
     """All six numerical controls must pass before ANY positive-lambda fit."""
     before = digest(docs)
     prepared = []
     for s in SETTINGS:
-        validate_document(docs[s], s)
+        validate_document(docs[s], s, matched_head=None if matched_authority is None else matched_authority['source_HEAD'])
         for p in docs[s]["parents"]:
             q = problem(p)
             q["k_components"] = {n: histogram(p["candidate_B"]["H_kaon_fit_"+n+"_scaled_refined"])[1]
@@ -388,6 +400,24 @@ def compare(docs, provenance):
                   "canonical_t_edges", "canonical_phi_edges")} for s in SETTINGS},
               "versions": {"python": platform.python_version(), "numpy": np.__version__, "scipy": scipy.__version__},
               "implementation_sha256": sha(Path(__file__).read_bytes()), "parents": []}
+    if matched_authority is not None:
+        require(matched_authority.get('schema_version') == 'pion_matched_cohort_authority/v1'
+                and matched_authority.get('mode') == 'matched_cohort'
+                and set(matched_authority.get('inputs', {})) == set(SETTINGS)
+                and matched_authority.get('private_input_policy') in (None, 'frozen_shiftprep_private_copy'), 'matched_C_authority')
+        for s in SETTINGS:
+            require(isinstance(provenance[s].get('sha256'), str) and
+                    re.fullmatch('[0-9a-f]{64}', provenance[s]['sha256']) is not None, 'matched_C_AB_source_hash')
+            require(provenance[s]['canonical_json_sha256'] == digest(docs[s]), 'matched_C_AB_identity')
+            expected = matched_authority['inputs'][s]
+            if matched_authority.get('private_input_policy') == 'frozen_shiftprep_private_copy':
+                require(provenance[s]['original_input_identity'] == expected, 'matched_C_original_input_identity')
+                expected = provenance[s]['runtime_input_identity']
+            for role in ('data', 'dummy'):
+                require(all(docs[s]['original_analysis_input_identity'][role][k] == expected[role][k]
+                            for k in ('sha256', 'bytes')), 'matched_C_source_identity')
+        output['source_HEAD_of_input'] = matched_authority['source_HEAD']
+        output['cohort_authority'] = deepcopy(matched_authority)
     for s, p, q, r, receipt in prepared:
         baseline_model = histogram(p["candidate_B"]["H_pion_fit_total_refined"])[1]
         b_transfer = transfer_summary(q, baseline_model, q["k"])
@@ -403,6 +433,11 @@ def compare(docs, provenance):
         else:
             for lam in LAMBDAS:
                 candidate = fit_candidate(q, lam, r, risk if risk>0 else 1.)
+                if matched_authority is not None:
+                    candidate['fit_identity'] = matched_fit_identity(candidate, matched_authority, provenance,
+                                                                     s, p, output['implementation_sha256'])
+                    if 'model' in candidate:
+                        candidate['model_identity'] = digest([candidate['fit_identity'], candidate['model'], row['fixed_K_B']])
                 row["C"].append(candidate)
                 if candidate["status"] != "available":
                     output["status"] = candidate["status"]

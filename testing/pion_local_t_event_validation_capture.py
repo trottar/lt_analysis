@@ -12,6 +12,8 @@ import struct
 import subprocess
 
 ENABLE_ENV = "LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION"
+MATCHED_ENV = "LT_ANALYSIS_PION_MATCHED_COHORT_MANIFEST"
+MATCHED_HASH_ENV = "LT_ANALYSIS_PION_MATCHED_COHORT_SHA256"
 SCHEMA = "pion_local_t_event_validation_packet/v1"
 SOURCES = ("prompt", "rand", "dummy", "dummy_rand")
 # Hash/size projections from the accepted A/B JSONs at 6d13abb4681b938c56def2a1f455244b0880096c.
@@ -89,6 +91,69 @@ def verify_accepted_input_identity(identities, setting):
     for role in ("data", "dummy"):
         require(identities.get(role) == ACCEPTED_INPUT_IDENTITIES[setting][role],
                 "accepted_AB_input_identity_mismatch:" + setting + ":" + role)
+
+
+def matched_authority(root, outpath, setting, identities, parents, head):
+    """Separate owner-pinned mode; historical pins above are never replaced.
+
+    The owner writes the fresh manifest before launch and pins its bytes in the
+    child environment. Same-run A/B has already been emitted at the cuts stage.
+    Both settings/six parents are joined again by the owner before collection.
+    """
+    manifest_path = Path(os.environ[MATCHED_ENV])
+    require(manifest_path.is_file() and not manifest_path.is_symlink(), 'matched_manifest_not_regular')
+    raw = manifest_path.read_bytes()
+    expected_hash = os.environ.get(MATCHED_HASH_ENV, '')
+    require(re.fullmatch(r'[0-9a-f]{64}', expected_hash) is not None and
+            hashlib.sha256(raw).hexdigest() == expected_hash, 'matched_manifest_hash')
+    manifest = json.loads(raw)
+    require(encoded(manifest) == raw, 'matched_manifest_canonical_encoding')
+    require(manifest.get('schema_version') == 'pion_matched_cohort_authority/v1' and
+            manifest.get('source_HEAD') == head and manifest.get('mode') == 'matched_cohort', 'matched_manifest_source')
+    require(set(manifest.get('inputs', {})) == {'Center', 'Left'}, 'matched_manifest_settings')
+    output = Path(outpath).resolve(strict=True)
+    require(manifest_path == output / 'matched-cohort-authority.json', 'matched_manifest_path')
+    require(str(output) == manifest['private_outpath'] and output.parent.parent.name == 'matched-output'
+            and output.is_relative_to(Path(root).resolve().parent), 'matched_private_output')
+    if manifest.get('private_input_policy') == 'frozen_shiftprep_private_copy':
+        writers = ('src/cuts/shift_prep.py', 'src/setup/shift_MM.py')
+        require(set(manifest.get('private_writer_source_files', {})) == set(writers), 'matched_private_writer_inventory')
+        require(all(file_identity(Path(root) / p) == manifest['private_writer_source_files'][p] for p in writers),
+                'matched_private_writer_source')
+        for role, title in (('data', 'Data'), ('dummy', 'Dummy')):
+            name = f'{setting}_kaon_Analysed_{title}_Q4p4W2p74_lowe.root'
+            binding = manifest['input_bindings'][name]
+            require(Path(binding['private']) == output / name and
+                    binding['private_mutation'] == 'frozen_shiftprep_derived_branches', 'matched_private_input_binding')
+            require(file_identity(binding['source']) == manifest['inputs'][setting][role] and
+                    all(binding['original'][k] == manifest['inputs'][setting][role][k] for k in ('sha256', 'bytes')),
+                    'matched_original_input_changed')
+            require(file_identity(output / name) == identities[role], 'matched_runtime_input_changed')
+    else:
+        require(manifest['inputs'][setting] == identities, 'matched_input_identity')
+    owner = Path(root) / 'testing/run_pion_local_t_matched_cohort_gate.py'
+    require(file_identity(owner) == manifest['owner_source'], 'matched_owner_source')
+    ab_path = output / (setting + '_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json')
+    require(ab_path.is_file() and not ab_path.is_symlink() and
+            ab_path.stat().st_mtime_ns >= manifest['started_ns'], 'matched_AB_freshness')
+    document = json.loads(ab_path.read_bytes())
+    require(document.get('source_HEAD') == head and document.get('status') == 'available'
+            and document.get('diagnostic_only') is True and document.get('production_applied') is False,
+            'matched_AB_source_or_status')
+    require(document.get('phi_setting') == setting and len(document.get('parents', [])) == 3,
+            'matched_AB_parent_inventory')
+    for role in ('data', 'dummy'):
+        require(all(document['original_analysis_input_identity'][role][k] == identities[role][k]
+                    for k in ('sha256', 'bytes')), 'matched_AB_input_identity:' + role)
+    for actual, saved in zip(parents, document['parents']):
+        for key in ('t_bin_index', 't_edges', 'pion_parent_id', 'canonical_interval_pair_id',
+                    'canonical_interval_pair_hash', 'coordinate_fingerprint', 'baseline_parent_fingerprint'):
+            require(actual[key] == saved[key], 'matched_AB_parent_identity:' + key)
+        require(actual['pion_input'] == saved['frozen_inputs']['pion'] and
+                actual['kaon_input'] == saved['frozen_inputs']['kaon'], 'matched_AB_histogram_identity')
+    return {'mode': 'matched_cohort', 'manifest_sha256': expected_hash,
+            'attempt_id': manifest['attempt_id'], 'AB': file_identity(ab_path),
+            'original_input_identity': manifest['inputs'][setting], 'runtime_input_identity': identities}
 
 
 def resolved_production_weight_policy(inp, parent):
@@ -287,7 +352,9 @@ def observe(hist, inp, t_edges, phi_edges, outpath):
                     for role,key in (("data","InFile_DATA"),("dummy","InFile_DUMMY"))}
     identities = {role: file_identity(path) for role,path in source_paths.items()}
     # Reject different data/dummy inputs before parent serialization or packet output.
-    verify_accepted_input_identity(identities, hist["phi_setting"])
+    if not os.environ.get(MATCHED_ENV):
+        require(not os.environ.get(MATCHED_HASH_ENV), 'matched_manifest_missing')
+        verify_accepted_input_identity(identities, hist["phi_setting"])
     parents = []
     for p in hist["_pion_t_bin_parent_results"]:
         parents.append({k: p[k] for k in ("t_bin_index", "t_edges", "pion_parent_id", "canonical_interval_pair_id", "canonical_interval_pair_hash", "coordinate_fingerprint")})
@@ -301,6 +368,11 @@ def observe(hist, inp, t_edges, phi_edges, outpath):
         source_head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
         input_identity=identities, parent_records=parents, source_files={p:file_identity(root/p) for p in files})
     packet["source_input_paths"] = {role: str(path) for role,path in source_paths.items()}
+    if os.environ.get(MATCHED_ENV):
+        packet['cohort_authority'] = matched_authority(root, outpath, hist['phi_setting'], identities,
+                                                      parents, packet['source_HEAD'])
+        manifest = json.loads(Path(os.environ[MATCHED_ENV]).read_bytes())
+        require(packet['source_files'] == manifest['source_files'], 'matched_capture_source_files')
     destination = Path(outpath) / (hist["phi_setting"] + "_kaon_Q4p4W2p74_lowe_pion-local-t-events.json")
     require(not os.path.lexists(destination), "packet_destination_exists")
     with destination.open("xb") as stream:

@@ -1102,3 +1102,116 @@ No same-run cohort, new fit, six-parent event result, PDF, ZIP, Lambda effect,
 held-out estimator, bias truth, MSE selection or strength preference is claimed.
 The exact scientific target remains the matched-source Center/Left six-parent
 comparison, with all seven C strengths refitted on its own newly captured A/B.
+
+
+### Matched-cohort private acquisition source checkpoint — October 22
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for the local candidate under the
+[attempt-isolation contract](../phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md).
+SOURCE VERIFIED: local `test`, local `origin/test` and read-only GitHub ref GET
+all identified `b23d231ce41f96759a2d9cddd39bfa20f8953ad2`. The supplied contract
+was the only untracked starting file; the tracked worktree and index were clean.
+No commit, push, ref update, hosted workflow or farm analysis was performed.
+
+The new `testing/run_pion_local_t_matched_cohort_gate.py` owns one unchanged
+plain `-d` child in the existing disposable worktree/copied-ltsep boundary.
+Its new private `OUTPUT` link does not weaken `prepare_debug_output_link` or
+`probe_paths`, and does not redirect `VOLATILEPATH`. Actual default-mode CSV
+writers and reached Plot callers must resolve to the private output. The
+source-derived input bindings include both epsilon raw prepasses and archived
+SIMC, efficiency/run-list/skim-existence/PID/timing inputs, low-setting generated
+pion and external Sigma0 sources. Diamond shortest-file/glob choices, including
+mid-epsilon and fallback candidates, must be preserved. Stable external
+SIMC/background links must already require no repair; existing external mkdir
+operations must be no-ops. Canonical temporary files and plotting caches are
+placed in owner-created private directories. No `-c` merge or full high-epsilon
+analysis is authorized by this owner.
+
+Two source findings prevent false input identity claims. `shift_prep.py` calls
+`shift_MM.py::add_derived_branches_to_file`, which opens data/dummy ROOTs in
+`UPDATE` and replaces derived `MM_shift`/`t_shift` branches. Accordingly mutable
+inputs are private copies, never hardlinks or read-through links. The original
+shared hashes/inodes remain separately pinned and checked. Fresh A/B and event
+packets join the actual private runtime-container hashes after these frozen
+writes; they are not relabelled as the original shared-container hashes. A
+fake-tree test checks the existing algorithm's raw-row preservation and branch
+replacement; real ROOT behavior is NOT VERIFIED locally. This supplies no
+historical-cohort equivalence, repinning or physical acceptance.
+
+The owner pins a fresh private manifest in its child environment, authenticates
+both observers' source/parent/coordinate/histogram joins, checks actual source
+paths and original/runtime identities, and counts the six fixed diagnostic
+file opens to reject duplicate/overwritten emissions. A/B's two intentional
+JSON writes are distinguished from a repeated observer. The post-cache observer
+retains its prepass guard and its unchanged historical SHA-256/size mode.
+Original input/shared-output, external-link and installed/copied-package checks
+run even on failure; one failed preservation check cannot suppress the others.
+Only after structural/freshness/provenance/closure gates does the unchanged
+collector produce the seven-artifact archive (four A/B outputs, two packets,
+one authority manifest) and standard metadata. CRC, exact member inventory,
+source checks, manifest fields and member hashes are verified before success
+companions are delivered. Failed artifacts remain inadmissible; no retry.
+
+The same owner's explicit offline-bundle mode validates the new archive,
+recomputes all six B controls and all 42 prospective C fits with the existing
+objective, bounds, priors, normalization and fixed protected-applied `K_B`, then
+runs the existing signed-event replay. Cohort-specific fit/model identities
+bind source, A/B hashes, parent, policy and numerical fit payloads. It preserves
+all packet rows, masks, source identities, normalization coefficients, parent
+inputs, aligned templates, fitted priors/parameters, and all seven strengths
+for later independent work. The original archive and direct historical CLI
+validation remain intact; synthetic fixture outputs match unchanged HEAD C
+math and historical replay exactly.
+
+Matched-only additions report source/phi-child closure, positive/negative and
+absolute support, quadratic Sumw2 and effective support, contribution quantiles
+and largest-one-percent support, every specified MM domain, distinct allcuts
+versus nommcuts, and both raw K/P and existing production floor/clip conventions.
+Lambda-window differences use paired same-event difference weights and their
+quadratic errors, not independent-error addition. The detached six-page PDF
+shows control models/residuals, fitted kaon-side pion background versus event
+application, full-MM/domain/Lambda views, fixed-weight variance, paired effects
+and tails. Synthetic PDF generation and same-geometry PNG layout inspection
+are local presentation checks only; no physical PDF or farm result is supplied.
+An independent external PDF rendering backend is unavailable locally; the
+writer's six-page counter is checked, and the eventual farm A/B structural
+checks require the existing Poppler backend before child execution.
+
+Local deterministic receipts: 158 affected Windows tests plus the additional
+unchanged-collector integration test passed with nine archival-input skips;
+15 POSIX owner tests passed in WSL. The nine skips require the original accepted
+A/B archive or saved C JSON, not simulated substitutes. Windows denied symlink
+creation (`WinError 1314`); real link tests were run successfully in WSL.
+Compilation/diff/manifest/bootstrap/health receipts accompany the actual diff.
+These checks establish neither installed JLab ltsep behavior nor ROOT/PyROOT,
+full main.py, actual input preservation, PDF legibility on real data or science
+acceptance. Training-only staged/protected refits and priors, independent fitted
+estimator evaluation, leakage truth, bias/MSE selection and any production
+promotion remain unavailable/NOT VERIFIED. All strengths remain unselected.
+
+The next gate is independent actual-diff review, then user publication and
+pushed-state synchronization, followed by one reviewed user-operated matched
+acquisition and the tracked offline scientific comparison. No follow-on
+infrastructure contract or farm command was generated. CURRENT owns that NEXT;
+all earlier accepted scopes and independent normalization/production blockers
+remain unchanged.
+
+
+### Matched-cohort Sigma0 owner review correction — October 22
+
+The independent actual-diff review identified an owner-only mismatch: the new
+external inventory required every low-epsilon Sigma0 variable, whereas the frozen
+launcher skips unconfigured values and the runtime background manifest strips
+blank values and retains the existing unavailable-template fallback. The owner
+now inventories Sigma0 only when configured; configured missing/non-file inputs
+still fail before the child, and configured valid inputs retain hash/size/inode
+and post-child preservation verification. No launcher, runtime manifest, science,
+historical pins, replay or fitting behavior changed.
+
+SOURCE VERIFIED local tests cover absent/empty/blank configuration, Center/Left
+configured valid files and subsequent mutation, missing/non-file rejection, and
+the exact execute_gate preflight with the real external inventory. Absent/valid
+sources reach only a simulated failing child; invalid configuration stops before
+it. Twenty owner tests pass in WSL. This correction supplies no farm, ROOT,
+physical-PDF or scientific acceptance. The next gate remains independent review
+of the revised complete actual diff; no automatic farm retry is authorized.

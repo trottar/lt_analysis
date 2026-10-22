@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16096,
+      "bytes": 16220,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "5ae6660e5968b0b463a2fa1a1ac4e58f3ab1a6b6d755ef1aa000349b37805187"
+      "sha256": "a7c510dcfb1c935b46101eaae5ef5ac3a3e7fe39070c85141f8bba4f7a1496de"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 73010,
+      "bytes": 80559,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "af02d5d3f4a16df8ee68ffe294517cbce0b538336ef691411ac56cc86a19ca8a"
+      "sha256": "c71da2774fb01ff459c9565f661e43d9de9326ef7c24c60765e3cbe41e91cb80"
     },
     {
       "bytes": 23507,
@@ -1324,6 +1324,11 @@
       "bytes": 11234,
       "path": "docs/memory/phases/kaonlt-pion-ltsep-receipt-canonical-globus-repair-2026-10-16-task-contract.md",
       "sha256": "46611892dd23a08c93c0c9f281f337fb6bf1a5058444354d7dd42052a647186f"
+    },
+    {
+      "bytes": 14692,
+      "path": "docs/memory/phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md",
+      "sha256": "a7766aae2d795c5264e68f7e49f935f6fba825865dfab695b1469c66e7adea12"
     },
     {
       "bytes": 10942,

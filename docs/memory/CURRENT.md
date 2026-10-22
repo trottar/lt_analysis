@@ -30,47 +30,52 @@ at its interrupted position.
 
 ## Current Work Item
 
-`BLOCKED`: the [matched-cohort feasibility audit](phases/kaonlt-pion-matched-cohort-event-evidence-2026-10-21-task-contract.md)
-at `532b661f73a827034edc269f85dc776b4170f574` cannot prove unique-attempt output
-isolation using the frozen helpers. `prepare_debug_output_link` requires the
-shared configured artifact root (`debug_output_artifact_root_mismatch` for an
-attempt subdirectory); `probe_paths` preserves the configured volatile root. The A/B observer
-writes fixed-name JSON/PDFs to that output root. No joint capture owner or
-new-cohort pin mode was implemented; no farm run or scientific result follows.
-See the [source audit](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#matched-cohort-acquisition-feasibility-stop--october-21).
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local implementation of the
+[matched-cohort attempt-isolation contract](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md),
+based on `test` audit anchor `b23d231ce41f96759a2d9cddd39bfa20f8953ad2`.
+Independent actual-diff review remains required; no farm readiness or scientific
+acceptance follows from this status. The previous frozen-helper
+[feasibility stop](phases/kaonlt-pion-matched-cohort-event-evidence-2026-10-21-task-contract.md)
+is historical, not a new farm result.
 
-The new contract records supplied independent observations that all four current
-Center/Left data/dummy files differ in SHA-256 and size from the historical A/B
-cohort. Those external files were not rehashed locally. Historical A/B/C remains
-immutable and cohort-specific; a fresh matched fit is required, not repinning or
-replaying historical C on the changed inputs. The prior boundary repair is
-published at the audit HEAD; publication supplies no event evidence.
+SOURCE VERIFIED locally: one new owner prepares a private output-tree sibling in
+the existing disposable worktree, retains original volatile-path role and stable
+external roles, probes actual default/Plot callers, stages byte-preserving
+private inputs for both epsilon prepasses, and checks diamond glob-selection
+parity. Optional Sigma0 sources retain the unchanged launcher fallback when
+unconfigured; configured files retain strict identity/preservation gates.
+Only its child enables both existing observers. Existing launchers,
+isolation helpers, installed `ltsep` and production source remain unchanged.
+The owner checks original input identities, shared outputs, external links,
+installed/copied package preservation, fresh six-parent A/B/event joins and
+histogram/source closure before collection/delivery. Failure stops the chain.
 
-Historical failure: the first owned event-capture farm child at `04f1ec403a9555634e61c229aa347cb76d0c78d3`
-failed before packet/collection checks: the observer ran during
-`bg_optimizer_pre_parent` and raised `accepted_AB_input_identity_mismatch:Center:data`.
-The [prepass boundary repair](phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md)
-is `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local dispatch now requires
-authoritative kaon component/t-bin application and excludes prepass flag/context
-before diagnostic import. Accepted A/B hashes and byte pins remain strict;
-a canonical-stage mismatch is still possible and must stop capture/replay.
-The failed attempt supplies no physical C event evidence. Its repair review
-was the earlier gate; no automatic rerun.
+The native input writer matters: frozen `shift_prep` replaces `MM_shift` and
+`t_shift` branches in ROOT containers. It operates on private copies here.
+Original shared-file hashes/inodes and private runtime-container identities are
+separate provenance roles; fresh A/B and packets must agree on the latter.
+Source/fake-tree checks are not real ROOT clone/update validation. Current farm
+inputs and preservation have NOT been independently verified in this chat.
+See the [October 22 source checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#matched-cohort-private-acquisition-source-checkpoint--october-22).
 
-The scientific objective remains independent event-level bias-variance evidence before any adaptive
-lambda selector, under the [October 21 event-validation contract](phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md).
-The detached six-parent, seven-strength C feasibility comparison has been
-numerically and visually reviewed per that supplied contract; no strength is
-selected or promoted. A local default-off cache observer, ROOT-free signed-event
-replay and single-run capture owner are proposed for independent actual-diff
-review. Production fitting, weights and application remain frozen.
+The same CLI's explicit offline mode consumes a verified new-cohort bundle,
+reconstructs all six B controls before seven fresh C strengths per parent, and
+replays signed events with distinct A and fixed protected-applied `K_B` for B/C.
+It retains original/runtime hashes, all events/cut masks, templates, staged
+priors, fits/model IDs, source/phi-child closure, full/narrow-MM statistics,
+raw-ratio versus production conventions, tails and paired fixed-weight errors.
+The compact six-parent JSON/PDF is detached. Historical archive/CLI pins remain
+strict and unchanged; historical C is never substituted for a fresh fit.
 
-SOURCE VERIFIED locally: the observer follows both yield-cache assignments;
-replay preserves separate signed sources, cut masks, parent/child support and
-fixed protected-applied K_B. Full-sample application is not held-out validation.
-Training-only staged/protected fits and priors are the first missing independent
-fitted-estimator step; bias truth and MSE selection remain unavailable. No
-farm packet, event-level acceptance, adaptive selector or production adoption.
+No matched farm bundle or fresh physical C result is available here. Historical
+A/B/C remains immutable and cohort-specific. The earlier failed capture at
+`04f1ec403a9555634e61c229aa347cb76d0c78d3` and published
+[prepass boundary repair](phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md)
+retain their recorded limits; failed artifacts supply no event acceptance.
+The [independent event-validation objective](phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md)
+remains: full-sample fits/priors/protected models do not provide a held-out fitted
+estimator. Training-only refits, physical bias truth and MSE selection remain
+unavailable. No strength is selected or promoted.
 
 The [controlled template comparison](phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
 and [execution gate](phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md)
@@ -211,18 +216,17 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independently review the matched-cohort audit's first output-isolation
-invariant. Safe same-run acquisition must be proved before owner implementation:
-the frozen shared-output helper route does not provide a unique attempt namespace.
-No auxiliary owner chain or unchanged-owner retry. The required science remains
-one matched-source Center/Left lowe six-parent A/B/C signed-event comparison:
-fresh same-run A/B parents and event packets, then all seven C strengths refitted
-on that cohort and detached event replay. Historical C is not its fitted input.
-No farm readiness, event acceptance, held-out fitted-estimator evaluation, physical
-bias truth or strength selection is established. The broader full-MM/component/
-normalization and authoritative signal-yield objective remains; no Lambda/SIMC
-unity constraint. User publication and pushed-state review remain prerequisites
-for any subsequently reviewed farm operation.
+NEXT — independent ChatGPT review of the complete matched-cohort actual diff.
+Conditional on acceptance, user publication and pushed-state synchronization,
+one user-operated owned Center/Left lowe acquisition must establish fresh
+same-run A/B and signed-event evidence, followed by the tracked offline fresh
+seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison.
+Any first source, input, child, artifact, provenance or preservation failure
+stops this operation; no automatic retry or manual replacement sequence.
+No farm command, runtime acceptance, held-out estimator, bias truth, MSE-optimal
+strength or production promotion is established. Preserve the broader full-MM,
+normalization and authoritative signal-yield objective without a Lambda/SIMC
+unity constraint.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior
