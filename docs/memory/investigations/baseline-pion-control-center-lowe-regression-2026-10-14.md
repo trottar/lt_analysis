@@ -1042,3 +1042,63 @@ parent serialization. Defective eligible parent/cache inputs fail with no
 packet. Disabled dispatch is equivalent. These checks establish no ROOT/farm
 integration, fresh event acceptance or scientific preference. CURRENT's soft-size
 warning remains nonblocking, scheduled for the next checkpoint/milestone audit.
+
+### Matched-cohort acquisition feasibility stop — October 21
+
+`BLOCKED` at the feasibility prerequisite of the
+[matched-cohort contract](../phases/kaonlt-pion-matched-cohort-event-evidence-2026-10-21-task-contract.md),
+audited on local `test` and observed local `origin/test` at
+`532b661f73a827034edc269f85dc776b4170f574`. No remote fetch, publication or
+farm execution occurred. The contract attributes independent SHA-256/size
+mismatches for all four current Center/Left data/dummy ROOT inputs; those
+external files were not available for local independent rehashing. Historical
+A/B/C authority remains immutable and specific to its original cohort.
+
+SOURCE VERIFIED call order: `rand_sub.py` calls `observe_template_comparison`
+immediately after `build_setting_t_bin_pion_parents`. The default-off yield
+observer runs after both `_yield_data_event_cache` and `_yield_sub_event_cache`
+assignments, excludes optimizer prepass before import/I/O, and retains strict
+historical input pins. The existing owners each enable only their own observer;
+joint enablement would require the new contract's separately owned child mode.
+The offline C reader and event replay still enforce the historical cohort;
+no new-cohort mode or fitted values were introduced during this audit.
+
+The first unproved mandatory acquisition invariant is **a unique attempt output
+namespace with unrelated outputs preserved using the frozen isolation helpers**:
+
+- `run_e8_2_left_lowe_scientific_audit_gate.py::prepare_debug_output_link`
+  derives its only permitted target from `VOLATILEPATH/OUTPUT`, and requires
+  `outdir` to equal its resolved `Analysis/<ANATYPE>LT` directory. An attempt
+  subdirectory is rejected as `debug_output_artifact_root_mismatch` before
+  output-link creation.
+- `run_e8_4_fix5_canonical_five_plot_gate.py::prepare_runtime_overlay` changes
+  only copied `LTANAPATH`; `probe_paths` checks every other field except
+  derived `OUTPATH` against the baseline. Redirecting `VOLATILEPATH` is rejected
+  as `ltsep_stable_fields_changed`. It is not a supported output-only override.
+- Both existing pion owners pass the configured shared artifact root to the
+  output-link helper. `observe_template_comparison` writes fixed-name A/B
+  JSON/PDFs there with replacement semantics; the event observer separately
+  rejects an existing fixed-name packet. A new ZIP/log stem does not isolate
+  these outputs or other ordinary child outputs. `rand_sub.py` also reads its
+  original data/dummy ROOT inputs from `OUTPATH`; a fresh empty directory alone
+  does not retain the required physical input visibility.
+
+The audited helper route therefore does not prove the contract's acquisition
+prerequisite. The contract freezes trusted isolation helpers; replacing their
+path policy, changing copied external-path roles, running against shared output,
+or inventing a manual acquisition sequence was not attempted. This is a source
+feasibility stop, not a newly observed farm failure or a claim that output
+isolation is impossible in principle. The minimum missing capability is a
+reviewed output-only attempt mapping that preserves exact backing-input
+visibility and existing path/ordinary-checkout protections. No auxiliary owner
+chain or further support contract was created.
+
+Deterministic checks: the existing output-path authority rejection and overlay
+stable-field/outpath rejection tests both passed. The existing capture/replay,
+event owner, C comparison and A/B owner suites ran 86 tests: 77 passed and nine
+skipped (two original-artifact controls not supplied; seven ROOT-dependent
+checks). No Python source changed, so no changed-module compilation applies.
+No same-run cohort, new fit, six-parent event result, PDF, ZIP, Lambda effect,
+held-out estimator, bias truth, MSE selection or strength preference is claimed.
+The exact scientific target remains the matched-source Center/Left six-parent
+comparison, with all seven C strengths refitted on its own newly captured A/B.
