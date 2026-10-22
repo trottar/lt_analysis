@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 15875,
+      "bytes": 16091,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "370c477be6007fadd1c94c673b4bd47ce8aa4cc362d6c5a60835417a6d997906"
+      "sha256": "529e74de3e5d4a0ffd96d10db5d6e001076cc9effaf87bdb7fbb7e2f03538407"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 89505,
+      "bytes": 95160,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "8fa01c1cccab19b2d47971a30c8a3e9611682383187943781d59b3a96d590141"
+      "sha256": "2cd50a7f9bf82859acb1debc7602dda201873a311a2ab5658d07ce4274f6d140"
     },
     {
       "bytes": 23507,
@@ -1284,6 +1284,11 @@
       "bytes": 7858,
       "path": "docs/memory/phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md",
       "sha256": "fa9ec458d9d5a89ac334f8557c5621eceaf6d4380bea9f5197bea49a2609781f"
+    },
+    {
+      "bytes": 11883,
+      "path": "docs/memory/phases/kaonlt-matched-cohort-resolver-import-preflight-fix-2026-10-22-task-contract.md",
+      "sha256": "3a2837301c9af59b0083b23601dde1346043cbebcf7df562f1ad8125dede9db5"
     },
     {
       "bytes": 15957,

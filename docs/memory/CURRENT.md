@@ -31,14 +31,17 @@ at its interrupted position.
 ## Current Work Item
 
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
-[cyclic-link preflight repair](phases/kaonlt-pion-matched-cohort-preflight-symlink-loop-fix-2026-10-22-task-contract.md)
-at `test` anchor `842dab7a957a9823a51dcb484a765b4d11c6d9c1`.
-Supplied October 22 `144029` terminal failure reports a historical-cache cycle;
-it and the earlier missing-HeeP preflight failure are inadmissible event evidence.
-The current farm caller/stage is NOT VERIFIED without its status/traceback.
-SOURCE VERIFIED: old broad inventory reproduces the loop; both Python loop
-exception forms now retain literal-target metadata and preservation checks.
-Required inputs stay strict; no shared path repair or science change.
+[resolver-import preflight repair](phases/kaonlt-matched-cohort-resolver-import-preflight-fix-2026-10-22-task-contract.md)
+at `test` anchor `a14e740ab68531aca1c60c48d7a73e13e8922aff`.
+Supplied `155418` failure: copied `ltsep -> uproot` source loading denied by
+the frozen hook before analysis (contract-attributed). No matched ZIP/science;
+failed/inadmissible evidence. Installed dependency closure and unsupplied status
+details remain NOT VERIFIED. SOURCE VERIFIED: isolated imports reproduce the
+old denial. Owner-only loader code/exact-config reads pass real fixture
+no-mode/Plot calls with caller/cwd, identity, stable/private path guards. Data
+reads, bytecode authority, ROOT bindings and mutations remain denied. Frozen
+resolver, farm_env, launchers and science are unchanged. Prior HeeP/cycle
+failures stay inadmissible; metadata fixes remain intact.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,

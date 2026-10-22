@@ -179,21 +179,189 @@ def prepare_private_output(worktree, paths):
     return output
 
 
-def probe_private_callers(repo, worktree, env, baseline, outdir):
-    """No scientific imports: interrogate actual no-mode and Plot Root calls."""
-    probes = isolation.probe_paths(worktree, env, baseline)
+# This probe belongs only to this owner. The separately frozen resolver PROBE
+# remains the authority for its own CLI. Neither callers nor analysis modules
+# are executed here; only the real ltsep.Root and the frozen farm_env wrapper.
+RESOLVER_PROBE = r'''
+import sys, os, json, inspect, sysconfig, hashlib
+import importlib.machinery as machinery
+from pathlib import Path
+tree=Path(sys.argv[1]); expected=Path(sys.argv[5])
+spec=machinery.PathFinder.find_spec("ltsep")
+if spec is None or spec.origin is None: raise ImportError("installed_ltsep_unavailable")
+if Path(spec.origin) != expected/"__init__.py":
+    raise RuntimeError("resolver_package_import_mismatch:"+str(spec.origin))
+stdlib=Path(sysconfig.get_path("stdlib")).resolve()
+dependencies={Path(sysconfig.get_path(k)).resolve() for k in ("purelib","platlib")}
+config_dir=expected/"PATH_TO_DIR"
+configs=set(config_dir.glob("*.path"))
+for path in [expected, config_dir, *configs]:
+    if path.resolve(strict=True) != path: raise RuntimeError("resolver_path_escape:"+str(path))
+authorized_read=None
+loaded={}
+def code_path(path):
+    p=Path(path)
+    if not p.is_absolute() or p.resolve(strict=True)!=p:
+        raise RuntimeError("resolver_code_path_escape:"+str(p))
+    # site-packages may be nested inside stdlib. It is a separate code-only
+    # authority, never a source of arbitrary package/config/scientific data.
+    if p.is_relative_to(expected): return p.suffix==".py"
+    if p==tree/"farm_env/__init__.py" or p==tree/"farm_env/ltsep_paths.py": return True
+    if p.is_relative_to(tree): return False
+    if any(part in {"site-packages","dist-packages"} for part in p.parts) and not any(p.is_relative_to(r) for r in dependencies):
+        return False
+    roots=dependencies if any(p.is_relative_to(r) for r in dependencies) else {stdlib}
+    return any(p.is_relative_to(r) for r in roots) and (
+        p.suffix==".py" or any(str(p).endswith(s) for s in machinery.EXTENSION_SUFFIXES))
+def readonly(event,args):
+    if event=="import":
+        if args[0].split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
+            raise RuntimeError("scientific_module_import_forbidden:"+args[0])
+        if len(args)>1 and args[1] and not code_path(args[1]):
+            raise RuntimeError("resolver_code_import_forbidden:"+str(args[1]))
+    if event=="open":
+        mode,flags=args[1:3]
+        if (isinstance(mode,str) and any(c in mode for c in "wax+")) or (isinstance(flags,int) and flags & (os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND)):
+            raise RuntimeError("resolver_write_attempt:"+str(args[0]))
+        if not isinstance(args[0],(str,bytes,os.PathLike)):
+            raise RuntimeError("resolver_data_read_forbidden:"+str(args[0]))
+        path=Path(os.path.abspath(os.fsdecode(args[0])))
+        if path.suffix==".pyc": raise FileNotFoundError("source_only_resolver_probe:"+str(path))
+        if path!=authorized_read and path not in configs:
+            raise RuntimeError("resolver_data_read_forbidden:"+str(path))
+        if path.resolve(strict=True)!=path:
+            raise RuntimeError("resolver_path_escape:"+str(path))
+    if event in {"os.mkdir","os.remove","os.rmdir","os.rename","os.link","os.symlink","os.chmod","os.chown","os.truncate","os.utime","os.chdir","os.fork","os.forkpty","os.startfile","subprocess.Popen","os.system","os.exec","os.posix_spawn","ctypes.dlopen","socket.__new__"}:
+        raise RuntimeError("resolver_mutation_attempt:"+event+":"+str(args)[:300])
+class Source(machinery.SourceFileLoader):
+    def get_data(self,path):
+        global authorized_read
+        p=Path(path)
+        if p.suffix==".pyc": raise FileNotFoundError("source_only_resolver_probe:"+str(p))
+        if p!=Path(self.path) or not code_path(p):
+            raise RuntimeError("resolver_code_read_forbidden:"+str(p))
+        authorized_read=p
+        try: raw=super().get_data(path)
+        finally: authorized_read=None
+        loaded[self.name]={"path":str(p),"sha256":hashlib.sha256(raw).hexdigest()}
+        return raw
+class Extension(machinery.ExtensionFileLoader):
+    def create_module(self,spec):
+        global authorized_read
+        p=Path(self.path)
+        if not code_path(p): raise RuntimeError("resolver_extension_forbidden:"+str(p))
+        authorized_read=p
+        try: raw=p.read_bytes()
+        finally: authorized_read=None
+        loaded[self.name]={"path":str(p),"sha256":hashlib.sha256(raw).hexdigest()}
+        return super().create_module(spec)
+class Finder:
+    def find_spec(self,name,path=None,target=None):
+        if name.split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
+            raise RuntimeError("scientific_module_import_forbidden:"+name)
+        found=machinery.PathFinder.find_spec(name,path,target)
+        if found is None: return None
+        if found.origin is None:
+            if not all(any(Path(p).resolve().is_relative_to(r) for r in dependencies|{stdlib,tree/"farm_env",expected}) for p in found.submodule_search_locations or []):
+                raise RuntimeError("resolver_namespace_forbidden:"+name)
+            return found
+        if not code_path(found.origin):
+            raise RuntimeError("resolver_code_import_forbidden:"+str(found.origin))
+        if isinstance(found.loader,machinery.SourceFileLoader):
+            found.loader=Source(name,found.origin)
+        elif isinstance(found.loader,machinery.ExtensionFileLoader):
+            found.loader=Extension(name,found.origin)
+        else:
+            raise RuntimeError("resolver_loader_forbidden:"+str(found.origin))
+        return found
+sys.addaudithook(readonly)
+sys.meta_path=[machinery.BuiltinImporter,machinery.FrozenImporter,Finder()]
+sys.path.insert(0,str(tree))
+import ltsep, ltsep.pathing
+from farm_env.ltsep_paths import create_ltsep_root
+caller=sys.argv[2]; modes=json.loads(sys.argv[3]); fields=json.loads(sys.argv[4])
+lt=create_ltsep_root(caller,*modes)
+paths={k:getattr(lt,k,None) for k in fields}
+matches=[]
+p=ltsep.pathing.SetPath(caller)
+for f in sorted(configs):
+    values={}
+    for line in f.read_text(encoding="utf-8").splitlines():
+        if not line.strip(): continue
+        key,sep,value=line.partition("=")
+        if not sep or not key.strip() or key.strip() in values: raise ValueError("ltsep_config_invalid")
+        values[key.strip()]=value.strip()
+    if "LTANAPATH" not in values: continue
+    observed={k:p.getPath(k) for k in values}
+    expanded={k:v.replace("${USER}",str(paths["USER"])) for k,v in values.items()}
+    if expanded==observed: matches.append(str(f))
+for name,record in loaded.items():
+    if name not in sys.modules or getattr(sys.modules[name],"__file__",None)!=record["path"]:
+        raise RuntimeError("resolver_module_identity_changed:"+name)
+print(json.dumps({"caller":caller,"caller_realpath":os.path.realpath(caller),"mode":modes,"cwd":os.getcwd(),
+    "paths":paths,"config_matches":matches,"package_file":ltsep.__file__,
+    "pathing_file":ltsep.pathing.__file__,"root_file":inspect.getsourcefile(type(lt)),
+    "resolver_file":sys.modules["farm_env.ltsep_paths"].__file__,
+    "python":sys.executable,"python_version":sys.version,"source_imports":loaded,
+    "dependency_roots":sorted(str(r) for r in dependencies)},allow_nan=False))
+'''
+
+
+def probe_resolver(tree, caller, modes, env, cwd, package):
+    """Source-only imports and exact config reads; no physics input reads."""
+    tree, package = Path(tree), Path(package)
+    path, working = tree / caller, tree / cwd
+    require(path.exists() and resolver.real(path) == path, 'caller_path_invalid:' + caller)
+    require(working.is_dir() and resolver.real(working) == working, 'caller_cwd_invalid:' + caller)
+    before = resolver.tree_bytes(package)
+    try:
+        result = subprocess.run([sys.executable, '-B', '-c', RESOLVER_PROBE, str(tree),
+            str(path), json.dumps(list(modes)), json.dumps(resolver.FIELDS), str(package)],
+            cwd=working, env=env, capture_output=True, text=True, timeout=60)
+        require(result.returncode == 0, 'resolver_subprocess_failed:' + caller + ':' + result.stderr[-2000:])
+        require(not result.stderr.strip(), 'resolver_stderr_contamination:' + caller)
+        record = json.loads(result.stdout)
+        require(record['caller'] == record['caller_realpath'] == str(path) and
+                record['mode'] == list(modes), 'resolver_caller_mismatch')
+        require(record['cwd'] == str(working), 'resolver_cwd_mismatch')
+        require(resolver.real(Path(record['resolver_file'])) == tree / 'farm_env/ltsep_paths.py',
+                'resolver_wrapper_import_mismatch')
+        require(resolver.real(Path(record['python'])) == resolver.real(Path(sys.executable)), 'interpreter_mismatch')
+        require(len(record['config_matches']) == 1, 'ltsep_matching_config_not_unique')
+        require(resolver.module_identity(record) == package, 'ltsep_package_import_mismatch')
+        for name in isolation.PATH_FIELDS:
+            require(isinstance(record['paths'].get(name), str) and record['paths'][name].strip(),
+                    'default_root_unresolved:' + caller + ':' + name)
+        return record
+    finally:
+        require(resolver.tree_bytes(package) == before, 'ltsep_package_changed_during_probe')
+
+
+def probe_private_callers(repo, worktree, env, baseline, outdir, installed_package=None):
+    """Interrogate real no-mode/Plot calls, including controlled dependencies."""
+    # The baseline package is captured by execute_gate before overlay creation.
+    require(installed_package is not None, 'installed_package_identity_required')
+    probes = []
     records = []
     callers = [(role, caller, modes, cwd) for role, caller, modes, cwd, _ in resolver.CALLERS]
     known = {(caller, tuple(modes)) for _, caller, modes, _ in callers}
     callers += [(caller, caller, modes, cwd) for caller, modes, cwd in reached_resolver_callers(repo)
                 if (caller, tuple(modes)) not in known]
     for role, caller, modes, cwd in callers:
-        record = resolver.probe(worktree, caller, modes, env, cwd)
-        base = resolver.probe(repo, caller, modes, os.environ, cwd)
+        record = probe_resolver(worktree, caller, modes, env, cwd, worktree.parent / 'runtime-python/ltsep')
+        base = probe_resolver(repo, caller, modes, os.environ, cwd, installed_package)
         fields = record['paths']
+        require(fields['LTANAPATH'] == str(worktree) and base['paths']['LTANAPATH'] == str(repo),
+                'resolver_ltanapath_mismatch:' + role)
         for key in resolver.FIELDS:
             if key not in {'LTANAPATH', 'OUTPATH'}:
                 require(fields.get(key) == base['paths'].get(key), 'stable_input_role_changed:' + role + ':' + key)
+                if key in baseline:
+                    require(base['paths'].get(key) == baseline[key], 'baseline_input_role_changed:' + role + ':' + key)
+        base_raw = str(base['paths']['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else base['paths']['OUTPATH']
+        require(Path(base_raw) == repo / 'OUTPUT/Analysis/KaonLT' and
+                Path(base_raw).resolve() == Path(baseline['OUTPATH']).resolve(),
+                'baseline_root_outpath_mismatch:' + role)
         raw = str(fields['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else fields['OUTPATH']
         require(Path(raw) == Path(worktree) / 'OUTPUT/Analysis/KaonLT' and
                 Path(raw).resolve() == outdir and Path(raw).is_absolute(),
@@ -201,6 +369,9 @@ def probe_private_callers(repo, worktree, env, baseline, outdir):
         require(resolver.module_identity(record) == worktree.parent / 'runtime-python/ltsep',
                 'copied_ltsep_import_mismatch:' + role)
         records.append(record)
+        if modes:
+            probes.append({'caller': record['caller'], 'paths': fields, 'isolation_passed': True})
+    require(probes and all(p['paths'] == probes[0]['paths'] for p in probes), 'ltsep_probe_paths_disagree')
     return {'plot': probes, 'all_callers': records}
 
 
@@ -683,7 +854,7 @@ def execute_gate(repo, outdir, output, source_commit):
             require(Path(skim).is_dir(), 'external_skim_mkdir_required')
             output_paths = isolation.probe_paths(worktree, env, paths)[0]['paths']
             private = prepare_private_output(worktree, output_paths)
-            probes = probe_private_callers(repo, worktree, env, paths, private)
+            probes = probe_private_callers(repo, worktree, env, paths, private, package)
             bindings = stage_input_files(shared, private)
             external_inputs = external_input_inventory(worktree, paths, private, env)
             audit_path = worktree.parent / 'runtime-python/sitecustomize.py'

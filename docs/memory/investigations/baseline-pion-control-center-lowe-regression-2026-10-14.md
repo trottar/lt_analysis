@@ -1325,3 +1325,85 @@ diff acceptance, user publication and pushed-state synchronization, then accepte
 owner/provenance/ZIP review and fresh offline seven-strength C/event MM/variance
 science. No farm command/run, ROOT acceptance, real-input preservation, physical
 PDF acceptance, strength selection or production promotion is established here.
+
+
+### Matched-cohort resolver dependency-import preflight — October 22
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[resolver-import repair contract](../phases/kaonlt-matched-cohort-resolver-import-preflight-fix-2026-10-22-task-contract.md),
+local `test`/`origin/test` anchor `a14e740ab68531aca1c60c48d7a73e13e8922aff`.
+The contract attributes the supplied `155418` pre-child failure to copied
+`ltsep/__init__.py -> ltsep.py -> uproot` source loading denied by the frozen
+resolver's read hook. That terminal exception is the supplied runtime claim;
+unsupplied status details and installed dependency closure remain NOT VERIFIED.
+No accepted ZIP, signed-event cohort, fresh C fit or MM science resulted. This
+attempt and the earlier HeeP/cycle failures remain failed/inadmissible evidence.
+
+SOURCE VERIFIED: an isolated interpreter's actual site-packages fixtures
+reproduce `resolver_data_read_forbidden` in the unchanged frozen probe. The
+matched owner now owns a separate subprocess probe; it neither patches that
+probe/module nor edits farm_env. A checked PathFinder/source-loader boundary
+admits Python source and interpreter-root binary-extension imports on demand,
+records imported paths/hashes, and rejects bytecode authority, unknown loaders,
+code outside checked interpreter/owned roots, module identity changes and path
+escapes. Dependency roots come from the executing interpreter's sysconfig;
+there is no general site-packages data-read exemption. Only loader-owned code
+reads and enumerated real ltsep PATH_TO_DIR configs may open files. Direct data
+or source reads from dependency code, scientific external roles and owned
+packages remain denied. Writes, filesystem/process mutations and ROOT bindings
+remain hard failures. Checked native code remains interpreter/library trust;
+Python audit hooks do not establish native-code sandboxing or ROOT validation.
+
+Both ordinary and private real fixture Root instances execute no-mode and
+Plot semantics, with distinct `None` versus `KaonLT` OUTPATH, exact caller/cwd,
+wrapper/package/config identity, unique matching config, stable role equality,
+ordinary baseline equivalence and physical private output checks. This owner's
+redundant inner unguarded Plot probes are replaced by these guarded calls;
+earlier frozen overlay/output-path helpers and all required-input inventories
+remain unchanged. Package byte preservation runs even after probe failure;
+owner failure retains bounded traceback, no child/ZIP/collection, and independent
+checkout/input/link/package checks. A successful real fixture probe reaches only
+the existing simulated protected child gate, not accepted analysis/collection.
+
+Local deterministic results: 46 matched-owner tests pass in WSL, covering the
+old denial, real uproot/numpy source dependency closure, both modes/cwds, data
+reads (.root/.csv/.json/package data), direct source reads, writes and mutation,
+ROOT/root_numpy, untrusted code, wrong package/module/realpath, stale and
+source-less bytecode, missing/duplicate configs, stable-role and output changes,
+and owner success/failure barriers. The unchanged template-owner (17) and frozen
+resolver (35) suites also pass; the combined run before the last added data-read
+case passed 97 tests. Windows Python runs 129 event/replay/C/cohort/template
+regressions with 11 archival-input skips, plus 44 memory tests with no skips.
+WSL lacks NumPy for the dependent scientific suites; Windows supplies their
+actual local results, without installing dependencies.
+
+The unchanged historical normal-launcher isolation suite has three live-tree
+failures: `test_source_order_and_no_analysis_import`,
+`test_read_only_receipt_stops_at_direct_background_mkdir`, and
+`test_collision_stale_and_no_debug_shortcut`. Its frozen ancestor's launcher
+blob `026fb42e5a486fbaa7c9dacd73640df33efa0d09` differs from starting HEAD's
+`5c5fd5a91ede0b347ac43e65fb1cd4e5568bf92e`; it stops at
+`protected_source_changed:run_Prod_Analysis.sh`. This pre-existing historical
+boundary is retained, not repinned or bypassed. It does not grant broader
+normal-launcher readiness. The other synthetic isolation cases remain strict.
+Syntax/diff, manifest write/check, ordinary memory health/bootstrap and
+preservation receipts accompany the complete review diff. Unrelated files,
+the supplied contract, frozen resolver and refs retain their startup bytes; no
+staged content changed. Raw index bytes changed during Git inspection (stat-cache
+refresh is an inference); no index restoration or publication was performed. CURRENT's soft-size
+warning remains nonblocking, batched at the next checkpoint/milestone audit.
+
+Known remaining import uncertainty is finite: the actual farm ltsep/uproot/numpy
+transitive closure may need code roots or package-data/native operations not
+admitted by this policy; those must fail closed with the denied event/path.
+No local synthetic result verifies that installed closure. Caller guards remain
+package/config/interpreter identity, caller/cwd/mode, stable inputs, baseline
+and private outputs, Plot parity and source-discovered reached callers. No
+production source, installed package, frozen resolver/tests, launcher, event
+selection, subtraction, templates, weights, yields or A/B/C math changed.
+
+NEXT remains one guarded user-operated matched acquisition only after independent
+actual-diff acceptance, user publication and pushed-state synchronization, then
+owner/provenance/ZIP acceptance and existing offline seven-strength C/six-parent
+MM/variance science. No farm command/run, real ROOT/input preservation, physical
+PDF acceptance, lambda selection, held-out/MSE claim or promotion is established.

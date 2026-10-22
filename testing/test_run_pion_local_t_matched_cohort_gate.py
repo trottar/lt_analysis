@@ -9,6 +9,8 @@ import sys
 import json
 import ast
 import errno
+import shutil
+import venv
 from array import array
 import unittest
 from unittest.mock import patch
@@ -19,6 +21,253 @@ from testing import run_pion_local_t_matched_cohort_gate as owner
 from testing import pion_local_t_event_validation_capture as cap
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class ResolverImports(unittest.TestCase):
+    """Real subprocess imports in an isolated interpreter, never fake Root results."""
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory(prefix='kaonlt-import-interpreter-')
+        cls.venv = Path(cls.temp.name).resolve()
+        venv.EnvBuilder(with_pip=False).create(cls.venv)
+        cls.python = cls.venv / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+        cls.site = Path(subprocess.check_output([str(cls.python), '-c',
+            'import sysconfig; print(sysconfig.get_path("purelib"))'], text=True).strip())
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    @contextmanager
+    def fixture(self, behavior='', dependency_behavior=''):
+        with tempfile.TemporaryDirectory(prefix='kaonlt-import-fixture-') as d:
+            root = Path(d).resolve()
+            repo, worktree = root / 'ordinary', root / 'attempt/analysis'
+            installed, copied = root / 'installed/ltsep', root / 'attempt/runtime-python/ltsep'
+            fields = {k: str(root / 'external' / k) for k in owner.resolver.FIELDS}
+            fields.update(USER='fixture', HOST='fixture', ANATYPE='Kaon', LTANAPATH=str(repo),
+                          OUTPATH=str(repo / 'OUTPUT/Analysis/KaonLT'))
+            for tree in (repo, worktree):
+                for name in {s for _, _, _, _, s in owner.resolver.CALLERS} | {
+                        'src/setup/calcTotalEffectiveCharge.py'}:
+                    p = tree / name
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_text('# caller must never execute\nraise RuntimeError("caller_executed")\n')
+                (tree / 'farm_env').mkdir()
+                for name in ('ltsep_paths.py',):
+                    shutil.copyfile(ROOT / 'farm_env' / name, tree / 'farm_env' / name)
+                (tree / 'OUTPUT/Analysis/KaonLT').mkdir(parents=True)
+            for package, tree in ((installed, repo), (copied, worktree)):
+                (package / 'PATH_TO_DIR').mkdir(parents=True)
+                (package / '__init__.py').write_text('from .ltsep import Root\n')
+                (package / 'ltsep.py').write_text(
+                    'from pathlib import Path\nimport uproot\nfrom .pathing import SetPath\n'
+                    'class Root:\n'
+                    ' def __init__(self,caller,*modes):\n'
+                    '  p=SetPath(caller)\n'
+                    '  for k in p.values: setattr(self,k,p.getPath(k))\n'
+                    '  if modes not in ((), ("Plot_LTSep",)): raise ValueError("wrong mode")\n'
+                    '  self.OUTPATH=str(Path(self.LTANAPATH)/"OUTPUT/Analysis"/("KaonLT" if modes else "None"))\n'
+                    + behavior)
+                (package / 'pathing.py').write_text(
+                    'from pathlib import Path\nclass SetPath:\n'
+                    ' def __init__(self,caller):\n'
+                    '  self.values=dict(line.split("=",1) for line in (Path(__file__).parent/"PATH_TO_DIR/user.path").read_text().splitlines())\n'
+                    ' def getPath(self,key): return self.values[key]\n')
+                config = dict(fields, LTANAPATH=str(tree))
+                (package / 'PATH_TO_DIR/user.path').write_text(''.join(k+'='+v+'\n' for k,v in config.items()))
+            # These are actual interpreter site-packages, outside ltsep/stdlib.
+            for name, text in (('uproot', 'import numpy\n' + dependency_behavior), ('numpy', 'fixture_dependency=True\n')):
+                p = self.site / name
+                p.mkdir()
+                (p / '__init__.py').write_text(text)
+            (root / 'physics.root').write_bytes(b'never read by resolver')
+            for suffix in ('root', 'csv', 'json', 'dat'):
+                (self.site / ('physics.' + suffix)).write_bytes(b'never read even inside site-packages')
+            baseline_env = dict(os.environ, PYTHONPATH=str(installed.parent), PYTHONDONTWRITEBYTECODE='1')
+            private_env = dict(baseline_env, PYTHONPATH=str(copied.parent))
+            before = {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()}
+            try:
+                with patch.object(owner.sys, 'executable', str(self.python)), patch.dict(os.environ, baseline_env, clear=True):
+                    yield SimpleNamespace(root=root, repo=repo, tree=worktree, package=installed,
+                        copied=copied, baseline=fields, env=private_env,
+                        outdir=worktree / 'OUTPUT/Analysis/KaonLT')
+            finally:
+                for name, raw in before.items():
+                    self.assertEqual(Path(name).read_bytes(), raw, name)
+                self.assertFalse((root / 'written').exists())
+                for name in ('uproot', 'numpy'):
+                    shutil.rmtree(self.site / name)
+                for p in self.site.glob('physics.*'):
+                    p.unlink()
+
+    def run_private(self, f):
+        return owner.probe_private_callers(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package)
+
+    def test_frozen_probe_reproduces_dependency_read_failure(self):
+        with self.fixture() as f:
+            with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):
+                owner.resolver.probe(f.tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'src/setup')
+
+    def test_real_import_closure_and_all_caller_modes(self):
+        with self.fixture() as f:
+            result = self.run_private(f)
+            self.assertEqual(len(result['all_callers']), len(owner.resolver.CALLERS))
+            self.assertTrue(result['plot'])
+            for record in result['all_callers']:
+                self.assertEqual(record['cwd'], str(f.tree / ('src/setup' if not record['mode'] else
+                    next(cwd for _, caller, modes, cwd, _ in owner.resolver.CALLERS
+                         if str(f.tree / caller) == record['caller'] and list(modes) == record['mode']))))
+                self.assertEqual(owner.resolver.module_identity(record), f.copied)
+                self.assertEqual(Path(record['paths']['OUTPATH']).name, 'KaonLT' if record['mode'] else 'None')
+                self.assertTrue({'ltsep', 'ltsep.ltsep', 'uproot', 'numpy'}.issubset(record['source_imports']))
+                from importlib.machinery import EXTENSION_SUFFIXES
+                self.assertTrue(all(r['path'].endswith(('.py', *EXTENSION_SUFFIXES))
+                                    for r in record['source_imports'].values()))
+
+    def test_data_reads_from_root_and_dependencies_are_forbidden(self):
+        for suffix in ('root', 'csv', 'json', 'dat'):
+            for dependency in (False, True):
+                statement = 'Path(' + repr(str(self.site / ('physics.'+suffix))) + ').read_bytes()\n'
+                with self.subTest(suffix=suffix, dependency=dependency), self.fixture(
+                    behavior='' if dependency else '  '+statement,
+                    dependency_behavior='from pathlib import Path\n'+statement if dependency else '') as f:
+                    with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden:.*physics'):
+                        self.run_private(f)
+        with self.fixture(dependency_behavior=
+                'from pathlib import Path\nPath(__file__).parents[2].joinpath("outside.root").read_bytes()\n') as f:
+            # Existing external physics file, so this tests denial, not ENOENT.
+            external = self.site.parent / 'outside.root'
+            external.write_bytes(b'physics')
+            try:
+                with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden:.*outside.root'):
+                    self.run_private(f)
+            finally:
+                external.unlink()
+
+    def test_mutations_and_scientific_imports_fail(self):
+        actions = [
+            'Path(__file__).write_text("mutation")',
+            'Path(__file__).parent.joinpath("PATH_TO_DIR/user.path").write_text("mutation")',
+            'Path(__file__).parent.joinpath("created").mkdir()',
+            'Path(__file__).unlink()',
+            'Path(__file__).rename(Path(__file__).with_name("renamed"))',
+            'Path(__file__).with_name("linked").symlink_to(__file__)',
+            '__import__("subprocess").run(["echo","forbidden"])',
+            '__import__("os").system("echo forbidden")',
+            '__import__("ROOT")', '__import__("root_numpy")',
+        ]
+        for action in actions:
+            with self.subTest(action=action), self.fixture(behavior='  '+action+'\n') as f:
+                with self.assertRaisesRegex(ValueError, 'resolver_(write|mutation)_attempt|scientific_module_import_forbidden'):
+                    self.run_private(f)
+
+    def test_owned_package_data_and_direct_source_reads_are_forbidden(self):
+        for statement in ('Path(__file__).with_name("unexpected.json").read_bytes()',
+                          'Path(self.UTILPATH).joinpath("absent.csv").read_bytes()',
+                          'Path(__file__).read_bytes()'):
+            with self.subTest(statement=statement), self.fixture(behavior='  '+statement+'\n') as f:
+                data = f.copied / 'unexpected.json'
+                data.write_bytes(b'not an authorized config')
+                with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):
+                    self.run_private(f)
+
+    def test_outside_code_and_unexpected_package_identity_fail(self):
+        with self.fixture() as f:
+            outside = f.root / 'untrusted'
+            outside.mkdir()
+            (outside / 'untrusted.py').write_text('value=True\n')
+            (self.site / 'uproot/__init__.py').write_text('import untrusted\n')
+            f.env['PYTHONPATH'] += os.pathsep + str(outside)
+            with self.assertRaisesRegex(ValueError, 'resolver_code_import_forbidden:.*untrusted.py'):
+                self.run_private(f)
+            f.env['PYTHONPATH'] = str(f.package.parent)
+            with self.assertRaisesRegex(ValueError, 'resolver_package_import_mismatch'):
+                self.run_private(f)
+
+    def test_source_authority_ignores_preexisting_pyc(self):
+        import py_compile
+        with self.fixture() as f:
+            p = self.site / 'uproot/__init__.py'
+            p.write_text('raise RuntimeError("bytecode_executed")\n')
+            py_compile.compile(str(p), doraise=True, invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
+            p.write_text('import numpy\n')
+            self.run_private(f)
+            py_compile.compile(str(p), cfile=str(p.with_suffix('.pyc')), doraise=True)
+            p.unlink()
+            with self.assertRaisesRegex(ValueError, 'resolver_|ModuleNotFoundError'):
+                self.run_private(f)
+
+    def test_root_semantics_and_unique_config_fail_closed(self):
+        cases = [
+            ('  if not modes: self.OUTPATH=str(Path(self.LTANAPATH)/"wrong")\n', 'root_outpath_mismatch'),
+            ('  if modes: self.OUTPATH=str(Path(self.LTANAPATH)/"OUTPUT/Analysis/None")\n', 'root_outpath_mismatch'),
+            ('  self.UTILPATH="changed"\n', 'baseline_input_role_changed|stable_input_role_changed'),
+            ('  __import__("uproot").__file__="unexpected.py"\n', 'module_identity_changed'),
+        ]
+        for behavior, message in cases:
+            with self.subTest(behavior=behavior), self.fixture(behavior=behavior) as f:
+                with self.assertRaisesRegex(ValueError, message):
+                    self.run_private(f)
+        for duplicate in (False, True):
+            with self.fixture() as f:
+                config = f.copied / 'PATH_TO_DIR/user.path'
+                if duplicate:
+                    second = config.with_name('second.path')
+                    shutil.copyfile(config, second)
+                    try:
+                        with self.assertRaisesRegex(ValueError, 'matching_config_not_unique'):
+                            self.run_private(f)
+                    finally:
+                        second.unlink()
+                else:
+                    # Valid parsed config with no matching LTANAPATH, not a missing file.
+                    original = config.read_bytes()
+                    config.write_bytes(original.replace(b'LTANAPATH=', b'OTHERPATH='))
+                    try:
+                        with self.assertRaisesRegex(ValueError, 'resolver_subprocess_failed|matching_config_not_unique'):
+                            self.run_private(f)
+                    finally:
+                        config.write_bytes(original)
+
+    def test_private_only_role_and_output_changes_fail(self):
+        for statement, reason in (
+                ('self.UTILPATH="changed"', 'stable_input_role_changed'),
+                ('self.OUTPATH=str(Path(self.LTANAPATH)/"wrong")', 'private_outpath_mismatch')):
+            with self.fixture(behavior='  if "runtime-python" in __file__: '+statement+'\n') as f:
+                with self.assertRaisesRegex(ValueError, reason):
+                    self.run_private(f)
+
+    def test_package_and_config_realpath_changes_fail(self):
+        for config in (False, True):
+            with self.subTest(config=config), self.fixture() as f:
+                path = f.copied / ('PATH_TO_DIR/user.path' if config else 'pathing.py')
+                raw = path.read_bytes()
+                target = f.root / 'escaped'
+                target.write_bytes(raw)
+                path.unlink()
+                path.symlink_to(target)
+                try:
+                    with self.assertRaisesRegex(ValueError, 'package_symlink_not_supported|resolver_path_escape'):
+                        self.run_private(f)
+                finally:
+                    path.unlink()
+                    path.write_bytes(raw)
+
+    def test_real_probe_success_and_failure_enter_owner_child_barrier(self):
+        # Keep unrelated orchestration fixtures synthetic, but execute the full
+        # subprocess import/caller gate rather than mocking probe return values.
+        real_probe = owner.probe_private_callers
+        for failure in (False, True):
+            with self.subTest(failure=failure), self.fixture(behavior=
+                    '  Path(self.UTILPATH).joinpath("physics.root").read_bytes()\n' if failure else '') as f:
+                external = Path(f.baseline['UTILPATH'])
+                external.mkdir(parents=True)
+                (external / 'physics.root').write_bytes(b'never read')
+                test = PrivateBoundary(methodName='runTest')
+                test.exercise_exact_preflight_sigma0('absent',
+                    probe_check=lambda *args: real_probe(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package),
+                    resolver_failure=failure)
 
 
 def external_fixture(worktree, private, volatile):
@@ -338,7 +587,8 @@ class PrivateBoundary(unittest.TestCase):
     def exercise_exact_preflight_sigma0(self, sigma_case, mutation=None, *, cyclic=False,
                                        loop_form='native', required_role='sigma0_SIMC',
                                        preflight_failure=False, preservation_failure=False,
-                                       artifact_failure=False, completed_child=False):
+                                       artifact_failure=False, completed_child=False,
+                                       probe_check=None, resolver_failure=False):
         with tempfile.TemporaryDirectory() as d:
             parent = Path(d).resolve()
             repo, worktree, globus = parent / 'repo', parent / 'analysis', parent / 'globus'
@@ -462,7 +712,10 @@ class PrivateBoundary(unittest.TestCase):
                         raise PermissionError('synthetic preflight denied')
                     inventory_call.side_effect = fail_source_caller
                 patched(owner, 'skim_paths', return_value={'launcher': str(shared), 'effective_charge': str(shared)})
-                patched(owner, 'probe_private_callers', return_value={})
+                if probe_check is None:
+                    patched(owner, 'probe_private_callers', return_value={})
+                else:
+                    patched(owner, 'probe_private_callers', side_effect=probe_check)
                 patched(owner.event_owner, 'committed_identities', return_value={})
                 def failed_child(tree, log, env):
                     Path(log).write_text('All available low-epsilon settings completed in debug mode.\n'
@@ -514,9 +767,9 @@ class PrivateBoundary(unittest.TestCase):
                 if preservation_failure:
                     checkout.side_effect = ValueError('checkout preservation failure')
                     installed.side_effect = ValueError('installed preservation failure')
-                invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure
+                invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure or resolver_failure
                 role = 'sigma0_SIMC' if required_role == 'sigma0_SIMC' else 'pion_SIMC_' + required_role
-                reason = ('preservation_failed' if mutation else
+                reason = ('resolver_data_read_forbidden' if resolver_failure else 'preservation_failed' if mutation else
                           'required_external_input_missing:' + role if invalid else
                           'synthetic joint gate failure' if artifact_failure else 'analysis_failed')
                 expected = ValueError
@@ -528,8 +781,11 @@ class PrivateBoundary(unittest.TestCase):
                     reason = 'preservation_failed'
                 with self.assertRaisesRegex(expected, reason):
                     owner.execute_gate(repo, shared, globus / 'new.zip', head)
-                inventory_call.assert_called_once()
-                self.assertEqual(inventory_call.call_args.args[3], sigma_env)
+                if resolver_failure:
+                    inventory_call.assert_not_called()
+                else:
+                    inventory_call.assert_called_once()
+                    self.assertEqual(inventory_call.call_args.args[3], sigma_env)
                 if invalid:
                     child.assert_not_called()
                 else:
@@ -547,6 +803,10 @@ class PrivateBoundary(unittest.TestCase):
                 self.assertTrue(status['failure_reason'])
                 self.assertIn('execute_gate', status['failure_traceback'])
                 self.assertLessEqual(len(status['failure_traceback']), 8192)
+                if resolver_failure:
+                    self.assertEqual(status['stage'], 'source_preflight')
+                    self.assertFalse(status['analysis_started'])
+                    self.assertIn('probe_resolver', status['failure_traceback'])
                 if preflight_failure:
                     self.assertEqual(status['stage'], 'source_preflight')
                     self.assertFalse(status['analysis_started'])
@@ -665,9 +925,9 @@ class PrivateBoundary(unittest.TestCase):
             base = {'VOLATILEPATH': str(tree / 'external'), 'OUTPATH': str(tree / 'external'),
                     'ANATYPE': 'Kaon', 'LTANAPATH': str(tree)}
             record = {'paths': base, 'package_file': str(tree / 'runtime-python/ltsep/__init__.py')}
-            with patch.object(owner, 'reached_resolver_callers', return_value=[]), patch.object(owner.isolation, 'probe_paths', return_value=[]), patch.object(owner.resolver, 'probe', return_value=record):
-                with self.assertRaisesRegex(ValueError, 'default_root_private_outpath_mismatch'):
-                    owner.probe_private_callers(tree, tree, {}, base, tree / 'private')
+            with patch.object(owner, 'reached_resolver_callers', return_value=[]), patch.object(owner, 'probe_resolver', return_value=record):
+                with self.assertRaisesRegex(ValueError, 'baseline_root_outpath_mismatch'):
+                    owner.probe_private_callers(tree, tree, {}, base, tree / 'private', tree)
 
     def test_reached_writers_cover_main_and_setup_contexts(self):
         callers = owner.reached_resolver_callers(ROOT)
