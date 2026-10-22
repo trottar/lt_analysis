@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16220,
+      "bytes": 16189,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "a7c510dcfb1c935b46101eaae5ef5ac3a3e7fe39070c85141f8bba4f7a1496de"
+      "sha256": "693c2e5e6618a01414e5d10b5923a51ccd071db110e8eb6ae815b5aa14864dd2"
     },
     {
       "bytes": 10506,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 80559,
+      "bytes": 83328,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "c71da2774fb01ff459c9565f661e43d9de9326ef7c24c60765e3cbe41e91cb80"
+      "sha256": "11cb450539ed39f26e1e621241a36c9a90284d52036f0cc5e78e7313ede52563"
     },
     {
       "bytes": 23507,
@@ -1334,6 +1334,11 @@
       "bytes": 10942,
       "path": "docs/memory/phases/kaonlt-pion-matched-cohort-event-evidence-2026-10-21-task-contract.md",
       "sha256": "8b398f152fdb70e9d6cc2f25a75d3de7613b6890d5fcac76210f08dbbe200097"
+    },
+    {
+      "bytes": 9234,
+      "path": "docs/memory/phases/kaonlt-pion-matched-cohort-preflight-dangling-link-fix-2026-10-22-task-contract.md",
+      "sha256": "8c1ad3639c44a0690c04a5e5e9eb4212b0495e723822858e13f86806a1e224e6"
     },
     {
       "bytes": 10313,

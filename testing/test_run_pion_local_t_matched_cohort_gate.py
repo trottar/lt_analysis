@@ -45,6 +45,97 @@ def external_fixture(worktree, private, volatile):
 
 
 class PrivateBoundary(unittest.TestCase):
+    def test_shared_dangling_link_metadata_and_preservation(self):
+        for change in ('retarget', 'remove', 'replace', 'resolve', 'bytes'):
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as d:
+                root = Path(d).resolve()
+                shared = root / 'KaonLT'
+                shared.mkdir()
+                target = root / 'OUTPUT/Analysis/HeeP'
+                target.parent.mkdir(parents=True)
+                link = shared / 'unrelated'
+                link.symlink_to(target, target_is_directory=True)
+                regular = shared / 'regular.bin'
+                regular.write_bytes(b'original')
+                before = owner.inventory(shared)
+                self.assertEqual(before['unrelated'], {'link': str(target), 'missing_target': True})
+                self.assertEqual(owner.inventory(shared), before)
+                self.assertFalse(target.exists())
+                if change in ('retarget', 'remove', 'replace'):
+                    link.unlink()
+                if change == 'retarget':
+                    link.symlink_to(root / 'other-missing')
+                elif change == 'replace':
+                    link.write_bytes(b'replacement')
+                elif change == 'resolve':
+                    target.mkdir(parents=True)
+                elif change == 'bytes':
+                    regular.write_bytes(b'mutated')
+                self.assertNotEqual(owner.inventory(shared), before)
+
+    def test_external_dangling_metadata_is_preserved(self):
+        for role in ('CUTPATH', 'PARAMPATH'):
+            for change in ('retarget', 'remove', 'replace', 'resolve'):
+                with self.subTest(role=role, change=change), tempfile.TemporaryDirectory() as d:
+                    root = Path(d).resolve()
+                    worktree, private = root / 'analysis', root / 'private'
+                    paths = external_fixture(worktree, private, root / 'volatile')
+                    directory = Path(paths[role])
+                    directory.mkdir(exist_ok=True)
+                    target = root / 'OUTPUT/Analysis/HeeP'
+                    target.parent.mkdir(parents=True)
+                    link = directory / 'unrelated'
+                    link.symlink_to(target, target_is_directory=True)
+                    with patch.object(owner, 'skim_paths', return_value={'effective_charge': str(root / 'skim')}):
+                        records = owner.external_input_inventory(worktree, paths, private, {})
+                    self.assertEqual(records[str(link)], {'role': role, 'unresolved_link': {
+                        'link': str(target), 'missing_target': True}})
+                    owner.verify_external_inputs(records)
+                    self.assertFalse(target.exists())
+                    if change in ('retarget', 'remove', 'replace'):
+                        link.unlink()
+                    if change == 'retarget':
+                        link.symlink_to(root / 'other-missing')
+                    elif change == 'replace':
+                        link.write_bytes(b'replacement')
+                    elif change == 'resolve':
+                        target.mkdir(parents=True)
+                    with self.assertRaisesRegex(ValueError, 'external_input_changed'):
+                        owner.verify_external_inputs(records)
+
+    def test_required_dangling_inputs_still_fail_closed(self):
+        for role in ('sigma0_SIMC', 'pion_SIMC_neutron'):
+            with self.subTest(role=role), tempfile.TemporaryDirectory() as d:
+                root = Path(d).resolve()
+                worktree, private = root / 'analysis', root / 'private'
+                paths = external_fixture(worktree, private, root / 'volatile')
+                env = {}
+                if role == 'sigma0_SIMC':
+                    link = root / 'sigma.root'
+                    env['LT_BG_SIGMA0_CENTER_LOW_ROOT'] = str(link)
+                else:
+                    link = root / 'volatile/OUTPUT/Analysis/KaonLT/background_samples/neutron/Prod_Coin_Q4p4W2p74center_lowe.root'
+                    link.unlink()
+                link.symlink_to(root / 'missing.root')
+                with self.assertRaises(FileNotFoundError):
+                    owner.identity(link)
+                with patch.object(owner, 'skim_paths', return_value={'effective_charge': str(root / 'skim')}):
+                    with self.assertRaisesRegex(ValueError, 'required_external_input_missing:' + role):
+                        owner.external_input_inventory(worktree, paths, private, env)
+
+    def test_intact_link_keeps_referent_identity(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            target = root / 'regular.bin'
+            target.write_bytes(b'original')
+            link = root / 'link'
+            link.symlink_to(target)
+            before = owner.inventory(root)
+            self.assertEqual(before['link'], {'link': str(target),
+                'resolved_path': str(target), 'referent': owner.identity(link)})
+            target.write_bytes(b'mutated')
+            self.assertNotEqual(owner.inventory(root), before)
+
     def test_sigma0_unconfigured_inventory_preserves_fallback(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d).resolve()
@@ -140,7 +231,16 @@ class PrivateBoundary(unittest.TestCase):
     def test_exact_preflight_invalid_sigma0_stops_before_child(self):
         self.exercise_exact_preflight_sigma0('invalid')
 
-    def exercise_exact_preflight_sigma0(self, sigma_case):
+    def test_exact_preflight_dangling_sigma0_stops_before_child(self):
+        self.exercise_exact_preflight_sigma0('dangling')
+
+    def test_child_dangling_link_mutations_fail_preservation(self):
+        for location in ('shared', 'CUTPATH', 'PARAMPATH'):
+            for change in ('retarget', 'remove', 'replace', 'resolve', 'bytes'):
+                with self.subTest(location=location, change=change):
+                    self.exercise_exact_preflight_sigma0('absent', (location, change))
+
+    def exercise_exact_preflight_sigma0(self, sigma_case, mutation=None):
         with tempfile.TemporaryDirectory() as d:
             parent = Path(d).resolve()
             repo, worktree, globus = parent / 'repo', parent / 'analysis', parent / 'globus'
@@ -163,12 +263,25 @@ class PrivateBoundary(unittest.TestCase):
             # Exercise execute_gate -> external_input_inventory directly;
             # only the eventual analysis child is simulated and fails.
             external_paths = external_fixture(worktree, shared, parent / 'volatile')
+            # Every exact preflight exercises both broad inventory callers.
+            target = parent / 'volatile/OUTPUT/Analysis/HeeP'
+            links = {}
+            for location, directory in dict(shared=str(shared), **external_paths).items():
+                if location not in ('shared', 'CUTPATH', 'PARAMPATH'):
+                    continue
+                directory = Path(directory)
+                directory.mkdir(exist_ok=True)
+                (directory / 'regular.bin').write_bytes(b'original')
+                links[location] = directory / 'unrelated'
+                links[location].symlink_to(target, target_is_directory=True)
             sigma_env = {}
             if sigma_case != 'absent':
                 for s in owner.SETTINGS:
                     p = parent / (s + '-sigma.root')
                     if sigma_case == 'valid':
                         p.write_bytes((s + ' Sigma0').encode())
+                    elif sigma_case == 'dangling':
+                        p.symlink_to(parent / 'missing-sigma.root')
                     sigma_env[f'LT_BG_SIGMA0_{s.upper()}_LOW_ROOT'] = str(p)
             original = owner.inventory(shared)
             package = parent / 'installed'
@@ -217,16 +330,33 @@ class PrivateBoundary(unittest.TestCase):
                 patched(owner.event_owner, 'committed_identities', return_value={})
                 def failed_child(tree, log, env):
                     Path(log).write_text('synthetic child failure; no analysis executed')
+                    if mutation:
+                        location, change = mutation
+                        link = links[location]
+                        if change in ('retarget', 'remove', 'replace'):
+                            link.unlink()
+                        if change == 'retarget':
+                            link.symlink_to(parent / 'other-missing')
+                        elif change == 'replace':
+                            link.write_bytes(b'replacement')
+                        elif change == 'resolve':
+                            target.mkdir()
+                        elif change == 'bytes':
+                            regular = (shared / 'Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root'
+                                       if location == 'shared' else Path(external_paths[location]) / 'regular.bin')
+                            regular.write_bytes(b'mutated')
                     return 1
                 child = patched(owner.ab.debug, 'run_analysis', side_effect=failed_child)
                 checkout = patched(owner.isolation, 'verify_preservation', return_value={})
                 installed = patched(owner.isolation, 'verify_ltsep_preservation', return_value={})
-                reason = 'required_external_input_missing:sigma0_SIMC' if sigma_case == 'invalid' else 'analysis_failed'
+                invalid = sigma_case in ('invalid', 'dangling')
+                reason = ('preservation_failed' if mutation else
+                          'required_external_input_missing:sigma0_SIMC' if invalid else 'analysis_failed')
                 with self.assertRaisesRegex(ValueError, reason):
                     owner.execute_gate(repo, shared, globus / 'new.zip', head)
                 inventory_call.assert_called_once()
                 self.assertEqual(inventory_call.call_args.args[3], sigma_env)
-                if sigma_case == 'invalid':
+                if invalid:
                     child.assert_not_called()
                 else:
                     child.assert_called_once()
@@ -237,8 +367,10 @@ class PrivateBoundary(unittest.TestCase):
                 self.assertGreaterEqual(checkout.call_count, 1)
                 self.assertGreaterEqual(installed.call_count, 1)
             self.assertIn('analysis', cleaned)
-            self.assertEqual({k: v for k, v in owner.inventory(shared).items() if k != 'new.log'}, original)
-            self.assertEqual((shared / 'new.log').is_file(), sigma_case != 'invalid')
+            if not mutation:
+                self.assertEqual({k: v for k, v in owner.inventory(shared).items() if k != 'new.log'}, original)
+                self.assertFalse(target.exists())
+            self.assertEqual((shared / 'new.log').is_file(), not invalid)
 
     def test_all_preservation_checks_run_after_first_failure(self):
         calls = []

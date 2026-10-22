@@ -110,6 +110,19 @@ def identity(path):
     return result
 
 
+def link_inventory(path):
+    """Missing referents are preservation metadata, never available inputs."""
+    record = {"link": os.readlink(path)}
+    try:
+        record["resolved_path"] = str(path.resolve(strict=True))
+    except FileNotFoundError:
+        record["missing_target"] = True
+        return record
+    if path.is_file():
+        record["referent"] = identity(path)
+    return record
+
+
 def inventory(root):
     """Do not follow directory symlinks; record every referent actually hashed."""
     root = Path(root)
@@ -120,9 +133,7 @@ def inventory(root):
             p = Path(parent) / name
             key = p.relative_to(root).as_posix()
             if p.is_symlink():
-                result[key] = {"link": os.readlink(p), "resolved_path": str(p.resolve(strict=True))}
-                if p.is_file():
-                    result[key]["referent"] = identity(p)
+                result[key] = link_inventory(p)
             elif p.is_file():
                 result[key] = identity(p)
             else:
@@ -374,16 +385,22 @@ def external_input_inventory(worktree, paths, private, env):
     for role in ('CUTPATH', 'PARAMPATH'):
         root = Path(paths[role])
         if root.is_dir():
-            for name in inventory(root):
+            for name, item in inventory(root).items():
                 p = root / name
-                if p.is_file():
+                if item.get('missing_target'):
+                    records[str(p)] = {'role': role, 'unresolved_link': item}
+                elif p.is_file():
                     add(p, role)
     return records
 
 
 def verify_external_inputs(records):
     for path, record in records.items():
-        if record.get('missing'):
+        if 'unresolved_link' in record:
+            p = Path(path)
+            require(p.is_symlink() and link_inventory(p) == record['unresolved_link'],
+                    'external_input_changed:' + path)
+        elif record.get('missing'):
             require(not Path(path).exists(), 'external_missing_input_changed:' + path)
         else:
             require(identity(path) == record['identity'], 'external_input_changed:' + path)

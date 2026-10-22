@@ -30,25 +30,25 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local implementation of the
-[matched-cohort attempt-isolation contract](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md),
-based on `test` audit anchor `b23d231ce41f96759a2d9cddd39bfa20f8953ad2`.
-Independent actual-diff review remains required; no farm readiness or scientific
-acceptance follows from this status. The previous frozen-helper
-[feasibility stop](phases/kaonlt-pion-matched-cohort-event-evidence-2026-10-21-task-contract.md)
-is historical, not a new farm result.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
+[dangling-link preflight repair](phases/kaonlt-pion-matched-cohort-preflight-dangling-link-fix-2026-10-22-task-contract.md)
+at `test` anchor `30e029c744ca2638733a1f4c070a71968641f157`.
+Supplied October 22 farm status: `BLOCKED` at `source_preflight`, missing
+HeeP target, `analysis_started=false`, `evidence_admissible=false`.
+SOURCE VERIFIED: broad inventory reproduced this exception; missing-target
+links now remain metadata under before/after preservation checks. The actual
+farm inventory caller is NOT VERIFIED without a traceback. Required inputs
+remain strict; no shared link/directory repair or science change.
 
-SOURCE VERIFIED locally: one new owner prepares a private output-tree sibling in
-the existing disposable worktree, retains original volatile-path role and stable
-external roles, probes actual default/Plot callers, stages byte-preserving
-private inputs for both epsilon prepasses, and checks diamond glob-selection
-parity. Optional Sigma0 sources retain the unchanged launcher fallback when
-unconfigured; configured files retain strict identity/preservation gates.
-Only its child enables both existing observers. Existing launchers,
-isolation helpers, installed `ltsep` and production source remain unchanged.
-The owner checks original input identities, shared outputs, external links,
-installed/copied package preservation, fresh six-parent A/B/event joins and
-histogram/source closure before collection/delivery. Failure stops the chain.
+The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
+retains private output/input copies, stable external roles and VOLATILEPATH,
+default/Plot caller probes, both epsilon prepasses, diamond-selection parity,
+optional unconfigured Sigma0 fallback and strict configured-file checks.
+Only its child enables both observers. Original inputs, shared outputs,
+external links, installed/copied packages and fresh six-parent A/B/event
+joins/closure must pass before delivery. Launchers, isolation helpers, installed
+`ltsep` and production source remain unchanged. Local synthetic checks grant
+no farm readiness or scientific acceptance.
 
 The native input writer matters: frozen `shift_prep` replaces `MM_shift` and
 `t_shift` branches in ROOT containers. It operates on private copies here.
@@ -216,9 +216,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT review of the complete matched-cohort actual diff.
-Conditional on acceptance, user publication and pushed-state synchronization,
-one user-operated owned Center/Left lowe acquisition must establish fresh
+NEXT — one guarded user-operated Center/Left lowe matched-cohort acquisition,
+conditional on independent ChatGPT actual-diff acceptance of the preflight
+repair, user publication and pushed-state synchronization. It must establish fresh
 same-run A/B and signed-event evidence, followed by the tracked offline fresh
 seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison.
 Any first source, input, child, artifact, provenance or preservation failure

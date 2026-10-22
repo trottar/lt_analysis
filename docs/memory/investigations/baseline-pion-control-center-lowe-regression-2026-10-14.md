@@ -1215,3 +1215,42 @@ sources reach only a simulated failing child; invalid configuration stops before
 it. Twenty owner tests pass in WSL. This correction supplies no farm, ROOT,
 physical-PDF or scientific acceptance. The next gate remains independent review
 of the revised complete actual diff; no automatic farm retry is authorized.
+
+### Matched-cohort dangling-link preflight repair — October 22
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[scoped repair contract](../phases/kaonlt-pion-matched-cohort-preflight-dangling-link-fix-2026-10-22-task-contract.md),
+local `test`/`origin/test` anchor `30e029c744ca2638733a1f4c070a71968641f157`.
+The supplied `KaonLT_matched_cohort_Q4p4W2p74_20261022-133634-gate-status.json`
+reports failed `source_preflight`, missing HeeP referent, `analysis_started=false`
+and `evidence_admissible=false`; it is failed-gate evidence only, not an accepted
+ZIP or event result. SOURCE VERIFIED: deterministic fixtures reproduce the
+missing-HeeP exception in broad `inventory()` strict symlink resolution. The
+earliest owner invocation is `shared_state()` after the copied-ltsep overlay;
+later CUTPATH/PARAMPATH inventories have the same defect. Earlier frozen
+delegates check source, package/config identities and resolver roles rather
+than broadly inventorying these output/config trees. Which invocation met the
+actual farm link remains NOT VERIFIED: the supplied status has no traceback.
+
+Only metadata inventory now catches `FileNotFoundError` from link resolution,
+retaining lexical path, literal target and `missing_target=true`. Intact links
+retain resolved targets and existing file-referent identities. External broad
+scans retain missing-link metadata in their post-child equality checks; these
+records never establish input availability. Other resolution errors propagate.
+Required/configured inputs, strict `identity`, shared-output scope, external live
+links, output collisions, installed/copied-package checks and failure preservation
+remain hard gates. No HeeP/shared directory or link was repaired; production,
+launcher, frozen delegates, cohort pins and A/B/C mathematics remain unchanged.
+
+Local deterministic validation: 26 owner tests pass in WSL, including both real
+inventory callers in exact simulated preflight, required dangling Sigma0/neutron
+rejection, unchanged live-file hashing, one child/no collection on failure and
+all three inventory locations detecting child-time retarget/removal/replacement,
+target creation and regular-byte mutation. Related Windows Python suites run
+76 tests with nine archival-input skips; their WSL imports lack NumPy, so no
+dependency repair was attempted. Memory/bootstrap/compilation/diff receipts are
+reported with the complete review bundle. The pre-existing CURRENT size warning
+is nonblocking and deferred to the next checkpoint/milestone audit. No farm,
+ROOT/PyROOT, real-input preservation, physical-PDF or scientific acceptance.
+CURRENT owns the conditional one-acquisition NEXT after independent actual-diff
+review, user publication and pushed-state review; no automatic retry or command.
