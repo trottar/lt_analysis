@@ -1327,6 +1327,20 @@ science. No farm command/run, ROOT acceptance, real-input preservation, physical
 PDF acceptance, strength selection or production promotion is established here.
 
 
+### Matched-cohort farm-readiness accountability — October 22
+
+`BLOCKED`: supplied `180522` attempt at
+`f266045e9a535970f54a189a5eecb009401b8adb` rejected an observed Python 3.9
+lib64 dependency path as `resolver_code_path_escape`. The
+[incident](kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md) records
+all four failed attempts and attributes the repeated unsupported readiness
+approvals and lost science day to assistant judgment, not user farm operation.
+Full latest status, canonical target and installed closure remain NOT VERIFIED.
+No fresh matched signed-event evidence or accepted ZIP exists here. The bounded
+owner alias repair and governing-memory corrections are local proposals pending
+actual-diff review/publication; prior accepted scientific findings remain intact.
+CURRENT owns the sole conditional acquisition NEXT. No new phase or farm rerun.
+
 ### Matched-cohort resolver dependency-import preflight — October 22
 
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the

@@ -76,6 +76,19 @@ the farm artifacts.
 
 ## Actual-diff review before user handoff
 
+Path-sensitive readiness review must map supplied failures to representative
+positive and strict negative tests: interpreter/version, lexical/canonical
+locations, symlink topology, interpreter dependency roots and exact caller/cwd.
+After repeated pre-child failures, reproduce all relevant supplied traceback
+classes and audit adjacent equivalent checks before a further farm command.
+State which tests execute the observed version and which replay only its path
+shape. A known unaddressed failure blocks readiness; missing installed dependency
+closure remains NOT VERIFIED. Local passes cannot establish RUNTIME VERIFIED or
+unqualified farm compatibility. This is part of the existing actual-diff and
+readiness review, not a separate process or phase. The
+[October 22 incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+attributes the repeated inadequate readiness approvals to assistant judgment.
+
 1. Codex implements locally and stops before commit/push.
 2. ChatGPT reviews the actual diff, not the Codex summary.
 3. For a small diff, terminal output may be pasted directly.

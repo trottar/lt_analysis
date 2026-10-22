@@ -191,27 +191,51 @@ spec=machinery.PathFinder.find_spec("ltsep")
 if spec is None or spec.origin is None: raise ImportError("installed_ltsep_unavailable")
 if Path(spec.origin) != expected/"__init__.py":
     raise RuntimeError("resolver_package_import_mismatch:"+str(spec.origin))
-stdlib=Path(sysconfig.get_path("stdlib")).resolve()
-dependencies={Path(sysconfig.get_path(k)).resolve() for k in ("purelib","platlib")}
+stdlib=Path(sysconfig.get_path("stdlib")).resolve(strict=True)
+dependencies={Path(sysconfig.get_path(k)).resolve(strict=True) for k in ("purelib","platlib")}
+# Authority comes from the interpreter scheme, never arbitrary PYTHONPATH.
+# Retain lexical roots too. On POSIX a venv may expose lib64 -> lib even
+# when sysconfig reports only lib. Admit that one verified prefix alias;
+# do not admit arbitrary symlinks pointing into a trusted code directory.
+code_roots={Path(sysconfig.get_path(k)):Path(sysconfig.get_path(k)).resolve(strict=True)
+            for k in ("stdlib","platstdlib","purelib","platlib")}
+prefix=Path(sys.prefix)
+alias=prefix/"lib64"
+if alias.is_symlink() and os.readlink(alias) in ("lib",str(prefix/"lib")) and alias.resolve(strict=True)==prefix/"lib":
+    for lexical,canonical in list(code_roots.items()):
+        if lexical.is_relative_to(prefix/"lib"):
+            candidate=alias/lexical.relative_to(prefix/"lib")
+            if candidate.is_dir() and candidate.resolve(strict=True)==canonical:
+                code_roots[candidate]=canonical
 config_dir=expected/"PATH_TO_DIR"
 configs=set(config_dir.glob("*.path"))
 for path in [expected, config_dir, *configs]:
     if path.resolve(strict=True) != path: raise RuntimeError("resolver_path_escape:"+str(path))
 authorized_read=None
 loaded={}
+def trusted_path(path):
+    p=Path(path)
+    if not p.is_absolute() or ".." in p.parts:
+        raise RuntimeError("resolver_code_path_escape:"+str(p))
+    resolved=p.resolve(strict=True)
+    if p.is_relative_to(expected) or p.is_relative_to(tree):
+        if resolved!=p: raise RuntimeError("resolver_code_path_escape:"+str(p))
+        return p.is_relative_to(expected) or p in (tree/"farm_env",tree/"farm_env/__init__.py",tree/"farm_env/ltsep_paths.py")
+    for lexical,canonical in code_roots.items():
+        if p.is_relative_to(lexical):
+            # A symlink below a code root is not an interpreter-root alias.
+            if resolved!=canonical/p.relative_to(lexical):
+                raise RuntimeError("resolver_code_path_escape:"+str(p))
+            if any(part in {"site-packages","dist-packages"} for part in p.parts) and not any(resolved.is_relative_to(r) for r in dependencies):
+                return False
+            return True
+    return False
+
 def code_path(path):
     p=Path(path)
-    if not p.is_absolute() or p.resolve(strict=True)!=p:
-        raise RuntimeError("resolver_code_path_escape:"+str(p))
     # site-packages may be nested inside stdlib. It is a separate code-only
     # authority, never a source of arbitrary package/config/scientific data.
-    if p.is_relative_to(expected): return p.suffix==".py"
-    if p==tree/"farm_env/__init__.py" or p==tree/"farm_env/ltsep_paths.py": return True
-    if p.is_relative_to(tree): return False
-    if any(part in {"site-packages","dist-packages"} for part in p.parts) and not any(p.is_relative_to(r) for r in dependencies):
-        return False
-    roots=dependencies if any(p.is_relative_to(r) for r in dependencies) else {stdlib}
-    return any(p.is_relative_to(r) for r in roots) and (
+    return trusted_path(p) and (
         p.suffix==".py" or any(str(p).endswith(s) for s in machinery.EXTENSION_SUFFIXES))
 def readonly(event,args):
     if event=="import":
@@ -229,7 +253,9 @@ def readonly(event,args):
         if path.suffix==".pyc": raise FileNotFoundError("source_only_resolver_probe:"+str(path))
         if path!=authorized_read and path not in configs:
             raise RuntimeError("resolver_data_read_forbidden:"+str(path))
-        if path.resolve(strict=True)!=path:
+        if path==authorized_read:
+            if not code_path(path): raise RuntimeError("resolver_code_read_forbidden:"+str(path))
+        elif path.resolve(strict=True)!=path:
             raise RuntimeError("resolver_path_escape:"+str(path))
     if event in {"os.mkdir","os.remove","os.rmdir","os.rename","os.link","os.symlink","os.chmod","os.chown","os.truncate","os.utime","os.chdir","os.fork","os.forkpty","os.startfile","subprocess.Popen","os.system","os.exec","os.posix_spawn","ctypes.dlopen","socket.__new__"}:
         raise RuntimeError("resolver_mutation_attempt:"+event+":"+str(args)[:300])
@@ -243,7 +269,7 @@ class Source(machinery.SourceFileLoader):
         authorized_read=p
         try: raw=super().get_data(path)
         finally: authorized_read=None
-        loaded[self.name]={"path":str(p),"sha256":hashlib.sha256(raw).hexdigest()}
+        loaded[self.name]={"path":str(p),"realpath":str(p.resolve(strict=True)),"sha256":hashlib.sha256(raw).hexdigest()}
         return raw
 class Extension(machinery.ExtensionFileLoader):
     def create_module(self,spec):
@@ -253,7 +279,7 @@ class Extension(machinery.ExtensionFileLoader):
         authorized_read=p
         try: raw=p.read_bytes()
         finally: authorized_read=None
-        loaded[self.name]={"path":str(p),"sha256":hashlib.sha256(raw).hexdigest()}
+        loaded[self.name]={"path":str(p),"realpath":str(p.resolve(strict=True)),"sha256":hashlib.sha256(raw).hexdigest()}
         return super().create_module(spec)
 class Finder:
     def find_spec(self,name,path=None,target=None):
@@ -262,7 +288,7 @@ class Finder:
         found=machinery.PathFinder.find_spec(name,path,target)
         if found is None: return None
         if found.origin is None:
-            if not all(any(Path(p).resolve().is_relative_to(r) for r in dependencies|{stdlib,tree/"farm_env",expected}) for p in found.submodule_search_locations or []):
+            if not found.submodule_search_locations or not all(trusted_path(p) for p in found.submodule_search_locations):
                 raise RuntimeError("resolver_namespace_forbidden:"+name)
             return found
         if not code_path(found.origin):
@@ -298,12 +324,20 @@ for f in sorted(configs):
 for name,record in loaded.items():
     if name not in sys.modules or getattr(sys.modules[name],"__file__",None)!=record["path"]:
         raise RuntimeError("resolver_module_identity_changed:"+name)
+    p=Path(record["path"])
+    if not code_path(p) or str(p.resolve(strict=True))!=record["realpath"]:
+        raise RuntimeError("resolver_module_identity_changed:"+name)
+    authorized_read=p
+    try: digest=hashlib.sha256(p.read_bytes()).hexdigest()
+    finally: authorized_read=None
+    if digest!=record["sha256"]: raise RuntimeError("resolver_module_source_changed:"+name)
 print(json.dumps({"caller":caller,"caller_realpath":os.path.realpath(caller),"mode":modes,"cwd":os.getcwd(),
     "paths":paths,"config_matches":matches,"package_file":ltsep.__file__,
     "pathing_file":ltsep.pathing.__file__,"root_file":inspect.getsourcefile(type(lt)),
     "resolver_file":sys.modules["farm_env.ltsep_paths"].__file__,
     "python":sys.executable,"python_version":sys.version,"source_imports":loaded,
-    "dependency_roots":sorted(str(r) for r in dependencies)},allow_nan=False))
+    "dependency_roots":sorted(str(r) for r in dependencies),
+    "code_roots":{str(k):str(v) for k,v in code_roots.items()}},allow_nan=False))
 '''
 
 

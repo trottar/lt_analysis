@@ -104,6 +104,134 @@ class ResolverImports(unittest.TestCase):
     def run_private(self, f):
         return owner.probe_private_callers(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package)
 
+    @contextmanager
+    def alias_fixture(self, python39_shape=False, **kwargs):
+        """Real POSIX venv alias; optional 3.9 scheme replay on the host VM.
+
+        The scheme replay is explicit, not a claim of Python 3.9 execution.
+        No import loader, Root result or resolver decision is mocked.
+        """
+        if os.name == 'nt':
+            self.skipTest('POSIX lib64 topology requires local Linux interpreter')
+        native_site = self.site
+        alias = self.venv / 'lib64'
+        if not alias.exists():
+            alias.symlink_to('lib', target_is_directory=True)
+        self.assertTrue(alias.is_symlink())
+        self.assertEqual(alias.resolve(), self.venv / 'lib')
+        if python39_shape:
+            self.site = self.venv / 'lib/python3.9/site-packages'
+            self.site.mkdir(parents=True, exist_ok=True)
+        lexical = alias / self.site.relative_to(self.venv / 'lib')
+        pth = native_site / 'resolver_alias_fixture.pth'
+        pth.write_text('import sys; sys.path.insert(0, '+repr(str(lexical))+')\n')
+        probe = owner.RESOLVER_PROBE
+        if python39_shape:
+            # Reproduce the observed scheme/path shape without pretending the
+            # available host interpreter has Python 3.9's import implementation.
+            prefix = ('import sysconfig\n_original_get_path=sysconfig.get_path\n'
+                      'sysconfig.get_path=lambda key,*a,**kw: '+repr(str(self.site))+
+                      ' if key in ("purelib","platlib") else _original_get_path(key,*a,**kw)\n')
+            probe = prefix + probe
+        try:
+            with patch.object(owner, 'RESOLVER_PROBE', probe), self.fixture(**kwargs) as f:
+                yield f, lexical
+        finally:
+            pth.unlink()
+            self.site = native_site
+
+    def test_exact_prior_probe_rejects_lib64_python39_source(self):
+        raw = subprocess.check_output(['git', 'show',
+            'f266045e9a535970f54a189a5eecb009401b8adb:testing/run_pion_local_t_matched_cohort_gate.py'],
+            cwd=ROOT, text=True)
+        prior = next(ast.literal_eval(n.value) for n in ast.parse(raw).body
+                     if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and
+                         t.id == 'RESOLVER_PROBE' for t in n.targets))
+        with self.alias_fixture(python39_shape=True) as (f, lexical):
+            prefix = owner.RESOLVER_PROBE.split('import sys, os, json, inspect')[0]
+            with patch.object(owner, 'RESOLVER_PROBE', prefix + prior):
+                with self.assertRaisesRegex(ValueError,
+                        r'resolver_code_path_escape:.*lib64/python3.9/site-packages/uproot/__init__.py'):
+                    self.run_private(f)
+
+    def test_entire_alias_import_path_native_and_python39_scheme(self):
+        for replay in (False, True):
+            with self.subTest(python39_scheme=replay), self.alias_fixture(
+                    python39_shape=replay, dependency_behavior='import alias_namespace.child\nimport termios\n') as (f, lexical):
+                import importlib.util
+                extension = self.site / Path(importlib.util.find_spec('termios').origin).name
+                shutil.copyfile(importlib.util.find_spec('termios').origin, extension)
+                ns = self.site / 'alias_namespace'
+                ns.mkdir()
+                (ns / 'child.py').write_text('value=True\n')
+                try:
+                    result = self.run_private(f)
+                    for record in result['all_callers']:
+                        for name in ('uproot', 'numpy', 'alias_namespace.child'):
+                            source = record['source_imports'][name]
+                            self.assertTrue(Path(source['path']).is_relative_to(lexical))
+                            self.assertEqual(Path(source['path']).resolve(), Path(source['realpath']))
+                        self.assertTrue(Path(record['source_imports']['termios']['path']).is_relative_to(lexical))
+                        self.assertEqual(Path(record['paths']['OUTPATH']).name,
+                                         'KaonLT' if record['mode'] else 'None')
+                finally:
+                    shutil.rmtree(ns)
+                    extension.unlink()
+
+    def test_alias_imports_still_deny_data_and_mutations(self):
+        for action, reason in (
+                ('open(__file__).read()', 'resolver_data_read_forbidden'),
+                ('open(__file__.replace("__init__.py", "data.json")).read()', 'resolver_data_read_forbidden'),
+                ('__import__("ROOT")', 'scientific_module_import_forbidden'),
+                ('__import__("root_numpy")', 'scientific_module_import_forbidden'),
+                ('__import__("ctypes").CDLL(None)', 'resolver_mutation_attempt'),
+                ('__import__("subprocess").run(["false"])', 'resolver_mutation_attempt'),
+                ('open(__file__,"w")', 'resolver_write_attempt'),
+                ('__import__("os").mkdir(__file__+".dir")', 'resolver_mutation_attempt'),
+                ('__import__("os").link(__file__,__file__+".link")', 'resolver_mutation_attempt'),
+                ('__import__("os").symlink(__file__,__file__+".link")', 'resolver_mutation_attempt'),
+                ('__import__("os").rename(__file__,__file__+".renamed")', 'resolver_mutation_attempt')):
+            with self.subTest(action=action), self.alias_fixture(dependency_behavior=action+'\n') as (f, _):
+                with self.assertRaisesRegex(ValueError, reason):
+                    self.run_private(f)
+
+    def test_external_alias_into_code_and_internal_escape_are_denied(self):
+        for namespace in (False, True):
+            with self.subTest(namespace=namespace), self.alias_fixture() as (f, _):
+                outside = f.root / 'external-alias'
+                outside.symlink_to(self.site, target_is_directory=True)
+                f.env['PYTHONPATH'] += os.pathsep + str(outside)
+                if namespace:
+                    ns = self.site / 'untrusted_namespace'
+                    ns.mkdir()
+                    (self.site / 'uproot/__init__.py').write_text('import untrusted_namespace\n')
+                else:
+                    (self.site / 'uproot/__init__.py').write_text(
+                        'import sys\nsys.path.insert(0,'+repr(str(outside))+')\nimport numpy\n')
+                try:
+                    with self.assertRaisesRegex(ValueError, 'resolver_code_import_forbidden|resolver_namespace_forbidden'):
+                        self.run_private(f)
+                finally:
+                    outside.unlink()
+                    if namespace: ns.rmdir()
+        with self.alias_fixture(dependency_behavior='import escaped\n') as (f, _):
+            target = f.root / 'escaped.py'
+            target.write_text('value=True\n')
+            link = self.site / 'escaped.py'
+            link.symlink_to(target)
+            try:
+                with self.assertRaisesRegex(ValueError, 'resolver_code_path_escape'):
+                    self.run_private(f)
+            finally:
+                link.unlink()
+
+    def test_alias_probe_failure_never_launches_child_or_collects(self):
+        real_probe = owner.probe_private_callers
+        with self.alias_fixture(dependency_behavior='open(__file__).read()\n') as (f, _):
+            PrivateBoundary(methodName='runTest').exercise_exact_preflight_sigma0('absent',
+                probe_check=lambda *args: real_probe(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package),
+                resolver_failure=True)
+
     def test_frozen_probe_reproduces_dependency_read_failure(self):
         with self.fixture() as f:
             with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):

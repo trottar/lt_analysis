@@ -30,18 +30,20 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
-[resolver-import preflight repair](phases/kaonlt-matched-cohort-resolver-import-preflight-fix-2026-10-22-task-contract.md)
-at `test` anchor `a14e740ab68531aca1c60c48d7a73e13e8922aff`.
-Supplied `155418` failure: copied `ltsep -> uproot` source loading denied by
-the frozen hook before analysis (contract-attributed). No matched ZIP/science;
-failed/inadmissible evidence. Installed dependency closure and unsupplied status
-details remain NOT VERIFIED. SOURCE VERIFIED: isolated imports reproduce the
-old denial. Owner-only loader code/exact-config reads pass real fixture
-no-mode/Plot calls with caller/cwd, identity, stable/private path guards. Data
-reads, bytecode authority, ROOT bindings and mutations remain denied. Frozen
-resolver, farm_env, launchers and science are unchanged. Prior HeeP/cycle
-failures stay inadmissible; metadata fixes remain intact.
+`BLOCKED`: supplied `180522` at `test` source
+`f266045e9a535970f54a189a5eecb009401b8adb` rejected Python 3.9 path shape
+`lib64/python3.9/site-packages/uproot/__init__.py`: `resolver_code_path_escape`.
+Farm canonical target, installed closure and full status are NOT VERIFIED;
+no child/accepted ZIP or fresh science evidenced. The
+[incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+attributes four failed/inadmissible attempts and lost science throughput to
+assistant readiness judgment, not user operation. The
+[bounded repair](phases/kaonlt-matched-cohort-farm-readiness-incident-and-path-alias-repair-2026-10-22-task-contract.md)
+is local/proposed pending review/publication. SOURCE VERIFIED: exact old alias
+failure reproduced; lexical/canonical authority checked across loader/read/
+namespace gates with source hashes and fixture Root default/Plot calls preserved.
+Python 3.12 tests/3.9 path-shape replay establish no Python 3.9 execution or farm
+compatibility. Frozen resolver, farm_env, launchers and science are unchanged.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -216,8 +218,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 ## Next Action
 
 NEXT — one guarded user-operated Center/Left lowe matched-cohort acquisition,
-conditional on independent ChatGPT actual-diff acceptance of the preflight
-repair, user publication and pushed-state synchronization. It must establish fresh
+conditional on independent ChatGPT actual-diff acceptance of the bounded alias
+repair, user publication, pushed-state synchronization and representative
+readiness review under MAINTENANCE/CODEX. It must establish fresh
 same-run A/B and signed-event evidence, followed by the tracked offline fresh
 seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison.
 Any first source, input, child, artifact, provenance or preservation failure

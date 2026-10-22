@@ -160,6 +160,19 @@ stops progression independently of whether memory itself is consistent.
 
 ## Science-gate displacement alarm
 
+For path-sensitive readiness review, compare every relevant supplied farm
+failure with the actual test environment: interpreter/version, lexical and
+canonical locations, symlink topology, installed dependency roots and exact
+caller/cwd. After repeated pre-child failures, require regression reproductions
+of all relevant supplied tracebacks and review adjacent equivalent checks
+(including loader, read-hook and namespace checks) before another farm command.
+A known failure left unaddressed blocks readiness. Record missing environment
+facts explicitly; a path-shape replay on another interpreter is not execution
+on the observed interpreter. Synthetic tests establish neither RUNTIME VERIFIED
+nor unqualified farm compatibility. Apply this within the existing review gate,
+without reflexive reruns or another support phase. See the
+[October 22 incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md).
+
 Trigger this mandatory professional re-anchor after two consecutive supporting
 gates without new scientific evidence or an evidence-producing action; repeated
 assistant-created contracts for the same blocker; a user saying the goal is

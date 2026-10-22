@@ -2,6 +2,15 @@
 
 ## Evidence and validation
 
+- After repeated pre-child failures, reproduce every supplied failure class and
+  inspect adjacent equivalent guards before another readiness approval. Match
+  interpreter/version, lexical/canonical paths, link topology, dependency roots
+  and caller/cwd; state every untested dimension. Source-only fixtures never
+  prove farm compatibility. The [October 22 incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+  attributes inadequate approvals and the resulting lost science day to the
+  assistant. An alias into trusted code is insufficient without trusted lexical
+  provenance; code-loader reads must never grant arbitrary package-data reads.
+
 - Source review and local unit tests do not establish farm/runtime behavior.
 - A bundle reporting completion is insufficient by itself: inspect provenance,
   checker gates, structured payloads or logs, and rendered pages when relevant.

@@ -73,6 +73,16 @@ requested, never substitutes for tracked E.8 deliverables.
 
 ## Scientific output and correction requirements
 
+The user's explicit October 22 correction identifies repeated assistant
+farm-readiness approvals without representative environmental tests as an
+assistant judgment failure, not a user farm-operation failure. Prioritize fresh
+scientific throughput and concrete accountability. Do not repeat synthetic-only
+farm-ready claims, reflexively rerun a failed owner or create recursive support
+contracts. Record the first exact blocker, cover the supplied failure classes
+and adjacent guards in the existing bounded repair, and state the unknown
+installed environment honestly. See the
+[incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md).
+
 Scientific tasks must produce the requested evidence. The user does not accept
 multi-day support-contract spirals, historical PDFs or illustrations in place of
 requested fresh farm results. After two consecutive non-evidence support gates,

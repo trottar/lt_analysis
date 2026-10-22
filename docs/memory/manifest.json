@@ -6,9 +6,9 @@
       "sha256": "de71043f446b7c84b77ce37c805f410512dbf61100f744691d450266f30c1da7"
     },
     {
-      "bytes": 10292,
+      "bytes": 11225,
       "path": "docs/memory/CODEX.md",
-      "sha256": "aca2826875916f96908581518813a213ac0ff9090bf5b3edf2bd78331f1c6871"
+      "sha256": "40611904c77dfc9f70d59ae56dd64c6dfca765d44d6d4052bafbc53159ed1bfe"
     },
     {
       "bytes": 6131,
@@ -16,24 +16,24 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16091,
+      "bytes": 16304,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "529e74de3e5d4a0ffd96d10db5d6e001076cc9effaf87bdb7fbb7e2f03538407"
+      "sha256": "0e3a597dc6705f8edf33f707977e257da90a3bbf281b76a77bbe86678814107f"
     },
     {
-      "bytes": 10506,
+      "bytes": 11186,
       "path": "docs/memory/LEARNINGS.md",
-      "sha256": "0611e9c1088b645f11f984e472272754aee5d0bc8e8dc76872b0ee4326f69442"
+      "sha256": "62413d59520df7daef71f7c8f37ebd5752d5f284d58cf2faaa36f33a04c66103"
     },
     {
-      "bytes": 12564,
+      "bytes": 13497,
       "path": "docs/memory/MAINTENANCE.md",
-      "sha256": "f92de8626796efa9e6deb38a1db6784087143c7114eb9ebb30eaddebcf2b0029"
+      "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 27005,
+      "bytes": 27843,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "f6e1542c537a2ce43c05120af33342967f7368b72fdbd876e7156483a26b7122"
+      "sha256": "90b2e376d0bde325cda5feae0e0b5ecbe4b24332c06be424dd1ff5d412804026"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 8946,
+      "bytes": 9612,
       "path": "docs/memory/USER.md",
-      "sha256": "8699e615878792f12082464e6f2523ca0fbb0d6513ad57c6fa482bd6ca628279"
+      "sha256": "88e90c23d5fe3a35a40d451fba3fa43f6ca0cc4b7e2c62cc995110824bed865e"
     },
     {
       "bytes": 1157,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 95160,
+      "bytes": 96034,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "2cd50a7f9bf82859acb1debc7602dda201873a311a2ab5658d07ce4274f6d140"
+      "sha256": "af0baa3747fca145a683a61b3bed10b0e4ca06368e6f760e3ec40a93198f4464"
     },
     {
       "bytes": 23507,
@@ -439,6 +439,11 @@
       "bytes": 2081,
       "path": "docs/memory/investigations/f4-refresh2-validation1-operational-readiness-failure.md",
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
+    },
+    {
+      "bytes": 8878,
+      "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
+      "sha256": "b43bbe0d9f57fbfb0945d484da35dfb6c2709b82e668155ab92efef8c581cc67"
     },
     {
       "bytes": 28637,
@@ -1284,6 +1289,11 @@
       "bytes": 7858,
       "path": "docs/memory/phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md",
       "sha256": "fa9ec458d9d5a89ac334f8557c5621eceaf6d4380bea9f5197bea49a2609781f"
+    },
+    {
+      "bytes": 12204,
+      "path": "docs/memory/phases/kaonlt-matched-cohort-farm-readiness-incident-and-path-alias-repair-2026-10-22-task-contract.md",
+      "sha256": "5148d2c9345454a17769aed331ecdd948cf2fad1e5ce52bd0da8a3809e3a3f72"
     },
     {
       "bytes": 11883,

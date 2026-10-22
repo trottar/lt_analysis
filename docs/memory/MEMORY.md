@@ -17,6 +17,18 @@ records.
 
 ## Source and provenance semantics
 
+Interpreter code aliases need both lexical provenance under an interpreter-owned
+root and canonical containment; canonical containment alone admits arbitrary
+external aliases, while unconditional lexical/canonical equality rejects genuine
+lib64-to-lib environments. Loader-only source/extension reads remain distinct
+from package data, bytecode and scientific reads. Review adjacent read, finder,
+namespace and identity guards together. The
+[October 22 incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+records inadequate assistant readiness judgment and lost scientific throughput.
+Replaying a Python 3.9 path shape on another version does not validate Python 3.9
+or the installed farm dependency closure; local checks never establish runtime
+acceptance. CURRENT owns the unresolved acquisition gate.
+
 Reviewed scientific source, repository observation, farm-evaluated source,
 renderer source, bundle/profile source, and artifact provenance are distinct
 roles. A source review may be anchored to an analysis source older than the
