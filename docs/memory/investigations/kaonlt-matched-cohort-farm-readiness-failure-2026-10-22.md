@@ -146,3 +146,54 @@ Independent diff review, user publication and pushed-state review precede user
 smoke. Review its receipt before acquisition readiness; no smoke pass accepts
 science. Scientific NEXT remains fresh six-parent matched-event A/B/C
 missing-mass/variance comparisons under Lambda.
+
+## Fifth failure: Python 3.9 ctypes initialization
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[bounded repair contract](../phases/kaonlt-python39-ctypes-bootstrap-fix-2026-10-22-task-contract.md).
+RUNTIME VERIFIED only for its supplied traceback: the first real resolver smoke
+at `abff8a49ead8c185b601af7e00fa5a89903bde52` stopped in
+`findEffectiveCharge.py -> ltsep -> uproot -> numpy.core._internal -> ctypes`:
+`resolver_mutation_attempt:ctypes.dlopen:(None,)`, from Python 3.9's intrinsic
+`pythonapi = PyDLL(None)`. No child or accepted scientific evidence follows.
+This fifth failure is assistant readiness judgment failure, not user operation.
+The first violated invariant was owner-only unconditional native-load denial
+installed before genuine standard-library initialization.
+
+SOURCE VERIFIED: the proposed owner-only repair verifies the interpreter-selected
+ctypes source, exact loader and stdlib/platstdlib lexical/canonical provenance.
+An early persistent audit hook denies scientific/config/data reads, writes,
+process/network activity and imports outside ctypes' explicit stdlib closure
+(`_ctypes`, `struct`, `_struct`, `ctypes._endian`). These implement its native
+types, size checks and endian classes; no third-party preimport is needed.
+Existing source-only loaders record hashes; module/file/code identities and
+source hashes are checked. Only intrinsic verified stdlib initialization runs
+before the full hook; all later dlopen and dlsym events are denied, including
+process-handle loads and cached `pythonapi` symbol lookups. The early hook stays
+installed. No scientific, frozen resolver, launcher or isolation-helper edit.
+
+Local evidence: WSL Python 3.12.3, not Python 3.9. The exact old hook rejects the
+controlled `(None,)` event; real ctypes import succeeds under the early guard.
+Tests cover stdlib aliases, shadowed ctypes/native dependencies, unexpected
+source/loader, bootstrap data/mutation/process/network denial, post-import
+native loads/symbols, and the existing input/config/package/source guards.
+Smoke and acquisition still call identical `resolver_preflight` and complete
+source authority; full smoke success/failure tests verify cleanup/preservation
+and no staging, observers, child, collection or ZIP. Installed farm dependency
+closure, actual Python 3.9, ROOT and scientific acceptance remain NOT VERIFIED.
+
+Historical isolation checks remain nine PASS, two FAIL, one ERROR, all three
+at unchanged `protected_source_changed:run_Prod_Analysis.sh`; no pin was relaxed.
+The single permitted next runtime gate, after independent actual-diff review,
+user publication and pushed-state synchronization, is one user-operated no-child
+resolver smoke. Its receipt must be reviewed before acquisition readiness.
+Fresh six-parent matched A/B/events then C/MM/variance evidence remains the
+scientific target; this repair accepts no science and starts no new phase.
+
+Deterministic final receipt: owner 64/64 PASS (WSL Python 3.12.3); frozen
+resolver/history + collector + memory-health suites 107/107 PASS; event-owner
+14/14 PASS (Windows Python 3.12.10). `py_compile` and whitespace checks PASS.
+Manifest write/check, ordinary health and bootstrap PASS; CURRENT soft-size
+warning remains nonblocking, to batch at the next checkpoint/milestone.
+The complete temporary root review bundle includes the actual diff, full new
+contract and detailed receipt. Local passes establish no farm compatibility.

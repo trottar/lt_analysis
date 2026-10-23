@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16339,
+      "bytes": 16371,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "5bcd8e856d7109629278859c747d4780ff4add33f3e1339bebe44056e21b9b3c"
+      "sha256": "72bc156424e3f8a5309bfbd40df4208c2870dbb34893c987b5d49b068a947792"
     },
     {
       "bytes": 11186,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 10006,
+      "bytes": 13449,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
-      "sha256": "e5128a55ec6c54831d44505cedb958e4dc09ead2555b5d708cc0c57b75c1a940"
+      "sha256": "fd5974d6f31b9bde0cbc4ca863c39082b6dbbd9e5b33dad20bdbf42b10cc59ef"
     },
     {
       "bytes": 28637,
@@ -1379,6 +1379,11 @@
       "bytes": 21848,
       "path": "docs/memory/phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md",
       "sha256": "1b0dde0fff7ca1040db9ef4160e35fec7bd311a3719a9d0450b0b7dfb5399905"
+    },
+    {
+      "bytes": 7088,
+      "path": "docs/memory/phases/kaonlt-python39-ctypes-bootstrap-fix-2026-10-22-task-contract.md",
+      "sha256": "57a897c33157521fd0f413abce3085443bb164511c16ae8ef379e9ad356b9bbf"
     },
     {
       "bytes": 21459,

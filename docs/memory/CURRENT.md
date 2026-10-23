@@ -30,22 +30,23 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local proposed
-[no-child resolver smoke](phases/kaonlt-matched-cohort-real-runtime-resolver-smoke-2026-10-22-task-contract.md)
-adds `--resolver-smoke` to the same matched-cohort owner. SOURCE VERIFIED:
-ordinary imports precede the guarded probe; the failure was owner-only path
-policy, not evidence of missing uproot.
-Published `bd308954c59ab10c528055ee111af20f18b0a04a` contains the alias repair,
-with no applicable farm acceptance. Smoke and acquisition share source authority,
-external-link/skim/output-role checks and real baseline/private no-mode/Plot
-resolver calls. Smoke emits runtime-only JSON, cleans owned scratch and stops before input
-staging, observers, child or ZIP.
-Source/index, packages and external links are rechecked on success/failure.
-Real Python 3.9, installed dependency closure, farm preservation and compatibility
-remain NOT VERIFIED. The
-[incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
-retains the four failed attempts and assistant readiness responsibility.
-Scientific source, frozen resolver, helpers and launchers are unchanged.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: owner-only
+[ctypes bootstrap repair](phases/kaonlt-python39-ctypes-bootstrap-fix-2026-10-22-task-contract.md).
+First real `--resolver-smoke` at `abff8a49e` failed before analysis:
+`resolver_mutation_attempt:ctypes.dlopen:(None,)` during Python 3.9
+`pythonapi = PyDLL(None)` initialization (RUNTIME VERIFIED: supplied traceback
+only). This fifth attempt is science-inadmissible; assistant readiness judgment
+owns the failure.
+SOURCE VERIFIED: local candidate verifies ctypes stdlib provenance and imports
+its bounded closure under an early read/write/process/network guard, then adds
+full resolver controls. Later native loads/symbol lookups remain denied.
+Smoke/acquisition share source/hash and baseline/private no-mode/Plot checks.
+Smoke stops before staging/observers/child/ZIP; cleanup and preservation checks
+cover success/failure.
+Local Python 3.12 tests do not verify Python 3.9, installed farm dependencies or
+farm preservation/compatibility. The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+retains all five failures. Science, frozen resolver, helpers and launchers stay
+unchanged.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -219,7 +220,7 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the local smoke candidate,
+NEXT — independent ChatGPT actual-diff review of the local ctypes repair,
 user publication and pushed-state synchronization, then one user-operated
 resolver smoke on real farm Python 3.9. Review its receipt before deciding
 readiness for the existing single Center/Left lowe matched-cohort acquisition;

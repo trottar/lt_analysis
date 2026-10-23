@@ -237,6 +237,23 @@ def code_path(path):
     # authority, never a source of arbitrary package/config/scientific data.
     return trusted_path(p) and (
         p.suffix==".py" or any(str(p).endswith(s) for s in machinery.EXTENSION_SUFFIXES))
+stdlib_roots={Path(sysconfig.get_path(k)).resolve(strict=True) for k in ("stdlib","platstdlib")}
+def stdlib_code(path):
+    p=Path(path)
+    return (code_path(p) and not any(part in {"site-packages","dist-packages"} for part in p.parts)
+            and any(p.resolve(strict=True).is_relative_to(r) for r in stdlib_roots))
+
+# Only ctypes' intrinsic stdlib closure executes before the full native-load
+# ban. No ltsep, third-party dependency or config runs in this phase.
+bootstrap_names={"ctypes","ctypes._endian","_ctypes","struct","_struct"}
+bootstrap_active=True
+ctypes_spec=machinery.PathFinder.find_spec("ctypes")
+if ("ctypes" in sys.modules or "_ctypes" in sys.modules or ctypes_spec is None
+        or type(ctypes_spec.loader) is not machinery.SourceFileLoader
+        or not stdlib_code(ctypes_spec.origin)
+        or not any(Path(ctypes_spec.origin).resolve(strict=True)==r/"ctypes/__init__.py" for r in stdlib_roots)):
+    raise RuntimeError("resolver_ctypes_bootstrap_provenance")
+
 def readonly(event,args):
     if event=="import":
         if args[0].split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
@@ -257,8 +274,23 @@ def readonly(event,args):
             if not code_path(path): raise RuntimeError("resolver_code_read_forbidden:"+str(path))
         elif path.resolve(strict=True)!=path:
             raise RuntimeError("resolver_path_escape:"+str(path))
-    if event in {"os.mkdir","os.remove","os.rmdir","os.rename","os.link","os.symlink","os.chmod","os.chown","os.truncate","os.utime","os.chdir","os.fork","os.forkpty","os.startfile","subprocess.Popen","os.system","os.exec","os.posix_spawn","ctypes.dlopen","socket.__new__"}:
+    if event.startswith("ctypes.dlsym") or event in {"os.mkdir","os.remove","os.rmdir","os.rename","os.link","os.symlink","os.chmod","os.chown","os.truncate","os.utime","os.chdir","os.fork","os.forkpty","os.startfile","subprocess.Popen","os.system","os.exec","os.posix_spawn","ctypes.dlopen","socket.__new__"}:
         raise RuntimeError("resolver_mutation_attempt:"+event+":"+str(args)[:300])
+def bootstrap_guard(event,args):
+    if not bootstrap_active:
+        return readonly(event,args)
+    if event=="import":
+        if args[0] not in bootstrap_names:
+            raise RuntimeError("resolver_bootstrap_import_forbidden:"+args[0])
+        if len(args)>1 and args[1] and not stdlib_code(args[1]):
+            raise RuntimeError("resolver_ctypes_bootstrap_provenance:"+str(args[1]))
+    if event=="open" and (authorized_read is None or not stdlib_code(authorized_read)):
+        raise RuntimeError("resolver_bootstrap_read_forbidden:"+str(args[0]))
+    # Only verified stdlib module bodies execute here. The phase ends before
+    # resolver/dependency code runs. The full hook has no native-load exception.
+    if event=="ctypes.dlopen" or event.startswith("ctypes.dlsym"):
+        return
+    readonly(event,args)
 class Source(machinery.SourceFileLoader):
     def get_data(self,path):
         global authorized_read
@@ -283,10 +315,16 @@ class Extension(machinery.ExtensionFileLoader):
         return super().create_module(spec)
 class Finder:
     def find_spec(self,name,path=None,target=None):
+        if bootstrap_active and name not in bootstrap_names:
+            raise RuntimeError("resolver_bootstrap_import_forbidden:"+name)
         if name.split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
             raise RuntimeError("scientific_module_import_forbidden:"+name)
         found=machinery.PathFinder.find_spec(name,path,target)
         if found is None: return None
+        if bootstrap_active and (found.origin is None or not stdlib_code(found.origin)):
+            raise RuntimeError("resolver_ctypes_bootstrap_provenance:"+str(found.origin))
+        if bootstrap_active and type(found.loader) not in (machinery.SourceFileLoader,machinery.ExtensionFileLoader):
+            raise RuntimeError("resolver_bootstrap_loader_forbidden:"+name)
         if found.origin is None:
             if not found.submodule_search_locations or not all(trusted_path(p) for p in found.submodule_search_locations):
                 raise RuntimeError("resolver_namespace_forbidden:"+name)
@@ -300,6 +338,15 @@ class Finder:
         else:
             raise RuntimeError("resolver_loader_forbidden:"+str(found.origin))
         return found
+sys.addaudithook(bootstrap_guard)
+sys.meta_path=[machinery.BuiltinImporter,machinery.FrozenImporter,Finder()]
+import ctypes
+if (ctypes.__file__!=ctypes_spec.origin or ctypes.__spec__.origin!=ctypes_spec.origin
+        or inspect.getsourcefile(ctypes.CDLL)!=ctypes_spec.origin
+        or ctypes.CDLL.__init__.__code__.co_filename!=ctypes_spec.origin
+        or "ctypes" not in loaded):
+    raise RuntimeError("resolver_ctypes_bootstrap_identity")
+bootstrap_active=False
 sys.addaudithook(readonly)
 sys.meta_path=[machinery.BuiltinImporter,machinery.FrozenImporter,Finder()]
 sys.path.insert(0,str(tree))

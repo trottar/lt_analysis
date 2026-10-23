@@ -115,6 +115,8 @@ class ResolverImports(unittest.TestCase):
                 ('mutate_link', 'external_link_changed'),
                 ('collision', 'private_output_collision'),
                 ('  self.OUTPATH="/unexpected/output"\n', 'outpath_mismatch'),
+                ('  __import__("ctypes").CDLL(None)\n', 'resolver_mutation_attempt:ctypes.dlopen'),
+                ('  __import__("ctypes").pythonapi.Py_GetVersion\n', 'resolver_mutation_attempt:ctypes.dlsym'),
                 ('  open("/outside.root").read()\n', 'resolver_data_read_forbidden')):
             with self.subTest(error=error), self.fixture(
                     behavior='' if behavior.startswith('mutate_') or behavior == 'collision' else behavior,
@@ -364,6 +366,129 @@ class ResolverImports(unittest.TestCase):
         with self.fixture() as f:
             with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):
                 owner.resolver.probe(f.tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'src/setup')
+
+    def test_exact_old_ctypes_none_audit_denial(self):
+        raw = subprocess.check_output(['git', 'show',
+            'abff8a49ead8c185b601af7e00fa5a89903bde52:testing/run_pion_local_t_matched_cohort_gate.py'],
+            cwd=ROOT, text=True)
+        prior = next(ast.literal_eval(n.value) for n in ast.parse(raw).body
+                     if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and
+                         t.id == 'RESOLVER_PROBE' for t in n.targets))
+        # Exercise the exact old hook and event, independent of host ctypes
+        # version or whether another dependency happens to import it.
+        prior = prior.replace('import ltsep, ltsep.pathing',
+                              'sys.audit("ctypes.dlopen",None)\nimport ltsep, ltsep.pathing')
+        with self.fixture() as f, patch.object(owner, 'RESOLVER_PROBE', prior):
+            with self.assertRaisesRegex(ValueError,
+                    r'resolver_mutation_attempt:ctypes.dlopen:\(None,\)'):
+                self.run_private(f)
+
+    def test_genuine_ctypes_bootstrap_under_active_guard(self):
+        # This witness observes the real stdlib import; no fake ctypes or
+        # native-load return value is supplied. 3.12 execution is not 3.9.
+        witness = ('bootstrap_events=[]\n'
+                   'def witness(event,args):\n'
+                   '    if event=="ctypes.dlopen":\n'
+                   '        assert bootstrap_active\n'
+                   '        bootstrap_events.append(args)\n'
+                   'sys.addaudithook(witness)\nimport ctypes\n'
+                   'assert bootstrap_events or os.name=="nt"\n')
+        probe = owner.RESOLVER_PROBE.replace('import ctypes\n', witness)
+        with self.fixture(dependency_behavior='import ctypes\n') as f, patch.object(
+                owner, 'RESOLVER_PROBE', probe):
+            result = self.run_private(f)
+            for record in result['all_callers']:
+                sources = record['source_imports']
+                self.assertTrue({'ctypes', 'ctypes._endian', '_ctypes'}.issubset(sources))
+                self.assertTrue(sources['ctypes']['path'].endswith('ctypes/__init__.py'))
+                self.assertTrue(sources['ctypes']['sha256'])
+
+    def test_ctypes_post_import_native_access_is_denied(self):
+        for action in ('ctypes.CDLL(None)', 'ctypes.PyDLL(None)',
+                       'ctypes.CDLL("libforbidden.so")',
+                       'ctypes.pythonapi.Py_GetVersion',
+                       'ctypes.pythonapi["Py_GetVersion"]'):
+            with self.subTest(action=action), self.fixture(
+                    dependency_behavior='import ctypes\n'+action+'\n') as f:
+                with self.assertRaisesRegex(ValueError, 'resolver_mutation_attempt:ctypes.dl'):
+                    self.run_private(f)
+
+    def test_bootstrap_denies_data_mutation_and_other_imports(self):
+        for action, reason in (
+                ('open("physics.root").read()', 'resolver_bootstrap_read_forbidden'),
+                ('open("physics.csv").read()', 'resolver_bootstrap_read_forbidden'),
+                ('open("physics.json").read()', 'resolver_bootstrap_read_forbidden'),
+                ('open("written","w")', 'resolver_bootstrap_read_forbidden'),
+                ('os.mkdir("written")', 'resolver_mutation_attempt'),
+                ('os.symlink("physics.root","written")', 'resolver_mutation_attempt'),
+                ('os.system("false")', 'resolver_mutation_attempt'),
+                ('sys.audit("socket.__new__",None,2,1,0)', 'resolver_mutation_attempt'),
+                ('sys.audit("subprocess.Popen","false",[],None,None)', 'resolver_mutation_attempt'),
+                ('__import__("ROOT")', 'resolver_bootstrap_import_forbidden'),
+                ('__import__("ltsep")', 'resolver_bootstrap_import_forbidden')):
+            probe = owner.RESOLVER_PROBE.replace('import ctypes\n', action+'\nimport ctypes\n')
+            with self.subTest(action=action), self.fixture() as f, patch.object(
+                    owner, 'RESOLVER_PROBE', probe):
+                with self.assertRaisesRegex(ValueError, reason):
+                    self.run_private(f)
+
+    def test_ctypes_shadow_and_dependency_provenance_fail_closed(self):
+        for location in ('pythonpath', 'site', 'symlink', 'extension'):
+            with self.subTest(location=location), self.fixture() as f:
+                directory = self.site if location in ('site', 'extension') else f.root / 'shadow'
+                directory.mkdir(exist_ok=True)
+                name = '_ctypes.py' if location == 'extension' else 'ctypes.py'
+                shadow = directory / name
+                if location == 'symlink':
+                    if os.name == 'nt':
+                        self.skipTest('POSIX symlink test runs under Linux')
+                    actual = subprocess.check_output([str(self.python), '-c',
+                        'import importlib.util; print(importlib.util.find_spec("ctypes").origin)'],
+                        text=True).strip()
+                    shadow.symlink_to(actual)
+                else:
+                    shadow.write_text('raise RuntimeError("shadow_executed")\n')
+                f.env['PYTHONPATH'] += os.pathsep + str(directory)
+                try:
+                    with self.assertRaisesRegex(ValueError, 'resolver_ctypes_bootstrap_provenance'):
+                        self.run_private(f)
+                finally:
+                    shadow.unlink()
+
+    def test_ctypes_nonstandard_loader_and_unexpected_source_fail_closed(self):
+        for change in ('ctypes_spec.loader=object()',
+                       'ctypes_spec.origin=str(stdlib/"os.py")'):
+            probe = owner.RESOLVER_PROBE.replace(
+                'ctypes_spec=machinery.PathFinder.find_spec("ctypes")\n',
+                'ctypes_spec=machinery.PathFinder.find_spec("ctypes")\n'+change+'\n')
+            with self.subTest(change=change), self.fixture() as f, patch.object(
+                    owner, 'RESOLVER_PROBE', probe):
+                with self.assertRaisesRegex(ValueError, 'resolver_ctypes_bootstrap_provenance'):
+                    self.run_private(f)
+
+    def test_ctypes_verified_stdlib_alias(self):
+        if os.name == 'nt':
+            self.skipTest('POSIX interpreter-root alias requires Linux')
+        actual = subprocess.check_output([str(self.python), '-c',
+            'import sysconfig; print(sysconfig.get_path("stdlib"))'], text=True).strip()
+        with self.fixture() as f:
+            alias = f.root / 'interpreter-stdlib'
+            alias.symlink_to(actual, target_is_directory=True)
+            # Controlled interpreter scheme, not an arbitrary PYTHONPATH alias.
+            prefix = ('import sys,sysconfig\n_original_get_path=sysconfig.get_path\n'
+                      'sysconfig.get_path=lambda key,*a,**kw: '+repr(str(alias))+
+                      ' if key=="stdlib" else _original_get_path(key,*a,**kw)\n'
+                      'sys.path.insert(0,'+repr(str(alias/'lib-dynload'))+')\n'
+                      'sys.path.insert(0,'+repr(str(alias))+')\n')
+            try:
+                with patch.object(owner, 'RESOLVER_PROBE', prefix+owner.RESOLVER_PROBE):
+                    result = self.run_private(f)
+                for record in result['all_callers']:
+                    source = record['source_imports']['ctypes']
+                    self.assertTrue(Path(source['path']).is_relative_to(alias))
+                    self.assertEqual(Path(source['realpath']), Path(actual)/'ctypes/__init__.py')
+            finally:
+                alias.unlink()
 
     def test_real_import_closure_and_all_caller_modes(self):
         with self.fixture() as f:
