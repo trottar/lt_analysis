@@ -39,7 +39,7 @@ class ResolverImports(unittest.TestCase):
         cls.temp.cleanup()
 
     @contextmanager
-    def fixture(self, behavior='', dependency_behavior=''):
+    def fixture(self, behavior='', dependency_behavior='', smoke_cleanup=False):
         with tempfile.TemporaryDirectory(prefix='kaonlt-import-fixture-') as d:
             root = Path(d).resolve()
             repo, worktree = root / 'ordinary', root / 'attempt/analysis'
@@ -47,9 +47,10 @@ class ResolverImports(unittest.TestCase):
             fields = {k: str(root / 'external' / k) for k in owner.resolver.FIELDS}
             fields.update(USER='fixture', HOST='fixture', ANATYPE='Kaon', LTANAPATH=str(repo),
                           OUTPATH=str(repo / 'OUTPUT/Analysis/KaonLT'))
+            reached = owner.reached_resolver_callers(ROOT) if smoke_cleanup else []
             for tree in (repo, worktree):
                 for name in {s for _, _, _, _, s in owner.resolver.CALLERS} | {
-                        'src/setup/calcTotalEffectiveCharge.py'}:
+                        'src/setup/calcTotalEffectiveCharge.py'} | {c for c, _, _ in reached}:
                     p = tree / name
                     p.parent.mkdir(parents=True, exist_ok=True)
                     p.write_text('# caller must never execute\nraise RuntimeError("caller_executed")\n')
@@ -94,12 +95,139 @@ class ResolverImports(unittest.TestCase):
                         outdir=worktree / 'OUTPUT/Analysis/KaonLT')
             finally:
                 for name, raw in before.items():
+                    if smoke_cleanup and Path(name).is_relative_to(worktree.parent):
+                        self.assertFalse(Path(name).exists())
+                        continue
                     self.assertEqual(Path(name).read_bytes(), raw, name)
                 self.assertFalse((root / 'written').exists())
                 for name in ('uproot', 'numpy'):
                     shutil.rmtree(self.site / name)
                 for p in self.site.glob('physics.*'):
                     p.unlink()
+
+    def test_smoke_real_resolver_and_no_child_success_failure(self):
+        # Only isolation setup is a fixture. The shared preflight and every
+        # guarded baseline/private Root subprocess run unchanged.
+        for behavior, error in (('', None),
+                ('mutate_installed', 'installed_ltsep_package_changed'),
+                ('mutate_copied', 'copied_ltsep_package_changed'),
+                ('mutate_index', 'smoke_worktree_source_index_changed'),
+                ('mutate_link', 'external_link_changed'),
+                ('collision', 'private_output_collision'),
+                ('  self.OUTPATH="/unexpected/output"\n', 'outpath_mismatch'),
+                ('  open("/outside.root").read()\n', 'resolver_data_read_forbidden')):
+            with self.subTest(error=error), self.fixture(
+                    behavior='' if behavior.startswith('mutate_') or behavior == 'collision' else behavior,
+                    smoke_cleanup=True) as f:
+                f.tree.parent.chmod(0o700)
+                shutil.rmtree(f.tree / 'OUTPUT')
+                shared = Path(f.baseline['VOLATILEPATH']) / 'OUTPUT/Analysis/KaonLT'
+                (shared / 'background_samples').mkdir(parents=True)
+                f.baseline['OUTPATH'] = str(shared)
+                # Baseline lexical OUTPATH is the ordinary OUTPUT alias.
+                shutil.rmtree(f.repo / 'OUTPUT')
+                (f.repo / 'OUTPUT').symlink_to(shared.parents[1], target_is_directory=True)
+                private_paths = dict(f.baseline, LTANAPATH=str(f.tree),
+                                     OUTPATH=str(f.tree / 'OUTPUT/Analysis/KaonLT'))
+                head = 'c' * 40
+                state = dict(head=head, origin_test=head, branch='test', porcelain='')
+                cleaned = []
+                @contextmanager
+                def owned(*args):
+                    try:
+                        yield f.tree
+                    finally:
+                        shutil.rmtree(f.tree.parent)
+                        cleaned.append(True)
+                with ExitStack() as stack:
+                    def patched(obj, name, **kwargs):
+                        return stack.enter_context(patch.object(obj, name, **kwargs))
+                    patched(owner.isolation.accepted, 'REPO', new=f.repo)
+                    patched(owner.isolation.accepted, 'ARTIFACTS', new=shared)
+                    patched(owner.isolation, 'snapshot', return_value=state)
+                    patched(owner, 'smoke_source_state', return_value=state)
+                    patched(owner.ab, 'git', return_value='')
+                    patched(owner.ab, 'sha256', return_value='fixture-index')
+                    patched(owner.shutil, 'which', return_value=str(self.python))
+                    patched(owner, 'audit_default_output_writer', return_value={})
+                    patched(owner.isolation, 'owned_worktree', new=owned)
+                    patched(owner.isolation, 'import_identity', return_value={
+                        'package_file': str(f.package / '__init__.py')})
+                    patched(owner.isolation, 'prepare_runtime_overlay', return_value=(f.env, {
+                        'baseline_paths': f.baseline, 'original_source_sha256': {}}))
+                    patched(owner.isolation, 'probe_paths', return_value=[{'paths': private_paths}])
+                    link = f.root / 'external-link'
+                    link.symlink_to(shared, target_is_directory=True)
+                    patched(owner.isolation, 'external_symlink_preflight', return_value={
+                        'links': [{'path': str(link), 'literal_target': str(shared),
+                                   'resolved_target': str(shared)}], 'background_simc_path': ''})
+                    patched(owner, 'skim_paths', return_value={'launcher': str(shared)})
+                    reached = owner.reached_resolver_callers(ROOT) if error is None else []
+                    patched(owner, 'reached_resolver_callers', return_value=reached)
+                    forbidden = [patched(owner, name, side_effect=AssertionError('forbidden:' + name))
+                        for name in ('stage_input_files', 'external_input_inventory', 'inventory',
+                                     'run_owned_child', 'verify_joint', 'verify_archive')]
+                    forbidden += [patched(cap, 'file_identity',
+                        side_effect=AssertionError('input artifact hashing forbidden')),
+                        patched(owner.ab, 'GateStatus', side_effect=AssertionError('log/status forbidden')),
+                        patched(owner.zipfile, 'ZipFile', side_effect=AssertionError('ZIP forbidden'))]
+                    forbidden += [patched(owner.isolation, name,
+                        side_effect=AssertionError('forbidden:' + name))
+                        for name in ('collection_module', 'deliver_evidence')]
+                    if behavior == 'collision':
+                        (f.tree.parent / 'matched-output').mkdir()
+                    real_preflight = owner.resolver_preflight
+                    original_package = (f.package / '__init__.py').read_bytes()
+                    def preflight(*args, **kwargs):
+                        result = real_preflight(*args, **kwargs)
+                        if behavior in ('mutate_installed', 'mutate_copied'):
+                            target = f.package if behavior == 'mutate_installed' else f.copied
+                            (target / '__init__.py').write_text('# mutated')
+                        if behavior == 'mutate_link':
+                            link.unlink()
+                            link.symlink_to(f.root, target_is_directory=True)
+                        if behavior == 'mutate_index':
+                            owner.ab.sha256.return_value = 'mutated-index'
+                        return result
+                    patched(owner, 'resolver_preflight', side_effect=preflight)
+                    real_probe = patched(owner, 'probe_resolver', wraps=owner.probe_resolver)
+                    if error:
+                        with self.assertRaisesRegex(ValueError, error):
+                            owner.resolver_smoke(f.repo, head)
+                    else:
+                        result = owner.resolver_smoke(f.repo, head)
+                        self.assertTrue(result['cleanup_completed'])
+                        self.assertTrue(result['preservation_passed'])
+                        self.assertFalse(result['analysis_started'])
+                        self.assertFalse(result['archive_created'])
+                        self.assertTrue(result['runtime_not_science'])
+                        known = {(c, tuple(m)) for _, c, m, _, _ in owner.resolver.CALLERS}
+                        expected = len(owner.resolver.CALLERS) + sum(
+                            (c, tuple(m)) not in known for c, m, _ in reached)
+                        self.assertEqual(real_probe.call_count, 2 * expected)
+                        for record in result['probes']['all_callers'] + result['probes']['baseline_callers']:
+                            self.assertIn('uproot', record['source_imports'])
+                            self.assertIn('numpy', record['source_imports'])
+                    (f.package / '__init__.py').write_bytes(original_package)
+                    for mock in forbidden:
+                        mock.assert_not_called()
+                self.assertEqual(cleaned, [True])
+                self.assertEqual(list(shared.iterdir()), [shared / 'background_samples'])
+
+    def test_actual_resolver_rejects_wrong_cwd_receipt(self):
+        with self.fixture() as f:
+            run = subprocess.run
+            def wrong_cwd(*args, **kwargs):
+                result = run(*args, **kwargs)
+                if result.returncode == 0:
+                    record = json.loads(result.stdout)
+                    record['cwd'] = str(f.root)
+                    result.stdout = json.dumps(record)
+                return result
+            with patch.object(owner.subprocess, 'run', side_effect=wrong_cwd):
+                with self.assertRaisesRegex(ValueError, 'resolver_cwd_mismatch'):
+                    owner.probe_resolver(f.tree, 'src/setup/findEffectiveCharge.py', (),
+                                         f.env, 'src/setup', f.copied)
 
     def run_private(self, f):
         return owner.probe_private_callers(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package)
@@ -1042,10 +1170,64 @@ class PrivateBoundary(unittest.TestCase):
     def test_no_child_before_path_gates_and_no_retry(self):
         import inspect
         source = inspect.getsource(owner.execute_gate)
-        self.assertLess(source.index('probe_private_callers('), source.index('run_owned_child('))
+        self.assertLess(source.index('resolver_preflight('), source.index('run_owned_child('))
         self.assertLess(source.index('stage_input_files('), source.index('run_owned_child('))
         self.assertLess(source.index('verify_joint('), source.index('module.collect_validation_bundle('))
         self.assertEqual(source.count('run_owned_child('), 1)
+
+    def test_smoke_cli_rejects_capture_and_offline_arguments(self):
+        import contextlib, io
+        for option in ('--outdir', '--output', '--output-dir', '--offline-bundle'):
+            with self.subTest(option=option), patch.object(owner, 'resolver_smoke') as smoke:
+                with contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(owner.main(['--resolver-smoke', '--source-commit', 'c'*40,
+                                                  option, '/unused']), 1)
+                smoke.assert_not_called()
+
+    def test_shared_source_authority_rejects_unknown_commit_and_dirty_index_source(self):
+        good = dict(head='c'*40, origin_test='c'*40, branch='test', porcelain='')
+        for change in ({'head': 'd'*40}, {'origin_test': 'd'*40}, {'branch': 'other'},
+                       {'porcelain': 'M  testing/source.py'}, {'porcelain': ' M src/main.py'}):
+            with self.subTest(change=change), patch.object(owner.isolation, 'snapshot',
+                    return_value=dict(good, **change)), patch.object(owner.ab, 'git', return_value=''):
+                with self.assertRaises(ValueError):
+                    owner.published_source(ROOT, 'c'*40)
+        with patch.object(owner.isolation, 'snapshot', return_value=good), patch.object(
+                owner.ab, 'git', return_value='src/unauthorized.py'):
+            with self.assertRaisesRegex(ValueError, 'unexpected_committed_source'):
+                owner.published_source(ROOT, 'c'*40)
+
+    def test_smoke_ordinary_import_failure_preserves_and_never_creates_worktree(self):
+        state = dict(head='c'*40, origin_test='c'*40, branch='test', porcelain='')
+        with ExitStack() as stack:
+            def patched(obj, name, **kwargs):
+                return stack.enter_context(patch.object(obj, name, **kwargs))
+            patched(owner.isolation.accepted, 'REPO', new=ROOT)
+            patched(owner.isolation, 'snapshot', return_value=state)
+            patched(owner, 'smoke_source_state', return_value=state)
+            patched(owner.ab, 'git', return_value='')
+            patched(owner.shutil, 'which', return_value=owner.sys.executable)
+            patched(owner, 'audit_default_output_writer', return_value={})
+            patched(owner.isolation, 'import_identity', side_effect=ValueError('ordinary_import_failed'))
+            worktree = patched(owner.isolation, 'owned_worktree')
+            preservation = patched(owner.isolation, 'verify_preservation')
+            with self.assertRaisesRegex(ValueError, 'ordinary_import_failed'):
+                owner.resolver_smoke(ROOT, 'c'*40)
+            worktree.assert_not_called()
+            preservation.assert_called_once_with(ROOT, state)
+
+    def test_smoke_and_acquisition_use_same_preflight(self):
+        import inspect
+        for function in (owner.resolver_smoke, owner.execute_gate):
+            source = inspect.getsource(function)
+            self.assertIn('published_source(repo, source_commit)', source)
+            self.assertIn('isolation.import_identity(repo)', source)
+            self.assertIn('isolation.prepare_runtime_overlay(repo, worktree)', source)
+            self.assertIn('resolver_preflight(repo, worktree, env, paths,', source)
+        preflight = inspect.getsource(owner.resolver_preflight)
+        for call in ('external_symlink_preflight(', 'skim_paths(', 'probe_paths(',
+                     'prepare_private_output(', 'probe_private_callers('):
+            self.assertIn(call, preflight)
 
     def test_wrong_mode_destination_blocks(self):
         with tempfile.TemporaryDirectory() as d:

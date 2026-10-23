@@ -377,6 +377,7 @@ def probe_private_callers(repo, worktree, env, baseline, outdir, installed_packa
     require(installed_package is not None, 'installed_package_identity_required')
     probes = []
     records = []
+    baseline_records = []
     callers = [(role, caller, modes, cwd) for role, caller, modes, cwd, _ in resolver.CALLERS]
     known = {(caller, tuple(modes)) for _, caller, modes, _ in callers}
     callers += [(caller, caller, modes, cwd) for caller, modes, cwd in reached_resolver_callers(repo)
@@ -403,10 +404,11 @@ def probe_private_callers(repo, worktree, env, baseline, outdir, installed_packa
         require(resolver.module_identity(record) == worktree.parent / 'runtime-python/ltsep',
                 'copied_ltsep_import_mismatch:' + role)
         records.append(record)
+        baseline_records.append(base)
         if modes:
             probes.append({'caller': record['caller'], 'paths': fields, 'isolation_passed': True})
     require(probes and all(p['paths'] == probes[0]['paths'] for p in probes), 'ltsep_probe_paths_disagree')
-    return {'plot': probes, 'all_callers': records}
+    return {'plot': probes, 'all_callers': records, 'baseline_callers': baseline_records}
 
 
 def reached_resolver_callers(repo):
@@ -820,12 +822,7 @@ def verify_archive(path, expected_head=None):
         return raw, authority, {'archive': capture.file_identity(path), 'manifest_sha256': hashlib.sha256(z.read('manifest.json')).hexdigest()}
 
 
-def execute_gate(repo, outdir, output, source_commit):
-    repo, outdir, output = map(lambda p: Path(p).absolute(), (repo, outdir, output))
-    require(repo.resolve() == isolation.accepted.REPO.resolve() and
-            outdir.resolve() == isolation.accepted.ARTIFACTS.resolve() and
-            output.parent.resolve() == isolation.accepted.GLOBUS.resolve() and output.suffix == '.zip',
-            'owner_path_boundary_invalid')
+def published_source(repo, source_commit):
     before = isolation.snapshot(repo)
     require(before['head'] == before['origin_test'] == source_commit and before['branch'] == 'test',
             'owner_source_not_published_test')
@@ -840,6 +837,109 @@ def execute_gate(repo, outdir, output, source_commit):
                 ab.git(repo, 'diff', '--name-only', BASE, source_commit).splitlines()), 'unexpected_committed_source')
     for line in before['porcelain'].splitlines():
         require(line[3:] in isolation.FARM_OUTPUTS or line[3:].startswith('OUTPUT/'), 'dirty_gate_source:' + line)
+    return before
+
+
+def resolver_preflight(repo, worktree, env, paths, outdir, package, preservation=None):
+    """Shared production resolver gate; no artifact inventory or input staging."""
+    shared = Path(paths["VOLATILEPATH"]) / "OUTPUT/Analysis" / (paths["ANATYPE"] + "LT")
+    require(shared.resolve() == outdir.resolve() == Path(paths["OUTPATH"]).resolve(),
+            "ordinary_output_authority_mismatch")
+    external = isolation.external_symlink_preflight(worktree, paths)
+    if preservation is not None:
+        preservation.append(('external_links', lambda: verify_external_links(external)))
+    if external['background_simc_path']:
+        require(Path(external['background_simc_path']).is_dir(), 'background_simc_directory_missing')
+    require((shared / 'background_samples').is_dir(), 'external_background_mkdir_required')
+    # Launcher mkdir of the stable skim role must already be a no-op.
+    skim = skim_paths(worktree, paths)['launcher']
+    require(Path(skim).is_dir(), 'external_skim_mkdir_required')
+    output_paths = isolation.probe_paths(worktree, env, paths)[0]['paths']
+    private = prepare_private_output(worktree, output_paths)
+    probes = probe_private_callers(repo, worktree, env, paths, private, package)
+    return private, probes, external
+
+
+def smoke_source_state(repo):
+    """Source/index bytes, never scientific input or shared-output traversal."""
+    index = Path(ab.git(repo, 'rev-parse', '--git-path', 'index'))
+    if not index.is_absolute():
+        index = repo / index
+    return {'snapshot': isolation.snapshot(repo), 'index_sha256': ab.sha256(index),
+            'diff': ab.git(repo, 'diff', '--binary', 'HEAD', '--', '.', ':(exclude)OUTPUT')}
+
+
+def resolver_smoke(repo, source_commit):
+    """Run the production resolver preflight, then clean up without a child."""
+    repo = Path(repo).absolute()
+    require(repo.resolve() == isolation.accepted.REPO.resolve(), 'owner_path_boundary_invalid')
+    require(re.fullmatch('[0-9a-f]{40}', source_commit) is not None, 'source_commit_requires_full_sha')
+    before = published_source(repo, source_commit)
+    source_before = smoke_source_state(repo)
+    child_environment(os.environ)
+    python = shutil.which('python3')
+    require(python and Path(python).resolve() == Path(sys.executable).resolve(),
+            'child_python_interpreter_mismatch')
+    checks = [('ordinary_checkout', lambda: isolation.verify_preservation(repo, before)),
+              ('ordinary_source_index', lambda: require(smoke_source_state(repo) == source_before,
+                                                        'ordinary_source_index_changed'))]
+    try:
+        audit = audit_default_output_writer(repo)
+        imported = isolation.import_identity(repo)
+        package = Path(imported['package_file']).resolve().parent
+        installed_before = resolver.tree_bytes(package)
+        checks.append(('installed_package', lambda: require(resolver.tree_bytes(package) == installed_before,
+                                                            'installed_ltsep_package_changed')))
+        with isolation.owned_worktree(repo, source_commit, 'analysis') as worktree:
+            checks.append(('cleanup', lambda: require(not worktree.parent.exists(),
+                                                       'resolver_smoke_cleanup_incomplete')))
+            local_checks = []
+            try:
+                # OUTPUT is the sole intentional source-tree addition below.
+                tree_before = ab.git(worktree, 'diff', '--binary', 'HEAD')
+                index = Path(ab.git(worktree, 'rev-parse', '--git-path', 'index'))
+                if not index.is_absolute():
+                    index = worktree / index
+                index_before = ab.sha256(index)
+                def source_unchanged():
+                    require(ab.git(worktree, 'diff', '--binary', 'HEAD') == tree_before and
+                            ab.sha256(index) == index_before and
+                            all(line == '?? OUTPUT' for line in ab.git(worktree, 'status',
+                                '--porcelain=v1', '--untracked-files=all').splitlines()),
+                            'smoke_worktree_source_index_changed')
+                local_checks.append(('worktree_source_index', source_unchanged))
+                env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
+                copied = worktree.parent / 'runtime-python/ltsep'
+                copied_before = resolver.tree_bytes(copied)
+                local_checks.append(('copied_package', lambda: require(
+                    resolver.tree_bytes(copied) == copied_before, 'copied_ltsep_package_changed')))
+                local_checks.append(('installed_overlay', lambda: isolation.verify_ltsep_preservation(overlay)))
+                paths = overlay['baseline_paths']
+                private, probes, external = resolver_preflight(repo, worktree, env, paths,
+                    isolation.accepted.ARTIFACTS, package, preservation=local_checks)
+                require(not any(private.iterdir()), 'resolver_smoke_output_created')
+                receipt = {'schema_version': 'pion_resolver_smoke/v1', 'source_HEAD': source_commit,
+                           'python': str(Path(sys.executable).resolve()), 'python_version': sys.version,
+                           'runtime_not_science': True, 'analysis_started': False,
+                           'archive_created': False, 'scientifically_accepted': False,
+                           'writer_audit': audit, 'probes': probes,
+                           'external_symlink_preflight': external}
+            finally:
+                preservation_checks(local_checks)
+        require(not worktree.parent.exists(), 'resolver_smoke_cleanup_incomplete')
+    finally:
+        preservation_checks(checks)
+    receipt.update(preservation_passed=True, cleanup_completed=True)
+    return receipt
+
+
+def execute_gate(repo, outdir, output, source_commit):
+    repo, outdir, output = map(lambda p: Path(p).absolute(), (repo, outdir, output))
+    require(repo.resolve() == isolation.accepted.REPO.resolve() and
+            outdir.resolve() == isolation.accepted.ARTIFACTS.resolve() and
+            output.parent.resolve() == isolation.accepted.GLOBUS.resolve() and output.suffix == '.zip',
+            'owner_path_boundary_invalid')
+    before = published_source(repo, source_commit)
     destinations = ab.destinations(outdir, output)
     require(all(not os.path.lexists(p) for p in destinations.values()), 'owner_destination_collision')
     child_environment(os.environ)  # Reject inherited opt-ins before any mutation.
@@ -852,6 +952,7 @@ def execute_gate(repo, outdir, output, source_commit):
                               'method_b_numerically_excluded': True})
     overlay = installed = None
     shared_before = None
+    preflight_checks = []
     try:
         tools = toolchain()
         audit = audit_default_output_writer(repo)
@@ -879,16 +980,8 @@ def execute_gate(repo, outdir, output, source_commit):
             def shared_state():
                 return {k: v for k, v in inventory(shared).items() if k not in excluded}
             shared_before = shared_state()
-            external = isolation.external_symlink_preflight(worktree, paths)
-            if external['background_simc_path']:
-                require(Path(external['background_simc_path']).is_dir(), 'background_simc_directory_missing')
-            require((shared / 'background_samples').is_dir(), 'external_background_mkdir_required')
-            # Launcher mkdir of the stable skim role must already be a no-op.
-            skim = skim_paths(worktree, paths)['launcher']
-            require(Path(skim).is_dir(), 'external_skim_mkdir_required')
-            output_paths = isolation.probe_paths(worktree, env, paths)[0]['paths']
-            private = prepare_private_output(worktree, output_paths)
-            probes = probe_private_callers(repo, worktree, env, paths, private, package)
+            private, probes, external = resolver_preflight(repo, worktree, env, paths, outdir, package,
+                                                          preservation=preflight_checks)
             bindings = stage_input_files(shared, private)
             external_inputs = external_input_inventory(worktree, paths, private, env)
             audit_path = worktree.parent / 'runtime-python/sitecustomize.py'
@@ -976,7 +1069,7 @@ def execute_gate(repo, outdir, output, source_commit):
                                                                          limit=16))[:8192])
         raise
     finally:
-        checks = [('ordinary_checkout', lambda: isolation.verify_preservation(repo, before))]
+        checks = [('ordinary_checkout', lambda: isolation.verify_preservation(repo, before)), *preflight_checks]
         if shared_before is not None:
             checks.append(('shared_outputs', lambda: require(shared_state() == shared_before, 'shared_outputs_changed')))
         if installed is not None:
@@ -1165,6 +1258,7 @@ def render_science_pdf(result, path, *, preview_dir=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-commit', required=True)
+    parser.add_argument('--resolver-smoke', action='store_true')
     parser.add_argument('--offline-bundle', type=Path)
     parser.add_argument('--output-dir', type=Path)
     parser.add_argument('--repo', type=Path)
@@ -1173,7 +1267,12 @@ def main(argv=None):
     args = parser.parse_args(argv)
     require(re.fullmatch('[0-9a-f]{40}', args.source_commit) is not None, 'source_commit_requires_full_sha')
     try:
-        if args.offline_bundle:
+        if args.resolver_smoke:
+            require(not any((args.offline_bundle, args.output_dir, args.outdir, args.output)),
+                    'resolver_smoke_argument_scope')
+            print(json.dumps(resolver_smoke(args.repo or isolation.accepted.REPO, args.source_commit),
+                             sort_keys=True, allow_nan=False))
+        elif args.offline_bundle:
             require(args.output_dir and not any((args.repo, args.outdir, args.output)), 'offline_argument_scope')
             outputs = offline_science(args.offline_bundle, args.output_dir, args.source_commit)
             print(json.dumps({k: str(v) for k, v in outputs.items()}, sort_keys=True))

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16304,
+      "bytes": 16339,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "0e3a597dc6705f8edf33f707977e257da90a3bbf281b76a77bbe86678814107f"
+      "sha256": "5bcd8e856d7109629278859c747d4780ff4add33f3e1339bebe44056e21b9b3c"
     },
     {
       "bytes": 11186,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 8878,
+      "bytes": 10006,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
-      "sha256": "b43bbe0d9f57fbfb0945d484da35dfb6c2709b82e668155ab92efef8c581cc67"
+      "sha256": "e5128a55ec6c54831d44505cedb958e4dc09ead2555b5d708cc0c57b75c1a940"
     },
     {
       "bytes": 28637,
@@ -1294,6 +1294,11 @@
       "bytes": 12204,
       "path": "docs/memory/phases/kaonlt-matched-cohort-farm-readiness-incident-and-path-alias-repair-2026-10-22-task-contract.md",
       "sha256": "5148d2c9345454a17769aed331ecdd948cf2fad1e5ce52bd0da8a3809e3a3f72"
+    },
+    {
+      "bytes": 8200,
+      "path": "docs/memory/phases/kaonlt-matched-cohort-real-runtime-resolver-smoke-2026-10-22-task-contract.md",
+      "sha256": "cf514d658e825fedb7107ad3ca4f959a33e51387c08663561afac53b4d1cb8e5"
     },
     {
       "bytes": 11883,

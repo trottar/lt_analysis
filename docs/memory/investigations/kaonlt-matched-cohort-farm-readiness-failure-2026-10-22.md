@@ -129,3 +129,20 @@ the sole NEXT: one guarded user acquisition after independent actual-diff
 acceptance, user publication, pushed-state synchronization and readiness review.
 On any failure stop at the first invariant and preserve complete failed evidence.
 Only an accepted new bundle permits the subsequent C replay/scientific comparison.
+
+## Real-runtime resolver smoke candidate - October 22
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[smoke contract](../phases/kaonlt-matched-cohort-real-runtime-resolver-smoke-2026-10-22-task-contract.md).
+SOURCE VERIFIED: ordinary installed/copied ltsep imports precede the failing
+guarded owner-only probe. The same owner exposes `--resolver-smoke`, sharing
+source authority and production external-link, skim, output and baseline/private
+caller checks. Stdout records interpreter and actual import/source identities;
+no input artifact inventory/staging, observer, child, log, collector or ZIP.
+Cleanup and source/index/package/link preservation gate success and failure.
+Local fixtures establish routing and negative guards only. Real farm Python 3.9,
+installed uproot/dependency closure and external preservation remain NOT VERIFIED.
+Independent diff review, user publication and pushed-state review precede user
+smoke. Review its receipt before acquisition readiness; no smoke pass accepts
+science. Scientific NEXT remains fresh six-parent matched-event A/B/C
+missing-mass/variance comparisons under Lambda.

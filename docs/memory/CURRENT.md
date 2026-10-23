@@ -30,20 +30,22 @@ at its interrupted position.
 
 ## Current Work Item
 
-`BLOCKED`: supplied `180522` at `test` source
-`f266045e9a535970f54a189a5eecb009401b8adb` rejected Python 3.9 path shape
-`lib64/python3.9/site-packages/uproot/__init__.py`: `resolver_code_path_escape`.
-Farm canonical target, installed closure and full status are NOT VERIFIED;
-no child/accepted ZIP or fresh science evidenced. The
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local proposed
+[no-child resolver smoke](phases/kaonlt-matched-cohort-real-runtime-resolver-smoke-2026-10-22-task-contract.md)
+adds `--resolver-smoke` to the same matched-cohort owner. SOURCE VERIFIED:
+ordinary imports precede the guarded probe; the failure was owner-only path
+policy, not evidence of missing uproot.
+Published `bd308954c59ab10c528055ee111af20f18b0a04a` contains the alias repair,
+with no applicable farm acceptance. Smoke and acquisition share source authority,
+external-link/skim/output-role checks and real baseline/private no-mode/Plot
+resolver calls. Smoke emits runtime-only JSON, cleans owned scratch and stops before input
+staging, observers, child or ZIP.
+Source/index, packages and external links are rechecked on success/failure.
+Real Python 3.9, installed dependency closure, farm preservation and compatibility
+remain NOT VERIFIED. The
 [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
-attributes four failed/inadmissible attempts and lost science throughput to
-assistant readiness judgment, not user operation. The
-[bounded repair](phases/kaonlt-matched-cohort-farm-readiness-incident-and-path-alias-repair-2026-10-22-task-contract.md)
-is local/proposed pending review/publication. SOURCE VERIFIED: exact old alias
-failure reproduced; lexical/canonical authority checked across loader/read/
-namespace gates with source hashes and fixture Root default/Plot calls preserved.
-Python 3.12 tests/3.9 path-shape replay establish no Python 3.9 execution or farm
-compatibility. Frozen resolver, farm_env, launchers and science are unchanged.
+retains the four failed attempts and assistant readiness responsibility.
+Scientific source, frozen resolver, helpers and launchers are unchanged.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -217,18 +219,17 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — one guarded user-operated Center/Left lowe matched-cohort acquisition,
-conditional on independent ChatGPT actual-diff acceptance of the bounded alias
-repair, user publication, pushed-state synchronization and representative
-readiness review under MAINTENANCE/CODEX. It must establish fresh
-same-run A/B and signed-event evidence, followed by the tracked offline fresh
-seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison.
-Any first source, input, child, artifact, provenance or preservation failure
-stops this operation; no automatic retry or manual replacement sequence.
-No farm command, runtime acceptance, held-out estimator, bias truth, MSE-optimal
-strength or production promotion is established. Preserve the broader full-MM,
-normalization and authoritative signal-yield objective without a Lambda/SIMC
-unity constraint.
+NEXT — independent ChatGPT actual-diff review of the local smoke candidate,
+user publication and pushed-state synchronization, then one user-operated
+resolver smoke on real farm Python 3.9. Review its receipt before deciding
+readiness for the existing single Center/Left lowe matched-cohort acquisition;
+a failed invariant stops without a child or automatic retry. Scientific NEXT
+remains fresh same-run A/B and signed-event evidence, then fresh seven-strength
+C fitting/replay and six-parent MM/variance JSON/PDF comparison under Lambda.
+No farm/runtime acceptance, held-out estimator, bias truth, optimal strength
+or promotion follows. Preserve full-MM, normalization and authoritative
+signal-yield objectives without a Lambda/SIMC unity constraint. Smoke validates
+neither science nor later acquisition gates.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior
