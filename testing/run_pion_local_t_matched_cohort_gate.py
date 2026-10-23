@@ -179,185 +179,24 @@ def prepare_private_output(worktree, paths):
     return output
 
 
-# This probe belongs only to this owner. The separately frozen resolver PROBE
-# remains the authority for its own CLI. Neither callers nor analysis modules
-# are executed here; only the real ltsep.Root and the frozen farm_env wrapper.
+# Ordinary imports match the established isolation probes and farm_env wrapper.
+# Callers are path arguments only; their analysis module bodies never execute.
+# This is not an import sandbox: dependencies may read ordinary package metadata.
 RESOLVER_PROBE = r'''
-import sys, os, json, inspect, sysconfig, hashlib
-import importlib.machinery as machinery
+import sys, os, json, inspect
 from pathlib import Path
 tree=Path(sys.argv[1]); expected=Path(sys.argv[5])
-spec=machinery.PathFinder.find_spec("ltsep")
-if spec is None or spec.origin is None: raise ImportError("installed_ltsep_unavailable")
-if Path(spec.origin) != expected/"__init__.py":
-    raise RuntimeError("resolver_package_import_mismatch:"+str(spec.origin))
-stdlib=Path(sysconfig.get_path("stdlib")).resolve(strict=True)
-dependencies={Path(sysconfig.get_path(k)).resolve(strict=True) for k in ("purelib","platlib")}
-# Authority comes from the interpreter scheme, never arbitrary PYTHONPATH.
-# Retain lexical roots too. On POSIX a venv may expose lib64 -> lib even
-# when sysconfig reports only lib. Admit that one verified prefix alias;
-# do not admit arbitrary symlinks pointing into a trusted code directory.
-code_roots={Path(sysconfig.get_path(k)):Path(sysconfig.get_path(k)).resolve(strict=True)
-            for k in ("stdlib","platstdlib","purelib","platlib")}
-prefix=Path(sys.prefix)
-alias=prefix/"lib64"
-if alias.is_symlink() and os.readlink(alias) in ("lib",str(prefix/"lib")) and alias.resolve(strict=True)==prefix/"lib":
-    for lexical,canonical in list(code_roots.items()):
-        if lexical.is_relative_to(prefix/"lib"):
-            candidate=alias/lexical.relative_to(prefix/"lib")
-            if candidate.is_dir() and candidate.resolve(strict=True)==canonical:
-                code_roots[candidate]=canonical
-config_dir=expected/"PATH_TO_DIR"
-configs=set(config_dir.glob("*.path"))
-for path in [expected, config_dir, *configs]:
-    if path.resolve(strict=True) != path: raise RuntimeError("resolver_path_escape:"+str(path))
-authorized_read=None
-loaded={}
-def trusted_path(path):
-    p=Path(path)
-    if not p.is_absolute() or ".." in p.parts:
-        raise RuntimeError("resolver_code_path_escape:"+str(p))
-    resolved=p.resolve(strict=True)
-    if p.is_relative_to(expected) or p.is_relative_to(tree):
-        if resolved!=p: raise RuntimeError("resolver_code_path_escape:"+str(p))
-        return p.is_relative_to(expected) or p in (tree/"farm_env",tree/"farm_env/__init__.py",tree/"farm_env/ltsep_paths.py")
-    for lexical,canonical in code_roots.items():
-        if p.is_relative_to(lexical):
-            # A symlink below a code root is not an interpreter-root alias.
-            if resolved!=canonical/p.relative_to(lexical):
-                raise RuntimeError("resolver_code_path_escape:"+str(p))
-            if any(part in {"site-packages","dist-packages"} for part in p.parts) and not any(resolved.is_relative_to(r) for r in dependencies):
-                return False
-            return True
-    return False
-
-def code_path(path):
-    p=Path(path)
-    # site-packages may be nested inside stdlib. It is a separate code-only
-    # authority, never a source of arbitrary package/config/scientific data.
-    return trusted_path(p) and (
-        p.suffix==".py" or any(str(p).endswith(s) for s in machinery.EXTENSION_SUFFIXES))
-stdlib_roots={Path(sysconfig.get_path(k)).resolve(strict=True) for k in ("stdlib","platstdlib")}
-def stdlib_code(path):
-    p=Path(path)
-    return (code_path(p) and not any(part in {"site-packages","dist-packages"} for part in p.parts)
-            and any(p.resolve(strict=True).is_relative_to(r) for r in stdlib_roots))
-
-# Only ctypes' intrinsic stdlib closure executes before the full native-load
-# ban. No ltsep, third-party dependency or config runs in this phase.
-bootstrap_names={"ctypes","ctypes._endian","_ctypes","struct","_struct"}
-bootstrap_active=True
-ctypes_spec=machinery.PathFinder.find_spec("ctypes")
-if ("ctypes" in sys.modules or "_ctypes" in sys.modules or ctypes_spec is None
-        or type(ctypes_spec.loader) is not machinery.SourceFileLoader
-        or not stdlib_code(ctypes_spec.origin)
-        or not any(Path(ctypes_spec.origin).resolve(strict=True)==r/"ctypes/__init__.py" for r in stdlib_roots)):
-    raise RuntimeError("resolver_ctypes_bootstrap_provenance")
-
-def readonly(event,args):
-    if event=="import":
-        if args[0].split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
-            raise RuntimeError("scientific_module_import_forbidden:"+args[0])
-        if len(args)>1 and args[1] and not code_path(args[1]):
-            raise RuntimeError("resolver_code_import_forbidden:"+str(args[1]))
-    if event=="open":
-        mode,flags=args[1:3]
-        if (isinstance(mode,str) and any(c in mode for c in "wax+")) or (isinstance(flags,int) and flags & (os.O_WRONLY|os.O_RDWR|os.O_CREAT|os.O_TRUNC|os.O_APPEND)):
-            raise RuntimeError("resolver_write_attempt:"+str(args[0]))
-        if not isinstance(args[0],(str,bytes,os.PathLike)):
-            raise RuntimeError("resolver_data_read_forbidden:"+str(args[0]))
-        path=Path(os.path.abspath(os.fsdecode(args[0])))
-        if path.suffix==".pyc": raise FileNotFoundError("source_only_resolver_probe:"+str(path))
-        if path!=authorized_read and path not in configs:
-            raise RuntimeError("resolver_data_read_forbidden:"+str(path))
-        if path==authorized_read:
-            if not code_path(path): raise RuntimeError("resolver_code_read_forbidden:"+str(path))
-        elif path.resolve(strict=True)!=path:
-            raise RuntimeError("resolver_path_escape:"+str(path))
-    if event.startswith("ctypes.dlsym") or event in {"os.mkdir","os.remove","os.rmdir","os.rename","os.link","os.symlink","os.chmod","os.chown","os.truncate","os.utime","os.chdir","os.fork","os.forkpty","os.startfile","subprocess.Popen","os.system","os.exec","os.posix_spawn","ctypes.dlopen","socket.__new__"}:
-        raise RuntimeError("resolver_mutation_attempt:"+event+":"+str(args)[:300])
-def bootstrap_guard(event,args):
-    if not bootstrap_active:
-        return readonly(event,args)
-    if event=="import":
-        if args[0] not in bootstrap_names:
-            raise RuntimeError("resolver_bootstrap_import_forbidden:"+args[0])
-        if len(args)>1 and args[1] and not stdlib_code(args[1]):
-            raise RuntimeError("resolver_ctypes_bootstrap_provenance:"+str(args[1]))
-    if event=="open" and (authorized_read is None or not stdlib_code(authorized_read)):
-        raise RuntimeError("resolver_bootstrap_read_forbidden:"+str(args[0]))
-    # Only verified stdlib module bodies execute here. The phase ends before
-    # resolver/dependency code runs. The full hook has no native-load exception.
-    if event=="ctypes.dlopen" or event.startswith("ctypes.dlsym"):
-        return
-    readonly(event,args)
-class Source(machinery.SourceFileLoader):
-    def get_data(self,path):
-        global authorized_read
-        p=Path(path)
-        if p.suffix==".pyc": raise FileNotFoundError("source_only_resolver_probe:"+str(p))
-        if p!=Path(self.path) or not code_path(p):
-            raise RuntimeError("resolver_code_read_forbidden:"+str(p))
-        authorized_read=p
-        try: raw=super().get_data(path)
-        finally: authorized_read=None
-        loaded[self.name]={"path":str(p),"realpath":str(p.resolve(strict=True)),"sha256":hashlib.sha256(raw).hexdigest()}
-        return raw
-class Extension(machinery.ExtensionFileLoader):
-    def create_module(self,spec):
-        global authorized_read
-        p=Path(self.path)
-        if not code_path(p): raise RuntimeError("resolver_extension_forbidden:"+str(p))
-        authorized_read=p
-        try: raw=p.read_bytes()
-        finally: authorized_read=None
-        loaded[self.name]={"path":str(p),"realpath":str(p.resolve(strict=True)),"sha256":hashlib.sha256(raw).hexdigest()}
-        return super().create_module(spec)
-class Finder:
-    def find_spec(self,name,path=None,target=None):
-        if bootstrap_active and name not in bootstrap_names:
-            raise RuntimeError("resolver_bootstrap_import_forbidden:"+name)
-        if name.split(".")[0] in {"ROOT","root_numpy","cppyy","libPyROOT"}:
-            raise RuntimeError("scientific_module_import_forbidden:"+name)
-        found=machinery.PathFinder.find_spec(name,path,target)
-        if found is None: return None
-        if bootstrap_active and (found.origin is None or not stdlib_code(found.origin)):
-            raise RuntimeError("resolver_ctypes_bootstrap_provenance:"+str(found.origin))
-        if bootstrap_active and type(found.loader) not in (machinery.SourceFileLoader,machinery.ExtensionFileLoader):
-            raise RuntimeError("resolver_bootstrap_loader_forbidden:"+name)
-        if found.origin is None:
-            if not found.submodule_search_locations or not all(trusted_path(p) for p in found.submodule_search_locations):
-                raise RuntimeError("resolver_namespace_forbidden:"+name)
-            return found
-        if not code_path(found.origin):
-            raise RuntimeError("resolver_code_import_forbidden:"+str(found.origin))
-        if isinstance(found.loader,machinery.SourceFileLoader):
-            found.loader=Source(name,found.origin)
-        elif isinstance(found.loader,machinery.ExtensionFileLoader):
-            found.loader=Extension(name,found.origin)
-        else:
-            raise RuntimeError("resolver_loader_forbidden:"+str(found.origin))
-        return found
-sys.addaudithook(bootstrap_guard)
-sys.meta_path=[machinery.BuiltinImporter,machinery.FrozenImporter,Finder()]
-import ctypes
-if (ctypes.__file__!=ctypes_spec.origin or ctypes.__spec__.origin!=ctypes_spec.origin
-        or inspect.getsourcefile(ctypes.CDLL)!=ctypes_spec.origin
-        or ctypes.CDLL.__init__.__code__.co_filename!=ctypes_spec.origin
-        or "ctypes" not in loaded):
-    raise RuntimeError("resolver_ctypes_bootstrap_identity")
-bootstrap_active=False
-sys.addaudithook(readonly)
-sys.meta_path=[machinery.BuiltinImporter,machinery.FrozenImporter,Finder()]
 sys.path.insert(0,str(tree))
 import ltsep, ltsep.pathing
+if Path(ltsep.__file__) != expected/"__init__.py":
+    raise RuntimeError("resolver_package_import_mismatch:"+str(ltsep.__file__))
 from farm_env.ltsep_paths import create_ltsep_root
 caller=sys.argv[2]; modes=json.loads(sys.argv[3]); fields=json.loads(sys.argv[4])
 lt=create_ltsep_root(caller,*modes)
 paths={k:getattr(lt,k,None) for k in fields}
 matches=[]
 p=ltsep.pathing.SetPath(caller)
-for f in sorted(configs):
+for f in sorted((expected/"PATH_TO_DIR").glob("*.path")):
     values={}
     for line in f.read_text(encoding="utf-8").splitlines():
         if not line.strip(): continue
@@ -368,28 +207,18 @@ for f in sorted(configs):
     observed={k:p.getPath(k) for k in values}
     expanded={k:v.replace("${USER}",str(paths["USER"])) for k,v in values.items()}
     if expanded==observed: matches.append(str(f))
-for name,record in loaded.items():
-    if name not in sys.modules or getattr(sys.modules[name],"__file__",None)!=record["path"]:
-        raise RuntimeError("resolver_module_identity_changed:"+name)
-    p=Path(record["path"])
-    if not code_path(p) or str(p.resolve(strict=True))!=record["realpath"]:
-        raise RuntimeError("resolver_module_identity_changed:"+name)
-    authorized_read=p
-    try: digest=hashlib.sha256(p.read_bytes()).hexdigest()
-    finally: authorized_read=None
-    if digest!=record["sha256"]: raise RuntimeError("resolver_module_source_changed:"+name)
+imports={name:{"path":module.__file__,"realpath":os.path.realpath(module.__file__)}
+         for name,module in list(sys.modules.items()) if getattr(module,"__file__",None)}
 print(json.dumps({"caller":caller,"caller_realpath":os.path.realpath(caller),"mode":modes,"cwd":os.getcwd(),
     "paths":paths,"config_matches":matches,"package_file":ltsep.__file__,
     "pathing_file":ltsep.pathing.__file__,"root_file":inspect.getsourcefile(type(lt)),
     "resolver_file":sys.modules["farm_env.ltsep_paths"].__file__,
-    "python":sys.executable,"python_version":sys.version,"source_imports":loaded,
-    "dependency_roots":sorted(str(r) for r in dependencies),
-    "code_roots":{str(k):str(v) for k,v in code_roots.items()}},allow_nan=False))
+    "python":sys.executable,"python_version":sys.version,"source_imports":imports},allow_nan=False))
 '''
 
 
 def probe_resolver(tree, caller, modes, env, cwd, package):
-    """Source-only imports and exact config reads; no physics input reads."""
+    """Ordinary ltsep import with exact identity/config and package preservation."""
     tree, package = Path(tree), Path(package)
     path, working = tree / caller, tree / cwd
     require(path.exists() and resolver.real(path) == path, 'caller_path_invalid:' + caller)
@@ -398,7 +227,8 @@ def probe_resolver(tree, caller, modes, env, cwd, package):
     try:
         result = subprocess.run([sys.executable, '-B', '-c', RESOLVER_PROBE, str(tree),
             str(path), json.dumps(list(modes)), json.dumps(resolver.FIELDS), str(package)],
-            cwd=working, env=env, capture_output=True, text=True, timeout=60)
+            cwd=working, env=dict(env, PYTHONDONTWRITEBYTECODE='1'),
+            capture_output=True, text=True, timeout=60)
         require(result.returncode == 0, 'resolver_subprocess_failed:' + caller + ':' + result.stderr[-2000:])
         require(not result.stderr.strip(), 'resolver_stderr_contamination:' + caller)
         record = json.loads(result.stdout)

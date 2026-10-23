@@ -197,3 +197,39 @@ Manifest write/check, ordinary health and bootstrap PASS; CURRENT soft-size
 warning remains nonblocking, to batch at the next checkpoint/milestone.
 The complete temporary root review bundle includes the actual diff, full new
 contract and detailed receipt. Local passes establish no farm compatibility.
+
+## Sixth failure and ordinary resolver reuse - October 23
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[ordinary resolver reuse contract](../phases/kaonlt-reuse-existing-ltsep-resolver-science-unblock-2026-10-23-task-contract.md).
+RUNTIME VERIFIED only as attributed to the supplied contract: published
+`82bbe68d31b93e8d44e8d6cd6b144b80ef88e99e`, real farm Python 3.9,
+installed/copied ltsep importing uproot, NumPy and pandas, then dateutil's
+legitimate `/usr/share/zoneinfo/UTC` read rejected by the owner-only
+`RESOLVER_PROBE`. No child, matched archive or fresh physics was produced.
+No full traceback/status artifact was independently inspected locally here.
+
+The user's correction and displacement alarm identify the wrong assumption:
+ordinary dependency startup required a new exhaustive custom import sandbox.
+The sixth failure follows the lib64 alias and ctypes initialization failures;
+this is assistant readiness judgment failure, not user farm operation.
+The prior mandatory smoke NEXT above is historical and superseded by CURRENT.
+
+SOURCE VERIFIED: delete owner-only Finder/Source/Extension loaders, bootstrap,
+audit hooks and package/system-data allowlists. The existing owner uses ordinary
+installed/copied ltsep imports and the unchanged farm_env wrapper under the real
+interpreter with `-B` and `PYTHONDONTWRITEBYTECODE=1`. Dependencies may read
+legitimate timezone/package metadata; there is no generic read/write sandbox
+claim. Whole-package byte checks on success and exceptions, exact caller/mode/
+cwd/interpreter/module/config identities, stable external roles, baseline/private
+lexical/resolved output checks, source/index/link preservation, private input
+identities and child/collector barriers remain. No frozen resolver/helper/
+launcher/scientific source changes or physics phase.
+
+After independent actual-diff acceptance, user publication and pushed-state
+synchronization, evaluate the already-tracked single matched-cohort scientific
+owner for the protected same-run acquisition. Existing smoke is optional;
+no new mandatory smoke-development loop. First failed invariant stops delivery.
+Fresh A/B/events and seven-strength C replay/six-parent MM/variance comparison
+remain the scientific target. Python 3.9, real farm dependency closure, ROOT,
+physical preservation and scientific acceptance remain NOT VERIFIED locally.

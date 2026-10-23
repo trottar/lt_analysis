@@ -30,23 +30,19 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: owner-only
-[ctypes bootstrap repair](phases/kaonlt-python39-ctypes-bootstrap-fix-2026-10-22-task-contract.md).
-First real `--resolver-smoke` at `abff8a49e` failed before analysis:
-`resolver_mutation_attempt:ctypes.dlopen:(None,)` during Python 3.9
-`pythonapi = PyDLL(None)` initialization (RUNTIME VERIFIED: supplied traceback
-only). This fifth attempt is science-inadmissible; assistant readiness judgment
-owns the failure.
-SOURCE VERIFIED: local candidate verifies ctypes stdlib provenance and imports
-its bounded closure under an early read/write/process/network guard, then adds
-full resolver controls. Later native loads/symbol lookups remain denied.
-Smoke/acquisition share source/hash and baseline/private no-mode/Plot checks.
-Smoke stops before staging/observers/child/ZIP; cleanup and preservation checks
-cover success/failure.
-Local Python 3.12 tests do not verify Python 3.9, installed farm dependencies or
-farm preservation/compatibility. The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
-retains all five failures. Science, frozen resolver, helpers and launchers stay
-unchanged.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [ordinary resolver reuse](phases/kaonlt-reuse-existing-ltsep-resolver-science-unblock-2026-10-23-task-contract.md).
+Sixth supplied farm failure at `82bbe68d3`: owner-only probe rejected dateutil's
+legitimate `/usr/share/zoneinfo/UTC` read. No child, matched ZIP or fresh science
+(RUNTIME VERIFIED only as attributed in the supplied contract). The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+retains six failures and assistant readiness accountability.
+SOURCE VERIFIED: custom loaders/bootstrap/audit hooks removed; ordinary ltsep
+imports use the unchanged farm_env wrapper, real Python `-B` and disabled
+bytecode writes. Exact baseline/private caller/mode/cwd/interpreter/module/config,
+stable-role, lexical/resolved OUTPATH and package/source/index checks remain.
+Dependencies may read metadata; no generic read/write sandbox claim. Optional
+smoke shares preflight and stops before staging/observers/child/ZIP; no mandatory
+extra cycle. Python 3.9, farm dependencies/preservation and science NOT VERIFIED
+locally. Scientific source, frozen resolver, helpers and launchers unchanged.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -220,17 +216,17 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the local ctypes repair,
-user publication and pushed-state synchronization, then one user-operated
-resolver smoke on real farm Python 3.9. Review its receipt before deciding
-readiness for the existing single Center/Left lowe matched-cohort acquisition;
-a failed invariant stops without a child or automatic retry. Scientific NEXT
-remains fresh same-run A/B and signed-event evidence, then fresh seven-strength
-C fitting/replay and six-parent MM/variance JSON/PDF comparison under Lambda.
-No farm/runtime acceptance, held-out estimator, bias truth, optimal strength
-or promotion follows. Preserve full-MM, normalization and authoritative
-signal-yield objectives without a Lambda/SIMC unity constraint. Smoke validates
-neither science nor later acquisition gates.
+NEXT — after independent ChatGPT actual-diff review, user publication and
+pushed-state synchronization, evaluate the existing single Center/Left lowe
+matched-cohort scientific owner for one protected acquisition: fresh same-run
+A/B and signed-event packets for canonical t1/t2/t3, then the existing fresh
+seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison
+under Lambda. The optional resolver smoke adds no mandatory development cycle.
+Hard-stop at the first failed invariant; no automatic retry or failed-artifact
+acceptance. No farm/runtime acceptance, held-out estimator, bias truth, optimal
+strength or promotion follows from this local repair. Preserve full-MM,
+normalization and authoritative signal-yield objectives without a Lambda/SIMC
+unity constraint.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior

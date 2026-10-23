@@ -39,7 +39,7 @@ class ResolverImports(unittest.TestCase):
         cls.temp.cleanup()
 
     @contextmanager
-    def fixture(self, behavior='', dependency_behavior='', smoke_cleanup=False):
+    def fixture(self, behavior='', dependency_behavior='', smoke_cleanup=False, real_dependencies=False, reached_callers=False):
         with tempfile.TemporaryDirectory(prefix='kaonlt-import-fixture-') as d:
             root = Path(d).resolve()
             repo, worktree = root / 'ordinary', root / 'attempt/analysis'
@@ -47,7 +47,7 @@ class ResolverImports(unittest.TestCase):
             fields = {k: str(root / 'external' / k) for k in owner.resolver.FIELDS}
             fields.update(USER='fixture', HOST='fixture', ANATYPE='Kaon', LTANAPATH=str(repo),
                           OUTPATH=str(repo / 'OUTPUT/Analysis/KaonLT'))
-            reached = owner.reached_resolver_callers(ROOT) if smoke_cleanup else []
+            reached = owner.reached_resolver_callers(ROOT) if smoke_cleanup or reached_callers else []
             for tree in (repo, worktree):
                 for name in {s for _, _, _, _, s in owner.resolver.CALLERS} | {
                         'src/setup/calcTotalEffectiveCharge.py'} | {c for c, _, _ in reached}:
@@ -62,7 +62,7 @@ class ResolverImports(unittest.TestCase):
                 (package / 'PATH_TO_DIR').mkdir(parents=True)
                 (package / '__init__.py').write_text('from .ltsep import Root\n')
                 (package / 'ltsep.py').write_text(
-                    'from pathlib import Path\nimport uproot\nfrom .pathing import SetPath\n'
+                    'from pathlib import Path\n' + (dependency_behavior if real_dependencies else 'import uproot\n') + 'from .pathing import SetPath\n'
                     'class Root:\n'
                     ' def __init__(self,caller,*modes):\n'
                     '  p=SetPath(caller)\n'
@@ -78,7 +78,7 @@ class ResolverImports(unittest.TestCase):
                 config = dict(fields, LTANAPATH=str(tree))
                 (package / 'PATH_TO_DIR/user.path').write_text(''.join(k+'='+v+'\n' for k,v in config.items()))
             # These are actual interpreter site-packages, outside ltsep/stdlib.
-            for name, text in (('uproot', 'import numpy\n' + dependency_behavior), ('numpy', 'fixture_dependency=True\n')):
+            for name, text in (() if real_dependencies else (('uproot', 'import numpy\n' + dependency_behavior), ('numpy', 'fixture_dependency=True\n'))):
                 p = self.site / name
                 p.mkdir()
                 (p / '__init__.py').write_text(text)
@@ -89,7 +89,7 @@ class ResolverImports(unittest.TestCase):
             private_env = dict(baseline_env, PYTHONPATH=str(copied.parent))
             before = {str(p): p.read_bytes() for p in root.rglob('*') if p.is_file()}
             try:
-                with patch.object(owner.sys, 'executable', str(self.python)), patch.dict(os.environ, baseline_env, clear=True):
+                with patch.object(owner.sys, 'executable', sys.executable if real_dependencies else str(self.python)), patch.dict(os.environ, baseline_env, clear=True):
                     yield SimpleNamespace(root=root, repo=repo, tree=worktree, package=installed,
                         copied=copied, baseline=fields, env=private_env,
                         outdir=worktree / 'OUTPUT/Analysis/KaonLT')
@@ -100,14 +100,14 @@ class ResolverImports(unittest.TestCase):
                         continue
                     self.assertEqual(Path(name).read_bytes(), raw, name)
                 self.assertFalse((root / 'written').exists())
-                for name in ('uproot', 'numpy'):
+                for name in (() if real_dependencies else ('uproot', 'numpy')):
                     shutil.rmtree(self.site / name)
                 for p in self.site.glob('physics.*'):
                     p.unlink()
 
     def test_smoke_real_resolver_and_no_child_success_failure(self):
         # Only isolation setup is a fixture. The shared preflight and every
-        # guarded baseline/private Root subprocess run unchanged.
+        # ordinary baseline/private Root subprocess run unchanged.
         for behavior, error in (('', None),
                 ('mutate_installed', 'installed_ltsep_package_changed'),
                 ('mutate_copied', 'copied_ltsep_package_changed'),
@@ -115,9 +115,7 @@ class ResolverImports(unittest.TestCase):
                 ('mutate_link', 'external_link_changed'),
                 ('collision', 'private_output_collision'),
                 ('  self.OUTPATH="/unexpected/output"\n', 'outpath_mismatch'),
-                ('  __import__("ctypes").CDLL(None)\n', 'resolver_mutation_attempt:ctypes.dlopen'),
-                ('  __import__("ctypes").pythonapi.Py_GetVersion\n', 'resolver_mutation_attempt:ctypes.dlsym'),
-                ('  open("/outside.root").read()\n', 'resolver_data_read_forbidden')):
+                ('  raise RuntimeError("dependency_import_failed")\n', 'dependency_import_failed')):
             with self.subTest(error=error), self.fixture(
                     behavior='' if behavior.startswith('mutate_') or behavior == 'collision' else behavior,
                     smoke_cleanup=True) as f:
@@ -216,279 +214,58 @@ class ResolverImports(unittest.TestCase):
                 self.assertEqual(cleaned, [True])
                 self.assertEqual(list(shared.iterdir()), [shared / 'background_samples'])
 
-    def test_actual_resolver_rejects_wrong_cwd_receipt(self):
-        with self.fixture() as f:
-            run = subprocess.run
-            def wrong_cwd(*args, **kwargs):
-                result = run(*args, **kwargs)
-                if result.returncode == 0:
-                    record = json.loads(result.stdout)
-                    record['cwd'] = str(f.root)
-                    result.stdout = json.dumps(record)
-                return result
-            with patch.object(owner.subprocess, 'run', side_effect=wrong_cwd):
-                with self.assertRaisesRegex(ValueError, 'resolver_cwd_mismatch'):
-                    owner.probe_resolver(f.tree, 'src/setup/findEffectiveCharge.py', (),
-                                         f.env, 'src/setup', f.copied)
+    def test_actual_resolver_rejects_wrong_identity_receipts(self):
+        for key, reason in (('cwd', 'resolver_cwd_mismatch'),
+                            ('caller', 'resolver_caller_mismatch'),
+                            ('mode', 'resolver_caller_mismatch'),
+                            ('python', 'interpreter_mismatch'),
+                            ('resolver_file', 'resolver_wrapper_import_mismatch'),
+                            ('pathing_file', 'ltsep_module_identity_invalid'),
+                            ('root_file', 'ltsep_module_identity_invalid')):
+            with self.subTest(key=key), self.fixture() as f:
+                run = subprocess.run
+                def wrong_identity(*args, **kwargs):
+                    result = run(*args, **kwargs)
+                    if result.returncode == 0:
+                        record = json.loads(result.stdout)
+                        record[key] = ['Plot_LTSep'] if key == 'mode' else str(f.root)
+                        result.stdout = json.dumps(record)
+                    return result
+                with patch.object(owner.subprocess, 'run', side_effect=wrong_identity):
+                    with self.assertRaisesRegex(ValueError, reason):
+                        owner.probe_resolver(f.tree, 'src/setup/findEffectiveCharge.py', (),
+                                             f.env, 'src/setup', f.copied)
+
+    def test_ordinary_import_package_mutation_stops_on_success_and_exception(self):
+        for installed in (False, True):
+            for fails in (False, True):
+                behavior = ('  Path(__file__).with_name("__init__.py").write_text("# changed")\n' +
+                            ('  raise RuntimeError("import_failed")\n' if fails else ''))
+                with self.subTest(installed=installed, fails=fails), self.fixture(behavior=behavior) as f:
+                    package, tree, env = ((f.package, f.repo, dict(os.environ)) if installed else
+                                          (f.copied, f.tree, f.env))
+                    path = package / '__init__.py'
+                    raw = path.read_bytes()
+                    try:
+                        with self.assertRaisesRegex(ValueError, 'ltsep_package_changed_during_probe'):
+                            owner.probe_resolver(tree, 'src/setup/findEffectiveCharge.py', (),
+                                                 env, 'src/setup', package)
+                    finally:
+                        path.write_bytes(raw)
+
+    def test_ordinary_import_ctypes_and_legitimate_timezone_read(self):
+        zone = Path('/usr/share/zoneinfo/UTC')
+        behavior = 'import ctypes\nctypes.pythonapi.Py_GetVersion\n'
+        if zone.is_file():
+            behavior += 'from pathlib import Path\nassert Path("/usr/share/zoneinfo/UTC").read_bytes()\n'
+        with self.fixture(dependency_behavior=behavior) as f:
+            # The environment must not re-enable bytecode writes.
+            f.env['PYTHONDONTWRITEBYTECODE'] = '0'
+            self.run_private(f)
+            self.assertFalse(list(f.copied.rglob('*.pyc')))
 
     def run_private(self, f):
         return owner.probe_private_callers(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package)
-
-    @contextmanager
-    def alias_fixture(self, python39_shape=False, **kwargs):
-        """Real POSIX venv alias; optional 3.9 scheme replay on the host VM.
-
-        The scheme replay is explicit, not a claim of Python 3.9 execution.
-        No import loader, Root result or resolver decision is mocked.
-        """
-        if os.name == 'nt':
-            self.skipTest('POSIX lib64 topology requires local Linux interpreter')
-        native_site = self.site
-        alias = self.venv / 'lib64'
-        if not alias.exists():
-            alias.symlink_to('lib', target_is_directory=True)
-        self.assertTrue(alias.is_symlink())
-        self.assertEqual(alias.resolve(), self.venv / 'lib')
-        if python39_shape:
-            self.site = self.venv / 'lib/python3.9/site-packages'
-            self.site.mkdir(parents=True, exist_ok=True)
-        lexical = alias / self.site.relative_to(self.venv / 'lib')
-        pth = native_site / 'resolver_alias_fixture.pth'
-        pth.write_text('import sys; sys.path.insert(0, '+repr(str(lexical))+')\n')
-        probe = owner.RESOLVER_PROBE
-        if python39_shape:
-            # Reproduce the observed scheme/path shape without pretending the
-            # available host interpreter has Python 3.9's import implementation.
-            prefix = ('import sysconfig\n_original_get_path=sysconfig.get_path\n'
-                      'sysconfig.get_path=lambda key,*a,**kw: '+repr(str(self.site))+
-                      ' if key in ("purelib","platlib") else _original_get_path(key,*a,**kw)\n')
-            probe = prefix + probe
-        try:
-            with patch.object(owner, 'RESOLVER_PROBE', probe), self.fixture(**kwargs) as f:
-                yield f, lexical
-        finally:
-            pth.unlink()
-            self.site = native_site
-
-    def test_exact_prior_probe_rejects_lib64_python39_source(self):
-        raw = subprocess.check_output(['git', 'show',
-            'f266045e9a535970f54a189a5eecb009401b8adb:testing/run_pion_local_t_matched_cohort_gate.py'],
-            cwd=ROOT, text=True)
-        prior = next(ast.literal_eval(n.value) for n in ast.parse(raw).body
-                     if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and
-                         t.id == 'RESOLVER_PROBE' for t in n.targets))
-        with self.alias_fixture(python39_shape=True) as (f, lexical):
-            prefix = owner.RESOLVER_PROBE.split('import sys, os, json, inspect')[0]
-            with patch.object(owner, 'RESOLVER_PROBE', prefix + prior):
-                with self.assertRaisesRegex(ValueError,
-                        r'resolver_code_path_escape:.*lib64/python3.9/site-packages/uproot/__init__.py'):
-                    self.run_private(f)
-
-    def test_entire_alias_import_path_native_and_python39_scheme(self):
-        for replay in (False, True):
-            with self.subTest(python39_scheme=replay), self.alias_fixture(
-                    python39_shape=replay, dependency_behavior='import alias_namespace.child\nimport termios\n') as (f, lexical):
-                import importlib.util
-                extension = self.site / Path(importlib.util.find_spec('termios').origin).name
-                shutil.copyfile(importlib.util.find_spec('termios').origin, extension)
-                ns = self.site / 'alias_namespace'
-                ns.mkdir()
-                (ns / 'child.py').write_text('value=True\n')
-                try:
-                    result = self.run_private(f)
-                    for record in result['all_callers']:
-                        for name in ('uproot', 'numpy', 'alias_namespace.child'):
-                            source = record['source_imports'][name]
-                            self.assertTrue(Path(source['path']).is_relative_to(lexical))
-                            self.assertEqual(Path(source['path']).resolve(), Path(source['realpath']))
-                        self.assertTrue(Path(record['source_imports']['termios']['path']).is_relative_to(lexical))
-                        self.assertEqual(Path(record['paths']['OUTPATH']).name,
-                                         'KaonLT' if record['mode'] else 'None')
-                finally:
-                    shutil.rmtree(ns)
-                    extension.unlink()
-
-    def test_alias_imports_still_deny_data_and_mutations(self):
-        for action, reason in (
-                ('open(__file__).read()', 'resolver_data_read_forbidden'),
-                ('open(__file__.replace("__init__.py", "data.json")).read()', 'resolver_data_read_forbidden'),
-                ('__import__("ROOT")', 'scientific_module_import_forbidden'),
-                ('__import__("root_numpy")', 'scientific_module_import_forbidden'),
-                ('__import__("ctypes").CDLL(None)', 'resolver_mutation_attempt'),
-                ('__import__("subprocess").run(["false"])', 'resolver_mutation_attempt'),
-                ('open(__file__,"w")', 'resolver_write_attempt'),
-                ('__import__("os").mkdir(__file__+".dir")', 'resolver_mutation_attempt'),
-                ('__import__("os").link(__file__,__file__+".link")', 'resolver_mutation_attempt'),
-                ('__import__("os").symlink(__file__,__file__+".link")', 'resolver_mutation_attempt'),
-                ('__import__("os").rename(__file__,__file__+".renamed")', 'resolver_mutation_attempt')):
-            with self.subTest(action=action), self.alias_fixture(dependency_behavior=action+'\n') as (f, _):
-                with self.assertRaisesRegex(ValueError, reason):
-                    self.run_private(f)
-
-    def test_external_alias_into_code_and_internal_escape_are_denied(self):
-        for namespace in (False, True):
-            with self.subTest(namespace=namespace), self.alias_fixture() as (f, _):
-                outside = f.root / 'external-alias'
-                outside.symlink_to(self.site, target_is_directory=True)
-                f.env['PYTHONPATH'] += os.pathsep + str(outside)
-                if namespace:
-                    ns = self.site / 'untrusted_namespace'
-                    ns.mkdir()
-                    (self.site / 'uproot/__init__.py').write_text('import untrusted_namespace\n')
-                else:
-                    (self.site / 'uproot/__init__.py').write_text(
-                        'import sys\nsys.path.insert(0,'+repr(str(outside))+')\nimport numpy\n')
-                try:
-                    with self.assertRaisesRegex(ValueError, 'resolver_code_import_forbidden|resolver_namespace_forbidden'):
-                        self.run_private(f)
-                finally:
-                    outside.unlink()
-                    if namespace: ns.rmdir()
-        with self.alias_fixture(dependency_behavior='import escaped\n') as (f, _):
-            target = f.root / 'escaped.py'
-            target.write_text('value=True\n')
-            link = self.site / 'escaped.py'
-            link.symlink_to(target)
-            try:
-                with self.assertRaisesRegex(ValueError, 'resolver_code_path_escape'):
-                    self.run_private(f)
-            finally:
-                link.unlink()
-
-    def test_alias_probe_failure_never_launches_child_or_collects(self):
-        real_probe = owner.probe_private_callers
-        with self.alias_fixture(dependency_behavior='open(__file__).read()\n') as (f, _):
-            PrivateBoundary(methodName='runTest').exercise_exact_preflight_sigma0('absent',
-                probe_check=lambda *args: real_probe(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package),
-                resolver_failure=True)
-
-    def test_frozen_probe_reproduces_dependency_read_failure(self):
-        with self.fixture() as f:
-            with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):
-                owner.resolver.probe(f.tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'src/setup')
-
-    def test_exact_old_ctypes_none_audit_denial(self):
-        raw = subprocess.check_output(['git', 'show',
-            'abff8a49ead8c185b601af7e00fa5a89903bde52:testing/run_pion_local_t_matched_cohort_gate.py'],
-            cwd=ROOT, text=True)
-        prior = next(ast.literal_eval(n.value) for n in ast.parse(raw).body
-                     if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and
-                         t.id == 'RESOLVER_PROBE' for t in n.targets))
-        # Exercise the exact old hook and event, independent of host ctypes
-        # version or whether another dependency happens to import it.
-        prior = prior.replace('import ltsep, ltsep.pathing',
-                              'sys.audit("ctypes.dlopen",None)\nimport ltsep, ltsep.pathing')
-        with self.fixture() as f, patch.object(owner, 'RESOLVER_PROBE', prior):
-            with self.assertRaisesRegex(ValueError,
-                    r'resolver_mutation_attempt:ctypes.dlopen:\(None,\)'):
-                self.run_private(f)
-
-    def test_genuine_ctypes_bootstrap_under_active_guard(self):
-        # This witness observes the real stdlib import; no fake ctypes or
-        # native-load return value is supplied. 3.12 execution is not 3.9.
-        witness = ('bootstrap_events=[]\n'
-                   'def witness(event,args):\n'
-                   '    if event=="ctypes.dlopen":\n'
-                   '        assert bootstrap_active\n'
-                   '        bootstrap_events.append(args)\n'
-                   'sys.addaudithook(witness)\nimport ctypes\n'
-                   'assert bootstrap_events or os.name=="nt"\n')
-        probe = owner.RESOLVER_PROBE.replace('import ctypes\n', witness)
-        with self.fixture(dependency_behavior='import ctypes\n') as f, patch.object(
-                owner, 'RESOLVER_PROBE', probe):
-            result = self.run_private(f)
-            for record in result['all_callers']:
-                sources = record['source_imports']
-                self.assertTrue({'ctypes', 'ctypes._endian', '_ctypes'}.issubset(sources))
-                self.assertTrue(sources['ctypes']['path'].endswith('ctypes/__init__.py'))
-                self.assertTrue(sources['ctypes']['sha256'])
-
-    def test_ctypes_post_import_native_access_is_denied(self):
-        for action in ('ctypes.CDLL(None)', 'ctypes.PyDLL(None)',
-                       'ctypes.CDLL("libforbidden.so")',
-                       'ctypes.pythonapi.Py_GetVersion',
-                       'ctypes.pythonapi["Py_GetVersion"]'):
-            with self.subTest(action=action), self.fixture(
-                    dependency_behavior='import ctypes\n'+action+'\n') as f:
-                with self.assertRaisesRegex(ValueError, 'resolver_mutation_attempt:ctypes.dl'):
-                    self.run_private(f)
-
-    def test_bootstrap_denies_data_mutation_and_other_imports(self):
-        for action, reason in (
-                ('open("physics.root").read()', 'resolver_bootstrap_read_forbidden'),
-                ('open("physics.csv").read()', 'resolver_bootstrap_read_forbidden'),
-                ('open("physics.json").read()', 'resolver_bootstrap_read_forbidden'),
-                ('open("written","w")', 'resolver_bootstrap_read_forbidden'),
-                ('os.mkdir("written")', 'resolver_mutation_attempt'),
-                ('os.symlink("physics.root","written")', 'resolver_mutation_attempt'),
-                ('os.system("false")', 'resolver_mutation_attempt'),
-                ('sys.audit("socket.__new__",None,2,1,0)', 'resolver_mutation_attempt'),
-                ('sys.audit("subprocess.Popen","false",[],None,None)', 'resolver_mutation_attempt'),
-                ('__import__("ROOT")', 'resolver_bootstrap_import_forbidden'),
-                ('__import__("ltsep")', 'resolver_bootstrap_import_forbidden')):
-            probe = owner.RESOLVER_PROBE.replace('import ctypes\n', action+'\nimport ctypes\n')
-            with self.subTest(action=action), self.fixture() as f, patch.object(
-                    owner, 'RESOLVER_PROBE', probe):
-                with self.assertRaisesRegex(ValueError, reason):
-                    self.run_private(f)
-
-    def test_ctypes_shadow_and_dependency_provenance_fail_closed(self):
-        for location in ('pythonpath', 'site', 'symlink', 'extension'):
-            with self.subTest(location=location), self.fixture() as f:
-                directory = self.site if location in ('site', 'extension') else f.root / 'shadow'
-                directory.mkdir(exist_ok=True)
-                name = '_ctypes.py' if location == 'extension' else 'ctypes.py'
-                shadow = directory / name
-                if location == 'symlink':
-                    if os.name == 'nt':
-                        self.skipTest('POSIX symlink test runs under Linux')
-                    actual = subprocess.check_output([str(self.python), '-c',
-                        'import importlib.util; print(importlib.util.find_spec("ctypes").origin)'],
-                        text=True).strip()
-                    shadow.symlink_to(actual)
-                else:
-                    shadow.write_text('raise RuntimeError("shadow_executed")\n')
-                f.env['PYTHONPATH'] += os.pathsep + str(directory)
-                try:
-                    with self.assertRaisesRegex(ValueError, 'resolver_ctypes_bootstrap_provenance'):
-                        self.run_private(f)
-                finally:
-                    shadow.unlink()
-
-    def test_ctypes_nonstandard_loader_and_unexpected_source_fail_closed(self):
-        for change in ('ctypes_spec.loader=object()',
-                       'ctypes_spec.origin=str(stdlib/"os.py")'):
-            probe = owner.RESOLVER_PROBE.replace(
-                'ctypes_spec=machinery.PathFinder.find_spec("ctypes")\n',
-                'ctypes_spec=machinery.PathFinder.find_spec("ctypes")\n'+change+'\n')
-            with self.subTest(change=change), self.fixture() as f, patch.object(
-                    owner, 'RESOLVER_PROBE', probe):
-                with self.assertRaisesRegex(ValueError, 'resolver_ctypes_bootstrap_provenance'):
-                    self.run_private(f)
-
-    def test_ctypes_verified_stdlib_alias(self):
-        if os.name == 'nt':
-            self.skipTest('POSIX interpreter-root alias requires Linux')
-        actual = subprocess.check_output([str(self.python), '-c',
-            'import sysconfig; print(sysconfig.get_path("stdlib"))'], text=True).strip()
-        with self.fixture() as f:
-            alias = f.root / 'interpreter-stdlib'
-            alias.symlink_to(actual, target_is_directory=True)
-            # Controlled interpreter scheme, not an arbitrary PYTHONPATH alias.
-            prefix = ('import sys,sysconfig\n_original_get_path=sysconfig.get_path\n'
-                      'sysconfig.get_path=lambda key,*a,**kw: '+repr(str(alias))+
-                      ' if key=="stdlib" else _original_get_path(key,*a,**kw)\n'
-                      'sys.path.insert(0,'+repr(str(alias/'lib-dynload'))+')\n'
-                      'sys.path.insert(0,'+repr(str(alias))+')\n')
-            try:
-                with patch.object(owner, 'RESOLVER_PROBE', prefix+owner.RESOLVER_PROBE):
-                    result = self.run_private(f)
-                for record in result['all_callers']:
-                    source = record['source_imports']['ctypes']
-                    self.assertTrue(Path(source['path']).is_relative_to(alias))
-                    self.assertEqual(Path(source['realpath']), Path(actual)/'ctypes/__init__.py')
-            finally:
-                alias.unlink()
 
     def test_real_import_closure_and_all_caller_modes(self):
         with self.fixture() as f:
@@ -502,89 +279,42 @@ class ResolverImports(unittest.TestCase):
                 self.assertEqual(owner.resolver.module_identity(record), f.copied)
                 self.assertEqual(Path(record['paths']['OUTPATH']).name, 'KaonLT' if record['mode'] else 'None')
                 self.assertTrue({'ltsep', 'ltsep.ltsep', 'uproot', 'numpy'}.issubset(record['source_imports']))
-                from importlib.machinery import EXTENSION_SUFFIXES
-                self.assertTrue(all(r['path'].endswith(('.py', *EXTENSION_SUFFIXES))
-                                    for r in record['source_imports'].values()))
 
-    def test_data_reads_from_root_and_dependencies_are_forbidden(self):
-        for suffix in ('root', 'csv', 'json', 'dat'):
-            for dependency in (False, True):
-                statement = 'Path(' + repr(str(self.site / ('physics.'+suffix))) + ').read_bytes()\n'
-                with self.subTest(suffix=suffix, dependency=dependency), self.fixture(
-                    behavior='' if dependency else '  '+statement,
-                    dependency_behavior='from pathlib import Path\n'+statement if dependency else '') as f:
-                    with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden:.*physics'):
-                        self.run_private(f)
-        with self.fixture(dependency_behavior=
-                'from pathlib import Path\nPath(__file__).parents[2].joinpath("outside.root").read_bytes()\n') as f:
-            # Existing external physics file, so this tests denial, not ENOENT.
-            external = self.site.parent / 'outside.root'
-            external.write_bytes(b'physics')
-            try:
-                with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden:.*outside.root'):
-                    self.run_private(f)
-            finally:
-                external.unlink()
-
-    def test_mutations_and_scientific_imports_fail(self):
-        actions = [
-            'Path(__file__).write_text("mutation")',
-            'Path(__file__).parent.joinpath("PATH_TO_DIR/user.path").write_text("mutation")',
-            'Path(__file__).parent.joinpath("created").mkdir()',
-            'Path(__file__).unlink()',
-            'Path(__file__).rename(Path(__file__).with_name("renamed"))',
-            'Path(__file__).with_name("linked").symlink_to(__file__)',
-            '__import__("subprocess").run(["echo","forbidden"])',
-            '__import__("os").system("echo forbidden")',
-            '__import__("ROOT")', '__import__("root_numpy")',
-        ]
-        for action in actions:
-            with self.subTest(action=action), self.fixture(behavior='  '+action+'\n') as f:
-                with self.assertRaisesRegex(ValueError, 'resolver_(write|mutation)_attempt|scientific_module_import_forbidden'):
-                    self.run_private(f)
-
-    def test_owned_package_data_and_direct_source_reads_are_forbidden(self):
-        for statement in ('Path(__file__).with_name("unexpected.json").read_bytes()',
-                          'Path(self.UTILPATH).joinpath("absent.csv").read_bytes()',
-                          'Path(__file__).read_bytes()'):
-            with self.subTest(statement=statement), self.fixture(behavior='  '+statement+'\n') as f:
-                data = f.copied / 'unexpected.json'
-                data.write_bytes(b'not an authorized config')
-                with self.assertRaisesRegex(ValueError, 'resolver_data_read_forbidden'):
-                    self.run_private(f)
-
-    def test_outside_code_and_unexpected_package_identity_fail(self):
+    def test_unexpected_package_identity_fails(self):
         with self.fixture() as f:
-            outside = f.root / 'untrusted'
-            outside.mkdir()
-            (outside / 'untrusted.py').write_text('value=True\n')
-            (self.site / 'uproot/__init__.py').write_text('import untrusted\n')
-            f.env['PYTHONPATH'] += os.pathsep + str(outside)
-            with self.assertRaisesRegex(ValueError, 'resolver_code_import_forbidden:.*untrusted.py'):
-                self.run_private(f)
             f.env['PYTHONPATH'] = str(f.package.parent)
             with self.assertRaisesRegex(ValueError, 'resolver_package_import_mismatch'):
                 self.run_private(f)
 
-    def test_source_authority_ignores_preexisting_pyc(self):
-        import py_compile
-        with self.fixture() as f:
-            p = self.site / 'uproot/__init__.py'
-            p.write_text('raise RuntimeError("bytecode_executed")\n')
-            py_compile.compile(str(p), doraise=True, invalidation_mode=py_compile.PycInvalidationMode.UNCHECKED_HASH)
-            p.write_text('import numpy\n')
-            self.run_private(f)
-            py_compile.compile(str(p), cfile=str(p.with_suffix('.pyc')), doraise=True)
-            p.unlink()
-            with self.assertRaisesRegex(ValueError, 'resolver_|ModuleNotFoundError'):
-                self.run_private(f)
+    def test_ordinary_dependencies_and_timezone_reads(self):
+        import importlib.util
+        names = ('numpy', 'pandas', 'dateutil')
+        missing = [name for name in names if importlib.util.find_spec(name) is None]
+        if missing:
+            self.skipTest('NOT VERIFIED: real dependencies unavailable: ' + ', '.join(missing))
+        # Real host packages, never the isolated venv's dummy numpy/uproot.
+        with self.fixture(real_dependencies=True, reached_callers=True, dependency_behavior=(
+                'import numpy, pandas, dateutil, ctypes\n'
+                'from dateutil import tz\nassert tz.gettz("UTC") is not None\n'
+                'ctypes.pythonapi.Py_GetVersion\n')) as f:
+            reached = owner.reached_resolver_callers(ROOT)
+            with patch.object(owner, 'reached_resolver_callers', return_value=reached):
+                result = self.run_private(f)
+            known = {(c, tuple(m)) for _, c, m, _, _ in owner.resolver.CALLERS}
+            expected = len(owner.resolver.CALLERS) + sum((c, tuple(m)) not in known for c, m, _ in reached)
+            self.assertEqual(len(result['all_callers']), expected)
+            self.assertEqual(len(result['baseline_callers']), expected)
+            for record in result['all_callers'] + result['baseline_callers']:
+                self.assertTrue(set(names + ('ctypes',)).issubset(record['source_imports']))
+                self.assertNotIn(str(self.site), record['source_imports']['numpy']['path'])
+            self.assertFalse(list(f.package.rglob('*.pyc')))
+            self.assertFalse(list(f.copied.rglob('*.pyc')))
 
     def test_root_semantics_and_unique_config_fail_closed(self):
         cases = [
             ('  if not modes: self.OUTPATH=str(Path(self.LTANAPATH)/"wrong")\n', 'root_outpath_mismatch'),
             ('  if modes: self.OUTPATH=str(Path(self.LTANAPATH)/"OUTPUT/Analysis/None")\n', 'root_outpath_mismatch'),
             ('  self.UTILPATH="changed"\n', 'baseline_input_role_changed|stable_input_role_changed'),
-            ('  __import__("uproot").__file__="unexpected.py"\n', 'module_identity_changed'),
         ]
         for behavior, message in cases:
             with self.subTest(behavior=behavior), self.fixture(behavior=behavior) as f:
@@ -641,7 +371,7 @@ class ResolverImports(unittest.TestCase):
         real_probe = owner.probe_private_callers
         for failure in (False, True):
             with self.subTest(failure=failure), self.fixture(behavior=
-                    '  Path(self.UTILPATH).joinpath("physics.root").read_bytes()\n' if failure else '') as f:
+                    '  raise RuntimeError("resolver_fixture_failure")\n' if failure else '') as f:
                 external = Path(f.baseline['UTILPATH'])
                 external.mkdir(parents=True)
                 (external / 'physics.root').write_bytes(b'never read')
@@ -1150,7 +880,7 @@ class PrivateBoundary(unittest.TestCase):
                     installed.side_effect = ValueError('installed preservation failure')
                 invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure or resolver_failure
                 role = 'sigma0_SIMC' if required_role == 'sigma0_SIMC' else 'pion_SIMC_' + required_role
-                reason = ('resolver_data_read_forbidden' if resolver_failure else 'preservation_failed' if mutation else
+                reason = ('resolver_fixture_failure' if resolver_failure else 'preservation_failed' if mutation else
                           'required_external_input_missing:' + role if invalid else
                           'synthetic joint gate failure' if artifact_failure else 'analysis_failed')
                 expected = ValueError
