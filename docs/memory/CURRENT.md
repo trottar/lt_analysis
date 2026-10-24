@@ -30,23 +30,20 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
-[effective-charge OUTPATH correction](phases/kaonlt-matched-cohort-effective-charge-outpath-fix-2026-10-24-task-contract.md)
-from `92af408d0431d2955fc6e8544edebad3b45df5dc`; actual-diff review pending.
-SOURCE VERIFIED: ordinary no-mode accepts canonical equivalence; Plot stays
-lexically strict. The CSV producer uses LTANAPATH's analysis output; the owner
-checks ordinary equivalence and private confinement. No-mode readers do not use
-Root.OUTPATH. Stable inputs, installed package/config, shared links, physics,
-frozen resolver, launchers, fast-fail order and preservation/status gates remain.
-
-Runtime acceptance remains `BLOCKED`: the eighth supplied pre-child failure at
-`92af408d0431d2955fc6e8544edebad3b45df5dc` was
-`baseline_root_outpath_mismatch:effective_charge`. Supplied probes establish
-canonical ordinary no-mode/Plot equivalence, not private isolation or shared
-preservation. See the
-[incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#eighth-failure-and-effective-charge-path-only-correction--october-24).
-No successful child, matched ZIP or fresh science is supplied. October 20
-remains the accepted scientific checkpoint; local tests grant no farm readiness.
+`BLOCKED`: ninth supplied acquisition failure at published
+`902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
+not runtime acceptance. RUNTIME VERIFIED only as attributed to supplied
+status/process excerpts in the
+[memory-only contract](phases/kaonlt-ninth-attempt-accountability-memory-update-2026-10-24-task-contract.md):
+`external_input_verification` / `source_changed_during_hash`, before analysis.
+The snapshot hashed 336,715,800,553 bytes in 1,818.525 s; no admissible fresh
+science. Final preservation was incomplete; termination, cleanup and shared
+preservation remain NOT VERIFIED. The
+[incident checkpoint](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#ninth-failure-io-cost-and-assistant-accountability--october-24)
+records cost, unknown cause and repeated assistant readiness/workflow failures.
+SOURCE VERIFIED: the owner fully hashes existence-only skim inputs. October 20
+remains accepted science (MEMORY ONLY here); this closeout authorizes no repair,
+new phase or tenth attempt.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -217,17 +214,21 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — preserve the scientific target: fresh same-cohort Center/Left lowe
-A/B and signed-event packets for canonical t1/t2/t3, then the existing fresh
-seven-strength C fitting/replay and six-parent Lambda-window MM/variance
-JSON/PDF comparison. First independently review the complete OUTPATH-fix diff and
-CLI execution/preservation path, then user publication and pushed-state
-synchronization before acquisition-readiness review. No farm command or new
-mandatory smoke cycle follows from local tests. Hard-stop at the first failed invariant;
-no automatic retry or failed-artifact acceptance. No farm/runtime acceptance,
-held-out estimator, bias truth, optimal strength or promotion follows. Preserve
-full-MM, normalization and authoritative signal-yield objectives without a
-Lambda/SIMC unity constraint.
+NEXT — re-establish the minimum genuinely missing evidence for the Lambda
+MM/signal-region residual, subtraction and variance question against accepted
+October 20 scope. Preserve fresh same-cohort Center/Left lowe canonical t1/t2/t3
+A/B plus signed-event packets, then seven-strength C fitting/replay and six-parent
+Lambda-window MM/variance JSON/PDF comparison as the proposed evidence target.
+Further acquisition is `BLOCKED` until the failed infrastructure/preservation
+gate and its insufficient performance contract are diagnosed and scientific
+necessity is justified. No new infrastructure task or run is authorized here.
+Independent ChatGPT actual-diff review of this memory closeout precedes user
+publication and pushed-state synchronization; neither clears acquisition.
+Hard-stop at the first failed invariant; no automatic retry, failed-artifact
+acceptance, mandatory smoke cycle or weakening of preservation. No held-out
+estimator, bias truth, optimal strength or promotion follows. Preserve full-MM,
+normalization and authoritative signal-yield objectives without a Lambda/SIMC
+unity constraint.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior

@@ -513,3 +513,113 @@ full runtime preservation and fresh science remain NOT VERIFIED. October 20 and
 all closed scientific scopes are preserved; no ninth acquisition is authorized.
 NEXT is the complete actual-diff review, then user publication/pushed-state review
 before the substantive acquisition-readiness decision retained by CURRENT.
+
+## Ninth failure, I/O cost and assistant accountability — October 24
+
+`BLOCKED` for acquisition under the single
+[memory-only contract](../phases/kaonlt-ninth-attempt-accountability-memory-update-2026-10-24-task-contract.md).
+Earlier chronology, including the [seventh failure](#seventh-failure-and-repeated-review-failures--october-23)
+and [eighth failure](#eighth-failure-and-effective-charge-path-only-correction--october-24),
+remains historical. Their then-pending review/NEXT wording is superseded by CURRENT.
+The eighth OUTPATH correction is published at
+`902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; that narrow correction did not make
+attempt nine successful.
+
+### Supplied observations and evidence limits
+
+RUNTIME VERIFIED only as attributed to the user's pasted gate-status JSON and
+`ps` output incorporated in the contract; no raw farm files were independently
+opened or rerun in this local memory task. Source HEAD was
+`902fa7d292a20b445d8e3e5d1aa49978e922d1e7`, requested Q4p4W2p74 Center/Left lowe,
+attempt basename `KaonLT_MatchedCohort_Q4p4W2p74_20261024_attempt09`.
+
+- `status=failed`, `failed_stage=external_input_verification`,
+  `failure_reason=source_changed_during_hash`.
+- `analysis_started=false`, `analysis_completed=false`, `evidence_admissible=false`,
+  `collection_completed=false`, `zip_verification_completed=false`.
+- `shared_output_snapshot` passed after traversing 16,018 entries and hashing
+  336,715,800,553 bytes (~336.7 GB decimal), taking 1,818.525 seconds (~30.3 minutes).
+  `private_ROOT_staging` passed in 89.372 seconds; `overlay_path_validation`
+  took 63.612 seconds, source preflight 17.360 seconds, installed-package
+  preflight 1.145 seconds; external-input verification failed after 1.371 seconds.
+  These measured preparatory costs produced no new scientific child or accepted
+  evidence. Snapshot/staging success does not establish post-attempt preservation.
+- `final_preservation.completed=false` and
+  `shared_inputs_outputs_preserved='NOT VERIFIED'`. Supplied process state `T`
+  showed PID 1682126 stopped/suspended at observation. Termination, cleanup,
+  preserved originals and final preservation remain NOT VERIFIED. Termination
+  instructions are not evidence they occurred. Partial files remain failed,
+  inadmissible diagnostic evidence; no repackaging or scientific interpretation.
+
+SOURCE VERIFIED against the current owner and utility source:
+`testing/run_pion_local_t_matched_cohort_gate.py::external_input_inventory`
+calls `add(Path(skim) / kaon_<run>_-1_Raw_Data.root, role='skim_existence',
+required=False)`. For an existing regular file outside `check_only`, `add`
+calls `identity`, which calls
+`testing/pion_local_t_event_validation_capture.py::file_identity`. That function
+reads the full file in 1 MiB blocks for SHA-256 and requires unchanged size/mtime
+before and after, otherwise raising `source_changed_during_hash`.
+`src/utility/utility.py::check_runs_in_effcharge` uses `os.path.exists()` for
+these skim ROOTs. Existence-only selection and full-content verification have
+different read semantics and cost. The owner also performs the full shared
+snapshot before staging and external-input identity checks.
+
+INFERENCE: whole-tree byte reads explain the measured large snapshot cost;
+the failed size/mtime invariant is consistent with metadata changing during a
+hash. The specific skim path, modification cause and presence of a concurrent
+writer are NOT VERIFIED. Neither confirmed concurrent mutation nor scientific
+input corruption is established by this record.
+
+### Assistant responsibility and scientific impact
+
+User-reported impact: roughly three days and nine farm attempts without the
+requested fresh matched-cohort result. This is an attributed impact statement,
+not nine independently accepted elapsed/runtime records. Repeated premature
+`Farm readiness: PASS` judgments belonged to the assistant, not to user Git or
+farm command errors. ChatGPT readiness reviews promoted local/synthetic checks
+despite known interpreter, path, installed-package and adjacent-guard coverage
+limits, and failed to account for the source-visible whole-shared-tree hash/copy
+workflow and its serious I/O risk before authorization.
+
+The assistant privileged acquisition-owner hardening over the intended scientific
+comparison, repeatedly invented or prolonged support gates, violated the user's
+three-check simplicity expectation, and finally supplied a ChatGPT writing block
+instead of the established tracked contract/Codex memory workflow. These are
+assistant judgment and process failures. Source, contract and test passes did
+not advance the physics. Lost scientific throughput includes the still-missing
+same-cohort Lambda MM/signal-region residual, subtraction and variance comparison;
+this incident establishes neither a new physical defect nor its cause.
+
+Require verification proportional to actual read/write semantics: distinguish
+existence-only roles from bytes-consumed scientific inputs; expose full-directory
+hash/copy scope and expected scale before readiness. Diagnose this existing
+failed preservation gate and insufficient performance contract without blindly
+weakening preservation, reflexively ordering another run to discover the next
+invariant, or creating another adjacent support cycle. The minimum genuinely
+missing evidence and its scientific necessity must be justified first. This
+single memory closeout authorizes no infrastructure implementation or tenth run.
+
+### Scientific continuity
+
+MEMORY ONLY here: October 20 remains the accepted scientific checkpoint and its
+recorded limits remain. Global and local-t template Methods A/B already exist
+within their recorded scopes. SOURCE VERIFIED:
+`testing/pion_local_t_transfer_variance_comparison.py::problem`, `base_residual`,
+`reconstruct_b` and `fit_candidate` construct C from local-t candidate B's aligned
+templates, fit bins, staged amplitudes and prior widths, adding the dynamic
+model-dependent transfer-variance penalty
+`lambda * V_normal_full_MM(beta) / V_normal_full_MM(B)` across seven predeclared
+strengths. Zero strength must reproduce B; protected-applied `K_B` stays fixed.
+Thus C extends local-t B with regularization, not a new subtraction architecture.
+Template A/B/C nomenclature is distinct from HGCer Method A/B and fitted
+amplitude names. No strength is selected or accepted by this source inspection.
+
+Fresh Center/Left lowe canonical t1/t2/t3 matched A/B + signed events, seven-strength
+C replay and six-parent Lambda-window MM/variance JSON/PDF remain a proposed
+evidence target, neither completed nor discarded. Acquisition is BLOCKED pending
+the existing failed infrastructure/preservation gate and scientific-necessity
+justification; CURRENT alone owns the substantive NEXT. Preserve all closed
+phases, `no_empirical_residual`, accepted subtraction/normalization/cuts and
+uncertainties. HGCer Method A remains detached/non-production; Method B remains
+independent diagnostic/cross-check and numerically excluded. No C strength
+selection, absolute SIMC normalization claim or scientific promotion follows.

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16250,
+      "bytes": 16336,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "e38d088b3d4525f54aca2b20564241d535e155722dc3ae747a7613af795e7390"
+      "sha256": "daae6320c025053e8343da38dde01bbfca79c870b1c1fba7453a2aa5b81f2bd6"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 29076,
+      "bytes": 29898,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "0bdddfc44a104be68ed0d8321ae366128c95e3ddc9e86a0d56143cb962f8c67a"
+      "sha256": "b5355e0a2433c17d99669b7d0225d9da3754e9d5839727c9ef1dadf20a7c80a0"
     },
     {
       "bytes": 3606,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 34919,
+      "bytes": 42001,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
-      "sha256": "d7920f74d294fd3363c3ee171597865856770001798c002a6d68162887502b5e"
+      "sha256": "2127a46375b74beeffd24c3303d2ee4c9bf75948736e8270e8caadf1b2820a24"
     },
     {
       "bytes": 28637,
@@ -1314,6 +1314,11 @@
       "bytes": 11883,
       "path": "docs/memory/phases/kaonlt-matched-cohort-resolver-import-preflight-fix-2026-10-22-task-contract.md",
       "sha256": "3a2837301c9af59b0083b23601dde1346043cbebcf7df562f1ad8125dede9db5"
+    },
+    {
+      "bytes": 11289,
+      "path": "docs/memory/phases/kaonlt-ninth-attempt-accountability-memory-update-2026-10-24-task-contract.md",
+      "sha256": "4a96d245db63365a3ca62f5fb8f1927361ffd087549571e632af63ff203bbf9a"
     },
     {
       "bytes": 15957,

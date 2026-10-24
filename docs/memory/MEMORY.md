@@ -322,6 +322,16 @@ Publication and farm execution remain user-only. Direct assistant patch/applicat
 instructions and unreviewed manual repository mutations bypass this workflow
 and are forbidden; this does not prohibit contract-authorized Codex implementation.
 
+The [ninth-attempt accountability checkpoint](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#ninth-failure-io-cost-and-assistant-accountability--october-24)
+adds a durable review constraint: match verification cost to actual read/write
+semantics, distinguish existence-only inputs from scientific byte consumers, and
+expose whole-directory hash/copy scope and expected scale before readiness.
+Diagnose a failed preservation/performance gate without blindly weakening it or
+ordering another run to discover the next invariant; first justify the minimum
+missing scientific evidence. Repeated premature readiness approvals and replacing
+the tracked memory workflow with a writing block are assistant process failures.
+Use the established three-check receipt; this lesson creates no support phase.
+
 ### Science priority and evidence admissibility
 
 A real safety/provenance hard gate stops the specific unsafe operation; it
