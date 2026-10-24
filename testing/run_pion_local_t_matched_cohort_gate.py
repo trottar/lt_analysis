@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import ast
 import argparse
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from copy import deepcopy
 import hashlib
 import glob
@@ -136,7 +136,7 @@ def link_inventory(path):
     return record
 
 
-def inventory(root):
+def inventory(root, excluded=()):
     """Do not follow directory symlinks; record every referent actually hashed."""
     root = Path(root)
     require(root.is_dir(), "inventory_root_missing:" + str(root))
@@ -145,6 +145,8 @@ def inventory(root):
         for name in sorted(dirs + files):
             p = Path(parent) / name
             key = p.relative_to(root).as_posix()
+            if key in excluded:
+                continue
             if p.is_symlink():
                 result[key] = link_inventory(p)
             elif p.is_file():
@@ -188,14 +190,14 @@ from pathlib import Path
 tree=Path(sys.argv[1]); expected=Path(sys.argv[5])
 sys.path.insert(0,str(tree))
 import ltsep, ltsep.pathing
-if Path(ltsep.__file__) != expected/"__init__.py":
+if Path(ltsep.__file__).resolve() != (expected/"__init__.py").resolve():
     raise RuntimeError("resolver_package_import_mismatch:"+str(ltsep.__file__))
 from farm_env.ltsep_paths import create_ltsep_root
 caller=sys.argv[2]; modes=json.loads(sys.argv[3]); fields=json.loads(sys.argv[4])
 lt=create_ltsep_root(caller,*modes)
 paths={k:getattr(lt,k,None) for k in fields}
 matches=[]
-p=ltsep.pathing.SetPath(caller)
+p=ltsep.pathing.SetPath(os.path.realpath(caller))
 for f in sorted((expected/"PATH_TO_DIR").glob("*.path")):
     values={}
     for line in f.read_text(encoding="utf-8").splitlines():
@@ -217,12 +219,44 @@ print(json.dumps({"caller":caller,"caller_realpath":os.path.realpath(caller),"mo
 '''
 
 
+def caller_paths(tree, caller, cwd):
+    """Allow an authorized root alias, never a redirected source below it."""
+    tree = Path(tree)
+    root = resolver.real(tree)
+    result = []
+    for relative, kind in ((caller, 'caller'), (cwd, 'cwd')):
+        part = Path(relative)
+        require(not part.is_absolute() and '..' not in part.parts, 'caller_relative_path_invalid:' + relative)
+        lexical = tree / part
+        try:
+            canonical = resolver.real(lexical)
+        except ValueError as exc:
+            raise ValueError('caller_' + kind + '_resolution_failed:' + json.dumps(
+                {'lexical': str(lexical), 'canonical': None, 'reason': str(exc)}, sort_keys=True)) from exc
+        facts = json.dumps({'lexical': str(lexical), 'canonical': str(canonical),
+                            'authorized': str(root / part)}, sort_keys=True)
+        valid = lexical.is_dir() if kind == 'cwd' or part == Path('.') else lexical.is_file()
+        require(valid, 'caller_' + kind + '_missing_or_nonregular:' + facts)
+        require(canonical == root / part, 'caller_' + kind + '_alias_mismatch:' + facts)
+        result.append((lexical, canonical))
+    return result
+
+
+def package_identity(record, package):
+    """Keep the frozen identity guard, with authorized ancestor aliases resolved."""
+    package = resolver.real(Path(package))
+    observed = Path(record['package_file'])
+    require(observed.is_absolute() and observed.name == '__init__.py' and
+            resolver.real(observed) == package / '__init__.py', 'ltsep_package_import_mismatch')
+    normalized = dict(record, package_file=str(package / '__init__.py'))
+    require(resolver.module_identity(normalized) == package, 'ltsep_package_import_mismatch')
+    return package
+
+
 def probe_resolver(tree, caller, modes, env, cwd, package):
     """Ordinary ltsep import with exact identity/config and package preservation."""
     tree, package = Path(tree), Path(package)
-    path, working = tree / caller, tree / cwd
-    require(path.exists() and resolver.real(path) == path, 'caller_path_invalid:' + caller)
-    require(working.is_dir() and resolver.real(working) == working, 'caller_cwd_invalid:' + caller)
+    (path, canonical), (working, canonical_cwd) = caller_paths(tree, caller, cwd)
     before = resolver.tree_bytes(package)
     try:
         result = subprocess.run([sys.executable, '-B', '-c', RESOLVER_PROBE, str(tree),
@@ -232,14 +266,14 @@ def probe_resolver(tree, caller, modes, env, cwd, package):
         require(result.returncode == 0, 'resolver_subprocess_failed:' + caller + ':' + result.stderr[-2000:])
         require(not result.stderr.strip(), 'resolver_stderr_contamination:' + caller)
         record = json.loads(result.stdout)
-        require(record['caller'] == record['caller_realpath'] == str(path) and
+        require(record['caller'] == str(path) and record['caller_realpath'] == str(canonical) and
                 record['mode'] == list(modes), 'resolver_caller_mismatch')
-        require(record['cwd'] == str(working), 'resolver_cwd_mismatch')
-        require(resolver.real(Path(record['resolver_file'])) == tree / 'farm_env/ltsep_paths.py',
+        require(record['cwd'] == str(canonical_cwd), 'resolver_cwd_mismatch')
+        require(resolver.real(Path(record['resolver_file'])) == resolver.real(tree) / 'farm_env/ltsep_paths.py',
                 'resolver_wrapper_import_mismatch')
         require(resolver.real(Path(record['python'])) == resolver.real(Path(sys.executable)), 'interpreter_mismatch')
         require(len(record['config_matches']) == 1, 'ltsep_matching_config_not_unique')
-        require(resolver.module_identity(record) == package, 'ltsep_package_import_mismatch')
+        package_identity(record, package)
         for name in isolation.PATH_FIELDS:
             require(isinstance(record['paths'].get(name), str) and record['paths'][name].strip(),
                     'default_root_unresolved:' + caller + ':' + name)
@@ -263,7 +297,8 @@ def probe_private_callers(repo, worktree, env, baseline, outdir, installed_packa
         record = probe_resolver(worktree, caller, modes, env, cwd, worktree.parent / 'runtime-python/ltsep')
         base = probe_resolver(repo, caller, modes, os.environ, cwd, installed_package)
         fields = record['paths']
-        require(fields['LTANAPATH'] == str(worktree) and base['paths']['LTANAPATH'] == str(repo),
+        require(resolver.real(Path(fields['LTANAPATH'])) == resolver.real(Path(worktree)) and
+                resolver.real(Path(base['paths']['LTANAPATH'])) == resolver.real(Path(repo)),
                 'resolver_ltanapath_mismatch:' + role)
         for key in resolver.FIELDS:
             if key not in {'LTANAPATH', 'OUTPATH'}:
@@ -271,14 +306,16 @@ def probe_private_callers(repo, worktree, env, baseline, outdir, installed_packa
                 if key in baseline:
                     require(base['paths'].get(key) == baseline[key], 'baseline_input_role_changed:' + role + ':' + key)
         base_raw = str(base['paths']['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else base['paths']['OUTPATH']
-        require(Path(base_raw) == repo / 'OUTPUT/Analysis/KaonLT' and
+        require(Path(base_raw).is_absolute() and
+                Path(base_raw) == Path(base['paths']['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
                 Path(base_raw).resolve() == Path(baseline['OUTPATH']).resolve(),
                 'baseline_root_outpath_mismatch:' + role)
         raw = str(fields['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else fields['OUTPATH']
-        require(Path(raw) == Path(worktree) / 'OUTPUT/Analysis/KaonLT' and
-                Path(raw).resolve() == outdir and Path(raw).is_absolute(),
+        require(Path(raw) == Path(fields['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
+                Path(raw).resolve() == Path(outdir).resolve() and Path(raw).is_absolute(),
                 'default_root_private_outpath_mismatch:' + role)
-        require(resolver.module_identity(record) == worktree.parent / 'runtime-python/ltsep',
+        require(package_identity(record, worktree.parent / 'runtime-python/ltsep') ==
+                resolver.real(worktree.parent / 'runtime-python/ltsep'),
                 'copied_ltsep_import_mismatch:' + role)
         records.append(record)
         baseline_records.append(base)
@@ -328,6 +365,38 @@ def reached_resolver_callers(repo):
     return sorted(callers)
 
 
+def input_plan(shared, outdir):
+    """Cheap source-derived availability/collision checks, before any byte read."""
+    shared, outdir = Path(shared), Path(outdir)
+    records = []
+    for eps in ('lowe', 'highe'):
+        for setting in ('Center', 'Left', 'Right'):
+            names = [f'{setting}_kaon_Analysed_{role}_Q4p4W2p74_{eps}.root' for role in ('Data', 'Dummy')]
+            names += [f'Prod_Coin_Q4p4W2p74{setting.lower()}_{eps}{suffix}'
+                      for suffix in (('.root', '.hist') if eps == 'lowe' else ('.root',))]
+            present = [(shared / name).is_file() for name in names[:2]]
+            if not any(present):
+                require(setting not in SETTINGS or eps != 'lowe', 'required_lowe_setting_missing:' + setting)
+                continue
+            require(all(present), 'incomplete_data_dummy_pair:' + setting + ':' + eps)
+            for name in names:
+                source, target = shared / name, outdir / name
+                if name.startswith('Prod_Coin_') and not source.is_file() and not (eps == 'lowe' and setting in SETTINGS):
+                    continue
+                require(source.is_file(), 'required_staged_input_missing:' + str(source))
+                require(not os.path.lexists(target), 'staged_input_collision:' + name)
+                records.append((source, target, 'frozen_shiftprep_derived_branches' if '_Analysed_' in name else 'none'))
+    planned = {source.name for source, _, _ in records}
+    for source in map(Path, glob.glob(str(shared / '*kaon*Q4p4W2p74*.root'))):
+        if 'simc' in str(source).lower() or 'shiftprep' in source.name.lower() or source.name in planned:
+            continue
+        target = outdir / source.name
+        require(source.is_file(), 'required_diamond_input_missing:' + str(source))
+        require(not os.path.lexists(target), 'diamond_input_collision:' + source.name)
+        records.append((source, target, 'ordinary_private_output_replacement'))
+    return records
+
+
 def stage_input_files(shared, outdir):
     """Source-derived physical inputs used by low/high shared preflight.
 
@@ -337,47 +406,20 @@ def stage_input_files(shared, outdir):
     """
     shared, outdir = Path(shared), Path(outdir)
     records = {}
-    for eps, settings in (('lowe', ('Center', 'Left', 'Right')), ('highe', ('Center', 'Left', 'Right'))):
-        for setting in settings:
-            names = [f'{setting}_kaon_Analysed_{role}_Q4p4W2p74_{eps}.root' for role in ('Data', 'Dummy')]
-            names += [f'Prod_Coin_Q4p4W2p74{setting.lower()}_{eps}{suffix}'
-                      for suffix in (('.root', '.hist') if eps == 'lowe' else ('.root',))]
-            # Preserve source availability: a missing setting is not invented.
-            present = [(shared / name).is_file() for name in names[:2]]
-            if not any(present):
-                require(setting not in SETTINGS or eps != 'lowe', 'required_lowe_setting_missing:' + setting)
-                continue
-            require(all(present), 'incomplete_data_dummy_pair:' + setting + ':' + eps)
-            for name in names:
-                source, target = shared / name, outdir / name
-                if name.startswith('Prod_Coin_') and not source.is_file() and not (eps == 'lowe' and setting in SETTINGS):
-                    continue  # Preserve the ordinary shift_prep availability decision.
-                require(not os.path.lexists(target), 'staged_input_collision:' + name)
-                before = identity(source)
-                with source.open('rb') as src, target.open('xb') as dst:
-                    shutil.copyfileobj(src, dst, 1024 * 1024)
-                require(identity(source) == before, 'input_changed_during_copy:' + name)
-                require(capture.file_identity(target) == {k: before[k] for k in ('sha256', 'bytes')},
-                        'private_copy_identity:' + name)
-                require(target.stat().st_ino != source.stat().st_ino or target.stat().st_dev != source.stat().st_dev,
-                        'private_copy_hardlink:' + name)
-                records[name] = {'source': str(source), 'original': before, 'private': str(target),
-                                 'private_mutation': 'frozen_shiftprep_derived_branches' if '_Analysed_' in name else 'none'}
     # DiamondPlot reads shortest matching filenames, including mid-epsilon and
     # center fallback candidates. Preserve its actual candidate namespace; do
     # not silently change the common cut by staging just four lowe ROOT files.
-    for source in map(Path, glob.glob(str(shared / '*kaon*Q4p4W2p74*.root'))):
-        if 'simc' in str(source).lower() or 'shiftprep' in source.name.lower() or source.name in records:
-            continue
-        target = outdir / source.name
-        require(not os.path.lexists(target), 'diamond_input_collision:' + source.name)
+    for source, target, mutation in input_plan(shared, outdir):
         before = identity(source)
         with source.open('rb') as src, target.open('xb') as dst:
             shutil.copyfileobj(src, dst, 1024 * 1024)
-        require(identity(source) == before and capture.file_identity(target) ==
-                {k: before[k] for k in ('sha256', 'bytes')}, 'diamond_copy_identity:' + source.name)
+        require(identity(source) == before, 'input_changed_during_copy:' + source.name)
+        require(capture.file_identity(target) == {k: before[k] for k in ('sha256', 'bytes')},
+                'private_copy_identity:' + source.name)
+        require(target.stat().st_ino != source.stat().st_ino or target.stat().st_dev != source.stat().st_dev,
+                'private_copy_hardlink:' + source.name)
         records[source.name] = {'source': str(source), 'original': before, 'private': str(target),
-                                'private_mutation': 'ordinary_private_output_replacement'}
+                                'private_mutation': mutation}
     require(diamond_selections(shared) == diamond_selections(outdir), 'diamond_input_selection_changed')
     return records
 
@@ -427,7 +469,7 @@ def skim_paths(repo, paths):
     return {'launcher': result.stdout.strip(), 'effective_charge': effective}
 
 
-def external_input_inventory(worktree, paths, private, env):
+def external_input_inventory(worktree, paths, private, env, *, check_only=False):
     """Declared stable read roles for the exact unchanged Q4p4W2p74 -d child.
 
     Background ROOT consumers use TFile.Open(..., READ); skim paths are tested
@@ -442,7 +484,7 @@ def external_input_inventory(worktree, paths, private, env):
             require(not required, 'required_external_input_missing:' + role + ':' + str(path))
             records[str(path)] = {'role': role, 'missing': True}
         else:
-            records[str(path)] = {'role': role, 'identity': identity(path)}
+            records[str(path)] = {'role': role} if check_only else {'role': role, 'identity': identity(path)}
     launcher = (worktree / 'run_Prod_Analysis.sh').read_text(encoding='utf-8')
     tables = re.findall(r'(?m)^EffData="([^"\r\n]+)"', launcher)
     require(len(tables) == 1, 'efficiency_table_source_not_unique')
@@ -477,6 +519,8 @@ def external_input_inventory(worktree, paths, private, env):
                 sigma = str(env.get(f'LT_BG_SIGMA0_{s.upper()}_{eps.upper()}_ROOT', '')).strip()
                 if sigma:
                     add(sigma, 'sigma0_SIMC')
+    if check_only:
+        return records  # No recursive inventory or scientific byte reads here.
     # External cut/config inputs are stable resolver roles, not new guessed
     # paths. Record their complete regular-file inventory without link repair.
     for role in ('CUTPATH', 'PARAMPATH'):
@@ -487,7 +531,7 @@ def external_input_inventory(worktree, paths, private, env):
                 if item.get('missing_target') or item.get('cyclic_target'):
                     records[str(p)] = {'role': role, 'unresolved_link': item}
                 elif p.is_file():
-                    add(p, role)
+                    records[str(p)] = {'role': role, 'identity': item.get('referent', item)}
     return records
 
 
@@ -737,6 +781,22 @@ def resolver_preflight(repo, worktree, env, paths, outdir, package, preservation
     return private, probes, external
 
 
+@contextmanager
+def timed_stage(status, name):
+    """Bounded timing in the existing atomic status document, including failures."""
+    started = time.monotonic()
+    timing = {'entered_ns': time.time_ns(), 'completed': False}
+    timings = dict(status.record.get('stage_timings', {}))
+    timings[name] = timing
+    status.update(name, stage_timings=timings)
+    try:
+        yield
+        timing['completed'] = True
+    finally:
+        timing.update(exited_ns=time.time_ns(), elapsed_seconds=time.monotonic() - started)
+        status.update(stage_timings=timings)
+
+
 def smoke_source_state(repo):
     """Source/index bytes, never scientific input or shared-output traversal."""
     index = Path(ab.git(repo, 'rev-parse', '--git-path', 'index'))
@@ -812,16 +872,24 @@ def resolver_smoke(repo, source_commit):
 
 def execute_gate(repo, outdir, output, source_commit):
     repo, outdir, output = map(lambda p: Path(p).absolute(), (repo, outdir, output))
+    requested_paths = dict(repo=str(repo), outdir=str(outdir), output=str(output))
     require(repo.resolve() == isolation.accepted.REPO.resolve() and
             outdir.resolve() == isolation.accepted.ARTIFACTS.resolve() and
             output.parent.resolve() == isolation.accepted.GLOBUS.resolve() and output.suffix == '.zip',
             'owner_path_boundary_invalid')
+    # Boundary equality establishes authority before normalizing accepted root
+    # aliases. Never resolve a destination leaf: a colliding symlink must fail.
+    repo, outdir, output = repo.resolve(), outdir.resolve(), output.parent.resolve() / output.name
+    require(outdir.is_dir() and output.parent.is_dir(), 'owner_destination_directory_missing')
     before = published_source(repo, source_commit)
     destinations = ab.destinations(outdir, output)
+    require(len(set(destinations.values())) == len(destinations), 'owner_destinations_overlap')
     require(all(not os.path.lexists(p) for p in destinations.values()), 'owner_destination_collision')
     child_environment(os.environ)  # Reject inherited opt-ins before any mutation.
     status = ab.GateStatus(outdir, output, source_commit)
     status.update(schema_version='pion_local_t_matched_cohort_gate_status/v1',
+                  requested_paths=requested_paths,
+                  canonical_paths=dict(repo=str(repo), outdir=str(outdir), output=str(output)),
                   boundaries={'diagnostic_only': True, 'scientifically_accepted': False,
                               'production_applied': False, 'private_child_outputs_required': True,
                               'shared_inputs_outputs_preserved': 'NOT VERIFIED',
@@ -829,38 +897,69 @@ def execute_gate(repo, outdir, output, source_commit):
                               'method_b_numerically_excluded': True})
     overlay = installed = None
     shared_before = None
+    shared_failure = None
     preflight_checks = []
+    preservation_completed = False
     try:
-        tools = toolchain()
-        audit = audit_default_output_writer(repo)
-        status.update('source_preflight', writer_audit=audit, toolchain=tools)
-        with isolation.owned_worktree(repo, source_commit, 'source') as source:
-            with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
-                _, checks = module.collect_source_checks(source, required_analysis_commit=source_commit,
-                                                         allowed_committed_files=[])
-                require(all(c['returncode'] == 0 for c in checks), 'collector_source_check_failed')
-        original_import = isolation.import_identity(repo)
-        package = Path(original_import['package_file']).resolve().parent
-        installed_package_before = resolver.tree_bytes(package)
-        installed = {'original_source_sha256': {str(p): ab.sha256(p) for p in
-                     (Path(original_import['package_file']), Path(original_import['pathing_file']),
-                      *sorted((package / 'PATH_TO_DIR').glob('*.path')))}}
+        with timed_stage(status, 'source_preflight'):
+            tools = toolchain()
+            callers = [(caller, cwd) for _, caller, _, cwd, _ in resolver.CALLERS]
+            for caller, cwd in callers:
+                caller_paths(repo, caller, cwd)
+            audit = audit_default_output_writer(repo)
+            callers += [(caller, cwd) for caller, _, cwd in reached_resolver_callers(repo)]
+            for caller, cwd in callers:
+                caller_paths(repo, caller, cwd)
+            status.update(writer_audit=audit, toolchain=tools)
+            with isolation.owned_worktree(repo, source_commit, 'source') as source:
+                with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
+                    _, checks = module.collect_source_checks(source, required_analysis_commit=source_commit,
+                                                             allowed_committed_files=[])
+                    require(all(c['returncode'] == 0 for c in checks), 'collector_source_check_failed')
+                    status.update(collector_source_preflight_completed=True)
+        with timed_stage(status, 'installed_package_preflight'):
+            original_import = isolation.import_identity(repo)
+            package = Path(original_import['package_file']).resolve().parent
+            installed_package_before = resolver.tree_bytes(package)
+            installed = {'original_source_sha256': {str(p): ab.sha256(p) for p in
+                         (Path(original_import['package_file']), Path(original_import['pathing_file']),
+                          *sorted((package / 'PATH_TO_DIR').glob('*.path')))}}
         with isolation.owned_worktree(repo, source_commit, 'analysis') as worktree:
-            env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
-            paths = overlay['baseline_paths']
-            shared = Path(paths['VOLATILEPATH']) / 'OUTPUT/Analysis' / (paths['ANATYPE'] + 'LT')
-            require(shared.resolve() == outdir.resolve() == Path(paths['OUTPATH']).resolve(),
-                    'ordinary_output_authority_mismatch')
+            with timed_stage(status, 'overlay_path_validation'):
+                for caller, cwd in callers:
+                    caller_paths(worktree, caller, cwd)
+                env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
+                paths = overlay['baseline_paths']
+                shared = Path(paths['VOLATILEPATH']) / 'OUTPUT/Analysis' / (paths['ANATYPE'] + 'LT')
+                private, probes, external = resolver_preflight(repo, worktree, env, paths, outdir, package,
+                                                              preservation=preflight_checks)
+                input_plan(shared, private)
+                external_input_inventory(worktree, paths, shared, env, check_only=True)
             # All shared outputs, not just historical A/B filenames. Exclude only
             # this owner's explicitly named log/status/summary destinations.
             excluded = {p.name for p in destinations.values() if p.parent == outdir}
             def shared_state():
-                return {k: v for k, v in inventory(shared).items() if k not in excluded}
-            shared_before = shared_state()
-            private, probes, external = resolver_preflight(repo, worktree, env, paths, outdir, package,
-                                                          preservation=preflight_checks)
-            bindings = stage_input_files(shared, private)
-            external_inputs = external_input_inventory(worktree, paths, private, env)
+                return inventory(shared, excluded=excluded)
+            def verify_shared():
+                nonlocal shared_failure
+                # A recorded failure is already authoritative for refusal. No
+                # reread can turn this attempt into admissible evidence.
+                if shared_failure is not None:
+                    raise shared_failure
+                try:
+                    require(shared_state() == shared_before, 'shared_outputs_changed')
+                except Exception as exc:
+                    shared_failure = exc
+                    raise
+            with timed_stage(status, 'shared_output_snapshot'):
+                shared_before = shared_state()
+                status.update(shared_snapshot_scope={'root': str(shared), 'entries': len(shared_before),
+                    'hashed_bytes': sum(item.get('referent', item).get('bytes', 0) for item in shared_before.values()),
+                    'excluded_owner_destinations': sorted(excluded), 'byte_checks': 'all regular files and file-link referents'})
+            with timed_stage(status, 'private_ROOT_staging'):
+                bindings = stage_input_files(shared, private)
+            with timed_stage(status, 'external_input_verification'):
+                external_inputs = external_input_inventory(worktree, paths, private, env)
             audit_path = worktree.parent / 'runtime-python/sitecustomize.py'
             require(not os.path.lexists(audit_path), 'observer_audit_code_collision')
             with audit_path.open('x', encoding='utf-8') as stream:
@@ -895,7 +994,8 @@ def execute_gate(repo, outdir, output, source_commit):
             # All gates above precede the one unchanged destructive/setup child.
             status.update('analysis', analysis_started=True, probes=probes, input_bindings=bindings,
                           external_symlink_preflight=external, authority_sha256=capture.digest(authority))
-            code = run_owned_child(worktree, destinations['log'], env)
+            with timed_stage(status, 'analysis'):
+                code = run_owned_child(worktree, destinations['log'], env)
             status.update('completion_markers', analysis_returncode=code,
                           log_identity=capture.file_identity(destinations['log']))
             ab.verify_completion(destinations['log'], code)
@@ -904,34 +1004,31 @@ def execute_gate(repo, outdir, output, source_commit):
             status.update('verify_joint', analysis_completed=True)
             records, _, packets = verify_joint(private, authority, ab.committed_identities(repo, source_commit))
             runtime_inputs = {s: packets[s]['input_identity'] for s in SETTINGS}
-            for rec in bindings.values():
-                require(identity(rec['source']) == rec['original'], 'original_input_changed:' + rec['source'])
-                if rec['private_mutation'] == 'none':
-                    require(capture.file_identity(rec['private']) == {k: rec['original'][k] for k in ('sha256', 'bytes')},
-                            'private_archived_SIMC_changed:' + rec['private'])
-            verify_external_inputs(external_inputs)
-            require(shared_state() == shared_before, 'shared_outputs_changed')
+            with timed_stage(status, 'post_child_preservation'):
+                for rec in bindings.values():
+                    require(identity(rec['source']) == rec['original'], 'original_input_changed:' + rec['source'])
+                    if rec['private_mutation'] == 'none':
+                        require(capture.file_identity(rec['private']) == {k: rec['original'][k] for k in ('sha256', 'bytes')},
+                                'private_archived_SIMC_changed:' + rec['private'])
+                verify_external_inputs(external_inputs)
+                verify_shared()
             verify_external_links(external)
             isolation.verify_ltsep_preservation(installed)
             isolation.verify_preservation(repo, before)
-            status.update('collection', artifact_verification_completed=True)
-            with tempfile.TemporaryDirectory(prefix='matched-profile-') as directory:
-                pf = Path(directory) / 'profile.json'
-                pf.write_bytes(capture.encoded(profile(source_commit)))
-                with isolation.owned_worktree(repo, source_commit, 'source') as source:
-                    with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
-                        result = module.collect_validation_bundle(outdir=private, kinematic='Q4p4W2p74',
-                            output=output, profile_path=pf, repo_root=source)
-                    require(result['returncode'] == 0, 'collection_failed')
-            verify_archive(output, source_commit)
+            status.update(artifact_verification_completed=True)
+            with timed_stage(status, 'collection'):
+                with tempfile.TemporaryDirectory(prefix='matched-profile-') as directory:
+                    pf = Path(directory) / 'profile.json'
+                    pf.write_bytes(capture.encoded(profile(source_commit)))
+                    with isolation.owned_worktree(repo, source_commit, 'source') as source:
+                        with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
+                            result = module.collect_validation_bundle(outdir=private, kinematic='Q4p4W2p74',
+                                output=output, profile_path=pf, repo_root=source)
+                        require(result['returncode'] == 0, 'collection_failed')
+                verify_archive(output, source_commit)
             status.update(zip_verification_completed=True, collection_completed=True)
         isolation.verify_preservation(repo, before)
 
-        require(shared_state() == shared_before, 'shared_outputs_changed_after_cleanup')
-        verify_external_inputs(external_inputs)
-        verify_external_links(external)
-        require(resolver.tree_bytes(package) == installed_package_before, 'installed_ltsep_package_changed')
-        isolation.verify_ltsep_preservation(installed)
         summary = {'schema_version': PROFILE_ID, 'source_HEAD': source_commit, 'artifacts': records,
                    'authority_sha256': capture.digest(authority), 'diagnostic_only': True,
                    'scientifically_accepted': False, 'zip_identity': capture.file_identity(output),
@@ -942,13 +1039,14 @@ def execute_gate(repo, outdir, output, source_commit):
             stream.write(capture.encoded(summary))
     except Exception as exc:
         status.update(status='failed', failure_reason=str(exc), evidence_admissible=False,
+                      failed_stage=status.record.get('stage'),
                       failure_traceback=''.join(traceback.format_exception(type(exc), exc, exc.__traceback__,
                                                                          limit=16))[:8192])
         raise
     finally:
         checks = [('ordinary_checkout', lambda: isolation.verify_preservation(repo, before)), *preflight_checks]
         if shared_before is not None:
-            checks.append(('shared_outputs', lambda: require(shared_state() == shared_before, 'shared_outputs_changed')))
+            checks.append(('shared_outputs', verify_shared))
         if installed is not None:
             checks.append(('installed_ltsep', lambda: isolation.verify_ltsep_preservation(installed)))
         if 'installed_package_before' in locals():
@@ -959,12 +1057,22 @@ def execute_gate(repo, outdir, output, source_commit):
         if 'external' in locals():
             checks.append(('external_links', lambda: verify_external_links(external)))
         try:
-            preservation_checks(checks)
+            attempted = False
+            try:
+                with timed_stage(status, 'final_preservation'):
+                    attempted = True
+                    preservation_checks(checks)
+            finally:
+                # Status I/O failure must never suppress preservation checks.
+                if not attempted:
+                    preservation_checks(checks)
+            preservation_completed = True
         except Exception as exc:
             status.update(status='failed', evidence_admissible=False, preservation_failure_reason=str(exc))
             raise
     # Delivery is reachable only after the finally preservation barrier passes.
     try:
+        require(preservation_completed, 'final_preservation_incomplete')
         status.update(status='success', artifacts=records, scientifically_accepted=False,
                       shared_inputs_outputs_preserved=True, worktree_cleanup_completed=True)
         isolation.deliver_evidence(status, destinations['log'], destinations['summary'], output)

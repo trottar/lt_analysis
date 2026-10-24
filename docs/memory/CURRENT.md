@@ -30,21 +30,22 @@ at its interrupted position.
 
 ## Current Work Item
 
-`BLOCKED`: seventh pre-child matched-cohort failure at published source
-`b05ad2a1d9af241527a7d6ce90196eb591188d19`:
-`caller_path_invalid:src/setup/findEffectiveCharge.py` (RUNTIME VERIFIED only
-as supplied in the [memory contract](phases/kaonlt-seventh-farm-failure-memory-task-contract-2026-10-23.md)).
-The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#seventh-failure-and-repeated-review-failures--october-23)
-records seven failures, repeated assistant review/readiness failures and the
-withdrawn direct-patch instruction. No successful child, matched ZIP or fresh
-science is supplied; October 20 remains the accepted scientific checkpoint.
-SOURCE VERIFIED: caller existence/canonical-equality checks remain after
-[ordinary resolver reuse](phases/kaonlt-reuse-existing-ltsep-resolver-science-unblock-2026-10-23-task-contract.md);
-recursive shared-output inventory/hashing precedes resolver preflight and can
-repeat in preservation. Actual farm path resolution, status/timestamps,
-preservation results and attribution of the reported hours are NOT VERIFIED.
-First gate: source/path and pre-analysis cost audit, not another farm attempt.
-Scientific source, frozen resolver, helpers and launchers remain unchanged.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
+[fast-fail correction](phases/kaonlt-matched-cohort-fast-fail-science-unblock-2026-10-24-task-contract.md)
+from `c6c6963a00cfc82965eb2414968093a3da4a0fbb`; actual-diff review pending.
+SOURCE VERIFIED: caller/cwd/module/config/private-output and input-availability
+gates precede scientific hashing/copying. Authorized root aliases retain both
+path identities. Full shared byte checks remain before collection and after
+cleanup without a duplicate final scan. Status records stage timings. See the
+[source/preservation review](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#fast-fail-source-and-preservation-review--october-23).
+Scientific source, frozen resolver, helpers and launchers are unchanged.
+
+Runtime acceptance remains `BLOCKED`: the seventh supplied pre-child failure at
+`b05ad2a1d9af241527a7d6ce90196eb591188d19` was
+`caller_path_invalid:src/setup/findEffectiveCharge.py`. Its exact farm alias,
+status/timestamps, preservation and reported hours remain NOT VERIFIED.
+No successful child, matched ZIP or fresh science is supplied. October 20
+remains the accepted scientific checkpoint; local tests grant no farm readiness.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -218,11 +219,10 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 NEXT — preserve the scientific target: fresh same-cohort Center/Left lowe
 A/B and signed-event packets for canonical t1/t2/t3, then the existing fresh
 seven-strength C fitting/replay and six-parent Lambda-window MM/variance
-JSON/PDF comparison. First audit the blocked owner's source/path assumptions
-and pre-analysis cost ordering; no new farm attempt is authorized by this
-memory correction. Resume the established contract/implementation/local-check,
-independent actual-diff review, user publication and pushed-state synchronization
-flow only as justified by that audit. Hard-stop at the first failed invariant;
+JSON/PDF comparison. First independently review the complete fast-fail diff and
+CLI execution/preservation path, then user publication and pushed-state
+synchronization before acquisition-readiness review. No farm command or new
+mandatory smoke cycle follows from local tests. Hard-stop at the first failed invariant;
 no automatic retry or failed-artifact acceptance. No farm/runtime acceptance,
 held-out estimator, bias truth, optimal strength or promotion follows. Preserve
 full-MM, normalization and authoritative signal-yield objectives without a

@@ -296,3 +296,141 @@ Center/Left lowe canonical t1/t2/t3 same-run A/B plus signed-event evidence,
 seven-strength C replay and six-parent Lambda-window MM/variance results remain
 absent. This memory correction provides no scientific acceptance and changes no
 analysis code, frozen scientific roles or accepted checkpoint.
+
+## Fast-fail source and preservation review — October 23
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the
+[October 24 contract](../phases/kaonlt-matched-cohort-fast-fail-science-unblock-2026-10-24-task-contract.md),
+implemented locally from `test`/local `origin/test`
+`c6c6963a00cfc82965eb2414968093a3da4a0fbb`. Independent actual-diff review is
+pending. The seventh failure's actual farm lexical/canonical paths, complete
+status, elapsed-stage costs and preservation results remain NOT VERIFIED.
+No exact farm alias cause, successful child or fresh science is asserted.
+
+SOURCE VERIFIED: only the existing matched owner and its directly owned tests
+change executable source. Authorized CLI roots are checked against existing
+role authorities before canonicalization; destination leaves are never resolved
+away from collision checks. Caller/cwd checks accept an ancestor alias of the
+authorized tree, require the expected relative source under its canonical root,
+and distinguish missing/nonregular callers from redirected paths with lexical,
+canonical and authorized facts. Subprocess results retain the literal caller
+and canonical caller/cwd separately. Wrapper/interpreter/package/root/pathing/
+unique-config identity, stable roles and distinct ordinary/private output
+authorities remain strict. Config lookup uses the same real caller as the
+unchanged farm_env wrapper. Package aliases normalize only the authorized
+package identity before the unchanged frozen module guard; internal package
+symlinks still fail its whole-package inventory.
+
+The unchanged isolation helper creates a canonical disposable worktree, patches
+only copied LTANAPATH and verifies all stable fields. Consequently the remaining
+private-worktree and private lexical-OUTPATH equalities describe owner-created
+canonical geometry, not arbitrary ordinary farm roots. No frozen helper,
+installed package, launcher, observer, collector, scientific producer or pin is
+edited. No import sandbox, new resolver or mandatory smoke cycle is introduced.
+
+End-to-end source path:
+
+1. Existing CLI -> source SHA/role boundaries -> canonical root authorization,
+   distinct noncolliding destinations and inherited-environment rejection.
+2. Existing status -> timed source/caller/cwd audit and unchanged detached
+   collector source checks -> installed-package identity and byte snapshot.
+3. Existing analysis worktree/overlay -> private path/link preflight -> actual
+   no-mode and Plot probes for ordinary/private callers and reached import
+   closure -> cheap ROOT availability/collision plan and external-input checks.
+4. Only then full shared-output byte snapshot -> private ROOT copies -> external
+   byte inventory -> existing authority, observer audit and private caches.
+5. One unchanged `run_Prod_Analysis.sh -d 4p4 2p74` child, including both epsilon
+   canonical prepasses and low-epsilon analysis -> completion markers -> existing
+   A/B/event freshness, six-parent identities and signed-histogram closure.
+6. Original/private-input, external-input, shared-output, link, installed-package
+   and ordinary-checkout checks -> unchanged collector/profile and ZIP validation.
+7. Owned cleanup -> one final independent preservation barrier -> success receipt
+   and existing delivery. No delivery follows any failed barrier.
+8. The unchanged explicit offline route verifies that returned ZIP and computes
+   fresh seven-strength C fits/replay and the six-parent MM/variance JSON/PDF.
+   Historical cohort pins, full-sample limitations and no-promotion rules remain.
+
+Preservation proof and cost limits (SOURCE VERIFIED):
+
+- No successful comparison snapshot is cached across a potentially changing
+  interval. All preexisting shared entries retain the prior inventory semantics:
+  regular-file SHA-256/bytes/stat/realpath, file-link referent identity, directory
+  metadata and dangling/cyclic/directory-link metadata. Only initially absent,
+  explicitly collision-checked owner destinations are excluded, before hashing.
+  The owner neither narrows shared coverage to selected filenames nor substitutes
+  unchecked metadata for byte checks.
+- The initial snapshot follows all path gates. The pre-collection comparison
+  covers staging and child execution; the final comparison covers collection,
+  cleanup and summary creation. Delivery follows that final barrier. Removing
+  the immediate duplicate post-cleanup scan leaves these intervals intact:
+  success has one initial scan and two distinct comparison scans, not four scans.
+  A failed child has one initial and one final scan. A failed comparison is
+  cached only as a permanent refusal, never as preservation PASS; cleanup still
+  runs independent package/link/checkout/external-input checks.
+- Original staged ROOTs retain before/after-copy SHA-256 and separate inode/
+  device checks; every copied input, including Diamond candidates, remains
+  private. Frozen shift_prep derived-branch writes stay in those copies. All
+  originals remain covered by the full shared comparison. External scientific
+  files retain SHA-256/bytes/stat/realpath and missing/unresolved decisions, with
+  checks before collection and after cleanup. CUTPATH/PARAMPATH reuse only the
+  identities just captured in their own inventory, eliminating immediate duplicate
+  reads without extending the snapshot interval. Configured Sigma0 stays strict;
+  blank/unconfigured fallback, both epsilon availability and Diamond parity stay.
+- The first cheap path/input failure occurs before any shared snapshot exists,
+  so finally cannot trigger a full shared reread. Package/code checks may still
+  read bounded source/package bytes. Status I/O failure also cannot suppress the
+  final independent preservation checks. Failed/partial artifacts remain
+  inadmissible and are not delivered.
+- No cheap replacement for full byte preservation is claimed. Full shared-tree
+  snapshots, external CUTPATH/PARAMPATH inventories, skim/background ROOT hashing,
+  private copies and repeated import/package checks can still be expensive.
+  They remain bounded by the declared roots/files, with stage entry/exit,
+  monotonic elapsed time, failed-stage, shared entry/byte counts and requested/
+  canonical CLI roots in the existing atomic status. There is no new logger or
+  timeout around scientific reads/copies. Actual farm volumes/costs are unknown.
+
+The seven supplied failure classes were reviewed together: irrelevant dangling
+links and historical cycles retain metadata-only regressions and strict required
+input rejection; dependency code reads and lib64 aliases now use ordinary imports
+without the removed sandbox; real ctypes/PyDLL initialization and timezone reads
+have positive import tests; the seventh caller failure has real ancestor-alias
+subprocess tests plus missing/redirected caller/cwd negatives. Wrong wrapper,
+package, interpreter, config uniqueness, stable roles, private-output escapes,
+source/publication, observer escapes, cleanup and no-collection guards remain.
+These tests reproduce local failure mechanisms, not the unobserved farm topology
+or the complete installed JLab Python 3.9 dependency closure.
+
+Deterministic local receipt:
+
+- WSL Python 3.12.3: final owner suite 58 tests, 57 PASS and one skip for the
+  unavailable real dependency set; 61.409 seconds. This includes real alias
+  subprocess/cwd/package checks, full aliased CLI acquisition fixtures, an 8 GiB
+  sparse output-tree cheap-failure test, missing caller diagnostics, cleanup
+  mutation, exact full-scan counts and final status-I/O failure preservation.
+- Windows Python 3.12.10: real NumPy/pandas/dateutil/ctypes/timezone import test
+  plus the unchanged event-owner suite, 15/15 PASS; 43.873 seconds. This executes
+  the real dependency case skipped in WSL, not a JLab dependency claim.
+- WSL unchanged frozen resolver/history, collector and memory-health suites:
+  107/107 PASS; 75.717 seconds. Fixture archive-path stdout is not a farm run.
+- Syntax compilation with py_compile output outside the repository, manifest
+  write/check, ordinary memory-health hard checks, bootstrap and whitespace
+  checks PASS. CURRENT 16,196 bytes, MEMORY 29,076 and handoff 323. CURRENT's
+  8 KiB soft-size warning is nonblocking; batch further compaction at the next
+  checkpoint/milestone without changing the active scientific gate.
+- AST comparison: exactly six existing owner functions change; 28 existing
+  functions remain identical, including resolver_preflight, run_owned_child,
+  verify_joint, archive verification, offline fitting/replay and rendering.
+  Four bounded owner-local helpers are added; the inline probe changes only
+  alias identity and canonical config-caller handling.
+- Startup byte comparison finds only the two allowlisted source files, CURRENT,
+  this investigation and manifest changed. The supplied new contract and all
+  unrelated/frozen file bytes are preserved. HEAD/local origin/test/refs are
+  unchanged and staged content remains empty. Git refreshed raw index metadata;
+  byte-identical raw-index preservation is not claimed. A temporary root review
+  bundle contains the entire actual tracked diff, full new contract, receipt and
+  execution/preservation review; remove it before publication.
+
+NEXT remains CURRENT's independent complete-diff/CLI-path review, then user
+publication and pushed-state synchronization before acquisition-readiness review.
+No commit, push, farm execution, ROOT/full-main.py validation, fresh matched
+science, Lambda yield claim, strength selection or production promotion occurred.

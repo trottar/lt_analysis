@@ -217,6 +217,7 @@ class ResolverImports(unittest.TestCase):
     def test_actual_resolver_rejects_wrong_identity_receipts(self):
         for key, reason in (('cwd', 'resolver_cwd_mismatch'),
                             ('caller', 'resolver_caller_mismatch'),
+                            ('caller_realpath', 'resolver_caller_mismatch'),
                             ('mode', 'resolver_caller_mismatch'),
                             ('python', 'interpreter_mismatch'),
                             ('resolver_file', 'resolver_wrapper_import_mismatch'),
@@ -235,6 +236,58 @@ class ResolverImports(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, reason):
                         owner.probe_resolver(f.tree, 'src/setup/findEffectiveCharge.py', (),
                                              f.env, 'src/setup', f.copied)
+
+    def test_group_u_group_aliases_across_baseline_private_and_inline_probe(self):
+        # Real POSIX root alias, actual subprocess/cwd/imports, both modes and
+        # all reached callers. Python 3.12 path-shape evidence, not farm 3.9.
+        with self.fixture(reached_callers=True) as f:
+            physical = f.root / 'u/group'
+            physical.parent.mkdir()
+            physical.symlink_to(f.root, target_is_directory=True)
+            group = f.root / 'group'
+            group.symlink_to(physical, target_is_directory=True)
+            repo, tree = group / 'ordinary', group / 'attempt/analysis'
+            configs = [f.package / 'PATH_TO_DIR/user.path', f.copied / 'PATH_TO_DIR/user.path']
+            originals = [p.read_bytes() for p in configs]
+            try:
+                for config, old, alias in zip(configs, (f.repo, f.tree), (repo, tree)):
+                    config.write_bytes(config.read_bytes().replace(str(old).encode(), str(alias).encode()))
+                env = dict(f.env, PYTHONPATH=str(group / 'attempt/runtime-python'))
+                baseline_env = dict(os.environ, PYTHONPATH=str(group / 'installed'))
+                with patch.dict(os.environ, baseline_env, clear=True), patch.object(
+                        owner, 'reached_resolver_callers', return_value=owner.reached_resolver_callers(ROOT)):
+                    result = owner.probe_private_callers(repo, tree, env, f.baseline,
+                        f.outdir, group / 'installed/ltsep')
+                for record in result['all_callers'] + result['baseline_callers']:
+                    self.assertNotEqual(record['caller'], record['caller_realpath'])
+                    self.assertEqual(Path(record['caller']).resolve(), Path(record['caller_realpath']))
+                    self.assertEqual(Path(record['cwd']).resolve(), Path(record['cwd']))
+            finally:
+                for config, raw in zip(configs, originals):
+                    config.write_bytes(raw)
+
+    def test_missing_caller_and_redirected_caller_cwd_fail_before_import_or_hash(self):
+        with self.fixture() as f:
+            for tree in (f.repo, f.tree):
+                path = tree / 'src/setup/findEffectiveCharge.py'
+                raw = path.read_bytes()
+                path.unlink()
+                with patch.object(owner.subprocess, 'run') as run, patch.object(owner.resolver, 'tree_bytes') as hashes:
+                    with self.assertRaisesRegex(ValueError, 'missing_or_nonregular:.*canonical.*lexical'):
+                        owner.probe_resolver(tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'src/setup', f.copied)
+                    outside = f.root / 'wrong-checkout.py'
+                    outside.write_bytes(raw)
+                    path.symlink_to(outside)
+                    with self.assertRaisesRegex(ValueError, 'alias_mismatch:.*authorized.*canonical.*lexical'):
+                        owner.probe_resolver(tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'src/setup', f.copied)
+                    path.unlink()
+                    path.write_bytes(raw)
+                    cwd = tree / 'redirected-cwd'
+                    cwd.symlink_to(f.root, target_is_directory=True)
+                    with self.assertRaisesRegex(ValueError, 'cwd_alias_mismatch'):
+                        owner.probe_resolver(tree, 'src/setup/findEffectiveCharge.py', (), f.env, 'redirected-cwd', f.copied)
+                    run.assert_not_called()
+                    hashes.assert_not_called()
 
     def test_ordinary_import_package_mutation_stops_on_success_and_exception(self):
         for installed in (False, True):
@@ -695,16 +748,51 @@ class PrivateBoundary(unittest.TestCase):
                 with self.subTest(location=location, change=change):
                     self.exercise_exact_preflight_sigma0('absent', (location, change))
 
+    def test_cheap_full_acquisition_failure_does_not_read_large_shared_tree(self):
+        self.exercise_exact_preflight_sigma0('absent', cheap_bulk_failure=True)
+
+    def test_missing_full_acquisition_caller_stops_before_audit_and_bulk_reads(self):
+        self.exercise_exact_preflight_sigma0('absent', cheap_bulk_failure='caller')
+
+    def test_success_has_distinct_precollection_and_final_byte_checks_without_duplicate_final_scan(self):
+        self.exercise_exact_preflight_sigma0('absent', complete_owner=True)
+
+    def test_cleanup_mutation_still_blocks_delivery_after_collection(self):
+        self.exercise_exact_preflight_sigma0('absent', complete_owner=True, cleanup_mutation=True)
+
+    def test_status_io_failure_cannot_suppress_final_preservation(self):
+        self.exercise_exact_preflight_sigma0('absent', complete_owner=True, final_status_failure=True)
+
+    def test_full_acquisition_accepts_authorized_cli_root_aliases(self):
+        self.exercise_exact_preflight_sigma0('absent', complete_owner=True, root_alias=True)
+
     def exercise_exact_preflight_sigma0(self, sigma_case, mutation=None, *, cyclic=False,
                                        loop_form='native', required_role='sigma0_SIMC',
                                        preflight_failure=False, preservation_failure=False,
                                        artifact_failure=False, completed_child=False,
-                                       probe_check=None, resolver_failure=False):
+                                       probe_check=None, resolver_failure=False,
+                                       cheap_bulk_failure=False, complete_owner=False, cleanup_mutation=False,
+                                       final_status_failure=False, root_alias=False):
+        completed_child = completed_child or complete_owner
         with tempfile.TemporaryDirectory() as d:
             parent = Path(d).resolve()
             repo, worktree, globus = parent / 'repo', parent / 'analysis', parent / 'globus'
             for p in (repo, worktree, globus, parent / 'runtime-python'):
                 p.mkdir()
+            entry_repo, entry_shared, entry_output = repo, None, globus / 'new.zip'
+            if root_alias:
+                alias = parent / 'group'
+                alias.symlink_to(parent, target_is_directory=True)
+                entry_repo, entry_output = alias / 'repo', alias / 'globus/new.zip'
+            # The cheap source/caller gate now precedes all scientific I/O.
+            for tree in (repo, worktree):
+                names = {caller for _, caller, _, _, _ in owner.resolver.CALLERS}
+                names.update(('src/main.py', 'src/setup/calcTotalEffectiveCharge.py',
+                              'src/setup/set_sig_fortran.py'))
+                for name in names - {'.'}:
+                    p = tree / name
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_text('# source-only caller fixture\n')
             (parent / 'runtime-python/ltsep').mkdir()
             (worktree / 'testing').mkdir()
             (worktree / owner.OWNER).write_text('synthetic owner')
@@ -713,6 +801,7 @@ class PrivateBoundary(unittest.TestCase):
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text('# frozen writer fixture')
             shared = parent / 'volatile/OUTPUT/Analysis/KaonLT'
+            entry_shared = alias / 'volatile/OUTPUT/Analysis/KaonLT' if root_alias else shared
             (shared / 'background_samples').mkdir(parents=True)
             for setting in owner.SETTINGS:
                 for role in ('Data', 'Dummy'):
@@ -778,6 +867,8 @@ class PrivateBoundary(unittest.TestCase):
                     yield worktree
                 finally:
                     cleaned.append(args[-1])
+                    if cleanup_mutation and args[-1] == 'analysis':
+                        (shared / 'regular.bin').write_bytes(b'cleanup mutated original')
             source_checks = Mock(return_value=('', [{'returncode': 0}]))
             collect = Mock(side_effect=AssertionError('failed child must not collect'))
             @contextmanager
@@ -811,20 +902,35 @@ class PrivateBoundary(unittest.TestCase):
                     'baseline_paths': dict(paths, LTANAPATH=str(repo), OUTPATH=str(shared))}))
                 patched(owner.isolation, 'probe_paths', return_value=[{'paths': paths}])
                 patched(owner.isolation, 'external_symlink_preflight', return_value={'links': [], 'background_simc_path': ''})
+                scans = patched(owner, 'inventory', wraps=owner.inventory)
+                bulk = shared / 'large-unrelated'
+                if cheap_bulk_failure:
+                    bulk.mkdir()
+                    with (bulk / 'large.root').open('wb') as stream:
+                        stream.truncate(8 * 1024**3)
+                    for i in range(128):
+                        (bulk / str(i)).mkdir()
+                    scans.side_effect = AssertionError('cheap gate must not scan shared or external trees')
+                    hashes = patched(owner, 'identity', side_effect=AssertionError('cheap gate must not hash science'))
+                    if cheap_bulk_failure == 'caller':
+                        (repo / 'src/setup/findEffectiveCharge.py').unlink()
                 captured = {}
                 real_inventory = owner.external_input_inventory
-                def capture_inventory(*args):
-                    records = real_inventory(*args)
-                    captured.update(records)
+                def capture_inventory(*args, **kwargs):
+                    records = real_inventory(*args, **kwargs)
+                    if not kwargs.get('check_only'):
+                        captured.update(records)
                     return records
                 inventory_call = patched(owner, 'external_input_inventory', side_effect=capture_inventory)
                 if preflight_failure:
-                    def fail_source_caller(*args):
+                    def fail_source_caller(*args, **kwargs):
                         raise PermissionError('synthetic preflight denied')
                     inventory_call.side_effect = fail_source_caller
                 patched(owner, 'skim_paths', return_value={'launcher': str(shared), 'effective_charge': str(shared)})
                 if probe_check is None:
-                    patched(owner, 'probe_private_callers', return_value={})
+                    probe = patched(owner, 'probe_private_callers', return_value={})
+                    if cheap_bulk_failure:
+                        probe.side_effect = ValueError('synthetic_cheap_path_failure')
                 else:
                     patched(owner, 'probe_private_callers', side_effect=probe_check)
                 patched(owner.event_owner, 'committed_identities', return_value={})
@@ -875,12 +981,28 @@ class PrivateBoundary(unittest.TestCase):
                 checkout = patched(owner.isolation, 'verify_preservation', return_value={})
                 installed = patched(owner.isolation, 'verify_ltsep_preservation', return_value={})
                 delivery = patched(owner.isolation, 'deliver_evidence')
+                if final_status_failure:
+                    update = owner.ab.GateStatus.update
+                    def fail_status(instance, stage=None, **fields):
+                        if stage == 'final_preservation':
+                            raise ValueError('synthetic_status_io_failure')
+                        return update(instance, stage, **fields)
+                    patched(owner.ab.GateStatus, 'update', new=fail_status)
+                if complete_owner:
+                    def collected(**kwargs):
+                        Path(kwargs['output']).write_bytes(b'synthetic ZIP; archive validator tested separately')
+                        return {'returncode': 0}
+                    collect.side_effect = collected
+                    patched(owner, 'verify_archive', return_value={})
                 if preservation_failure:
                     checkout.side_effect = ValueError('checkout preservation failure')
                     installed.side_effect = ValueError('installed preservation failure')
-                invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure or resolver_failure
+                invalid = sigma_case in ('invalid', 'dangling', 'cycle') or preflight_failure or resolver_failure or cheap_bulk_failure
                 role = 'sigma0_SIMC' if required_role == 'sigma0_SIMC' else 'pion_SIMC_' + required_role
-                reason = ('resolver_fixture_failure' if resolver_failure else 'preservation_failed' if mutation else
+                reason = ('missing_or_nonregular:.*canonical.*lexical' if cheap_bulk_failure == 'caller' else
+                          'synthetic_status_io_failure' if final_status_failure else
+                          'synthetic_cheap_path_failure' if cheap_bulk_failure else
+                          'resolver_fixture_failure' if resolver_failure else 'preservation_failed' if mutation or cleanup_mutation else
                           'required_external_input_missing:' + role if invalid else
                           'synthetic joint gate failure' if artifact_failure else 'analysis_failed')
                 expected = ValueError
@@ -890,12 +1012,22 @@ class PrivateBoundary(unittest.TestCase):
                     reason = 'required_external_input_missing:|[Ss]ymlink|[Ss]ymbolic'
                 if preservation_failure:
                     reason = 'preservation_failed'
-                with self.assertRaisesRegex(expected, reason):
-                    owner.execute_gate(repo, shared, globus / 'new.zip', head)
-                if resolver_failure:
+                if complete_owner and not cleanup_mutation and not final_status_failure:
+                    owner.execute_gate(entry_repo, entry_shared, entry_output, head)
+                else:
+                    with self.assertRaisesRegex(expected, reason):
+                        owner.execute_gate(entry_repo, entry_shared, entry_output, head)
+                shared_scans = [call for call in scans.call_args_list if Path(call.args[0]) == shared]
+                self.assertEqual(len(shared_scans), 0 if cheap_bulk_failure or resolver_failure or invalid else
+                                 3 if complete_owner else 2)
+                if cheap_bulk_failure:
+                    hashes.assert_not_called()
+                    scans.assert_not_called()
+                    shutil.rmtree(bulk)
+                if resolver_failure or cheap_bulk_failure:
                     inventory_call.assert_not_called()
                 else:
-                    inventory_call.assert_called_once()
+                    self.assertEqual(inventory_call.call_count, 1 if invalid else 2)
                     self.assertEqual(inventory_call.call_args.args[3], sigma_env)
                 if invalid:
                     child.assert_not_called()
@@ -904,31 +1036,59 @@ class PrivateBoundary(unittest.TestCase):
                     child_env = child.call_args.args[-1]
                     self.assertEqual(child_env[owner.ab.ENABLE_ENV], child_env[cap.ENABLE_ENV])
                     self.assertEqual({k: child_env[k] for k in sigma_env}, sigma_env)
-                collect.assert_not_called()
-                delivery.assert_not_called()
-                self.assertFalse((globus / 'new.zip').exists())
-                self.assertFalse(owner.ab.destinations(shared, globus / 'new.zip')['summary'].exists())
+                if complete_owner:
+                    collect.assert_called_once()
+                else:
+                    collect.assert_not_called()
+                    self.assertFalse((globus / 'new.zip').exists())
+                if not complete_owner or cleanup_mutation or final_status_failure:
+                    delivery.assert_not_called()
+                else:
+                    delivery.assert_called_once()
                 status = json.loads(owner.isolation.accepted.gate_status_path(shared, globus / 'new.zip').read_text())
+                if complete_owner and not cleanup_mutation and not final_status_failure:
+                    self.assertEqual(status['status'], 'success')
+                    if root_alias:
+                        self.assertNotEqual(status['requested_paths'], status['canonical_paths'])
+                        self.assertEqual(status['canonical_paths']['repo'], str(repo))
+                    for name in ('source_preflight', 'overlay_path_validation', 'shared_output_snapshot',
+                                 'private_ROOT_staging', 'external_input_verification', 'analysis',
+                                 'post_child_preservation', 'collection', 'final_preservation'):
+                        timing = status['stage_timings'][name]
+                        self.assertTrue(timing['completed'])
+                        self.assertGreaterEqual(timing['elapsed_seconds'], 0)
+                    self.assertTrue(status['shared_inputs_outputs_preserved'])
+                    return
                 self.assertEqual(status['status'], 'failed')
                 self.assertFalse(status['evidence_admissible'])
-                self.assertTrue(status['failure_reason'])
-                self.assertIn('execute_gate', status['failure_traceback'])
-                self.assertLessEqual(len(status['failure_traceback']), 8192)
+                if cheap_bulk_failure:
+                    self.assertNotIn('shared_output_snapshot', status['stage_timings'])
+                    self.assertFalse(status['stage_timings'][
+                        'source_preflight' if cheap_bulk_failure == 'caller' else 'overlay_path_validation']['completed'])
+                if cleanup_mutation or final_status_failure:
+                    self.assertIn('synthetic_status_io_failure' if final_status_failure else 'shared_outputs_changed',
+                                  status['preservation_failure_reason'])
+                else:
+                    self.assertTrue(status['failure_reason'])
+                    self.assertIn('execute_gate', status['failure_traceback'])
+                    self.assertLessEqual(len(status['failure_traceback']), 8192)
                 if resolver_failure:
-                    self.assertEqual(status['stage'], 'source_preflight')
+                    self.assertEqual(status['failed_stage'], 'overlay_path_validation')
                     self.assertFalse(status['analysis_started'])
                     self.assertIn('probe_resolver', status['failure_traceback'])
                 if preflight_failure:
-                    self.assertEqual(status['stage'], 'source_preflight')
+                    self.assertEqual(status['failed_stage'], 'overlay_path_validation')
                     self.assertFalse(status['analysis_started'])
                     self.assertIn('fail_source_caller', status['failure_traceback'])
                     self.assertEqual(status['failure_reason'], 'synthetic preflight denied')
                     self.assertIn('ordinary_checkout:', status['preservation_failure_reason'])
                     self.assertIn('installed_ltsep:', status['preservation_failure_reason'])
                 self.assertGreaterEqual(checkout.call_count, 1)
-                self.assertGreaterEqual(installed.call_count, 1)
-            self.assertIn('analysis', cleaned)
-            if not mutation:
+                if cheap_bulk_failure != 'caller':
+                    self.assertGreaterEqual(installed.call_count, 1)
+            if cheap_bulk_failure != 'caller':
+                self.assertIn('analysis', cleaned)
+            if not mutation and not cleanup_mutation:
                 excluded = {p.name for p in owner.ab.destinations(shared, globus / 'new.zip').values()}
                 self.assertEqual({k: v for k, v in owner.inventory(shared).items() if k not in excluded}, original)
                 self.assertFalse(target.exists())
