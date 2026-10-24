@@ -305,6 +305,23 @@ comparison, accepted runtime artifact, or one directly evidenced scientific/
 runtime blocker with one coherent repair. Documentation alone is not scientific
 completion. See the [workflow decision](decisions/memory-bracketed-scientific-throughput.md).
 
+### Review discipline across projects
+
+Prefer mature working source and the shortest science-producing path. A reviewed
+diff and passing synthetic suites do not establish farm readiness. Trace CLI ->
+preflight -> child -> validation/collection through actual farm path aliases,
+symlink/cwd/import geometry, cheap-to-expensive check ordering and expected work
+before approving a farm handoff. Expose unverified hard invariants and stop at
+them; do not substitute repeated speculative infrastructure fixes for evidence.
+The [seventh-failure record](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#seventh-failure-and-repeated-review-failures--october-23)
+records repeated assistant review failures and the withdrawn direct-patch advice.
+Preserve audit -> one standalone Markdown contract -> short Codex launch ->
+Codex implementation/local checks -> independent actual-diff review -> user
+commit/push -> pushed-state synchronization -> farm only if proven ready.
+Publication and farm execution remain user-only. Direct assistant patch/application
+instructions and unreviewed manual repository mutations bypass this workflow
+and are forbidden; this does not prohibit contract-authorized Codex implementation.
+
 ### Science priority and evidence admissibility
 
 A real safety/provenance hard gate stops the specific unsafe operation; it

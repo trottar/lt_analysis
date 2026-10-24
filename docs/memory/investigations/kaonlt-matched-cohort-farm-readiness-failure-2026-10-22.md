@@ -233,3 +233,66 @@ no new mandatory smoke-development loop. First failed invariant stops delivery.
 Fresh A/B/events and seven-strength C replay/six-parent MM/variance comparison
 remain the scientific target. Python 3.9, real farm dependency closure, ROOT,
 physical preservation and scientific acceptance remain NOT VERIFIED locally.
+
+## Seventh failure and repeated review failures — October 23
+
+`BLOCKED` for matched-cohort acquisition under the
+[memory-only contract](../phases/kaonlt-seventh-farm-failure-memory-task-contract-2026-10-23.md).
+RUNTIME VERIFIED only as attributed to its supplied CLI excerpt: the user ran
+the published full owner on ifarm2402 with source argument
+`--source-commit b05ad2a1d9af241527a7d6ce90196eb591188d19`; it stopped with:
+
+`Matched-cohort gate failed: caller_path_invalid:src/setup/findEffectiveCharge.py`
+
+The CLI printed the status filename
+`KaonLT_MatchedCohort_Q4p4W2p74_20261023-gate-status.json` under the ordinary
+analysis artifact root. The exact supplied location is preserved in the contract;
+no machine-specific path is duplicated here. The user reported hours consumed.
+The status file itself, stage timestamps, actual filesystem resolution and
+output/checkout preservation results are NOT VERIFIED here. The supplied failure
+is the seventh failed pre-child owner/smoke attempt in this incident series;
+there is no supplied successful child completion, matched-cohort ZIP or new
+scientific result. October 20 remains the accepted scientific checkpoint.
+
+SOURCE VERIFIED against local source at
+`b05ad2a1d9af241527a7d6ce90196eb591188d19`:
+
+- `testing/run_pion_local_t_matched_cohort_gate.py:220-225`, `probe_resolver()`,
+  requires both caller existence and `resolver.real(path) == path`; either a
+  missing caller or unequal resolved path rejects as `caller_path_invalid`.
+- `testing/attest_pion_chain_ltsep_default_root.py:71-81`, `real()`, requires an
+  absolute non-traversing path, checks symlink ancestors and returns
+  `Path.resolve()`. Resolution includes farm `/group` versus `/u/group` aliases;
+  whether an alias or missing path caused this attempt is NOT VERIFIED.
+- The full owner's `execute_gate()` calls `shared_state()` before
+  `resolver_preflight()` (`:857-861`), which reaches `probe_private_callers()`
+  then `probe_resolver()` (`:720-737`, `:251-265`). `shared_state()` recursively
+  calls `inventory(shared)`; regular files and file-symlink referents pass through
+  `identity()` to file hashing (`:99-150`). It inventories before excluding the
+  owner's named destinations. Later preservation/cleanup paths can reevaluate
+  it (`:913`, `:930`, `:951`). This expensive ordering was overlooked in review.
+  Exact runtime attribution of the reported hours is NOT VERIFIED.
+
+Codex executed scoped tasks and supplied local tests. ChatGPT approved their
+scope/readiness, missed path/topology assumptions, failed to trace the entire
+actual runtime call chain and expensive ordering, and improperly promoted
+local/synthetic passes into farm readiness. These repeated assistant review
+failures displaced science and consumed user time and cost; responsibility does
+not lie in the user's command or farm operation. Earlier lib64, ctypes and
+metadata-read failures should have exposed the limits of those readiness claims.
+
+The assistant then supplied a direct `git apply` patch and manual repository
+mutation instructions. That violated the established KaonLT process and was
+explicitly withdrawn. The patch is neither incorporated nor applied by this
+task. The required flow remains audit -> one standalone Markdown task contract
+-> short Codex launch -> Codex implementation/deterministic checks -> independent
+actual-diff review -> user commit/push -> pushed-state synchronization -> farm
+only if proven ready. No direct assistant patch/application workflow or unreviewed
+user mutation is authorized.
+
+CURRENT owns the next gate: a source/path and pre-analysis cost audit before
+considering acquisition, not a new farm attempt or second support phase. Fresh
+Center/Left lowe canonical t1/t2/t3 same-run A/B plus signed-event evidence,
+seven-strength C replay and six-parent Lambda-window MM/variance results remain
+absent. This memory correction provides no scientific acceptance and changes no
+analysis code, frozen scientific roles or accepted checkpoint.

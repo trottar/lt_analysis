@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16344,
+      "bytes": 16308,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "04732a3db7bf3511b7e20f67fb577d1feb6fced86019696196ffbeb78f9d11fe"
+      "sha256": "62cdbf4e578008ef604e97308f0780e8b5147cf0dff3a014d24a888cd332f02f"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 27843,
+      "bytes": 29076,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "90b2e376d0bde325cda5feae0e0b5ecbe4b24332c06be424dd1ff5d412804026"
+      "sha256": "0bdddfc44a104be68ed0d8321ae366128c95e3ddc9e86a0d56143cb962f8c67a"
     },
     {
       "bytes": 3606,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 15816,
+      "bytes": 19806,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
-      "sha256": "db6882660e3f951a13c3a69c7e04c336cbd64b36e663b52f2fac0fac6623a6f3"
+      "sha256": "2ab19a0ecfb70ac4887fa8485f48911b0bec8751cb6acd9b7a1ea5487d6ff083"
     },
     {
       "bytes": 28637,
@@ -1394,6 +1394,11 @@
       "bytes": 21459,
       "path": "docs/memory/phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md",
       "sha256": "bbaeee09e9da54e71d8c1463af7cbbfe51ccfc92793de72cf015c58530e0ef84"
+    },
+    {
+      "bytes": 6321,
+      "path": "docs/memory/phases/kaonlt-seventh-farm-failure-memory-task-contract-2026-10-23.md",
+      "sha256": "c502d652bb9414f9fd70a516f70a912c137e105068bda67b6bbe1285e3b47fe1"
     },
     {
       "bytes": 14192,

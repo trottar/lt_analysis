@@ -30,19 +30,21 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [ordinary resolver reuse](phases/kaonlt-reuse-existing-ltsep-resolver-science-unblock-2026-10-23-task-contract.md).
-Sixth supplied farm failure at `82bbe68d3`: owner-only probe rejected dateutil's
-legitimate `/usr/share/zoneinfo/UTC` read. No child, matched ZIP or fresh science
-(RUNTIME VERIFIED only as attributed in the supplied contract). The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
-retains six failures and assistant readiness accountability.
-SOURCE VERIFIED: custom loaders/bootstrap/audit hooks removed; ordinary ltsep
-imports use the unchanged farm_env wrapper, real Python `-B` and disabled
-bytecode writes. Exact baseline/private caller/mode/cwd/interpreter/module/config,
-stable-role, lexical/resolved OUTPATH and package/source/index checks remain.
-Dependencies may read metadata; no generic read/write sandbox claim. Optional
-smoke shares preflight and stops before staging/observers/child/ZIP; no mandatory
-extra cycle. Python 3.9, farm dependencies/preservation and science NOT VERIFIED
-locally. Scientific source, frozen resolver, helpers and launchers unchanged.
+`BLOCKED`: seventh pre-child matched-cohort failure at published source
+`b05ad2a1d9af241527a7d6ce90196eb591188d19`:
+`caller_path_invalid:src/setup/findEffectiveCharge.py` (RUNTIME VERIFIED only
+as supplied in the [memory contract](phases/kaonlt-seventh-farm-failure-memory-task-contract-2026-10-23.md)).
+The [incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#seventh-failure-and-repeated-review-failures--october-23)
+records seven failures, repeated assistant review/readiness failures and the
+withdrawn direct-patch instruction. No successful child, matched ZIP or fresh
+science is supplied; October 20 remains the accepted scientific checkpoint.
+SOURCE VERIFIED: caller existence/canonical-equality checks remain after
+[ordinary resolver reuse](phases/kaonlt-reuse-existing-ltsep-resolver-science-unblock-2026-10-23-task-contract.md);
+recursive shared-output inventory/hashing precedes resolver preflight and can
+repeat in preservation. Actual farm path resolution, status/timestamps,
+preservation results and attribution of the reported hours are NOT VERIFIED.
+First gate: source/path and pre-analysis cost audit, not another farm attempt.
+Scientific source, frozen resolver, helpers and launchers remain unchanged.
 
 The [matched-cohort owner](phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
 retains private output/input copies, stable external roles and VOLATILEPATH,
@@ -96,18 +98,15 @@ It is detached from farm science and clears no runtime gate.
 
 - [Full-chain diagnostic](phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
   `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for independent validation.
-  RUNTIME VERIFIED (supplied artifacts/prior review, recorded through the
-  [October 18 contract](phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md)):
-  published all-low debug source `f1d1984b5e0fca9ba3c5666477996af783423db7`
-  ran on the farm with `DEBUG_EXIT_STATUS=0`; Center/Left lowe PDFs and a
-  Center canonical t1/t2/t3 seven-stage JSON/PDF (19 pages) were captured.
-  No populated Right/lowe result established. Producer status remains
-  `captured_pending_independent_validation`, completeness `captured`, PDF
-  `available`, `observed_source_HEAD=not_provided`. Farm checkout HEAD was
-  explicitly verified before the run; that does not fill the artifact's
-  missing identity. The reviewed eight-member `KaonLT_loweps_20261018_093137.zip`
-  is not full independent provenance/checker or production acceptance.
-  Normal-launcher isolation remains separately blocked.
+  RUNTIME VERIFIED only as supplied/prior-reviewed in the
+  [October 18 contract](phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md):
+  all-low debug `f1d1984b5e0fca9ba3c5666477996af783423db7`,
+  `DEBUG_EXIT_STATUS=0`, Center/Left lowe PDFs and Center t1/t2/t3 seven-stage
+  JSON/PDF (19 pages). No populated Right/lowe result. Producer status remains
+  `captured_pending_independent_validation`; `observed_source_HEAD=not_provided`.
+  Checkout verification does not fill missing artifact identity. The reviewed
+  eight-member `KaonLT_loweps_20261018_093137.zip` establishes neither full
+  independent provenance/checker acceptance nor production/normal-launcher isolation.
 
 - [Attempt-output isolation](phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
   `BLOCKED`: the historical helper reports
@@ -216,17 +215,18 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — after independent ChatGPT actual-diff review, user publication and
-pushed-state synchronization, evaluate the existing single Center/Left lowe
-matched-cohort scientific owner for one protected acquisition: fresh same-run
+NEXT — preserve the scientific target: fresh same-cohort Center/Left lowe
 A/B and signed-event packets for canonical t1/t2/t3, then the existing fresh
-seven-strength C fitting/replay and six-parent MM/variance JSON/PDF comparison
-under Lambda. The optional resolver smoke adds no mandatory development cycle.
-Hard-stop at the first failed invariant; no automatic retry or failed-artifact
-acceptance. No farm/runtime acceptance, held-out estimator, bias truth, optimal
-strength or promotion follows from this local repair. Preserve full-MM,
-normalization and authoritative signal-yield objectives without a Lambda/SIMC
-unity constraint.
+seven-strength C fitting/replay and six-parent Lambda-window MM/variance
+JSON/PDF comparison. First audit the blocked owner's source/path assumptions
+and pre-analysis cost ordering; no new farm attempt is authorized by this
+memory correction. Resume the established contract/implementation/local-check,
+independent actual-diff review, user publication and pushed-state synchronization
+flow only as justified by that audit. Hard-stop at the first failed invariant;
+no automatic retry or failed-artifact acceptance. No farm/runtime acceptance,
+held-out estimator, bias truth, optimal strength or promotion follows. Preserve
+full-MM, normalization and authoritative signal-yield objectives without a
+Lambda/SIMC unity constraint.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior
