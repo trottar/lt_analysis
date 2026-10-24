@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16196,
+      "bytes": 16250,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "f14f72a2bdf46fe55e31d0a3231c5c884b9848c1c8d134f25969cd5c298c26ed"
+      "sha256": "e38d088b3d4525f54aca2b20564241d535e155722dc3ae747a7613af795e7390"
     },
     {
       "bytes": 11186,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 29344,
+      "bytes": 34919,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
-      "sha256": "483d3ed3974fb6071346fe99150bb8e7ac259df89f7682d5b33c8a0e165e14d4"
+      "sha256": "d7920f74d294fd3363c3ee171597865856770001798c002a6d68162887502b5e"
     },
     {
       "bytes": 28637,
@@ -1289,6 +1289,11 @@
       "bytes": 7858,
       "path": "docs/memory/phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md",
       "sha256": "fa9ec458d9d5a89ac334f8557c5621eceaf6d4380bea9f5197bea49a2609781f"
+    },
+    {
+      "bytes": 13359,
+      "path": "docs/memory/phases/kaonlt-matched-cohort-effective-charge-outpath-fix-2026-10-24-task-contract.md",
+      "sha256": "ba47415afee7e63a7640d1c9bad0b360e92e9e2aa398afb9735bedd7dfd0d41b"
     },
     {
       "bytes": 12204,

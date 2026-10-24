@@ -31,19 +31,20 @@ at its interrupted position.
 ## Current Work Item
 
 `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local
-[fast-fail correction](phases/kaonlt-matched-cohort-fast-fail-science-unblock-2026-10-24-task-contract.md)
-from `c6c6963a00cfc82965eb2414968093a3da4a0fbb`; actual-diff review pending.
-SOURCE VERIFIED: caller/cwd/module/config/private-output and input-availability
-gates precede scientific hashing/copying. Authorized root aliases retain both
-path identities. Full shared byte checks remain before collection and after
-cleanup without a duplicate final scan. Status records stage timings. See the
-[source/preservation review](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#fast-fail-source-and-preservation-review--october-23).
-Scientific source, frozen resolver, helpers and launchers are unchanged.
+[effective-charge OUTPATH correction](phases/kaonlt-matched-cohort-effective-charge-outpath-fix-2026-10-24-task-contract.md)
+from `92af408d0431d2955fc6e8544edebad3b45df5dc`; actual-diff review pending.
+SOURCE VERIFIED: ordinary no-mode accepts canonical equivalence; Plot stays
+lexically strict. The CSV producer uses LTANAPATH's analysis output; the owner
+checks ordinary equivalence and private confinement. No-mode readers do not use
+Root.OUTPATH. Stable inputs, installed package/config, shared links, physics,
+frozen resolver, launchers, fast-fail order and preservation/status gates remain.
 
-Runtime acceptance remains `BLOCKED`: the seventh supplied pre-child failure at
-`b05ad2a1d9af241527a7d6ce90196eb591188d19` was
-`caller_path_invalid:src/setup/findEffectiveCharge.py`. Its exact farm alias,
-status/timestamps, preservation and reported hours remain NOT VERIFIED.
+Runtime acceptance remains `BLOCKED`: the eighth supplied pre-child failure at
+`92af408d0431d2955fc6e8544edebad3b45df5dc` was
+`baseline_root_outpath_mismatch:effective_charge`. Supplied probes establish
+canonical ordinary no-mode/Plot equivalence, not private isolation or shared
+preservation. See the
+[incident](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#eighth-failure-and-effective-charge-path-only-correction--october-24).
 No successful child, matched ZIP or fresh science is supplied. October 20
 remains the accepted scientific checkpoint; local tests grant no farm readiness.
 
@@ -54,7 +55,7 @@ optional unconfigured Sigma0 fallback and strict configured-file checks.
 Only its child enables both observers. Original inputs, shared outputs,
 external links, installed/copied packages and fresh six-parent A/B/event
 joins/closure must pass before delivery. Launchers, isolation helpers, installed
-`ltsep` and production source remain unchanged. Local synthetic checks grant
+`ltsep` and production physics remain unchanged. Local synthetic checks grant
 no farm readiness or scientific acceptance.
 
 Frozen `shift_prep` writes `MM_shift`/`t_shift` only in private copies. Original
@@ -219,7 +220,7 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 NEXT — preserve the scientific target: fresh same-cohort Center/Left lowe
 A/B and signed-event packets for canonical t1/t2/t3, then the existing fresh
 seven-strength C fitting/replay and six-parent Lambda-window MM/variance
-JSON/PDF comparison. First independently review the complete fast-fail diff and
+JSON/PDF comparison. First independently review the complete OUTPATH-fix diff and
 CLI execution/preservation path, then user publication and pushed-state
 synchronization before acquisition-readiness review. No farm command or new
 mandatory smoke cycle follows from local tests. Hard-stop at the first failed invariant;

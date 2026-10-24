@@ -47,6 +47,9 @@ class ResolverImports(unittest.TestCase):
             fields = {k: str(root / 'external' / k) for k in owner.resolver.FIELDS}
             fields.update(USER='fixture', HOST='fixture', ANATYPE='Kaon', LTANAPATH=str(repo),
                           OUTPATH=str(repo / 'OUTPUT/Analysis/KaonLT'))
+            # Replay the supplied farm geometry under a temporary root. No-mode
+            # follows stable hallc_replay_lt/UTIL_KAONLT, Plot follows LTANAPATH.
+            fields['UTILPATH'] = str(root / 'hallc_replay_lt/UTIL_KAONLT')
             reached = owner.reached_resolver_callers(ROOT) if smoke_cleanup or reached_callers else []
             for tree in (repo, worktree):
                 for name in {s for _, _, _, _, s in owner.resolver.CALLERS} | {
@@ -54,10 +57,22 @@ class ResolverImports(unittest.TestCase):
                     p = tree / name
                     p.parent.mkdir(parents=True, exist_ok=True)
                     p.write_text('# caller must never execute\nraise RuntimeError("caller_executed")\n')
+                for name in ('findEffectiveCharge.py', 'getEfficiencyValue.py', 'getDataTable.py',
+                             'calcTotalEffectiveCharge.py'):
+                    shutil.copyfile(ROOT / 'src/setup' / name, tree / 'src/setup' / name)
                 (tree / 'farm_env').mkdir()
                 for name in ('ltsep_paths.py',):
                     shutil.copyfile(ROOT / 'farm_env' / name, tree / 'farm_env' / name)
-                (tree / 'OUTPUT/Analysis/KaonLT').mkdir(parents=True)
+                if tree == repo:
+                    (tree / 'OUTPUT/Analysis/KaonLT').mkdir(parents=True)
+            worktree.parent.chmod(0o700)
+            private = worktree.parent / 'matched-output/Analysis/KaonLT'
+            if not smoke_cleanup:
+                private = owner.prepare_private_output(worktree, dict(fields, LTANAPATH=str(worktree),
+                    OUTPATH=str(worktree / 'OUTPUT/Analysis/KaonLT')))
+            util_output = Path(fields['UTILPATH']) / 'OUTPUT'
+            util_output.parent.mkdir(parents=True)
+            util_output.symlink_to(repo / 'OUTPUT', target_is_directory=True)
             for package, tree in ((installed, repo), (copied, worktree)):
                 (package / 'PATH_TO_DIR').mkdir(parents=True)
                 (package / '__init__.py').write_text('from .ltsep import Root\n')
@@ -68,7 +83,7 @@ class ResolverImports(unittest.TestCase):
                     '  p=SetPath(caller)\n'
                     '  for k in p.values: setattr(self,k,p.getPath(k))\n'
                     '  if modes not in ((), ("Plot_LTSep",)): raise ValueError("wrong mode")\n'
-                    '  self.OUTPATH=str(Path(self.LTANAPATH)/"OUTPUT/Analysis"/("KaonLT" if modes else "None"))\n'
+                    '  self.OUTPATH=str(Path(self.LTANAPATH if modes else self.UTILPATH)/"OUTPUT/Analysis"/("KaonLT" if modes else "None"))\n'
                     + behavior)
                 (package / 'pathing.py').write_text(
                     'from pathlib import Path\nclass SetPath:\n'
@@ -92,7 +107,7 @@ class ResolverImports(unittest.TestCase):
                 with patch.object(owner.sys, 'executable', sys.executable if real_dependencies else str(self.python)), patch.dict(os.environ, baseline_env, clear=True):
                     yield SimpleNamespace(root=root, repo=repo, tree=worktree, package=installed,
                         copied=copied, baseline=fields, env=private_env,
-                        outdir=worktree / 'OUTPUT/Analysis/KaonLT')
+                        outdir=private)
             finally:
                 for name, raw in before.items():
                     if smoke_cleanup and Path(name).is_relative_to(worktree.parent):
@@ -120,7 +135,6 @@ class ResolverImports(unittest.TestCase):
                     behavior='' if behavior.startswith('mutate_') or behavior == 'collision' else behavior,
                     smoke_cleanup=True) as f:
                 f.tree.parent.chmod(0o700)
-                shutil.rmtree(f.tree / 'OUTPUT')
                 shared = Path(f.baseline['VOLATILEPATH']) / 'OUTPUT/Analysis/KaonLT'
                 (shared / 'background_samples').mkdir(parents=True)
                 f.baseline['OUTPATH'] = str(shared)
@@ -323,7 +337,10 @@ class ResolverImports(unittest.TestCase):
     def test_real_import_closure_and_all_caller_modes(self):
         with self.fixture() as f:
             result = self.run_private(f)
-            self.assertEqual(len(result['all_callers']), len(owner.resolver.CALLERS))
+            known = {(caller, tuple(modes)) for _, caller, modes, _, _ in owner.resolver.CALLERS}
+            expected = len(owner.resolver.CALLERS) + sum(
+                (caller, tuple(modes)) not in known for caller, modes, _ in owner.reached_resolver_callers(f.repo))
+            self.assertEqual(len(result['all_callers']), expected)
             self.assertTrue(result['plot'])
             for record in result['all_callers']:
                 self.assertEqual(record['cwd'], str(f.tree / ('src/setup' if not record['mode'] else
@@ -426,12 +443,79 @@ class ResolverImports(unittest.TestCase):
             with self.subTest(failure=failure), self.fixture(behavior=
                     '  raise RuntimeError("resolver_fixture_failure")\n' if failure else '') as f:
                 external = Path(f.baseline['UTILPATH'])
-                external.mkdir(parents=True)
+                external.mkdir(parents=True, exist_ok=True)
                 (external / 'physics.root').write_bytes(b'never read')
                 test = PrivateBoundary(methodName='runTest')
                 test.exercise_exact_preflight_sigma0('absent',
                     probe_check=lambda *args: real_probe(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package),
                     resolver_failure=failure)
+
+    def test_farm_no_mode_alias_and_actual_csv_sink(self):
+        import csv
+        with self.fixture() as f:
+            result = self.run_private(f)
+            base = next(r for r in result['baseline_callers'] if r['caller'].endswith('findEffectiveCharge.py'))
+            private = next(r for r in result['all_callers'] if r['caller'].endswith('findEffectiveCharge.py'))
+            normalized = Path(base['paths']['OUTPATH'].replace('None', 'KaonLT'))
+            self.assertIn('hallc_replay_lt/UTIL_KAONLT/OUTPUT/Analysis/None', base['paths']['OUTPATH'])
+            self.assertNotEqual(normalized, Path(f.baseline['OUTPATH']))
+            self.assertEqual(normalized.resolve(), Path(f.baseline['OUTPATH']).resolve())
+            self.assertEqual(Path(private['paths']['OUTPATH']).parent, normalized.parent)
+            sink = owner.effective_charge_outpath(f.tree, private['paths']) / 'table_kaon_Q4p4W2p74.csv'
+            self.assertEqual(sink.parent.resolve(), f.outdir)
+            # Execute the existing standard-library CSV sink, without importing
+            # utility.py's analysis dependencies or calculating any physics.
+            tree = ast.parse((ROOT / 'src/utility/utility.py').read_text())
+            function = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'data_to_csv')
+            namespace = {'os': os, 'csv': csv}
+            exec(compile(ast.Module(body=[function], type_ignores=[]), '<csv-sink>', 'exec'), namespace)
+            namespace['data_to_csv'](str(sink), 'Total Efficiency', 0.75, '1234')
+            self.assertTrue(sink.is_file())
+            self.assertFalse((Path(f.baseline['OUTPATH']) / sink.name).exists())
+            sink.unlink()
+
+    def test_farm_wrong_baseline_and_shared_private_writer_fail(self):
+        real_probe = owner.probe_private_callers
+        for failure in ('baseline', 'private'):
+            with self.subTest(failure=failure), self.fixture() as f:
+                link = (Path(f.baseline['UTILPATH']) / 'OUTPUT' if failure == 'baseline' else f.tree / 'OUTPUT')
+                target = os.readlink(link)
+                wrong = f.root / 'wrong-output'
+                (wrong / 'Analysis/KaonLT').mkdir(parents=True)
+                link.unlink()
+                link.symlink_to(wrong if failure == 'baseline' else f.repo / 'OUTPUT', target_is_directory=True)
+                try:
+                    reason = 'baseline_root_outpath_mismatch' if failure == 'baseline' else 'default_root_private_outpath_mismatch'
+                    with self.assertRaisesRegex(ValueError, reason):
+                        self.run_private(f)
+                    if failure == 'private':
+                        def probe(*args):
+                            try:
+                                return real_probe(f.repo, f.tree, f.env, f.baseline, f.outdir, f.package)
+                            except ValueError as error:
+                                raise ValueError('resolver_fixture_failure:' + str(error)) from error
+                        PrivateBoundary(methodName='runTest').exercise_exact_preflight_sigma0(
+                            'absent', probe_check=probe, resolver_failure=True, via_cli=True)
+                finally:
+                    link.unlink()
+                    link.symlink_to(target, target_is_directory=True)
+
+    def test_private_no_mode_can_already_point_private(self):
+        with self.fixture(behavior='  if not modes and "runtime-python" in __file__: self.OUTPATH=str(Path(self.LTANAPATH)/"OUTPUT/Analysis/None")\n') as f:
+            self.run_private(f)
+
+    def test_private_backing_tree_alias_escape_fails(self):
+        with self.fixture() as f:
+            output = f.tree.parent / 'matched-output'
+            saved = output.with_name('saved-output')
+            output.rename(saved)
+            output.symlink_to(f.repo / 'OUTPUT', target_is_directory=True)
+            try:
+                with self.assertRaisesRegex(ValueError, 'default_root_private_outpath_mismatch'):
+                    self.run_private(f)
+            finally:
+                output.unlink()
+                saved.rename(output)
 
 
 def external_fixture(worktree, private, volatile):
@@ -772,7 +856,7 @@ class PrivateBoundary(unittest.TestCase):
                                        artifact_failure=False, completed_child=False,
                                        probe_check=None, resolver_failure=False,
                                        cheap_bulk_failure=False, complete_owner=False, cleanup_mutation=False,
-                                       final_status_failure=False, root_alias=False):
+                                       final_status_failure=False, root_alias=False, via_cli=False):
         completed_child = completed_child or complete_owner
         with tempfile.TemporaryDirectory() as d:
             parent = Path(d).resolve()
@@ -1014,6 +1098,16 @@ class PrivateBoundary(unittest.TestCase):
                     reason = 'preservation_failed'
                 if complete_owner and not cleanup_mutation and not final_status_failure:
                     owner.execute_gate(entry_repo, entry_shared, entry_output, head)
+                elif via_cli:
+                    import io
+                    from contextlib import redirect_stderr
+                    errors = io.StringIO()
+                    with redirect_stderr(errors):
+                        result = owner.main(['--repo', str(entry_repo), '--outdir', str(entry_shared),
+                                             '--output', str(entry_output), '--source-commit', head])
+                    self.assertEqual(result, 1)
+                    self.assertIn('resolver_fixture_failure:default_root_private_outpath_mismatch', errors.getvalue())
+                    self.assertIn('Owner gate status:', errors.getvalue())
                 else:
                     with self.assertRaisesRegex(expected, reason):
                         owner.execute_gate(entry_repo, entry_shared, entry_output, head)
@@ -1075,7 +1169,7 @@ class PrivateBoundary(unittest.TestCase):
                 if resolver_failure:
                     self.assertEqual(status['failed_stage'], 'overlay_path_validation')
                     self.assertFalse(status['analysis_started'])
-                    self.assertIn('probe_resolver', status['failure_traceback'])
+                    self.assertIn('probe_private_callers', status['failure_traceback'])
                 if preflight_failure:
                     self.assertEqual(status['failed_stage'], 'overlay_path_validation')
                     self.assertFalse(status['analysis_started'])
@@ -1181,6 +1275,25 @@ class PrivateBoundary(unittest.TestCase):
         report = owner.audit_default_output_writer(ROOT)
         self.assertEqual(report['mode'], [])
         self.assertIn('table_kaon_', report['destination'])
+
+    def test_effective_charge_change_is_path_only_and_old_sink_is_rejected(self):
+        relative = 'src/setup/findEffectiveCharge.py'
+        old = subprocess.check_output(['git', 'show', owner.BASE + ':' + relative], cwd=ROOT, text=True)
+        new = (ROOT / relative).read_text()
+        before, after = ast.parse(old), ast.parse(new)
+        original_path = next(n for n in before.body if isinstance(n, ast.If) and
+                             ast.unparse(n.test) == "'None' in OUTPATH")
+        before.body.remove(original_path)
+        new_path = [n for n in after.body if isinstance(n, ast.Assign) and
+                    any(isinstance(t, ast.Name) and t.id == 'OUTPATH' for t in n.targets)][-1]
+        after.body.remove(new_path)
+        self.assertEqual(ast.dump(before), ast.dump(after))
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / relative
+            target.parent.mkdir(parents=True)
+            target.write_text(old)
+            with self.assertRaisesRegex(ValueError, 'effective_charge_writer_path_changed'):
+                owner.effective_charge_outpath(directory, {'LTANAPATH': directory, 'ANATYPE': 'Kaon'})
 
     def test_no_child_before_path_gates_and_no_retry(self):
         import inspect

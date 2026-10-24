@@ -49,8 +49,9 @@ from utility import check_runs_in_effcharge
 
 ##################################################################################################################################################
 
-if "None" in OUTPATH:
-    OUTPATH = OUTPATH.replace("None", f"{ANATYPE}LT")
+# The table belongs to this analysis, as do its downstream Plot-mode readers.
+# No-mode ltsep OUTPATH can instead remain anchored in the replay UTILPATH.
+OUTPATH = str(Path(LTANAPATH) / "OUTPUT" / "Analysis" / f"{ANATYPE}LT")
 def resolve_skim_outpath(raw_skimpath, anatype):
     skim_text = str(raw_skimpath)
     leaf = f"{anatype}LT"

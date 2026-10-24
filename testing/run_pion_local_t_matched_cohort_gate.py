@@ -306,14 +306,48 @@ def probe_private_callers(repo, worktree, env, baseline, outdir, installed_packa
                 if key in baseline:
                     require(base['paths'].get(key) == baseline[key], 'baseline_input_role_changed:' + role + ':' + key)
         base_raw = str(base['paths']['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else base['paths']['OUTPATH']
-        require(Path(base_raw).is_absolute() and
-                Path(base_raw) == Path(base['paths']['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
+        require(Path(base_raw).is_absolute() and Path(base_raw).is_dir() and
+                (not modes or Path(base_raw) == Path(base['paths']['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT') and
                 Path(base_raw).resolve() == Path(baseline['OUTPATH']).resolve(),
                 'baseline_root_outpath_mismatch:' + role)
         raw = str(fields['OUTPATH']).replace('None', fields['ANATYPE'] + 'LT') if not modes else fields['OUTPATH']
-        require(Path(raw) == Path(fields['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
-                Path(raw).resolve() == Path(outdir).resolve() and Path(raw).is_absolute(),
+        require(Path(raw).is_absolute() and Path(raw).is_dir() and
+                Path(raw).resolve() in {Path(base_raw).resolve(), Path(outdir).resolve()},
                 'default_root_private_outpath_mismatch:' + role)
+        if caller == 'src/setup/findEffectiveCharge.py':
+            # Evaluate the actual, narrowly audited writer expression, not the
+            # no-mode Root field (which can still name the shared UTILPATH).
+            base_sink = effective_charge_outpath(repo, base['paths'])
+            require(base_sink.is_absolute() and base_sink.is_dir() and
+                    base_sink.resolve() == Path(base_raw).resolve(),
+                    'baseline_effective_charge_writer_mismatch')
+            sink = effective_charge_outpath(worktree, fields)
+            owned = resolver.real(Path(worktree)).parent / 'matched-output'
+            require(Path(outdir).resolve() == owned / 'Analysis/KaonLT' and
+                    all(p.is_dir() and not p.is_symlink() for p in
+                        (owned, owned / 'Analysis', owned / 'Analysis/KaonLT')),
+                    'default_root_private_outpath_mismatch:' + role)
+            require(sink.is_absolute() and sink.is_dir() and
+                    sink == Path(fields['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
+                    sink.resolve() == Path(outdir).resolve() and
+                    sink.resolve() != Path(baseline['OUTPATH']).resolve(),
+                    'default_root_private_outpath_mismatch:' + role)
+            record['writer_outpath'] = str(sink)
+            record['writer_outpath_realpath'] = str(sink.resolve())
+            base['writer_outpath'] = str(base_sink)
+        elif not modes:
+            # Table helpers consume caller-supplied foutcsv; the total-charge
+            # helper prints scalars. None consumes Root.OUTPATH.
+            require(caller in {'src/setup/getEfficiencyValue.py', 'src/setup/getDataTable.py',
+                               'src/setup/calcTotalEffectiveCharge.py'},
+                    'unapproved_no_mode_reader:' + caller)
+            reader = ast.parse((Path(worktree) / caller).read_text(encoding='utf-8'))
+            require(not any(isinstance(n, ast.Attribute) and n.attr == 'OUTPATH'
+                            for n in ast.walk(reader)), 'no_mode_reader_uses_outpath:' + role)
+        else:
+            require(Path(raw) == Path(fields['LTANAPATH']) / 'OUTPUT/Analysis/KaonLT' and
+                    Path(raw).resolve() == Path(outdir).resolve() and Path(raw).is_absolute(),
+                    'default_root_private_outpath_mismatch:' + role)
         require(package_identity(record, worktree.parent / 'runtime-python/ltsep') ==
                 resolver.real(worktree.parent / 'runtime-python/ltsep'),
                 'copied_ltsep_import_mismatch:' + role)
@@ -753,7 +787,8 @@ def published_source(repo, source_commit):
                'testing/pion_local_t_event_validation_capture.py', 'testing/test_pion_local_t_event_validation.py',
                'testing/pion_local_t_transfer_variance_comparison.py', 'testing/pion_local_t_event_validation_replay.py',
                'testing/test_pion_local_t_transfer_variance_comparison.py', 'testing/test_pion_local_t_matched_cohort_science.py',
-               'src/binning/calculate_yield.py', 'src/cuts/rand_sub.py'}
+               'src/binning/calculate_yield.py', 'src/cuts/rand_sub.py',
+               'src/setup/findEffectiveCharge.py'}
     require(all(p in allowed or p.startswith('docs/memory/') for p in
                 ab.git(repo, 'diff', '--name-only', BASE, source_commit).splitlines()), 'unexpected_committed_source')
     for line in before['porcelain'].splitlines():
@@ -1297,6 +1332,7 @@ def audit_default_output_writer(repo):
             "effective_charge_launcher_call_missing")
     require('foutcsv = OUTPATH + "/" + OutFilename + ".csv"' in text,
             "effective_charge_output_expression_changed")
+    effective_charge_outpath(repo, {'LTANAPATH': str(repo), 'ANATYPE': 'Kaon'})
     helper = (repo / "src/setup/getDataTable.py").read_text(encoding="utf-8")
     require('data_to_csv(foutcsv, "Total Efficiency", tot_efficiency, runNum)' in helper,
             "effective_charge_csv_writer_changed")
@@ -1304,11 +1340,26 @@ def audit_default_output_writer(repo):
     require('def data_to_csv(' in utility, "effective_charge_csv_sink_missing")
     return {"caller": caller.relative_to(repo).as_posix(), "mode": [],
             "writer": "src/setup/getDataTable.py -> src/utility/utility.py::data_to_csv",
-            "destination": "OUTPATH/table_kaon_<KIN>.csv",
+            "destination": "LTANAPATH/OUTPUT/Analysis/<ANATYPE>LT/table_kaon_<KIN>.csv",
+            "writer_source": capture.file_identity(caller),
             "required_invariant": "effective_charge_default_root_private_outpath_verified",
             "private_input_writer": "src/cuts/shift_prep.py::_apply_shift_branches -> src/setup/shift_MM.py::add_derived_branches_to_file",
             "private_input_scope": "MM_shift and t_shift in private prompt trees; original ROOT container identities remain distinct",
             "root_semantics": "source reviewed only; real ROOT clone/update behavior requires the user farm gate"}
+
+
+def effective_charge_outpath(repo, fields):
+    """Evaluate only the approved path expression from the real CSV producer."""
+    tree = ast.parse((Path(repo) / 'src/setup/findEffectiveCharge.py').read_text(encoding='utf-8'))
+    assignments = [n for n in ast.walk(tree) if isinstance(n, ast.Assign) and
+                   any(isinstance(t, ast.Name) and t.id == 'OUTPATH' for t in n.targets)]
+    expected = ast.parse('OUTPATH = str(Path(LTANAPATH) / "OUTPUT" / "Analysis" / f"{ANATYPE}LT")').body[0]
+    require(len(assignments) == 2 and ast.dump(assignments[-1]) == ast.dump(expected),
+            'effective_charge_writer_path_changed')
+    expression = ast.Expression(body=assignments[-1].value)
+    return Path(eval(compile(expression, '<effective-charge-path>', 'eval'),
+                     {'__builtins__': {}, 'str': str, 'Path': Path},
+                     {'LTANAPATH': fields['LTANAPATH'], 'ANATYPE': fields['ANATYPE']}))
 
 
 if __name__ == '__main__':

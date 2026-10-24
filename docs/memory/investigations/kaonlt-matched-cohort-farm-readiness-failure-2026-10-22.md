@@ -434,3 +434,82 @@ NEXT remains CURRENT's independent complete-diff/CLI-path review, then user
 publication and pushed-state synchronization before acquisition-readiness review.
 No commit, push, farm execution, ROOT/full-main.py validation, fresh matched
 science, Lambda yield claim, strength selection or production promotion occurred.
+
+## Eighth failure and effective-charge path-only correction — October 24
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; independent actual-diff review
+is pending. Starting branch/HEAD/local origin/test: `test`,
+`92af408d0431d2955fc6e8544edebad3b45df5dc`. Full-access Git inspection found
+clean tracked/index state and only the supplied new correction contract.
+Sandbox-denied reads initially produced false dirty-path reports; those were
+resolved by authorized full-access inspection, without repository mutation.
+
+RUNTIME VERIFIED as supplied in the
+[contract](../phases/kaonlt-matched-cohort-effective-charge-outpath-fix-2026-10-24-task-contract.md):
+the eighth attempt failed `baseline_root_outpath_mismatch:effective_charge` in
+`overlay_path_validation`, before snapshot, staging, child or collection.
+`analysis_started=false`, `evidence_admissible=false`; shared preservation was
+NOT VERIFIED. The installed Python 3.9 probe showed ordinary no-mode output
+anchored in replay UTILPATH, ending `OUTPUT/Analysis/None`. Its exact existing
+`None` substitution resolves to ordinary Plot output, despite lexical inequality.
+Reported stage timings were approximately 20.89/3.11/13.39/0.48 seconds for
+source/package/overlay/final preservation. This is failure diagnosis, not science
+or acceptance; no raw farm artifact was independently opened here.
+
+SOURCE VERIFIED: the owner-only copied-config correction changes LTANAPATH,
+while UTILPATH and other input roles must remain stable. A no-mode output derived
+solely from stable UTILPATH therefore cannot become private through that overlay.
+Redirecting UTILPATH, replacing shared links or patching copied package code
+would violate the task. The contract's conditional producer correction is used:
+`findEffectiveCharge.py` retains its real no-mode Root, efficiency inputs, skim
+path, computations, CSV filename/rows and stdout, but derives the table output
+from LTANAPATH's analysis output role. The supplied ordinary canonical equivalence
+supports this path-only change. The owner checks that equivalence again for each
+acquisition before allowing the child; an unexpected ordinary configuration fails.
+
+The three consolidated checks cover:
+
+1. **Pathing and imports:** ordinary no-mode requires an absolute existing output
+   canonically equal to the authorized ordinary Plot destination; only Plot keeps
+   lexical LTANAPATH equality. Receipts retain raw no-mode fields and separately
+   record the producer's lexical/canonical writer destination. The owner evaluates
+   only the exact audited producer path AST. Its private destination must equal
+   the owner-created matched-output tree, with real backing directories and no
+   alias escape or ordinary-output equality. getEfficiencyValue/getDataTable use
+   the caller's foutcsv; calcTotalEffectiveCharge prints scalars. Their no-mode
+   Root.OUTPATH fields are not write authorities; current ASTs must not consume
+   that attribute. Unknown no-mode consumers fail closed. Caller/cwd, root aliases,
+   wrapper/interpreter/package identity, unique config and stable inputs remain.
+2. **Code infrastructure and preservation:** the matched owner adds only the
+   specific producer to its permitted committed successors. The historical frozen
+   resolver/source check is unchanged; this correction does not make its separate
+   historical attestation accept modified production source. The current owner's
+   collector checks the exact requested commit, while its writer-audit status
+   records the producer identity. The source AST is identical to the frozen
+   predecessor after removing the old/new output-path statement. Scientific source,
+   all physics, package/config/link preservation, private inputs, full shared byte
+   comparisons, observer checks, collector and offline science remain unchanged.
+3. **Existing status/log debugging:** acquisition still performs the resolver
+   gate in overlay_path_validation before shared snapshots, scientific input I/O
+   or the sole child. Tests enter execute_gate with actual imported resolver probes
+   and mock child, proving a shared writer failure leaves analysis unstarted,
+   evidence inadmissible, no shared snapshot/collection/delivery and final
+   preservation attempted. Existing timing, bounded traceback, final status-I/O
+   failure and post-cleanup preservation tests remain. No new logging framework.
+
+Execution path: CLI -> published-source/caller/writer/collector preflight ->
+installed package snapshot -> copied LTANAPATH-only overlay -> authorized ordinary
+output -> owner-created private OUTPUT link -> baseline/private no-mode and Plot
+imports -> source-derived effective-charge CSV sink -> input staging -> unchanged
+debug child -> getEfficiencyValue/getDataTable -> utility.data_to_csv -> joint
+artifact checks -> original/shared/package/link preservation -> collector/ZIP ->
+cleanup/final preservation -> delivery. Failed gates stop before downstream work.
+
+The task contract's appended local receipt records exact tests and memory health.
+Local representative path shapes and a fixture CSV write prove deterministic
+source/isolation behavior only. Installed JLab ltsep/dependency closure, actual
+Python 3.9 execution, current farm filesystem, physical ROOT writes, real child,
+full runtime preservation and fresh science remain NOT VERIFIED. October 20 and
+all closed scientific scopes are preserved; no ninth acquisition is authorized.
+NEXT is the complete actual-diff review, then user publication/pushed-state review
+before the substantive acquisition-readiness decision retained by CURRENT.
