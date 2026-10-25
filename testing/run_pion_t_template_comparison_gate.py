@@ -7,6 +7,7 @@ readiness review. This module imports operational helpers only, never physics.
 from __future__ import annotations
 
 import argparse
+import ast
 from collections import Counter
 from contextlib import redirect_stdout
 from copy import deepcopy
@@ -17,6 +18,8 @@ import math
 import os
 from pathlib import Path
 import re
+import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -31,6 +34,7 @@ except ImportError:
 isolation = debug.isolation
 collector, require, sha256, git = debug.collector, debug.require, debug.sha256, debug.git
 BASE_HEAD = "554ad84630ad77920ce17954d99f73df8ed2e6ac"
+REVIEWED_HEAD = "1144fe56b68b0980f7f7ce59887987b10e0f3d9a"
 PROFILE = "testing/pion_t_template_comparison_gate_profile.json"
 PROFILE_ID = "pion_t_template_comparison_center_left_lowe/v1"
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
@@ -49,8 +53,9 @@ ARTIFACTS = {"global": [
      "kind": "json" if extension == "json" else "file", "required": True}
     for setting in ("Center", "Left") for extension in ("json", "pdf")], "settings": []}
 BOUNDARIES = {"diagnostic_only": True, "scientifically_accepted": False,
-    "production_applied": False, "ordinary_production_outputs_may_be_written": True,
-    "whole_output_root_immutable": False, "pdf_legibility_verified": False,
+    "production_applied": False, "ordinary_production_outputs_may_be_written": False,
+    "whole_output_root_immutable": False, "private_scientific_outputs": True,
+    "pdf_legibility_verified": False,
     "method_a_detached": True, "method_b_numerically_excluded": True}
 
 
@@ -83,7 +88,7 @@ def resolved_profile(repo, source_commit):
     expected = {"schema_version": "pion_hgcer_validation_bundle_profile/v4",
         "validation_profile": PROFILE_ID, "collection_mode": "generic_artifacts",
         "settings": SETTINGS, "artifacts": ARTIFACTS,
-        "source_identity": {"required_analysis_commit": BASE_HEAD, "allowed_committed_files": [],
+        "source_identity": {"required_analysis_commit": REVIEWED_HEAD, "allowed_committed_files": [],
                             "allowed_non_analysis_path_prefixes": ["docs/memory/"]}}
     require(profile == expected, "profile_contract_mismatch")
     profile = deepcopy(profile)
@@ -103,13 +108,15 @@ def preflight(repo, source_commit):
     require(before["origin_test"] == source_commit, "source_not_observed_pushed")
     require(source_commit != BASE_HEAD, "owner_source_not_committed")
     git(repo, "merge-base", "--is-ancestor", BASE_HEAD, source_commit)
+    git(repo, "merge-base", "--is-ancestor", BASE_HEAD, REVIEWED_HEAD)
+    git(repo, "merge-base", "--is-ancestor", REVIEWED_HEAD, source_commit)
     for line in before["porcelain"].splitlines():
         path = line[3:]
         require(path in isolation.FARM_OUTPUTS or path.startswith("OUTPUT/") or
                 (line[:2] == "??" and re.fullmatch(r"kaonlt_review(?:\([^/]+\))?\.diff", path)),
                 "dirty_gate_source:" + line)
     # This successor may add only the three owned files and repository memory.
-    changed = git(repo, "diff", "--name-only", BASE_HEAD, source_commit).splitlines()
+    changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
     allowed = {PROFILE, "testing/run_pion_t_template_comparison_gate.py",
                "testing/test_run_pion_t_template_comparison_gate.py"}
     require(all(p in allowed or p.startswith("docs/memory/") for p in changed),
@@ -321,6 +328,305 @@ def destinations(outdir, output):
             "delivered_receipt": output.with_name(output.stem + "-gate-status.json")}
 
 
+def file_identity(path):
+    path = Path(path)
+    info = path.stat()
+    require(path.is_file(), "input_not_regular:" + str(path))
+    return {"sha256": sha256(path), "bytes": info.st_size,
+            "device": info.st_dev, "inode": info.st_ino, "mtime_ns": info.st_mtime_ns,
+            "resolved": str(path.resolve()), "link": os.readlink(path) if path.is_symlink() else None}
+
+
+def accepted_identities(outdir):
+    records = {}
+    for name in sorted(names()):
+        p = Path(outdir) / name
+        if not os.path.lexists(p):
+            records[name] = None
+            continue
+        link = os.readlink(p) if p.is_symlink() else None
+        require(p.is_file(), "accepted_artifact_not_regular_or_dangling:" + name)
+        records[name] = {"identity": file_identity(p), "link": link, "resolved": str(p.resolve())}
+    return records
+
+
+def verify_accepted(outdir, before):
+    require(accepted_identities(outdir) == before, "accepted_artifact_changed")
+    return {"passed": True, "artifacts": before}
+
+
+def private_output(worktree, paths, shared):
+    """Exclusive owner-local topology; the frozen shared-link helper is unused."""
+    worktree, shared = Path(worktree), Path(shared).resolve()
+    external_output = (Path(paths["VOLATILEPATH"]) / "OUTPUT").resolve()
+    require(shared == (external_output / "Analysis/KaonLT").resolve(), "private_shared_authority")
+    parent = worktree.parent
+    private, link = parent / "ab-output", worktree / "OUTPUT"
+    require(worktree.is_absolute() and worktree.resolve() == worktree and worktree.name == "analysis"
+            and not worktree.is_symlink() and worktree.is_dir(), "private_worktree_invalid")
+    require(parent.resolve() == parent and parent.stat().st_uid == os.geteuid()
+            and stat.S_IMODE(parent.stat().st_mode) & 0o077 == 0, "private_parent_permissions")
+    require(paths["ANATYPE"] == "Kaon" and Path(paths["LTANAPATH"]) == worktree
+            and Path(paths["OUTPATH"]) == link / "Analysis/KaonLT", "private_path_authority")
+    require(all(not private.is_relative_to(p) and not p.is_relative_to(private)
+                for p in (external_output, shared)), "private_shared_overlap")
+    require(not os.path.lexists(private) and not os.path.lexists(link), "private_output_collision")
+    private.mkdir(mode=0o700)
+    target = private / "Analysis/KaonLT"
+    target.mkdir(parents=True, mode=0o700)
+    link.symlink_to(private, target_is_directory=True)
+    require(os.readlink(link) == str(private) and link.resolve() == private
+            and Path(paths["OUTPATH"]).resolve() == target, "private_link_identity")
+    return target
+
+
+def verify_private(worktree, output):
+    private = worktree.parent / "ab-output"
+    link = worktree / "OUTPUT"
+    require(link.is_symlink() and os.readlink(link) == str(private) and link.resolve() == private,
+            "private_link_changed")
+    require(output == private / "Analysis/KaonLT" and all(p.is_dir() and not p.is_symlink()
+            for p in (private, private / "Analysis", output)), "private_output_path_changed")
+    return {"passed": True}
+
+
+def skim_directories(repo, paths):
+    """Only the existing pure normalizers; no ROOT or setup-module imports."""
+    tree = ast.parse((Path(repo) / "src/setup/findEffectiveCharge.py").read_text())
+    nodes = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "resolve_skim_outpath"]
+    require(len(nodes) == 1, "skim_normalizer_changed")
+    ns = {"os": os}
+    exec(compile(ast.Module(body=nodes, type_ignores=[]), "<skim-normalizer>", "exec"), ns)
+    effective = ns["resolve_skim_outpath"](paths["SKIMPATH"], paths["ANATYPE"])
+    text = (Path(repo) / "run_Prod_Analysis.sh").read_text()
+    require(text.count("normalize_ltsep_dir() {") == 1, "launcher_skim_normalizer_changed")
+    body = "normalize_ltsep_dir() {" + text.split("normalize_ltsep_dir() {", 1)[1].split("\n}", 1)[0] + "\n}\n"
+    result = subprocess.run(["bash", "-c", body + '\nANATYPE="$1"\nnormalize_ltsep_dir "$2"',
+                             "ab-skim-path", paths["ANATYPE"], paths["SKIMPATH"]], capture_output=True, text=True)
+    require(result.returncode == 0 and result.stdout.strip() and not result.stderr, "launcher_skim_path_failed")
+    return result.stdout.strip(), effective
+
+
+def external_setup(worktree, paths, shared):
+    external = isolation.external_symlink_preflight(worktree, paths)
+    if external["background_simc_path"]:
+        require(Path(external["background_simc_path"]).is_dir(), "background_simc_directory_missing")
+    require((Path(shared) / "background_samples").is_dir(), "external_background_mkdir_required")
+    skim, effective = skim_directories(worktree, paths)
+    require(Path(skim).is_dir() and Path(effective).is_dir(), "external_skim_directory_missing")
+    external["skim_directories"] = [skim, effective]
+    external["directories"] = [{"path": str(p), "resolved": str(p.resolve()),
+                                "inode": p.stat().st_ino, "device": p.stat().st_dev}
+                               for p in (Path(shared) / "background_samples", Path(skim), Path(effective))]
+    return external
+
+
+def verify_external(record):
+    for item in record["links"]:
+        p = Path(item["path"])
+        require(p.is_symlink() and p.exists() and os.readlink(p) == item["literal_target"]
+                and str(p.resolve()) == item["resolved_target"], "external_link_changed:" + str(p))
+    for item in record.get("directories", []):
+        p = Path(item["path"])
+        require(p.is_dir() and str(p.resolve()) == item["resolved"] and
+                p.stat().st_ino == item["inode"] and p.stat().st_dev == item["device"], "external_directory_changed")
+    return {"passed": True}
+
+
+def reached_callers(repo):
+    """Bounded source-only import walk for this unchanged debug entry chain."""
+    repo = Path(repo)
+    modules = {}
+    for p in (repo / "src").rglob("*.py"):
+        modules.setdefault(p.stem, []).append(p)
+    pending = [(repo / p, cwd) for p, cwd in (("src/main.py", "src"),
+        ("src/setup/findEffectiveCharge.py", "src/setup"), ("src/setup/calcTotalEffectiveCharge.py", "src/setup"),
+        ("src/setup/set_sig_fortran.py", "src/setup"))]
+    seen, callers = set(), set()
+    while pending:
+        p, cwd = pending.pop()
+        if (p, cwd) in seen:
+            continue
+        seen.add((p, cwd))
+        for n in ast.walk(ast.parse(p.read_text())):
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in {"Root", "create_ltsep_root"}:
+                require(n.args and not n.keywords and all(isinstance(m, ast.Constant) and isinstance(m.value, str)
+                        for m in n.args[1:]), "resolver_call_changed:" + str(p))
+                modes = tuple(m.value for m in n.args[1:])
+                require(modes in ((), ("Plot_LTSep",)), "resolver_mode_changed:" + str(p))
+                callers.add((p.relative_to(repo).as_posix(), modes, cwd))
+            imports = ([n.module] if isinstance(n, ast.ImportFrom) and n.module else
+                       [a.name for a in n.names] if isinstance(n, ast.Import) else [])
+            for name in imports:
+                candidates = modules.get(name.split(".")[-1], [])
+                require(len(candidates) <= 1, "ambiguous_source_import:" + name)
+                if candidates:
+                    pending.append((candidates[0], cwd))
+    return sorted(callers)
+
+
+def effective_csv_path(tree, fields):
+    source = ast.parse((Path(tree) / "src/setup/findEffectiveCharge.py").read_text())
+    assignments = [n for n in source.body if isinstance(n, ast.Assign) and
+                   any(isinstance(t, ast.Name) and t.id == "OUTPATH" for t in n.targets)]
+    expected = ast.parse('OUTPATH = str(Path(LTANAPATH) / "OUTPUT" / "Analysis" / f"{ANATYPE}LT")').body[0]
+    require(len(assignments) == 2 and ast.dump(assignments[-1]) == ast.dump(expected), "effective_charge_writer_changed")
+    return Path(eval(compile(ast.Expression(assignments[-1].value), "<actual-csv-path>", "eval"),
+        {"__builtins__": {}, "Path": Path, "str": str}, fields))
+
+
+def private_callers(repo, worktree, env, baseline, output, installed_package):
+    records = []
+    copied = worktree.parent / "runtime-python/ltsep"
+    for caller, modes, cwd in reached_callers(repo):
+        observations = []
+        for tree, environ, package in ((repo, {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, installed_package),
+                                      (worktree, env, copied)):
+            code = ('import json,os,sys,ltsep,ltsep.pathing; from farm_env.ltsep_paths import create_ltsep_root; '
+                    'r=create_ltsep_root(os.path.realpath(sys.argv[1]),*json.loads(sys.argv[2])); '
+                    'print(json.dumps({"paths":{k:str(getattr(r,k,"")) for k in json.loads(sys.argv[3])},'
+                    '"package":ltsep.__file__,"pathing":ltsep.pathing.__file__}))')
+            fields = isolation.python_json(tree / cwd, code,
+                (str(tree / caller), json.dumps(modes), json.dumps(isolation.PATH_FIELDS)),
+                {**environ, "PYTHONPATH": str(tree) + os.pathsep + environ.get("PYTHONPATH", "")})
+            require(Path(fields["package"]).resolve() == package / "__init__.py" and
+                    Path(fields["pathing"]).resolve().is_relative_to(package), "caller_package_identity:" + caller)
+            require(Path(fields["paths"]["LTANAPATH"]).resolve() == tree.resolve(), "caller_ltanapath:" + caller)
+            observations.append(fields["paths"])
+        ordinary, runtime = observations
+        require(all(ordinary[k] == runtime[k] == baseline[k] for k in isolation.PATH_FIELDS
+                    if k not in {"OUTPATH", "LTANAPATH"}), "caller_stable_roles:" + caller)
+        if modes:
+            require(Path(ordinary["OUTPATH"]).resolve() == Path(baseline["OUTPATH"]).resolve() and
+                    Path(runtime["OUTPATH"]) == worktree / "OUTPUT/Analysis/KaonLT" and
+                    Path(runtime["OUTPATH"]).resolve() == output, "caller_private_outpath:" + caller)
+        elif caller == "src/setup/findEffectiveCharge.py":
+            require(effective_csv_path(repo, ordinary).resolve() == Path(baseline["OUTPATH"]).resolve() and
+                    effective_csv_path(worktree, runtime).resolve() == output, "effective_charge_private_outpath")
+        else:
+            require(caller in {"src/setup/getDataTable.py", "src/setup/getEfficiencyValue.py", "src/setup/calcTotalEffectiveCharge.py"}
+                    and not any(isinstance(n, ast.Attribute) and n.attr == "OUTPATH" for n in
+                                ast.walk(ast.parse((worktree / caller).read_text()))), "unapproved_default_writer:" + caller)
+        records.append({"caller": caller, "modes": modes, "cwd": cwd, "ordinary": ordinary, "runtime": runtime})
+    require(records, "caller_inventory_empty")
+    return records
+
+
+def diamond_choices(root):
+    import glob
+    root = Path(root)
+    def choose(tokens, eps, fallback=False, main=False):
+        best = None
+        for token in tokens:
+            for p in glob.glob(str(root / ("*" + token + "*kaon*Q4p4W2p74*.root"))):
+                low = p.lower()
+                if "simc" in low or "shiftprep" in Path(p).name.lower() or eps not in (p if main else low):
+                    continue
+                if fallback and ("left" in low or "right" in low):
+                    continue
+                if best is None or len(p) < len(best):
+                    best = p
+        return None if best is None else Path(best).name
+    return {f"{kind}:{s}:{eps}": choose(tokens, eps, kind == "fallback", kind == "main")
+            for kind, settings in (("main", [(s, [s]) for s in ("Center", "Left", "Right")]),
+                ("overlay", [(s, [s, s.lower()]) for s in ("Center", "Left", "Right")]), ("fallback", [("Center", [""])]))
+            for s, tokens in settings for eps in ("low", "mid", "high")}
+
+
+def copy_plan(shared, output):
+    shared, output = Path(shared), Path(output)
+    needed = set()
+    for eps in ("lowe", "highe"):
+        for s in ("Center", "Left", "Right"):
+            pair = [f"{s}_kaon_Analysed_{r}_Q4p4W2p74_{eps}.root" for r in ("Data", "Dummy")]
+            present = [(shared / n).is_file() for n in pair]
+            if not any(present):
+                require(eps != "lowe" or s not in ("Center", "Left"), "required_lowe_setting_missing:" + s)
+                continue
+            archived = shared / f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}.root"
+            if not archived.exists() and not (eps == "lowe" and s in ("Center", "Left")):
+                # Frozen shift_prep/main skip this optional setting. Its raw
+                # ROOTs still enter the complete Diamond namespace below.
+                continue
+            require(all(present), "incomplete_data_dummy_pair:" + s + ":" + eps)
+            needed.update(pair)
+            # Low epsilon reaches full SIMC preparation; high is raw prepass only.
+            for suffix in ((".root", ".hist") if eps == "lowe" else (".root",)):
+                name = f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}{suffix}"
+                require((shared / name).is_file(), "required_simc_input_missing:" + name)
+                needed.add(name)
+    # Preserve the complete actual Diamond candidate namespace and first-tie order.
+    import glob
+    needed.update(Path(p).name for p in glob.glob(str(shared / "*kaon*Q4p4W2p74*.root"))
+                  if "simc" not in p.lower() and "shiftprep" not in Path(p).name.lower())
+    plan = []
+    for source in shared.iterdir():
+        if source.name not in needed:
+            continue
+        target = output / source.name
+        require(source.is_file() and not os.path.lexists(target), "input_missing_or_collision:" + source.name)
+        require(target.parent == output and target.resolve().is_relative_to(output.resolve()), "copy_path_escape")
+        plan.append({"source": str(source), "target": str(target), "bytes": source.stat().st_size})
+    require({Path(p["source"]).name for p in plan} == needed, "copy_inventory_changed")
+    return plan
+
+
+def stage_copies(shared, output, plan, records):
+    require(plan == copy_plan(shared, output), "copy_plan_changed")
+    for entry in plan:
+        source, target = Path(entry["source"]), Path(entry["target"])
+        before = file_identity(source)
+        records[source.name] = {"source": str(source), "original": before}
+        with source.open("rb") as src, target.open("xb") as dst:
+            shutil.copyfileobj(src, dst, 1024 * 1024)
+        after = file_identity(target)
+        require(file_identity(source) == before and before["bytes"] == entry["bytes"], "original_changed_during_copy")
+        require(all(before[k] == after[k] for k in ("sha256", "bytes")) and
+                (before["device"], before["inode"]) != (after["device"], after["inode"]), "private_copy_identity")
+        records[source.name]["runtime_container_before"] = after
+    require(diamond_choices(shared) == diamond_choices(output), "diamond_selection_changed")
+    return records
+
+
+def verify_originals(records):
+    for item in records.values():
+        require(file_identity(item["source"]) == item["original"], "original_input_changed:" + item["source"])
+    return {"passed": True}
+
+
+def private_environment(env, worktree):
+    result = child_environment(env)
+    for key, leaf in (("TMPDIR", "tmp"), ("XDG_CACHE_HOME", "cache"), ("MPLCONFIGDIR", "mpl"),
+                      ("PYTHONPYCACHEPREFIX", "pycache")):
+        p = worktree.parent / ("ab-" + leaf)
+        require(not os.path.lexists(p), "private_cache_collision:" + key)
+        p.mkdir(mode=0o700)
+        result[key] = str(p)
+    result["PYTHONDONTWRITEBYTECODE"] = "1"
+    return result
+
+
+def skim_inventory(repo, paths):
+    """Use the real existence-only predicate; never hash or open skim ROOTs."""
+    _, skim = skim_directories(repo, paths)
+    result = {}
+    for eps in ("lowe", "highe"):
+        for setting in ("center", "left", "right"):
+            for suffix in ("", "_dummy"):
+                p = Path(paths["UTILPATH"]) / "run_list/KaonLT" / f"Q4p4W2p74{setting}_{eps}{suffix}"
+                if not p.exists():
+                    result[str(p)] = {"kind": "runlist", "exists": False}
+                    continue
+                raw = p.read_bytes()
+                runs = raw.decode().split()
+                require(all(re.fullmatch(r"\d+", run) for run in runs), "run_list_not_integer")
+                result[str(p)] = {"kind": "runlist", "exists": True, "sha256": hashlib.sha256(raw).hexdigest()}
+                for run in runs:
+                    target = Path(skim) / f"kaon_{run}_-1_Raw_Data.root"
+                    result[str(target)] = {"kind": "skim_existence", "exists": target.exists()}
+    return result
+
+
 class GateStatus(isolation.accepted.GateStatus):
     def __init__(self, outdir, output, source_commit):
         super().__init__(outdir, output, source_commit)
@@ -344,16 +650,37 @@ def execute_gate(repo, outdir, output, source_commit):
     for path in paths.values():
         require(not os.path.lexists(path), "output_collision:" + str(path))
     status = GateStatus(outdir, output, source_commit)
-    before = overlay = installed = None
+    before = overlay = installed = external = accepted = skims = None
+    copies = {}
     succeeded = False
+    def preservation():
+        checks = []
+        if before is not None:
+            checks.append(("ordinary_checkout", lambda: isolation.verify_preservation(repo, before)))
+        if installed is not None:
+            checks.append(("installed_ltsep", lambda: isolation.verify_ltsep_preservation(installed)))
+        if accepted is not None:
+            checks.append(("accepted_artifacts", lambda: verify_accepted(outdir, accepted)))
+        if external is not None:
+            checks.append(("external_links", lambda: verify_external(external)))
+        if skims is not None:
+            checks.append(("skim_existence", lambda: require(skim_inventory(repo, baseline) == skims, "skim_existence_changed")))
+        checks.append(("original_inputs", lambda: verify_originals(copies)))
+        results, errors = {}, []
+        for name, check in checks:
+            try:
+                results[name] = check()
+            except Exception as exc:
+                results[name] = {"passed": False, "reason": str(exc)}
+                errors.append(name + ":" + str(exc))
+        status.update(preservation=results, staged_inputs=copies)
+        require(not errors, "preservation_failed:" + ";".join(errors))
     try:
+        accepted = accepted_identities(outdir)
         before = preflight(repo, source_commit)
         profile = resolved_profile(repo, source_commit)
         child_environment(os.environ)  # Reject injected opt-ins before any path work.
-        prior = {name: None if not os.path.lexists(outdir / name) else
-                 {"path": str(outdir / name)} for name in names()}
-        status.update(preexisting_comparison_targets=prior, destinations={k: str(v) for k,v in paths.items()})
-        require(all(value is None for value in prior.values()), "comparison_artifact_preexists")
+        status.update(accepted_comparison_targets=accepted, destinations={k: str(v) for k,v in paths.items()})
         checks, identities = source_preflight(repo, source_commit, profile)
         status.update("runtime_isolation", collector_source_preflight_completed=True,
                       collector_source_checks=checks, committed_source_identities=identities)
@@ -366,44 +693,64 @@ def execute_gate(repo, outdir, output, source_commit):
         installed = {"original_source_sha256": {str(p): sha256(p) for p in protected}}
         with isolation.owned_worktree(repo, source_commit, "analysis") as worktree:
             env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
-            env = child_environment(env)
+            env = private_environment(env, worktree)
             probes = isolation.probe_paths(worktree, env, overlay["baseline_paths"])
-            external = isolation.external_symlink_preflight(worktree, probes[0]["paths"])
-            if external["background_simc_path"]:
-                require(Path(external["background_simc_path"]).is_dir(), "background_simc_directory_missing")
-            link = debug.prepare_debug_output_link(worktree, probes[0]["paths"], outdir.resolve())
+            baseline = overlay["baseline_paths"]
+            require(Path(baseline["OUTPATH"]).resolve() == outdir.resolve() ==
+                    (Path(baseline["VOLATILEPATH"]) / "OUTPUT/Analysis/KaonLT").resolve(), "ordinary_output_authority")
+            external = external_setup(worktree, probes[0]["paths"], outdir)
+            private = private_output(worktree, probes[0]["paths"], outdir)
+            callers = private_callers(repo, worktree, env, baseline, private, package)
+            skims = skim_inventory(worktree, baseline)
+            plan = copy_plan(outdir, private)
+            status.update("input_staging", copy_plan=plan, copy_files=len(plan),
+                          copy_bytes=sum(p["bytes"] for p in plan), skim_existence_inventory=skims)
+            print(json.dumps({"copy_plan": plan, "copy_bytes": sum(p["bytes"] for p in plan)}), file=sys.stderr, flush=True)
+            stage_copies(outdir, private, plan, copies)
+            verify_private(worktree, private)
+            verify_external(external)
+            verify_originals(copies)
+            prior = {name: None if not os.path.lexists(private / name) else {"path": str(private / name)} for name in names()}
+            require(all(v is None for v in prior.values()), "comparison_artifact_preexists")
             status.update("analysis", analysis_started=True, analysis_worktree=str(worktree),
-                          isolation_probes=probes, debug_output_link=link, external_symlink_preflight=external)
+                          isolation_probes=probes, private_output=str(private), private_callers=callers,
+                          staged_inputs=copies, external_symlink_preflight=external)
             started = time.time_ns()
             returncode = debug.run_analysis(worktree, paths["log"], env)
             status.update("completion_markers", analysis_returncode=returncode,
                           log_identity={"sha256": sha256(paths["log"]), "bytes": paths["log"].stat().st_size})
             verify_completion(paths["log"], returncode)
             status.update("verify_artifacts", analysis_completed=True)
-            records, outcomes = verify_artifacts(outdir, source_commit, identities, started, prior)
+            records, outcomes = verify_artifacts(private, source_commit, identities, started, prior)
+            runtime = {name: file_identity(private / name) for name in copies}
+            require(skim_inventory(worktree, baseline) == skims, "skim_existence_changed")
             status.update(artifact_verification_completed=True, artifacts=records, diagnostic_outcomes=outcomes)
-        status.update(worktree_cleanup_completed=True)
-        status.update(ordinary_checkout_preservation=isolation.verify_preservation(repo, before),
-                      installed_ltsep_preservation=isolation.verify_ltsep_preservation(installed))
-        status.update("collection")
-        with tempfile.TemporaryDirectory(prefix="kaonlt-pion-t-profile-") as directory:
-            effective = Path(directory) / "profile.json"
-            effective.write_text(json.dumps(profile), encoding="utf-8")
+            preservation()
+            status.update("collection", runtime_container_identities=runtime)
+            verify_private(worktree, private)
+            effective = worktree.parent / "ab-profile.json"
+            with effective.open("x", encoding="utf-8") as handle:
+                json.dump(profile, handle)
             with isolation.owned_worktree(repo, source_commit, "source") as source:
+                require(source.resolve() != worktree.resolve() and not os.path.lexists(source / "OUTPUT"),
+                        "collector_source_not_independent")
                 require(resolved_profile(source, source_commit) == profile, "detached_profile_mismatch")
                 with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
-                    result = module.collect_validation_bundle(outdir=outdir, kinematic="Q4p4W2p74",
+                    result = module.collect_validation_bundle(outdir=private, kinematic="Q4p4W2p74",
                         output=output, profile_path=effective, repo_root=source)
                 require(result["returncode"] == 0, "collection_failed")
                 status.update("verify_zip", collection_completed=True)
                 verify_zip(output, source_commit, records)
                 status.update(zip_verification_completed=True, zip_identity={"sha256": sha256(output),
                               "bytes": output.stat().st_size})
-        status.update(final_ordinary_checkout_preservation=isolation.verify_preservation(repo, before),
-                      final_installed_ltsep_preservation=isolation.verify_ltsep_preservation(installed))
+            require(not os.path.lexists(source), "source_cleanup_incomplete")
+        require(not os.path.lexists(worktree.parent), "private_cleanup_incomplete")
+        status.update(worktree_cleanup_completed=True)
+        preservation()
         summary = {"schema_version": "pion_t_template_comparison_run_summary/v1",
             "source_commit": source_commit, "analysis_command": COMMAND, "analysis_returncode": returncode,
             "diagnostic_outcomes": outcomes, "artifacts": records, "boundaries": BOUNDARIES,
+            "copy_plan": plan, "original_inputs": copies, "runtime_container_identities": runtime,
             "log_identity": status.record["log_identity"], "zip_identity": status.record["zip_identity"]}
         with paths["summary"].open("x", encoding="utf-8") as handle:
             handle.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
@@ -414,21 +761,12 @@ def execute_gate(repo, outdir, output, source_commit):
         status.update(status="failed", failure_reason=str(exc))
         raise
     finally:
-        # Every failure after the initial snapshot gets preservation checks,
-        # including source, overlay, child, cleanup, artifact and ZIP failures.
-        try:
-            if before is not None and not succeeded:
-                status.update(final_ordinary_checkout_preservation=isolation.verify_preservation(repo, before))
-        except Exception as exc:
-            status.update(status="failed", preservation_failure_reason=str(exc))
-            raise
-        finally:
-            if installed is not None and not succeeded:
-                try:
-                    status.update(final_installed_ltsep_preservation=isolation.verify_ltsep_preservation(installed))
-                except Exception as exc:
-                    status.update(status="failed", ltsep_preservation_failure_reason=str(exc))
-                    raise
+        if not succeeded:
+            try:
+                preservation()
+            except Exception as exc:
+                status.update(status="failed", preservation_failure_reason=str(exc))
+                raise
 
 
 def main(argv=None):

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16221,
+      "bytes": 16211,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4e784248e2871ebdcb49b88204d4c9ba36dd2fa149e24310c326ad852954fb06"
+      "sha256": "dfef2e6577b1a021cd78bf9e449f43446587d6b620226157cc33d19f2ff885a4"
     },
     {
       "bytes": 11186,
@@ -1264,6 +1264,11 @@
       "bytes": 1723,
       "path": "docs/memory/phases/farm-validation-bundle-wrapper.md",
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
+    },
+    {
+      "bytes": 24409,
+      "path": "docs/memory/phases/kaonlt-ab-owner-preservation-repair-2026-10-25-task-contract.md",
+      "sha256": "b853086806af1cfd4bd27b33220490b943e2c94c0440ebf2694331ec768918ad"
     },
     {
       "bytes": 14922,

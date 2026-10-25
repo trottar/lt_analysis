@@ -19,7 +19,7 @@
     "settings": []
   },
   "source_identity": {
-    "required_analysis_commit": "554ad84630ad77920ce17954d99f73df8ed2e6ac",
+    "required_analysis_commit": "1144fe56b68b0980f7f7ce59887987b10e0f3d9a",
     "allowed_committed_files": [],
     "allowed_non_analysis_path_prefixes": ["docs/memory/"]
   }
