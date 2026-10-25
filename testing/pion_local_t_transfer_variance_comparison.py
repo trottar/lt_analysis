@@ -2,7 +2,9 @@
 
 CLI: python -B testing/pion_local_t_transfer_variance_comparison.py --archive ZIP
      --output-json NEW.json [--output-pdf NEW.pdf]
-Alternatively supply exactly --center-json and --left-json. No ROOT imports,
+Alternatively supply exactly --center-json and --left-json, with --source-commit
+for fresh inputs (default: strict historical SOURCE). A matching commit alone
+does not establish the same execution or population. No ROOT imports,
 event loops, farm execution, production imports, clipping or strength selection.
 """
 from __future__ import annotations
@@ -97,9 +99,17 @@ def histogram(h, *, variance=False):
     return e, y
 
 
-def load_inputs(*, archive=None, center_json=None, left_json=None):
+def validate_source_commit(value):
+    require(isinstance(value, str) and re.fullmatch('[0-9a-f]{40}', value) is not None,
+            "source commit must be exactly 40 lowercase hex characters")
+    return value
+
+
+def load_inputs(*, archive=None, center_json=None, left_json=None, source_commit=None):
     """Read only explicit local inputs. Never extract a ZIP or resolve farm paths."""
     require(bool(archive) != bool(center_json or left_json), "supply archive OR exact Center/Left JSON pair")
+    expected_head = SOURCE if source_commit is None else validate_source_commit(source_commit)
+    require(not archive or expected_head == SOURCE, "archive source override must remain historical")
     docs, provenance = {}, {}
     if archive:
         raw = Path(archive).read_bytes()
@@ -133,7 +143,7 @@ def load_inputs(*, archive=None, center_json=None, left_json=None):
             provenance[s] = {"member": basename(s), "sha256": sha(content)}
         provenance["archive_verification"] = "unavailable: explicit JSON pair, no archive supplied"
     for s in SETTINGS:
-        validate_document(docs[s], s)
+        validate_document(docs[s], s, matched_head=expected_head)
     return docs, provenance
 
 
@@ -379,12 +389,18 @@ def matched_fit_identity(fit, authority, provenance, setting, parent, implementa
                    'policy_sha256': digest(POLICY), 'implementation_sha256': implementation_hash, 'fit': payload})
 
 
-def compare(docs, provenance, *, matched_authority=None):
+def compare(docs, provenance, *, matched_authority=None, source_commit=None):
     """All six numerical controls must pass before ANY positive-lambda fit."""
     before = digest(docs)
+    require(source_commit is None or matched_authority is None, "source override with matched authority unsupported")
+    expected_head = SOURCE if source_commit is None else validate_source_commit(source_commit)
+    if matched_authority is not None:
+        expected_head = matched_authority['source_HEAD']
+    require('archive_sha256' not in provenance or expected_head == SOURCE,
+            "archive source override must remain historical")
     prepared = []
     for s in SETTINGS:
-        validate_document(docs[s], s, matched_head=None if matched_authority is None else matched_authority['source_HEAD'])
+        validate_document(docs[s], s, matched_head=expected_head)
         for p in docs[s]["parents"]:
             q = problem(p)
             q["k_components"] = {n: histogram(p["candidate_B"]["H_kaon_fit_"+n+"_scaled_refined"])[1]
@@ -394,7 +410,7 @@ def compare(docs, provenance, *, matched_authority=None):
             prepared.append((s, p, q, r, receipt))
     output = {"schema_version": SCHEMA, "status": "available", "diagnostic_only": True,
               "production_applied": False, "scientifically_accepted": False, "provenance": deepcopy(provenance),
-              "source_HEAD_of_input": SOURCE, "policy": deepcopy(POLICY), "limits": LIMITS[:],
+              "source_HEAD_of_input": expected_head, "policy": deepcopy(POLICY), "limits": LIMITS[:],
               "input_metadata": {s: {k: deepcopy(docs[s][k]) for k in (
                   "source_files", "original_analysis_input_identity", "original_input_population_accounting",
                   "canonical_t_edges", "canonical_phi_edges")} for s in SETTINGS},
@@ -591,6 +607,9 @@ def main(argv=None):
     parser.add_argument("--archive", type=Path)
     parser.add_argument("--center-json", type=Path)
     parser.add_argument("--left-json", type=Path)
+    parser.add_argument("--source-commit", type=validate_source_commit,
+                        help="Exact 40-hex source HEAD for direct Center/Left JSON pair; defaults to historical SOURCE. "
+                             "Archive mode remains historically pinned; matching HEAD alone is not same-run evidence.")
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-pdf", type=Path)
     args = parser.parse_args(argv)
@@ -604,8 +623,9 @@ def main(argv=None):
     require(all(not p.exists() and p.parent.is_dir() for p in outputs), "outputs must be new files in existing local directories")
     print(json.dumps(POLICY, sort_keys=True), flush=True)  # predeclared BEFORE loading/comparing
     try:
-        docs, provenance = load_inputs(archive=args.archive, center_json=args.center_json, left_json=args.left_json)
-        result = compare(docs, provenance)
+        docs, provenance = load_inputs(archive=args.archive, center_json=args.center_json, left_json=args.left_json,
+                                       source_commit=args.source_commit)
+        result = compare(docs, provenance, source_commit=args.source_commit)
     except (ValueError, TypeError, KeyError, OSError, zipfile.BadZipFile) as exc:
         result = {"schema_version": SCHEMA, "status": "unavailable", "first_failed_invariant": str(exc),
                   "policy": POLICY, "limits": LIMITS, "production_applied": False}

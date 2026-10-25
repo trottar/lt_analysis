@@ -8,6 +8,7 @@ import importlib.util
 import json
 import os
 import re
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -218,6 +219,165 @@ class Arithmetic(unittest.TestCase):
                 z.writestr("manifest.json", json.dumps({"complete": True, "git_head": "wrong"}))
             with self.assertRaisesRegex(c.InvariantError, "archive provenance"):
                 c.load_inputs(archive=path)
+
+
+def synthetic_documents(head=c.SOURCE):
+    """Complete six-parent inputs using the existing deterministic fit problem."""
+    q = synthetic()
+
+    def hist(values, variance=None):
+        values = np.asarray(values)
+        variance = np.zeros(len(values)) if variance is None else np.asarray(variance)
+        errors = np.sqrt(variance)
+        packed = [float(len(q["edges"])-1), q["edges"][0], q["edges"][-1], *q["edges"]]
+        packed += [v for pair in zip(values, errors) for v in pair]
+        return {"status": "available", "edges": q["edges"].tolist(), "values": values.tolist(),
+                "errors": errors.tolist(), "stored_sumw2": variance.tolist(),
+                "content_error_fingerprint": c.sha(b"".join(struct.pack("!d", v) for v in packed))}
+
+    b_control, _ = c.reconstruct_b(q)
+    fit = {"pion_component_alignment": {"mode": "synthetic fixed"}, "resolved_subtraction_config": {},
+           "H_pion_control_input": hist(q["y"], q["s2"]), "H_kaon_nosub_input": hist(q["k"]),
+           "H_pion_fit_total_refined": hist(q["t"]@b_control.x),
+           "H_kaon_pion_bg_fit_total_refined": hist(q["k"]),
+           "diagnostics": {"pion": {"fit_min": .7, "fit_max": 1.3,
+               "staged_component_amplitudes": dict(zip(c.COMPONENTS, q["initial"].tolist())),
+               "joint_refinement": {**q["joint"], "success": True, "status": "success",
+                   "fit_bin_indices": q["ix"].tolist(), "regularization_enabled": True,
+                   "regularization_widths": dict(zip(c.COMPONENTS, q["tau"].tolist()))}}}}
+    templates = {}
+    for i, n in enumerate(c.COMPONENTS):
+        fit["H_simc_shape_"+n] = hist(q["t"][:, i])
+        fit["H_kaon_fit_"+n+"_scaled_refined"] = hist(q["k"]/3)
+        h = hist(q["t"][:, i]/sum(q["t"][:, i]))
+        templates[n] = {"status": "genuinely_local", "normalization_count": 1,
+                        "canonical_selection_closure": True, "weighted_child_to_parent_closure": True,
+                        "production_global_selection_closure": True, "histogram": h,
+                        "normalized_values": h["values"], "normalized_variances": h["stored_sumw2"],
+                        "normalized_integral": 1., "provenance": {"status": "available",
+                            "sha256": "a"*64, "tree_name": "synthetic", "missing_branches": []}}
+    docs = {}
+    for s in c.SETTINGS:
+        parents = []
+        for i in range(3):
+            edges = [float(i), float(i+1)]
+            local = deepcopy(templates)
+            for t in local.values():
+                t["t_edges"] = edges
+            parents.append({"status": "available", "authoritative_parent_unchanged": True,
+                "production_applied": False, "rejection_reasons": [], "t_bin_index": i, "t_edges": edges,
+                "alignment_mode": "fixed_parent_alignment_template_shape_test",
+                "baseline_A": deepcopy(fit), "candidate_B": deepcopy(fit), "templates": local,
+                "frozen_inputs": {"pion": deepcopy(fit["H_pion_control_input"]),
+                                  "kaon": deepcopy(fit["H_kaon_nosub_input"])}})
+        docs[s] = {"schema_version": "pion_t_template_comparison/v1", "source_HEAD": head,
+            "status": "available", "diagnostic_only": True, "production_applied": False,
+            "source_identity_rejection_reasons": [], "phi_setting": s,
+            "setting": {"EPSSET": "low", "ParticleType": "kaon", "Q2": "4p4", "W": "2p74"},
+            "canonical_t_edges": [0., 1., 2., 3.], "canonical_phi_edges": [0., 360.],
+            "source_files": {"synthetic.py": "b"*64}, "original_analysis_input_identity": {
+                "data": {"sha256": "c"*64, "bytes": 123}, "dummy": {"sha256": "d"*64, "bytes": 456}},
+            "original_input_population_accounting": {"synthetic": True}, "parents": parents}
+    return docs
+
+
+class FreshSourceIdentity(unittest.TestCase):
+    fresh = "1234567890abcdef"*2+"12345678"
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    def pair(self, docs):
+        paths = {s: self.root/c.basename(s) for s in c.SETTINGS}
+        for s, path in paths.items():
+            path.write_bytes(c.encoded(docs[s]))
+        return {"center_json": paths["Center"], "left_json": paths["Left"]}
+
+    def test_fresh_pair_cli_and_exact_input_identities(self):
+        original = synthetic_documents(self.fresh)
+        pair = self.pair(original)
+        docs, provenance = c.load_inputs(**pair, source_commit=self.fresh)
+        before = c.digest(docs)
+        out = self.root/"fresh.json"
+        with patch("builtins.print"):
+            code = c.main(["--center-json", str(pair["center_json"]), "--left-json", str(pair["left_json"]),
+                           "--source-commit", self.fresh, "--output-json", str(out)])
+        self.assertEqual(code, 0)
+        result = json.loads(out.read_bytes())
+        self.assertEqual(result["source_HEAD_of_input"], self.fresh)
+        self.assertEqual(len(result["parents"]), 6)
+        for s, path in zip(c.SETTINGS, pair.values()):
+            self.assertEqual(result["provenance"][s]["sha256"], c.sha(path.read_bytes()))
+            self.assertEqual(result["input_metadata"][s]["original_analysis_input_identity"],
+                             original[s]["original_analysis_input_identity"])
+        self.assertEqual(c.digest(docs), before)
+        self.assertEqual(result["provenance"], provenance)
+
+    def test_default_historical_and_explicit_pin_are_identical(self):
+        pair = self.pair(synthetic_documents())
+        docs, provenance = c.load_inputs(**pair)
+        self.assertEqual(c.load_inputs(**pair, source_commit=c.SOURCE), (docs, provenance))
+        historical = c.compare(docs, provenance)
+        self.assertEqual(historical, c.compare(docs, provenance, source_commit=c.SOURCE))
+        fresh_docs = deepcopy(docs)
+        for d in fresh_docs.values():
+            d["source_HEAD"] = self.fresh
+        fresh_pair = self.pair(fresh_docs)
+        fresh_docs, fresh_provenance = c.load_inputs(**fresh_pair, source_commit=self.fresh)
+        fresh = c.compare(fresh_docs, fresh_provenance, source_commit=self.fresh)
+        for result in (historical, fresh):
+            result.pop("source_HEAD_of_input")
+            result.pop("provenance")
+        self.assertEqual(historical, fresh)  # includes all numeric and presentation payloads
+
+    def test_default_rejects_fresh_and_pair_requires_exact_requested_head(self):
+        for heads, expected in (((self.fresh, self.fresh), None),
+                                ((self.fresh, c.SOURCE), self.fresh),
+                                ((c.SOURCE, c.SOURCE), self.fresh),
+                                ((self.fresh, None), self.fresh)):
+            with self.subTest(heads=heads, expected=expected):
+                docs = synthetic_documents()
+                for s, head in zip(c.SETTINGS, heads):
+                    docs[s]["source_HEAD"] = head
+                pair = self.pair(docs)
+                with self.assertRaisesRegex(c.InvariantError, "source/schema"):
+                    c.load_inputs(**pair, source_commit=expected)
+                with self.assertRaisesRegex(c.InvariantError, "source/schema"):
+                    c.compare(docs, {}, source_commit=expected)
+
+    def test_invalid_commit_and_missing_cli_value(self):
+        pair = self.pair(synthetic_documents())
+        for value in ("", "a"*39, "a"*41, "g"*40, "A"*40, c.SOURCE+"\n", 123):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(c.InvariantError, "40 lowercase hex"):
+                    c.load_inputs(**pair, source_commit=value)
+                with self.assertRaisesRegex(c.InvariantError, "40 lowercase hex"):
+                    c.compare({}, {}, source_commit=value)
+        with patch("sys.stderr"), self.assertRaises(SystemExit) as error:
+            c.main(["--source-commit"])
+        self.assertEqual(error.exception.code, 2)
+
+    def test_archive_override_and_matched_authority_conflict_rejected(self):
+        with self.assertRaisesRegex(c.InvariantError, "archive source override"):
+            c.load_inputs(archive=self.root/"unread.zip", source_commit=self.fresh)
+        with self.assertRaisesRegex(c.InvariantError, "archive source override"):
+            c.compare({}, {"archive_sha256": "a"*64}, source_commit=self.fresh)
+        with self.assertRaisesRegex(c.InvariantError, "matched authority unsupported"):
+            c.compare({}, {}, source_commit=self.fresh, matched_authority={})
+
+    def test_fresh_override_preserves_schema_diagnostic_and_fingerprint_gates(self):
+        for key, value in (("schema_version", "unsupported"), ("production_applied", True),
+                           ("source_identity_rejection_reasons", ["unverified"])):
+            docs = synthetic_documents(self.fresh)
+            docs["Left"][key] = value
+            with self.subTest(key=key), self.assertRaises(c.InvariantError):
+                c.load_inputs(**self.pair(docs), source_commit=self.fresh)
+        docs = synthetic_documents(self.fresh)
+        docs["Center"]["parents"][0]["frozen_inputs"]["pion"]["values"][1] += 1
+        with self.assertRaisesRegex(c.InvariantError, "fingerprint"):
+            c.load_inputs(**self.pair(docs), source_commit=self.fresh)
 
 
 @unittest.skipUnless(os.environ.get("KAONLT_ACCEPTED_AB_ZIP"), "accepted A/B archive not supplied; six-parent evidence unexecuted")

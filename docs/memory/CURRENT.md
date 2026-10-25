@@ -30,7 +30,9 @@ at its interrupted position.
 
 ## Current Work Item
 
-`BLOCKED`: ninth supplied acquisition failure at published
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [fresh A/B source pin](phases/kaonlt-normal-debug-abc-comparison-2026-10-25-task-contract.md).
+
+Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
 not runtime acceptance. RUNTIME VERIFIED only as attributed to supplied
 status/process excerpts in the
@@ -214,21 +216,16 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — re-establish the minimum genuinely missing evidence for the Lambda
-MM/signal-region residual, subtraction and variance question against accepted
-October 20 scope. Preserve fresh same-cohort Center/Left lowe canonical t1/t2/t3
-A/B plus signed-event packets, then seven-strength C fitting/replay and six-parent
-Lambda-window MM/variance JSON/PDF comparison as the proposed evidence target.
-Further acquisition is `BLOCKED` until the failed infrastructure/preservation
-gate and its insufficient performance contract are diagnosed and scientific
-necessity is justified. No new infrastructure task or run is authorized here.
-Independent ChatGPT actual-diff review of this memory closeout precedes user
-publication and pushed-state synchronization; neither clears acquisition.
-Hard-stop at the first failed invariant; no automatic retry, failed-artifact
-acceptance, mandatory smoke cycle or weakening of preservation. No held-out
-estimator, bias truth, optimal strength or promotion follows. Preserve full-MM,
-normalization and authoritative signal-yield objectives without a Lambda/SIMC
-unity constraint.
+NEXT — existing normal `-d` A/B observer -> fresh-pair seven-strength C histogram
+JSON/PDF: Center/Left lowe t1/t2/t3 full-MM, 1.10–1.16 GeV control shapes,
+transferred-background and fixed-weight variance proxies. Gate: local checks ->
+ChatGPT actual-diff review -> user commit/push -> pushed-state review -> justified,
+safe user operation -> evidence review. Confirm checkout/output safety; concrete
+preservation conflicts stop execution. Review debug log, four A/B files, C JSON/PDF
+and input identities with explicit fresh SHA; identical HEAD is not same-run proof.
+Failed acquisition wrapper is no prerequisite. Signed-event application, final
+Lambda yield/variance, independent fitted estimator and bias truth remain NOT VERIFIED.
+No C selection/promotion; preserve October 20 and normalization/yield objectives.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior

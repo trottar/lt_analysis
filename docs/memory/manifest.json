@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16336,
+      "bytes": 16221,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "daae6320c025053e8343da38dde01bbfca79c870b1c1fba7453a2aa5b81f2bd6"
+      "sha256": "4e784248e2871ebdcb49b88204d4c9ba36dd2fa149e24310c326ad852954fb06"
     },
     {
       "bytes": 11186,
@@ -1319,6 +1319,11 @@
       "bytes": 11289,
       "path": "docs/memory/phases/kaonlt-ninth-attempt-accountability-memory-update-2026-10-24-task-contract.md",
       "sha256": "4a96d245db63365a3ca62f5fb8f1927361ffd087549571e632af63ff203bbf9a"
+    },
+    {
+      "bytes": 9424,
+      "path": "docs/memory/phases/kaonlt-normal-debug-abc-comparison-2026-10-25-task-contract.md",
+      "sha256": "c1f986e6afa01d9f7955c9f223bd42bb3e6c56e24c05cc4b8b2311e3c72eba61"
     },
     {
       "bytes": 15957,
