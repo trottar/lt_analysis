@@ -242,6 +242,8 @@ class GateTests(unittest.TestCase):
                 self.assertFalse(list(tree.parent.rglob("*.root")))
                 self.assertFalse(list(tree.parent.rglob("*.hist")))
                 self.assertFalse((tree.parent / "ab-output").exists())
+                for setting in ("Center", "Left", "Right"):
+                    self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
                 log.write_text(MARKERS); time.sleep(.02); artifacts(private)
                 (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"derived private branches")
                 return 0
@@ -266,7 +268,7 @@ class GateTests(unittest.TestCase):
                 placement = summary["runtime_placement"]
                 self.assertFalse(Path(placement["parent"]["path"]).exists())
                 self.assertFalse(Path(placement["code_parent"]["path"]).exists())
-                self.assertEqual(len(summary["copy_plan"]), 21)
+                self.assertEqual(len(summary["copy_plan"]), 27)
                 for path in previous: self.assertEqual((path / "KEEP").read_bytes(), b"old attempt")
             finally:
                 self.repo, self.outdir, self.transfer, self.output = old
@@ -473,6 +475,8 @@ class GateTests(unittest.TestCase):
         baseline = {"LTANAPATH": str(self.repo), "OUTPATH": str(self.outdir),
                     "VOLATILEPATH": str(self.outdir.parents[2]), "ANATYPE": "Kaon"}
         populate_inputs(self.outdir)
+        if fail == "pion_missing":
+            (self.outdir / "Center_pion_Analysed_Dummy_Q4p4W2p74_lowe.root").unlink()
         ordinary_before = {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
                            if p.suffix == ".root" or p.name in owner.names()}
         @contextmanager
@@ -531,6 +535,8 @@ class GateTests(unittest.TestCase):
             # never retime artifacts or change the owner's freshness boundary.
             time.sleep(.02)
             private = tree.joinpath("OUTPUT/Analysis/KaonLT").resolve()
+            for setting in ("Center", "Left", "Right"):
+                self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
             artifacts(private)
             (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"private derived branches")
             return 1 if fail == "child" else 0
@@ -584,6 +590,20 @@ class GateTests(unittest.TestCase):
             finally:
                 self.assertEqual(ordinary_before, {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
                                                   if p.suffix == ".root" or p.name in owner.names()})
+
+    def test_missing_pion_is_reported_before_copy_or_analysis_child(self):
+        with self.flow("pion_missing") as (run, _, verify), patch.object(owner, "stage_copies") as stage:
+            with self.assertRaisesRegex(ValueError,
+                    "required_pion_input_missing:Center_pion_Analysed_Dummy_Q4p4W2p74_lowe.root"):
+                owner.execute_gate(self.repo, self.outdir, self.output, SHA)
+            stage.assert_not_called()
+            run.assert_not_called()
+            verify.assert_not_called()
+        status = json.loads((self.outdir / "comparison-gate-status.json").read_text())
+        self.assertEqual(status["status"], "failed")
+        self.assertFalse(status.get("analysis_started", False))
+        self.assertIn("required_pion_input_missing:", status["failure_reason"])
+        self.assertFalse(self.output.exists())
 
     def test_owner_success_once_and_companions(self):
         with self.flow() as (run, preservation, verify):
@@ -1060,7 +1080,7 @@ class VolatileRuntime(unittest.TestCase):
                 owner.isolation.verify_ltsep_preservation(overlay)
                 owner.verify_accepted(shared, accepted); owner.verify_originals(copies)
                 self.assertTrue(all(p["paths"]["VOLATILEPATH"] == baseline["VOLATILEPATH"] for p in probes))
-                self.assertEqual(len(plan), 21)
+                self.assertEqual(len(plan), 27)
                 self.assertNotEqual(baseline["VOLATILEPATH"], str(base))
             self.assertFalse(work.parent.exists())
             self.assertTrue((repo / "OUTPUT").is_symlink())
@@ -1178,12 +1198,34 @@ def populate_inputs(root):
     for eps in ("lowe", "highe"):
         for s in ("Center", "Left", "Right"):
             filenames = [f"{s}_kaon_Analysed_{r}_Q4p4W2p74_{eps}.root" for r in ("Data", "Dummy")]
+            if eps == "lowe":
+                filenames += [f"{s}_pion_Analysed_{r}_Q4p4W2p74_{eps}.root" for r in ("Data", "Dummy")]
             filenames += [f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}{suffix}"
                           for suffix in ((".root", ".hist") if eps == "lowe" else (".root",))]
             for name in filenames:
                 p = root / name
                 if not p.exists():
                     p.write_bytes(("fixture:" + name).encode())
+
+
+def open_frozen_pion_inputs(root, setting):
+    """Exercise production filename/first-use semantics without importing ROOT."""
+    tree = ast.parse((ROOT / "src/cuts/rand_sub.py").read_text())
+    function = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and
+                    n.name == "_open_subtracted_particle_tree_bundle")
+    opened = []
+    def open_file(path):
+        opened.append((Path(path), Path(path).read_bytes()))
+        return Mock()
+    ns = {"os": os, "open_root_file": open_file,
+          "_print_rand_debug": lambda *a, **kw: None,
+          "_debug_tree_status": lambda *a: None,
+          "get_prompt_tree_name": lambda *a, **kw: "fixture_prompt",
+          "get_rand_tree_name": lambda *a, **kw: "fixture_rand"}
+    exec(compile(ast.Module(body=[function], type_ignores=[]), "<frozen-pion-opener>", "exec"), ns)
+    ns[function.name](str(root), setting, "pion", "Analysed_Data_Q4p4W2p74_lowe",
+                      "Analysed_Dummy_Q4p4W2p74_lowe", "low")
+    return opened
 
 
 class PrivateTopology(unittest.TestCase):
@@ -1210,8 +1252,8 @@ class PrivateTopology(unittest.TestCase):
         accepted = owner.accepted_identities(self.shared)
         private = self.private()
         plan = owner.copy_plan(self.shared, private)
-        self.assertEqual(len(plan), 21)
-        self.assertEqual(sum(p["bytes"] for p in plan), 1017)
+        self.assertEqual(len(plan), 27)
+        self.assertEqual(sum(p["bytes"] for p in plan), 1332)
         copies = {}
         owner.stage_copies(self.shared, private, plan, copies)
         for item in copies.values():
@@ -1225,6 +1267,83 @@ class PrivateTopology(unittest.TestCase):
         owner.verify_originals(copies)
         owner.verify_accepted(self.shared, accepted)
         self.assertEqual(before, {p.name: owner.file_identity(p) for p in self.shared.iterdir()})
+
+    def test_pion_pairs_reach_frozen_first_use_with_private_bytes(self):
+        populate_inputs(self.shared)
+        private = self.private()
+        copies = {}
+        owner.stage_copies(self.shared, private, owner.copy_plan(self.shared, private), copies)
+        for setting in ("Center", "Left", "Right"):
+            for path, raw in open_frozen_pion_inputs(private, setting):
+                self.assertEqual(raw, (self.shared / path.name).read_bytes())
+                self.assertEqual(path.parent, private)
+                self.assertIn(path.name, copies)
+                self.assertNotEqual(path.stat().st_ino, (self.shared / path.name).stat().st_ino)
+        self.assertFalse(list(private.glob("*pion*highe*")))
+        owner.verify_originals(copies)
+
+    def test_old_inventory_reproduces_exact_center_first_use_failure(self):
+        populate_inputs(self.shared)
+        private = self.private()
+        source = subprocess.check_output(["git", "show",
+            "b5769e51c01655d9756481c91b258f029e219211:testing/run_pion_t_template_comparison_gate.py"], cwd=ROOT)
+        function = next(n for n in ast.parse(source).body if isinstance(n, ast.FunctionDef) and n.name == "copy_plan")
+        ns = dict(vars(owner))
+        exec(compile(ast.Module(body=[function], type_ignores=[]), "<old-copy-plan>", "exec"), ns)
+        old_plan = ns["copy_plan"](self.shared, private)
+        self.assertFalse(any("_pion_" in p["source"] for p in old_plan))
+        for entry in old_plan:
+            shutil.copyfile(entry["source"], entry["target"])
+        with self.assertRaisesRegex(FileNotFoundError, "Center_pion_Analysed_Data_Q4p4W2p74_lowe.root"):
+            open_frozen_pion_inputs(private, "Center")
+        self.assertFalse((private / "Center_pion_Analysed_Dummy_Q4p4W2p74_lowe.root").exists())
+
+    def test_missing_consumed_pion_pair_fails_before_any_staging(self):
+        populate_inputs(self.shared)
+        private = self.private()
+        for setting in ("Center", "Left", "Right"):
+            pair = [self.shared / f"{setting}_pion_Analysed_{r}_Q4p4W2p74_lowe.root" for r in ("Data", "Dummy")]
+            for missing in ([pair[0]], [pair[1]], pair):
+                raw = {p: p.read_bytes() for p in missing}
+                for p in missing: p.unlink()
+                with self.subTest(setting=setting, missing=missing):
+                    with self.assertRaisesRegex(ValueError, "required_pion_input_missing:" + missing[0].name):
+                        owner.copy_plan(self.shared, private)
+                    self.assertEqual(list(private.iterdir()), [])
+                for p, value in raw.items(): p.write_bytes(value)
+
+    def test_invalid_pion_file_and_plan_change_fail_closed(self):
+        populate_inputs(self.shared)
+        private = self.private()
+        p = self.shared / "Center_pion_Analysed_Dummy_Q4p4W2p74_lowe.root"
+        raw = p.read_bytes()
+        for kind in ("directory", "dangling"):
+            p.unlink()
+            if kind == "directory": p.mkdir()
+            else: p.symlink_to(self.base / "missing-pion")
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, "required_pion_input_missing:" + p.name):
+                owner.copy_plan(self.shared, private)
+            if kind == "directory": p.rmdir()
+            else: p.unlink()
+            p.write_bytes(raw)
+        plan = owner.copy_plan(self.shared, private)
+        p.unlink()
+        with self.assertRaisesRegex(ValueError, "required_pion_input_missing:" + p.name):
+            owner.stage_copies(self.shared, private, plan, {})
+        self.assertEqual(list(private.iterdir()), [])
+
+    def test_unavailable_right_needs_no_pion_and_high_prepass_needs_no_pion(self):
+        populate_inputs(self.shared)
+        (self.shared / "Prod_Coin_Q4p4W2p74right_lowe.root").unlink()
+        for p in self.shared.glob("Right_pion_*.root"): p.unlink()
+        # No high-epsilon pion files are present, including available high settings.
+        private = self.private()
+        plan = owner.copy_plan(self.shared, private)
+        self.assertEqual(sum("_pion_" in p["source"] for p in plan), 4)
+        owner.stage_copies(self.shared, private, plan, {})
+        self.assertEqual(owner.diamond_choices(self.shared), owner.diamond_choices(private))
+        for setting in ("Center", "Left"):
+            self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
 
     def test_optional_right_without_archived_simc_keeps_raw_inputs_and_diamond(self):
         populate_inputs(self.shared)

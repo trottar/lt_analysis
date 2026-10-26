@@ -30,8 +30,11 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B group caller repair](phases/kaonlt-ab-restore-working-ltsep-caller-2026-10-26-task-contract.md).
-Amended cleanup/split local checks pass; corrected farm runtime NOT VERIFIED.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B pion input staging](phases/kaonlt-ab-stage-pion-inputs-2026-10-26-task-contract.md).
+Supplied `b5769e51` run: `analysis_failed`, missing private Center pion lowe
+Data/Dummy. SOURCE VERIFIED: `-d` consumes these inputs; copy_plan omitted them.
+Repair stages available-low pairs; science frozen, farm NOT VERIFIED.
+Receipt and local results in contract.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -217,16 +220,15 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent actual-diff review, user publication and pushed-state review.
-Then decide the single private A/B farm validation; no automatic run.
-Target: private fresh Center/Left lowe t1/t2/t3
-A/B, then unchanged seven-strength C histogram JSON/PDF: full-MM, 1.10–1.16 GeV
-control shapes, transferred-background and fixed-weight variance proxies.
-Review debug log, four A/B files, C JSON/PDF and input identities with explicit
-fresh SHA; identical HEAD is not same-run proof. Concrete preservation conflicts
-stop execution; the failed acquisition wrapper is no prerequisite. Signed-event
-application, final Lambda yield/variance, independent fitted estimator and bias
-truth remain NOT VERIFIED. No C selection/promotion or normalization/yield change.
+NEXT — independent actual-diff review of pion staging, user publication and
+pushed-state review; then decide one private Center/Left lowe t1/t2/t3 A/B gate.
+Review pion copies, log, four fresh A/B files, identities and preservation/
+collection; then seven-strength C JSON/PDF: full-MM, 1.10–1.16 GeV
+controls, transferred background and fixed-weight variance proxies. Equal HEAD
+is not same-run proof. Preservation conflicts stop; failed acquisition wrapper
+is no prerequisite. Farm user-only; no automatic run. Signed events, final Lambda
+yield/variance, independent fitted estimator and bias truth NOT VERIFIED.
+No C promotion or normalization/yield change.
 
 Hierarchical amplitudes and child refitting remain deferred; no prior width,
 covariance model or fallback is approved. The investigation retains prior

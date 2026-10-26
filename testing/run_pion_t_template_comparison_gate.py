@@ -766,6 +766,13 @@ def copy_plan(shared, output):
                 name = f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}{suffix}"
                 require((shared / name).is_file(), "required_simc_input_missing:" + name)
                 needed.add(name)
+            if eps == "lowe":
+                # Full kaon rand_sub consumes the existing merged pion control
+                # pair; -d never runs the -c merge that produces these inputs.
+                for role in ("Data", "Dummy"):
+                    name = f"{s}_pion_Analysed_{role}_Q4p4W2p74_{eps}.root"
+                    require((shared / name).is_file(), "required_pion_input_missing:" + name)
+                    needed.add(name)
     # Preserve the complete actual Diamond candidate namespace and first-tie order.
     import glob
     needed.update(Path(p).name for p in glob.glob(str(shared / "*kaon*Q4p4W2p74*.root"))
