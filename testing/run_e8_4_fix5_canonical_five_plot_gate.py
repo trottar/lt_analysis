@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -360,32 +361,69 @@ def resolved_profile(repo, source_commit):
 
 
 def cleanup_path(repo, parent, worktree, leaf):
-    parent = parent.resolve()
-    root = repo.resolve()
-    require(parent.parent == root.parent and parent != root and not parent.is_relative_to(root) and
-            not parent.is_symlink() and worktree.resolve() == parent / leaf and
-            worktree.resolve() != root and not worktree.resolve().is_relative_to(root),
+    parent, worktree = Path(parent), Path(worktree)
+    root = Path(repo).resolve(strict=True)
+    require(leaf in {"analysis", "source"} and parent.is_absolute() and
+            all(not p.is_symlink() for p in (parent, *parent.parents)) and
+            not worktree.is_symlink() and parent.is_dir() and parent == parent.resolve(strict=True) and
+            parent.parent == root.parent and parent != root and
+            worktree == parent / leaf,
             "worktree_cleanup_path_invalid")
+    info = parent.lstat()
+    require(stat.S_ISDIR(info.st_mode) and info.st_uid == os.geteuid() and
+            stat.S_IMODE(info.st_mode) in (0o700, 0o2700) and
+            info.st_dev == root.stat().st_dev, "worktree_parent_owner_or_mode")
+    if os.path.lexists(worktree):
+        info = worktree.lstat()
+        require(worktree.resolve(strict=True) == worktree and stat.S_ISDIR(info.st_mode) and
+                info.st_uid == os.geteuid() and info.st_dev == parent.stat().st_dev,
+                "worktree_cleanup_path_invalid")
 
 
 @contextmanager
 def owned_worktree(repo, source_commit, leaf):
     require(leaf in {"analysis", "source"}, "worktree_role_invalid")
-    with tempfile.TemporaryDirectory(prefix="kaonlt-e8-4-canonical-five-" + leaf + "-",
-                                     dir=repo.resolve().parent) as directory:
-        parent = Path(directory).resolve()
-        worktree = parent / leaf
+    require(shutil.rmtree.avoids_symlink_attacks, "worktree_cleanup_not_symlink_safe")
+    root = Path(repo).resolve(strict=True)
+    def identity(path):
+        info = path.lstat()
+        return (info.st_dev, info.st_ino, info.st_uid, info.st_mode)
+    root_identity = identity(root)
+    # Explicit lifetime: no TemporaryDirectory fallback may delete a replacement
+    # after a guard has refused cleanup of the original identity.
+    parent = Path(tempfile.mkdtemp(prefix="kaonlt-e8-4-canonical-five-" + leaf + "-", dir=root.parent))
+    worktree = parent / leaf
+    created = parent_identity = worktree_identity = None
+    try:
+        created = identity(parent)
         cleanup_path(repo, parent, worktree, leaf)
+        parent_identity = created
+        require(identity(parent) == parent_identity, "worktree_parent_identity_changed")
         git(repo, "worktree", "add", "--detach", str(worktree), source_commit)
-        try:
-            require(git(worktree, "rev-parse", "HEAD") == source_commit, "worktree_head_mismatch")
-            require(git(worktree, "branch", "--show-current") == "", "worktree_not_detached")
-            require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "",
-                    "worktree_dirty")
-            yield worktree
-        finally:
-            cleanup_path(repo, parent, worktree, leaf)
+        cleanup_path(repo, parent, worktree, leaf)
+        worktree_identity = identity(worktree)
+        require(git(worktree, "rev-parse", "HEAD") == source_commit, "worktree_head_mismatch")
+        require(git(worktree, "branch", "--show-current") == "", "worktree_not_detached")
+        require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "", "worktree_dirty")
+        yield worktree
+    finally:
+        require(identity(root) == root_identity, "worktree_repository_identity_changed")
+        cleanup_path(repo, parent, worktree, leaf)
+        require(created is not None and identity(parent) == created,
+                "worktree_parent_identity_changed")
+        if parent_identity is None or worktree_identity is None:
+            # An add/first-check failure has no validated worktree to recurse into.
+            require(not os.path.lexists(worktree), "worktree_unvalidated_retained:" + str(parent))
+            parent.rmdir()  # Empty, newly owned parent only; nonempty stays put.
+        else:
+            require(identity(worktree) == worktree_identity, "worktree_identity_changed")
             git(repo, "worktree", "remove", "--force", str(worktree))
+            require(not os.path.lexists(worktree), "worktree_cleanup_incomplete")
+            cleanup_path(repo, parent, worktree, leaf)
+            require(identity(parent) == parent_identity, "worktree_parent_identity_changed")
+            require(shutil.rmtree.avoids_symlink_attacks, "worktree_cleanup_not_symlink_safe")
+            shutil.rmtree(parent)
+        require(not os.path.lexists(parent), "worktree_parent_cleanup_incomplete")
 
 
 def collector_source_preflight(repo, source_commit, profile):

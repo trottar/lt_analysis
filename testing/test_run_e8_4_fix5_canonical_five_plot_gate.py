@@ -4,6 +4,7 @@ from copy import deepcopy
 import io
 import json
 import os
+import stat
 from pathlib import Path
 import subprocess
 import shutil
@@ -30,11 +31,124 @@ def pages(phi="Left", epsilon="lowe"):
     return payload
 
 
+class CleanupSafety(unittest.TestCase):
+    """Real disposable filesystem; only Git worktree operations are mocked."""
+
+    @contextmanager
+    def fixture(self, leaf, failure=None):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve(); repo = root / "ordinary"; repo.mkdir()
+            calls = []
+            def git(tree, *args):
+                calls.append((tree, args))
+                if args[:2] == ("worktree", "add"):
+                    if failure == "add": raise ValueError("injected_add")
+                    work = Path(args[3]); work.mkdir(); (work / "code").write_bytes(b"code")
+                    if failure == "partial_add": raise ValueError("injected_partial_add")
+                if args[:2] == ("worktree", "remove"):
+                    if failure == "remove": raise ValueError("injected_remove")
+                    shutil.rmtree(args[3])
+                return SHA if args == ("rev-parse", "HEAD") else ""
+            with patch.object(owner, "git", side_effect=git):
+                yield repo, calls
+
+    def test_success_body_and_cleanup_failure_both_roles(self):
+        for leaf in ("analysis", "source"):
+            for failure in (None, "body", "remove"):
+                with self.subTest(leaf=leaf, failure=failure), self.fixture(leaf, failure) as (repo, calls):
+                    def run():
+                        with owner.owned_worktree(repo, SHA, leaf) as work:
+                            self.assertEqual(work.parent.parent, repo.parent)
+                            if failure == "body": raise ValueError("injected_body")
+                        return work
+                    if failure:
+                        with self.assertRaisesRegex(ValueError, "injected_" + failure): run()
+                    else:
+                        work = run(); self.assertFalse(work.parent.exists())
+                    parent = Path(calls[0][1][3]).parent
+                    self.assertEqual(parent.exists(), failure == "remove")
+                    self.assertEqual(sum(args[:2] == ("worktree", "remove") for _, args in calls), 1)
+
+    def test_parent_symlink_and_directory_replacement_never_removed(self):
+        for leaf in ("analysis", "source"):
+            for kind in ("symlink", "directory"):
+                with self.subTest(leaf=leaf, kind=kind), self.fixture(leaf) as (repo, calls):
+                    unrelated = repo.parent / "unrelated"; (unrelated / leaf).mkdir(parents=True)
+                    sentinel = unrelated / leaf / "KEEP"; sentinel.write_bytes(b"unrelated")
+                    with self.assertRaisesRegex(ValueError, "cleanup_path_invalid|parent_identity_changed"):
+                        with owner.owned_worktree(repo, SHA, leaf) as work:
+                            parent = work.parent; saved = parent.with_name(parent.name + "-saved")
+                            parent.rename(saved)
+                            if kind == "symlink": parent.symlink_to(unrelated)
+                            else:
+                                parent.mkdir(mode=0o700); (parent / "KEEP").write_bytes(b"replacement")
+                            # The context must remain harmless after a guard rejects it.
+                            with self.assertRaises(ValueError):
+                                owner.cleanup_path(repo, parent, work, leaf) if kind == "symlink" else owner.require(False, "guard_rejected")
+                            raise ValueError("guard_rejected")
+                    self.assertEqual(sentinel.read_bytes(), b"unrelated")
+                    self.assertEqual((saved / leaf / "code").read_bytes(), b"code")
+                    if kind == "directory": self.assertEqual((parent / "KEEP").read_bytes(), b"replacement")
+                    self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+
+    def test_child_replacement_never_removed(self):
+        for leaf in ("analysis", "source"):
+            for kind in ("symlink", "directory"):
+                with self.subTest(leaf=leaf, kind=kind), self.fixture(leaf) as (repo, calls):
+                    unrelated = repo.parent / "unrelated"; unrelated.mkdir(); (unrelated / "KEEP").write_bytes(b"keep")
+                    with self.assertRaisesRegex(ValueError, "cleanup_path_invalid|worktree_identity_changed"):
+                        with owner.owned_worktree(repo, SHA, leaf) as work:
+                            work.rename(work.with_name("saved"))
+                            if kind == "symlink": work.symlink_to(unrelated)
+                            else: work.mkdir(); (work / "KEEP").write_bytes(b"replacement")
+                    self.assertEqual((unrelated / "KEEP").read_bytes(), b"keep")
+                    if kind == "directory": self.assertEqual((work / "KEEP").read_bytes(), b"replacement")
+                    self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+
+    def test_first_check_and_add_failure_remove_only_empty_parent(self):
+        for leaf in ("analysis", "source"):
+            for failure in ("first", "add", "partial_add", "nonempty"):
+                with self.subTest(leaf=leaf, failure=failure), self.fixture(leaf, failure) as (repo, calls):
+                    check = owner.cleanup_path
+                    def first(*args):
+                        if first.pending:
+                            first.pending = False
+                            if failure == "nonempty": (args[1] / "KEEP").write_bytes(b"keep")
+                            raise ValueError("injected_first")
+                        return check(*args)
+                    first.pending = True
+                    with ExitStack() as stack:
+                        if failure in ("first", "nonempty"): stack.enter_context(patch.object(owner, "cleanup_path", side_effect=first))
+                        with self.assertRaises((ValueError, OSError)):
+                            with owner.owned_worktree(repo, SHA, leaf): self.fail("unvalidated worktree yielded")
+                    parents = list(repo.parent.glob("kaonlt-e8-4-canonical-five-*"))
+                    self.assertEqual(len(parents), int(failure in ("partial_add", "nonempty")))
+                    if failure == "nonempty": self.assertEqual((parents[0] / "KEEP").read_bytes(), b"keep")
+                    self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+
+    def test_setgid_and_changed_mode_owner_are_identity_checked(self):
+        for leaf in ("analysis", "source"):
+            for mode in (0o700, 0o2700):
+                with self.subTest(leaf=leaf, mode=oct(mode)), self.fixture(leaf) as (repo, calls):
+                    repo.parent.chmod(mode)
+                    with owner.owned_worktree(repo, SHA, leaf) as work:
+                        self.assertEqual(stat.S_IMODE(work.parent.stat().st_mode), mode)
+                    self.assertFalse(work.parent.exists())
+            for defect in ("mode", "owner"):
+                with self.subTest(leaf=leaf, defect=defect), self.fixture(leaf) as (repo, calls), ExitStack() as stack:
+                    with self.assertRaisesRegex(ValueError, "parent_identity_changed|owner_or_mode"):
+                        with owner.owned_worktree(repo, SHA, leaf) as work:
+                            if defect == "mode": work.parent.chmod(0o2700)
+                            else: stack.enter_context(patch.object(owner.os, "geteuid", return_value=os.geteuid()+1))
+                    self.assertTrue((work / "code").is_file())
+                    self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+
+
 class OwnerTests(unittest.TestCase):
     def runtime_fixture(self, directory):
         root = Path(directory).resolve()
         repo = root / "ordinary"; repo.mkdir()
-        parent = root / "kaonlt-owner"; parent.mkdir()
+        parent = root / "kaonlt-owner"; parent.mkdir(mode=0o700)
         worktree = parent / "analysis"; worktree.mkdir()
         for tree in (repo, worktree):
             (tree / "farm_env").mkdir()
@@ -243,6 +357,8 @@ class OwnerTests(unittest.TestCase):
             calls = []
             def git(repo, *args):
                 calls.append((repo, args))
+                if args[:2] == ("worktree", "add"): Path(args[3]).mkdir()
+                if args[:2] == ("worktree", "remove"): shutil.rmtree(args[3])
                 if args[0] == "rev-parse": return "b" * 40 if defect == "head" else SHA
                 if args[0] == "branch": return "test" if defect == "branch" else ""
                 if args[0] == "status": return " M src/main.py" if defect == "status" else ""
@@ -326,6 +442,8 @@ class OwnerTests(unittest.TestCase):
                 (worktree / owner.PROFILE).write_bytes((ROOT / owner.PROFILE).read_bytes())
                 path = worktree / "src/models/xmodel_kaon_pl.f"
                 path.parent.mkdir(parents=True); path.write_bytes(b"committed model")
+            if args[:2] == ("worktree", "remove"):
+                shutil.rmtree(args[-1])
             if args[0] == "branch": return "other" if defect == "branch" and cwd == repo else "test" if cwd == repo else ""
             if args[0] == "rev-parse":
                 if cwd == repo and ((defect == "head" and args[1] == "HEAD") or

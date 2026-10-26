@@ -35,6 +35,12 @@ isolation = debug.isolation
 collector, require, sha256, git = debug.collector, debug.require, debug.sha256, debug.git
 BASE_HEAD = "554ad84630ad77920ce17954d99f73df8ed2e6ac"
 REVIEWED_HEAD = "1144fe56b68b0980f7f7ce59887987b10e0f3d9a"
+CLEANUP_REPAIR_BASE = "f77b73786960f8a4136267372efa2b607f064706"
+# Exact Git blob identities of the amended cleanup helper and its tests.
+CLEANUP_REPAIR_BLOBS = {
+    "testing/run_e8_4_fix5_canonical_five_plot_gate.py": "a05f041ceaf2a1ef5798002272a1e29a22083b83",
+    "testing/test_run_e8_4_fix5_canonical_five_plot_gate.py": "48cc342829933da42cf925f453ad19fe352a97c7",
+}
 PROFILE = "testing/pion_t_template_comparison_gate_profile.json"
 PROFILE_ID = "pion_t_template_comparison_center_left_lowe/v1"
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
@@ -158,9 +164,8 @@ def runtime_directory(repo, record, path, private=False):
 
 
 @contextmanager
-def analysis_worktree(repo, source_commit, record):
-    # mkdtemp, rather than TemporaryDirectory: never invoke an implicit recursive
-    # cleanup after a failed identity/containment check.
+def private_data_parent(repo, record):
+    # No implicit recursive cleanup after a failed first identity check.
     require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
     require(volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]}) == record,
             "volatile_base_identity_changed")
@@ -169,21 +174,10 @@ def analysis_worktree(repo, source_commit, record):
     try:
         created = parent.lstat()
         record["parent"] = directory_identity(parent, private=True)
-        worktree = parent / "analysis"
-        added = False
         verify_runtime_parent(repo, record)
-        require(not os.path.lexists(worktree), "runtime_worktree_collision")
-        git(repo, "worktree", "add", "--detach", str(worktree), source_commit)
-        added = True
-        record["analysis"] = runtime_directory(repo, record, worktree)
-        require(git(worktree, "rev-parse", "HEAD") == source_commit, "worktree_head_mismatch")
-        require(git(worktree, "branch", "--show-current") == "", "worktree_not_detached")
-        require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "", "worktree_dirty")
-        yield worktree
+        yield parent
     finally:
         if "parent" not in record:
-            # Before validation, remove only the newly created empty directory.
-            # Never recurse or trust a replaced path after the first check fails.
             current = volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]})
             require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")
             require(created is not None and stat.S_ISDIR(created.st_mode) and
@@ -195,22 +189,14 @@ def analysis_worktree(repo, source_commit, record):
                     (created.st_dev, created.st_ino, created.st_uid, stat.S_IMODE(created.st_mode)) and
                     created.st_dev == record["mount_device"],
                     "runtime_initial_parent_cleanup_unsafe:" + str(parent))
-            parent.rmdir()  # Fails closed if anything appeared in this directory.
+            parent.rmdir()
         else:
             verify_runtime_parent(repo, record)
-            if "locations" in record:
-                verify_private(worktree, parent / "ab-output/Analysis/KaonLT")
+            if "code_parent" in record:
+                require(not os.path.lexists(record["code_parent"]["path"]), "runtime_code_identity_changed_or_cleanup_incomplete")
             for location, identity in record.get("locations", {}).items():
                 require(runtime_directory(repo, record, Path(location)) == identity,
                         "runtime_cleanup_location_changed:" + location)
-            if added:
-                require(runtime_directory(repo, record, worktree) == record["analysis"],
-                        "runtime_worktree_identity_changed")
-                # Git removes only this registered worktree. Symlinks inside it are
-                # unlinked, never traversed to their external targets.
-                git(repo, "worktree", "remove", "--force", str(worktree))
-            require(not os.path.lexists(worktree), "runtime_worktree_cleanup_incomplete")
-            verify_runtime_parent(repo, record)
             require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
             shutil.rmtree(parent)
         require(not os.path.lexists(parent), "runtime_parent_cleanup_incomplete")
@@ -218,14 +204,50 @@ def analysis_worktree(repo, source_commit, record):
         require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")
 
 
+def verify_code_layout(repo, worktree, record):
+    isolation.cleanup_path(repo, worktree.parent, worktree, "analysis")
+    require(worktree.parent.parent == Path(repo).resolve().parent and
+            directory_identity(worktree.parent, private=True) == record["code_parent"] and
+            directory_identity(worktree) == record["analysis"] and
+            worktree.stat().st_dev == Path(repo).stat().st_dev != record["mount_device"],
+            "runtime_code_identity_changed")
+    for location, identity in record.get("code_locations", {}).items():
+        require(directory_identity(Path(location)) == identity,
+                "runtime_code_location_changed:" + location)
+
+
+@contextmanager
+def analysis_worktree(repo, source_commit, record):
+    with private_data_parent(repo, record):
+        with isolation.owned_worktree(repo, source_commit, "analysis") as worktree:
+            record["code_parent"] = directory_identity(worktree.parent, private=True)
+            record["analysis"] = directory_identity(worktree)
+            verify_code_layout(repo, worktree, record)
+            try:
+                yield worktree
+            finally:
+                verify_code_layout(repo, worktree, record)
+                verify_runtime_parent(repo, record)
+                if "locations" in record:
+                    verify_private(worktree, Path(record["parent"]["path"]) / "ab-output/Analysis/KaonLT")
+        require(not os.path.lexists(worktree.parent), "runtime_code_cleanup_incomplete")
+
+
 def verify_runtime_layout(repo, worktree, record, output, env):
-    require(runtime_directory(repo, record, worktree) == record["analysis"],
-            "runtime_worktree_identity_changed")
+    verify_code_layout(repo, worktree, record)
+    parent = verify_runtime_parent(repo, record)
+    require(output == parent / "ab-output/Analysis/KaonLT", "private_output_path_changed")
     verify_private(worktree, output)
-    locations = [worktree.parent / "ab-output", output.parent, output,
-                 worktree.parent / "runtime-python", worktree.parent / "runtime-python/ltsep"]
+    code_paths = [worktree.parent / "runtime-python", worktree.parent / "runtime-python/ltsep"]
+    code = {str(p): directory_identity(p) for p in code_paths}
+    require(all(identity["device"] == record["analysis"]["device"] for identity in code.values()),
+            "runtime_code_device_changed")
+    if "code_locations" in record:
+        require(code == record["code_locations"], "runtime_code_location_changed")
+    record["code_locations"] = code
+    locations = [parent / "ab-output", output.parent, output]
     locations += [Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]
-    identities = {str(p): runtime_directory(repo, record, p, private=p == locations[0] or p in locations[5:])
+    identities = {str(p): runtime_directory(repo, record, p, private=p == locations[0] or p in locations[3:])
                   for p in locations}
     require(not output.is_relative_to(Path(record["shared_output"])) and
             not Path(record["shared_output"]).is_relative_to(output), "runtime_shared_output_overlap")
@@ -236,71 +258,13 @@ def verify_runtime_layout(repo, worktree, record, output, env):
 
 
 def prepare_runtime_overlay(repo, worktree, placement):
-    """Frozen overlay algorithm with owner-local volatile placement validation.
+    """Use the established installed-package algorithm in its group geometry."""
+    verify_code_layout(repo, worktree, placement)
+    env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
+    require(overlay["baseline_paths"] == placement["baseline_paths"], "runtime_baseline_changed")
+    verify_code_layout(repo, worktree, placement)
+    return env, overlay
 
-    Keep configuration selection, bytes and import/preservation probes identical
-    to isolation.prepare_runtime_overlay; its sibling-only guard cannot apply.
-    """
-    identity = isolation.import_identity(repo)
-    package_file = Path(identity["package_file"]).resolve()
-    package = package_file.parent
-    pathing = Path(identity["pathing_file"]).resolve()
-    require(package_file.name == "__init__.py" and pathing.is_relative_to(package),
-            "ltsep_package_layout_invalid")
-    baseline = isolation.path_fields(repo, repo)
-    require(baseline["LTANAPATH"] and Path(baseline["LTANAPATH"]).is_absolute() and
-            Path(baseline["LTANAPATH"]).resolve() == repo.resolve(), "baseline_ltanapath_not_ordinary_repo")
-    parent = worktree.parent.resolve()
-    require(runtime_directory(repo, placement, worktree) == placement["analysis"],
-            "runtime_worktree_identity_changed")
-    require(baseline == placement["baseline_paths"], "runtime_baseline_changed")
-    overlay = parent / "runtime-python"
-    require(not overlay.exists(), "ltsep_overlay_already_exists")
-    overlay.mkdir(mode=0o700)
-    runtime_directory(repo, placement, overlay, private=True)
-    copied = overlay / "ltsep"
-    shutil.copytree(package, copied, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    runtime_directory(repo, placement, copied)
-    configs = []
-    for file in sorted((copied / "PATH_TO_DIR").glob("*.path")):
-        values = isolation.read_path_config(file.read_bytes())
-        if "LTANAPATH" not in values:
-            continue
-        # Use the installed package's own raw SetPath lookup to account for
-        # Root's derived OUTPATH/CUTPATH, without guessing those transformations.
-        observed = isolation.python_json(repo,
-            'import json,sys; from ltsep.pathing import SetPath; '
-            'p=SetPath(sys.argv[1]); '
-            'print(json.dumps({k:p.getPath(k) for k in json.loads(sys.argv[2])}))',
-            (str(repo), json.dumps(list(values))))
-        expanded = {key: value.replace("${USER}", baseline["USER"]) for key, value in values.items()}
-        if expanded == observed:
-            configs.append(file)
-    require(len(configs) == 1, "ltsep_matching_config_not_unique")
-    selected = configs[0]
-    original_config = package / selected.relative_to(copied)
-    original_bytes = selected.read_bytes()
-    require(original_config.read_bytes() == original_bytes, "ltsep_copy_identity_mismatch")
-    # Replace the value span only; keep all other fields, whitespace and line
-    # endings byte-for-byte. Never patch installed files or Python code.
-    matches = list(re.finditer(rb"(?m)^(LTANAPATH[ \t]*=[ \t]*)([^\r\n]*?)([ \t]*)(\r?$)", original_bytes))
-    require(len(matches) == 1, "ltsep_ltanapath_assignment_not_unique")
-    match = matches[0]
-    patched = original_bytes[:match.start(2)] + str(worktree).encode("utf-8") + original_bytes[match.end(2):]
-    selected.write_bytes(patched)
-    protected = {str(file): sha256(file) for file in (package_file, pathing, original_config)}
-    env = isolation.analysis_environment(overlay)
-    imported = isolation.import_identity(worktree, env)
-    require(Path(imported["package_file"]).resolve() == (copied / "__init__.py").resolve() and
-            Path(imported["pathing_file"]).resolve().is_relative_to(copied.resolve()),
-            "ltsep_overlay_import_identity_invalid")
-    record = {"original_package_identity": identity, "baseline_paths": baseline,
-        "overlay_parent": str(overlay), "selected_copied_config": str(selected),
-        "original_config_path": str(original_config), "original_copied_file_sha256": hashlib.sha256(original_bytes).hexdigest(),
-        "patched_copied_file_sha256": sha256(selected), "original_source_sha256": protected,
-        "child_import_identity": imported, "import_isolation_passed": True}
-    isolation.verify_ltsep_preservation(record)
-    return env, record
 
 def strict_json(raw):
     def invalid(value):
@@ -358,12 +322,16 @@ def preflight(repo, source_commit):
         require(path in isolation.FARM_OUTPUTS or path.startswith("OUTPUT/") or
                 (line[:2] == "??" and re.fullmatch(r"kaonlt_review(?:\([^/]+\))?\.diff", path)),
                 "dirty_gate_source:" + line)
-    # This successor may add only the three owned files and repository memory.
+    # Only the two pinned cleanup files extend the historical three-file scope.
     changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
     allowed = {PROFILE, "testing/run_pion_t_template_comparison_gate.py",
-               "testing/test_run_pion_t_template_comparison_gate.py"}
+               "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS}
     require(all(p in allowed or p.startswith("docs/memory/") for p in changed),
             "unexpected_committed_source")
+    git(repo, "merge-base", "--is-ancestor", CLEANUP_REPAIR_BASE, source_commit)
+    for path, blob in CLEANUP_REPAIR_BLOBS.items():
+        require(git(repo, "rev-parse", source_commit + ":" + path) == blob,
+                "cleanup_repair_blob_changed:" + path)
     return before
 
 
@@ -598,12 +566,12 @@ def verify_accepted(outdir, before):
     return {"passed": True, "artifacts": before}
 
 
-def private_output(worktree, paths, shared):
+def private_output(worktree, paths, shared, data_parent):
     """Exclusive owner-local topology; the frozen shared-link helper is unused."""
     worktree, shared = Path(worktree), Path(shared).resolve()
     external_output = (Path(paths["VOLATILEPATH"]) / "OUTPUT").resolve()
     require(shared == (external_output / "Analysis/KaonLT").resolve(), "private_shared_authority")
-    parent = worktree.parent
+    parent = Path(data_parent)
     private, link = parent / "ab-output", worktree / "OUTPUT"
     require(worktree.is_absolute() and worktree.resolve() == worktree and worktree.name == "analysis"
             and not worktree.is_symlink() and worktree.is_dir(), "private_worktree_invalid")
@@ -624,7 +592,7 @@ def private_output(worktree, paths, shared):
 
 
 def verify_private(worktree, output):
-    private = worktree.parent / "ab-output"
+    private = Path(output).parents[1]
     link = worktree / "OUTPUT"
     require(link.is_symlink() and os.readlink(link) == str(private) and link.resolve() == private,
             "private_link_changed")
@@ -837,11 +805,11 @@ def verify_originals(records):
     return {"passed": True}
 
 
-def private_environment(env, worktree):
+def private_environment(env, data_parent):
     result = child_environment(env)
     for key, leaf in (("TMPDIR", "tmp"), ("XDG_CACHE_HOME", "cache"), ("MPLCONFIGDIR", "mpl"),
                       ("PYTHONPYCACHEPREFIX", "pycache")):
-        p = worktree.parent / ("ab-" + leaf)
+        p = Path(data_parent) / ("ab-" + leaf)
         require(not os.path.lexists(p), "private_cache_collision:" + key)
         p.mkdir(mode=0o700)
         result[key] = str(p)
@@ -942,13 +910,14 @@ def execute_gate(repo, outdir, output, source_commit):
             placement["shared_output"] = str(outdir.resolve())
             status.update(runtime_placement=placement)
             env, overlay = prepare_runtime_overlay(repo, worktree, placement)
-            env = private_environment(env, worktree)
+            data_parent = Path(placement["parent"]["path"])
+            env = private_environment(env, data_parent)
             probes = isolation.probe_paths(worktree, env, overlay["baseline_paths"])
             baseline = overlay["baseline_paths"]
             require(Path(baseline["OUTPATH"]).resolve() == outdir.resolve() ==
                     (Path(baseline["VOLATILEPATH"]) / "OUTPUT/Analysis/KaonLT").resolve(), "ordinary_output_authority")
             external = external_setup(worktree, probes[0]["paths"], outdir)
-            private = private_output(worktree, probes[0]["paths"], outdir)
+            private = private_output(worktree, probes[0]["paths"], outdir, data_parent)
             callers = private_callers(repo, worktree, env, baseline, private, package)
             skims = skim_inventory(worktree, baseline)
             plan = copy_plan(outdir, private)
@@ -998,7 +967,7 @@ def execute_gate(repo, outdir, output, source_commit):
                 status.update(zip_verification_completed=True, zip_identity={"sha256": sha256(output),
                               "bytes": output.stat().st_size})
             require(not os.path.lexists(source), "source_cleanup_incomplete")
-        require(not os.path.lexists(worktree.parent), "private_cleanup_incomplete")
+        require(not os.path.lexists(worktree.parent) and not os.path.lexists(data_parent), "private_cleanup_incomplete")
         status.update(worktree_cleanup_completed=True)
         preservation()
         summary = {"schema_version": "pion_t_template_comparison_run_summary/v1",

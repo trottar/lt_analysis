@@ -161,16 +161,115 @@ class GateTests(unittest.TestCase):
         extra = [p for p in changed if p not in allowed and not p.startswith("docs/memory/")]
         self.assertEqual(len(extra), 13)  # reproduce the original committed-range rejection
         state = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}
-        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", return_value="") as run:
+        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", side_effect=lambda repo, *args: owner.CLEANUP_REPAIR_BLOBS[args[1].split(":", 1)[1]] if args[0] == "rev-parse" else "") as run:
             self.assertEqual(owner.preflight(ROOT, SHA), state)
             self.assertIn((ROOT, "merge-base", "--is-ancestor", owner.BASE_HEAD, owner.REVIEWED_HEAD),
                           [call.args for call in run.call_args_list])
-            self.assertEqual(run.call_args.args, (ROOT, "diff", "--name-only", owner.REVIEWED_HEAD, SHA))
+            self.assertIn((ROOT, "diff", "--name-only", owner.REVIEWED_HEAD, SHA), [c.args for c in run.call_args_list])
         for path in extra + ["unrelated.py"]:
             with self.subTest(path=path), patch.object(owner.isolation, "snapshot", return_value=state), patch.object(
                     owner, "git", side_effect=["", "", "", path]):
                 with self.assertRaisesRegex(ValueError, "unexpected_committed_source"):
                     owner.preflight(ROOT, SHA)
+
+    def test_cleanup_successor_source_guard_is_exact_and_pinned(self):
+        state = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}
+        for defect in (None, "helper", "test", "unrelated", "ancestor", "dirty"):
+            def git(repo, *args):
+                if args[0] == "diff":
+                    return "unrelated.py" if defect == "unrelated" else "\n".join(owner.CLEANUP_REPAIR_BLOBS)
+                if args[0] == "rev-parse":
+                    path = args[1].split(":", 1)[1]
+                    if defect == ("test" if "/test_" in path else "helper"): return "0" * 40
+                    return owner.CLEANUP_REPAIR_BLOBS[path]
+                if args[:3] == ("merge-base", "--is-ancestor", owner.CLEANUP_REPAIR_BASE) and defect == "ancestor":
+                    raise ValueError("not_cleanup_successor")
+                return ""
+            observed = {**state, "porcelain": " M testing/run_e8_4_fix5_canonical_five_plot_gate.py"} if defect == "dirty" else state
+            with self.subTest(defect=defect), patch.object(owner.isolation, "snapshot", return_value=observed), patch.object(owner, "git", side_effect=git):
+                if defect:
+                    with self.assertRaisesRegex(ValueError, "blob_changed|unexpected_committed_source|not_cleanup_successor|dirty_gate_source"):
+                        owner.preflight(self.repo, SHA)
+                else:
+                    self.assertEqual(owner.preflight(self.repo, SHA), state)
+        for path, blob in owner.CLEANUP_REPAIR_BLOBS.items():
+            raw = (ROOT / path).read_bytes().replace(b"\r\n", b"\n")
+            self.assertEqual(hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest(), blob)
+
+    def test_split_entry_with_real_group_selected_package_and_private_data(self):
+        with VolatileRuntime().fixture(aliases=True) as (repo, base, shared, package, config, calls), ExitStack() as stack:
+            old = self.repo, self.outdir, self.transfer, self.output
+            self.repo, self.outdir = repo, shared
+            self.transfer = base / "transfer"; self.transfer.mkdir()
+            self.output = self.transfer / "split.zip"
+            populate_inputs(shared); artifacts(shared)
+            previous = [base / ("kaonlt-ab-analysis-" + x) for x in ("c16r9oxs", "0o8v_67p")]
+            for path in previous: path.mkdir(); (path / "KEEP").write_bytes(b"old attempt")
+            caller_paths = [("src/main.py", ("Plot_LTSep",), "src"),
+                            ("src/setup/findEffectiveCharge.py", (), "src/setup"),
+                            ("src/setup/getDataTable.py", (), "src/setup")]
+            def copy_callers(tree):
+                for caller, _, _ in caller_paths:
+                    target = tree / caller; target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes((ROOT / caller).read_bytes())
+            copy_callers(repo)
+            real_git = owner.isolation.git
+            def git(tree, *args):
+                result = real_git(tree, *args)
+                if args[:2] == ("worktree", "add"): copy_callers(Path(args[3]))
+                return result
+            def mock(obj, name, **kwargs): return stack.enter_context(patch.object(obj, name, **kwargs))
+            mock(owner.isolation, "git", side_effect=git)
+            mock(owner.isolation.accepted, "REPO", new=repo)
+            mock(owner.isolation.accepted, "ARTIFACTS", new=shared)
+            mock(owner.isolation.accepted, "GLOBUS", new=self.transfer)
+            source = mock(owner, "source_preflight", return_value=([], IDENTITIES))
+            mock(owner, "preflight", return_value={"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""})
+            mock(owner, "resolved_profile", return_value=self.profile)
+            mock(owner, "reached_callers", return_value=caller_paths)
+            mock(owner, "external_setup", return_value={"links": [], "directories": []})
+            mock(owner, "skim_inventory", return_value={"fixture": {"exists": False}})
+            mock(owner.isolation, "verify_preservation", return_value={"passed": True})
+            mock(owner, "pdf_pages", return_value=6)
+            def child(tree, log, env):
+                self.assertTrue(source.called)
+                private = (tree / "OUTPUT/Analysis/KaonLT").resolve()
+                self.assertTrue(tree.is_relative_to(repo.parent))
+                self.assertTrue(private.is_relative_to(base))
+                self.assertNotEqual(tree.stat().st_dev, private.stat().st_dev)
+                for key in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX"):
+                    self.assertTrue(Path(env[key]).is_relative_to(base))
+                self.assertFalse(list(tree.parent.rglob("*.root")))
+                self.assertFalse(list(tree.parent.rglob("*.hist")))
+                self.assertFalse((tree.parent / "ab-output").exists())
+                log.write_text(MARKERS); time.sleep(.02); artifacts(private)
+                (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"derived private branches")
+                return 0
+            run = mock(owner.debug, "run_analysis", side_effect=child)
+            @contextmanager
+            def collection(clean):
+                module = Mock()
+                def collect(**kw):
+                    self.assertEqual(kw["repo_root"], clean)
+                    self.assertFalse((clean / "OUTPUT").exists())
+                    self.assertTrue(Path(kw["outdir"]).is_relative_to(base))
+                    self.assertTrue(Path(kw["outdir"]).is_dir())
+                    return self.collect(outdir=kw["outdir"])
+                module.collect_validation_bundle.side_effect = collect
+                yield module
+            mock(owner.isolation, "collection_module", side_effect=collection)
+            stack.enter_context(redirect_stderr(io.StringIO()))
+            try:
+                owner.execute_gate(repo, shared, self.output, SHA)
+                run.assert_called_once()
+                summary = json.loads((self.transfer / "split-run-summary.json").read_text())
+                placement = summary["runtime_placement"]
+                self.assertFalse(Path(placement["parent"]["path"]).exists())
+                self.assertFalse(Path(placement["code_parent"]["path"]).exists())
+                self.assertEqual(len(summary["copy_plan"]), 21)
+                for path in previous: self.assertEqual((path / "KEEP").read_bytes(), b"old attempt")
+            finally:
+                self.repo, self.outdir, self.transfer, self.output = old
 
     def test_original_owner_reproduces_history_rejection_and_four_target_collision(self):
         raw = subprocess.check_output(["git", "show", owner.REVIEWED_HEAD + ":testing/run_pion_t_template_comparison_gate.py"], cwd=ROOT)
@@ -378,6 +477,12 @@ class GateTests(unittest.TestCase):
                            if p.suffix == ".root" or p.name in owner.names()}
         @contextmanager
         def owned(repo, sha, leaf):
+            nonlocal worktree
+            if leaf == "analysis":
+                with tempfile.TemporaryDirectory(prefix="kaonlt-e8-4-canonical-five-analysis-", dir=repo.parent) as d:
+                    worktree = Path(d) / "analysis"; worktree.mkdir()
+                    yield worktree
+                return
             self.assertEqual(leaf, "source")
             target = source
             target.mkdir()
@@ -410,7 +515,7 @@ class GateTests(unittest.TestCase):
             module = Mock()
             def collect(**kw):
                 self.assertEqual(kw["repo_root"], source)
-                private = worktree.parent / "ab-output/Analysis/KaonLT"
+                private = worktree.joinpath("OUTPUT/Analysis/KaonLT").resolve()
                 self.assertEqual(kw["outdir"], private)
                 self.assertTrue(private.is_dir())
                 if fail == "collector":
@@ -425,7 +530,7 @@ class GateTests(unittest.TestCase):
             # Let the real filesystem clock advance before genuinely new writes;
             # never retime artifacts or change the owner's freshness boundary.
             time.sleep(.02)
-            private = tree.parent / "ab-output/Analysis/KaonLT"
+            private = tree.joinpath("OUTPUT/Analysis/KaonLT").resolve()
             artifacts(private)
             (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"private derived branches")
             return 1 if fail == "child" else 0
@@ -577,6 +682,83 @@ class GateTests(unittest.TestCase):
 class VolatileRuntime(unittest.TestCase):
     """Real Linux filesystem/probe fixtures; Git and the analysis child are mocks."""
 
+    def test_group_selector_reproduces_volatile_caller_failure_and_group_success(self):
+        """Diagnostic only: a working caller does not validate split cleanup."""
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            fields = owner.isolation.read_path_config(config.read_bytes())
+            fields["ANALYSISPATH"] = str(repo.parent)
+            config.write_text("".join(k + "=" + v + "\n" for k, v in fields.items()))
+            pathing = package / "pathing.py"
+            pathing.write_text('class InvalidPath(Exception): pass\n' + pathing.read_text().replace(
+                'raise ValueError("no matching caller")', 'raise InvalidPath("PATHFILE not defined")'))
+            original = {p: p.read_bytes() for p in package.rglob("*") if p.is_file()}
+            previous = [base / ("kaonlt-ab-analysis-" + suffix) for suffix in ("c16r9oxs", "0o8v_67p")]
+            for parent in previous:
+                parent.mkdir(mode=0o700); (parent / "KEEP").write_bytes(b"previous failed attempt")
+            real_glob = Path.glob
+            def no_previous_scan(path, pattern):
+                self.assertNotEqual(path, base, "must not enumerate prior attempts")
+                return real_glob(path, pattern)
+            old_text = subprocess.check_output(["git", "show", "f77b73786960f8a4136267372efa2b607f064706:testing/run_pion_t_template_comparison_gate.py"], cwd=ROOT).decode()
+            selected = [n for n in ast.parse(old_text).body if isinstance(n, ast.FunctionDef) and n.name in {"analysis_worktree", "prepare_runtime_overlay"}]
+            old = dict(vars(owner))
+            exec(compile(ast.Module(body=selected, type_ignores=[]), "<starting-volatile-owner>", "exec"), old)
+            baseline = owner.isolation.path_fields(repo, repo)
+            record = owner.volatile_base(repo, baseline)
+            with patch.object(Path, "glob", no_previous_scan):
+                with old["analysis_worktree"](repo, SHA, record) as work:
+                    record.update(baseline_paths=baseline, shared_output=str(shared))
+                    env, overlay = old["prepare_runtime_overlay"](repo, work, record)
+                    self.assertTrue(work.is_relative_to(base))
+                    self.assertEqual(work.name, "analysis")
+                    self.assertTrue(work.parent.name.startswith("kaonlt-ab-analysis-"))
+                    with self.assertRaisesRegex(ValueError, "(?s)ltsep_probe_failed:.*PATHFILE not defined"):
+                        owner.isolation.probe_paths(work, env, baseline)
+                # The actual frozen helper and real create_ltsep_root/realpath
+                # probes succeed under the historical group-sibling geometry.
+                with patch.object(owner.isolation, "git", side_effect=owner.git):
+                    with owner.isolation.owned_worktree(repo, SHA, "analysis") as work:
+                        env, overlay = owner.isolation.prepare_runtime_overlay(repo, work)
+                        probes = owner.isolation.probe_paths(work, env, baseline)
+                        self.assertEqual(len(probes), 3)
+                        self.assertTrue(work.is_relative_to(repo.parent))
+                        self.assertNotEqual(work.stat().st_dev, base.stat().st_dev)
+                        self.assertTrue(all(Path(p["paths"]["LTANAPATH"]) == work for p in probes))
+                        self.assertTrue(all(p["paths"]["VOLATILEPATH"] == baseline["VOLATILEPATH"] for p in probes))
+                        self.assertEqual(owner.isolation.read_path_config(
+                            Path(overlay["selected_copied_config"]).read_bytes())["LTANAPATH"], str(work))
+            self.assertEqual({p: p.read_bytes() for p in original}, original)
+            for parent in previous:
+                self.assertEqual((parent / "KEEP").read_bytes(), b"previous failed attempt")
+
+    def test_frozen_group_parent_swap_refuses_cleanup_outside_owned_area(self):
+        """Retained safety regression: reject the swap without any removal.
+
+        Git is mocked exactly as in the existing Linux fixture. Only disposable
+        fixture bytes can be removed; no real Git mutation or analysis runs.
+        """
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            unrelated = repo.parent / "unrelated-existing"
+            (unrelated / "analysis").mkdir(parents=True)
+            sentinel = unrelated / "analysis/KEEP"; sentinel.write_bytes(b"unrelated bytes")
+            with patch.object(owner.isolation, "git", side_effect=owner.git):
+                with self.assertRaisesRegex(ValueError, "worktree_cleanup_path_invalid"):
+                    with owner.isolation.owned_worktree(repo, SHA, "analysis") as work:
+                        parent = work.parent
+                        saved = parent.with_name(parent.name + "-saved")
+                        parent.rename(saved)
+                        parent.symlink_to(unrelated)
+                        # Reproduce guard rejection followed by context exit;
+                        # neither cleanup route may touch the replacement.
+                        with self.assertRaisesRegex(ValueError, "alias_or_invalid"):
+                            owner.directory_identity(parent, private=True)
+                        raise ValueError("owner rejected swapped code parent")
+            removals = [args for _, args in calls if args[:2] == ("worktree", "remove")]
+            self.assertTrue((saved / "analysis/science.py").is_file())
+            self.assertEqual({"removals": len(removals), "sentinel_preserved": sentinel.exists()},
+                             {"removals": 0, "sentinel_preserved": True},
+                             "frozen cleanup issued removal through a swapped parent")
+
     def test_00_starting_owner_rejects_real_2700_and_leaves_parent(self):
         with self.fixture() as (repo, base, shared, package, config, calls):
             base.chmod(0o2700)
@@ -629,14 +811,14 @@ class VolatileRuntime(unittest.TestCase):
                 record = owner.volatile_base(repo, baseline)
                 with owner.analysis_worktree(repo, SHA, record) as work:
                     self.assertEqual(record["parent"]["mode"], mode)
-                    self.assertEqual(owner.verify_runtime_parent(repo, record), work.parent)
+                    self.assertEqual(owner.verify_runtime_parent(repo, record), Path(record["parent"]["path"]))
                     record.update(baseline_paths=baseline, shared_output=str(shared))
                     env, _ = owner.prepare_runtime_overlay(repo, work, record)
-                    env = owner.private_environment(env, work)
+                    env = owner.private_environment(env, Path(record["parent"]["path"]))
                     paths = owner.isolation.probe_paths(work, env, baseline)[0]["paths"]
-                    private = owner.private_output(work, paths, shared)
+                    private = owner.private_output(work, paths, shared, Path(record["parent"]["path"]))
                     owner.verify_runtime_layout(repo, work, record, private, env)
-                    roots = [work.parent / "ab-output", work.parent / "runtime-python"]
+                    roots = [Path(record["parent"]["path"]) / "ab-output"]
                     roots += [Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]
                     for path in roots:
                         self.assertEqual(stat.S_IMODE(path.stat().st_mode), mode)
@@ -656,12 +838,12 @@ class VolatileRuntime(unittest.TestCase):
                             owner.verify_runtime_layout(repo, work, record, private, env)
                     finally:
                         changed.chmod(mode)
-                    work.parent.chmod(0o2700 if mode == 0o700 else 0o700)
+                    Path(record["parent"]["path"]).chmod(0o2700 if mode == 0o700 else 0o700)
                     try:
                         with self.assertRaisesRegex(ValueError, "parent_identity_changed"):
                             owner.verify_runtime_parent(repo, record)
                     finally:
-                        work.parent.chmod(mode)
+                        Path(record["parent"]["path"]).chmod(mode)
                 self.assertFalse(work.parent.exists())
 
     def test_first_identity_failure_removes_only_new_empty_parent(self):
@@ -796,8 +978,8 @@ class VolatileRuntime(unittest.TestCase):
                     anchor.parent.chmod(0o755)
                     anchor.unlink(); anchor.symlink_to(base.parent)
                     anchor.parent.chmod(0o555)
-            self.assertTrue((work / "science.py").is_file())
-            self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+            self.assertTrue(Path(record["parent"]["path"]).is_dir())
+            self.assertTrue(all(Path(args[3]).is_relative_to(repo.parent) for _, args in calls if args[:2] == ("worktree", "remove")))
             owner.verify_accepted(shared, before)
 
     @contextmanager
@@ -822,7 +1004,7 @@ class VolatileRuntime(unittest.TestCase):
                 mount, raw = stack.enter_context(infrastructure_aliases(base, root / "infrastructure"))
             else:
                 raw = base
-            fields.update(LTANAPATH=str(repo), VOLATILEPATH=str(raw), ANALYSISPATH="/")
+            fields.update(LTANAPATH=str(repo), VOLATILEPATH=str(raw), ANALYSISPATH=str(repo.parent))
             config.write_text("".join(k + "=" + v + "\n" for k, v in fields.items()))
             if ambiguous:
                 config.with_name("duplicate.path").write_bytes(config.read_bytes())
@@ -839,6 +1021,7 @@ class VolatileRuntime(unittest.TestCase):
                     return SHA
                 return ""
             stack.enter_context(patch.object(owner, "git", side_effect=fake_git))
+            stack.enter_context(patch.object(owner.isolation, "git", side_effect=fake_git))
             stack.enter_context(patch.object(owner, "VOLATILE_MOUNT", mount))
             stack.enter_context(patch.dict(os.environ, {"PYTHONPATH": str(package.parent),
                 "PYTHONDONTWRITEBYTECODE": "1"}))
@@ -854,17 +1037,20 @@ class VolatileRuntime(unittest.TestCase):
             with owner.analysis_worktree(repo, SHA, record) as work:
                 record.update(baseline_paths=baseline, shared_output=str(shared))
                 env, overlay = owner.prepare_runtime_overlay(repo, work, record)
-                env = owner.private_environment(env, work)
+                env = owner.private_environment(env, Path(record["parent"]["path"]))
                 probes = owner.isolation.probe_paths(work, env, baseline)
-                private = owner.private_output(work, probes[0]["paths"], shared)
+                private = owner.private_output(work, probes[0]["paths"], shared, Path(record["parent"]["path"]))
                 owner.verify_runtime_layout(repo, work, record, private, env)
                 copies = {}; plan = owner.copy_plan(shared, private)
                 owner.stage_copies(shared, private, plan, copies)
-                for p in (work, private, Path(overlay["overlay_parent"]) / "ltsep",
+                for p in (private,
                           *[Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]):
                     self.assertTrue(p.is_relative_to(base))
                     self.assertFalse(p.is_relative_to(repo.parent))
-                self.assertEqual(stat.S_IMODE(work.parent.stat().st_mode), 0o700)
+                self.assertTrue(work.is_relative_to(repo.parent))
+                self.assertTrue(Path(overlay["overlay_parent"]).is_relative_to(work.parent))
+                self.assertNotEqual(work.stat().st_dev, private.stat().st_dev)
+                self.assertEqual(record["parent"]["mode"], 0o700)
                 for copy in copies.values():
                     self.assertTrue(Path(copy["runtime_container_before"]["resolved"]).is_relative_to(base))
                     self.assertNotEqual(copy["original"]["inode"], copy["runtime_container_before"]["inode"])
@@ -921,12 +1107,13 @@ class VolatileRuntime(unittest.TestCase):
             record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
             with self.assertRaisesRegex(ValueError, "alias_or_invalid"):
                 with owner.analysis_worktree(repo, SHA, record) as work:
-                    saved = work.parent.with_name(work.parent.name + "-saved")
-                    work.parent.rename(saved)
-                    work.parent.symlink_to(repo.parent)
-            self.assertTrue((saved / "analysis/science.py").is_file())
+                    parent = Path(record["parent"]["path"])
+                    saved = parent.with_name(parent.name + "-saved")
+                    parent.rename(saved)
+                    parent.symlink_to(repo.parent)
+            self.assertTrue(saved.is_dir())
             self.assertTrue((repo / "OUTPUT").is_symlink())
-            self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+            self.assertTrue(all(Path(args[3]).is_relative_to(repo.parent) for _, args in calls if args[:2] == ("worktree", "remove")))
 
     def test_swapped_cache_escape_and_group_output_are_rejected(self):
         with self.fixture() as (repo, base, shared, package, config, calls):
@@ -935,9 +1122,9 @@ class VolatileRuntime(unittest.TestCase):
             with owner.analysis_worktree(repo, SHA, record) as work:
                 record.update(baseline_paths=baseline, shared_output=str(shared))
                 env, _ = owner.prepare_runtime_overlay(repo, work, record)
-                env = owner.private_environment(env, work)
+                env = owner.private_environment(env, Path(record["parent"]["path"]))
                 paths = owner.isolation.probe_paths(work, env, baseline)[0]["paths"]
-                private = owner.private_output(work, paths, shared)
+                private = owner.private_output(work, paths, shared, Path(record["parent"]["path"]))
                 owner.verify_runtime_layout(repo, work, record, private, env)
                 with self.assertRaisesRegex(ValueError, "private_output_path_changed"):
                     owner.verify_runtime_layout(repo, work, record, repo.parent / "ab-output", env)
@@ -955,7 +1142,7 @@ class VolatileRuntime(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "private_link_changed"):
                         owner.verify_runtime_layout(repo, work, record, private, env)
                 finally:
-                    link.unlink(); link.symlink_to(work.parent / "ab-output")
+                    link.unlink(); link.symlink_to(Path(record["parent"]["path"]) / "ab-output")
 
     def test_cleanup_capability_and_changed_base_reject_before_worktree(self):
         with self.fixture() as (repo, base, shared, package, config, calls):
@@ -978,10 +1165,13 @@ class VolatileRuntime(unittest.TestCase):
                         if defect == "worktree":
                             work.rename(work.with_name("saved-analysis")); work.mkdir()
                         else:
-                            work.parent.chmod(0o755)
-                self.assertTrue(work.parent.exists())
+                            Path(record["parent"]["path"]).chmod(0o755)
+                self.assertTrue(Path(record["parent"]["path"]).exists())
                 self.assertTrue((repo / "OUTPUT").is_symlink())
-                self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+                if defect == "worktree":
+                    self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+                else:
+                    self.assertFalse(work.parent.exists())  # Safe code role cleaned independently.
 
 
 def populate_inputs(root):
@@ -1009,7 +1199,7 @@ class PrivateTopology(unittest.TestCase):
                       "VOLATILEPATH": str(self.base / "volatile"), "ANATYPE": "Kaon"}
 
     def private(self):
-        return owner.private_output(self.work, self.paths, self.shared)
+        return owner.private_output(self.work, self.paths, self.shared, self.base)
 
     def test_private_writes_keep_original_bytes_links_and_independent_inodes(self):
         populate_inputs(self.shared)
@@ -1143,10 +1333,10 @@ class PrivateTopology(unittest.TestCase):
                     else: leaf.unlink()
         bad = {**self.paths, "OUTPATH": str(self.shared)}
         with self.assertRaisesRegex(ValueError, "authority"):
-            owner.private_output(self.work, bad, self.shared)
+            owner.private_output(self.work, bad, self.shared, self.base)
         alias = self.base / "alias"; alias.symlink_to(self.work)
         with self.assertRaisesRegex(ValueError, "worktree_invalid"):
-            owner.private_output(alias, self.paths, self.shared)
+            owner.private_output(alias, self.paths, self.shared, self.base)
 
     def test_changed_private_link_and_unsafe_parent_stop(self):
         self.base.chmod(0o755)
@@ -1163,7 +1353,7 @@ class PrivateTopology(unittest.TestCase):
         alias = self.base / "volatile-alias"
         alias.symlink_to(self.base / "volatile")
         paths = {**self.paths, "VOLATILEPATH": str(alias)}
-        private = owner.private_output(self.work, paths, alias / "OUTPUT/Analysis/KaonLT")
+        private = owner.private_output(self.work, paths, alias / "OUTPUT/Analysis/KaonLT", self.base)
         owner.verify_private(self.work, private)
         self.assertNotEqual(private, self.shared.resolve())
 
@@ -1222,7 +1412,7 @@ class PrivateTopology(unittest.TestCase):
         with patch.object(owner.isolation, "external_symlink_preflight", return_value={"background_simc_path": "", "links": []}):
             with self.assertRaisesRegex(ValueError, "background_mkdir"):
                 owner.external_setup(ROOT, self.paths, self.shared)
-        env = owner.private_environment({"VOLATILEPATH": "stable"}, self.work)
+        env = owner.private_environment({"VOLATILEPATH": "stable"}, self.base)
         self.assertEqual(env["VOLATILEPATH"], "stable")
         for key in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX"):
             self.assertTrue(Path(env[key]).is_relative_to(self.base))
