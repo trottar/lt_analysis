@@ -30,7 +30,7 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B owner preservation repair](phases/kaonlt-ab-owner-preservation-repair-2026-10-25-task-contract.md).
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B volatile runtime placement repair](phases/kaonlt-ab-owner-volatile-runtime-placement-2026-10-25-task-contract.md).
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -216,9 +216,10 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the A/B owner repair, then user
-publication and pushed-state review. A later farm operation needs a separate
-evidence-based readiness decision. Target: private fresh Center/Left lowe t1/t2/t3
+NEXT — independent ChatGPT actual-diff review, user publication and pushed-state
+review, then one owner-controlled private A/B farm validation under verified
+resolver VOLATILEPATH; corrected runtime placement remains NOT VERIFIED.
+Target: private fresh Center/Left lowe t1/t2/t3
 A/B, then unchanged seven-strength C histogram JSON/PDF: full-MM, 1.10–1.16 GeV
 control shapes, transferred-background and fixed-weight variance proxies.
 Review debug log, four A/B files, C JSON/PDF and input identities with explicit

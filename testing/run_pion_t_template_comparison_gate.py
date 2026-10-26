@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import Counter
-from contextlib import redirect_stdout
+from contextlib import contextmanager, redirect_stdout
 from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
@@ -58,6 +58,190 @@ BOUNDARIES = {"diagnostic_only": True, "scientifically_accepted": False,
     "pdf_legibility_verified": False,
     "method_a_detached": True, "method_b_numerically_excluded": True}
 
+# Mount roles, never replacement environment configuration. Tests substitute
+# synthetic mount directories; runtime always verifies the real /volatile.
+VOLATILE_MOUNT = Path("/volatile")
+GROUP_MOUNT = Path("/group")
+
+
+def directory_identity(path, private=False):
+    path = Path(path)
+    require(path.is_absolute() and path.resolve(strict=True) == path and
+            all(not p.is_symlink() for p in (path, *path.parents)) and path.is_dir(),
+            "runtime_directory_alias_or_invalid:" + str(path))
+    info = path.stat()
+    require(info.st_uid == os.geteuid() and
+            (not private or stat.S_IMODE(info.st_mode) == 0o700),
+            "runtime_directory_owner_or_mode:" + str(path))
+    return {"path": str(path), "canonical": str(path.resolve()), "device": info.st_dev, "inode": info.st_ino,
+            "uid": info.st_uid, "mode": stat.S_IMODE(info.st_mode)}
+
+
+def volatile_base(repo, baseline):
+    raw = baseline.get("VOLATILEPATH", "")
+    require(isinstance(raw, str) and raw and Path(raw).is_absolute(), "volatile_base_not_absolute")
+    mount, base = VOLATILE_MOUNT, Path(raw)
+    require(mount.is_absolute() and mount.resolve(strict=True) == mount and
+            not mount.is_symlink() and mount.is_mount(), "volatile_mount_invalid")
+    identity = directory_identity(base)
+    require(base != mount and base.is_relative_to(mount) and
+            base.stat().st_dev == mount.stat().st_dev and os.access(base, os.W_OK | os.X_OK),
+            "volatile_base_invalid")
+    for forbidden in (Path(repo).resolve(), GROUP_MOUNT.resolve()):
+        require(not base.is_relative_to(forbidden) and not forbidden.is_relative_to(base),
+                "volatile_base_overlap")
+    if GROUP_MOUNT.exists():
+        require(base.stat().st_dev != GROUP_MOUNT.stat().st_dev, "volatile_on_group_device")
+    return {"resolver_VOLATILEPATH": raw, "base": identity,
+            "mount_device": mount.stat().st_dev}
+
+
+def verify_runtime_parent(repo, record):
+    current = volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]})
+    require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")
+    parent = Path(record["parent"]["path"])
+    require(parent.parent == Path(record["base"]["path"]) and
+            parent.name.startswith("kaonlt-ab-analysis-") and
+            directory_identity(parent, private=True) == record["parent"],
+            "runtime_parent_identity_changed")
+    return parent
+
+
+def runtime_directory(repo, record, path, private=False):
+    parent = verify_runtime_parent(repo, record)
+    path = Path(path)
+    require(path != parent and path.is_relative_to(parent), "runtime_path_outside_volatile_parent")
+    identity = directory_identity(path, private=private)
+    require(identity["device"] == record["mount_device"], "runtime_device_changed")
+    return identity
+
+
+@contextmanager
+def analysis_worktree(repo, source_commit, record):
+    # mkdtemp, rather than TemporaryDirectory: never invoke an implicit recursive
+    # cleanup after a failed identity/containment check.
+    require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
+    require(volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]}) == record,
+            "volatile_base_identity_changed")
+    parent = Path(tempfile.mkdtemp(prefix="kaonlt-ab-analysis-", dir=record["base"]["path"]))
+    record["parent"] = directory_identity(parent, private=True)
+    worktree = parent / "analysis"
+    added = False
+    try:
+        verify_runtime_parent(repo, record)
+        require(not os.path.lexists(worktree), "runtime_worktree_collision")
+        git(repo, "worktree", "add", "--detach", str(worktree), source_commit)
+        added = True
+        record["analysis"] = runtime_directory(repo, record, worktree)
+        require(git(worktree, "rev-parse", "HEAD") == source_commit, "worktree_head_mismatch")
+        require(git(worktree, "branch", "--show-current") == "", "worktree_not_detached")
+        require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "", "worktree_dirty")
+        yield worktree
+    finally:
+        verify_runtime_parent(repo, record)
+        if "locations" in record:
+            verify_private(worktree, parent / "ab-output/Analysis/KaonLT")
+        for location, identity in record.get("locations", {}).items():
+            require(runtime_directory(repo, record, Path(location)) == identity,
+                    "runtime_cleanup_location_changed:" + location)
+        if added:
+            require(runtime_directory(repo, record, worktree) == record["analysis"],
+                    "runtime_worktree_identity_changed")
+            # Git removes only this registered worktree. Symlinks inside it are
+            # unlinked, never traversed to their external targets.
+            git(repo, "worktree", "remove", "--force", str(worktree))
+        require(not os.path.lexists(worktree), "runtime_worktree_cleanup_incomplete")
+        verify_runtime_parent(repo, record)
+        require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
+        shutil.rmtree(parent)
+        require(not os.path.lexists(parent), "runtime_parent_cleanup_incomplete")
+        current = volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]})
+        require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")
+
+
+def verify_runtime_layout(repo, worktree, record, output, env):
+    require(runtime_directory(repo, record, worktree) == record["analysis"],
+            "runtime_worktree_identity_changed")
+    verify_private(worktree, output)
+    locations = [worktree.parent / "ab-output", output.parent, output,
+                 worktree.parent / "runtime-python", worktree.parent / "runtime-python/ltsep"]
+    locations += [Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]
+    identities = {str(p): runtime_directory(repo, record, p, private=p == locations[0] or p in locations[5:])
+                  for p in locations}
+    require(not output.is_relative_to(Path(record["shared_output"])) and
+            not Path(record["shared_output"]).is_relative_to(output), "runtime_shared_output_overlap")
+    if "locations" in record:
+        require(identities == record["locations"], "runtime_location_identity_changed")
+    record["locations"] = identities
+    return identities
+
+
+def prepare_runtime_overlay(repo, worktree, placement):
+    """Frozen overlay algorithm with owner-local volatile placement validation.
+
+    Keep configuration selection, bytes and import/preservation probes identical
+    to isolation.prepare_runtime_overlay; its sibling-only guard cannot apply.
+    """
+    identity = isolation.import_identity(repo)
+    package_file = Path(identity["package_file"]).resolve()
+    package = package_file.parent
+    pathing = Path(identity["pathing_file"]).resolve()
+    require(package_file.name == "__init__.py" and pathing.is_relative_to(package),
+            "ltsep_package_layout_invalid")
+    baseline = isolation.path_fields(repo, repo)
+    require(baseline["LTANAPATH"] and Path(baseline["LTANAPATH"]).is_absolute() and
+            Path(baseline["LTANAPATH"]).resolve() == repo.resolve(), "baseline_ltanapath_not_ordinary_repo")
+    parent = worktree.parent.resolve()
+    require(runtime_directory(repo, placement, worktree) == placement["analysis"],
+            "runtime_worktree_identity_changed")
+    require(baseline == placement["baseline_paths"], "runtime_baseline_changed")
+    overlay = parent / "runtime-python"
+    require(not overlay.exists(), "ltsep_overlay_already_exists")
+    overlay.mkdir(mode=0o700)
+    runtime_directory(repo, placement, overlay, private=True)
+    copied = overlay / "ltsep"
+    shutil.copytree(package, copied, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    runtime_directory(repo, placement, copied)
+    configs = []
+    for file in sorted((copied / "PATH_TO_DIR").glob("*.path")):
+        values = isolation.read_path_config(file.read_bytes())
+        if "LTANAPATH" not in values:
+            continue
+        # Use the installed package's own raw SetPath lookup to account for
+        # Root's derived OUTPATH/CUTPATH, without guessing those transformations.
+        observed = isolation.python_json(repo,
+            'import json,sys; from ltsep.pathing import SetPath; '
+            'p=SetPath(sys.argv[1]); '
+            'print(json.dumps({k:p.getPath(k) for k in json.loads(sys.argv[2])}))',
+            (str(repo), json.dumps(list(values))))
+        expanded = {key: value.replace("${USER}", baseline["USER"]) for key, value in values.items()}
+        if expanded == observed:
+            configs.append(file)
+    require(len(configs) == 1, "ltsep_matching_config_not_unique")
+    selected = configs[0]
+    original_config = package / selected.relative_to(copied)
+    original_bytes = selected.read_bytes()
+    require(original_config.read_bytes() == original_bytes, "ltsep_copy_identity_mismatch")
+    # Replace the value span only; keep all other fields, whitespace and line
+    # endings byte-for-byte. Never patch installed files or Python code.
+    matches = list(re.finditer(rb"(?m)^(LTANAPATH[ \t]*=[ \t]*)([^\r\n]*?)([ \t]*)(\r?$)", original_bytes))
+    require(len(matches) == 1, "ltsep_ltanapath_assignment_not_unique")
+    match = matches[0]
+    patched = original_bytes[:match.start(2)] + str(worktree).encode("utf-8") + original_bytes[match.end(2):]
+    selected.write_bytes(patched)
+    protected = {str(file): sha256(file) for file in (package_file, pathing, original_config)}
+    env = isolation.analysis_environment(overlay)
+    imported = isolation.import_identity(worktree, env)
+    require(Path(imported["package_file"]).resolve() == (copied / "__init__.py").resolve() and
+            Path(imported["pathing_file"]).resolve().is_relative_to(copied.resolve()),
+            "ltsep_overlay_import_identity_invalid")
+    record = {"original_package_identity": identity, "baseline_paths": baseline,
+        "overlay_parent": str(overlay), "selected_copied_config": str(selected),
+        "original_config_path": str(original_config), "original_copied_file_sha256": hashlib.sha256(original_bytes).hexdigest(),
+        "patched_copied_file_sha256": sha256(selected), "original_source_sha256": protected,
+        "child_import_identity": imported, "import_isolation_passed": True}
+    isolation.verify_ltsep_preservation(record)
+    return env, record
 
 def strict_json(raw):
     def invalid(value):
@@ -691,8 +875,14 @@ def execute_gate(repo, outdir, output, source_commit):
         protected = [Path(identity["package_file"]), Path(identity["pathing_file"]),
                      *sorted((package / "PATH_TO_DIR").glob("*.path"))]
         installed = {"original_source_sha256": {str(p): sha256(p) for p in protected}}
-        with isolation.owned_worktree(repo, source_commit, "analysis") as worktree:
-            env, overlay = isolation.prepare_runtime_overlay(repo, worktree)
+        baseline = isolation.path_fields(repo, repo)
+        placement = volatile_base(repo, baseline)
+        status.update(runtime_placement=placement)
+        with analysis_worktree(repo, source_commit, placement) as worktree:
+            placement["baseline_paths"] = baseline
+            placement["shared_output"] = str(outdir.resolve())
+            status.update(runtime_placement=placement)
+            env, overlay = prepare_runtime_overlay(repo, worktree, placement)
             env = private_environment(env, worktree)
             probes = isolation.probe_paths(worktree, env, overlay["baseline_paths"])
             baseline = overlay["baseline_paths"]
@@ -706,7 +896,10 @@ def execute_gate(repo, outdir, output, source_commit):
             status.update("input_staging", copy_plan=plan, copy_files=len(plan),
                           copy_bytes=sum(p["bytes"] for p in plan), skim_existence_inventory=skims)
             print(json.dumps({"copy_plan": plan, "copy_bytes": sum(p["bytes"] for p in plan)}), file=sys.stderr, flush=True)
+            verify_runtime_layout(repo, worktree, placement, private, env)
+            status.update(runtime_placement=placement, private_output=str(private))
             stage_copies(outdir, private, plan, copies)
+            verify_runtime_layout(repo, worktree, placement, private, env)
             verify_private(worktree, private)
             verify_external(external)
             verify_originals(copies)
@@ -715,10 +908,12 @@ def execute_gate(repo, outdir, output, source_commit):
             status.update("analysis", analysis_started=True, analysis_worktree=str(worktree),
                           isolation_probes=probes, private_output=str(private), private_callers=callers,
                           staged_inputs=copies, external_symlink_preflight=external)
+            verify_runtime_layout(repo, worktree, placement, private, env)
             started = time.time_ns()
             returncode = debug.run_analysis(worktree, paths["log"], env)
             status.update("completion_markers", analysis_returncode=returncode,
                           log_identity={"sha256": sha256(paths["log"]), "bytes": paths["log"].stat().st_size})
+            verify_runtime_layout(repo, worktree, placement, private, env)
             verify_completion(paths["log"], returncode)
             status.update("verify_artifacts", analysis_completed=True)
             records, outcomes = verify_artifacts(private, source_commit, identities, started, prior)
@@ -750,6 +945,7 @@ def execute_gate(repo, outdir, output, source_commit):
         summary = {"schema_version": "pion_t_template_comparison_run_summary/v1",
             "source_commit": source_commit, "analysis_command": COMMAND, "analysis_returncode": returncode,
             "diagnostic_outcomes": outcomes, "artifacts": records, "boundaries": BOUNDARIES,
+            "runtime_placement": placement, "copy_bytes": sum(p["bytes"] for p in plan),
             "copy_plan": plan, "original_inputs": copies, "runtime_container_identities": runtime,
             "log_identity": status.record["log_identity"], "zip_identity": status.record["zip_identity"]}
         with paths["summary"].open("x", encoding="utf-8") as handle:

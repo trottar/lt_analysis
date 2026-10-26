@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16211,
+      "bytes": 16264,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "dfef2e6577b1a021cd78bf9e449f43446587d6b620226157cc33d19f2ff885a4"
+      "sha256": "cd36483e9a05f621551aafb4e53dc826b387bb2ec07231a07f500eef019d4728"
     },
     {
       "bytes": 11186,
@@ -1269,6 +1269,11 @@
       "bytes": 24409,
       "path": "docs/memory/phases/kaonlt-ab-owner-preservation-repair-2026-10-25-task-contract.md",
       "sha256": "b853086806af1cfd4bd27b33220490b943e2c94c0440ebf2694331ec768918ad"
+    },
+    {
+      "bytes": 15069,
+      "path": "docs/memory/phases/kaonlt-ab-owner-volatile-runtime-placement-2026-10-25-task-contract.md",
+      "sha256": "f3240858be9174d59a0fdac44762abde8c76a05fd2d6811eb85aeae76b7efe3c"
     },
     {
       "bytes": 14922,

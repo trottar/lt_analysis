@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import stat
 from pathlib import Path
 import shutil
 import subprocess
@@ -77,9 +78,9 @@ class GateTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name).resolve()
-        self.repo = self.directory / "repo"
-        self.repo.mkdir()
-        self.outdir = self.directory / "volatile/OUTPUT/Analysis/KaonLT"
+        self.repo = self.directory / "group/repo"
+        self.repo.mkdir(parents=True)
+        self.outdir = self.directory / "volatile/user/OUTPUT/Analysis/KaonLT"
         self.outdir.mkdir(parents=True)
         self.transfer = self.directory / "transfer"
         self.transfer.mkdir()
@@ -339,9 +340,9 @@ class GateTests(unittest.TestCase):
     @contextmanager
     def flow(self, fail=None):
         """Keep actual status, child mock, artifacts, collector and delivery logic."""
-        parent = self.directory / "owned-runtime"
-        parent.mkdir(mode=0o700, exist_ok=True)
-        worktree = parent / "analysis"
+        worktree = None
+        volatile = self.outdir.parents[2]
+        (self.repo / "OUTPUT").symlink_to(volatile / "OUTPUT") if not (self.repo / "OUTPUT").is_symlink() else None
         source = self.directory / "clean-source"
         config = self.directory / "installed.path"
         config.write_bytes(b"installed unchanged")
@@ -349,23 +350,36 @@ class GateTests(unittest.TestCase):
         state = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}
         baseline = {"LTANAPATH": str(self.repo), "OUTPATH": str(self.outdir),
                     "VOLATILEPATH": str(self.outdir.parents[2]), "ANATYPE": "Kaon"}
-        runtime_paths = {**baseline, "LTANAPATH": str(worktree), "OUTPATH": str(worktree / "OUTPUT/Analysis/KaonLT")}
         populate_inputs(self.outdir)
         ordinary_before = {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
                            if p.suffix == ".root" or p.name in owner.names()}
         @contextmanager
         def owned(repo, sha, leaf):
-            target = worktree if leaf == "analysis" else source
+            self.assertEqual(leaf, "source")
+            target = source
             target.mkdir()
             try:
                 yield target
             finally:
-                if leaf == "analysis":
-                    shutil.rmtree(parent)
-                else:
-                    shutil.rmtree(source)
+                shutil.rmtree(source)
                 if fail == "cleanup":
                     raise ValueError("cleanup_failed")
+        def fake_git(repo, *args):
+            nonlocal worktree
+            if args[:2] == ("worktree", "add"):
+                worktree = Path(args[3]); worktree.mkdir()
+            elif args[:2] == ("worktree", "remove"):
+                shutil.rmtree(Path(args[3]))
+            elif args == ("rev-parse", "HEAD"):
+                return SHA
+            return ""
+        def overlay_copy(repo, work, placement):
+            copied = work.parent / "runtime-python/ltsep"
+            copied.mkdir(parents=True)
+            return {}, {"baseline_paths": baseline}
+        def runtime_probes(*args):
+            return [{"paths": {**baseline, "LTANAPATH": str(worktree),
+                               "OUTPATH": str(worktree / "OUTPUT/Analysis/KaonLT")}}]
         @contextmanager
         def collection(clean):
             self.assertEqual(clean, source)
@@ -404,8 +418,12 @@ class GateTests(unittest.TestCase):
             source_check = mock(owner, "source_preflight", return_value=([], IDENTITIES))
             mock(owner.isolation, "import_identity", return_value={"package_file": str(config), "pathing_file": str(config)})
             mock(owner.isolation, "owned_worktree", side_effect=owned)
-            overlay = mock(owner.isolation, "prepare_runtime_overlay", return_value=({}, {"baseline_paths": baseline}))
-            probes = mock(owner.isolation, "probe_paths", return_value=[{"paths": runtime_paths}])
+            mock(owner, "git", side_effect=fake_git)
+            mock(owner, "VOLATILE_MOUNT", new=volatile.parent)
+            mock(Path, "is_mount", new=lambda p: p == volatile.parent)
+            mock(owner.isolation, "path_fields", return_value=baseline)
+            overlay = mock(owner, "prepare_runtime_overlay", side_effect=overlay_copy)
+            probes = mock(owner.isolation, "probe_paths", side_effect=runtime_probes)
             external = mock(owner, "external_setup", return_value={"background_simc_path": "", "passed": True, "links": []})
             link = mock(owner, "private_output", wraps=owner.private_output)
             mock(owner, "private_callers", return_value=[])
@@ -442,7 +460,7 @@ class GateTests(unittest.TestCase):
         run.assert_called_once()
         verify.assert_called_once()
         self.assertEqual(preservation.call_count, 2)
-        self.assertFalse((self.directory / "owned-runtime").exists())
+        self.assertEqual(list(self.outdir.parents[2].glob("kaonlt-ab-analysis-*")), [])
         status = json.loads((self.transfer / "comparison-gate-status.json").read_text())
         self.assertEqual(status["status"], "success")
         self.assertEqual(status["diagnostic_outcomes"]["Left"]["status"], "available")
@@ -455,7 +473,7 @@ class GateTests(unittest.TestCase):
                 # Each attempt owns separate fresh destinations and target inventory.
                 with tempfile.TemporaryDirectory() as fresh:
                     old = self.outdir, self.transfer, self.output
-                    self.outdir = Path(fresh) / "volatile/OUTPUT/Analysis/KaonLT"; self.outdir.mkdir(parents=True)
+                    self.outdir = Path(fresh) / "volatile/user/OUTPUT/Analysis/KaonLT"; self.outdir.mkdir(parents=True)
                     self.transfer = Path(fresh) / "transfer"; self.transfer.mkdir()
                     self.output = self.transfer / "attempt.zip"
                     try:
@@ -496,6 +514,194 @@ class GateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "owner_path_boundary_invalid"):
             owner.execute_gate(self.repo, self.outdir, self.output, SHA)
         self.assertFalse(any(self.outdir.iterdir()))
+
+    def test_group_placement_rejected_before_copy_or_child(self):
+        with self.flow() as (run, _, _), patch.object(owner.isolation, "path_fields",
+                return_value={"VOLATILEPATH": str(self.repo.parent)}), patch.object(owner, "stage_copies") as copy:
+            with self.assertRaisesRegex(ValueError, "volatile_base_invalid"):
+                owner.execute_gate(self.repo, self.outdir, self.output, SHA)
+        copy.assert_not_called()
+        run.assert_not_called()
+        self.assertEqual(list(self.repo.parent.glob("kaonlt-ab-analysis-*")), [])
+
+
+class VolatileRuntime(unittest.TestCase):
+    """Real Linux filesystem/probe fixtures; Git and the analysis child are mocks."""
+
+    @contextmanager
+    def fixture(self, ambiguous=False):
+        # Extract only the frozen harmless package fixture. Importing that test
+        # module would also import plotting/science dependencies unnecessarily.
+        source = ast.parse((ROOT / "testing/test_run_e8_4_fix5_canonical_five_plot_gate.py").read_text())
+        builder = next(n for n in ast.walk(source) if isinstance(n, ast.FunctionDef) and n.name == "runtime_fixture")
+        namespace = {"ROOT": ROOT, "Path": Path, "owner": owner.isolation}
+        exec(compile(ast.Module(body=[builder], type_ignores=[]), "<installed-package-fixture>", "exec"), namespace)
+        with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
+            root = Path(directory).resolve()
+            old_repo, old_work, package, config = namespace["runtime_fixture"](self, directory)
+            repo = root / "group/repo"
+            repo.parent.mkdir(); old_repo.rename(repo)
+            shutil.rmtree(old_work.parent)
+            mount = root / "volatile"; base = mount / "user"; base.mkdir(parents=True)
+            shared = base / "OUTPUT/Analysis/KaonLT"; shared.mkdir(parents=True)
+            (repo / "OUTPUT").symlink_to(base / "OUTPUT")
+            fields = owner.isolation.read_path_config(config.read_bytes())
+            fields.update(LTANAPATH=str(repo), VOLATILEPATH=str(base))
+            config.write_text("".join(k + "=" + v + "\n" for k, v in fields.items()))
+            if ambiguous:
+                config.with_name("duplicate.path").write_bytes(config.read_bytes())
+            calls = []
+            def fake_git(tree, *args):
+                calls.append((Path(tree), args))
+                if args[:2] == ("worktree", "add"):
+                    work = Path(args[3]); work.mkdir()
+                    shutil.copytree(repo / "farm_env", work / "farm_env")
+                    (work / "science.py").write_text("# detached fixture\n")
+                elif args[:2] == ("worktree", "remove"):
+                    shutil.rmtree(Path(args[3]))
+                elif args == ("rev-parse", "HEAD"):
+                    return SHA
+                return ""
+            stack.enter_context(patch.object(owner, "git", side_effect=fake_git))
+            stack.enter_context(patch.object(owner, "VOLATILE_MOUNT", mount))
+            stack.enter_context(patch.object(Path, "is_mount", new=lambda p: p == mount))
+            stack.enter_context(patch.dict(os.environ, {"PYTHONPATH": str(package.parent),
+                "PYTHONDONTWRITEBYTECODE": "1"}))
+            yield repo, base, shared, package, config, calls
+
+    def test_real_copied_overlay_and_all_writable_locations_are_volatile(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            original = {p: p.read_bytes() for p in package.rglob("*") if p.is_file()}
+            populate_inputs(shared); artifacts(shared)
+            accepted = owner.accepted_identities(shared)
+            baseline = owner.isolation.path_fields(repo, repo)
+            record = owner.volatile_base(repo, baseline)
+            with owner.analysis_worktree(repo, SHA, record) as work:
+                record.update(baseline_paths=baseline, shared_output=str(shared))
+                env, overlay = owner.prepare_runtime_overlay(repo, work, record)
+                env = owner.private_environment(env, work)
+                probes = owner.isolation.probe_paths(work, env, baseline)
+                private = owner.private_output(work, probes[0]["paths"], shared)
+                owner.verify_runtime_layout(repo, work, record, private, env)
+                copies = {}; plan = owner.copy_plan(shared, private)
+                owner.stage_copies(shared, private, plan, copies)
+                for p in (work, private, Path(overlay["overlay_parent"]) / "ltsep",
+                          *[Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]):
+                    self.assertTrue(p.is_relative_to(base))
+                    self.assertFalse(p.is_relative_to(repo.parent))
+                self.assertEqual(stat.S_IMODE(work.parent.stat().st_mode), 0o700)
+                for copy in copies.values():
+                    self.assertTrue(Path(copy["runtime_container_before"]["resolved"]).is_relative_to(base))
+                    self.assertNotEqual(copy["original"]["inode"], copy["runtime_container_before"]["inode"])
+                patched = Path(overlay["selected_copied_config"]).read_bytes()
+                self.assertEqual(patched, original[config].replace(str(repo).encode(), str(work).encode()))
+                self.assertEqual({p: p.read_bytes() for p in original}, original)
+                owner.isolation.verify_ltsep_preservation(overlay)
+                owner.verify_accepted(shared, accepted); owner.verify_originals(copies)
+                self.assertTrue(all(p["paths"]["VOLATILEPATH"] == str(base) for p in probes))
+            self.assertFalse(work.parent.exists())
+            self.assertTrue((repo / "OUTPUT").is_symlink())
+            self.assertEqual(calls[0][1][:3], ("worktree", "add", "--detach"))
+            self.assertEqual(calls[-1][1][:3], ("worktree", "remove", "--force"))
+
+    def test_invalid_base_and_mount_fail_before_creation(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            alias = base.parent / "alias"; alias.symlink_to(repo.parent)
+            for path in ("", "relative", str(repo.parent), str(alias), str(base / "missing"), str(base.parent)):
+                with self.subTest(path=path), self.assertRaises((ValueError, OSError)):
+                    owner.volatile_base(repo, {"VOLATILEPATH": path})
+            with patch.object(Path, "is_mount", return_value=False), self.assertRaisesRegex(ValueError, "mount_invalid"):
+                owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
+            with patch.object(os, "access", return_value=False), self.assertRaisesRegex(ValueError, "base_invalid"):
+                owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
+            # Synthetic directories share a device: an alleged volatile mount
+            # on the real group device must be refused even with free space.
+            with patch.object(owner, "GROUP_MOUNT", repo.parent), self.assertRaisesRegex(ValueError, "on_group_device"):
+                owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
+            with patch.object(os, "geteuid", return_value=os.geteuid()+1), self.assertRaisesRegex(ValueError, "owner_or_mode"):
+                owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
+            self.assertEqual(calls, [])
+            self.assertEqual(list(base.glob("kaonlt-ab-analysis-*")), [])
+
+    def test_injected_body_and_overlay_failures_clean_owned_parent(self):
+        for defect in ("body", "ambiguous"):
+            with self.subTest(defect=defect), self.fixture(ambiguous=defect == "ambiguous") as (repo, base, shared, package, config, calls):
+                baseline = owner.isolation.path_fields(repo, repo)
+                record = owner.volatile_base(repo, baseline)
+                with self.assertRaisesRegex(ValueError, "injected|matching_config_not_unique"):
+                    with owner.analysis_worktree(repo, SHA, record) as work:
+                        record.update(baseline_paths=baseline, shared_output=str(shared))
+                        owner.prepare_runtime_overlay(repo, work, record)
+                        raise ValueError("injected")
+                self.assertFalse(work.parent.exists())
+                self.assertTrue(config.exists())
+
+    def test_swapped_parent_refuses_cleanup_and_never_touches_target(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+            with self.assertRaisesRegex(ValueError, "alias_or_invalid"):
+                with owner.analysis_worktree(repo, SHA, record) as work:
+                    saved = work.parent.with_name(work.parent.name + "-saved")
+                    work.parent.rename(saved)
+                    work.parent.symlink_to(repo.parent)
+            self.assertTrue((saved / "analysis/science.py").is_file())
+            self.assertTrue((repo / "OUTPUT").is_symlink())
+            self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+
+    def test_swapped_cache_escape_and_group_output_are_rejected(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            baseline = owner.isolation.path_fields(repo, repo)
+            record = owner.volatile_base(repo, baseline)
+            with owner.analysis_worktree(repo, SHA, record) as work:
+                record.update(baseline_paths=baseline, shared_output=str(shared))
+                env, _ = owner.prepare_runtime_overlay(repo, work, record)
+                env = owner.private_environment(env, work)
+                paths = owner.isolation.probe_paths(work, env, baseline)[0]["paths"]
+                private = owner.private_output(work, paths, shared)
+                owner.verify_runtime_layout(repo, work, record, private, env)
+                with self.assertRaisesRegex(ValueError, "private_output_path_changed"):
+                    owner.verify_runtime_layout(repo, work, record, repo.parent / "ab-output", env)
+                with self.assertRaisesRegex(ValueError, "outside_volatile_parent"):
+                    owner.verify_runtime_layout(repo, work, record, private, {**env, "TMPDIR": str(repo.parent)})
+                cache = Path(env["TMPDIR"]); saved = cache.with_name("saved-tmp")
+                cache.rename(saved); cache.symlink_to(repo.parent)
+                try:
+                    with self.assertRaisesRegex(ValueError, "alias_or_invalid"):
+                        owner.verify_runtime_layout(repo, work, record, private, env)
+                finally:
+                    cache.unlink(); saved.rename(cache)  # Fixture repairs only.
+                link = work / "OUTPUT"; link.unlink(); link.symlink_to(shared)
+                try:
+                    with self.assertRaisesRegex(ValueError, "private_link_changed"):
+                        owner.verify_runtime_layout(repo, work, record, private, env)
+                finally:
+                    link.unlink(); link.symlink_to(work.parent / "ab-output")
+
+    def test_cleanup_capability_and_changed_base_reject_before_worktree(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+            with patch.object(shutil.rmtree, "avoids_symlink_attacks", False), self.assertRaisesRegex(ValueError, "cleanup_not_symlink_safe"):
+                with owner.analysis_worktree(repo, SHA, record):
+                    self.fail("unsafe cleanup accepted")
+            saved = base.with_name("old-base"); base.rename(saved); base.mkdir()
+            with self.assertRaisesRegex(ValueError, "base_identity_changed"):
+                with owner.analysis_worktree(repo, SHA, record):
+                    self.fail("replaced base accepted")
+            self.assertEqual(calls, [])
+
+    def test_changed_worktree_identity_and_parent_mode_refuse_cleanup(self):
+        for defect in ("worktree", "mode"):
+            with self.subTest(defect=defect), self.fixture() as (repo, base, shared, package, config, calls):
+                record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+                with self.assertRaisesRegex(ValueError, "identity_changed|owner_or_mode"):
+                    with owner.analysis_worktree(repo, SHA, record) as work:
+                        if defect == "worktree":
+                            work.rename(work.with_name("saved-analysis")); work.mkdir()
+                        else:
+                            work.parent.chmod(0o755)
+                self.assertTrue(work.parent.exists())
+                self.assertTrue((repo / "OUTPUT").is_symlink())
+                self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
 
 
 def populate_inputs(root):
