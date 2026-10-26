@@ -71,7 +71,7 @@ def directory_identity(path, private=False, owned=True):
             "runtime_directory_alias_or_invalid:" + str(path))
     info = path.stat()
     require((not owned or info.st_uid == os.geteuid()) and
-            (not private or stat.S_IMODE(info.st_mode) == 0o700),
+            (not private or stat.S_IMODE(info.st_mode) in (0o700, 0o2700)),
             "runtime_directory_owner_or_mode:" + str(path))
     return {"path": str(path), "canonical": str(path.resolve()), "device": info.st_dev, "inode": info.st_ino,
             "uid": info.st_uid, "mode": stat.S_IMODE(info.st_mode)}
@@ -165,10 +165,12 @@ def analysis_worktree(repo, source_commit, record):
     require(volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]}) == record,
             "volatile_base_identity_changed")
     parent = Path(tempfile.mkdtemp(prefix="kaonlt-ab-analysis-", dir=record["base"]["path"]))
-    record["parent"] = directory_identity(parent, private=True)
-    worktree = parent / "analysis"
-    added = False
+    created = None
     try:
+        created = parent.lstat()
+        record["parent"] = directory_identity(parent, private=True)
+        worktree = parent / "analysis"
+        added = False
         verify_runtime_parent(repo, record)
         require(not os.path.lexists(worktree), "runtime_worktree_collision")
         git(repo, "worktree", "add", "--detach", str(worktree), source_commit)
@@ -179,22 +181,38 @@ def analysis_worktree(repo, source_commit, record):
         require(git(worktree, "status", "--porcelain=v1", "--untracked-files=all") == "", "worktree_dirty")
         yield worktree
     finally:
-        verify_runtime_parent(repo, record)
-        if "locations" in record:
-            verify_private(worktree, parent / "ab-output/Analysis/KaonLT")
-        for location, identity in record.get("locations", {}).items():
-            require(runtime_directory(repo, record, Path(location)) == identity,
-                    "runtime_cleanup_location_changed:" + location)
-        if added:
-            require(runtime_directory(repo, record, worktree) == record["analysis"],
-                    "runtime_worktree_identity_changed")
-            # Git removes only this registered worktree. Symlinks inside it are
-            # unlinked, never traversed to their external targets.
-            git(repo, "worktree", "remove", "--force", str(worktree))
-        require(not os.path.lexists(worktree), "runtime_worktree_cleanup_incomplete")
-        verify_runtime_parent(repo, record)
-        require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
-        shutil.rmtree(parent)
+        if "parent" not in record:
+            # Before validation, remove only the newly created empty directory.
+            # Never recurse or trust a replaced path after the first check fails.
+            current = volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]})
+            require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")
+            require(created is not None and stat.S_ISDIR(created.st_mode) and
+                    parent.parent == Path(record["base"]["path"]) and
+                    parent.name.startswith("kaonlt-ab-analysis-"),
+                    "runtime_initial_parent_cleanup_unsafe:" + str(parent))
+            identity = directory_identity(parent)
+            require((identity["device"], identity["inode"], identity["uid"], identity["mode"]) ==
+                    (created.st_dev, created.st_ino, created.st_uid, stat.S_IMODE(created.st_mode)) and
+                    created.st_dev == record["mount_device"],
+                    "runtime_initial_parent_cleanup_unsafe:" + str(parent))
+            parent.rmdir()  # Fails closed if anything appeared in this directory.
+        else:
+            verify_runtime_parent(repo, record)
+            if "locations" in record:
+                verify_private(worktree, parent / "ab-output/Analysis/KaonLT")
+            for location, identity in record.get("locations", {}).items():
+                require(runtime_directory(repo, record, Path(location)) == identity,
+                        "runtime_cleanup_location_changed:" + location)
+            if added:
+                require(runtime_directory(repo, record, worktree) == record["analysis"],
+                        "runtime_worktree_identity_changed")
+                # Git removes only this registered worktree. Symlinks inside it are
+                # unlinked, never traversed to their external targets.
+                git(repo, "worktree", "remove", "--force", str(worktree))
+            require(not os.path.lexists(worktree), "runtime_worktree_cleanup_incomplete")
+            verify_runtime_parent(repo, record)
+            require(shutil.rmtree.avoids_symlink_attacks, "runtime_cleanup_not_symlink_safe")
+            shutil.rmtree(parent)
         require(not os.path.lexists(parent), "runtime_parent_cleanup_incomplete")
         current = volatile_base(repo, {"VOLATILEPATH": record["resolver_VOLATILEPATH"]})
         require(current == {k: record[k] for k in current}, "volatile_base_identity_changed")

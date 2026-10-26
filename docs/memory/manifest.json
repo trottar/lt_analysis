@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16270,
+      "bytes": 16242,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "ae36565e0aac8db46185ede789922096021de6d7349bccf8c01b8c9fb68b80a6"
+      "sha256": "ee95cd2766bbe32ba55df5f3f7327e1580dfc07d9e067a2023d5f49dc248fbe5"
     },
     {
       "bytes": 11186,
@@ -1264,6 +1264,11 @@
       "bytes": 1723,
       "path": "docs/memory/phases/farm-validation-bundle-wrapper.md",
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
+    },
+    {
+      "bytes": 14379,
+      "path": "docs/memory/phases/kaonlt-ab-owner-lustre-setgid-mode-fix-2026-10-25-task-contract.md",
+      "sha256": "1d1904efe7530e8c8b3c913c0d7e9dbca339cff1899eebae81d0e473be44543a"
     },
     {
       "bytes": 24409,

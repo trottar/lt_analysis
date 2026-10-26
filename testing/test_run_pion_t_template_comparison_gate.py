@@ -577,6 +577,149 @@ class GateTests(unittest.TestCase):
 class VolatileRuntime(unittest.TestCase):
     """Real Linux filesystem/probe fixtures; Git and the analysis child are mocks."""
 
+    def test_00_starting_owner_rejects_real_2700_and_leaves_parent(self):
+        with self.fixture() as (repo, base, shared, package, config, calls):
+            base.chmod(0o2700)
+            text = subprocess.check_output(["git", "show",
+                "e628f727d780a4d87c2ce928fedfcdc62958eb00:testing/run_pion_t_template_comparison_gate.py"], cwd=ROOT).decode()
+            functions = [n for n in ast.parse(text).body if isinstance(n, ast.FunctionDef)
+                         and n.name in {"directory_identity", "analysis_worktree"}]
+            namespace = dict(vars(owner))
+            exec(compile(ast.Module(body=functions, type_ignores=[]), "<starting-mode-guard>", "exec"), namespace)
+            record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+            with self.assertRaisesRegex(ValueError, "runtime_directory_owner_or_mode"):
+                with namespace["analysis_worktree"](repo, SHA, record):
+                    self.fail("old guard accepted inherited setgid")
+            parents = list(base.glob("kaonlt-ab-analysis-*"))
+            self.assertEqual(len(parents), 1)
+            parent = parents[0]
+            self.assertEqual(parent.stat().st_uid, os.geteuid())
+            self.assertEqual(stat.S_IMODE(parent.stat().st_mode), 0o2700)
+            self.assertEqual(owner.directory_identity(parent, private=True)["mode"], 0o2700)
+            self.assertEqual(calls, [])
+            parent.rmdir()  # Only this test's reproduction of the old leak.
+
+    def test_private_modes_allow_only_0700_and_2700(self):
+        with tempfile.TemporaryDirectory(dir="/dev/shm") as directory:
+            path = Path(directory).resolve() / "private"; path.mkdir()
+            denied = {0o770, 0o750, 0o755, 0o777, 0o1700, 0o4700, 0o3770}
+            denied.update(0o700 | access | special for access in range(0o100)
+                          for special in (0, 0o1000, 0o2000, 0o3000, 0o4000, 0o5000, 0o6000, 0o7000)
+                          if (0o700 | access | special) not in (0o700, 0o2700))
+            denied.update((0o600, 0o2600))
+            for mode in (0o700, 0o2700):
+                path.chmod(mode)
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), mode)
+                self.assertEqual(owner.directory_identity(path, private=True)["mode"], mode)
+                with patch.object(os, "geteuid", return_value=os.geteuid()+1), self.assertRaisesRegex(ValueError, "owner_or_mode"):
+                    owner.directory_identity(path, private=True)
+            for mode in sorted(denied):
+                with self.subTest(mode=oct(mode)):
+                    path.chmod(mode)
+                    self.assertEqual(stat.S_IMODE(path.stat().st_mode), mode)
+                    with self.assertRaisesRegex(ValueError, "owner_or_mode"):
+                        owner.directory_identity(path, private=True)
+            path.chmod(0o700)
+
+    def test_inherited_setgid_passes_actual_parent_and_layout_paths(self):
+        for mode in (0o700, 0o2700):
+            with self.subTest(mode=oct(mode)), self.fixture() as (repo, base, shared, package, config, calls):
+                base.chmod(mode)
+                baseline = owner.isolation.path_fields(repo, repo)
+                record = owner.volatile_base(repo, baseline)
+                with owner.analysis_worktree(repo, SHA, record) as work:
+                    self.assertEqual(record["parent"]["mode"], mode)
+                    self.assertEqual(owner.verify_runtime_parent(repo, record), work.parent)
+                    record.update(baseline_paths=baseline, shared_output=str(shared))
+                    env, _ = owner.prepare_runtime_overlay(repo, work, record)
+                    env = owner.private_environment(env, work)
+                    paths = owner.isolation.probe_paths(work, env, baseline)[0]["paths"]
+                    private = owner.private_output(work, paths, shared)
+                    owner.verify_runtime_layout(repo, work, record, private, env)
+                    roots = [work.parent / "ab-output", work.parent / "runtime-python"]
+                    roots += [Path(env[k]) for k in ("TMPDIR", "XDG_CACHE_HOME", "MPLCONFIGDIR", "PYTHONPYCACHEPREFIX")]
+                    for path in roots:
+                        self.assertEqual(stat.S_IMODE(path.stat().st_mode), mode)
+                        for denied in (0o770, 0o750, 0o755, 0o777, 0o1700, 0o4700, 0o3770):
+                            path.chmod(denied)
+                            try:
+                                with self.subTest(path=path.name, mode=oct(denied)), self.assertRaisesRegex(ValueError, "owner_or_mode"):
+                                    owner.runtime_directory(repo, record, path, private=True)
+                                if path != work.parent / "runtime-python":
+                                    with self.assertRaisesRegex(ValueError, "owner_or_mode"):
+                                        owner.verify_runtime_layout(repo, work, record, private, env)
+                            finally:
+                                path.chmod(mode)
+                    changed = roots[0]; changed.chmod(0o2700 if mode == 0o700 else 0o700)
+                    try:
+                        with self.assertRaisesRegex(ValueError, "location_identity_changed"):
+                            owner.verify_runtime_layout(repo, work, record, private, env)
+                    finally:
+                        changed.chmod(mode)
+                    work.parent.chmod(0o2700 if mode == 0o700 else 0o700)
+                    try:
+                        with self.assertRaisesRegex(ValueError, "parent_identity_changed"):
+                            owner.verify_runtime_parent(repo, record)
+                    finally:
+                        work.parent.chmod(mode)
+                self.assertFalse(work.parent.exists())
+
+    def test_first_identity_failure_removes_only_new_empty_parent(self):
+        for mode in (0o700, 0o2700):
+            with self.subTest(mode=oct(mode)), self.fixture() as (repo, base, shared, package, config, calls):
+                base.chmod(mode)
+                artifacts(shared); before = owner.accepted_identities(shared)
+                unrelated = base / "unrelated"; unrelated.mkdir(); (unrelated / "keep").write_bytes(b"keep")
+                record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+                real_identity = owner.directory_identity
+                def fail_first(path, private=False, owned=True):
+                    if private and Path(path).name.startswith("kaonlt-ab-analysis-"):
+                        raise ValueError("injected_first_identity_failure")
+                    return real_identity(path, private=private, owned=owned)
+                with patch.object(owner, "directory_identity", side_effect=fail_first), patch.object(shutil, "rmtree") as recursive:
+                    with self.assertRaisesRegex(ValueError, "injected_first_identity_failure"):
+                        with owner.analysis_worktree(repo, SHA, record):
+                            self.fail("analysis reached after identity failure")
+                    recursive.assert_not_called()
+                self.assertEqual(list(base.glob("kaonlt-ab-analysis-*")), [])
+                self.assertEqual((unrelated / "keep").read_bytes(), b"keep")
+                self.assertEqual(calls, [])
+                owner.verify_accepted(shared, before)
+
+    def test_first_identity_failure_refuses_ambiguous_or_nonempty_cleanup(self):
+        for defect in ("symlink", "replacement", "mode", "owner", "nonempty"):
+            with self.subTest(defect=defect), self.fixture() as (repo, base, shared, package, config, calls):
+                record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+                real_identity = owner.directory_identity
+                created = []
+                def fail_first(path, private=False, owned=True):
+                    path = Path(path)
+                    if private and path.name.startswith("kaonlt-ab-analysis-"):
+                        created.append(path)
+                        if defect in ("symlink", "replacement"):
+                            path.rename(path.with_name(path.name + "-saved"))
+                            if defect == "symlink":
+                                path.symlink_to(repo.parent)
+                            else:
+                                path.mkdir(mode=0o700)
+                        elif defect == "mode":
+                            path.chmod(0o2700)
+                        elif defect == "nonempty":
+                            (path / "keep").write_bytes(b"keep")
+                        raise ValueError("injected_first_identity_failure")
+                    if defect == "owner" and created and path == created[0]:
+                        with patch.object(os, "geteuid", return_value=os.geteuid()+1):
+                            return real_identity(path, private=private, owned=owned)
+                    return real_identity(path, private=private, owned=owned)
+                with patch.object(owner, "directory_identity", side_effect=fail_first), patch.object(shutil, "rmtree") as recursive:
+                    with self.assertRaisesRegex((ValueError, OSError), "alias_or_invalid|cleanup_unsafe|owner_or_mode|Directory not empty"):
+                        with owner.analysis_worktree(repo, SHA, record):
+                            self.fail("analysis reached after identity failure")
+                    recursive.assert_not_called()
+                self.assertTrue(os.path.lexists(created[0]))
+                self.assertTrue((repo / "OUTPUT").is_symlink())
+                self.assertEqual(calls, [])
+
     def test_00_pushed_owner_rejects_real_alias_chain(self):
         with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
             text = subprocess.check_output(["git", "show",

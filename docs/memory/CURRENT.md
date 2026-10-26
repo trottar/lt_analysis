@@ -30,7 +30,8 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B volatile alias correction](phases/kaonlt-ab-owner-volatile-alias-compatibility-2026-10-25-task-contract.md).
+`BLOCKED`: [A/B Lustre mode repair](phases/kaonlt-ab-owner-lustre-setgid-mode-fix-2026-10-25-task-contract.md).
+`e628f727` farm: owned `02700` rejected before child; cleanup NOT VERIFIED.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -216,9 +217,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent actual-diff review, user publication and pushed-state review,
-then bounded read-only farm readiness: aliases, capacity/quota, interpreter and
-inputs. If it passes, one private A/B validation; corrected runtime NOT VERIFIED.
+NEXT — independent actual-diff review of the mode/early-cleanup repair, user
+publication and pushed-state review. Farm remains user-only; no automatic rerun.
+Corrected runtime NOT VERIFIED.
 Target: private fresh Center/Left lowe t1/t2/t3
 A/B, then unchanged seven-strength C histogram JSON/PDF: full-MM, 1.10–1.16 GeV
 control shapes, transferred-background and fixed-weight variance proxies.
