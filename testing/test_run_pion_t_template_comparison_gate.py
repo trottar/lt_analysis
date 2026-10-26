@@ -26,6 +26,27 @@ MARKERS = ("All available low-epsilon settings completed in debug mode.\n"
 IDENTITIES = {name: {"sha256": FP, "bytes": 12} for name in owner.SOURCE_FILES}
 
 
+@contextmanager
+def infrastructure_aliases(base, infra):
+    """Real logical /volatile -> /lustre/enp/volatile -> expphy chain."""
+    physical = base.parents[2]
+    infra.mkdir()
+    (infra / "volatile").symlink_to("lustre/enp/volatile")
+    (infra / "lustre").symlink_to("lustre24")
+    (infra / "lustre24").symlink_to(physical)
+    (physical / "enp").symlink_to("expphy")
+    modes = {p: stat.S_IMODE(p.stat().st_mode) for p in (infra, physical)}
+    for p in modes:
+        p.chmod(0o555)
+    try:
+        yield infra / "volatile", infra / "volatile" / base.name
+    finally:
+        for p, mode in modes.items():
+            p.chmod(mode)
+        (physical / "enp").unlink()
+        shutil.rmtree(infra)
+
+
 def histogram():
     return {"status": "available", "stored_sumw2": [0., 1., 0.],
             "content_error_fingerprint": FP}
@@ -78,9 +99,11 @@ class GateTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name).resolve()
+        self.volatile_temp = tempfile.TemporaryDirectory(dir="/dev/shm")
+        self.addCleanup(self.volatile_temp.cleanup)
         self.repo = self.directory / "group/repo"
         self.repo.mkdir(parents=True)
-        self.outdir = self.directory / "volatile/user/OUTPUT/Analysis/KaonLT"
+        self.outdir = Path(self.volatile_temp.name) / "expphy/volatile/user/OUTPUT/Analysis/KaonLT"
         self.outdir.mkdir(parents=True)
         self.transfer = self.directory / "transfer"
         self.transfer.mkdir()
@@ -338,7 +361,7 @@ class GateTests(unittest.TestCase):
                 owner.verify_zip(path, SHA, records)
 
     @contextmanager
-    def flow(self, fail=None):
+    def flow(self, fail=None, aliases=False):
         """Keep actual status, child mock, artifacts, collector and delivery logic."""
         worktree = None
         volatile = self.outdir.parents[2]
@@ -419,8 +442,11 @@ class GateTests(unittest.TestCase):
             mock(owner.isolation, "import_identity", return_value={"package_file": str(config), "pathing_file": str(config)})
             mock(owner.isolation, "owned_worktree", side_effect=owned)
             mock(owner, "git", side_effect=fake_git)
-            mock(owner, "VOLATILE_MOUNT", new=volatile.parent)
-            mock(Path, "is_mount", new=lambda p: p == volatile.parent)
+            anchor = volatile.parent
+            if aliases:
+                anchor, raw = stack.enter_context(infrastructure_aliases(volatile, self.directory / "infrastructure"))
+                baseline["VOLATILEPATH"] = str(raw)
+            mock(owner, "VOLATILE_MOUNT", new=anchor)
             mock(owner.isolation, "path_fields", return_value=baseline)
             overlay = mock(owner, "prepare_runtime_overlay", side_effect=overlay_copy)
             probes = mock(owner.isolation, "probe_paths", side_effect=runtime_probes)
@@ -471,9 +497,9 @@ class GateTests(unittest.TestCase):
         for failure in ("source", "overlay", "paths", "external", "output_link", "copy", "child", "collector", "cleanup", "zip", "preservation", "original", "accepted", "installed"):
             with self.subTest(failure=failure):
                 # Each attempt owns separate fresh destinations and target inventory.
-                with tempfile.TemporaryDirectory() as fresh:
+                with tempfile.TemporaryDirectory(dir="/dev/shm") as fresh:
                     old = self.outdir, self.transfer, self.output
-                    self.outdir = Path(fresh) / "volatile/user/OUTPUT/Analysis/KaonLT"; self.outdir.mkdir(parents=True)
+                    self.outdir = Path(fresh) / "expphy/volatile/user/OUTPUT/Analysis/KaonLT"; self.outdir.mkdir(parents=True)
                     self.transfer = Path(fresh) / "transfer"; self.transfer.mkdir()
                     self.output = self.transfer / "attempt.zip"
                     try:
@@ -524,29 +550,136 @@ class GateTests(unittest.TestCase):
         run.assert_not_called()
         self.assertEqual(list(self.repo.parent.glob("kaonlt-ab-analysis-*")), [])
 
+    def test_owner_alias_success_once_preserves_raw_resolver_and_source_collection(self):
+        with self.flow(aliases=True) as (run, _, verify):
+            owner.execute_gate(self.repo, self.outdir, self.output, SHA)
+        run.assert_called_once(); verify.assert_called_once()
+        summary = json.loads((self.transfer / "comparison-run-summary.json").read_text())
+        placement = summary["runtime_placement"]
+        self.assertEqual(placement["base"]["canonical"], str(self.outdir.parents[2]))
+        self.assertNotEqual(placement["resolver_VOLATILEPATH"], placement["base"]["canonical"])
+        self.assertTrue(placement["aliases"])
+        self.assertFalse(Path(placement["parent"]["path"]).exists())
+
+    def test_owner_mutable_alias_rejects_before_copy_or_child(self):
+        with self.flow(aliases=True) as (run, _, _), patch.object(owner, "stage_copies") as copy:
+            parent = owner.VOLATILE_MOUNT.parent
+            parent.chmod(0o755)
+            try:
+                with self.assertRaisesRegex(ValueError, "alias_parent_writable"):
+                    owner.execute_gate(self.repo, self.outdir, self.output, SHA)
+            finally:
+                parent.chmod(0o555)
+        copy.assert_not_called(); run.assert_not_called()
+        self.assertFalse((self.transfer / "comparison-gate-status.json").exists())
+
 
 class VolatileRuntime(unittest.TestCase):
     """Real Linux filesystem/probe fixtures; Git and the analysis child are mocks."""
 
+    def test_00_pushed_owner_rejects_real_alias_chain(self):
+        with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
+            text = subprocess.check_output(["git", "show",
+                "df07ecedf01b2d299c6fc61ac293c1fb4101ffd2:testing/run_pion_t_template_comparison_gate.py"], cwd=ROOT).decode()
+            functions = [n for n in ast.parse(text).body if isinstance(n, ast.FunctionDef)
+                         and n.name in {"volatile_base", "directory_identity"}]
+            namespace = {**vars(owner), "VOLATILE_MOUNT": owner.VOLATILE_MOUNT}
+            exec(compile(ast.Module(body=functions, type_ignores=[]), "<pushed-volatile-guard>", "exec"), namespace)
+            baseline = owner.isolation.path_fields(repo, repo)
+            self.assertTrue(owner.VOLATILE_MOUNT.is_symlink())
+            self.assertFalse(owner.VOLATILE_MOUNT.resolve(strict=True).is_mount())
+            with self.assertRaisesRegex(ValueError, "volatile_mount_invalid"):
+                namespace["volatile_base"](repo, baseline)
+            record = owner.volatile_base(repo, baseline)
+            self.assertEqual(record["base"]["path"], str(base))
+            self.assertEqual(record["anchor"]["canonical"], str(base.parent))
+            self.assertGreaterEqual(len(record["aliases"]), 3)
+            self.assertEqual(calls, [])
+
+    def test_user_writable_aliases_and_repository_device_are_rejected(self):
+        with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
+            baseline = owner.isolation.path_fields(repo, repo)
+            anchor_parent = owner.VOLATILE_MOUNT.parent
+            anchor_parent.chmod(0o755)
+            try:
+                with self.assertRaisesRegex(ValueError, "alias_parent_writable"):
+                    owner.volatile_base(repo, baseline)
+            finally:
+                anchor_parent.chmod(0o555)
+            for target in (repo, repo.parent, base, package.parent):
+                link = base / "untrusted"; link.symlink_to(target)
+                try:
+                    with self.subTest(target=target), self.assertRaisesRegex(ValueError, "alias_parent_writable"):
+                        owner.volatile_base(repo, {**baseline, "VOLATILEPATH": str(link)})
+                finally:
+                    link.unlink()
+            with self.assertRaisesRegex(ValueError, "on_repository_device"):
+                owner.volatile_base(package.parent, baseline)
+            read_only = base / "read-only"; read_only.mkdir()
+            (read_only / "alias").symlink_to(base)
+            read_only.chmod(0o555)
+            try:
+                with self.assertRaisesRegex(ValueError, "untrusted_base_alias"):
+                    owner.volatile_base(repo, {**baseline, "VOLATILEPATH": str(read_only / "alias")})
+            finally:
+                read_only.chmod(0o755)
+            dangling = base / "dangling"; dangling.symlink_to(base / "missing")
+            with self.assertRaises(FileNotFoundError):
+                owner.volatile_base(repo, {**baseline, "VOLATILEPATH": str(dangling)})
+            self.assertEqual(calls, [])
+            self.assertEqual(list(base.glob("kaonlt-ab-analysis-*")), [])
+
+    def test_trusted_anchor_alias_to_group_or_repository_is_rejected(self):
+        with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
+            outside = repo.parent / "user"; outside.mkdir()
+            for target, raw in ((repo.parent, outside), (repo, repo / "user")):
+                raw.mkdir(exist_ok=True)
+                anchor = owner.VOLATILE_MOUNT
+                anchor.parent.chmod(0o755)
+                anchor.unlink(); anchor.symlink_to(target)
+                anchor.parent.chmod(0o555)
+                with self.subTest(target=target), self.assertRaisesRegex(ValueError, "base_overlap|on_repository_device"):
+                    owner.volatile_base(repo, {"VOLATILEPATH": str(anchor / "user")})
+            self.assertEqual(calls, [])
+
+    def test_same_referent_alias_rebinding_stops_cleanup_without_traversal(self):
+        with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
+            artifacts(shared)
+            before = owner.accepted_identities(shared)
+            record = owner.volatile_base(repo, owner.isolation.path_fields(repo, repo))
+            with self.assertRaisesRegex(ValueError, "base_identity_changed"):
+                with owner.analysis_worktree(repo, SHA, record) as work:
+                    anchor = owner.VOLATILE_MOUNT
+                    anchor.parent.chmod(0o755)
+                    anchor.unlink(); anchor.symlink_to(base.parent)
+                    anchor.parent.chmod(0o555)
+            self.assertTrue((work / "science.py").is_file())
+            self.assertFalse(any(args[:2] == ("worktree", "remove") for _, args in calls))
+            owner.verify_accepted(shared, before)
+
     @contextmanager
-    def fixture(self, ambiguous=False):
+    def fixture(self, ambiguous=False, aliases=False):
         # Extract only the frozen harmless package fixture. Importing that test
         # module would also import plotting/science dependencies unnecessarily.
         source = ast.parse((ROOT / "testing/test_run_e8_4_fix5_canonical_five_plot_gate.py").read_text())
         builder = next(n for n in ast.walk(source) if isinstance(n, ast.FunctionDef) and n.name == "runtime_fixture")
         namespace = {"ROOT": ROOT, "Path": Path, "owner": owner.isolation}
         exec(compile(ast.Module(body=[builder], type_ignores=[]), "<installed-package-fixture>", "exec"), namespace)
-        with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
+        with tempfile.TemporaryDirectory(dir="/dev/shm") as directory, tempfile.TemporaryDirectory() as group, ExitStack() as stack:
             root = Path(directory).resolve()
             old_repo, old_work, package, config = namespace["runtime_fixture"](self, directory)
-            repo = root / "group/repo"
-            repo.parent.mkdir(); old_repo.rename(repo)
+            repo = Path(group) / "repo"
+            shutil.move(str(old_repo), repo)
             shutil.rmtree(old_work.parent)
-            mount = root / "volatile"; base = mount / "user"; base.mkdir(parents=True)
+            mount = root / "expphy/volatile"; base = mount / "user"; base.mkdir(parents=True)
             shared = base / "OUTPUT/Analysis/KaonLT"; shared.mkdir(parents=True)
             (repo / "OUTPUT").symlink_to(base / "OUTPUT")
             fields = owner.isolation.read_path_config(config.read_bytes())
-            fields.update(LTANAPATH=str(repo), VOLATILEPATH=str(base))
+            if aliases:
+                mount, raw = stack.enter_context(infrastructure_aliases(base, root / "infrastructure"))
+            else:
+                raw = base
+            fields.update(LTANAPATH=str(repo), VOLATILEPATH=str(raw), ANALYSISPATH="/")
             config.write_text("".join(k + "=" + v + "\n" for k, v in fields.items()))
             if ambiguous:
                 config.with_name("duplicate.path").write_bytes(config.read_bytes())
@@ -564,13 +697,12 @@ class VolatileRuntime(unittest.TestCase):
                 return ""
             stack.enter_context(patch.object(owner, "git", side_effect=fake_git))
             stack.enter_context(patch.object(owner, "VOLATILE_MOUNT", mount))
-            stack.enter_context(patch.object(Path, "is_mount", new=lambda p: p == mount))
             stack.enter_context(patch.dict(os.environ, {"PYTHONPATH": str(package.parent),
                 "PYTHONDONTWRITEBYTECODE": "1"}))
             yield repo, base, shared, package, config, calls
 
     def test_real_copied_overlay_and_all_writable_locations_are_volatile(self):
-        with self.fixture() as (repo, base, shared, package, config, calls):
+        with self.fixture(aliases=True) as (repo, base, shared, package, config, calls):
             original = {p: p.read_bytes() for p in package.rglob("*") if p.is_file()}
             populate_inputs(shared); artifacts(shared)
             accepted = owner.accepted_identities(shared)
@@ -598,7 +730,9 @@ class VolatileRuntime(unittest.TestCase):
                 self.assertEqual({p: p.read_bytes() for p in original}, original)
                 owner.isolation.verify_ltsep_preservation(overlay)
                 owner.verify_accepted(shared, accepted); owner.verify_originals(copies)
-                self.assertTrue(all(p["paths"]["VOLATILEPATH"] == str(base) for p in probes))
+                self.assertTrue(all(p["paths"]["VOLATILEPATH"] == baseline["VOLATILEPATH"] for p in probes))
+                self.assertEqual(len(plan), 21)
+                self.assertNotEqual(baseline["VOLATILEPATH"], str(base))
             self.assertFalse(work.parent.exists())
             self.assertTrue((repo / "OUTPUT").is_symlink())
             self.assertEqual(calls[0][1][:3], ("worktree", "add", "--detach"))
@@ -610,13 +744,16 @@ class VolatileRuntime(unittest.TestCase):
             for path in ("", "relative", str(repo.parent), str(alias), str(base / "missing"), str(base.parent)):
                 with self.subTest(path=path), self.assertRaises((ValueError, OSError)):
                     owner.volatile_base(repo, {"VOLATILEPATH": path})
-            with patch.object(Path, "is_mount", return_value=False), self.assertRaisesRegex(ValueError, "mount_invalid"):
+            self.assertFalse(base.parent.is_mount())
+            with patch.object(owner, "VOLATILE_MOUNT", base / "missing"), self.assertRaises(FileNotFoundError):
                 owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
             with patch.object(os, "access", return_value=False), self.assertRaisesRegex(ValueError, "base_invalid"):
                 owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
             # Synthetic directories share a device: an alleged volatile mount
             # on the real group device must be refused even with free space.
-            with patch.object(owner, "GROUP_MOUNT", repo.parent), self.assertRaisesRegex(ValueError, "on_group_device"):
+            with patch.object(owner, "GROUP_MOUNT", base.parent / ".."), self.assertRaisesRegex(ValueError, "base_overlap"):
+                owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
+            with patch.object(owner, "GROUP_MOUNT", package.parent), self.assertRaisesRegex(ValueError, "on_group_device"):
                 owner.volatile_base(repo, {"VOLATILEPATH": str(base)})
             with patch.object(os, "geteuid", return_value=os.geteuid()+1), self.assertRaisesRegex(ValueError, "owner_or_mode"):
                 owner.volatile_base(repo, {"VOLATILEPATH": str(base)})

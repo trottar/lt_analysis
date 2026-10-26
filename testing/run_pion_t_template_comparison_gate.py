@@ -58,42 +58,83 @@ BOUNDARIES = {"diagnostic_only": True, "scientifically_accepted": False,
     "pdf_legibility_verified": False,
     "method_a_detached": True, "method_b_numerically_excluded": True}
 
-# Mount roles, never replacement environment configuration. Tests substitute
-# synthetic mount directories; runtime always verifies the real /volatile.
+# Infrastructure entry points, never replacement environment configuration.
+# /volatile may resolve through trusted aliases above the physical subtree.
 VOLATILE_MOUNT = Path("/volatile")
 GROUP_MOUNT = Path("/group")
 
 
-def directory_identity(path, private=False):
+def directory_identity(path, private=False, owned=True):
     path = Path(path)
     require(path.is_absolute() and path.resolve(strict=True) == path and
             all(not p.is_symlink() for p in (path, *path.parents)) and path.is_dir(),
             "runtime_directory_alias_or_invalid:" + str(path))
     info = path.stat()
-    require(info.st_uid == os.geteuid() and
+    require((not owned or info.st_uid == os.geteuid()) and
             (not private or stat.S_IMODE(info.st_mode) == 0o700),
             "runtime_directory_owner_or_mode:" + str(path))
     return {"path": str(path), "canonical": str(path.resolve()), "device": info.st_dev, "inode": info.st_ino,
             "uid": info.st_uid, "mode": stat.S_IMODE(info.st_mode)}
 
 
+def volatile_alias_identity(path):
+    """Snapshot infrastructure links, including links in their target paths.
+
+    Only root-controlled parents without group/other write, or read-only
+    synthetic infrastructure parents, may supply trusted aliases. User-owned
+    writable directories never extend this trust into the configured base.
+    """
+    path = Path(path)
+    canonical = path.resolve(strict=True)
+    trusted_uid = VOLATILE_MOUNT.lstat().st_uid
+    links, visited, pending = {}, set(), [path]
+    while pending:
+        candidate = pending.pop()
+        if candidate in visited:
+            continue
+        visited.add(candidate)
+        require(len(visited) <= 64, "volatile_alias_chain_invalid")
+        for entry in reversed((candidate, *candidate.parents)):
+            if not entry.is_symlink():
+                continue
+            info, parent = entry.lstat(), entry.parent.resolve(strict=True)
+            parent_info = parent.stat()
+            mode = stat.S_IMODE(parent_info.st_mode)
+            require((parent_info.st_uid == 0 and mode & 0o022 == 0) or mode & 0o222 == 0,
+                    "volatile_alias_parent_writable:" + str(entry))
+            require(info.st_uid == parent_info.st_uid == trusted_uid,
+                    "volatile_alias_owner_invalid:" + str(entry))
+            target = os.readlink(entry)
+            links[str(entry)] = {"target": target, "canonical": str(entry.resolve(strict=True)),
+                "device": info.st_dev, "inode": info.st_ino, "uid": info.st_uid,
+                "parent": directory_identity(parent, owned=False)}
+            pending.append(entry.parent / target)
+    require(path.resolve(strict=True) == canonical, "volatile_alias_changed")
+    return canonical, links
+
+
 def volatile_base(repo, baseline):
     raw = baseline.get("VOLATILEPATH", "")
     require(isinstance(raw, str) and raw and Path(raw).is_absolute(), "volatile_base_not_absolute")
-    mount, base = VOLATILE_MOUNT, Path(raw)
-    require(mount.is_absolute() and mount.resolve(strict=True) == mount and
-            not mount.is_symlink() and mount.is_mount(), "volatile_mount_invalid")
+    require(VOLATILE_MOUNT.is_absolute(), "volatile_anchor_invalid")
+    anchor, aliases = volatile_alias_identity(VOLATILE_MOUNT)
+    base, base_aliases = volatile_alias_identity(Path(raw))
+    require(all(aliases.get(key) == value for key, value in base_aliases.items()),
+            "volatile_untrusted_base_alias")
+    anchor_identity = directory_identity(anchor, owned=False)
     identity = directory_identity(base)
-    require(base != mount and base.is_relative_to(mount) and
-            base.stat().st_dev == mount.stat().st_dev and os.access(base, os.W_OK | os.X_OK),
+    require(base != anchor and base.is_relative_to(anchor) and
+            identity["device"] == anchor_identity["device"] and os.access(base, os.W_OK | os.X_OK),
             "volatile_base_invalid")
     for forbidden in (Path(repo).resolve(), GROUP_MOUNT.resolve()):
         require(not base.is_relative_to(forbidden) and not forbidden.is_relative_to(base),
                 "volatile_base_overlap")
     if GROUP_MOUNT.exists():
         require(base.stat().st_dev != GROUP_MOUNT.stat().st_dev, "volatile_on_group_device")
+    require(base.stat().st_dev != Path(repo).stat().st_dev, "volatile_on_repository_device")
     return {"resolver_VOLATILEPATH": raw, "base": identity,
-            "mount_device": mount.stat().st_dev}
+            "anchor": anchor_identity, "aliases": aliases,
+            "mount_device": anchor_identity["device"]}
 
 
 def verify_runtime_parent(repo, record):
