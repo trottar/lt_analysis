@@ -30,9 +30,10 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) fit-status/owner integration](phases/kaonlt-local-t-phi-farm-owner-integration-2026-10-27-task-contract.md).
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) published-identity repair](phases/kaonlt-local-t-phi-published-identity-2026-10-27-task-contract.md).
 One private child, six artifacts in v2; returned/accepted fits distinct.
-Transferred signed content/Sumw2 checked.
+Transferred signed content/Sumw2 checked. Published d6a923d companions
+are pinned exactly; LF manifest/export checks are local, not farm acceptance.
 Fixtures only; production/USER frozen; no farm/ROOT acceptance.
 Prior [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
 remains `SOURCE REVIEWED`; [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
@@ -224,10 +225,10 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the application repair
-and owner dependencies. Resolve publication scope; user publication and
-pushed-state review precede deciding one private six-artifact gate.
-No farm command or readiness claim. Hierarchy/C deferred.
+NEXT — independent ChatGPT actual-diff review of the published-identity/LF
+repair. User publication and pushed-state review precede one private
+Center/Left six-artifact gate. No farm command or runtime acceptance.
+Hierarchy/C deferred.
 
 The investigation retains prior
 construction, transfer and signed-application findings and their limitations.

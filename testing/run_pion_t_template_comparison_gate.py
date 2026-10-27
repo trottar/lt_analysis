@@ -41,6 +41,15 @@ CLEANUP_REPAIR_BLOBS = {
     "testing/run_e8_4_fix5_canonical_five_plot_gate.py": "a05f041ceaf2a1ef5798002272a1e29a22083b83",
     "testing/test_run_e8_4_fix5_canonical_five_plot_gate.py": "48cc342829933da42cf925f453ad19fe352a97c7",
 }
+# Approved co-published companions at d6a923d; future edits remain frozen.
+REVIEWED_PUBLICATION_BLOBS = {
+    "testing/pion_local_t_event_validation_replay.py": "8addd03229a95fba8753c539ee966dc4ec74d01b",
+    "testing/pion_local_t_statistical_validation.py": "93ddf7b329598485e4a6b5236f64abcc7e8aa063",
+    "testing/pion_t_template_comparison_gate_profile.json": "5020d2e71e6ea36e2bce6a8e97b8200c9255132f",
+    "testing/render_pion_t_template_comparison_pdf.py": "3039b71a0030e2de71ed15c20a66af1192d81970",
+    "testing/test_pion_local_t_statistical_validation.py": "7b0dfda5a6c66b0064159121fd5b79ed122354c3",
+    "testing/test_render_pion_t_template_comparison_pdf.py": "c4a64c090833565a575713c41b72ae11a3f26fa8",
+}
 PROFILE = "testing/pion_t_phi_template_comparison_gate_profile_v2.json"
 PROFILE_ID = "pion_t_phi_template_comparison_center_left_lowe/v2"
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
@@ -340,13 +349,16 @@ def preflight(repo, source_commit):
     changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
     allowed = {PROFILE, "testing/run_pion_t_template_comparison_gate.py",
                "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS,
-               *INTEGRATION_FILES}
+               *INTEGRATION_FILES, *REVIEWED_PUBLICATION_BLOBS}
     require(all(p in allowed or p.startswith("docs/memory/") for p in changed),
             "unexpected_committed_source")
     git(repo, "merge-base", "--is-ancestor", CLEANUP_REPAIR_BASE, source_commit)
     for path, blob in CLEANUP_REPAIR_BLOBS.items():
         require(git(repo, "rev-parse", source_commit + ":" + path) == blob,
                 "cleanup_repair_blob_changed:" + path)
+    for path, blob in REVIEWED_PUBLICATION_BLOBS.items():
+        require(git(repo, "rev-parse", source_commit + ":" + path) == blob,
+                "reviewed_publication_blob_changed:" + path)
     return before
 
 

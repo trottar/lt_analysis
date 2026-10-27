@@ -472,8 +472,10 @@ class EventTests(unittest.TestCase):
                              for n in tree.body))
         original=ast.parse(subprocess.check_output(["git","show","HEAD:src/binning/calculate_yield.py"],cwd=ROOT).decode())
         original_function=next(n for n in original.body if isinstance(n,ast.FunctionDef) and n.name=="calculate_yield_data")
+        # HEAD may already contain both published diagnostic guards.
         original_function.body=[n for n in original_function.body if not (
-            isinstance(n,ast.If) and cap.ENABLE_ENV in ast.unparse(n.test))]
+            isinstance(n,ast.If) and any(flag in ast.unparse(n.test) for flag in
+                (cap.ENABLE_ENV, "LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON")))]
         function.body.remove(guard)
         # A separately tested detached observer is also default-off. Removing
         # both diagnostic guards must leave the exact HEAD production AST.

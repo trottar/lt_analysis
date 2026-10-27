@@ -229,12 +229,12 @@ class GateTests(unittest.TestCase):
         extra = [p for p in changed if p not in allowed and not p.startswith("docs/memory/")]
         self.assertEqual(len(extra), 13)  # reproduce the original committed-range rejection
         state = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}
-        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", side_effect=lambda repo, *args: owner.CLEANUP_REPAIR_BLOBS[args[1].split(":", 1)[1]] if args[0] == "rev-parse" else "") as run:
+        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", side_effect=lambda repo, *args: {**owner.CLEANUP_REPAIR_BLOBS, **owner.REVIEWED_PUBLICATION_BLOBS}[args[1].split(":", 1)[1]] if args[0] == "rev-parse" else "") as run:
             self.assertEqual(owner.preflight(ROOT, SHA), state)
             self.assertIn((ROOT, "merge-base", "--is-ancestor", owner.BASE_HEAD, owner.REVIEWED_HEAD),
                           [call.args for call in run.call_args_list])
             self.assertIn((ROOT, "diff", "--name-only", owner.REVIEWED_HEAD, SHA), [c.args for c in run.call_args_list])
-        for path in [p for p in extra if p not in owner.INTEGRATION_FILES] + ["unrelated.py"]:
+        for path in [p for p in extra if p not in owner.INTEGRATION_FILES and p not in owner.REVIEWED_PUBLICATION_BLOBS] + ["unrelated.py"]:
             with self.subTest(path=path), patch.object(owner.isolation, "snapshot", return_value=state), patch.object(
                     owner, "git", side_effect=["", "", "", path]):
                 with self.assertRaisesRegex(ValueError, "unexpected_committed_source"):
@@ -249,7 +249,7 @@ class GateTests(unittest.TestCase):
                 if args[0] == "rev-parse":
                     path = args[1].split(":", 1)[1]
                     if defect == ("test" if "/test_" in path else "helper"): return "0" * 40
-                    return owner.CLEANUP_REPAIR_BLOBS[path]
+                    return {**owner.CLEANUP_REPAIR_BLOBS, **owner.REVIEWED_PUBLICATION_BLOBS}[path]
                 if args[:3] == ("merge-base", "--is-ancestor", owner.CLEANUP_REPAIR_BASE) and defect == "ancestor":
                     raise ValueError("not_cleanup_successor")
                 return ""
@@ -733,15 +733,64 @@ class GateTests(unittest.TestCase):
         state={'branch':'test','head':SHA,'origin_test':SHA,'porcelain':''}
         def run(repo,*args):
             if args[0]=='diff': return '\n'.join(owner.INTEGRATION_FILES|{owner.PROFILE})
-            if args[0]=='rev-parse': return owner.CLEANUP_REPAIR_BLOBS[args[1].split(':',1)[1]]
+            if args[0]=='rev-parse': return {**owner.CLEANUP_REPAIR_BLOBS, **owner.REVIEWED_PUBLICATION_BLOBS}[args[1].split(':',1)[1]]
             return ''
         with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=run):
             self.assertEqual(owner.preflight(ROOT,SHA),state)
-        for path in ('src/main.py','testing/pion_local_t_event_validation_replay.py',
-                     'testing/pion_local_t_statistical_validation.py','unrelated.py'):
+        for path in ('src/main.py','unrelated.py'):
             with self.subTest(path=path),patch.object(owner.isolation,'snapshot',return_value=state),patch.object(
                     owner,'git',side_effect=['','','',path]),self.assertRaisesRegex(ValueError,'unexpected_committed_source'):
                 owner.preflight(ROOT,SHA)
+
+    def test_published_companion_pins_match_exact_approved_git_blobs(self):
+        head='d6a923d35072de4c3d56e354ec71622ca4486ad8'
+        changed=owner.git(ROOT,'diff','--name-only',owner.REVIEWED_HEAD,head).splitlines()
+        old_allowed={owner.PROFILE,'testing/run_pion_t_template_comparison_gate.py',
+            'testing/test_run_pion_t_template_comparison_gate.py',*owner.CLEANUP_REPAIR_BLOBS,*owner.INTEGRATION_FILES}
+        rejected={p for p in changed if p not in old_allowed and not p.startswith('docs/memory/')}
+        self.assertEqual(len(rejected),6)
+        self.assertEqual(set(owner.REVIEWED_PUBLICATION_BLOBS),rejected)
+        for path,blob in owner.REVIEWED_PUBLICATION_BLOBS.items():
+            self.assertEqual(owner.git(ROOT,'rev-parse',head+':'+path),blob)
+
+    def test_current_manifest_matches_the_git_clean_publication_bytes(self):
+        path='docs/memory/CURRENT.md'
+        raw=(ROOT/path).read_bytes()
+        manifest=json.loads((ROOT/'docs/memory/manifest.json').read_text(encoding='utf-8'))
+        entry=next(e for e in manifest['files'] if e['path']==path)
+        self.assertEqual(entry['bytes'],len(raw))
+        self.assertEqual(entry['sha256'],hashlib.sha256(raw).hexdigest())
+        clean=subprocess.check_output(['git','hash-object','--path='+path,'--stdin'],
+                                      cwd=ROOT,input=raw).strip().decode()
+        raw_blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+        self.assertEqual(clean,raw_blob,'manifest must hash bytes unchanged by Git clean conversion')
+
+    def test_actual_approved_publication_passes_source_range_and_pins(self):
+        # Only snapshot is synthetic: all Git ancestry, range and blob queries
+        # use actual approved history. No worktree creation or farm execution.
+        head='d6a923d35072de4c3d56e354ec71622ca4486ad8'
+        state={'branch':'test','head':head,'origin_test':head,'porcelain':''}
+        with patch.object(owner.isolation,'snapshot',return_value=state):
+            self.assertEqual(owner.preflight(ROOT,head),state)
+
+    def test_each_changed_or_missing_reviewed_companion_remains_rejected(self):
+        state={'branch':'test','head':SHA,'origin_test':SHA,'porcelain':''}
+        for target in owner.REVIEWED_PUBLICATION_BLOBS:
+            for missing in (False,True):
+                def query(repo,*args):
+                    if args[0]=='diff': return '\n'.join(owner.REVIEWED_PUBLICATION_BLOBS)
+                    if args[0]=='rev-parse':
+                        path=args[1].split(':',1)[1]
+                        if path==target:
+                            if missing: raise subprocess.CalledProcessError(128,['git','rev-parse',args[1]])
+                            return '0'*40
+                        return {**owner.CLEANUP_REPAIR_BLOBS,**owner.REVIEWED_PUBLICATION_BLOBS}[path]
+                    return ''
+                with self.subTest(path=target,missing=missing),patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=query):
+                    if missing:
+                        with self.assertRaises(subprocess.CalledProcessError): owner.preflight(ROOT,SHA)
+                    else:
+                        with self.assertRaisesRegex(ValueError,'reviewed_publication_blob_changed:'+target): owner.preflight(ROOT,SHA)
 
     @contextmanager
     def flow(self, fail=None, aliases=False):
