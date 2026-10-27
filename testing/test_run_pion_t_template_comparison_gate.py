@@ -23,7 +23,7 @@ SHA = "a" * 40
 FP = "b" * 64
 MARKERS = ("All available low-epsilon settings completed in debug mode.\n"
            "Full high-epsilon processing is intentionally skipped in -d debug mode.\n")
-IDENTITIES = {name: {"sha256": FP, "bytes": 12} for name in owner.SOURCE_FILES}
+IDENTITIES = {name: {"sha256": FP, "bytes": 12} for name in owner.child_source_inventory(ROOT)}
 
 
 @contextmanager
@@ -48,7 +48,7 @@ def infrastructure_aliases(base, infra):
 
 
 def histogram():
-    return {"status": "available", "stored_sumw2": [0., 1., 0.],
+    return {"status": "available", "edges": [0., 1.], "values": [0., 9., 0.], "stored_sumw2": [0., 9., 0.],
             "content_error_fingerprint": FP}
 
 
@@ -79,11 +79,55 @@ def payload(setting, pdf):
     return {"schema_version": "pion_t_template_comparison/v1", "diagnostic_only": True,
         "production_applied": False, "scientifically_accepted": False, "source_HEAD": SHA,
         "source_identity_rejection_reasons": [], "source_files": {
-            name: {"status": "available", **record} for name, record in IDENTITIES.items()},
+            name: {"status": "available", **IDENTITIES[name]} for name in owner.SOURCE_FILES},
         "phi_setting": setting, "setting": {"Q2": "4p4", "W": "2p74", "EPSSET": "low", "ParticleType": "kaon"},
         "enable_environment_variable": owner.ENABLE_ENV,
         "pdf": {"status": "available", "path": str(pdf), "sha256": owner.sha256(pdf), "bytes": pdf.stat().st_size},
-        "canonical_t_edges": edges, "parents": parents, "status": "available"}
+        "canonical_t_edges": edges, "canonical_phi_edges": list(range(10)),
+        "original_analysis_input_identity": runtime_identities(setting, pdf.parent),
+        "parents": parents, "status": "available"}
+
+
+def runtime_identities(setting, directory):
+    result = {}
+    for role in ('data', 'dummy'):
+        p = directory / f'{setting}_kaon_Analysed_{role.title()}_Q4p4W2p74_lowe.root'
+        result[role] = {'status':'available','path':str(p), 'bytes':p.stat().st_size if p.exists() else 12,
+                        'sha256':owner.sha256(p) if p.exists() else FP}
+    return result
+
+
+def child_payload(setting, ab):
+    def cell(count=1):
+        return dict(count=count,values=[0.,float(count),0.],variances=[0.,float(count),0.])
+    def projection():
+        return dict(edges=[0.,1.],closure='PASS',parents=[cell(9) for _ in range(3)],
+            children=[[cell() for _ in range(9)] for _ in range(3)],outside_phi=[cell(0) for _ in range(3)],
+            sources=[{s:cell(9 if s=='prompt' else 0) for s in ('prompt','rand','dummy','dummy_rand')} for _ in range(3)])
+    cells=[]
+    for ti in range(3):
+        for pi in range(9):
+            h=histogram(); h.update(values=[0.,1.,0.],stored_sumw2=[0.,1.,0.])
+            fit=dict(analysis_scope=f't_bin{ti+1}phi_bin{pi+1}',H_pion_control_input=deepcopy(h),
+                H_kaon_nosub_input=deepcopy(h),fit_status_pion='success',fit_status_kaon='failed',
+                diagnostics={'kaon':{'validation':{'accepted':False},
+                    'pi_delta_signal_protected_fit':{'accepted':False,'status':'rejected'}}})
+            cells.append(dict(t_index=ti,phi_index=pi,t_edges=ab['canonical_t_edges'][ti:ti+2],
+                phi_edges=ab['canonical_phi_edges'][pi:pi+2],status='fit_rejected',
+                inputs={pop:deepcopy(h) for pop in ('pion','kaon')},
+                template_scopes={c:'local_t_phi' for c in owner.COMPONENTS},
+                signal_scopes={'k_lambda':'setting_fallback','k_sigma0':'unavailable'},
+                fit_returned=True,fit_accepted=False,fit=fit,reason='kaon validation rejected',
+                protected_model_status=deepcopy(fit['diagnostics']['kaon']['pi_delta_signal_protected_fit']),
+                fit_acceptance={'accepted':False,'reason':'kaon validation rejected','diagnostics':{'fit_validation_kaon':False}},
+                applications={m:{'status':'unavailable','reason':'fit_rejected'} for m in ('Global','Local_t','Local_t_phi')}))
+    return dict(schema_version='pion_t_phi_template_comparison/v1',diagnostic_only=True,production_applied=False,
+        scientifically_accepted=False,status='captured_pending_independent_validation',source_HEAD=SHA,
+        source_identity_complete=True,source_files={n:{'status':'available',**v} for n,v in IDENTITIES.items()},
+        phi_setting=setting,t_edges=ab['canonical_t_edges'],phi_edges=ab['canonical_phi_edges'],
+        runtime_inputs=ab['original_analysis_input_identity'],parent_input_closure='PASS',production_parents_unchanged=True,
+        observations={p:{cut:projection() for cut in ('allcuts','nommcuts')} for p in ('pion','kaon')},
+        cells=cells,cell_status_counts={'fit_rejected':27})
 
 
 def artifacts(outdir):
@@ -91,7 +135,28 @@ def artifacts(outdir):
         stem = f"{setting}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison"
         pdf = outdir / (stem + ".pdf")
         pdf.write_bytes(b"%PDF-1.4\nsynthetic fixture\n")
-        (outdir / (stem + ".json")).write_text(json.dumps(payload(setting, pdf)), encoding="utf-8")
+        ab=payload(setting,pdf)
+        (outdir / (stem + ".json")).write_text(json.dumps(ab), encoding="utf-8")
+        (outdir / (stem.replace('pion-t-','pion-t-phi-') + '.json')).write_text(
+            json.dumps(child_payload(setting,ab)),encoding='utf-8')
+
+
+def scalar_producer_application(cells, weights):
+    """Run the actual scalar producer; stub only ROOT-dependent weight building."""
+    import sys
+    import types
+    source=ast.parse((ROOT/'src/cuts/pion_t_phi_template_comparison.py').read_text())
+    node=next(n for n in source.body if isinstance(n,ast.FunctionDef) and n.name=='apply_transfer')
+    config=types.ModuleType('background_config')
+    config.resolve_particle_subtraction_weight_denominator_floor=lambda inp:1e-12
+    config.resolve_particle_subtraction_weight_clip_bounds=lambda inp:(None,None)
+    subtraction=types.ModuleType('pion_component_subtraction')
+    subtraction.build_simc_shape_pion_control_weights=lambda fit,**kw:{'weights':list(weights),'diagnostics':dict(kw)}
+    audit=types.ModuleType('pion_background_chain_audit');audit.snapshot=deepcopy
+    ns={'require':owner.require,'math':owner.math}
+    exec(compile(ast.Module(body=[node],type_ignores=[]),'<actual-apply-transfer>','exec'),ns)
+    with patch.dict(sys.modules,{'background_config':config,'pion_component_subtraction':subtraction,'pion_background_chain_audit':audit}):
+        return ns['apply_transfer']({},deepcopy(cells),{'mm_min':1.1,'mm_max':1.13})
 
 
 class GateTests(unittest.TestCase):
@@ -120,7 +185,10 @@ class GateTests(unittest.TestCase):
         self.assertEqual(tracked["artifacts"], owner.ARTIFACTS)
         self.assertEqual(tracked["settings"], owner.SETTINGS)
         self.assertEqual(tracked["artifacts"]["settings"], [])
-        self.assertEqual(len(owner.names()), 4)
+        self.assertEqual(len(owner.names()), 6)
+        historical=owner.collector.load_validation_profile(ROOT / 'testing/pion_t_template_comparison_gate_profile.json')
+        self.assertEqual(historical['validation_profile'],'pion_t_template_comparison_center_left_lowe/v1')
+        self.assertEqual(len(historical['artifacts']['global']),4)
         self.assertEqual(tracked["source_identity"]["required_analysis_commit"], owner.REVIEWED_HEAD)
         self.assertEqual(self.profile["source_identity"]["required_analysis_commit"], SHA)
         self.assertTrue(all("{" not in name for name in owner.names()))
@@ -156,7 +224,7 @@ class GateTests(unittest.TestCase):
 
     def test_reviewed_checkpoint_and_all_thirteen_future_changes(self):
         changed = owner.git(ROOT, "diff", "--name-only", owner.BASE_HEAD, owner.REVIEWED_HEAD).splitlines()
-        allowed = {owner.PROFILE, "testing/run_pion_t_template_comparison_gate.py",
+        allowed = {"testing/pion_t_template_comparison_gate_profile.json", "testing/run_pion_t_template_comparison_gate.py",
                    "testing/test_run_pion_t_template_comparison_gate.py"}
         extra = [p for p in changed if p not in allowed and not p.startswith("docs/memory/")]
         self.assertEqual(len(extra), 13)  # reproduce the original committed-range rejection
@@ -166,7 +234,7 @@ class GateTests(unittest.TestCase):
             self.assertIn((ROOT, "merge-base", "--is-ancestor", owner.BASE_HEAD, owner.REVIEWED_HEAD),
                           [call.args for call in run.call_args_list])
             self.assertIn((ROOT, "diff", "--name-only", owner.REVIEWED_HEAD, SHA), [c.args for c in run.call_args_list])
-        for path in extra + ["unrelated.py"]:
+        for path in [p for p in extra if p not in owner.INTEGRATION_FILES] + ["unrelated.py"]:
             with self.subTest(path=path), patch.object(owner.isolation, "snapshot", return_value=state), patch.object(
                     owner, "git", side_effect=["", "", "", path]):
                 with self.assertRaisesRegex(ValueError, "unexpected_committed_source"):
@@ -244,8 +312,9 @@ class GateTests(unittest.TestCase):
                 self.assertFalse((tree.parent / "ab-output").exists())
                 for setting in ("Center", "Left", "Right"):
                     self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
-                log.write_text(MARKERS); time.sleep(.02); artifacts(private)
+                log.write_text(MARKERS); time.sleep(.02)
                 (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"derived private branches")
+                artifacts(private)
                 return 0
             run = mock(owner.debug, "run_analysis", side_effect=child)
             @contextmanager
@@ -298,11 +367,13 @@ class GateTests(unittest.TestCase):
 
     def test_committed_source_bytes_and_missing_source(self):
         result = subprocess.CompletedProcess([], 0, stdout=b"committed bytes", stderr=b"")
-        with patch.object(owner.subprocess, "run", return_value=result) as run:
+        with patch.object(owner.subprocess, "run", return_value=result) as run, patch.object(
+                owner, 'child_source_inventory', return_value=tuple(IDENTITIES)):
             records = owner.committed_identities(self.repo, SHA)
         self.assertEqual(records[owner.SOURCE_FILES[0]]["sha256"], hashlib.sha256(result.stdout).hexdigest())
-        self.assertEqual(run.call_count, len(owner.SOURCE_FILES))
-        with patch.object(owner.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, stdout=b"", stderr=b"missing")):
+        self.assertEqual(run.call_count, len(IDENTITIES))
+        with patch.object(owner.subprocess, "run", return_value=subprocess.CompletedProcess([], 1, stdout=b"", stderr=b"missing")), patch.object(
+                owner, 'child_source_inventory', return_value=tuple(IDENTITIES)):
             with self.assertRaisesRegex(ValueError, "committed_source_missing"):
                 owner.committed_identities(self.repo, SHA)
 
@@ -312,8 +383,8 @@ class GateTests(unittest.TestCase):
         original = dict(env)
         child = owner.child_environment(env)
         self.assertEqual(env, original)
-        self.assertEqual(child, {"PATH": "existing", "PYTHONPATH": "overlay", owner.ENABLE_ENV: "1"})
-        for extra in ({"LT_ANALYSIS_NEW_OPT_IN": "1"}, {owner.ENABLE_ENV: "0"}):
+        self.assertEqual(child, {"PATH": "existing", "PYTHONPATH": "overlay", owner.ENABLE_ENV: "1", owner.CHILD_ENABLE_ENV: "1"})
+        for extra in ({"LT_ANALYSIS_NEW_OPT_IN": "1"}, {owner.ENABLE_ENV: "0"}, {owner.CHILD_ENABLE_ENV:'0'}):
             with self.assertRaises(ValueError):
                 owner.child_environment({**env, **extra})
 
@@ -340,9 +411,10 @@ class GateTests(unittest.TestCase):
     def test_six_page_artifacts_and_explicit_negative_evidence(self):
         artifacts(self.outdir)
         records, outcomes = self.verify()
-        self.assertEqual(len(records), 4)
+        self.assertEqual(len(records), 6)
+        self.assertEqual(outcomes['Center']['child_comparison']['accepted_fits'],0)
         self.assertEqual(outcomes["Center"]["status"], "available")
-        path = next(self.outdir.glob("Center*.json"))
+        path = self.outdir / 'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json'
         p = json.loads(path.read_text())
         p["parents"][1].update(status="unavailable", candidate_B=None,
                                 rejection_reasons=["pi_n:invalid_local_template_or_provenance"])
@@ -355,7 +427,7 @@ class GateTests(unittest.TestCase):
 
     def test_structural_identity_authority_provenance_negative_cases(self):
         artifacts(self.outdir)
-        path = next(self.outdir.glob("Center*.json"))
+        path = self.outdir / 'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json'
         good = json.loads(path.read_text())
         mutations = [
             lambda p: p.update(schema_version="wrong"), lambda p: p.update(production_applied=True),
@@ -387,7 +459,7 @@ class GateTests(unittest.TestCase):
 
     def test_malformed_nonfinite_empty_missing_stale_and_pdf_failure(self):
         artifacts(self.outdir)
-        path = next(self.outdir.glob("Center*.json"))
+        path = self.outdir / 'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json'
         good = path.read_bytes()
         for bad in (b"", b"{", b'{"x":NaN}', b'{"x":1e999}', b'{"x":1,"x":2}'):
             path.write_bytes(bad)
@@ -433,8 +505,8 @@ class GateTests(unittest.TestCase):
         self.assertEqual(result["returncode"], 0)
         owner.verify_zip(self.output, SHA, records)
         with zipfile.ZipFile(self.output) as archive:
-            self.assertEqual(len(archive.namelist()), 13)
-            self.assertEqual(sum(not name.endswith("/") and name.startswith("global/") for name in archive.namelist()), 4)
+            self.assertEqual(len(archive.namelist()), 15)
+            self.assertEqual(sum(not name.endswith("/") and name.startswith("global/") for name in archive.namelist()), 6)
         self.assertEqual(len(result["manifest"]["settings"]), 5)
 
     def test_zip_inventory_manifest_and_hash_tampering(self):
@@ -460,6 +532,216 @@ class GateTests(unittest.TestCase):
                     archive.writestr(name, data)
             with self.subTest(index=index), self.assertRaises(ValueError):
                 owner.verify_zip(path, SHA, records)
+
+    def test_child_identity_inventory_closure_and_status_tampering(self):
+        artifacts(self.outdir)
+        path=self.outdir/'Center_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json'
+        good=json.loads(path.read_text())
+        mutations=[
+            lambda p:p.update(schema_version='wrong'), lambda p:p.update(source_HEAD='c'*40),
+            lambda p:p.update(phi_setting='Left'), lambda p:p.update(parent_input_closure='FAIL'),
+            lambda p:p.update(production_parents_unchanged=False),
+            lambda p:p['source_files'][owner.SOURCE_FILES[0]].update(sha256='c'*64),
+            lambda p:p['source_files'].pop(owner.SOURCE_FILES[0]),
+            lambda p:p['runtime_inputs']['data'].update(sha256='c'*64),
+            lambda p:p['runtime_inputs']['dummy'].update(path='original_pre_shift.root'),
+            lambda p:p['cells'].pop(), lambda p:p['cells'][1].update(phi_index=0),
+            lambda p:p['cells'][0].update(phi_index=9),
+            lambda p:p['cells'][0].update(t_edges=[.1,.2]),
+            lambda p:p.update(phi_edges=list(range(1,11))),
+            lambda p:p.update(cell_status_counts={'fitted_local_templates':27}),
+            lambda p:p['cells'][0].update(status='fitted_local_templates'),
+            lambda p:p['cells'][0].pop('fit_accepted'),
+            lambda p:p['cells'][0]['fit'].pop('fit_status_kaon'),
+            lambda p:p['cells'][0]['protected_model_status'].update(status='success'),
+            lambda p:p['cells'][0].update(fit_acceptance={'accepted':False}),
+            lambda p:p['cells'][0]['applications']['Local_t_phi'].update(status='available'),
+            lambda p:p['cells'][0]['template_scopes'].update(pi_n='coarse_disguised_local'),
+            lambda p:p['observations']['kaon']['nommcuts']['children'][0][0]['variances'].__setitem__(1,-1.),
+            lambda p:p['observations']['pion']['allcuts']['sources'][0]['rand']['values'].__setitem__(1,1.),
+            lambda p:p['observations']['pion']['nommcuts']['outside_phi'][0].update(count=1),
+            lambda p:p['cells'][0]['inputs']['kaon']['values'].__setitem__(1,2.),
+        ]
+        for index, mutate in enumerate(mutations):
+            changed=deepcopy(good); mutate(changed); path.write_text(json.dumps(changed))
+            with self.subTest(index=index),self.assertRaises(ValueError): self.verify()
+        path.write_text(json.dumps(good))
+        for defect in ('duplicate','missing','stale','malformed'):
+            with self.subTest(defect=defect):
+                extra=path.with_name('duplicate-pion-t-phi-template-comparison.json')
+                if defect=='duplicate': extra.write_bytes(path.read_bytes())
+                elif defect=='missing': path.unlink()
+                elif defect=='malformed': path.write_text('{"cells":[],"cells":[]}')
+                else: self.before[path.name]={'old':True}
+                with self.assertRaises(ValueError): self.verify()
+                if extra.exists(): extra.unlink()
+                path.write_text(json.dumps(good)); self.before[path.name]=None
+
+    def test_actual_private_container_checked_in_addition_to_ab_join(self):
+        artifacts(self.outdir)
+        ab=json.loads((self.outdir/'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json').read_text())
+        child=child_payload('Center',ab)
+        runtime={f'Center_kaon_Analysed_{r.title()}_Q4p4W2p74_lowe.root':
+                 {'resolved':v['path'],'sha256':v['sha256'],'bytes':v['bytes']} for r,v in child['runtime_inputs'].items()}
+        self.assertEqual(owner.verify_child_payload(child,'Center',SHA,IDENTITIES,ab,runtime)['accepted_fits'],0)
+        runtime[next(iter(runtime))]['sha256']='c'*64
+        with self.assertRaisesRegex(ValueError,'private_container_mismatch'):
+            owner.verify_child_payload(child,'Center',SHA,IDENTITIES,ab,runtime)
+
+    def test_child_accepted_fallback_empty_and_failed_outcomes(self):
+        artifacts(self.outdir)
+        path=self.outdir/'Center_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json'
+        doc=json.loads(path.read_text())
+        for index in (0,1):
+            c=doc['cells'][index]; fit=c['fit']
+            fit.update(fit_status_kaon='success',fallback_used=False,
+                **{k:1. for k in ('A_n','A_delta','A_sidis','B_n','B_delta','B_sidis')})
+            fit['diagnostics']={pop:{'validation':{'accepted':True}} for pop in ('pion','kaon')}
+            c['protected_model_status']={'status':'unavailable','reason':'protected_diagnostics_not_retained'}
+            c.update(fit_accepted=True,reason='',fit_acceptance=dict(accepted=True,reason='',diagnostics=dict(
+                fit_validation_pion=True,fit_validation_kaon=True,amplitudes={k:fit[k] for k in
+                    ('A_n','A_delta','A_sidis','B_n','B_delta','B_sidis')})))
+            c['status']='fitted_local_templates' if index==0 else 'fitted_with_template_fallback'
+            if index==1: c['template_scopes']['pi_n']='local_t_aggregate_fallback'
+        for index,status,reason in ((2,'fit_failed','solver sparse exception'),(3,'fit_failed','solver exception')):
+            doc['cells'][index].update(status=status,reason=reason,fit_returned=False,fit_accepted=False,fit=None,fit_acceptance=None,
+                protected_model_status={'status':'unavailable','reason':'fit_not_returned'})
+        doc['cell_status_counts']=dict(owner.Counter(c['status'] for c in doc['cells']))
+        path.write_text(json.dumps(doc))
+        _,outcomes=self.verify()
+        self.assertEqual(outcomes['Center']['child_comparison']['accepted_fits'],2)
+        self.assertEqual(outcomes['Center']['child_comparison']['physics_adequacy'],'NOT VERIFIED')
+        for mutate in (lambda c:c['fit'].update(fit_status_kaon='failed'),
+                       lambda c:c['fit_acceptance']['diagnostics'].update(fit_validation_kaon=False),
+                       lambda c:c['template_scopes'].update(pi_n='setting_fallback')):
+            changed=deepcopy(doc); mutate(changed['cells'][0]); path.write_text(json.dumps(changed))
+            with self.assertRaises(ValueError): self.verify()
+
+    def _available_child_application_fixture(self):
+        artifacts(self.outdir)
+        stem = 'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison'
+        ab = json.loads((self.outdir / (stem + '.json')).read_text())
+        doc = child_payload('Center', ab)
+        cell = doc['cells'][0]
+        fit = cell['fit']
+        fit.update(fit_status_kaon='success', fallback_used=False,
+                   **{k:1. for k in ('A_n','A_delta','A_sidis','B_n','B_delta','B_sidis')})
+        fit['diagnostics'] = {pop:{'validation':{'accepted':True}} for pop in ('pion','kaon')}
+        cell.update(fit_accepted=True, reason='', status='fitted_local_templates',
+            protected_model_status={'status':'unavailable','reason':'protected_diagnostics_not_retained'},
+            fit_acceptance={'accepted':True,'reason':'','diagnostics':{
+                'fit_validation_pion':True,'fit_validation_kaon':True,
+                'amplitudes':{k:fit[k] for k in ('A_n','A_delta','A_sidis','B_n','B_delta','B_sidis')}}})
+        observed = {cut:doc['observations']['pion'][cut]['children'][0][0]
+                    for cut in ('allcuts','nommcuts')}
+        cell['applications'] = {method:scalar_producer_application(observed, [0.,2.,0.])
+                                for method in ('Global','Local_t','Local_t_phi')}
+        doc['cell_status_counts'] = dict(owner.Counter(c['status'] for c in doc['cells']))
+        return doc, ab
+
+    def test_available_application_producer_arrays_are_verified(self):
+        doc, ab = self._available_child_application_fixture()
+        before = deepcopy(doc)
+        result = owner.verify_child_payload(doc,'Center',SHA,IDENTITIES,ab)
+        self.assertEqual(result['accepted_fits'],1)
+        self.assertEqual(doc,before)
+        for app in doc['cells'][0]['applications'].values():
+            self.assertEqual(app['cuts']['nommcuts']['values'],[0.,2.,0.])
+            self.assertEqual(app['cuts']['allcuts']['variances'],[0.,4.,0.])
+
+    def test_available_application_missing_fields_or_cuts_rejected(self):
+        doc, ab = self._available_child_application_fixture()
+        mutations = [lambda a:a.pop('weights'), lambda a:a.pop('cuts'),
+            lambda a:a.update(cuts=None), lambda a:a['cuts'].pop('allcuts'),
+            lambda a:a['cuts'].pop('nommcuts'), lambda a:a['cuts'].update(other={}),
+            lambda a:a['cuts']['allcuts'].pop('values'),
+            lambda a:a['cuts']['nommcuts'].pop('variances'),
+            lambda a:a['cuts'].update(allcuts=None)]
+        for method in ('Global','Local_t','Local_t_phi'):
+            for i,mutate in enumerate(mutations):
+                changed=deepcopy(doc); mutate(changed['cells'][0]['applications'][method])
+                with self.subTest(method=method,mutation=i),self.assertRaises(ValueError):
+                    owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+        changed=deepcopy(doc)
+        changed['cells'][0]['applications']['Local_t_phi']={'status':'available'}
+        with self.assertRaises(ValueError): owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+
+    def test_available_application_invalid_arrays_and_flows_rejected(self):
+        doc, ab = self._available_child_application_fixture()
+        mutations = [lambda a:a.update(weights=[0.,2.]), lambda a:a.update(weights=None),
+            lambda a:a.update(weights=[0.,True,0.]), lambda a:a.update(weights=[0.,'2',0.]),
+            lambda a:a.update(weights=[0.,float('nan'),0.]),
+            lambda a:a.update(weights=[0.,float('inf'),0.]),
+            lambda a:a.update(weights=[1.,2.,0.]), lambda a:a.update(weights=[0.,2.,1.]),
+            lambda a:a['cuts']['nommcuts'].update(variances=[0.,-5.,0.]),
+            lambda a:a['cuts']['allcuts'].update(values=[0.,float('inf'),0.]),
+            lambda a:a['cuts']['allcuts'].update(variances=[0.,float('nan'),0.]),
+            lambda a:a['cuts']['allcuts'].update(values=[0.,False,0.]),
+            lambda a:a['cuts']['nommcuts'].update(values=[0.,2.]),
+            lambda a:a['cuts']['nommcuts'].update(variances=[0.,4.,0.,0.])]
+        for method in ('Global','Local_t','Local_t_phi'):
+            for i,mutate in enumerate(mutations):
+                changed=deepcopy(doc);mutate(changed['cells'][0]['applications'][method])
+                with self.subTest(method=method,mutation=i),self.assertRaises(ValueError):
+                    owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+
+    def test_available_application_content_and_quadratic_variance_rejected_on_mismatch(self):
+        doc,ab=self._available_child_application_fixture()
+        for method in ('Global','Local_t','Local_t_phi'):
+            for cut in ('allcuts','nommcuts'):
+                for field,value in (('values',9.),('variances',2.)):
+                    changed=deepcopy(doc)
+                    changed['cells'][0]['applications'][method]['cuts'][cut][field][1]=value
+                    with self.subTest(method=method,cut=cut,field=field),self.assertRaises(ValueError):
+                        owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+
+    def test_application_inventory_and_unavailable_evidence_are_explicit(self):
+        doc,ab=self._available_child_application_fixture()
+        for method in ('Global','Local_t','Local_t_phi'):
+            changed=deepcopy(doc);changed['cells'][0]['applications'].pop(method)
+            with self.subTest(missing=method),self.assertRaises(ValueError):
+                owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+            for bad in (None,{'status':'other'},{'status':'unavailable'},
+                {'status':'unavailable','reason':True}, {'status':'unavailable','reason':' '},
+                {'status':'unavailable','reason':'fit_rejected','weights':[0.,2.,0.]},
+                {'status':'unavailable','reason':'fit_rejected','cuts':{}}):
+                changed=deepcopy(doc);changed['cells'][0]['applications'][method]=bad
+                with self.subTest(method=method,bad=bad),self.assertRaises(ValueError):
+                    owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+        changed=deepcopy(doc);changed['cells'][0]['applications']['extra']={'status':'unavailable','reason':'fixture'}
+        with self.assertRaises(ValueError): owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+        changed=deepcopy(doc);changed['cells'][1]['applications']['Local_t_phi']=deepcopy(doc['cells'][0]['applications']['Local_t_phi'])
+        with self.assertRaisesRegex(ValueError,'rejected_weights'): owner.verify_child_payload(changed,'Center',SHA,IDENTITIES,ab)
+
+    def test_scalar_producer_signed_cancellations_and_zero_transfers(self):
+        observed={'nommcuts':{'values':[5.,-2.,0.,7.],'variances':[25.,8.,4.,49.]},
+                  'allcuts':{'values':[0.,-1.,0.,0.],'variances':[0.,3.,0.,0.]}}
+        projections={cut:{'edges':[0.,1.,2.],'children':[[v]]} for cut,v in observed.items()}
+        for weights in ([0.,2.,-.5,0.],[0.,0.,0.,0.]):
+            app=scalar_producer_application(observed,weights)
+            cell={'t_index':0,'phi_index':0,'fit_accepted':True,
+                  'applications':{m:deepcopy(app) for m in ('Global','Local_t','Local_t_phi')}}
+            before=deepcopy(cell)
+            owner.verify_child_applications(cell,projections)
+            self.assertEqual(cell,before)
+            if any(weights):
+                self.assertEqual(app['cuts']['nommcuts']['values'],[0.,-4.,0.,0.])
+                self.assertEqual(app['cuts']['nommcuts']['variances'],[0.,32.,1.,0.])
+            else:self.assertEqual(app['cuts']['nommcuts']['variances'],[0.]*4)
+
+    def test_new_source_guard_accepts_exact_paths_and_rejects_unrelated_pending_dependencies(self):
+        state={'branch':'test','head':SHA,'origin_test':SHA,'porcelain':''}
+        def run(repo,*args):
+            if args[0]=='diff': return '\n'.join(owner.INTEGRATION_FILES|{owner.PROFILE})
+            if args[0]=='rev-parse': return owner.CLEANUP_REPAIR_BLOBS[args[1].split(':',1)[1]]
+            return ''
+        with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=run):
+            self.assertEqual(owner.preflight(ROOT,SHA),state)
+        for path in ('src/main.py','testing/pion_local_t_event_validation_replay.py',
+                     'testing/pion_local_t_statistical_validation.py','unrelated.py'):
+            with self.subTest(path=path),patch.object(owner.isolation,'snapshot',return_value=state),patch.object(
+                    owner,'git',side_effect=['','','',path]),self.assertRaisesRegex(ValueError,'unexpected_committed_source'):
+                owner.preflight(ROOT,SHA)
 
     @contextmanager
     def flow(self, fail=None, aliases=False):
@@ -530,6 +812,7 @@ class GateTests(unittest.TestCase):
         def child(tree, log, env):
             self.assertEqual(tree, worktree)
             self.assertEqual(env[owner.ENABLE_ENV], "1")
+            self.assertEqual(env[owner.CHILD_ENABLE_ENV], "1")
             log.write_text(MARKERS)
             # Let the real filesystem clock advance before genuinely new writes;
             # never retime artifacts or change the owner's freshness boundary.
@@ -537,8 +820,8 @@ class GateTests(unittest.TestCase):
             private = tree.joinpath("OUTPUT/Analysis/KaonLT").resolve()
             for setting in ("Center", "Left", "Right"):
                 self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
-            artifacts(private)
             (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"private derived branches")
+            artifacts(private)
             return 1 if fail == "child" else 0
         with ExitStack() as stack:
             stack.enter_context(redirect_stderr(io.StringIO()))

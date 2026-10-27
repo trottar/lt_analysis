@@ -4067,6 +4067,17 @@ def calculate_yield_data(kin_type, hist, t_bins, phi_bins, inpDict):
     hist["_yield_data_event_cache"] = ave_event_cache
     hist["_yield_sub_event_cache"] = sub_event_cache
     if (
+        os.environ.get("LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON") == "1"
+        and not bool(inpDict.get("bg_opt_prepass_mode"))
+        and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT
+        and str(inpDict.get("ParticleType", "")).strip().lower() == "kaon"
+        and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+        and resolve_pion_subtraction_scope(inpDict) == "t_bin"
+    ):
+        from pion_t_phi_template_comparison import observe as observe_t_phi_comparison
+        observe_t_phi_comparison(hist, inpDict, t_bins, phi_bins, OUTPATH,
+                                 kaon_signal_shape_payload, kaon_sigma0_shape_payload)
+    if (
         os.environ.get("LT_ANALYSIS_PION_LOCAL_T_EVENT_VALIDATION") == "1"
         and not bool(inpDict.get("bg_opt_prepass_mode"))
         and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT

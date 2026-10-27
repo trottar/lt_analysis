@@ -11,6 +11,8 @@ for each task rather than treating workstation configuration as project truth.
 
 ## Collaboration preferences
 
+Use Work as the preferred environment for substantial offline KaonLT scientific development, numerical experiments, statistical validation, prototyping, and genuine-data diagnostic plots. Establish scientific feasibility and test failure modes before requesting farm-oriented integration. Use Codex for narrowly scoped tracked implementation changes when Jefferson Lab farm integration becomes necessary. Preserve independent source review, user-only Git publication, user-only farm execution, and applicable runtime validation. This separation is intended to minimize repeated costly farm attempts and speculative infrastructure development; offline tests never substitute for actual farm evidence.
+
 For forthcoming E.8 quick-debug science, use **Left/lowe + Center/lowe**
 together by default: adjacent low-epsilon runs are quick to analyze. Left/lowe
 has restricted phi support; Center/lowe covers a wider phi range. Report actual

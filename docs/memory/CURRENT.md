@@ -30,11 +30,14 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [A/B pion input staging](phases/kaonlt-ab-stage-pion-inputs-2026-10-26-task-contract.md).
-Supplied `b5769e51` run: `analysis_failed`, missing private Center pion lowe
-Data/Dummy. SOURCE VERIFIED: `-d` consumes these inputs; copy_plan omitted them.
-Repair stages available-low pairs; science frozen, farm NOT VERIFIED.
-Receipt and local results in contract.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) fit-status/owner integration](phases/kaonlt-local-t-phi-farm-owner-integration-2026-10-27-task-contract.md).
+One private child, six artifacts in v2; returned/accepted fits distinct.
+Transferred signed content/Sumw2 checked.
+Fixtures only; production/USER frozen; no farm/ROOT acceptance.
+Prior [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
+remains `SOURCE REVIEWED`; [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
+remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. October 26 `60f1f4f`
+A/B runtime and completed C evidence preserved.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -74,7 +77,8 @@ identities, event/cut/template/fit provenance, source/phi-child closure, MM/tail
 statistics, production conventions and paired fixed-weight errors remain in the
 detached six-parent JSON/PDF. Historical pins stay strict; no historical C reuse.
 
-No matched farm bundle or fresh physical C result is available here. Historical
+No matched event farm bundle or event-level physical C result is available here.
+Historical
 A/B/C remains immutable and cohort-specific. The earlier failed capture at
 `04f1ec403a9555634e61c229aa347cb76d0c78d3` and published
 [prepass boundary repair](phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md)
@@ -220,20 +224,14 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent actual-diff review of pion staging, user publication and
-pushed-state review; then decide one private Center/Left lowe t1/t2/t3 A/B gate.
-Review pion copies, log, four fresh A/B files, identities and preservation/
-collection; then seven-strength C JSON/PDF: full-MM, 1.10–1.16 GeV
-controls, transferred background and fixed-weight variance proxies. Equal HEAD
-is not same-run proof. Preservation conflicts stop; failed acquisition wrapper
-is no prerequisite. Farm user-only; no automatic run. Signed events, final Lambda
-yield/variance, independent fitted estimator and bias truth NOT VERIFIED.
-No C promotion or normalization/yield change.
+NEXT — independent ChatGPT actual-diff review of the application repair
+and owner dependencies. Resolve publication scope; user publication and
+pushed-state review precede deciding one private six-artifact gate.
+No farm command or readiness claim. Hierarchy/C deferred.
 
-Hierarchical amplitudes and child refitting remain deferred; no prior width,
-covariance model or fallback is approved. The investigation retains prior
+The investigation retains prior
 construction, transfer and signed-application findings and their limitations.
-The template diagnostic's single opt-in remains detached; it does not change
+The template diagnostics remain opt-in and detached; they do not change
 production templates, alignment, fits, subtraction or yields.
 
 ## Success Criteria

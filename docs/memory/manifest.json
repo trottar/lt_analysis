@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16324,
+      "bytes": 16351,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "b056209222c790aecf18eabe81dd87553336c9685c55e35fc2bf9215a13314e6"
+      "sha256": "f2ff05b0a9d2e2d8c762e44eaae7d0110223d8261b70e3c43e9db1c328e94575"
     },
     {
       "bytes": 11186,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 9612,
+      "bytes": 10313,
       "path": "docs/memory/USER.md",
-      "sha256": "88e90c23d5fe3a35a40d451fba3fa43f6ca0cc4b7e2c62cc995110824bed865e"
+      "sha256": "247a6823f585ec327796431790b6f0e6fe9a1b4b547434132cb00fcd540f1c22"
     },
     {
       "bytes": 1157,
@@ -1266,6 +1266,11 @@
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
     },
     {
+      "bytes": 11392,
+      "path": "docs/memory/phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md",
+      "sha256": "bdc31dc57e6f8f8002dc7100a68921646e26f495c1fa757afebf9125bd2e4a57"
+    },
+    {
       "bytes": 14379,
       "path": "docs/memory/phases/kaonlt-ab-owner-lustre-setgid-mode-fix-2026-10-25-task-contract.md",
       "sha256": "1d1904efe7530e8c8b3c913c0d7e9dbca339cff1899eebae81d0e473be44543a"
@@ -1314,6 +1319,21 @@
       "bytes": 12284,
       "path": "docs/memory/phases/kaonlt-full-mm-reconstruction-scientific-memory-checkpoint-2026-10-20-task-contract.md",
       "sha256": "ae67a5d70447015b3549cb03ce1bd0720f2556b740970aec4b0411509f6a8e46"
+    },
+    {
+      "bytes": 10485,
+      "path": "docs/memory/phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md",
+      "sha256": "9be238312263a703c6f7703cfd11ef059c1f1b257f19254907204fb3c3717a95"
+    },
+    {
+      "bytes": 8604,
+      "path": "docs/memory/phases/kaonlt-local-t-phi-2026-10-27-task-contract.md",
+      "sha256": "b6ab3b89ce64932831945fd1c08edb578817cb5d06eb9da4dcd1bf646e19c509"
+    },
+    {
+      "bytes": 15503,
+      "path": "docs/memory/phases/kaonlt-local-t-phi-farm-owner-integration-2026-10-27-task-contract.md",
+      "sha256": "6ccf051acd6030e394c8e66cfc3a485c040e4b35cbbf9a3e6f8cd6afc1b6382e"
     },
     {
       "bytes": 7858,

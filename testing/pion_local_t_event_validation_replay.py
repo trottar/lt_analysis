@@ -15,9 +15,11 @@ from pathlib import Path
 try:
     from . import pion_local_t_event_validation_capture as capture
     from . import pion_local_t_transfer_variance_comparison as c
+    from . import pion_local_t_statistical_validation as statistics
 except ImportError:
     import pion_local_t_event_validation_capture as capture
     import pion_local_t_transfer_variance_comparison as c
+    import pion_local_t_statistical_validation as statistics
 
 require, digest = capture.require, capture.digest
 DOMAINS = {"normal_full_MM": None, "full_0.7_1.3": (.7,1.3), "signal_1.10_1.16": (1.10,1.16),
@@ -173,7 +175,7 @@ def validate_candidate(candidate, *, matched_authority=None):
     return candidate
 
 
-def replay(packets, candidate, *, expected_head, matched_authority=None):
+def replay(packets, candidate, *, expected_head, matched_authority=None, include_statistics=False):
     before = digest([packets,candidate])
     detailed = matched_authority is not None
     validate_candidate(candidate, matched_authority=matched_authority)
@@ -284,6 +286,9 @@ def replay(packets, candidate, *, expected_head, matched_authority=None):
                                    reference[cut]['parent']['domains'][domain]['sumw2'], rel_tol=1e-10, abs_tol=1e-14)]
                             for cut in ('nommcuts', 'allcuts')},
                         'interpretation': 'descriptive full-sample comparisons only; no accepted or selected strength'}
+            if detailed or include_statistics:
+                record["training_dependency_audit"] = statistics.training_dependency_audit(p)
+                record["conditional_fixed_weight_covariance"] = statistics.event_replay_statistics(record, DOMAINS)
             output["parents"].append(record)
     require(digest([packets,candidate]) == before, "replay_input_mutation")
     output["inputs_unchanged"] = True
@@ -352,6 +357,7 @@ def main(argv=None):
     parser.add_argument("--candidate-json",type=Path,required=True)
     parser.add_argument("--candidate-sha256",required=True,help="independently reviewed original c_review_candidate_c.json hash")
     parser.add_argument("--capture-source-commit",required=True,help="independently reviewed published capture HEAD")
+    parser.add_argument("--statistical-audit",action="store_true",help="Add conditional same-event covariance; never held-out model validation")
     parser.add_argument("--output-json",type=Path,required=True)
     parser.add_argument("--output-pdf",type=Path,required=True)
     args = parser.parse_args(argv)
@@ -364,7 +370,7 @@ def main(argv=None):
     require(hashlib.sha256(raw).hexdigest() == args.candidate_sha256, "accepted_candidate_hash_mismatch")
     candidate = strict_json(raw)
     packets = {s:strict_json(p.read_bytes()) for s,p in zip(c.SETTINGS,inputs[:2])}
-    result = replay(packets,candidate,expected_head=args.capture_source_commit)
+    result = replay(packets,candidate,expected_head=args.capture_source_commit,include_statistics=args.statistical_audit)
     result["input_files"] = {str(p):capture.file_identity(p) for p in inputs}
     render_pdf(result,args.output_pdf)
     result["pdf"] = capture.file_identity(args.output_pdf)

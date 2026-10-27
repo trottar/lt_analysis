@@ -41,9 +41,10 @@ CLEANUP_REPAIR_BLOBS = {
     "testing/run_e8_4_fix5_canonical_five_plot_gate.py": "a05f041ceaf2a1ef5798002272a1e29a22083b83",
     "testing/test_run_e8_4_fix5_canonical_five_plot_gate.py": "48cc342829933da42cf925f453ad19fe352a97c7",
 }
-PROFILE = "testing/pion_t_template_comparison_gate_profile.json"
-PROFILE_ID = "pion_t_template_comparison_center_left_lowe/v1"
+PROFILE = "testing/pion_t_phi_template_comparison_gate_profile_v2.json"
+PROFILE_ID = "pion_t_phi_template_comparison_center_left_lowe/v2"
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
+CHILD_ENABLE_ENV = "LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON"
 COMMAND = ["./run_Prod_Analysis.sh", "-d", "4p4", "2p74"]
 SETTINGS = [dict(row) for row in isolation.CANONICAL_SETTINGS]
 COMPONENTS = ("pi_n", "pi_delta", "pi_sidis")
@@ -57,7 +58,20 @@ ARTIFACTS = {"global": [
     {"key": setting.lower() + "_comparison_" + extension,
      "basename_template": f"{setting}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.{extension}",
      "kind": "json" if extension == "json" else "file", "required": True}
-    for setting in ("Center", "Left") for extension in ("json", "pdf")], "settings": []}
+    for setting in ("Center", "Left") for extension in ("json", "pdf")] + [
+    {"key": setting.lower() + "_child_comparison_json",
+     "basename_template": f"{setting}_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json",
+     "kind": "json", "required": True} for setting in ("Center", "Left")], "settings": []}
+# Exact consumed scientific/reporting dependencies and their regression tests.
+# Unrelated pending statistics/replay implementation remains outside this scope.
+INTEGRATION_FILES = {
+    "src/cuts/pion_t_phi_template_comparison.py", "src/binning/calculate_yield.py",
+    "src/cuts/pion_t_template_comparison.py",
+    "testing/test_pion_t_phi_template_comparison.py",
+    "testing/test_pion_t_template_comparison.py",
+    "testing/test_pion_local_t_event_validation.py",
+    "testing/render_pion_t_phi_template_comparison.py",
+}
 BOUNDARIES = {"diagnostic_only": True, "scientifically_accepted": False,
     "production_applied": False, "ordinary_production_outputs_may_be_written": False,
     "whole_output_root_immutable": False, "private_scientific_outputs": True,
@@ -322,10 +336,11 @@ def preflight(repo, source_commit):
         require(path in isolation.FARM_OUTPUTS or path.startswith("OUTPUT/") or
                 (line[:2] == "??" and re.fullmatch(r"kaonlt_review(?:\([^/]+\))?\.diff", path)),
                 "dirty_gate_source:" + line)
-    # Only the two pinned cleanup files extend the historical three-file scope.
+    # Historical ancestry and cleanup pins stay strict; only exact reviewed paths.
     changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
     allowed = {PROFILE, "testing/run_pion_t_template_comparison_gate.py",
-               "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS}
+               "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS,
+               *INTEGRATION_FILES}
     require(all(p in allowed or p.startswith("docs/memory/") for p in changed),
             "unexpected_committed_source")
     git(repo, "merge-base", "--is-ancestor", CLEANUP_REPAIR_BASE, source_commit)
@@ -335,9 +350,31 @@ def preflight(repo, source_commit):
     return before
 
 
+def child_source_inventory(repo):
+    """Read the observer's declared inventory without importing physics/ROOT."""
+    base_tree = ast.parse((Path(repo) / "src/cuts/pion_t_template_comparison.py").read_text())
+    base = [n.value for n in base_tree.body if isinstance(n, ast.Assign) and
+            any(isinstance(t, ast.Name) and t.id == "REQUIRED_SOURCE_FILES" for t in n.targets)]
+    require(len(base) == 1 and ast.literal_eval(base[0]) == SOURCE_FILES,
+            "observer_base_source_inventory_changed")
+    tree = ast.parse((Path(repo) / "src/cuts/pion_t_phi_template_comparison.py").read_text())
+    declarations = [n.value for n in ast.walk(tree) if isinstance(n, ast.Assign) and
+                    any(isinstance(t, ast.Name) and t.id == "files" for t in n.targets)]
+    require(len(declarations) == 1 and isinstance(declarations[0], ast.Tuple),
+            "observer_child_source_inventory_invalid")
+    elements = declarations[0].elts
+    require(isinstance(elements[0], ast.Starred) and isinstance(elements[0].value, ast.Name)
+            and elements[0].value.id == "REQUIRED_SOURCE_FILES", "observer_child_source_inventory_invalid")
+    paths = SOURCE_FILES + tuple(ast.literal_eval(n) for n in elements[1:])
+    require(len(set(paths)) == len(paths) and all(isinstance(p, str) and
+            not Path(p).is_absolute() and ".." not in Path(p).parts for p in paths),
+            "observer_child_source_inventory_invalid")
+    return paths
+
+
 def committed_identities(repo, source_commit):
     records = {}
-    for path in SOURCE_FILES:
+    for path in child_source_inventory(repo):
         result = subprocess.run(["git", "show", source_commit + ":" + path], cwd=repo,
                                 capture_output=True)
         require(result.returncode == 0 and result.stdout, "committed_source_missing:" + path)
@@ -363,10 +400,12 @@ def child_environment(env):
     for key in ("LT_ANALYSIS_DEBUG_LEFT_LOW", "LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE",
                 "LT_ANALYSIS_ALLOW_UNPAIRED_CANONICAL_BINNING"):
         result.pop(key, None)
-    require(not any(k.startswith("LT_ANALYSIS_") and k != ENABLE_ENV and v
+    flags = (ENABLE_ENV, CHILD_ENABLE_ENV)
+    require(not any(k.startswith("LT_ANALYSIS_") and k not in flags and v
                     for k, v in result.items()), "untrusted_analysis_environment")
-    require(result.get(ENABLE_ENV, "1") == "1", "conflicting_comparison_environment")
-    result[ENABLE_ENV] = "1"
+    for flag in flags:
+        require(result.get(flag, "1") == "1", "conflicting_comparison_environment")
+        result[flag] = "1"
     return result
 
 
@@ -479,8 +518,207 @@ def verify_payload(payload, setting, source_commit, identities, pdf_record):
         str(p["t_bin_index"]): p["rejection_reasons"] for p in parents}, "canonical_t_edges": edges}
 
 
-def verify_artifacts(outdir, source_commit, identities, started_ns, before):
+def verify_child_applications(cell, pion_observations):
+    """Validate captured transfers, not fit physics or fitted-parameter errors."""
+    applications = cell.get("applications")
+    require(isinstance(applications, dict) and
+            set(applications) == {"Global", "Local_t", "Local_t_phi"}, "child_application_inventory")
+    ti, pi = cell["t_index"], cell["phi_index"]
+    edges = pion_observations["nommcuts"]["edges"]
+    size = len(edges) + 1  # Includes ROOT underflow/overflow.
+
+    def vector(value, nonnegative=False):
+        return (isinstance(value, list) and len(value) == size and all(
+            type(v) in (int, float) and math.isfinite(v) and (not nonnegative or v >= 0)
+            for v in value))
+
+    for method, application in applications.items():
+        require(isinstance(application, dict) and application.get("status") in ("available", "unavailable"),
+                "child_application_status:" + method)
+        available = application["status"] == "available"
+        if method == "Local_t_phi" and not cell["fit_accepted"]:
+            require(not available, "child_rejected_weights_applied")
+        if not available:
+            require(isinstance(application.get("reason"), str) and application["reason"].strip() and
+                    not any(k in application for k in ("weights", "cuts")),
+                    "child_application_unavailable_evidence:" + method)
+            continue
+        weights = application.get("weights")
+        require(vector(weights) and weights[0] == weights[-1] == 0,
+                "child_application_weights:" + method)
+        cuts = application.get("cuts")
+        require(isinstance(cuts, dict) and set(cuts) == {"allcuts", "nommcuts"},
+                "child_application_cuts:" + method)
+        for cut, spectrum in cuts.items():
+            require(pion_observations[cut]["edges"] == edges, "child_application_axis:" + method)
+            require(isinstance(spectrum, dict) and vector(spectrum.get("values")) and
+                    vector(spectrum.get("variances"), nonnegative=True),
+                    "child_application_spectrum:" + method + ":" + cut)
+            observed = pion_observations[cut]["children"][ti][pi]
+            for field, expected in (
+                ("values", [v*w for v,w in zip(observed["values"], weights)]),
+                ("variances", [v*w*w for v,w in zip(observed["variances"], weights)]),
+            ):
+                require(vector(expected) and all(math.isclose(a, b, rel_tol=1e-8, abs_tol=1e-12)
+                        for a,b in zip(spectrum[field], expected)),
+                        "child_application_reconstruction:" + method + ":" + cut + ":" + field)
+
+
+def verify_child_payload(payload, setting, source_commit, identities, ab, runtime_inputs=None):
+    """Structural/provenance closure, independent of ROOT and scientific adequacy."""
+    require(payload.get("schema_version") == "pion_t_phi_template_comparison/v1" and
+            payload.get("status") == "captured_pending_independent_validation" and
+            payload.get("diagnostic_only") is True and payload.get("production_applied") is False and
+            payload.get("scientifically_accepted") is False, "child_schema_or_authority_invalid")
+    require(payload.get("source_HEAD") == source_commit and payload.get("source_identity_complete") is True,
+            "child_source_identity_invalid")
+    sources = payload.get("source_files") or {}
+    require(set(sources) == set(identities), "child_source_inventory_invalid")
+    for path, identity in sources.items():
+        require(identity.get("status") == "available" and all(identity.get(k) == v
+                for k, v in identities[path].items()), "child_committed_source_hash_mismatch:" + path)
+    require(payload.get("phi_setting") == setting and payload.get("t_edges") == ab["canonical_t_edges"] and
+            payload.get("phi_edges") == ab.get("canonical_phi_edges"), "child_setting_or_edges_invalid")
+    for edges, size in ((payload["t_edges"], 4), (payload["phi_edges"], 10)):
+        require(isinstance(edges, list) and len(edges) == size and
+                all(type(v) in (int, float) and math.isfinite(v) for v in edges) and
+                all(a < b for a, b in zip(edges, edges[1:])), "child_edges_invalid")
+    require(payload.get("parent_input_closure") == "PASS" and
+            payload.get("production_parents_unchanged") is True, "child_parent_closure_invalid")
+    inputs = payload.get("runtime_inputs") or {}
+    require(set(inputs) == {"data", "dummy"} and
+            set(ab.get("original_analysis_input_identity") or {}) == set(inputs), "child_runtime_input_inventory")
+    for role, identity in inputs.items():
+        original = ab["original_analysis_input_identity"][role]
+        require(identity.get("status") == original.get("status") == "available" and
+                all(identity.get(k) == original.get(k) for k in ("path", "sha256", "bytes")) and
+                type(identity.get("bytes")) is int and identity["bytes"] > 0 and
+                re.fullmatch(r"[0-9a-f]{64}", identity.get("sha256", "")) is not None,
+                "child_runtime_input_mismatch:" + role)
+        if runtime_inputs is not None:
+            name = f"{setting}_kaon_Analysed_{role.title()}_Q4p4W2p74_lowe.root"
+            actual = runtime_inputs.get(name) or {}
+            require(str(Path(identity["path"]).resolve()) == actual.get("resolved") and
+                    all(identity.get(k) == actual.get(k) for k in ("sha256", "bytes")),
+                    "child_private_container_mismatch:" + role)
+
+    def vector_equal(a, b, reason):
+        require(isinstance(a, list) and isinstance(b, list) and len(a) == len(b) and
+                all(type(x) in (float, int) and type(y) in (float, int) and
+                    math.isfinite(x) and math.isfinite(y) and math.isclose(x, y, rel_tol=1e-8, abs_tol=1e-12)
+                    for x, y in zip(a, b)), reason)
+
+    observations = payload.get("observations") or {}
+    require(set(observations) == {"pion", "kaon"}, "child_population_inventory")
+    for pop, cuts in observations.items():
+        require(set(cuts) == {"allcuts", "nommcuts"}, "child_cut_inventory")
+        for cut, projection in cuts.items():
+            edges = projection.get("edges")
+            require(isinstance(edges, list) and len(edges) >= 2 and
+                    all(type(v) in (int, float) and math.isfinite(v) for v in edges) and
+                    all(a < b for a,b in zip(edges,edges[1:])), "child_mm_edges_invalid")
+            require(projection.get("closure") == "PASS" and all(len(projection.get(k, [])) == 3
+                    for k in ("parents", "children", "sources", "outside_phi")), "child_projection_inventory")
+            for ti in range(3):
+                children, source = projection["children"][ti], projection["sources"][ti]
+                require(len(children) == 9 and set(source) == {"prompt", "rand", "dummy", "dummy_rand"},
+                        "child_projection_inventory")
+                parent = projection["parents"][ti]
+                for cell in [parent, projection["outside_phi"][ti], *children, *source.values()]:
+                    require(type(cell.get("count")) is int and cell["count"] >= 0, "child_count_invalid")
+                    for field in ("values", "variances"):
+                        v = cell.get(field)
+                        require(isinstance(v, list) and len(v) == len(edges)+1 and all(
+                            type(x) in (int, float) and math.isfinite(x) and (field != "variances" or x >= 0)
+                            for x in v), "child_signed_sumw2_invalid")
+                for group in ([*children, projection["outside_phi"][ti]], list(source.values())):
+                    require(parent["count"] == sum(c["count"] for c in group), "child_count_closure")
+                    for field in ("values", "variances"):
+                        vector_equal(parent[field], [math.fsum(c[field][i] for c in group)
+                            for i in range(len(edges)+1)], "child_signed_sumw2_closure")
+                if cut == "nommcuts":
+                    frozen = ab["parents"][ti]["frozen_inputs"][pop]
+                    require(edges == frozen.get("edges"), "child_parent_mm_edges_mismatch")
+                    vector_equal(parent["values"], frozen.get("values"), "child_parent_content_mismatch")
+                    vector_equal(parent["variances"], frozen.get("stored_sumw2"), "child_parent_sumw2_mismatch")
+    cells = payload.get("cells")
+    require(isinstance(cells, list) and len(cells) == 27, "child_cell_inventory")
+    keys = [(c.get("t_index"), c.get("phi_index")) for c in cells]
+    require(all(type(t) is int and type(p) is int for t,p in keys) and
+            Counter(keys) == Counter((t,p) for t in range(3) for p in range(9)), "child_cell_coordinates")
+    require(payload.get("cell_status_counts") == dict(Counter(c.get("status") for c in cells)),
+            "child_status_accounting")
+    scopes = {"local_t_phi", "local_t_aggregate_fallback", "setting_fallback", "unavailable"}
+    for cell in cells:
+        ti, pi = cell["t_index"], cell["phi_index"]
+        require(cell.get("t_edges") == payload["t_edges"][ti:ti+2] and
+                cell.get("phi_edges") == payload["phi_edges"][pi:pi+2], "child_cell_edges")
+        for field, components in (("template_scopes", set(COMPONENTS)),
+                                  ("signal_scopes", {"k_lambda", "k_sigma0"})):
+            mapping = cell.get(field) or {}
+            require(set(mapping) == components and all(v in scopes for v in mapping.values()), "child_shape_scope")
+        for pop in ("pion", "kaon"):
+            h = cell["inputs"][pop]
+            observed = observations[pop]["nommcuts"]
+            require(h.get("edges") == observed["edges"], "child_input_mm_edges")
+            fingerprint(h)
+            vector_equal(h.get("values"), observed["children"][ti][pi]["values"], "child_input_content")
+            vector_equal(h.get("stored_sumw2"), observed["children"][ti][pi]["variances"], "child_input_sumw2")
+        returned, accepted = cell.get("fit_returned"), cell.get("fit_accepted")
+        require(type(returned) is bool and type(accepted) is bool, "child_acceptance_missing")
+        fit, evaluation = cell.get("fit"), cell.get("fit_acceptance")
+        if returned:
+            require(isinstance(fit, dict) and isinstance(evaluation, dict) and
+                    evaluation.get("accepted") is accepted and isinstance(evaluation.get("reason"), str) and
+                    isinstance(evaluation.get("diagnostics"), dict), "child_fit_gate_evidence")
+            require(fit.get("analysis_scope") == f"t_bin{ti+1}phi_bin{pi+1}" and
+                    all(isinstance(fit.get(k), str) and fit[k] for k in ("fit_status_pion", "fit_status_kaon")),
+                    "child_protected_fit_status_missing")
+            protected = ((fit.get("diagnostics") or {}).get("kaon") or {}).get("pi_delta_signal_protected_fit")
+            require(cell.get("protected_model_status") == (protected or
+                    {"status":"unavailable","reason":"protected_diagnostics_not_retained"}) and
+                    isinstance(cell["protected_model_status"].get("status"), str) and
+                    cell["protected_model_status"]["status"], "child_protected_model_status")
+            for pop, key in (("pion", "H_pion_control_input"), ("kaon", "H_kaon_nosub_input")):
+                require(fingerprint(fit.get(key)) == fingerprint(cell["inputs"][pop]), "child_fit_input_identity")
+                require(fit[key].get("edges") == cell["inputs"][pop]["edges"], "child_fit_input_edges")
+                for field in ("values", "stored_sumw2"):
+                    vector_equal(fit[key].get(field), cell["inputs"][pop].get(field), "child_fit_input_content")
+            if accepted:
+                diagnostics = evaluation["diagnostics"]
+                require(not evaluation["reason"] and not fit.get("fallback_used") and
+                        all(fit[k].strip().lower() == "success" for k in ("fit_status_pion", "fit_status_kaon")) and
+                        all(diagnostics.get("fit_validation_" + pop) is True and
+                            (((fit.get("diagnostics") or {}).get(pop) or {}).get("validation") or {}).get("accepted") is True
+                            for pop in ("pion", "kaon")), "child_false_fit_acceptance")
+                for key in ("A_n", "A_delta", "A_sidis", "B_n", "B_delta", "B_sidis"):
+                    value = fit.get(key)
+                    require(type(value) in (int, float) and math.isfinite(value) and value >= 0 and
+                            diagnostics.get("amplitudes", {}).get(key) == value, "child_gate_amplitudes")
+                expected = "fitted_local_templates" if all(v == "local_t_phi" for v in
+                    cell["template_scopes"].values()) else "fitted_with_template_fallback"
+            else:
+                require(evaluation["reason"] and cell.get("reason") == evaluation["reason"], "child_rejection_reason")
+                expected = "fit_rejected"
+        else:
+            require(not accepted and fit is None and evaluation is None and cell.get("reason"), "child_failed_fit_evidence")
+            require(cell.get("protected_model_status") == {"status":"unavailable","reason":"fit_not_returned"},
+                    "child_protected_model_status")
+            expected = "empty_child" if cell["reason"] == "empty_observed_cell" else "fit_failed"
+            if expected == "empty_child":
+                require(not any(v > 0 for pop in ("pion", "kaon") for v in
+                        cell["inputs"][pop]["stored_sumw2"]), "child_false_empty_status")
+        require(cell.get("status") == expected, "child_fit_status_invalid")
+        verify_child_applications(cell, observations["pion"])
+    return {"collection_status": "verified", "cell_status_counts": payload["cell_status_counts"],
+            "accepted_fits": sum(c["fit_accepted"] for c in cells), "physics_adequacy": "NOT VERIFIED"}
+
+
+def verify_artifacts(outdir, source_commit, identities, started_ns, before, runtime_inputs=None):
     records, outcomes = {}, {}
+    child_names = {n for n in names() if "pion-t-phi-" in n}
+    require({p.name for p in outdir.glob("*pion-t-phi-template-comparison*")} == child_names,
+            "child_artifact_inventory_invalid")
     for name in sorted(names()):
         path = outdir / name
         require(path.is_file() and not path.is_symlink() and path.stat().st_size > 0,
@@ -497,6 +735,9 @@ def verify_artifacts(outdir, source_commit, identities, started_ns, before):
         stem = f"{setting}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison"
         payload = strict_json((outdir / (stem + ".json")).read_text(encoding="utf-8"))
         outcomes[setting] = verify_payload(payload, setting, source_commit, identities, records[stem + ".pdf"])
+        child = strict_json((outdir / (stem.replace("pion-t-", "pion-t-phi-") + ".json")).read_text(encoding="utf-8"))
+        outcomes[setting]["child_comparison"] = verify_child_payload(
+            child, setting, source_commit, identities, payload, runtime_inputs)
     require(outcomes["Center"]["canonical_t_edges"] == outcomes["Left"]["canonical_t_edges"],
             "mixed_canonical_t_edges")
     return records, outcomes
@@ -951,8 +1192,8 @@ def execute_gate(repo, outdir, output, source_commit):
             verify_runtime_layout(repo, worktree, placement, private, env)
             verify_completion(paths["log"], returncode)
             status.update("verify_artifacts", analysis_completed=True)
-            records, outcomes = verify_artifacts(private, source_commit, identities, started, prior)
             runtime = {name: file_identity(private / name) for name in copies}
+            records, outcomes = verify_artifacts(private, source_commit, identities, started, prior, runtime)
             require(skim_inventory(worktree, baseline) == skims, "skim_existence_changed")
             status.update(artifact_verification_completed=True, artifacts=records, diagnostic_outcomes=outcomes)
             preservation()

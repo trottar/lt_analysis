@@ -317,6 +317,44 @@ class EnabledObserverTests(unittest.TestCase):
 
 
 class EventTests(unittest.TestCase):
+    def test_conditional_covariance_preserves_cuts_sources_and_fitted_uncertainty_limits(self):
+        packets,candidate=comparison_fixture();before=cap.digest([packets,candidate])
+        result=replay.replay(packets,candidate,expected_head="a"*40,include_statistics=True)
+        self.assertEqual(cap.digest([packets,candidate]),before)
+        self.assertEqual(len(result["parents"]),6)
+        for parent in result["parents"]:
+            self.assertEqual(parent["training_dependency_audit"]["status"],"unavailable")
+            for convention in ("ratio","production_convention"):
+                for cut in ("nommcuts","allcuts"):
+                    stats=parent["conditional_fixed_weight_covariance"][convention][cut]
+                    self.assertFalse(stats["independent_model_validation"])
+                    self.assertEqual(stats["fitted_parameter_covariance"],"unavailable")
+                    self.assertEqual(stats["repeated_training_variance"],"unavailable")
+                    self.assertIn("PASS",stats["source_and_phi_closure"])
+                    ib=stats["model_order"].index("B")
+                    for domain,value in stats["domains"].items():
+                        self.assertEqual(value["paired_difference_variance_from_B"][ib],0.)
+                        for i,name in enumerate(stats["model_order"]):
+                            key="application" if convention=="ratio" else "production_convention_application"
+                            expected=parent["models"][name][key][cut]["parent"]["domains"][domain]["sumw2"]
+                            self.assertAlmostEqual(value["covariance"][i][i],expected)
+
+    def test_old_replay_scientific_fields_are_unchanged(self):
+        # Execute the actual pre-change replay source on the identical fixture.
+        import types
+        source=subprocess.check_output(["git","show",
+            "60f1f4f0e5bc11667b2fecde328c477cbd83926e:testing/pion_local_t_event_validation_replay.py"],cwd=ROOT)
+        module=types.ModuleType("testing._pre_statistics_replay")
+        module.__package__="testing"
+        exec(compile(source,"<pre-statistics-replay>","exec"),module.__dict__)
+        packets,candidate=comparison_fixture()
+        expected=module.replay(packets,candidate,expected_head="a"*40)
+        actual=replay.replay(packets,candidate,expected_head="a"*40,include_statistics=True)
+        for parent in actual["parents"]:
+            parent.pop("training_dependency_audit")
+            parent.pop("conditional_fixed_weight_covariance")
+        self.assertEqual(cap.encoded(actual),cap.encoded(expected))
+
     def test_capture_copies_original_caches(self):
         _,_,hist=fixture();before=deepcopy(hist)
         packet,_,_=fixture()
@@ -437,6 +475,10 @@ class EventTests(unittest.TestCase):
         original_function.body=[n for n in original_function.body if not (
             isinstance(n,ast.If) and cap.ENABLE_ENV in ast.unparse(n.test))]
         function.body.remove(guard)
+        # A separately tested detached observer is also default-off. Removing
+        # both diagnostic guards must leave the exact HEAD production AST.
+        function.body = [n for n in function.body if not (
+            isinstance(n, ast.If) and "LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON" in ast.unparse(n.test))]
         self.assertEqual(ast.dump(tree),ast.dump(original))
 
     def test_post_proton_factor_is_quadratic_and_rf_zero_is_preserved(self):

@@ -325,9 +325,13 @@ class DefaultAndAdapterTests(unittest.TestCase):
         self.assertEqual(before, comparison.digest(hist))
 
     def test_detached_pdf_draw_commands_do_not_touch_sources(self):
+        clones = []
         class DrawHist(Hist):
+            def Clone(self, name):
+                cloned = DrawHist(self.values, self.errors, self.edges); clones.append(cloned); return cloned
             def __getattr__(self, key):
-                if key.startswith("Set") or key == "Draw": return Mock()
+                if key.startswith("Set") or key == "Draw":
+                    result = Mock(); self.__dict__[key] = result; return result
                 raise AttributeError(key)
             def Add(self, other, scale):
                 self.values = [a+scale*b for a,b in zip(self.values, other.values)]
@@ -340,7 +344,13 @@ class DefaultAndAdapterTests(unittest.TestCase):
                 for c in comparison.COMPONENTS:
                     fit["H_{}_fit_{}_scaled{}".format(side, c, suffix)] = DrawHist()
         canvas, pad, directory = Mock(), Mock(), Mock()
-        root = types.SimpleNamespace(TCanvas=Mock(return_value=canvas), TLegend=Mock(), TPaveText=Mock(),
+        legends, panels = [], []
+        def legend(*args):
+            value = Mock(); legends.append(value); return value
+        def panel(*args):
+            value = Mock(); panels.append((args, value)); return value
+        root = types.SimpleNamespace(TCanvas=Mock(return_value=canvas), TPad=Mock(side_effect=panel),
+                                     TLegend=Mock(side_effect=legend), TPaveText=Mock(),
                                      kBlue=4, kRed=2, gPad=pad, gDirectory=directory)
         before = comparison.digest(fit)
         rows = [(dict(t_bin_index=i, rejection_reasons=[]), fit, deepcopy(fit)) for i in range(3)]
@@ -351,6 +361,83 @@ class DefaultAndAdapterTests(unittest.TestCase):
         self.assertEqual(before, comparison.digest(fit))
         pad.cd.assert_called_once()
         directory.cd.assert_called_once()
+        self.assertEqual(len(legends), 6)
+        self.assertEqual(len(panels), 30)
+        for legend in legends:
+            legend.SetNColumns.assert_called_once_with(4)
+            legend.SetTextSize.assert_called_once_with(.12)
+            labels = [c.args[1] for c in legend.AddEntry.call_args_list]
+            self.assertEqual(len(labels), len(set(labels)))
+            self.assertIn("same frozen data", labels)
+            self.assertIn("A baseline total", labels)
+            self.assertIn("B local total", labels)
+        canvas.Divide.assert_not_called()
+        data_clones = [h for h in clones if "SetMarkerStyle" in h.__dict__]
+        self.assertTrue(data_clones)
+        for hist in data_clones:
+            hist.SetStats.assert_called_once_with(False)
+        titles = [call.args[0] for hist in clones for call in
+                  hist.__dict__.get("SetTitle", Mock()).call_args_list if "NOT ACCEPTED" in call.args[0]]
+        self.assertTrue(titles)
+        for title in titles:
+            self.assertEqual(title.split(";")[1:], ["MM (GeV)", "weighted content"])
+            self.assertIn("fixed alignment, no subtraction, NOT ACCEPTED", title.split(";")[0])
+        colors = [call.args[0] for hist in clones for call in hist.__dict__.get("SetLineColor", Mock()).call_args_list]
+        self.assertEqual(set(colors), {root.kBlue, root.kRed})
+
+    def test_layout_reserves_dedicated_disjoint_legend_and_data_area(self):
+        layout = comparison.COMPARISON_LAYOUT
+        boxes = [*layout["models"], *layout["residuals"], layout["legend"]]
+        for box in boxes:
+            x1, y1, x2, y2 = box
+            self.assertTrue(0 <= x1 < x2 <= 1 and 0 <= y1 < y2 <= 1)
+        for i, a in enumerate(boxes):
+            for b in boxes[i+1:]:
+                self.assertTrue(a[2] <= b[0] or b[2] <= a[0] or a[3] <= b[1] or b[3] <= a[1])
+        self.assertTrue(all((r[2]-r[0])*layout["canvas"][0] >= 750 for r in layout["models"]))
+        self.assertTrue(all((r[3]-r[1])*layout["canvas"][1] >= 450 for r in layout["models"]))
+
+    def test_unavailable_candidate_notice_is_in_legend_band_and_globals_restore_on_error(self):
+        class DrawHist(Hist):
+            def __getattr__(self, key):
+                if key.startswith("Set") or key == "Draw": return Mock()
+                raise AttributeError(key)
+            def Add(self, other, scale):
+                self.values = [a+scale*b for a,b in zip(self.values, other.values)]
+        fit = {key: DrawHist() for key in ("H_pion_control_input", "H_kaon_nosub_input")}
+        for side in ("pion", "kaon"):
+            for suffix in ("", "_refined"):
+                fit["H_{}_fit_total{}".format(side, suffix)] = DrawHist()
+        before = comparison.digest(fit)
+        for fail in (False, True):
+            canvas, previous_pad, directory = Mock(), Mock(), Mock()
+            legend, text_boxes = [], []
+            def make_legend(*args):
+                obj = Mock(); legend.append(obj); return obj
+            def make_text(*args):
+                obj = Mock(); text_boxes.append((args, obj)); return obj
+            root = types.SimpleNamespace(TCanvas=Mock(return_value=canvas), TPad=Mock(side_effect=lambda *a: Mock()),
+                TLegend=Mock(side_effect=make_legend), TPaveText=Mock(side_effect=make_text),
+                kBlue=4, kRed=2, gPad=previous_pad, gDirectory=directory)
+            if fail: canvas.Print.side_effect = [None, RuntimeError("render failure"), None]
+            with patch.dict(sys.modules, {"ROOT": root}):
+                if fail:
+                    with self.assertRaisesRegex(RuntimeError, "render failure"):
+                        comparison.render_comparison_pdf(Path("fixture.pdf"), [(dict(t_bin_index=0,
+                            rejection_reasons=["known unavailable reason"]), fit, None)])
+                else:
+                    comparison.render_comparison_pdf(Path("fixture.pdf"), [(dict(t_bin_index=0,
+                        rejection_reasons=["known unavailable reason"]), fit, None)])
+            for obj in legend: obj.SetNColumns.assert_called_once_with(2)
+            notes = [obj for args, obj in text_boxes if args[:4] == (.50, .04, .99, .96)]
+            self.assertTrue(notes)
+            for note in notes:
+                note.AddText.assert_any_call("B unavailable; no global fallback")
+                note.AddText.assert_any_call("known unavailable reason")
+            self.assertEqual(comparison.digest(fit), before)
+            previous_pad.cd.assert_called_once()
+            directory.cd.assert_called_once()
+            canvas.Close.assert_called_once()
 
     def test_default_and_explicit_opt_in(self):
         self.assertFalse(comparison.enabled({}))

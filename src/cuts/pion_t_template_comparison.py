@@ -299,24 +299,57 @@ def compare_parent(parent, templates, inp_dict, *, selected_shapes, global_shape
     return result, candidate
 
 
+# Canvas-normalized geometry: legend never shares a scientific panel.
+COMPARISON_LAYOUT = {
+    "canvas": (1600, 1100),
+    "models": ((.01, .51, .495, .945), (.505, .51, .99, .945)),
+    "residuals": ((.01, .20, .495, .50), (.505, .20, .99, .50)),
+    "legend": (.01, .01, .99, .18),
+}
+
+
 def render_comparison_pdf(path, rows, title_prefix=""):
     """Two detached pages per t: staged/refined models and data-model residuals."""
     import ROOT
     previous_pad, previous_directory = ROOT.gPad, ROOT.gDirectory
-    canvas = ROOT.TCanvas("pion_t_template_comparison", "Fixed-alignment template comparison", 1200, 900)
+    canvas = ROOT.TCanvas("pion_t_template_comparison", "Fixed-alignment template comparison", *COMPARISON_LAYOUT["canvas"])
+    def panel(name, rect):
+        canvas.cd()
+        pad = ROOT.TPad(name, name, *rect)
+        pad.SetLeftMargin(.12)
+        pad.SetRightMargin(.035)
+        pad.SetBottomMargin(.14)
+        pad.SetTopMargin(.10)
+        pad.Draw()
+        return pad
     canvas.Print(str(path) + "[")
     try:
         for evidence, baseline, candidate in rows:
             for side, data_key in (("pion", "H_pion_control_input"), ("kaon", "H_kaon_nosub_input")):
                 canvas.Clear()
-                canvas.Divide(2, 2)
-                keep = []
+                model_pads = [panel("comparison_model_{}".format(i), rect)
+                              for i, rect in enumerate(COMPARISON_LAYOUT["models"])]
+                residual_pads = [panel("comparison_residual_{}".format(i), rect)
+                                 for i, rect in enumerate(COMPARISON_LAYOUT["residuals"])]
+                legend_pad = panel("comparison_legend", COMPARISON_LAYOUT["legend"])
+                legend = ROOT.TLegend(.015, .04, .985 if candidate is not None else .48, .96)
+                legend.SetNColumns(4 if candidate is not None else 2)
+                legend.SetTextSize(.12)
+                legend.SetBorderSize(0)
+                legend.SetFillStyle(0)
+                labels = set()
+                def entry(hist, label, option):
+                    if label not in labels:
+                        legend.AddEntry(hist, label, option)
+                        labels.add(label)
+                keep = [*model_pads, *residual_pads, legend_pad, legend]
                 for column, suffix in enumerate(("", "_refined")):
-                    canvas.cd(column + 1)
+                    model_pads[column].cd()
                     data = _clone(baseline[data_key], "comparison_display_data")
-                    data.SetTitle("t{} {} {}: fixed alignment; no subtraction; NOT ACCEPTED;MM (GeV);weighted content".format(
+                    data.SetTitle("t{} {} {}: fixed alignment, no subtraction, NOT ACCEPTED;MM (GeV);weighted content".format(
                         evidence["t_bin_index"] + 1, side, "staged" if not suffix else "refined"))
                     data.SetMarkerStyle(20)
+                    data.SetStats(False)
                     models = []
                     for label, fit, color in (("A baseline", baseline, ROOT.kBlue), ("B local", candidate, ROOT.kRed)):
                         if fit is None:
@@ -333,13 +366,11 @@ def render_comparison_pdf(path, rows, title_prefix=""):
                     data.SetMaximum(max(extrema + [0.]) * 1.15 + 1e-12)
                     data.SetMinimum(min([data.GetBinContent(i)-data.GetBinError(i) for i in range(1, data.GetNbinsX()+1)] + [0.]))
                     data.Draw("E1")
-                    legend = ROOT.TLegend(.52, .57, .98, .9)
-                    legend.SetTextSize(.025)
-                    legend.AddEntry(data, "same frozen data", "lep")
-                    keep += [data, legend]
+                    entry(data, "same frozen data", "lep")
+                    keep.append(data)
                     for label, model, fit, color in models:
                         model.Draw("HIST SAME")
-                        legend.AddEntry(model, label + " total", "l")
+                        entry(model, label + " total", "l")
                         keep.append(model)
                         for ci, component in enumerate((*COMPONENTS, "k_lambda", "k_sigma0")):
                             source = fit.get("H_{}_fit_{}_scaled{}".format(side, component, suffix))
@@ -349,18 +380,9 @@ def render_comparison_pdf(path, rows, title_prefix=""):
                             h.SetLineColor(color)
                             h.SetLineStyle(ci + 2)
                             h.Draw("HIST SAME")
-                            legend.AddEntry(h, label + " " + component, "l")
+                            entry(h, label + " " + component, "l")
                             keep.append(h)
-                    legend.Draw()
-                    if candidate is None:
-                        note = ROOT.TPaveText(.1, .75, .5, .95, "NDC")
-                        note.SetTextSize(.023)
-                        note.AddText("B unavailable; no global fallback")
-                        for reason in evidence["rejection_reasons"]:
-                            note.AddText(reason)
-                        note.Draw()
-                        keep.append(note)
-                    canvas.cd(column + 3)
+                    residual_pads[column].cd()
                     residuals = []
                     for mi, (label, model, _, color) in enumerate(models):
                         residual = _clone(data, "comparison_display_residual")
@@ -377,6 +399,16 @@ def render_comparison_pdf(path, rows, title_prefix=""):
                         residuals[0].SetMaximum(max(bounds + [0.]) + 1e-12)
                         for ri, residual in enumerate(residuals):
                             residual.Draw("E1" if ri == 0 else "E1 SAME")
+                legend_pad.cd()
+                legend.Draw()
+                if candidate is None:
+                    note = ROOT.TPaveText(.50, .04, .99, .96, "NDC")
+                    note.SetTextSize(.09)
+                    note.AddText("B unavailable; no global fallback")
+                    for reason in evidence["rejection_reasons"]:
+                        note.AddText(reason)
+                    note.Draw()
+                    keep.append(note)
                 canvas.cd()
                 header = ROOT.TPaveText(.05, .965, .95, .999, "NDC")
                 header.SetTextSize(.025)
