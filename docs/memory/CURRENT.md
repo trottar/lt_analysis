@@ -30,11 +30,13 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) published-identity repair](phases/kaonlt-local-t-phi-published-identity-2026-10-27-task-contract.md).
-One private child, six artifacts in v2; returned/accepted fits distinct.
-Transferred signed content/Sumw2 checked. Published d6a923d companions
-are pinned exactly; LF manifest/export checks are local, not farm acceptance.
-Fixtures only; production/USER frozen; no farm/ROOT acceptance.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) missing-fit serialization repair](phases/kaonlt-local-t-phi-missing-fit-serialization-2026-10-27-task-contract.md).
+Supplied October 27 21:05:03 UTC gate at `240f30c`: analysis returncode 0;
+`verify_artifacts / child_failed_fit_evidence`; no collection acceptance.
+Receipt preservation passed for originals, accepted outputs, checkout, links
+and ltsep. Missing fit fields serialize as exact unavailable records; owner
+now recognizes those records with failed-fit weight exclusion preserved.
+Real-serializer/JSON regressions are local; no farm/ROOT acceptance.
 Prior [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
 remains `SOURCE REVIEWED`; [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
 remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. October 26 `60f1f4f`
@@ -225,9 +227,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the published-identity/LF
-repair. User publication and pushed-state review precede one private
-Center/Left six-artifact gate. No farm command or runtime acceptance.
+NEXT — independent ChatGPT actual-diff review of the missing-fit repair.
+After user publication and pushed-state verification, evaluate one private
+Center/Left six-artifact gate. No retry or runtime acceptance here.
 Hierarchy/C deferred.
 
 The investigation retains prior

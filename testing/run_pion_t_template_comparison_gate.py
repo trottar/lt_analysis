@@ -713,7 +713,14 @@ def verify_child_payload(payload, setting, source_commit, identities, ab, runtim
                 require(evaluation["reason"] and cell.get("reason") == evaluation["reason"], "child_rejection_reason")
                 expected = "fit_rejected"
         else:
-            require(not accepted and fit is None and evaluation is None and cell.get("reason"), "child_failed_fit_evidence")
+            # snapshot(None) is persisted as this exact explicit missing record.
+            # Presence is required: omitted/malformed evidence must still fail.
+            missing = {"status": "unavailable", "reason": "not retained by producer"}
+            require(not accepted and all(key in cell and
+                    (cell[key] is None or cell[key] == missing)
+                    for key in ("fit", "fit_acceptance")) and
+                    isinstance(cell.get("reason"), str) and cell["reason"].strip(),
+                    "child_failed_fit_evidence")
             require(cell.get("protected_model_status") == {"status":"unavailable","reason":"fit_not_returned"},
                     "child_protected_model_status")
             expected = "empty_child" if cell["reason"] == "empty_observed_cell" else "fit_failed"

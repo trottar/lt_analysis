@@ -141,6 +141,18 @@ def artifacts(outdir):
             json.dumps(child_payload(setting,ab)),encoding='utf-8')
 
 
+def real_snapshot(value):
+    """Actual ROOT-free serializer, including its explicit missing-value record."""
+    import importlib.util
+    import sys
+    spec = importlib.util.spec_from_file_location(
+        "_owner_real_chain_audit", ROOT / "src/cuts/pion_background_chain_audit.py")
+    module = importlib.util.module_from_spec(spec)
+    with patch.object(sys, "path", [str(ROOT / "src/utility"), *sys.path]):
+        spec.loader.exec_module(module)
+    return module.snapshot(value)
+
+
 def scalar_producer_application(cells, weights):
     """Run the actual scalar producer; stub only ROOT-dependent weight building."""
     import sys
@@ -152,7 +164,7 @@ def scalar_producer_application(cells, weights):
     config.resolve_particle_subtraction_weight_clip_bounds=lambda inp:(None,None)
     subtraction=types.ModuleType('pion_component_subtraction')
     subtraction.build_simc_shape_pion_control_weights=lambda fit,**kw:{'weights':list(weights),'diagnostics':dict(kw)}
-    audit=types.ModuleType('pion_background_chain_audit');audit.snapshot=deepcopy
+    audit=types.ModuleType('pion_background_chain_audit');audit.snapshot=real_snapshot
     ns={'require':owner.require,'math':owner.math}
     exec(compile(ast.Module(body=[node],type_ignores=[]),'<actual-apply-transfer>','exec'),ns)
     with patch.dict(sys.modules,{'background_config':config,'pion_component_subtraction':subtraction,'pion_background_chain_audit':audit}):
@@ -616,6 +628,92 @@ class GateTests(unittest.TestCase):
                        lambda c:c['template_scopes'].update(pi_n='setting_fallback')):
             changed=deepcopy(doc); mutate(changed['cells'][0]); path.write_text(json.dumps(changed))
             with self.assertRaises(ValueError): self.verify()
+
+    def _nonreturned_serialized_fixture(self, empty=False):
+        artifacts(self.outdir)
+        stem = 'Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison'
+        ab = json.loads((self.outdir / (stem + '.json')).read_text())
+        doc = child_payload('Center', ab)
+        for c in doc['cells']:
+            c.update(status='empty_child' if empty else 'fit_failed',
+                     reason='empty_observed_cell' if empty else 'solver exception',
+                     fit_returned=False, fit_accepted=False, fit=None, fit_acceptance=None,
+                     protected_model_status={'status':'unavailable','reason':'fit_not_returned'})
+        if empty:
+            def zero(value):
+                if isinstance(value, dict):
+                    for key, item in value.items():
+                        if key in ('values', 'variances', 'stored_sumw2', 'errors'):
+                            value[key] = [0.] * len(item)
+                        elif key == 'count':
+                            value[key] = 0
+                        else:
+                            zero(item)
+                elif isinstance(value, list):
+                    for item in value:
+                        zero(item)
+            zero(doc['observations'])
+            zero(ab['parents'])
+            for c in doc['cells']:
+                zero(c['inputs'])
+        doc['cell_status_counts'] = dict(owner.Counter(c['status'] for c in doc['cells']))
+        # Mirror observer finally: real snapshot, JSON encode and persisted read.
+        return json.loads(json.dumps(real_snapshot(doc))), ab
+
+    def test_actual_serialized_nonreturned_and_empty_fit_collection(self):
+        for empty in (False, True):
+            with self.subTest(empty=empty):
+                doc, ab = self._nonreturned_serialized_fixture(empty)
+                sentinel = {'status':'unavailable','reason':'not retained by producer'}
+                self.assertEqual(doc['cells'][0]['fit'], sentinel)
+                self.assertEqual(doc, real_snapshot(doc))
+                result = owner.verify_child_payload(doc, 'Center', SHA, IDENTITIES, ab)
+                self.assertEqual(result['accepted_fits'], 0)
+                self.assertEqual(result['physics_adequacy'], 'NOT VERIFIED')
+                for setting in ('Center', 'Left'):
+                    stem = f'{setting}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison'
+                    local_ab = json.loads((self.outdir / (stem + '.json')).read_text())
+                    for current, reference in zip(local_ab['parents'], ab['parents']):
+                        current['frozen_inputs'] = deepcopy(reference['frozen_inputs'])
+                    local_doc = deepcopy(doc)
+                    local_doc.update(phi_setting=setting, runtime_inputs=local_ab['original_analysis_input_identity'])
+                    (self.outdir / (stem + '.json')).write_text(json.dumps(local_ab))
+                    (self.outdir / (stem.replace('pion-t-', 'pion-t-phi-') + '.json')).write_text(json.dumps(local_doc))
+                _, outcomes = self.verify()
+                self.assertTrue(all(v['child_comparison']['accepted_fits'] == 0 for v in outcomes.values()))
+
+    def test_serialized_missing_fit_records_fail_closed(self):
+        doc, ab = self._nonreturned_serialized_fixture()
+        invalid = ({}, False, 0, [], '', {'status':'unavailable'},
+                   {'status':'unavailable','reason':'another reason'},
+                   {'status':'unavailable','reason':'not retained by producer','fit':{}},
+                   {'status':'available','reason':'not retained by producer'})
+        for field in ('fit', 'fit_acceptance'):
+            for value in invalid:
+                with self.subTest(field=field,value=value):
+                    bad = deepcopy(doc); bad['cells'][0][field] = value
+                    with self.assertRaisesRegex(ValueError, 'child_failed_fit_evidence'):
+                        owner.verify_child_payload(bad, 'Center', SHA, IDENTITIES, ab)
+            bad = deepcopy(doc); del bad['cells'][0][field]
+            with self.subTest(missing=field), self.assertRaisesRegex(ValueError, 'child_failed_fit_evidence'):
+                owner.verify_child_payload(bad, 'Center', SHA, IDENTITIES, ab)
+        mutations = (
+            {'fit_accepted':True}, {'reason':None}, {'reason':[]}, {'reason':''},
+            {'reason':'   '}, {'protected_model_status':{}}, {'fit_returned':True},
+            {'reason':'empty_observed_cell','status':'empty_child'})
+        for mutation in mutations:
+            bad = deepcopy(doc); bad['cells'][0].update(mutation)
+            bad['cell_status_counts'] = dict(owner.Counter(c['status'] for c in bad['cells']))
+            with self.subTest(mutation=mutation), self.assertRaises(ValueError):
+                owner.verify_child_payload(bad, 'Center', SHA, IDENTITIES, ab)
+        # Valid application arithmetic cannot authorize a non-returned child fit.
+        bad = deepcopy(doc)
+        bad['cells'][0]['applications']['Local_t_phi'] = {
+            'status':'available','weights':[0.,1.,0.],
+            'cuts':{cut:{'values':[0.,1.,0.],'variances':[0.,1.,0.]}
+                    for cut in ('allcuts','nommcuts')}}
+        with self.assertRaises(ValueError):
+            owner.verify_child_payload(bad, 'Center', SHA, IDENTITIES, ab)
 
     def _available_child_application_fixture(self):
         artifacts(self.outdir)

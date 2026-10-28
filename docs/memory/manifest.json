@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16167,
+      "bytes": 16341,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "3cf41dae0e9e9cb70284725f9307bb3bca1f8aa0963d20b28c644d90f21da3d2"
+      "sha256": "2aedd2b8d0619a4d7f40f380cf23e859d689dfc45eb294bfafab59efc99ec593"
     },
     {
       "bytes": 11186,
@@ -1334,6 +1334,11 @@
       "bytes": 15503,
       "path": "docs/memory/phases/kaonlt-local-t-phi-farm-owner-integration-2026-10-27-task-contract.md",
       "sha256": "6ccf051acd6030e394c8e66cfc3a485c040e4b35cbbf9a3e6f8cd6afc1b6382e"
+    },
+    {
+      "bytes": 5008,
+      "path": "docs/memory/phases/kaonlt-local-t-phi-missing-fit-serialization-2026-10-27-task-contract.md",
+      "sha256": "345ea88d6c18a2130c6be344503c1aa1a719a57e4ef8fce31bfd5bf8f61dc459"
     },
     {
       "bytes": 7116,
