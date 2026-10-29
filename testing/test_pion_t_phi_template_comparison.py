@@ -220,7 +220,7 @@ class TransferTests(unittest.TestCase):
 class ObserverTests(unittest.TestCase):
     @contextmanager
     def environment(self, mismatch=False, fit_error=False, empty=False, setting='Center',one_empty=False,
-                    rejected=False, fallback=False):
+                    rejected=False, fallback=False, epsilon="low"):
         import pion_t_template_comparison as comparison
         import root_histogram_ownership as ownership
         fake_root=types.ModuleType('ROOT'); fake_root.gDirectory=None; fake_root.gPad=None
@@ -262,14 +262,14 @@ class ObserverTests(unittest.TestCase):
                              for pop in ('pion','kaon')},
                 **{key:1. for key in ('A_n','A_delta','A_sidis','B_n','B_delta','B_sidis')},
                 **{'H_simc_shape_'+c:h for c,h in s.items()})
-        inp=dict(Q2='4p4',W='2p74',EPSSET='low',ParticleType='kaon',mm_min=1.1,mm_max=1.13)
+        inp=dict(Q2='4p4',W='2p74',EPSSET=epsilon,ParticleType='kaon',mm_min=1.1,mm_max=1.13)
         with tempfile.TemporaryDirectory() as temp,ExitStack() as stack:
             inputfile=Path(temp)/'runtime.root'; inputfile.write_bytes(b'fixture runtime only')
             backing=types.SimpleNamespace(GetName=lambda:str(inputfile))
             hist=dict(phi_setting=setting,_pion_t_bin_parent_results=parents,
                       _authoritative_pion_control_source_cache={'kaon_data_coordinate':{'fixture':True}},
                       InFile_DATA=backing,InFile_DUMMY=backing)
-            stack.enter_context(patch.dict(os_environ(),{child.ENABLE_ENV:'1'}))
+            stack.enter_context(patch.dict(os_environ(),{child.ENABLE_ENV:'1',comparison.HIGH_ENV:'1' if epsilon=='high' else ''}))
             stack.enter_context(patch.dict(sys.modules,{'ROOT':fake_root,'apply_cuts':cuts,'pion_component_shapes':shape_module,
                 'pion_component_fits':fits,'hgcer_hole':hole_module}))
             stack.enter_context(patch.object(child,'rows_from_caches',return_value=(rows,{})))
@@ -362,6 +362,37 @@ class ObserverTests(unittest.TestCase):
                     identities={p:{k:v[k] for k in ('bytes','sha256')} for p,v in doc['source_files'].items()}
                     outcome=owner.verify_child_payload(doc,setting,doc['source_HEAD'],identities,ab)
                     self.assertEqual(outcome['accepted_fits'],0 if rejected or empty else 27)
+
+    def test_high_actual_serialized_failed_empty_and_rejected_round_trip(self):
+        from testing import run_pion_t_template_comparison_gate as owner
+        for setting in ('Center','Left','Right'):
+            for kwargs,status in ((dict(fit_error=True),'fit_failed'),(dict(empty=True),'empty_child'),
+                                  (dict(rejected=True),'fit_rejected'),({},'fitted_local_templates')):
+                with self.subTest(setting=setting,status=status),self.environment(
+                        setting=setting,epsilon='high',**kwargs) as (run,called,cuts,temp,prior):
+                    result=run()
+                    path=temp/(setting+'_kaon_Q4p4W2p74_highe_pion-t-phi-template-comparison.json')
+                    doc=json.loads(path.read_text())
+                    self.assertEqual(doc['setting']['EPSSET'],'high')
+                    self.assertEqual(doc['cell_status_counts'],{status:27})
+                    ab=dict(setting=doc['setting'],canonical_t_edges=doc['t_edges'],
+                        canonical_phi_edges=doc['phi_edges'],
+                        original_analysis_input_identity=doc['runtime_inputs'],parents=[])
+                    for ti in range(3):
+                        ab['parents'].append(dict(frozen_inputs={pop:dict(
+                            edges=doc['observations'][pop]['nommcuts']['edges'],
+                            values=doc['observations'][pop]['nommcuts']['parents'][ti]['values'],
+                            stored_sumw2=doc['observations'][pop]['nommcuts']['parents'][ti]['variances'])
+                            for pop in ('pion','kaon')}))
+                    ids={p:{k:v[k] for k in ('bytes','sha256')} for p,v in doc['source_files'].items()}
+                    checked=owner.verify_child_payload(doc,setting,doc['source_HEAD'],ids,ab,high=True)
+                    self.assertEqual(checked['accepted_fits'],27 if status=='fitted_local_templates' else 0)
+                    if status in ('fit_failed','empty_child'):
+                        self.assertEqual(doc['cells'][0]['fit'],
+                            {'status':'unavailable','reason':'not retained by producer'})
+                    bad=deepcopy(doc);bad['setting']['EPSSET']='low'
+                    with self.assertRaisesRegex(ValueError,'child_epsilon'):
+                        owner.verify_child_payload(bad,setting,doc['source_HEAD'],ids,ab,high=True)
 
     def test_renderer_uses_correct_rejected_and_fallback_status_titles(self):
         from testing.render_pion_t_phi_template_comparison import render

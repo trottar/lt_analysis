@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16341,
+      "bytes": 16251,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "2aedd2b8d0619a4d7f40f380cf23e859d689dfc45eb294bfafab59efc99ec593"
+      "sha256": "d8e62d76628b7ed98e14abeecb0e4d804867acb37a5cc762749f4d39d1b6bfe3"
     },
     {
       "bytes": 11186,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 96034,
+      "bytes": 102169,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "af0baa3747fca145a683a61b3bed10b0e4ca06368e6f760e3ec40a93198f4464"
+      "sha256": "c752bf5ea767a748bc7c4cf14d5331a7dfc8a6494639d4961696355483595b8e"
     },
     {
       "bytes": 23507,
@@ -1319,6 +1319,11 @@
       "bytes": 12284,
       "path": "docs/memory/phases/kaonlt-full-mm-reconstruction-scientific-memory-checkpoint-2026-10-20-task-contract.md",
       "sha256": "ae67a5d70447015b3549cb03ce1bd0720f2556b740970aec4b0411509f6a8e46"
+    },
+    {
+      "bytes": 17803,
+      "path": "docs/memory/phases/kaonlt-high-epsilon-pion-three-model-acquisition-2026-10-29-task-contract.md",
+      "sha256": "ab5d24bf0aba93cdc8c34de65acf44887d087d175f1ee71fa1da7fb31c5ca8df"
     },
     {
       "bytes": 10485,

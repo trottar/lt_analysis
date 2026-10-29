@@ -30,17 +30,15 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Local (t,phi) missing-fit serialization repair](phases/kaonlt-local-t-phi-missing-fit-serialization-2026-10-27-task-contract.md).
-Supplied October 27 21:05:03 UTC gate at `240f30c`: analysis returncode 0;
-`verify_artifacts / child_failed_fit_evidence`; no collection acceptance.
-Receipt preservation passed for originals, accepted outputs, checkout, links
-and ltsep. Missing fit fields serialize as exact unavailable records; owner
-now recognizes those records with failed-fit weight exclusion preserved.
-Real-serializer/JSON regressions are local; no farm/ROOT acceptance.
-Prior [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
-remains `SOURCE REVIEWED`; [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
-remains `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. October 26 `60f1f4f`
-A/B runtime and completed C evidence preserved.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [High-epsilon three-model acquisition](phases/kaonlt-high-epsilon-pion-three-model-acquisition-2026-10-29-task-contract.md)
+for Q4p4W2p74 Center/Left/Right highe. Accepted October 28-29 Center/Left lowe
+numerical comparisons and corrected 60-page Work review are attributed to that
+contract; raw artifacts were not independently rechecked here (MEMORY ONLY).
+Local-t is a candidate, with no production adoption. The October 27
+[missing-fit repair](phases/kaonlt-local-t-phi-missing-fit-serialization-2026-10-27-task-contract.md)
+and prior [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
+retain their local/farm evidence limits; [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
+remains `SOURCE REVIEWED`.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -227,10 +225,10 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT actual-diff review of the missing-fit repair.
-After user publication and pushed-state verification, evaluate one private
-Center/Left six-artifact gate. No retry or runtime acceptance here.
-Hierarchy/C deferred.
+NEXT — independent ChatGPT complete actual-diff review of the high-epsilon
+acquisition. Publication and pushed-state review precede at most one no-child
+farm smoke if environment facts remain unavailable. No farm readiness or
+execution acceptance here. Hierarchy/C deferred.
 
 The investigation retains prior
 construction, transfer and signed-application findings and their limitations.

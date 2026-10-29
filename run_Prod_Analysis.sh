@@ -4,6 +4,14 @@
 # getPathDict.py calling os.getlogin() on worker nodes.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="${SCRIPT_DIR}"
+if [[ -n "${LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON:-}" ]]; then
+    if [[ "${LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON}" != "1" || "$#" != 3 || "$1" != "-d" || "$2" != "4p4" || "$3" != "2p74" ]]; then
+        echo "ERROR: high-epsilon comparison requires the private owner and exact -d 4p4 2p74 invocation." >&2
+        exit 1
+    fi
+    PYTHONPATH="${REPO_ROOT}${PYTHONPATH:+:${PYTHONPATH}}" python3 -B -c \
+        'import sys; from testing.run_pion_t_template_comparison_gate import validate_high_launch; validate_high_launch(sys.argv[1])' "${REPO_ROOT}" || exit 1
+fi
 LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
 if [[ ! -f "${LTSEP_FIELDS_SCRIPT}" ]]; then
     REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -1724,6 +1732,12 @@ if [[ $i_flag != "true" && $a_flag != "true" ]]; then
 		EPSILON="$j"
 		export_background_sample_paths "${Q2}" "${W}" "${EPSILON}"
 		if [ "$j" = "low" ]; then
+		    if [[ $d_flag = "true" && "${LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON:-}" == "1" ]]; then
+			LT_ANALYSIS_DEBUG_LEFT_LOW= python3 main.py "${main_args_low[@]}" || exit 1
+			echo
+			echo "All available low-epsilon settings completed in debug mode."
+			continue
+		    fi
 		    if [[ $d_flag = "true" ]]; then
 			LT_ANALYSIS_DEBUG_LEFT_LOW= python3 main.py "${main_args_low[@]}" || exit 1
 			echo

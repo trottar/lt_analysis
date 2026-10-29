@@ -1421,3 +1421,93 @@ actual-diff acceptance, user publication and pushed-state synchronization, then
 owner/provenance/ZIP acceptance and existing offline seven-strength C/six-parent
 MM/variance science. No farm command/run, real ROOT/input preservation, physical
 PDF acceptance, lambda selection, held-out/MSE claim or promotion is established.
+
+
+### High-epsilon three-model acquisition implementation - October 29
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the single
+[high-epsilon acquisition contract](../phases/kaonlt-high-epsilon-pion-three-model-acquisition-2026-10-29-task-contract.md),
+starting `test`/`origin/test` HEAD `38307c486326faf159cf300fb7c60d6c3758a9f7`.
+The contract attributes accepted October 28-29 Center/Left lowe numerical
+comparisons and corrected 60-page Work review; those raw artifacts were not
+independently opened here (MEMORY ONLY). Local-t remains a candidate without
+production adoption. This implementation does not replace earlier accepted
+science with historical high-epsilon Method-B/Phase-C plots.
+
+SOURCE VERIFIED: the existing comparison owner gains explicit `--high-epsilon`
+and a no-child `--preflight-only` option. Default low CLI/profile/output names
+remain low-only. The launcher preserves its original default low-debug block;
+the extra branch requires the exact kaon Q4p4W2p74 debug invocation and an
+owner authorization tied to detached HEAD, private worktree and private output
+link before launcher setup. Both canonical prepasses precede low, then high.
+No ordinary-checkout launcher, `-c` merge, farm command or publication was run.
+
+The same fitters, source classes, signed coefficients, Sumw2 and acceptance
+semantics produce high parent/child diagnostics for Center/Left/Right. High
+JSON records its true setting/epsilon, source and runtime input identities;
+filenames use highe. The checker requires nine high artifacts (three parent
+JSONs, three six-page parent PDFs, three child JSONs), nine parent comparisons
+and 81 canonical child slots. Empty, failed, rejected and unavailable children
+remain explicit; no failed/rejected child gets applied local-child weights.
+The actual observer serializer/JSON round-trip is exercised at all three high
+settings. No child PDF or detailed Work four-group presentation is invented.
+The frozen collector keeps its five-setting context schema; only the nine
+required high globals enter this profile. All three high settings are mandatory.
+
+The actual inspected path is owner -> private overlay/output -> launcher ->
+paired prepass -> low/high main -> existing parent and yield-stage child observer
+-> checker -> independent detached collector -> strict ZIP verification and
+preservation -> delivery. High main also reaches `run_xsect.sh` in Step 7;
+its direct-Root `check_ratios.py`, `lt_2D_fit.py` and `plot_xsects.py` callers join the high preflight,
+without substituting the safe-login wrapper for their actual direct calls.
+Effective-charge CSV resolution is checked against its actual LTANAPATH writer
+assignment, independently of no-mode ltsep OUTPATH. The high smoke records the
+executing interpreter, module lexical/canonical locations and namespace roots;
+installed farm dependencies and real path topology remain NOT VERIFIED.
+
+Before scientific copying, high preflight requires all high Data/Dummy kaon and
+pion pairs, archived ROOT/hist pairs, consumed pion templates, runlists,
+efficiency reference and configured Sigma0 files. Unconfigured Sigma0 retains
+its existing unavailable semantics. The plan rejects escaped/incorrect-name
+aliases, missing pairs, collisions and unbounded scope. Runlists must have
+existing skim support under the consumer's existence-only rule; skim bytes
+are never opened/hashed. Existing optional low-setting selection is preserved.
+The declared inventory is bounded to 128 consumed records and at most 1 TiB
+staged bytes. With S staged bytes and E other consumed bytes, protected identity
+hash reads are predicted as 7*S + 3*E, and staging adds S read/write bytes.
+Runtime container growth, scientific ROOT scans and small package/source/
+reference/artifact reads are separate costs, not an asserted total runtime.
+Private output reserve is max(8*S, 1 GiB); actual protected-hash/copy counters,
+first failed invariant, timestamps and independent preservation survive failure.
+No recursive shared-tree hash is introduced. Numeric farm byte totals remain
+unavailable until the reviewed/published no-child inventory is observed.
+
+Local results and full commands are retained in the temporary root review
+report, alongside the complete actual diff including new profile/contract.
+Required focused producer/owner/launcher/collector and memory checks are local
+only. The real-PDF Poppler fixture is skipped locally because pdfinfo is absent;
+high preflight now explicitly requires python3, bash, gfortran and pdfinfo before
+any scientific copy/child. The extra frozen canonical-five suite cannot import NumPy in WSL;
+three attempted Windows overlay cases require POSIX os.geteuid. Those platform
+limits were not patched or passed off as farm evidence. Existing high-owner
+POSIX overlay/caller tests exercise the consumed helpers. The prior CURRENT
+soft-size warning remains nonblocking, scheduled for the next milestone audit.
+The manifest necessarily changes for CURRENT, this investigation and the new
+contract; it is integrity metadata only. CURRENT owns the sole review NEXT.
+No ROOT/PyROOT, farm integration, real input preservation, PDF legibility,
+high-epsilon scientific acceptance or production promotion is established.
+
+
+#### Independent-review direct-constructor correction - October 29
+
+SOURCE VERIFIED: independent actual-diff review identified that the high
+`private_callers` probe substituted `create_ltsep_root` for `src/check_ratios.py`,
+whose frozen source directly calls `ltsep.Root` with `Plot_LTSep`. The existing
+high direct-constructor selection now includes that exact caller. No scientific
+consumer, fit, launcher, staging or other infrastructure was changed by this
+follow-up. The new deterministic regression first failed for both ordinary and
+private check-ratios probes, then covers all three direct callers, their actual
+Plot mode/cwd and the legitimate utility-wrapper negative control in both trees.
+Default low-mode probes retain their prior wrapper behavior. CURRENT's sole
+NEXT remains independent complete actual-diff review; farm compatibility and
+runtime/scientific acceptance remain NOT VERIFIED.

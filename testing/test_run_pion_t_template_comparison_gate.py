@@ -141,6 +141,30 @@ def artifacts(outdir):
             json.dumps(child_payload(setting,ab)),encoding='utf-8')
 
 
+def high_inputs(root):
+    populate_inputs(root)
+    for setting in ('Center','Left','Right'):
+        for name in (f'Prod_Coin_Q4p4W2p74{setting.lower()}_highe.hist',
+                     *[f'{setting}_pion_Analysed_{role}_Q4p4W2p74_highe.root' for role in ('Data','Dummy')]):
+            (root/name).write_bytes(('high fixture:'+name).encode())
+
+
+def high_artifacts(outdir):
+    artifacts(outdir)
+    for setting in ('Center','Left','Right'):
+        stem=f'{setting}_kaon_Q4p4W2p74_highe_pion-t-template-comparison'
+        pdf=outdir/(stem+'.pdf');pdf.write_bytes(b'%PDF-1.4 high fixture')
+        ab=payload(setting,pdf);ab['setting']['EPSSET']='high'
+        ab['original_analysis_input_identity']={r:{**v,'path':v['path'].replace('_lowe.root','_highe.root')}
+                                              for r,v in ab['original_analysis_input_identity'].items()}
+        for role,identity in ab['original_analysis_input_identity'].items():
+            path=Path(identity['path'])
+            if path.exists():identity.update(bytes=path.stat().st_size,sha256=owner.sha256(path))
+        doc=child_payload(setting,ab);doc['setting']=deepcopy(ab['setting'])
+        (outdir/(stem+'.json')).write_text(json.dumps(ab))
+        (outdir/(stem.replace('pion-t-','pion-t-phi-')+'.json')).write_text(json.dumps(doc))
+
+
 def real_snapshot(value):
     """Actual ROOT-free serializer, including its explicit missing-value record."""
     import importlib.util
@@ -891,11 +915,12 @@ class GateTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError,'reviewed_publication_blob_changed:'+target): owner.preflight(ROOT,SHA)
 
     @contextmanager
-    def flow(self, fail=None, aliases=False):
+    def flow(self, fail=None, aliases=False, high=False):
         """Keep actual status, child mock, artifacts, collector and delivery logic."""
         worktree = None
         volatile = self.outdir.parents[2]
         (self.repo / "OUTPUT").symlink_to(volatile / "OUTPUT") if not (self.repo / "OUTPUT").is_symlink() else None
+        mode_profile = owner.resolved_profile(ROOT,SHA,high=high)
         source = self.directory / "clean-source"
         config = self.directory / "installed.path"
         config.write_bytes(b"installed unchanged")
@@ -903,7 +928,7 @@ class GateTests(unittest.TestCase):
         state = {"branch": "test", "head": SHA, "origin_test": SHA, "porcelain": ""}
         baseline = {"LTANAPATH": str(self.repo), "OUTPATH": str(self.outdir),
                     "VOLATILEPATH": str(self.outdir.parents[2]), "ANATYPE": "Kaon"}
-        populate_inputs(self.outdir)
+        (high_inputs if high else populate_inputs)(self.outdir)
         if fail == "pion_missing":
             (self.outdir / "Center_pion_Analysed_Dummy_Q4p4W2p74_lowe.root").unlink()
         ordinary_before = {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
@@ -953,14 +978,14 @@ class GateTests(unittest.TestCase):
                 self.assertTrue(private.is_dir())
                 if fail == "collector":
                     raise ValueError("collector_failed")
-                return self.collect(outdir=private)
+                return self.collect(outdir=private,profile=mode_profile)
             module.collect_validation_bundle.side_effect = collect
             yield module
         def child(tree, log, env):
             self.assertEqual(tree, worktree)
             self.assertEqual(env[owner.ENABLE_ENV], "1")
             self.assertEqual(env[owner.CHILD_ENABLE_ENV], "1")
-            log.write_text(MARKERS)
+            log.write_text("All available low-epsilon settings completed in debug mode.\nHigh Epsilon Completed!\n" if high else MARKERS)
             # Let the real filesystem clock advance before genuinely new writes;
             # never retime artifacts or change the owner's freshness boundary.
             time.sleep(.02)
@@ -968,7 +993,7 @@ class GateTests(unittest.TestCase):
             for setting in ("Center", "Left", "Right"):
                 self.assertEqual(len(open_frozen_pion_inputs(private, setting)), 2)
             (private / "Center_kaon_Analysed_Data_Q4p4W2p74_lowe.root").write_bytes(b"private derived branches")
-            artifacts(private)
+            (high_artifacts if high else artifacts)(private)
             return 1 if fail == "child" else 0
         with ExitStack() as stack:
             stack.enter_context(redirect_stderr(io.StringIO()))
@@ -978,7 +1003,7 @@ class GateTests(unittest.TestCase):
             mock(owner.isolation.accepted, "ARTIFACTS", new=self.outdir)
             mock(owner.isolation.accepted, "GLOBUS", new=self.transfer)
             mock(owner, "preflight", return_value=state)
-            mock(owner, "resolved_profile", return_value=self.profile)
+            mock(owner, "resolved_profile", return_value=mode_profile)
             source_check = mock(owner, "source_preflight", return_value=([], IDENTITIES))
             mock(owner.isolation, "import_identity", return_value={"package_file": str(config), "pathing_file": str(config)})
             mock(owner.isolation, "owned_worktree", side_effect=owned)
@@ -995,6 +1020,13 @@ class GateTests(unittest.TestCase):
             link = mock(owner, "private_output", wraps=owner.private_output)
             mock(owner, "private_callers", return_value=[])
             mock(owner, "skim_inventory", return_value={"skim.root": {"exists": False}})
+            if high:
+                mock(owner,'validate_high_launch')
+                mock(owner,'high_environment_identity',return_value={'version':'fixture only','tools':{k:None if fail=='runtime_tool' and k=='pdfinfo' else '/fixture/'+k for k in ('python3','bash','gfortran','pdfinfo')}})
+                def inventory(repo, paths, shared, output, plan, env, **kwargs):
+                    return [dict(path=p['source'],bytes=p['bytes'],copied=True,role='staged',semantics='byte_consumed') for p in plan]
+                mock(owner,'high_input_inventory',side_effect=inventory)
+
             copy = mock(owner, "stage_copies", wraps=owner.stage_copies)
             run = mock(owner.debug, "run_analysis", side_effect=child)
             preservation = mock(owner.isolation, "verify_preservation", return_value={"passed": True})
@@ -1020,6 +1052,219 @@ class GateTests(unittest.TestCase):
             finally:
                 self.assertEqual(ordinary_before, {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
                                                   if p.suffix == ".root" or p.name in owner.names()})
+
+    def test_high_exact_successor_source_and_publication_guards(self):
+        state=dict(branch='test',head=SHA,origin_test=SHA,porcelain='')
+        def fake_git(repo,*args):
+            if args[:2]==('diff','--name-only'):return 'src/main.py' if args[2]==owner.HIGH_BASE else ''
+            if args[0]=='rev-parse':
+                path=args[1].split(':',1)[1]
+                return (owner.CLEANUP_REPAIR_BLOBS|owner.REVIEWED_PUBLICATION_BLOBS)[path]
+            return ''
+        with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=fake_git):
+            with self.assertRaisesRegex(ValueError,'unexpected_high_committed_source'):owner.preflight(ROOT,SHA,high=True)
+        with patch.object(owner.isolation,'snapshot',return_value={**state,'origin_test':'c'*40}):
+            with self.assertRaisesRegex(ValueError,'source_not_observed_pushed'):owner.preflight(ROOT,SHA,high=True)
+
+    def test_high_profile_artifacts_real_collector_and_required_right(self):
+        profile=owner.resolved_profile(ROOT,SHA,high=True)
+        self.assertEqual(profile['settings'],owner.SETTINGS)  # frozen collector context; nine required high artifacts
+        self.assertEqual(len(owner.names(True)),9)
+        high_artifacts(self.outdir)
+        before=dict.fromkeys(owner.names(True))
+        with patch.object(owner,'pdf_pages',return_value=6):
+            records,outcomes=owner.verify_artifacts(self.outdir,SHA,IDENTITIES,0,before,high=True)
+            self.assertEqual(set(outcomes),{'Center','Left','Right'})
+            self.assertEqual(self.collect(profile=profile)['returncode'],0)
+            owner.verify_zip(self.output,SHA,records,high=True)
+            missing=self.outdir/'Right_kaon_Q4p4W2p74_highe_pion-t-template-comparison.pdf'
+            missing.unlink()
+            with self.assertRaisesRegex(ValueError,'missing_or_empty'):
+                owner.verify_artifacts(self.outdir,SHA,IDENTITIES,0,before,high=True)
+
+    def test_high_copy_plan_all_consumed_pairs_and_missing_roles(self):
+        high_inputs(self.outdir); private=self.directory/'private';private.mkdir()
+        plan=owner.copy_plan(self.outdir,private,high=True)
+        names={Path(p['source']).name for p in plan}
+        for setting in ('Center','Left','Right'):
+            for name in (f'Prod_Coin_Q4p4W2p74{setting.lower()}_highe.hist',
+                         *[f'{setting}_{pid}_Analysed_{role}_Q4p4W2p74_highe.root'
+                           for pid in ('kaon','pion') for role in ('Data','Dummy')]):
+                self.assertIn(name,names)
+                path=self.outdir/name;raw=path.read_bytes();path.unlink()
+                try:
+                    with self.subTest(name=name),self.assertRaises(ValueError):owner.copy_plan(self.outdir,private,high=True)
+                finally:path.write_bytes(raw)
+        target=private/next(iter(names));target.write_bytes(b'collision')
+        with self.assertRaisesRegex(ValueError,'collision'):owner.copy_plan(self.outdir,private,high=True)
+        target.unlink()
+        source=self.outdir/'Prod_Coin_Q4p4W2p74right_highe.hist';source.unlink()
+        source.symlink_to(ROOT/'AGENTS.md')
+        with self.assertRaisesRegex(ValueError,'alias_escape'):owner.copy_plan(self.outdir,private,high=True)
+
+    def test_high_actual_input_inventory_roles_cost_and_missing_before_reads(self):
+        high_inputs(self.outdir)
+        (self.repo/'run_Prod_Analysis.sh').write_bytes((ROOT/'run_Prod_Analysis.sh').read_bytes())
+        util=self.directory/'util';eff=util/'scripts/efficiency/OUTPUTS/coin_production_coin_efficiency_data_2026_04_23.csv'
+        eff.parent.mkdir(parents=True);eff.write_text('Run_Number\n1\n')
+        for eps in ('lowe','highe'):
+            for setting in ('Center','Left','Right'):
+                for suffix in ('','_dummy'):
+                    path=util/'run_list/KaonLT'/f'Q4p4W2p74{setting.lower()}_{eps}{suffix}'
+                    path.parent.mkdir(parents=True,exist_ok=True);path.write_text('1\n')
+                for component in ('neutron','delta','sidis'):
+                    path=self.outdir/'background_samples'/component/f'Prod_Coin_Q4p4W2p74{setting.lower()}_{eps}.root'
+                    path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'scientific template')
+        private=self.directory/'private';private.mkdir()
+        paths=dict(UTILPATH=str(util),VOLATILEPATH=str(self.outdir.parents[2]))
+        plan=owner.copy_plan(self.outdir,private,high=True)
+        with patch.object(owner,'sha256',side_effect=AssertionError('no heavy reads during inventory')):
+            rows=owner.high_input_inventory(self.repo,paths,self.outdir,private,plan,{})
+            self.assertEqual(sum(r['role'].startswith('pion_template:') for r in rows),18)
+            self.assertEqual(sum(r['role'].startswith('runlist:') for r in rows),12)
+            with self.assertRaisesRegex(ValueError,'configured_sigma0'):
+                owner.high_input_inventory(self.repo,paths,self.outdir,private,plan,
+                    {'LT_BG_SIGMA0_RIGHT_HIGH_ROOT':str(self.directory/'missing.root')})
+        skims={r['path']:{'kind':'runlist','sha256':hashlib.sha256(Path(r['path']).read_bytes()).hexdigest()}
+               for r in rows if r['role'].startswith('runlist:')}
+        with self.assertRaisesRegex(ValueError,'effective_charge_support_missing'):
+            owner.high_input_inventory(self.repo,paths,self.outdir,private,plan,{},skims=skims)
+        skims[str(self.directory/'kaon_1_-1_Raw_Data.root')]={'kind':'skim_existence','exists':True}
+        owner.high_input_inventory(self.repo,paths,self.outdir,private,plan,{},skims=skims)
+        costs=owner.high_cost_inventory(rows,{'skim.root':{'kind':'skim_existence','exists':True}},private)
+        self.assertEqual(costs['skim_hash_bytes'],0);self.assertEqual(costs['recursive_shared_hash_bytes'],0)
+        with patch.object(owner.shutil,'disk_usage',return_value=Mock(free=0)):
+            with self.assertRaisesRegex(ValueError,'space_shortage'):owner.high_cost_inventory(rows,{},private)
+        target=self.outdir/'background_samples/neutron/Prod_Coin_Q4p4W2p74right_highe.root'
+        target.unlink();target.symlink_to(target.with_name('Prod_Coin_Q4p4W2p74right_lowe.root'))
+        with self.assertRaisesRegex(ValueError,'epsilon_alias'):
+            owner.high_input_inventory(self.repo,paths,self.outdir,private,plan,{})
+
+    def test_high_launcher_controlled_paired_prepass_low_then_high(self):
+        text=(ROOT/'run_Prod_Analysis.sh').read_text()
+        start=text.index('    # Both epsilon input bundles now exist.')
+        stop=text.index('elif [[ $i_flag = "true"',start)
+        block=text[start:stop]
+        binpath=self.directory/'bin';binpath.mkdir();trace=self.directory/'trace'
+        shim=binpath/'python3';shim.write_text('#!/bin/bash\nprintf "%s|%s\\n" "$LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE" "$*" >> "$TRACE"\n')
+        shim.chmod(0o700);(self.directory/'src').mkdir()
+        prefix='export_background_sample_paths() { :; }\nParticleType=kaon\nd_flag=true\nQ2=4p4\nW=2p74\nmain_args_low=(LOW)\nmain_args_high=(HIGH)\n'
+        for high,expected in ((False,['main.py LOW','main.py HIGH','utility/shared_canonical_binning_preflight.py 4p4 2p74 kaon','main.py LOW']),
+                              (True,['main.py LOW','main.py HIGH','utility/shared_canonical_binning_preflight.py 4p4 2p74 kaon','main.py LOW','main.py HIGH'])):
+            env={**os.environ,'PATH':str(binpath)+os.pathsep+os.environ['PATH'],'TRACE':str(trace),
+                 'LTANAPATH':str(self.directory),'LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON':'1' if high else ''}
+            result=subprocess.run(['bash','-c',prefix+block],env=env,capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            calls=trace.read_text().splitlines();trace.unlink()
+            self.assertEqual(len(calls),len(expected))
+            self.assertTrue(calls[0].split('|')[0].endswith('/low.npz'))
+            self.assertTrue(calls[1].split('|')[0].endswith('/high.npz'))
+            for call,wanted in zip(calls,expected):self.assertTrue(call.split('|')[1].startswith(wanted))
+            self.assertEqual('High Epsilon Completed!' in result.stdout,high)
+        self.assertLess(text.index('validate_high_launch'),text.index('mkdir -p'))
+        self.assertIn('if [[ $d_flag != "true" ]]; then\n        git clean -fdx',text)
+        with self.assertRaisesRegex(ValueError,'private_worktree'):owner.validate_high_launch(ROOT)
+        callers=owner.reached_callers(ROOT,high=True)
+        for path in ('src/models/lt_2D_fit.py','src/plotting/plot_xsects.py'):
+            self.assertTrue(any(c[0]==path for c in callers))
+
+    def test_actual_pdfinfo_six_page_gate(self):
+        if not shutil.which('pdfinfo'):self.skipTest('local Poppler pdfinfo unavailable')
+        # Minimal real PDF with a page tree and correct byte offsets/xref.
+        objects=[b'<< /Type /Catalog /Pages 2 0 R >>',
+            b'<< /Type /Pages /Count 6 /Kids [3 0 R 4 0 R 5 0 R 6 0 R 7 0 R 8 0 R] >>']
+        objects += [b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 72 72] /Resources << >> >>']*6
+        data=b'%PDF-1.4\n';offsets=[0]
+        for i,obj in enumerate(objects,1):
+            offsets.append(len(data));data+=str(i).encode()+b' 0 obj\n'+obj+b'\nendobj\n'
+        xref=len(data);data+=b'xref\n0 9\n0000000000 65535 f \n'
+        for offset in offsets[1:]:data+=f'{offset:010} 00000 n \n'.encode()
+        data+=f'trailer\n<< /Size 9 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n'.encode()
+        pdf=self.directory/'actual-six.pdf';pdf.write_bytes(data)
+        self.assertEqual(owner.pdf_pages(pdf),6)
+
+    def test_high_stable_hash_and_actual_lib64_namespace_import_probe(self):
+        path=self.directory/'mutable.root';path.write_bytes(b'old')
+        costs={'actual_protected_hash_bytes':0}
+        def changed(p):
+            p.write_bytes(b'new length');return FP
+        with patch.object(owner,'sha256',side_effect=changed):
+            with self.assertRaisesRegex(ValueError,'source_changed_during_hash'):owner.file_identity(path,costs)
+        packages=self.directory/'lib/site-packages';packages.mkdir(parents=True)
+        alias=self.directory/'lib64';alias.symlink_to(self.directory/'lib')
+        for name in ('ltsep','numpy','pandas','dateutil','uproot'):
+            module=packages/name;module.mkdir();(module/'__init__.py').write_text('')
+        (packages/'uproot/namespace').mkdir()
+        (packages/'uproot/__init__.py').write_text('import uproot.namespace\n')
+        env={**os.environ,'PYTHONPATH':str(alias/'site-packages'),'PYTHONDONTWRITEBYTECODE':'1'}
+        result=owner.high_environment_identity(self.directory,env)
+        self.assertIn('lib64',result['modules']['uproot']['lexical'])
+        self.assertNotIn('lib64',result['modules']['uproot']['canonical'])
+        self.assertIsNone(result['modules']['uproot.namespace']['canonical'])
+        self.assertTrue(result['modules']['uproot.namespace']['namespace_roots'])
+        self.assertIn('3.',result['version'])  # path-shape replay only, not farm Python 3.9.
+
+    def test_high_launch_authorization_source_alias_and_private_output_guards(self):
+        code=self.directory/'code';code.mkdir();work=code/'analysis';work.mkdir();(work/'.git').write_text('fixture')
+        parent=self.directory/'kaonlt-ab-analysis-fixture';parent.mkdir(mode=0o700)
+        private=parent/'ab-output/Analysis/KaonLT';private.mkdir(parents=True)
+        (work/'OUTPUT').symlink_to(parent/'ab-output')
+        marker=code/'high-comparison-authorization.json'
+        record=dict(source_commit=SHA,worktree=str(work),settings=owner.HIGH_SETTINGS,private_output=str(private))
+        def fake_git(repo,*args):return SHA if args==('rev-parse','HEAD') else ''
+        with patch.object(owner,'git',side_effect=fake_git):
+            with self.assertRaisesRegex(ValueError,'authorization_missing'):owner.validate_high_launch(work)
+            marker.write_text(json.dumps(record));owner.validate_high_launch(work)
+            for key,value in (('source_commit','c'*40),('settings',owner.SETTINGS),('private_output',str(self.outdir))):
+                marker.write_text(json.dumps({**record,key:value}))
+                with self.subTest(key=key),self.assertRaises(ValueError):owner.validate_high_launch(work)
+            marker.write_text(json.dumps(record))
+            (work/'OUTPUT').unlink();(work/'OUTPUT').symlink_to(self.outdir)
+            with self.assertRaisesRegex(ValueError,'private_link_changed'):owner.validate_high_launch(work)
+
+    def test_high_environment_completion_and_frozen_default(self):
+        self.assertEqual(owner.child_environment({},high=True)[owner.HIGH_ENV],'1')
+        with self.assertRaisesRegex(ValueError,'untrusted'):owner.child_environment({owner.HIGH_ENV:'1'})
+        path=self.directory/'completion.log'
+        for text in (MARKERS,'High Epsilon Completed!\n',
+                     'High Epsilon Completed!\nAll available low-epsilon settings completed in debug mode.'):
+            path.write_text(text)
+            with self.assertRaises(ValueError):owner.verify_completion(path,0,high=True)
+        path.write_text('All available low-epsilon settings completed in debug mode.\nHigh Epsilon Completed!\n')
+        owner.verify_completion(path,0,high=True)
+        with self.assertRaises(ValueError):owner.verify_completion(path,0)
+
+    def test_high_full_owner_success_and_failure_preservation(self):
+        for fail in (None,'child','collector','zip','copy','original','runtime_tool'):
+            with self.subTest(fail=fail),tempfile.TemporaryDirectory(dir='/dev/shm') as fresh:
+                old=self.outdir,self.transfer,self.output
+                self.outdir=Path(fresh)/'expphy/volatile/user/OUTPUT/Analysis/KaonLT';self.outdir.mkdir(parents=True)
+                self.transfer=Path(fresh)/'transfer';self.transfer.mkdir();self.output=self.transfer/'high.zip'
+                try:
+                    with self.flow(fail,high=True) as (run,preservation,verify):
+                        if fail:
+                            with self.assertRaises(ValueError):owner.execute_gate(self.repo,self.outdir,self.output,SHA,high=True)
+                        else:owner.execute_gate(self.repo,self.outdir,self.output,SHA,high=True)
+                    status=json.loads((self.outdir/'high-gate-status.json').read_text())
+                    self.assertEqual(status['status'],'failed' if fail else 'success')
+                    self.assertEqual(status['requested_settings'],owner.HIGH_SETTINGS)
+                    self.assertGreaterEqual(preservation.call_count,1)
+                    if not fail:
+                        self.assertEqual(status['io_costs']['actual_copied_bytes'],status['copy_bytes'])
+                        delta=sum(v['bytes']-status['staged_inputs'][name]['runtime_container_before']['bytes'] for name,v in status['runtime_container_identities'].items())
+                        self.assertEqual(status['io_costs']['actual_protected_hash_bytes'],status['io_costs']['planned_owner_hash_bytes']+delta)
+                    self.assertEqual((self.transfer/'high-gate-status.json').exists(),not bool(fail))
+                finally:self.outdir,self.transfer,self.output=old
+
+    def test_high_no_child_preflight_has_no_copy_archive_or_delivery(self):
+        with self.flow(high=True) as (run,preservation,verify),patch.object(owner,'stage_copies') as copy:
+            path=owner.execute_gate(self.repo,self.outdir,self.output,SHA,high=True,preflight_only=True)
+        copy.assert_not_called();run.assert_not_called();verify.assert_not_called()
+        status=json.loads(path.read_text())
+        self.assertEqual(status['status'],'success')
+        self.assertFalse(status['analysis_started']);self.assertFalse(status['archive_created'])
+        self.assertFalse(status['evidence_admissible']);self.assertFalse(self.output.exists())
+        self.assertTrue(status['worktree_cleanup_completed'])
 
     def test_missing_pion_is_reported_before_copy_or_analysis_child(self):
         with self.flow("pion_missing") as (run, _, verify), patch.object(owner, "stage_copies") as stage:
@@ -2001,6 +2246,58 @@ class PrivateTopology(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "private_outpath"):
                 owner.private_callers(ordinary, self.work, {}, baseline, private, installed)
         self.assertEqual(len(owner.reached_callers(ROOT)), 24)
+
+    def test_high_direct_constructor_probes_match_consumers_in_both_trees(self):
+        direct = {"src/check_ratios.py", "src/models/lt_2D_fit.py", "src/plotting/plot_xsects.py"}
+        wrapper = "src/utility/utility.py"
+        reached = owner.reached_callers(ROOT, high=True)
+        calls = []
+        for caller in sorted(direct | {wrapper}):
+            matches = [row for row in reached if row[0] == caller]
+            self.assertTrue(matches, caller)
+            self.assertTrue(all(row[1] == ("Plot_LTSep",) for row in matches), caller)
+            calls.append(matches[0])
+        private = self.private()
+        ordinary = self.base / "ordinary-checkout"
+        ordinary.mkdir()
+        installed = self.base / "installed/ltsep"
+        copied = self.work.parent / "runtime-python/ltsep"
+        baseline = {k: "stable-" + k for k in owner.isolation.PATH_FIELDS}
+        baseline.update(LTANAPATH=str(ordinary), OUTPATH=str(self.shared), ANATYPE="Kaon")
+        captured = []
+
+        def probe(cwd, code, arguments, env):
+            runtime = Path(arguments[0]).is_relative_to(self.work)
+            tree, package = (self.work, copied) if runtime else (ordinary, installed)
+            captured.append((tree, Path(arguments[0]).relative_to(tree).as_posix(), code, arguments, cwd))
+            fields = {**baseline, "LTANAPATH": str(tree)}
+            if runtime:
+                fields["OUTPATH"] = str(self.work / "OUTPUT/Analysis/KaonLT")
+            return {"paths": fields, "package": str(package / "__init__.py"),
+                    "pathing": str(package / "pathing.py")}
+
+        for high in (True, False):
+            captured.clear()
+            with patch.object(owner, "reached_callers", return_value=calls), patch.object(
+                    owner.isolation, "python_json", side_effect=probe):
+                records = owner.private_callers(ordinary, self.work, {}, baseline, private, installed, high=high)
+            self.assertEqual(len(records), 4)
+            self.assertEqual(len(captured), 8)
+            self.assertEqual({(tree, caller) for tree, caller, *_ in captured},
+                             {(tree, caller) for tree in (ordinary, self.work) for caller in direct | {wrapper}})
+            for tree, caller, code, arguments, cwd in captured:
+                with self.subTest(high=high, tree=tree, caller=caller):
+                    self.assertEqual(json.loads(arguments[1]), ["Plot_LTSep"])
+                    self.assertEqual(cwd, tree / next(row[2] for row in calls if row[0] == caller))
+                    nodes = ast.parse(code).body
+                    constructor = next(n.value.func for n in nodes if isinstance(n, ast.Assign)
+                        and any(isinstance(t, ast.Name) and t.id == "r" for t in n.targets))
+                    if high and caller in direct:
+                        self.assertEqual(ast.dump(constructor), ast.dump(ast.parse("ltsep.Root", mode="eval").body))
+                        self.assertNotIn("create_ltsep_root", code)
+                    else:
+                        self.assertEqual(ast.dump(constructor), ast.dump(ast.Name(id="create_ltsep_root", ctx=ast.Load())))
+                        self.assertIn("from farm_env.ltsep_paths import create_ltsep_root", code)
 
     def test_copy_failure_keeps_original_snapshot_and_source_symlink_identity(self):
         populate_inputs(self.shared)

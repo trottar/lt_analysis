@@ -17,6 +17,19 @@ sys.path[:0] = [str(REPO / "src/cuts"), str(REPO / "src/utility")]
 import pion_t_template_comparison as comparison
 
 
+class HighSelectionTests(unittest.TestCase):
+    def test_all_five_selections_and_wrong_modes(self):
+        for eps,setting in (('low','Center'),('low','Left'),('high','Center'),('high','Left'),('high','Right')):
+            inp=dict(Q2='4p4',W='2p74',EPSSET=eps,ParticleType='kaon')
+            self.assertTrue(comparison.selected(inp,setting,{comparison.HIGH_ENV:'1'}))
+            self.assertEqual(comparison.selected(inp,setting,{}),eps=='low')
+            for key,value in (('Q2','3p0'),('W','3p14'),('ParticleType','pion'),('EPSSET','mid')):
+                with self.subTest(key=key,setting=setting):
+                    self.assertFalse(comparison.selected({**inp,key:value},setting,{comparison.HIGH_ENV:'1'}))
+        self.assertFalse(comparison.selected(dict(Q2='4p4',W='2p74',EPSSET='low',ParticleType='kaon'),'Right',
+                                            {comparison.HIGH_ENV:'1'}))
+
+
 class Hist:
     def __init__(self, values=(0., 2., 6., 0.), errors=(0., 1., 2., 0.), edges=(0., 1., 2.)):
         self.values, self.errors, self.edges = list(values), list(errors), list(edges)

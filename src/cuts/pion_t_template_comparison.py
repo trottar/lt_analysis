@@ -20,6 +20,7 @@ from pion_background_chain_audit import digest, histogram, snapshot
 import root_histogram_ownership as ownership
 
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
+HIGH_ENV = "LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON"
 COMPONENTS = ("pi_n", "pi_delta", "pi_sidis")
 SCHEMA = "pion_t_template_comparison/v1"
 REQUIRED_SOURCE_FILES = (
@@ -33,6 +34,17 @@ REQUIRED_SOURCE_FILES = (
 
 def enabled(environ=None):
     return (os.environ if environ is None else environ).get(ENABLE_ENV) == "1"
+
+
+def selected(inp, setting, environ=None):
+    env = os.environ if environ is None else environ
+    if (str(inp.get("Q2")) != "4p4" or str(inp.get("W")) != "2p74"
+            or str(inp.get("ParticleType", "")).lower() != "kaon"):
+        return False
+    eps = str(inp.get("EPSSET", "")).lower()
+    return ((eps in ("low", "lowe") and setting in ("Center", "Left"))
+            or (env.get(HIGH_ENV) == "1" and eps in ("high", "highe")
+                and setting in ("Center", "Left", "Right")))
 
 
 def file_identity(path):
@@ -431,14 +443,13 @@ def observe_template_comparison(hist, inp_dict, *, t_edges, phi_edges, component
     """One environment opt-in; no import/load/fit/write on the default path.
 
     Ordinary launcher passes its environment to main.py (including plain -d).
-    Limit capture to the contracted Q4p4W2p74 Center/Left low-epsilon settings.
+    Default capture is Q4p4W2p74 Center/Left lowe; explicit high mode adds
+    Center/Left/Right highe using the same physical fitting context.
     Each setting gets its own JSON/PDF; populations are never pooled.
     """
     if not enabled():
         return None
-    if (str(inp_dict.get("Q2")) != "4p4" or str(inp_dict.get("W")) != "2p74"
-            or str(inp_dict.get("EPSSET")).lower() not in ("low", "lowe")
-            or hist.get("phi_setting") not in ("Center", "Left")):
+    if not selected(inp_dict, hist.get("phi_setting")):
         return None
     from background_config import get_pion_component_dynamic_alignment_config
     from pion_component_shapes import load_raw_t_pion_comparison_shapes
@@ -488,12 +499,15 @@ def observe_template_comparison(hist, inp_dict, *, t_edges, phi_edges, component
                   "available" if all(r["status"] == "available" for r in reports) else "partial_unavailable")}
     output = Path(outpath)
     output.mkdir(parents=True, exist_ok=True)
-    stem = "{}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison".format(hist["phi_setting"])
+    epsilon = "highe" if str(inp_dict["EPSSET"]).lower() in ("high", "highe") else "lowe"
+    stem = "{}_kaon_Q4p4W2p74_{}_pion-t-template-comparison".format(hist["phi_setting"], epsilon)
     json_path, pdf_path = output / (stem + ".json"), output / (stem + ".pdf")
+    if epsilon == "highe" and any(os.path.lexists(p) for p in (json_path, pdf_path)):
+        raise RuntimeError("high_comparison_destination_exists")
     result["pdf"] = {"path": str(pdf_path), "status": "not_rendered"}
     json_path.write_text(json.dumps(snapshot(result), sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     try:
-        render_comparison_pdf(pdf_path, rows, "{} Q4p4W2p74 lowe | source {} | diagnostic only".format(hist["phi_setting"], head[:12]))
+        render_comparison_pdf(pdf_path, rows, "{} Q4p4W2p74 {} | source {} | diagnostic only".format(hist["phi_setting"], epsilon, head[:12]))
     except Exception as exc:
         result["status"] = "failed"
         result["pdf"] = {"path": str(pdf_path), "status": "unavailable", "reason": str(exc)}

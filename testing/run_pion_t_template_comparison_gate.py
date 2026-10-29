@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Own one isolated Center/Left lowe template comparison, then verify and collect.
+"""Own an isolated template comparison, then verify and collect.
+
+Default: Center/Left lowe. --high-epsilon adds Center/Left/Right highe after
+the unchanged low analysis. --preflight-only performs no scientific copying,
+analysis or collection; it reports installed callers and bounded I/O inventory.
 
 Farm execution requires independent diff, publication, synchronization and
 readiness review. This module imports operational helpers only, never physics.
@@ -54,6 +58,137 @@ PROFILE = "testing/pion_t_phi_template_comparison_gate_profile_v2.json"
 PROFILE_ID = "pion_t_phi_template_comparison_center_left_lowe/v2"
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
 CHILD_ENABLE_ENV = "LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON"
+HIGH_ENV = "LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON"
+HIGH_BASE = "38307c486326faf159cf300fb7c60d6c3758a9f7"
+HIGH_PROFILE = "testing/pion_t_phi_template_comparison_highe_gate_profile_v1.json"
+HIGH_PROFILE_ID = "pion_t_phi_template_comparison_center_left_right_highe/v1"
+HIGH_SETTINGS = [{"phi": s, "epsilon": "highe"} for s in ("Center", "Left", "Right")]
+HIGH_ARTIFACTS = {"global": [
+    {"key": s.lower() + "_comparison_" + ext,
+     "basename_template": f"{s}_kaon_Q4p4W2p74_highe_pion-t-template-comparison.{ext}",
+     "kind": "json" if ext == "json" else "file", "required": True}
+    for s in ("Center", "Left", "Right") for ext in ("json", "pdf")] + [
+    {"key": s.lower() + "_child_comparison_json",
+     "basename_template": f"{s}_kaon_Q4p4W2p74_highe_pion-t-phi-template-comparison.json",
+     "kind": "json", "required": True} for s in ("Center", "Left", "Right")], "settings": []}
+
+
+def selection(high=False):
+    return (SETTINGS, HIGH_ARTIFACTS, HIGH_PROFILE_ID, HIGH_PROFILE, "highe") if high else (
+        SETTINGS, ARTIFACTS, PROFILE_ID, PROFILE, "lowe")
+
+
+def validate_high_launch(repo):
+    """Launcher guard: only the owner's detached, output-isolated worktree."""
+    repo = Path(repo).absolute()
+    require(repo == repo.resolve() and repo.name == "analysis" and
+            (repo / ".git").is_file() and not (repo / ".git").is_symlink(), "high_requires_private_worktree")
+    require(not git(repo, "branch", "--show-current").strip(), "high_requires_detached_head")
+    marker = repo.parent / "high-comparison-authorization.json"
+    require(marker.is_file() and not marker.is_symlink(), "high_owner_authorization_missing")
+    record = strict_json(marker.read_text())
+    require(record.get("source_commit") == git(repo, "rev-parse", "HEAD").strip() and
+            record.get("worktree") == str(repo) and record.get("settings") == HIGH_SETTINGS,
+            "high_owner_authorization_invalid")
+    output = Path(record["private_output"])
+    require(output.is_absolute() and output == output.resolve() and
+            output.parts[-3:] == ("ab-output", "Analysis", "KaonLT") and
+            output.parents[2].name.startswith("kaonlt-ab-analysis-") and
+            stat.S_IMODE(output.parents[2].stat().st_mode) in (0o700, 0o2700),
+            "high_private_output_invalid")
+    verify_private(repo, output)
+
+
+def high_input_inventory(repo, paths, shared, output, plan, env, skims=None):
+    """Explicit consumed roles only; no shared-tree walk or skim byte reads."""
+    records = []
+    def add(path, role, copied=False):
+        path = Path(path).absolute()
+        require(path.is_file(), "required_input_missing:" + role + ":" + str(path))
+        resolved = path.resolve(strict=True)
+        require(resolved.name == path.name, "input_source_name_or_epsilon_alias:" + str(path))
+        require(resolved != output and not resolved.is_relative_to(output) and
+                not resolved.is_relative_to(Path(repo).resolve()), "external_input_alias_escape:" + str(path))
+        info = path.stat()
+        require(info.st_size > 0, "required_input_empty:" + role + ":" + str(path))
+        records.append(dict(path=str(path), resolved=str(resolved), role=role,
+                            semantics="byte_consumed", bytes=info.st_size, copied=copied))
+    for entry in plan:
+        add(entry["source"], "staged_scientific_input", True)
+        require(Path(entry["source"]).resolve().parent == Path(shared).resolve(),
+                "staged_source_alias_escape:" + entry["source"])
+    # Read the actual launcher's efficiency-table assignment, not a second default.
+    text = (Path(repo) / "run_Prod_Analysis.sh").read_text()
+    efficiency = re.findall(r'^EffData="([^"\n]+)"', text, re.M)
+    require(len(efficiency) == 1, "efficiency_assignment_changed")
+    add(Path(paths["UTILPATH"]) / "scripts/efficiency/OUTPUTS" / efficiency[0], "efficiency_table")
+    base = Path(repo) / "background_samples/OUTPUTS"
+    if not (base.is_symlink() or base.is_dir()):
+        base = Path(paths["VOLATILEPATH"]) / "OUTPUT/Analysis/KaonLT/background_samples"
+    # Low full processing remains part of the acquisition; high needs all three.
+    low_settings = tuple(s for s in ("Center", "Left", "Right") if any(
+        Path(p["source"]).name == f"Prod_Coin_Q4p4W2p74{s.lower()}_lowe.hist" for p in plan))
+    for eps, settings in (("lowe", low_settings), ("highe", ("Center", "Left", "Right"))):
+        for setting in settings:
+            for suffix in ("", "_dummy"):
+                runlist = Path(paths["UTILPATH"]) / "run_list/KaonLT" / f"Q4p4W2p74{setting.lower()}_{eps}{suffix}"
+                add(runlist, "runlist:" + setting + ":" + eps)
+                if skims is not None:
+                    raw = runlist.read_bytes()
+                    runs = raw.decode().split()
+                    require(runs and all(re.fullmatch(r"\d+", run) for run in runs),
+                            "required_runlist_empty_or_invalid:" + str(runlist))
+                    require(skims.get(str(runlist), {}).get("sha256") == hashlib.sha256(raw).hexdigest(),
+                            "runlist_inventory_changed:" + str(runlist))
+                    targets = {f"kaon_{run}_-1_Raw_Data.root" for run in runs}
+                    require(any(Path(p).name in targets and v.get("kind") == "skim_existence" and v.get("exists")
+                                for p, v in skims.items()), "required_effective_charge_support_missing:" + str(runlist))
+            for component in ("neutron", "delta", "sidis"):
+                add(base / component / f"Prod_Coin_Q4p4W2p74{setting.lower()}_{eps}.root",
+                    "pion_template:" + component + ":" + setting + ":" + eps)
+            key = "LT_BG_SIGMA0_" + setting.upper() + "_" + eps[:-1].upper() + "_ROOT"
+            if env.get(key):
+                require(Path(env[key]).is_absolute(), "sigma0_path_not_absolute:" + key)
+                add(env[key], "configured_sigma0:" + setting + ":" + eps)
+    for path, item in (skims or {}).items():
+        if item.get("kind") == "runlist" and item.get("exists") and not any(r["path"] == path for r in records):
+            add(path, "runlist:launcher_reference")
+    return records
+
+
+def high_cost_inventory(records, skims, output):
+    copied = sum(r["bytes"] for r in records if r["copied"])
+    consumed = sum(r["bytes"] for r in records if not r["copied"])
+    # Initial identity + final check for each input; copying adds a read and
+    # source/target identity checks. Runtime/observer hashes and scientific reads
+    # are reported separately: they are data dependent, not a promised total.
+    require(len(records) <= 128 and copied <= 1024 ** 4, "high_input_scope_exceeds_bound")
+    hash_bytes = 3 * consumed + 7 * copied
+    reserve = max(8 * copied, 1024 ** 3)
+    require(shutil.disk_usage(output).free >= reserve, "private_output_space_shortage")
+    return dict(files=records, file_count=len(records), skim_inventory=skims,
+                cost_scope="protected scientific input identity hashes and staging; small source/package/reference/artifact reads separate",
+                copied_bytes=copied, planned_owner_hash_bytes=hash_bytes,
+                planned_owner_read_bytes=hash_bytes + copied,
+                output_space_required_bytes=reserve, output_space_policy="8 * staged bytes, minimum 1 GiB",
+                scientific_read_bytes="NOT VERIFIED; ROOT scans, fitted support and archive size depend on runtime",
+                actual_protected_hash_bytes=0, actual_copied_bytes=0,
+                skim_hash_bytes=0, recursive_shared_hash_bytes=0)
+
+
+def high_environment_identity(repo, env):
+    code = '''import importlib,json,os,sys,shutil,ltsep
+for name in ("numpy","pandas","uproot","dateutil"):
+    importlib.import_module(name)
+modules={}
+for name,module in list(sys.modules.items()):
+    path=getattr(module,"__file__",None)
+    roots=list(getattr(module,"__path__",()))
+    if name.split(".")[0] in ("ltsep","uproot","numpy","pandas","dateutil"):
+        modules[name]={"lexical":path,"canonical":os.path.realpath(path) if path else None,"namespace_roots":roots}
+print(json.dumps({"executable":sys.executable,"canonical_executable":os.path.realpath(sys.executable),"version":sys.version,"sys_path":sys.path,"modules":modules,"tools":{name:shutil.which(name) for name in ("python3","bash","gfortran","pdfinfo")}}))'''
+    return isolation.python_json(repo, code, (), env)
+
 COMMAND = ["./run_Prod_Analysis.sh", "-d", "4p4", "2p74"]
 SETTINGS = [dict(row) for row in isolation.CANONICAL_SETTINGS]
 COMPONENTS = ("pi_n", "pi_delta", "pi_sidis")
@@ -312,13 +447,14 @@ def strict_json(raw):
     return result
 
 
-def resolved_profile(repo, source_commit):
+def resolved_profile(repo, source_commit, high=False):
+    settings, artifacts, profile_id, profile_path, _ = selection(high)
     require(re.fullmatch(r"[0-9a-f]{40}", source_commit) is not None, "source_commit_requires_full_sha")
-    profile = collector.load_validation_profile(Path(repo) / PROFILE)
+    profile = collector.load_validation_profile(Path(repo) / profile_path)
     expected = {"schema_version": "pion_hgcer_validation_bundle_profile/v4",
-        "validation_profile": PROFILE_ID, "collection_mode": "generic_artifacts",
-        "settings": SETTINGS, "artifacts": ARTIFACTS,
-        "source_identity": {"required_analysis_commit": REVIEWED_HEAD, "allowed_committed_files": [],
+        "validation_profile": profile_id, "collection_mode": "generic_artifacts",
+        "settings": settings, "artifacts": artifacts,
+        "source_identity": {"required_analysis_commit": HIGH_BASE if high else REVIEWED_HEAD, "allowed_committed_files": [],
                             "allowed_non_analysis_path_prefixes": ["docs/memory/"]}}
     require(profile == expected, "profile_contract_mismatch")
     profile = deepcopy(profile)
@@ -326,16 +462,28 @@ def resolved_profile(repo, source_commit):
     return profile
 
 
-def names():
-    return {row["basename_template"] for row in ARTIFACTS["global"]}
+def names(high=False):
+    return {row["basename_template"] for row in selection(high)[1]["global"]}
 
 
-def preflight(repo, source_commit):
+def preflight(repo, source_commit, high=False):
     require(re.fullmatch(r"[0-9a-f]{40}", source_commit) is not None, "source_commit_requires_full_sha")
     before = isolation.snapshot(repo)
     require(before["branch"] == "test", "wrong_branch")
     require(before["head"] == source_commit, "wrong_head")
     require(before["origin_test"] == source_commit, "source_not_observed_pushed")
+    if high:
+        git(repo, "merge-base", "--is-ancestor", HIGH_BASE, source_commit)
+        require(source_commit != HIGH_BASE, "high_owner_source_not_committed")
+        allowed_high = {HIGH_PROFILE, "run_Prod_Analysis.sh",
+            "src/cuts/pion_t_template_comparison.py", "src/cuts/pion_t_phi_template_comparison.py",
+            "testing/run_pion_t_template_comparison_gate.py", "testing/test_run_pion_t_template_comparison_gate.py",
+            "testing/test_pion_t_template_comparison.py", "testing/test_pion_t_phi_template_comparison.py",
+            "docs/memory/CURRENT.md", "docs/memory/manifest.json",
+            "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
+            "docs/memory/phases/kaonlt-high-epsilon-pion-three-model-acquisition-2026-10-29-task-contract.md"}
+        require(all(p in allowed_high for p in git(repo, "diff", "--name-only", HIGH_BASE, source_commit).splitlines()),
+                "unexpected_high_committed_source")
     require(source_commit != BASE_HEAD, "owner_source_not_committed")
     git(repo, "merge-base", "--is-ancestor", BASE_HEAD, source_commit)
     git(repo, "merge-base", "--is-ancestor", BASE_HEAD, REVIEWED_HEAD)
@@ -347,7 +495,7 @@ def preflight(repo, source_commit):
                 "dirty_gate_source:" + line)
     # Historical ancestry and cleanup pins stay strict; only exact reviewed paths.
     changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
-    allowed = {PROFILE, "testing/run_pion_t_template_comparison_gate.py",
+    allowed = {PROFILE, HIGH_PROFILE, "run_Prod_Analysis.sh", "testing/run_pion_t_template_comparison_gate.py",
                "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS,
                *INTEGRATION_FILES, *REVIEWED_PUBLICATION_BLOBS}
     require(all(p in allowed or p.startswith("docs/memory/") for p in changed),
@@ -394,9 +542,9 @@ def committed_identities(repo, source_commit):
     return records
 
 
-def source_preflight(repo, source_commit, profile):
+def source_preflight(repo, source_commit, profile, high=False):
     with isolation.owned_worktree(repo, source_commit, "source") as source:
-        require(resolved_profile(source, source_commit) == profile, "detached_profile_mismatch")
+        require(resolved_profile(source, source_commit, high=high) == profile, "detached_profile_mismatch")
         with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
             _, checks = module.collect_source_checks(source,
                 required_analysis_commit=source_commit, allowed_committed_files=[])
@@ -407,12 +555,12 @@ def source_preflight(repo, source_commit, profile):
     return checks, identities
 
 
-def child_environment(env):
+def child_environment(env, high=False):
     result = dict(env)
     for key in ("LT_ANALYSIS_DEBUG_LEFT_LOW", "LT_ANALYSIS_CANONICAL_PREPASS_CAPTURE",
                 "LT_ANALYSIS_ALLOW_UNPAIRED_CANONICAL_BINNING"):
         result.pop(key, None)
-    flags = (ENABLE_ENV, CHILD_ENABLE_ENV)
+    flags = (ENABLE_ENV, CHILD_ENABLE_ENV) + ((HIGH_ENV,) if high else ())
     require(not any(k.startswith("LT_ANALYSIS_") and k not in flags and v
                     for k, v in result.items()), "untrusted_analysis_environment")
     for flag in flags:
@@ -421,13 +569,20 @@ def child_environment(env):
     return result
 
 
-def verify_completion(log_path, returncode):
+def verify_completion(log_path, returncode, high=False):
     require(returncode == 0, "analysis_failed")
     text = Path(log_path).read_text(encoding="utf-8", errors="replace")
-    require("All available low-epsilon settings completed in debug mode." in text and
-            "Full high-epsilon processing is intentionally skipped in -d debug mode." in text,
-            "all_low_completion_missing")
-    require("High Epsilon Completed!" not in text, "unexpected_high_epsilon_execution")
+    low_marker = "All available low-epsilon settings completed in debug mode."
+    require(low_marker in text, "all_low_completion_missing")
+    if high:
+        require(text.count("High Epsilon Completed!") == 1 and
+                text.index(low_marker) < text.index("High Epsilon Completed!") and
+                "Full high-epsilon processing is intentionally skipped" not in text,
+                "high_completion_missing_or_out_of_order")
+    else:
+        require("Full high-epsilon processing is intentionally skipped in -d debug mode." in text,
+                "all_low_completion_missing")
+        require("High Epsilon Completed!" not in text, "unexpected_high_epsilon_execution")
 
 
 def pdf_pages(path):
@@ -447,15 +602,16 @@ def fingerprint(hist):
     return hist["content_error_fingerprint"]
 
 
-def verify_payload(payload, setting, source_commit, identities, pdf_record):
+def verify_payload(payload, setting, source_commit, identities, pdf_record, high=False):
+    epsilon = "high" if high else "low"
     require(payload.get("schema_version") == "pion_t_template_comparison/v1" and
             payload.get("diagnostic_only") is True and payload.get("production_applied") is False and
             payload.get("scientifically_accepted") is False, "comparison_schema_or_authority_invalid")
     require(payload.get("source_HEAD") == source_commit and
             payload.get("source_identity_rejection_reasons") == [], "comparison_source_identity_invalid")
     require(payload.get("phi_setting") == setting and payload.get("setting") in (
-        {"Q2": "4p4", "W": "2p74", "EPSSET": "low", "ParticleType": "kaon"},
-        {"Q2": "4p4", "W": "2p74", "EPSSET": "lowe", "ParticleType": "kaon"}) and
+        {"Q2": "4p4", "W": "2p74", "EPSSET": epsilon, "ParticleType": "kaon"},
+        {"Q2": "4p4", "W": "2p74", "EPSSET": epsilon + "e", "ParticleType": "kaon"}) and
         payload.get("enable_environment_variable") == ENABLE_ENV, "comparison_setting_invalid")
     source = payload.get("source_files") or {}
     require(set(source) == set(SOURCE_FILES), "comparison_source_inventory_invalid")
@@ -576,8 +732,11 @@ def verify_child_applications(cell, pion_observations):
                         "child_application_reconstruction:" + method + ":" + cut + ":" + field)
 
 
-def verify_child_payload(payload, setting, source_commit, identities, ab, runtime_inputs=None):
+def verify_child_payload(payload, setting, source_commit, identities, ab, runtime_inputs=None, high=False):
     """Structural/provenance closure, independent of ROOT and scientific adequacy."""
+    epsilon = "highe" if high else "lowe"
+    if high:
+        require(payload.get("setting") == ab.get("setting"), "child_epsilon_identity_invalid")
     require(payload.get("schema_version") == "pion_t_phi_template_comparison/v1" and
             payload.get("status") == "captured_pending_independent_validation" and
             payload.get("diagnostic_only") is True and payload.get("production_applied") is False and
@@ -608,7 +767,7 @@ def verify_child_payload(payload, setting, source_commit, identities, ab, runtim
                 re.fullmatch(r"[0-9a-f]{64}", identity.get("sha256", "")) is not None,
                 "child_runtime_input_mismatch:" + role)
         if runtime_inputs is not None:
-            name = f"{setting}_kaon_Analysed_{role.title()}_Q4p4W2p74_lowe.root"
+            name = f"{setting}_kaon_Analysed_{role.title()}_Q4p4W2p74_{epsilon}.root"
             actual = runtime_inputs.get(name) or {}
             require(str(Path(identity["path"]).resolve()) == actual.get("resolved") and
                     all(identity.get(k) == actual.get(k) for k in ("sha256", "bytes")),
@@ -733,12 +892,14 @@ def verify_child_payload(payload, setting, source_commit, identities, ab, runtim
             "accepted_fits": sum(c["fit_accepted"] for c in cells), "physics_adequacy": "NOT VERIFIED"}
 
 
-def verify_artifacts(outdir, source_commit, identities, started_ns, before, runtime_inputs=None):
+def verify_artifacts(outdir, source_commit, identities, started_ns, before, runtime_inputs=None, high=False):
+    settings, _, _, _, epsilon = selection(high)
+    required_names = names(high)
     records, outcomes = {}, {}
-    child_names = {n for n in names() if "pion-t-phi-" in n}
+    child_names = {n for n in required_names | (names() if high else set()) if "pion-t-phi-" in n}
     require({p.name for p in outdir.glob("*pion-t-phi-template-comparison*")} == child_names,
             "child_artifact_inventory_invalid")
-    for name in sorted(names()):
+    for name in sorted(required_names):
         path = outdir / name
         require(path.is_file() and not path.is_symlink() and path.stat().st_size > 0,
                 "comparison_artifact_missing_or_empty:" + name)
@@ -750,36 +911,40 @@ def verify_artifacts(outdir, source_commit, identities, started_ns, before, runt
         if path.suffix == ".pdf":
             require(path.read_bytes().startswith(b"%PDF-"), "comparison_pdf_signature_invalid")
             require(pdf_pages(path) == 6, "comparison_pdf_page_count_invalid")
-    for setting in ("Center", "Left"):
-        stem = f"{setting}_kaon_Q4p4W2p74_lowe_pion-t-template-comparison"
+    for setting in (("Center", "Left", "Right") if high else ("Center", "Left")):
+        stem = f"{setting}_kaon_Q4p4W2p74_{epsilon}_pion-t-template-comparison"
         payload = strict_json((outdir / (stem + ".json")).read_text(encoding="utf-8"))
-        outcomes[setting] = verify_payload(payload, setting, source_commit, identities, records[stem + ".pdf"])
+        outcomes[setting] = verify_payload(payload, setting, source_commit, identities, records[stem + ".pdf"], high=high)
         child = strict_json((outdir / (stem.replace("pion-t-", "pion-t-phi-") + ".json")).read_text(encoding="utf-8"))
         outcomes[setting]["child_comparison"] = verify_child_payload(
-            child, setting, source_commit, identities, payload, runtime_inputs)
+            child, setting, source_commit, identities, payload, runtime_inputs, high=high)
     require(outcomes["Center"]["canonical_t_edges"] == outcomes["Left"]["canonical_t_edges"],
             "mixed_canonical_t_edges")
+    if high:
+        require(outcomes["Center"]["canonical_t_edges"] == outcomes["Right"]["canonical_t_edges"],
+                "mixed_canonical_t_edges")
     return records, outcomes
 
 
-def verify_zip(path, source_commit, records):
+def verify_zip(path, source_commit, records, high=False):
+    settings, artifacts, profile_id, _, _ = selection(high)
     expected = {"manifest.json", "source_state.txt", "source_checks.txt", "global/"}
-    expected.update(s["phi"] + "_" + s["epsilon"] + "/" for s in SETTINGS)
-    expected.update("global/" + name for name in names())
+    expected.update(s["phi"] + "_" + s["epsilon"] + "/" for s in settings)
+    expected.update("global/" + name for name in names(high))
     with zipfile.ZipFile(path) as archive:
         require(archive.testzip() is None, "zip_crc_failed")
         require(Counter(archive.namelist()) == Counter(expected), "zip_inventory_invalid")
         manifest = strict_json(archive.read("manifest.json"))
         require(manifest.get("complete") is True and manifest.get("errors") == [] and
                 manifest.get("git_head") == manifest.get("required_analysis_commit") == source_commit and
-                manifest.get("validation_profile") == PROFILE_ID and
+                manifest.get("validation_profile") == profile_id and
                 manifest.get("requested_kinematic") == "Q4p4W2p74" and
-                manifest.get("requested_settings") == SETTINGS, "zip_manifest_invalid")
-        require(len(manifest.get("settings", [])) == 5 and
+                manifest.get("requested_settings") == settings, "zip_manifest_invalid")
+        require(len(manifest.get("settings", [])) == len(settings) and
                 all(s.get("artifacts") == {} for s in manifest["settings"]), "zip_setting_artifacts_invalid")
-        require(set(manifest.get("global_artifacts", {})) == {r["key"] for r in ARTIFACTS["global"]},
+        require(set(manifest.get("global_artifacts", {})) == {r["key"] for r in artifacts["global"]},
                 "zip_global_inventory_invalid")
-        for declaration in ARTIFACTS["global"]:
+        for declaration in artifacts["global"]:
             name = declaration["basename_template"]
             raw = archive.read("global/" + name)
             record = manifest["global_artifacts"][declaration["key"]]
@@ -799,18 +964,25 @@ def destinations(outdir, output):
             "delivered_receipt": output.with_name(output.stem + "-gate-status.json")}
 
 
-def file_identity(path):
+def file_identity(path, costs=None):
     path = Path(path)
     info = path.stat()
     require(path.is_file(), "input_not_regular:" + str(path))
-    return {"sha256": sha256(path), "bytes": info.st_size,
+    value = sha256(path)
+    if costs is not None:
+        costs["actual_protected_hash_bytes"] += info.st_size
+        after = path.stat()
+        require((info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) ==
+                (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns),
+                "source_changed_during_hash:" + str(path))
+    return {"sha256": value, "bytes": info.st_size,
             "device": info.st_dev, "inode": info.st_ino, "mtime_ns": info.st_mtime_ns,
             "resolved": str(path.resolve()), "link": os.readlink(path) if path.is_symlink() else None}
 
 
-def accepted_identities(outdir):
+def accepted_identities(outdir, high=False):
     records = {}
-    for name in sorted(names()):
+    for name in sorted(names() | (names(True) if high else set())):
         p = Path(outdir) / name
         if not os.path.lexists(p):
             records[name] = None
@@ -821,8 +993,8 @@ def accepted_identities(outdir):
     return records
 
 
-def verify_accepted(outdir, before):
-    require(accepted_identities(outdir) == before, "accepted_artifact_changed")
+def verify_accepted(outdir, before, high=False):
+    require(accepted_identities(outdir, high=high) == before, "accepted_artifact_changed")
     return {"passed": True, "artifacts": before}
 
 
@@ -904,7 +1076,7 @@ def verify_external(record):
     return {"passed": True}
 
 
-def reached_callers(repo):
+def reached_callers(repo, high=False):
     """Bounded source-only import walk for this unchanged debug entry chain."""
     repo = Path(repo)
     modules = {}
@@ -913,6 +1085,12 @@ def reached_callers(repo):
     pending = [(repo / p, cwd) for p, cwd in (("src/main.py", "src"),
         ("src/setup/findEffectiveCharge.py", "src/setup"), ("src/setup/calcTotalEffectiveCharge.py", "src/setup"),
         ("src/setup/set_sig_fortran.py", "src/setup"))]
+    if high:
+        # src/main.py Step 7 -> run_xsect.sh, absent from the old low path.
+        pending += [(repo / p, cwd) for p, cwd in (
+            ("src/models/lt_2D_fit.py", "src/models"),
+            ("src/plotting/plot_xsects.py", "src/plotting"),
+            ("src/check_ratios.py", "src"))]
     seen, callers = set(), set()
     while pending:
         p, cwd = pending.pop()
@@ -946,10 +1124,10 @@ def effective_csv_path(tree, fields):
         {"__builtins__": {}, "Path": Path, "str": str}, fields))
 
 
-def private_callers(repo, worktree, env, baseline, output, installed_package):
+def private_callers(repo, worktree, env, baseline, output, installed_package, high=False):
     records = []
     copied = worktree.parent / "runtime-python/ltsep"
-    for caller, modes, cwd in reached_callers(repo):
+    for caller, modes, cwd in reached_callers(repo, high=high):
         observations = []
         for tree, environ, package in ((repo, {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, installed_package),
                                       (worktree, env, copied)):
@@ -957,6 +1135,12 @@ def private_callers(repo, worktree, env, baseline, output, installed_package):
                     'r=create_ltsep_root(os.path.realpath(sys.argv[1]),*json.loads(sys.argv[2])); '
                     'print(json.dumps({"paths":{k:str(getattr(r,k,"")) for k in json.loads(sys.argv[3])},'
                     '"package":ltsep.__file__,"pathing":ltsep.pathing.__file__}))')
+            if high and caller in {"src/check_ratios.py", "src/models/lt_2D_fit.py",
+                                   "src/plotting/plot_xsects.py"}:
+                # These frozen consumers call ltsep.Root directly. Do not hide
+                # their installed-package behavior behind the safe-login wrapper.
+                code = code.replace('from farm_env.ltsep_paths import create_ltsep_root; ', '')
+                code = code.replace('r=create_ltsep_root(', 'r=ltsep.Root(')
             fields = isolation.python_json(tree / cwd, code,
                 (str(tree / caller), json.dumps(modes), json.dumps(isolation.PATH_FIELDS)),
                 {**environ, "PYTHONPATH": str(tree) + os.pathsep + environ.get("PYTHONPATH", "")})
@@ -1004,7 +1188,7 @@ def diamond_choices(root):
             for s, tokens in settings for eps in ("low", "mid", "high")}
 
 
-def copy_plan(shared, output):
+def copy_plan(shared, output, high=False):
     shared, output = Path(shared), Path(output)
     needed = set()
     for eps in ("lowe", "highe"):
@@ -1012,21 +1196,21 @@ def copy_plan(shared, output):
             pair = [f"{s}_kaon_Analysed_{r}_Q4p4W2p74_{eps}.root" for r in ("Data", "Dummy")]
             present = [(shared / n).is_file() for n in pair]
             if not any(present):
-                require(eps != "lowe" or s not in ("Center", "Left"), "required_lowe_setting_missing:" + s)
+                require(not (high and eps == "highe") and (eps != "lowe" or s not in ("Center", "Left")), "required_setting_missing:" + s + ":" + eps if high else "required_lowe_setting_missing:" + s)
                 continue
             archived = shared / f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}.root"
-            if not archived.exists() and not (eps == "lowe" and s in ("Center", "Left")):
+            if not archived.exists() and not (eps == "lowe" and s in ("Center", "Left")) and not (high and eps == "highe"):
                 # Frozen shift_prep/main skip this optional setting. Its raw
                 # ROOTs still enter the complete Diamond namespace below.
                 continue
             require(all(present), "incomplete_data_dummy_pair:" + s + ":" + eps)
             needed.update(pair)
-            # Low epsilon reaches full SIMC preparation; high is raw prepass only.
-            for suffix in ((".root", ".hist") if eps == "lowe" else (".root",)):
+            # Default high is raw-prepass only; opt-in high reaches full SIMC.
+            for suffix in ((".root", ".hist") if eps == "lowe" or high else (".root",)):
                 name = f"Prod_Coin_Q4p4W2p74{s.lower()}_{eps}{suffix}"
                 require((shared / name).is_file(), "required_simc_input_missing:" + name)
                 needed.add(name)
-            if eps == "lowe":
+            if eps == "lowe" or high:
                 # Full kaon rand_sub consumes the existing merged pion control
                 # pair; -d never runs the -c merge that produces these inputs.
                 for role in ("Data", "Dummy"):
@@ -1044,21 +1228,28 @@ def copy_plan(shared, output):
         target = output / source.name
         require(source.is_file() and not os.path.lexists(target), "input_missing_or_collision:" + source.name)
         require(target.parent == output and target.resolve().is_relative_to(output.resolve()), "copy_path_escape")
+        if high:
+            require(source.resolve(strict=True).parent == shared.resolve(strict=True),
+                    "staged_source_alias_escape:" + str(source))
         plan.append({"source": str(source), "target": str(target), "bytes": source.stat().st_size})
     require({Path(p["source"]).name for p in plan} == needed, "copy_inventory_changed")
     return plan
 
 
-def stage_copies(shared, output, plan, records):
-    require(plan == copy_plan(shared, output), "copy_plan_changed")
+def stage_copies(shared, output, plan, records, high=False, costs=None):
+    require(plan == copy_plan(shared, output, high=high), "copy_plan_changed")
     for entry in plan:
         source, target = Path(entry["source"]), Path(entry["target"])
-        before = file_identity(source)
+        before = file_identity(source, costs)
         records[source.name] = {"source": str(source), "original": before}
         with source.open("rb") as src, target.open("xb") as dst:
-            shutil.copyfileobj(src, dst, 1024 * 1024)
-        after = file_identity(target)
-        require(file_identity(source) == before and before["bytes"] == entry["bytes"], "original_changed_during_copy")
+            if costs is None:
+                shutil.copyfileobj(src, dst, 1024 * 1024)
+            else:
+                for block in iter(lambda: src.read(1024 * 1024), b""):
+                    costs["actual_copied_bytes"] += dst.write(block)
+        after = file_identity(target, costs)
+        require(file_identity(source, costs) == before and before["bytes"] == entry["bytes"], "original_changed_during_copy")
         require(all(before[k] == after[k] for k in ("sha256", "bytes")) and
                 (before["device"], before["inode"]) != (after["device"], after["inode"]), "private_copy_identity")
         records[source.name]["runtime_container_before"] = after
@@ -1066,14 +1257,14 @@ def stage_copies(shared, output, plan, records):
     return records
 
 
-def verify_originals(records):
+def verify_originals(records, costs=None):
     for item in records.values():
-        require(file_identity(item["source"]) == item["original"], "original_input_changed:" + item["source"])
+        require(file_identity(item["source"], costs) == item["original"], "original_input_changed:" + item["source"])
     return {"passed": True}
 
 
-def private_environment(env, data_parent):
-    result = child_environment(env)
+def private_environment(env, data_parent, high=False):
+    result = child_environment(env, high=high)
     for key, leaf in (("TMPDIR", "tmp"), ("XDG_CACHE_HOME", "cache"), ("MPLCONFIGDIR", "mpl"),
                       ("PYTHONPYCACHEPREFIX", "pycache")):
         p = Path(data_parent) / ("ab-" + leaf)
@@ -1106,16 +1297,28 @@ def skim_inventory(repo, paths):
 
 
 class GateStatus(isolation.accepted.GateStatus):
-    def __init__(self, outdir, output, source_commit):
+    def __init__(self, outdir, output, source_commit, high=False):
+        self.high = high
         super().__init__(outdir, output, source_commit)
         self.record.pop("phi", None)
         self.record.pop("epsilon", None)
         self.update(schema_version="pion_t_template_comparison_gate_status/v1",
-                    requested_settings=[{"phi": s, "epsilon": "lowe"} for s in ("Center", "Left")],
+                    requested_settings=HIGH_SETTINGS if high else [{"phi": s, "epsilon": "lowe"} for s in ("Center", "Left")],
                     boundaries=BOUNDARIES)
+        if high:
+            self.update(actual_environment={"owner_executable": sys.executable,
+                "owner_version": sys.version, "owner_cwd": os.getcwd()},
+                evidence_admissible=False, scientifically_accepted=False)
+
+    def update(self, stage=None, **fields):
+        if stage is not None and self.high:
+            self.record.setdefault("stage_timestamps", []).append(
+                {"stage": stage, "at_utc": datetime.now(timezone.utc).isoformat()})
+        super().update(stage, **fields)
 
 
-def execute_gate(repo, outdir, output, source_commit):
+def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only=False):
+    require(not preflight_only or high, "preflight_only_requires_high_mode")
     repo, outdir, output = (Path(p).absolute() for p in (repo, outdir, output))
     # Use the established farm-owner boundary; no new machine-specific values.
     require(repo.resolve() == isolation.accepted.REPO.resolve() and
@@ -1127,9 +1330,9 @@ def execute_gate(repo, outdir, output, source_commit):
     require(len(set(map(str, paths.values()))) == len(paths), "companion_paths_overlap")
     for path in paths.values():
         require(not os.path.lexists(path), "output_collision:" + str(path))
-    status = GateStatus(outdir, output, source_commit)
+    status = GateStatus(outdir, output, source_commit, high=high)
     before = overlay = installed = external = accepted = skims = None
-    copies = {}
+    copies, consumed, costs = {}, {}, None
     succeeded = False
     def preservation():
         checks = []
@@ -1138,12 +1341,14 @@ def execute_gate(repo, outdir, output, source_commit):
         if installed is not None:
             checks.append(("installed_ltsep", lambda: isolation.verify_ltsep_preservation(installed)))
         if accepted is not None:
-            checks.append(("accepted_artifacts", lambda: verify_accepted(outdir, accepted)))
+            checks.append(("accepted_artifacts", lambda: verify_accepted(outdir, accepted, high=high)))
         if external is not None:
             checks.append(("external_links", lambda: verify_external(external)))
         if skims is not None:
             checks.append(("skim_existence", lambda: require(skim_inventory(repo, baseline) == skims, "skim_existence_changed")))
-        checks.append(("original_inputs", lambda: verify_originals(copies)))
+        checks.append(("original_inputs", lambda: verify_originals(copies, costs)))
+        if high and consumed:
+            checks.append(("consumed_external_inputs", lambda: verify_originals(consumed, costs)))
         results, errors = {}, []
         for name, check in checks:
             try:
@@ -1151,15 +1356,15 @@ def execute_gate(repo, outdir, output, source_commit):
             except Exception as exc:
                 results[name] = {"passed": False, "reason": str(exc)}
                 errors.append(name + ":" + str(exc))
-        status.update(preservation=results, staged_inputs=copies)
+        status.update(preservation=results, staged_inputs=copies, **({"io_costs": costs} if high else {}))
         require(not errors, "preservation_failed:" + ";".join(errors))
     try:
-        accepted = accepted_identities(outdir)
-        before = preflight(repo, source_commit)
-        profile = resolved_profile(repo, source_commit)
-        child_environment(os.environ)  # Reject injected opt-ins before any path work.
+        accepted = accepted_identities(outdir, high=high)
+        before = preflight(repo, source_commit, high=high)
+        profile = resolved_profile(repo, source_commit, high=high)
+        child_environment(os.environ, high=high)  # Reject injected opt-ins before any path work.
         status.update(accepted_comparison_targets=accepted, destinations={k: str(v) for k,v in paths.items()})
-        checks, identities = source_preflight(repo, source_commit, profile)
+        checks, identities = source_preflight(repo, source_commit, profile, high=high)
         status.update("runtime_isolation", collector_source_preflight_completed=True,
                       collector_source_checks=checks, committed_source_identities=identities)
         # Snapshot the original package before the frozen overlay helper: its
@@ -1178,27 +1383,56 @@ def execute_gate(repo, outdir, output, source_commit):
             status.update(runtime_placement=placement)
             env, overlay = prepare_runtime_overlay(repo, worktree, placement)
             data_parent = Path(placement["parent"]["path"])
-            env = private_environment(env, data_parent)
+            env = private_environment(env, data_parent, high=high)
             probes = isolation.probe_paths(worktree, env, overlay["baseline_paths"])
             baseline = overlay["baseline_paths"]
             require(Path(baseline["OUTPATH"]).resolve() == outdir.resolve() ==
                     (Path(baseline["VOLATILEPATH"]) / "OUTPUT/Analysis/KaonLT").resolve(), "ordinary_output_authority")
             external = external_setup(worktree, probes[0]["paths"], outdir)
             private = private_output(worktree, probes[0]["paths"], outdir, data_parent)
-            callers = private_callers(repo, worktree, env, baseline, private, package)
+            callers = private_callers(repo, worktree, env, baseline, private, package, high=high)
             skims = skim_inventory(worktree, baseline)
-            plan = copy_plan(outdir, private)
+            plan = copy_plan(outdir, private, high=high)
+            if high:
+                status.update("input_inventory")
+                inventory = high_input_inventory(worktree, baseline, outdir, private, plan, env, skims=skims)
+                costs = high_cost_inventory(inventory, skims, private)
+                status.update(io_costs=costs)
+                print(json.dumps({"high_epsilon_io_inventory": costs}), file=sys.stderr, flush=True)
+                status.update("installed_dependency_probe", actual_environment=high_environment_identity(worktree, env))
+                require(all(status.record["actual_environment"]["tools"].values()), "required_runtime_tool_missing")
+                if preflight_only:
+                    status.update("no_child_preflight", runtime_not_science=True,
+                                  analysis_started=False, archive_created=False, evidence_admissible=False)
+                    return status.path
+                for item in inventory:
+                    if item["copied"]:
+                        continue  # stage_copies owns these exact original hashes.
+                    before_hash = Path(item["path"]).stat()
+                    identity = file_identity(item["path"], costs)
+                    after_hash = Path(item["path"]).stat()
+                    require((before_hash.st_dev, before_hash.st_ino, before_hash.st_size, before_hash.st_mtime_ns) ==
+                            (after_hash.st_dev, after_hash.st_ino, after_hash.st_size, after_hash.st_mtime_ns),
+                            "source_changed_during_hash:" + item["path"])
+                    consumed[item["path"]] = {"source": item["path"], "original": identity}
+                marker = worktree.parent / "high-comparison-authorization.json"
+                marker.write_text(json.dumps(dict(source_commit=source_commit, worktree=str(worktree),
+                    settings=HIGH_SETTINGS, private_output=str(private))), encoding="utf-8")
+                validate_high_launch(worktree)
             status.update("input_staging", copy_plan=plan, copy_files=len(plan),
                           copy_bytes=sum(p["bytes"] for p in plan), skim_existence_inventory=skims)
             print(json.dumps({"copy_plan": plan, "copy_bytes": sum(p["bytes"] for p in plan)}), file=sys.stderr, flush=True)
             verify_runtime_layout(repo, worktree, placement, private, env)
             status.update(runtime_placement=placement, private_output=str(private))
-            stage_copies(outdir, private, plan, copies)
+            stage_copies(outdir, private, plan, copies, high=high, costs=costs)
+            if high:
+                status.update(actual_copied_bytes=sum(p["bytes"] for p in plan),
+                              actual_initial_consumed_hash_bytes=sum(p["bytes"] for p in inventory if not p["copied"]))
             verify_runtime_layout(repo, worktree, placement, private, env)
             verify_private(worktree, private)
             verify_external(external)
-            verify_originals(copies)
-            prior = {name: None if not os.path.lexists(private / name) else {"path": str(private / name)} for name in names()}
+            verify_originals(copies, costs)
+            prior = {name: None if not os.path.lexists(private / name) else {"path": str(private / name)} for name in names(high)}
             require(all(v is None for v in prior.values()), "comparison_artifact_preexists")
             status.update("analysis", analysis_started=True, analysis_worktree=str(worktree),
                           isolation_probes=probes, private_output=str(private), private_callers=callers,
@@ -1209,10 +1443,10 @@ def execute_gate(repo, outdir, output, source_commit):
             status.update("completion_markers", analysis_returncode=returncode,
                           log_identity={"sha256": sha256(paths["log"]), "bytes": paths["log"].stat().st_size})
             verify_runtime_layout(repo, worktree, placement, private, env)
-            verify_completion(paths["log"], returncode)
+            verify_completion(paths["log"], returncode, high=high)
             status.update("verify_artifacts", analysis_completed=True)
-            runtime = {name: file_identity(private / name) for name in copies}
-            records, outcomes = verify_artifacts(private, source_commit, identities, started, prior, runtime)
+            runtime = {name: file_identity(private / name, costs) for name in copies}
+            records, outcomes = verify_artifacts(private, source_commit, identities, started, prior, runtime, high=high)
             require(skim_inventory(worktree, baseline) == skims, "skim_existence_changed")
             status.update(artifact_verification_completed=True, artifacts=records, diagnostic_outcomes=outcomes)
             preservation()
@@ -1224,13 +1458,13 @@ def execute_gate(repo, outdir, output, source_commit):
             with isolation.owned_worktree(repo, source_commit, "source") as source:
                 require(source.resolve() != worktree.resolve() and not os.path.lexists(source / "OUTPUT"),
                         "collector_source_not_independent")
-                require(resolved_profile(source, source_commit) == profile, "detached_profile_mismatch")
+                require(resolved_profile(source, source_commit, high=high) == profile, "detached_profile_mismatch")
                 with isolation.collection_module(source) as module, redirect_stdout(sys.stderr):
                     result = module.collect_validation_bundle(outdir=private, kinematic="Q4p4W2p74",
                         output=output, profile_path=effective, repo_root=source)
                 require(result["returncode"] == 0, "collection_failed")
                 status.update("verify_zip", collection_completed=True)
-                verify_zip(output, source_commit, records)
+                verify_zip(output, source_commit, records, high=high)
                 status.update(zip_verification_completed=True, zip_identity={"sha256": sha256(output),
                               "bytes": output.stat().st_size})
             require(not os.path.lexists(source), "source_cleanup_incomplete")
@@ -1243,18 +1477,27 @@ def execute_gate(repo, outdir, output, source_commit):
             "runtime_placement": placement, "copy_bytes": sum(p["bytes"] for p in plan),
             "copy_plan": plan, "original_inputs": copies, "runtime_container_identities": runtime,
             "log_identity": status.record["log_identity"], "zip_identity": status.record["zip_identity"]}
+        if high:
+            summary["io_costs"] = costs
+            summary["actual_environment"] = status.record["actual_environment"]
         with paths["summary"].open("x", encoding="utf-8") as handle:
             handle.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
         isolation.deliver_evidence(status, paths["log"], paths["summary"], output)
         succeeded = True
         return output
     except Exception as exc:
-        status.update(status="failed", failure_reason=str(exc))
+        status.update(status="failed", failure_reason=str(exc), **({
+            "first_failed_invariant": str(exc), "failed_stage": status.record["stage"]} if high else {}))
         raise
     finally:
         if not succeeded:
             try:
                 preservation()
+                if preflight_only and status.record.get("failure_reason") is None:
+                    require(not os.path.lexists(worktree.parent) and not os.path.lexists(data_parent),
+                            "private_cleanup_incomplete")
+                    status.update(status="success", worktree_cleanup_completed=True,
+                                  evidence_admissible=False, scientifically_accepted=False)
             except Exception as exc:
                 status.update(status="failed", preservation_failure_reason=str(exc))
                 raise
@@ -1263,12 +1506,15 @@ def execute_gate(repo, outdir, output, source_commit):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-commit", required=True)
+    parser.add_argument("--high-epsilon", action="store_true", help="explicit Center/Left/Right highe acquisition")
+    parser.add_argument("--preflight-only", action="store_true", help="high mode: installed callers and bounded inventory; no copies, child or ZIP")
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--outdir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     try:
-        result = execute_gate(args.repo, args.outdir, args.output, args.source_commit)
+        result = execute_gate(args.repo, args.outdir, args.output, args.source_commit,
+                              high=args.high_epsilon, preflight_only=args.preflight_only)
     except Exception as exc:
         print("Pion template gate failed: " + str(exc), file=sys.stderr)
         print("Owner gate status: " + str(isolation.accepted.gate_status_path(args.outdir, args.output)), file=sys.stderr)

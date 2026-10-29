@@ -25,13 +25,15 @@ def require(ok, reason):
 
 
 def requested(inp, setting, environ=None):
+    if (os.environ if environ is None else environ).get(ENABLE_ENV) != "1":
+        return False
+    from pion_t_template_comparison import selected
     return ((os.environ if environ is None else environ).get(ENABLE_ENV) == "1"
             and not inp.get("bg_opt_prepass_mode")
             and str(inp.get("analysis_subtraction_context", "")).strip() != "bg_optimizer_pre_parent"
             and str(inp.get("ParticleType", "")).lower() == "kaon"
             and str(inp.get("Q2")) == "4p4" and str(inp.get("W")) == "2p74"
-            and str(inp.get("EPSSET")).lower() in ("low", "lowe")
-            and setting in ("Center", "Left"))
+            and selected(inp, setting, environ))
 
 
 def rows_from_caches(hist):
@@ -222,7 +224,8 @@ def observe(hist, inp, t_edges, phi_edges, outpath, signal_payload, sigma0_paylo
     from background_config import get_pion_component_dynamic_alignment_config
     from pion_component_subtraction import evaluate_particle_subtraction_component_fit_result
     setting = hist["phi_setting"]
-    destination = Path(outpath) / (setting+"_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json")
+    epsilon = "highe" if str(inp["EPSSET"]).lower() in ("high", "highe") else "lowe"
+    destination = Path(outpath) / (setting+"_kaon_Q4p4W2p74_"+epsilon+"_pion-t-phi-template-comparison.json")
     require(not os.path.lexists(destination), "child_comparison_destination_exists")
     parents = hist["_pion_t_bin_parent_results"]
     require(len(t_edges) == 4 and len(phi_edges) == 10 and len(parents) == 3,
@@ -241,6 +244,8 @@ def observe(hist, inp, t_edges, phi_edges, outpath, signal_payload, sigma0_paylo
         methods={"Global": "historical A: t-fit amplitudes with inherited Global templates",
                  "Local_t": "fresh B: raw-weighted t templates; fixed A alignment",
                  "Local_t_phi": "independent existing fitter and configured child alignment"})
+    if epsilon == "highe":
+        result["setting"] = {k: inp.get(k) for k in ("Q2", "W", "EPSSET", "ParticleType")}
     try:
         rows, result["source_coefficients"] = rows_from_caches(hist)
         edges = histogram(parents[0]["H_pion_control"])["edges"]
