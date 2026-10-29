@@ -1511,3 +1511,32 @@ Plot mode/cwd and the legitimate utility-wrapper negative control in both trees.
 Default low-mode probes retain their prior wrapper behavior. CURRENT's sole
 NEXT remains independent complete actual-diff review; farm compatibility and
 runtime/scientific acceptance remain NOT VERIFIED.
+
+
+#### Supplied no-child dependency-probe failure and local repair - October 29
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: user reports ifarm2402
+no-child preflight at published `d24ca01a432f2cd6543486b1cedf11e1e1e15fc6`
+failed at `installed_dependency_probe` with
+`ltsep_python_probe_failed: TypeError: 'type' object is not iterable`.
+This is an attributed supplied failure excerpt, not independently opened farm
+status. The offending module, full dependency closure, preservation and cleanup
+results remain NOT VERIFIED. No successful smoke/acquisition is inferred.
+
+SOURCE VERIFIED: `high_environment_identity` accessed every sys.modules entry's
+file/path attributes before checking the five relevant package families.
+The unmodified real subprocess probe reproduces the exact exception with an
+unrelated imported fixture module whose __path__ is type. The repair filters
+first, records absent/non-iterable/invalid-container namespace metadata and
+its qualified type, and preserves normal lexical/canonical and namespace roots.
+Path-like/bytes locations serialize as filesystem text; invalid relevant file
+or namespace-root locations and invalid sys.path entries fail with a specific
+module_path_invalid diagnostic. Import errors and the existing required-tool
+availability gate remain failures, not normalized diagnostic success.
+
+Real subprocess tests cover the reported failure, unrelated attribute guards,
+relevant abnormal paths, adjacent serialization/import failures and the existing
+real lib64 namespace fixture. These local fixture imports establish no actual
+farm Python/dependency compatibility. No scientific source, inputs, launcher,
+owner stage, staging, fitting physics or unrelated infrastructure changed.
+CURRENT owns independent actual-diff review as NEXT; no retry or farm command.

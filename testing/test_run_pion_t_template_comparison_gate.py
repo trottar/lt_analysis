@@ -1183,6 +1183,87 @@ class GateTests(unittest.TestCase):
         pdf=self.directory/'actual-six.pdf';pdf.write_bytes(data)
         self.assertEqual(owner.pdf_pages(pdf),6)
 
+    @contextmanager
+    def environment_probe_packages(self, ltsep_source="", uproot_source=""):
+        """Real subprocess/import fixtures; never mock python_json or modules."""
+        with tempfile.TemporaryDirectory() as directory:
+            packages = Path(directory)
+            for name in ("ltsep", "numpy", "pandas", "uproot", "dateutil"):
+                package = packages / name
+                package.mkdir()
+                source = ltsep_source if name == "ltsep" else uproot_source if name == "uproot" else ""
+                (package / "__init__.py").write_text(source, encoding="utf-8")
+            yield packages, {**os.environ, "PYTHONPATH": str(packages), "PYTHONDONTWRITEBYTECODE": "1"}
+
+    def test_high_environment_ignores_unrelated_noniterable_module_path(self):
+        source = ('import sys, types\n'
+                  'module = types.ModuleType("unrelated_dependency")\n'
+                  'module.__path__ = type\n'
+                  'sys.modules[module.__name__] = module\n')
+        with self.environment_probe_packages(ltsep_source=source) as (packages, env):
+            result = owner.high_environment_identity(packages, env)
+        self.assertNotIn("unrelated_dependency", result["modules"])
+        self.assertEqual(set(result["tools"]), {"python3", "bash", "gfortran", "pdfinfo"})
+        self.assertEqual(result["tools"], {name: shutil.which(name, path=env.get("PATH")) for name in result["tools"]})
+        self.assertEqual(result["canonical_executable"], str(Path(shutil.which("python3", path=env.get("PATH"))).resolve()))
+        self.assertEqual(result["version"], owner.sys.version)
+
+    def test_high_environment_filters_before_reading_unrelated_attributes(self):
+        source = ('import sys, types\n'
+                  'class Guard(types.ModuleType):\n'
+                  ' def __getattribute__(self, name):\n'
+                  '  if name in ("__file__", "__path__"): raise AssertionError("unrelated attribute read")\n'
+                  '  return super().__getattribute__(name)\n'
+                  'sys.modules["unrelated_guard"] = Guard("unrelated_guard")\n')
+        with self.environment_probe_packages(ltsep_source=source) as (packages, env):
+            result = owner.high_environment_identity(packages, env)
+        self.assertNotIn("unrelated_guard", result["modules"])
+
+    def test_high_environment_retains_relevant_abnormal_path_types(self):
+        for value, typename, status in (("type", "builtins.type", "non_iterable"),
+                                        ("None", "builtins.NoneType", "non_iterable"),
+                                        ("17", "builtins.int", "non_iterable"),
+                                        ("'not-a-path-list'", "builtins.str", "invalid_container")):
+            source = ('import sys, types\nmodule = types.ModuleType("uproot.abnormal")\n'
+                      f'module.__path__ = {value}\nsys.modules[module.__name__] = module\n')
+            with self.subTest(value=value), self.environment_probe_packages(uproot_source=source) as (packages, env):
+                result = owner.high_environment_identity(packages, env)
+            record = result["modules"]["uproot.abnormal"]
+            self.assertEqual(record["namespace_roots"], [])
+            self.assertEqual(record["namespace_path"], {"status": status, "type": typename})
+            self.assertIsNone(record["lexical"])
+            self.assertIsNone(record["canonical"])
+
+    def test_high_environment_serializes_pathlike_metadata_and_rejects_invalid_locations(self):
+        source = ('import sys, types, os\nfrom pathlib import Path\n'
+                  'module = types.ModuleType("uproot.paths")\n'
+                  'module.__file__ = Path(__file__)\n'
+                  'module.__path__ = [Path(__file__).parent, os.fsencode(str(Path(__file__).parent))]\n'
+                  'sys.modules[module.__name__] = module\n'
+                  'sys.path.append(Path(__file__).parent)\n')
+        with self.environment_probe_packages(uproot_source=source) as (packages, env):
+            result = owner.high_environment_identity(packages, env)
+            record = result["modules"]["uproot.paths"]
+            expected = str(packages / "uproot")
+            self.assertEqual(record["lexical"], str(packages / "uproot/__init__.py"))
+            self.assertEqual(record["canonical"], str((packages / "uproot/__init__.py").resolve()))
+            self.assertEqual(record["namespace_roots"], [expected, expected])
+            self.assertEqual(result["sys_path"][-1], expected)
+            self.assertEqual(record["namespace_path"]["status"], "available")
+        for assignment, field in (("module.__file__ = object()", "__file__"),
+                                  ("module.__path__ = [object()]", "__path__\\[0\\]")):
+            source = ('import sys, types\nmodule = types.ModuleType("uproot.invalid")\n'
+                      + assignment + '\nsys.modules[module.__name__] = module\n')
+            with self.subTest(field=field), self.environment_probe_packages(uproot_source=source) as (packages, env):
+                with self.assertRaisesRegex(ValueError, "module_path_invalid:uproot.invalid." + field + ":builtins.object"):
+                    owner.high_environment_identity(packages, env)
+        with self.environment_probe_packages(uproot_source='raise RuntimeError("deliberate import failure")\n') as (packages, env):
+            with self.assertRaisesRegex(ValueError, "RuntimeError: deliberate import failure"):
+                owner.high_environment_identity(packages, env)
+        with self.environment_probe_packages(uproot_source='import sys\nsys.path.append(object())\n') as (packages, env):
+            with self.assertRaisesRegex(ValueError, r"module_path_invalid:sys.path\[\d+\]:builtins.object"):
+                owner.high_environment_identity(packages, env)
+
     def test_high_stable_hash_and_actual_lib64_namespace_import_probe(self):
         path=self.directory/'mutable.root';path.write_bytes(b'old')
         costs={'actual_protected_hash_bytes':0}

@@ -180,13 +180,38 @@ def high_environment_identity(repo, env):
     code = '''import importlib,json,os,sys,shutil,ltsep
 for name in ("numpy","pandas","uproot","dateutil"):
     importlib.import_module(name)
+def type_name(value):
+    cls=type(value)
+    return cls.__module__+"."+cls.__qualname__
+def path_text(value,label):
+    try:
+        return os.fsdecode(os.fspath(value))
+    except TypeError as exc:
+        raise TypeError("module_path_invalid:"+label+":"+type_name(value)) from exc
 modules={}
+absent=object()
 for name,module in list(sys.modules.items()):
+    if not isinstance(name,str) or name.split(".")[0] not in ("ltsep","uproot","numpy","pandas","dateutil"):
+        continue
     path=getattr(module,"__file__",None)
-    roots=list(getattr(module,"__path__",()))
-    if name.split(".")[0] in ("ltsep","uproot","numpy","pandas","dateutil"):
-        modules[name]={"lexical":path,"canonical":os.path.realpath(path) if path else None,"namespace_roots":roots}
-print(json.dumps({"executable":sys.executable,"canonical_executable":os.path.realpath(sys.executable),"version":sys.version,"sys_path":sys.path,"modules":modules,"tools":{name:shutil.which(name) for name in ("python3","bash","gfortran","pdfinfo")}}))'''
+    path=path_text(path,name+".__file__") if path is not None else None
+    raw_roots=getattr(module,"__path__",absent)
+    roots=[]
+    namespace_path={"status":"absent"}
+    if raw_roots is not absent:
+        namespace_path={"status":"available","type":type_name(raw_roots)}
+        if isinstance(raw_roots,(str,bytes,os.PathLike)):
+            namespace_path["status"]="invalid_container"
+        else:
+            try:
+                iterator=iter(raw_roots)
+            except TypeError:
+                namespace_path["status"]="non_iterable"
+            else:
+                roots=[path_text(root,name+".__path__["+str(i)+"]") for i,root in enumerate(iterator)]
+    modules[name]={"lexical":path,"canonical":os.path.realpath(path) if path else None,
+                   "namespace_roots":roots,"namespace_path":namespace_path}
+print(json.dumps({"executable":sys.executable,"canonical_executable":os.path.realpath(sys.executable),"version":sys.version,"sys_path":[path_text(p,"sys.path["+str(i)+"]") for i,p in enumerate(sys.path)],"modules":modules,"tools":{name:shutil.which(name) for name in ("python3","bash","gfortran","pdfinfo")}}))'''
     return isolation.python_json(repo, code, (), env)
 
 COMMAND = ["./run_Prod_Analysis.sh", "-d", "4p4", "2p74"]
