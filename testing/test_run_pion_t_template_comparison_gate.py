@@ -155,6 +155,7 @@ def high_artifacts(outdir):
         stem=f'{setting}_kaon_Q4p4W2p74_highe_pion-t-template-comparison'
         pdf=outdir/(stem+'.pdf');pdf.write_bytes(b'%PDF-1.4 high fixture')
         ab=payload(setting,pdf);ab['setting']['EPSSET']='high'
+        ab['capture_stage']='final_selected_rerun'
         ab['original_analysis_input_identity']={r:{**v,'path':v['path'].replace('_lowe.root','_highe.root')}
                                               for r,v in ab['original_analysis_input_identity'].items()}
         for role,identity in ab['original_analysis_input_identity'].items():
@@ -1052,6 +1053,51 @@ class GateTests(unittest.TestCase):
             finally:
                 self.assertEqual(ordinary_before, {p.name: owner.file_identity(p) for p in self.outdir.iterdir()
                                                   if p.suffix == ".root" or p.name in owner.names()})
+
+    def test_high_parent_verifier_requires_final_publication_phase(self):
+        high_artifacts(self.outdir)
+        name='Center_kaon_Q4p4W2p74_highe_pion-t-template-comparison.json'
+        path=self.outdir/name;document=json.loads(path.read_text())
+        for phase in (None,'initial','provisional'):
+            bad=deepcopy(document)
+            if phase is None:bad.pop('capture_stage')
+            else:bad['capture_stage']=phase
+            path.write_text(json.dumps(bad))
+            with patch.object(owner,'pdf_pages',return_value=6),self.assertRaisesRegex(ValueError,'comparison_capture_stage_invalid'):
+                owner.verify_artifacts(self.outdir,SHA,IDENTITIES,0,dict.fromkeys(owner.names(True)),high=True)
+        path.write_text(json.dumps(document))
+        with patch.object(owner,'pdf_pages',return_value=6):
+            owner.verify_artifacts(self.outdir,SHA,IDENTITIES,0,dict.fromkeys(owner.names(True)),high=True)
+
+    def test_publication_repair_paths_in_real_temporary_committed_history(self):
+        repo=self.directory/'publication-history';repo.mkdir()
+        def git(*args):
+            return subprocess.check_output(['git','-c','user.name=fixture','-c','user.email=fixture@example.invalid',
+                '-c','core.hooksPath=/dev/null',*args],cwd=repo,stderr=subprocess.DEVNULL,text=True).strip()
+        git('init','-b','test')
+        for path in owner.CLEANUP_REPAIR_BLOBS|owner.REVIEWED_PUBLICATION_BLOBS:
+            target=repo/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('frozen fixture\n')
+        git('add','.');git('commit','-m','fixture base');base=git('rev-parse','HEAD')
+        pins={p:git('rev-parse',base+':'+p)for p in owner.CLEANUP_REPAIR_BLOBS|owner.REVIEWED_PUBLICATION_BLOBS}
+        for path in ('src/utility/bg_optimization.py','testing/test_bg_optimizer_preparent_contract.py',
+                     'docs/memory/phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md'):
+            target=repo/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('publication fixture\n')
+        git('add','.');git('commit','-m','fixture publication');head=git('rev-parse','HEAD')
+        state=dict(branch='test',head=head,origin_test=head,porcelain='')
+        with ExitStack() as stack:
+            for key in ('BASE_HEAD','HIGH_BASE','REVIEWED_HEAD','CLEANUP_REPAIR_BASE'):stack.enter_context(patch.object(owner,key,base))
+            stack.enter_context(patch.object(owner,'CLEANUP_REPAIR_BLOBS',{p:pins[p]for p in owner.CLEANUP_REPAIR_BLOBS}))
+            stack.enter_context(patch.object(owner,'REVIEWED_PUBLICATION_BLOBS',{p:pins[p]for p in owner.REVIEWED_PUBLICATION_BLOBS}))
+            stack.enter_context(patch.object(owner.isolation,'snapshot',return_value=state))
+            self.assertEqual(owner.preflight(repo,head,high=True),state)
+            self.assertEqual(owner.preflight(repo,head),state)
+            unrelated=repo/'src/main.py';unrelated.parent.mkdir(exist_ok=True);unrelated.write_text('unrelated fixture\n')
+            git('add','src/main.py');git('commit','-m','fixture unrelated');state['head']=state['origin_test']=git('rev-parse','HEAD')
+            with self.assertRaisesRegex(ValueError,'unexpected_high_committed_source'):
+                owner.preflight(repo,state['head'],high=True)
+            with self.assertRaisesRegex(ValueError,'unexpected_committed_source'):
+                owner.preflight(repo,state['head'])
+
 
     def test_high_exact_successor_source_and_publication_guards(self):
         state=dict(branch='test',head=SHA,origin_test=SHA,porcelain='')

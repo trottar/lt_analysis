@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16325,
+      "bytes": 16314,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "da094e075efe863566b55e0a122700d2012c8766fb2c347f71b82d534d50dcb6"
+      "sha256": "781f7b36baf6dd2ad09b776ec788919ec91874eb601e54ce27c7e9f5d832f4f3"
     },
     {
       "bytes": 11186,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 103980,
+      "bytes": 106709,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "eb97fad2b7c16c310fdded35b151d41e8fddb691106808f19a5770bfd4283165"
+      "sha256": "8d5c0491a4b9edeca07e9b6733360e31fcc78cb327195833e7425a02fc7aede6"
     },
     {
       "bytes": 23507,
@@ -1319,6 +1319,11 @@
       "bytes": 12284,
       "path": "docs/memory/phases/kaonlt-full-mm-reconstruction-scientific-memory-checkpoint-2026-10-20-task-contract.md",
       "sha256": "ae67a5d70447015b3549cb03ce1bd0720f2556b740970aec4b0411509f6a8e46"
+    },
+    {
+      "bytes": 11349,
+      "path": "docs/memory/phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md",
+      "sha256": "1b2b367b44b50a6aca902a031dd0420c25e941adb7bc709219c61066386ac8f5"
     },
     {
       "bytes": 17803,

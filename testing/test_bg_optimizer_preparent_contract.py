@@ -140,6 +140,36 @@ class BGOptimizerPrepassContractTests(unittest.TestCase):
             ),
         }
 
+    def test_final_publication_annotation_is_high_diagnostic_only_and_preserves_inputs(self):
+        base=dict(_production_input(),EPSSET="high")
+        flags={"LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON":"1","LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON":"1"}
+        cases=[(base,flags,True),({**base,"EPSSET":"low"},flags,False),
+               ({**base,"EPSSET":"highe"},flags,True),
+               (base,{**flags,"LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON":"0"},False),
+               (base,{**flags,"LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON":"0"},False),
+               ({**base,"bg_opt_prepass_mode":True},flags,False),
+               ({**base,"analysis_subtraction_context":BG_OPT_PREPASS_CONTEXT},flags,False),
+               ({**base,"ParticleType":"pion"},flags,False),({**base,"Q2":"3p0"},flags,False),
+               ({**base,"W":"3p14"},flags,False)]
+        for inp,env,enabled in cases:
+            with self.subTest(inp=inp,env=env):
+                original=deepcopy(inp);key=self.bg_optimization.get_bg_scale_setting_key(inp["EPSSET"],"Center");maps=({key:1.25},{key:2.5});seen=[]
+                def rand_sub(setting,parameters,**kwargs):
+                    seen.append((parameters,kwargs));return {"phi_setting":setting,"context":"refreshed"}
+                fake=types.SimpleNamespace(rand_sub=rand_sub)
+                with mock.patch.dict(sys.modules,{"rand_sub":fake}),mock.patch.dict("os.environ",env):
+                    result=self.bg_optimization._rerun_final_rand_sub([{"phi_setting":"Center","context":"old","static":17}],inp,*maps)
+                expected={**inp,"bg_stat_scale1_by_setting":maps[0],"bg_stat_scale2_by_setting":maps[1]}
+                if enabled:expected["_pion_t_template_comparison_capture_stage"]="final_selected_rerun"
+                self.assertEqual(seen[0][0],expected)
+                self.assertIsNot(seen[0][0],inp)
+                self.assertIsNot(seen[0][0]["bg_stat_scale1_by_setting"],maps[0])
+                self.assertEqual(seen[0][1],dict(shift_mode="raw",emit_plots=True,component_payload=None,
+                    kaon_signal_shape_payload=None,kaon_sigma0_shape_payload=None))
+                self.assertEqual(inp,original)
+                self.assertEqual(result,[{"phi_setting":"Center","context":"refreshed","static":17}])
+
+
     def test_prepass_config_is_top_level_only_and_keeps_production_input_unchanged(self):
         production_input = _production_input()
         original = deepcopy(production_input)

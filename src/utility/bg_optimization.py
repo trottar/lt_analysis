@@ -1343,6 +1343,16 @@ def _rerun_final_rand_sub(histlist, inpDict, selected_bg_scale1s, selected_bg_sc
     final_inp = dict(inpDict)
     final_inp["bg_stat_scale1_by_setting"] = dict(selected_bg_scale1s)
     final_inp["bg_stat_scale2_by_setting"] = dict(selected_bg_scale2s)
+    # Diagnostic publication belongs to the selected high-epsilon rerun only.
+    # Do not change the caller's input or any numerical configuration.
+    if (str(inpDict.get("EPSSET", "")).lower() in ("high", "highe")
+            and str(inpDict.get("ParticleType", "")).lower() == "kaon"
+            and str(inpDict.get("Q2")) == "4p4" and str(inpDict.get("W")) == "2p74"
+            and os.environ.get("LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON") == "1"
+            and os.environ.get("LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON") == "1"
+            and not inpDict.get("bg_opt_prepass_mode")
+            and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT):
+        final_inp["_pion_t_template_comparison_capture_stage"] = "final_selected_rerun"
 
     refreshed_histlist = []
     for base_hist in histlist:

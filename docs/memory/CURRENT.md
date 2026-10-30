@@ -30,17 +30,16 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [High-epsilon acquisition](phases/kaonlt-high-epsilon-pion-three-model-acquisition-2026-10-29-task-contract.md),
-Q4p4W2p74 Center/Left/Right highe. Supplied ifarm2402 no-child preflight at
-`d24ca01a432f2cd6543486b1cedf11e1e1e15fc6` failed `installed_dependency_probe`:
-`ltsep_python_probe_failed: TypeError: 'type' object is not iterable`.
-Local probe repair retains abnormal types. No smoke or preservation acceptance.
-October 28-29 lowe comparisons and corrected 60-page Work review remain
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [High-epsilon final-publication repair](phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md),
+base `874e5743266db0952b240124c8aeeff24e7cc94d`. Supplied October 29 acquisition
+failed `analysis_failed` after 22 m 56.58 s: initial parent publication collided
+with Step 4's selected rand_sub rerun (`high_comparison_destination_exists`).
+Actual run SHA/full receipt, cleanup and preservation remain NOT VERIFIED.
+Local repair publishes only from the final high rerun; the owner requires its
+phase evidence. Physics and stale-file guards remain unchanged. Review pending.
+Prior probe/fit/A-B history retains its evidence limits; statistics remains
+`SOURCE REVIEWED`. October 28-29 lowe comparisons/60-page review remain
 contract-attributed (MEMORY ONLY here); Local-t is a candidate only.
-Prior [missing-fit repair](phases/kaonlt-local-t-phi-missing-fit-serialization-2026-10-27-task-contract.md)
-and [A/B layout/replay](phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md)
-retain their evidence limits; [statistics](phases/kaonlt-independent-statistical-validation-2026-10-26-task-contract.md)
-remains `SOURCE REVIEWED`.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -227,8 +226,9 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — independent ChatGPT complete actual-diff review of the dependency-probe
-repair. Publication and pushed-state review precede any new smoke decision.
+NEXT — obtain fresh final-phase high-epsilon comparison evidence through the
+existing owner, first requiring independent actual-diff review of the publication
+repair, user publication and pushed-state review before any farm-run decision.
 No automatic retry or farm-readiness acceptance. Hierarchy/C deferred.
 
 The investigation retains prior

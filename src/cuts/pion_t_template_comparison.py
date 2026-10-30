@@ -21,6 +21,8 @@ import root_histogram_ownership as ownership
 
 ENABLE_ENV = "LT_ANALYSIS_PION_T_TEMPLATE_COMPARISON"
 HIGH_ENV = "LT_ANALYSIS_PION_HIGH_EPSILON_COMPARISON"
+CAPTURE_STAGE_KEY = "_pion_t_template_comparison_capture_stage"
+FINAL_CAPTURE_STAGE = "final_selected_rerun"
 COMPONENTS = ("pi_n", "pi_delta", "pi_sidis")
 SCHEMA = "pion_t_template_comparison/v1"
 REQUIRED_SOURCE_FILES = (
@@ -451,6 +453,15 @@ def observe_template_comparison(hist, inp_dict, *, t_edges, phi_edges, component
         return None
     if not selected(inp_dict, hist.get("phi_setting")):
         return None
+    high = str(inp_dict.get("EPSSET", "")).lower() in ("high", "highe")
+    if high:
+        if (inp_dict.get(CAPTURE_STAGE_KEY) != FINAL_CAPTURE_STAGE
+                or inp_dict.get("bg_opt_prepass_mode")
+                or str(inp_dict.get("analysis_subtraction_context", "")).strip() == "bg_optimizer_pre_parent"):
+            return None
+        stem = "{}_kaon_Q4p4W2p74_highe_pion-t-template-comparison".format(hist["phi_setting"])
+        if any(os.path.lexists(Path(outpath) / (stem + suffix)) for suffix in (".json", ".pdf")):
+            raise RuntimeError("high_comparison_destination_exists")
     from background_config import get_pion_component_dynamic_alignment_config
     from pion_component_shapes import load_raw_t_pion_comparison_shapes
     from pion_component_fits import (build_particle_subtraction_component_result,
@@ -504,6 +515,8 @@ def observe_template_comparison(hist, inp_dict, *, t_edges, phi_edges, component
     json_path, pdf_path = output / (stem + ".json"), output / (stem + ".pdf")
     if epsilon == "highe" and any(os.path.lexists(p) for p in (json_path, pdf_path)):
         raise RuntimeError("high_comparison_destination_exists")
+    if high:
+        result["capture_stage"] = FINAL_CAPTURE_STAGE
     result["pdf"] = {"path": str(pdf_path), "status": "not_rendered"}
     json_path.write_text(json.dumps(snapshot(result), sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     try:

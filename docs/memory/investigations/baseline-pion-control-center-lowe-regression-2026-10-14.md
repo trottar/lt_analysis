@@ -1540,3 +1540,41 @@ real lib64 namespace fixture. These local fixture imports establish no actual
 farm Python/dependency compatibility. No scientific source, inputs, launcher,
 owner stage, staging, fitting physics or unrelated infrastructure changed.
 CURRENT owns independent actual-diff review as NEXT; no retry or farm command.
+
+
+#### High-epsilon final-parent diagnostic publication collision - October 29
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the [bounded repair](../phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md),
+starting clean published test/origin/test `874e5743266db0952b240124c8aeeff24e7cc94d`.
+Supplied terminal excerpt: high acquisition ended after 22 m 56.58 s with owner
+`analysis_failed`; Step 4 optimization's final rand_sub called the parent observer
+again, raising `high_comparison_destination_exists` for Center. Failed status
+basename: `KaonLT_HighEpsilon_Acquisition_20261029T172725-gate-status.json`.
+Actual failed-run SHA, full receipt, final preservation/cleanup and artifact bytes
+remain NOT VERIFIED; do not infer successful acquisition from internal fit status.
+The earlier assistant source review missed this repeated producer invocation.
+
+SOURCE VERIFIED: Step 3's initial rand_sub and Step 4's selected final rerun both
+reach the same observer. The pre-fix actual helper/observer/serializer reproduced
+the collision locally for Center, Left and Right using controlled scientific
+adapters. High preliminary/trial/pre-parent calls now do no comparison work or
+canonical publication. The existing helper marks only its high diagnostic local
+input copy as `final_selected_rerun`; the observer records that high-only capture
+stage and the owner requires it. Existing final JSON/PDF collision guards remain,
+including an early check before comparison fitting. No deletion, overwrite option,
+stale reuse, fitting change, scale change, input mutation or production promotion.
+Low/no-opt-in behavior and actual final histlist ownership remain unchanged.
+Only exact new source/test/contract paths join committed-source allowlists; all
+historical pins, ancestry and unrelated-source rejection remain enforced.
+
+Deterministic actual helper -> observer -> JSON tests verify final parent IDs,
+selected-map/input preservation and refreshed-key precedence. Owner tests reject
+missing/provisional phases, and real temporary committed histories accept only
+the scoped new paths. Stale JSON/PDF, repeated final calls, rendering/serialization
+failure, pre-parent calls and real POSIX symlink/dangling destinations are covered.
+Windows symlink subcases require privileges and were separately executed in WSL;
+the existing Poppler fixture remains unavailable locally. Synthetic scientific
+adapters establish control/serialization behavior only, not ROOT/farm science.
+CURRENT owns the exact next gate: independent review, user publication and
+pushed-state verification before any new targeted farm decision. No farm rerun,
+commit, push, installed-package mutation or failed-attempt cleanup occurred.

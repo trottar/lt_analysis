@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import ast
+from contextlib import contextmanager
 from copy import deepcopy
 import json
 import math
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -254,6 +256,128 @@ class FrozenComparisonTests(unittest.TestCase):
         finally:
             ownership._DEBUG_ENABLED = original_flag
             ownership._DEBUG_RECORDS[:] = original_records
+
+
+class FinalHighPublicationTests(unittest.TestCase):
+    @contextmanager
+    def runtime(self, setting="Center", with_optimizer=False):
+        optimizer = None
+        if with_optimizer:
+            from testing.test_bg_optimizer_preparent_contract import _load_bg_optimization_module
+            optimizer = _load_bg_optimization_module()
+        parent, templates, options, fitter = fixture()
+        parents, raw = [], {c: dict(parents=[], selected={}, excluded={}) for c in comparison.COMPONENTS}
+        for i in range(3):
+            p = deepcopy(parent)
+            p.update(t_bin_index=i, t_edges=[float(i), float(i+1)], analysis_scope="t_bin"+str(i+1),
+                     pion_parent_id="final-{}-{}".format(setting, i))
+            parents.append(p)
+            for c in comparison.COMPONENTS:
+                t = deepcopy(templates[c]);t["evidence"].update(t_bin_index=i,t_edges=p["t_edges"])
+                raw[c]["parents"].append(t)
+        final = dict(phi_setting=setting,_pion_t_bin_parent_results=tuple(parents),context="final")
+        initial = deepcopy(final);initial["context"]="initial";initial["static_only"]=19
+        for p in initial["_pion_t_bin_parent_results"]:p["pion_parent_id"]="initial"
+        inp=dict(Q2="4p4",W="2p74",EPSSET="high",ParticleType="kaon")
+        loader=Mock(return_value=raw)
+        modules={"pion_component_shapes":types.SimpleNamespace(load_raw_t_pion_comparison_shapes=loader),
+                 "pion_component_fits":types.SimpleNamespace(build_particle_subtraction_component_result=fitter,
+                     resolve_scope_component_shapes=lambda *a,**k:options["selected_shapes"],
+                     resolve_scope_single_shape=lambda *a,**k:Hist())}
+        with tempfile.TemporaryDirectory() as tmp:
+            def publish(hist, parameters):
+                return comparison.observe_template_comparison(hist,parameters,t_edges=[0.,1.,2.,3.],
+                    phi_edges=[0.,90.,180.],component_payload={},signal_payload={},sigma0_payload={},outpath=tmp,
+                    original_inputs={"data":__file__})
+            captured=[]
+            def rand_sub(setting, parameters, **kwargs):
+                captured.append((deepcopy(parameters),kwargs))
+                publish(final,parameters)
+                return dict(final)
+            modules["rand_sub"]=types.SimpleNamespace(rand_sub=rand_sub)
+            def render(path,rows,title):path.write_bytes(b"fixture PDF; no ROOT runtime claim")
+            with patch.dict(sys.modules,modules),patch.dict("os.environ",{comparison.ENABLE_ENV:"1",comparison.HIGH_ENV:"1"}),patch.object(comparison,"render_comparison_pdf",side_effect=render) as renderer:
+                yield dict(optimizer=optimizer,initial=initial,final=final,inp=inp,publish=publish,
+                           loader=loader,renderer=renderer,captured=captured,out=Path(tmp))
+
+    def test_actual_initial_then_selected_rerun_publishes_only_final_parents(self):
+        for setting in ("Center","Left","Right"):
+            with self.subTest(setting=setting),self.runtime(setting, with_optimizer=True) as c:
+                before=comparison.digest((c["initial"],c["final"],c["inp"]))
+                self.assertIsNone(c["publish"](c["initial"],c["inp"]))
+                c["loader"].assert_not_called();c["renderer"].assert_not_called()
+                self.assertEqual(list(c["out"].iterdir()),[])
+                key=c["optimizer"].get_bg_scale_setting_key("high",setting)
+                maps=({key:0.},{key:0.});maps_before=deepcopy(maps)
+                result=c["optimizer"]._rerun_final_rand_sub([c["initial"]],c["inp"],*maps)
+                self.assertEqual(result[0]["context"],"final")
+                self.assertEqual(result[0]["static_only"],19)
+                self.assertIs(result[0]["_pion_t_bin_parent_results"],c["final"]["_pion_t_bin_parent_results"])
+                parameters,kwargs=c["captured"][0]
+                self.assertEqual(parameters[comparison.CAPTURE_STAGE_KEY],comparison.FINAL_CAPTURE_STAGE)
+                self.assertEqual(parameters["bg_stat_scale1_by_setting"],maps[0])
+                self.assertEqual(parameters["bg_stat_scale2_by_setting"],maps[1])
+                self.assertEqual(kwargs,dict(shift_mode="raw",emit_plots=True,component_payload=None,
+                    kaon_signal_shape_payload=None,kaon_sigma0_shape_payload=None))
+                self.assertEqual(maps,maps_before)
+                self.assertEqual(before,comparison.digest((c["initial"],c["final"],c["inp"])))
+                doc=json.loads(next(c["out"].glob("*.json")).read_text())
+                self.assertEqual(doc["capture_stage"],"final_selected_rerun")
+                self.assertEqual([p["pion_parent_id"]for p in doc["parents"]],
+                                 ["final-{}-{}".format(setting,i)for i in range(3)])
+                self.assertEqual(len(list(c["out"].iterdir())),2)
+                c["loader"].reset_mock();c["renderer"].reset_mock()
+                with self.assertRaisesRegex(RuntimeError,"high_comparison_destination_exists"):
+                    c["publish"](c["final"],parameters)
+                c["loader"].assert_not_called();c["renderer"].assert_not_called()
+
+    def test_final_collisions_fail_before_comparison_work_and_preserve_destinations(self):
+        for kind in ("json","pdf","both","symlink","dangling"):
+            with self.subTest(kind=kind),self.runtime() as c:
+                inp={**c["inp"],comparison.CAPTURE_STAGE_KEY:comparison.FINAL_CAPTURE_STAGE}
+                stem="Center_kaon_Q4p4W2p74_highe_pion-t-template-comparison"
+                if kind in ("json","both"):(c["out"]/(stem+".json")).write_bytes(b"preserve JSON")
+                if kind in ("pdf","both"):(c["out"]/(stem+".pdf")).write_bytes(b"preserve PDF")
+                if kind in ("symlink","dangling"):
+                    target=c["out"]/"target"
+                    if kind=="symlink":target.write_bytes(b"preserve target")
+                    try:(c["out"]/(stem+".json")).symlink_to(target)
+                    except OSError as exc:self.skipTest("local symlinks unavailable: "+str(exc))
+                before={p.name:(os.readlink(p)if p.is_symlink()else p.read_bytes())for p in c["out"].iterdir()}
+                with self.assertRaisesRegex(RuntimeError,"high_comparison_destination_exists"):
+                    c["publish"](c["final"],inp)
+                c["loader"].assert_not_called();c["renderer"].assert_not_called()
+                self.assertEqual(before,{p.name:(os.readlink(p)if p.is_symlink()else p.read_bytes())for p in c["out"].iterdir()})
+
+    def test_prepass_and_preliminary_never_publish_even_with_final_marker(self):
+        with self.runtime() as c:
+            final={**c["inp"],comparison.CAPTURE_STAGE_KEY:comparison.FINAL_CAPTURE_STAGE}
+            for inp in (c["inp"],{**final,"bg_opt_prepass_mode":True},
+                        {**final,"analysis_subtraction_context":"bg_optimizer_pre_parent"}):
+                self.assertIsNone(c["publish"](c["initial"],inp))
+            c["loader"].assert_not_called();c["renderer"].assert_not_called()
+
+    def test_render_and_serialization_failures_cannot_be_reused_as_success(self):
+        for failure in ("render","serialize"):
+            with self.subTest(failure=failure),self.runtime() as c:
+                inp={**c["inp"],comparison.CAPTURE_STAGE_KEY:comparison.FINAL_CAPTURE_STAGE}
+                if failure=="render":
+                    c["renderer"].side_effect=RuntimeError("fixture render failure")
+                    with self.assertRaisesRegex(RuntimeError,"fixture render failure"):c["publish"](c["final"],inp)
+                    doc=json.loads(next(c["out"].glob("*.json")).read_text())
+                    self.assertEqual(doc["status"],"failed")
+                    with self.assertRaisesRegex(RuntimeError,"high_comparison_destination_exists"):c["publish"](c["final"],inp)
+                else:
+                    original_dumps=comparison.json.dumps
+                    def fail_document(value,*args,**kwargs):
+                        if isinstance(value,dict) and value.get("schema_version")==comparison.SCHEMA:
+                            raise TypeError("fixture serialization failure")
+                        return original_dumps(value,*args,**kwargs)
+                    with patch.object(comparison.json,"dumps",side_effect=fail_document):
+                        with self.assertRaisesRegex(TypeError,"fixture serialization failure"):c["publish"](c["final"],inp)
+                    c["renderer"].assert_not_called()
+                    self.assertEqual(list(c["out"].iterdir()),[])
+
 
 
 class DefaultAndAdapterTests(unittest.TestCase):
