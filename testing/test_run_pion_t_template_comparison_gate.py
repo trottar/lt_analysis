@@ -251,7 +251,7 @@ class GateTests(unittest.TestCase):
             with self.subTest(key=key), patch.object(owner.isolation, "snapshot", return_value={**state, key: value}), patch.object(owner, "git", return_value=""):
                 with self.assertRaisesRegex(ValueError, reason):
                     owner.preflight(self.repo, SHA)
-        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", side_effect=["", "", "", "src/main.py"]):
+        with patch.object(owner.isolation, "snapshot", return_value=state), patch.object(owner, "git", side_effect=["", "", "", "src/cuts/pion_component_fits.py"]):
             with self.assertRaisesRegex(ValueError, "unexpected_committed_source"):
                 owner.preflight(self.repo, SHA)
         for sha in ("short", "A"*40, owner.BASE_HEAD):
@@ -860,7 +860,7 @@ class GateTests(unittest.TestCase):
             return ''
         with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=run):
             self.assertEqual(owner.preflight(ROOT,SHA),state)
-        for path in ('src/main.py','unrelated.py'):
+        for path in ('src/cuts/pion_component_fits.py','unrelated.py'):
             with self.subTest(path=path),patch.object(owner.isolation,'snapshot',return_value=state),patch.object(
                     owner,'git',side_effect=['','','',path]),self.assertRaisesRegex(ValueError,'unexpected_committed_source'):
                 owner.preflight(ROOT,SHA)
@@ -1080,7 +1080,9 @@ class GateTests(unittest.TestCase):
         git('add','.');git('commit','-m','fixture base');base=git('rev-parse','HEAD')
         pins={p:git('rev-parse',base+':'+p)for p in owner.CLEANUP_REPAIR_BLOBS|owner.REVIEWED_PUBLICATION_BLOBS}
         for path in ('src/utility/bg_optimization.py','testing/test_bg_optimizer_preparent_contract.py',
-                     'docs/memory/phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md'):
+                     'docs/memory/phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md',
+                     'src/main.py','testing/test_main_correction_ledger_paths.py','testing/test_e8_4_fix5_main_order.py',
+                     'docs/memory/phases/kaonlt-profile-ledger-consumer-2026-10-30-task-contract.md'):
             target=repo/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('publication fixture\n')
         git('add','.');git('commit','-m','fixture publication');head=git('rev-parse','HEAD')
         state=dict(branch='test',head=head,origin_test=head,porcelain='')
@@ -1091,8 +1093,8 @@ class GateTests(unittest.TestCase):
             stack.enter_context(patch.object(owner.isolation,'snapshot',return_value=state))
             self.assertEqual(owner.preflight(repo,head,high=True),state)
             self.assertEqual(owner.preflight(repo,head),state)
-            unrelated=repo/'src/main.py';unrelated.parent.mkdir(exist_ok=True);unrelated.write_text('unrelated fixture\n')
-            git('add','src/main.py');git('commit','-m','fixture unrelated');state['head']=state['origin_test']=git('rev-parse','HEAD')
+            unrelated=repo/'src/cuts/pion_component_fits.py';unrelated.parent.mkdir(exist_ok=True);unrelated.write_text('unrelated fixture\n')
+            git('add','src/cuts/pion_component_fits.py');git('commit','-m','fixture unrelated');state['head']=state['origin_test']=git('rev-parse','HEAD')
             with self.assertRaisesRegex(ValueError,'unexpected_high_committed_source'):
                 owner.preflight(repo,state['head'],high=True)
             with self.assertRaisesRegex(ValueError,'unexpected_committed_source'):
@@ -1102,7 +1104,7 @@ class GateTests(unittest.TestCase):
     def test_high_exact_successor_source_and_publication_guards(self):
         state=dict(branch='test',head=SHA,origin_test=SHA,porcelain='')
         def fake_git(repo,*args):
-            if args[:2]==('diff','--name-only'):return 'src/main.py' if args[2]==owner.HIGH_BASE else ''
+            if args[:2]==('diff','--name-only'):return 'src/cuts/pion_component_fits.py' if args[2]==owner.HIGH_BASE else ''
             if args[0]=='rev-parse':
                 path=args[1].split(':',1)[1]
                 return (owner.CLEANUP_REPAIR_BLOBS|owner.REVIEWED_PUBLICATION_BLOBS)[path]

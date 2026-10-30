@@ -501,6 +501,8 @@ def preflight(repo, source_commit, high=False):
         git(repo, "merge-base", "--is-ancestor", HIGH_BASE, source_commit)
         require(source_commit != HIGH_BASE, "high_owner_source_not_committed")
         allowed_high = {HIGH_PROFILE, "run_Prod_Analysis.sh",
+            "src/main.py", "testing/test_main_correction_ledger_paths.py", "testing/test_e8_4_fix5_main_order.py",
+            "docs/memory/phases/kaonlt-profile-ledger-consumer-2026-10-30-task-contract.md",
             "src/utility/bg_optimization.py", "testing/test_bg_optimizer_preparent_contract.py",
             "docs/memory/phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md",
             "src/cuts/pion_t_template_comparison.py", "src/cuts/pion_t_phi_template_comparison.py",
@@ -523,6 +525,7 @@ def preflight(repo, source_commit, high=False):
     # Historical ancestry and cleanup pins stay strict; only exact reviewed paths.
     changed = git(repo, "diff", "--name-only", REVIEWED_HEAD, source_commit).splitlines()
     allowed = {PROFILE, HIGH_PROFILE, "run_Prod_Analysis.sh", "testing/run_pion_t_template_comparison_gate.py",
+               "src/main.py", "testing/test_main_correction_ledger_paths.py", "testing/test_e8_4_fix5_main_order.py",
                "src/utility/bg_optimization.py", "testing/test_bg_optimizer_preparent_contract.py",
                "testing/test_run_pion_t_template_comparison_gate.py", *CLEANUP_REPAIR_BLOBS,
                *INTEGRATION_FILES, *REVIEWED_PUBLICATION_BLOBS}

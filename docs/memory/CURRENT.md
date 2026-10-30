@@ -30,16 +30,17 @@ at its interrupted position.
 
 ## Current Work Item
 
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [High-epsilon final-publication repair](phases/kaonlt-high-epsilon-final-parent-publication-2026-10-29-task-contract.md),
-base `874e5743266db0952b240124c8aeeff24e7cc94d`. Supplied October 29 acquisition
-failed `analysis_failed` after 22 m 56.58 s: initial parent publication collided
-with Step 4's selected rand_sub rerun (`high_comparison_destination_exists`).
-Actual run SHA/full receipt, cleanup and preservation remain NOT VERIFIED.
-Local repair publishes only from the final high rerun; the owner requires its
-phase evidence. Physics and stale-file guards remain unchanged. Review pending.
-Prior probe/fit/A-B history retains its evidence limits; statistics remains
-`SOURCE REVIEWED`. October 28-29 lowe comparisons/60-page review remain
-contract-attributed (MEMORY ONLY here); Local-t is a candidate only.
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: [Profile-ledger reader repair](phases/kaonlt-profile-ledger-consumer-2026-10-30-task-contract.md),
+base `19dbac361c08e6aec88e3c3bcc4cd77216ad83ad`. Supplied acquisition failed
+`analysis_failed` after 1 h 22 m 11.66 s, after separation, opening the generic
+low correction ledger. The active profile writes profile-suffixed ledgers only.
+Local repair uses those primary paths for both epsilon readers and checks
+finalization inputs before separation. No alias creation or physics change.
+Actual run SHA/full receipt, cleanup, surviving artifacts and science remain
+NOT VERIFIED. Independent actual-diff review is pending. Prior parent/probe
+repairs are published; their evidence limits/history remain in the investigation.
+Statistics remains `SOURCE REVIEWED`; October 28-29 lowe comparisons/60-page
+review remain contract-attributed (MEMORY ONLY); Local-t is a candidate only.
 
 Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
 `902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
@@ -226,10 +227,10 @@ retain historical scope; no owner/pathing/attestation cycle is authorized here.
 
 ## Next Action
 
-NEXT — obtain fresh final-phase high-epsilon comparison evidence through the
-existing owner, first requiring independent actual-diff review of the publication
-repair, user publication and pushed-state review before any farm-run decision.
-No automatic retry or farm-readiness acceptance. Hierarchy/C deferred.
+NEXT — obtain fresh high-epsilon comparison evidence through the existing
+owner after independent actual-diff review of the ledger repair, user publication
+and pushed-state review. Check the failed receipt before any recovery/retry
+decision; no automatic farm run or acceptance. Hierarchy/C deferred.
 
 The investigation retains prior
 construction, transfer and signed-application findings and their limitations.

@@ -1578,3 +1578,46 @@ adapters establish control/serialization behavior only, not ROOT/farm science.
 CURRENT owns the exact next gate: independent review, user publication and
 pushed-state verification before any new targeted farm decision. No farm rerun,
 commit, push, installed-package mutation or failed-attempt cleanup occurred.
+
+
+#### Profile correction-ledger producer/consumer mismatch - October 30
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` under the [bounded repair](../phases/kaonlt-profile-ledger-consumer-2026-10-30-task-contract.md),
+starting clean published test/origin/test `19dbac361c08e6aec88e3c3bcc4cd77216ad83ad`.
+The supplied acquisition excerpt completes high yields and L/T separation but
+raises FileNotFoundError in main.py opening the generic low correction ledger;
+owner `analysis_failed`, elapsed 1 h 22 m 11.66 s. Failed status basename:
+`KaonLT_HighEpsilon_Acquisition_20261029T221118-gate-status.json`.
+Actual run SHA, full receipt, final preservation/cleanup, surviving artifacts and
+scientific adequacy remain NOT VERIFIED. Buffered ROOT fit diagnostics are not
+treated as the cause of the explicit ledger exception or as scientific acceptance.
+
+SOURCE VERIFIED: the unchanged writer chooses json_profile as primary and does
+not write a generic alias for no_empirical_residual. Main chose the generic json
+for both Step-7 epsilon readers and Step-6 recorded path. The high reader would
+have failed next. The earlier high-path audit should have caught this mismatch.
+Local reproduction uses the actual writer and extracted actual main statements,
+and reaches the exact missing generic low basename with both profile files present.
+
+The three consumers now select json_profile. The existing bundle/path/four-read
+block moves before model activation/separation; final-summary timing remains after
+separation. No ledger fabrication, stale generic fallback, alias creation, skipped
+validator, numerical change or new execution mode. The existing main AST guard
+normalizes only these keys, that relocation and its prior SIMC-block allowance;
+an unrelated numerical mutation still fails. Exact owner source/test/contract
+allowlists and real temporary-history tests retain unrelated-source rejection.
+
+Real writer/consumer tests cover no_empirical_residual, nominal_weighted, None
+and empty profiles, both epsilon files, stale generic data and missing/malformed
+primary failures. The profile-aware input bundle and required BG summaries reach
+the same reader context. ROOT integration is stubbed only at an unused histogram
+helper; no full main, scientific processing or farm is executed. Existing ledger
+writer, profile alias policy, comparison thresholds and physics remain frozen.
+
+Source also shows private_data_parent cleanup executes on failed owner exit;
+no retained private science output can be assumed. No matching full receipt was
+found in the local Downloads/KaonLT transfer directories checked. Do not claim
+recovery or accept partial products without the actual status/artifact identities.
+The cleanup policy and all failed attempts are untouched by this repair.
+CURRENT owns independent review, user publication and pushed-state verification
+before any runtime/recovery decision. No commit, push or farm run occurred here.

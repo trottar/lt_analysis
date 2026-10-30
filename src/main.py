@@ -1368,7 +1368,7 @@ inpDict["correction_ledger_path"] = get_correction_ledger_paths(
     ParticleType,
     OutFilename,
     active_profile=inpDict.get("bg_active_profile"),
-)["json"]
+)["json_profile"]
 debug_file_status("Correction ledger JSON", inpDict["correction_ledger_path"])
 record_stage_time("Step 6 correction ledger export", stage_start)
 
@@ -1594,6 +1594,43 @@ if EPSSET == "high":
         particle=ParticleType,
     )
     
+    zeroth_bundle = load_zeroth_iteration_input_bundle(
+        OUTPATH,
+        ParticleType,
+        Q2,
+        W,
+        active_profile=inpDict.get("bg_active_profile"),
+    ) or {}
+    low_bundle_entry = zeroth_bundle.get("low", {})
+    high_bundle_entry = zeroth_bundle.get("high", {})
+    low_outfilename = low_bundle_entry.get("inp_dict", {}).get("OutFilename")
+    if not low_outfilename:
+        raise RuntimeError("Low-epsilon entry was not found in the 0th-iteration input bundle")
+
+    low_ledger_path = get_correction_ledger_paths(
+        OUTPATH,
+        ParticleType,
+        low_outfilename,
+        active_profile=inpDict.get("bg_active_profile"),
+    )["json_profile"]
+    high_ledger_path = get_correction_ledger_paths(
+        OUTPATH,
+        ParticleType,
+        OutFilename,
+        active_profile=inpDict.get("bg_active_profile"),
+    )["json_profile"]
+    low_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_low.json".format(ParticleType, low_outfilename)
+    high_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_high.json".format(ParticleType, OutFilename)
+
+    with open(low_ledger_path, "r") as handle:
+        low_ledger_payload = json.load(handle)
+    with open(high_ledger_path, "r") as handle:
+        high_ledger_payload = json.load(handle)
+    with open(low_bg_opt_path, "r") as handle:
+        low_bg_summary = json.load(handle)
+    with open(high_bg_opt_path, "r") as handle:
+        high_bg_summary = json.load(handle)
+
     # Save fortran scripts that contain iteration functional form of parameterization
     py_param = 'models/param_{}_{}.py'.format(ParticleType, pol_str)
     output_file_lst.append(py_param) 
@@ -1669,43 +1706,6 @@ if EPSSET == "high":
     record_stage_time("Step 7 xsect separation", stage_start)
 
     stage_start = perf_counter()
-    zeroth_bundle = load_zeroth_iteration_input_bundle(
-        OUTPATH,
-        ParticleType,
-        Q2,
-        W,
-        active_profile=inpDict.get("bg_active_profile"),
-    ) or {}
-    low_bundle_entry = zeroth_bundle.get("low", {})
-    high_bundle_entry = zeroth_bundle.get("high", {})
-    low_outfilename = low_bundle_entry.get("inp_dict", {}).get("OutFilename")
-    if not low_outfilename:
-        raise RuntimeError("Low-epsilon entry was not found in the 0th-iteration input bundle")
-
-    low_ledger_path = get_correction_ledger_paths(
-        OUTPATH,
-        ParticleType,
-        low_outfilename,
-        active_profile=inpDict.get("bg_active_profile"),
-    )["json"]
-    high_ledger_path = get_correction_ledger_paths(
-        OUTPATH,
-        ParticleType,
-        OutFilename,
-        active_profile=inpDict.get("bg_active_profile"),
-    )["json"]
-    low_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_low.json".format(ParticleType, low_outfilename)
-    high_bg_opt_path = OUTPATH + "/" + "{}_{}_bg_opt_high.json".format(ParticleType, OutFilename)
-
-    with open(low_ledger_path, "r") as handle:
-        low_ledger_payload = json.load(handle)
-    with open(high_ledger_path, "r") as handle:
-        high_ledger_payload = json.load(handle)
-    with open(low_bg_opt_path, "r") as handle:
-        low_bg_summary = json.load(handle)
-    with open(high_bg_opt_path, "r") as handle:
-        high_bg_summary = json.load(handle)
-
     manifest_payload = build_frozen_manifest_payload(
         ParticleType,
         Q2,

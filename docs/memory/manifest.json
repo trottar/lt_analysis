@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16314,
+      "bytes": 16370,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "781f7b36baf6dd2ad09b776ec788919ec91874eb601e54ce27c7e9f5d832f4f3"
+      "sha256": "9dd4f036e4661e4e8db5f6451f29685fbb1b5864ae0ec5a3bd6458b1f2c7e3ea"
     },
     {
       "bytes": 11186,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 106709,
+      "bytes": 109643,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "8d5c0491a4b9edeca07e9b6733360e31fcc78cb327195833e7425a02fc7aede6"
+      "sha256": "6a1b4ab2dff7c86d221ee985efc5e169cc2614c9b5c9b4a05177ed47bbde2625"
     },
     {
       "bytes": 23507,
@@ -1469,6 +1469,11 @@
       "bytes": 21848,
       "path": "docs/memory/phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md",
       "sha256": "1b0dde0fff7ca1040db9ef4160e35fec7bd311a3719a9d0450b0b7dfb5399905"
+    },
+    {
+      "bytes": 8405,
+      "path": "docs/memory/phases/kaonlt-profile-ledger-consumer-2026-10-30-task-contract.md",
+      "sha256": "970abbc341e20ae89b55750d764301f3c00ac0171406f54eae59e8cf1a2d77e0"
     },
     {
       "bytes": 7088,
