@@ -1621,3 +1621,434 @@ recovery or accept partial products without the actual status/artifact identitie
 The cleanup policy and all failed attempts are untouched by this repair.
 CURRENT owns independent review, user publication and pushed-state verification
 before any runtime/recovery decision. No commit, push or farm run occurred here.
+
+
+## Scientific memory checkpoint and independent anchor gate — November 3
+
+### Scope, source and evidence identities
+
+`SOURCE REVIEWED` for this read-only source/evidence gate; `BLOCKED` for a
+scientifically justified correction contract (Outcome B). No correction was
+implemented. Local test HEAD, origin/test and public test were independently
+observed at `9172aba853fd5b5b744c19add992fa4f27466180`; tracked worktree/index
+were clean before this memory checkpoint. Two unrelated untracked review files
+were preserved. Only CURRENT, MEMORY, this investigation and generated manifest
+are owned by the checkpoint; USER's Work-first preference remains unchanged.
+
+RUNTIME VERIFIED (supplied evidence, not a new farm execution):
+`KaonLT_HighEpsilon_Acquisition_20261030T022205` reports source above,
+analysis_returncode=0, status=success, stage=complete, collection and artifact/
+ZIP verification complete. The nine required high artifacts cover Center,
+Left and Right. This supersedes the obsolete instruction to obtain that fresh
+acquisition after the ledger repair. It does not establish scientific acceptance:
+stored evidence_admissible=false and scientifically_accepted=false are retained.
+Historical failed attempts and their unknowns above are not rewritten.
+
+Reverified original farm ZIP: 16,765,469 bytes, SHA-256
+`971e0ec9d10b06a9c6b9c1b96e2019fbce53f099b6211e56e4529618de5179be`.
+The six retained high comparison JSONs match its original members byte-for-byte.
+Status SHA-256:
+`2d19616204538bcfa59e6962e26cf2c6e6947291fc0f65e39e43656c84be0c75`;
+summary SHA-256:
+`b43ef47888f091fae8512cdc59b348aa53097d661619fb42fa56de5654ad27b0`.
+
+November 2-3 Work evidence, all detached/non-production:
+
+| Archive | Bytes | SHA-256 |
+| --- | ---: | --- |
+| KaonLT_high_epsilon_matching_comparisons_20261102.zip | 101079333 | 6949481049f006afb1fdad4247399021a4f97d5951063875c9dc7526cfcf2f70 |
+| KaonLT_Center_highe_t3_forensic_20261102.zip | 22679495 | b01a7ea0c5bc388a1a506231f65f8572cea975f4c967e1c8bbdcd61204899426 |
+| KaonLT_Independent_Local_t_Audit_20261103.zip | 30989841 | 4f73641ffd67d0302764d502de087f384af73c176d2cbe09e4c5122ba5af8228 |
+| KaonLT_Local_t_Normalization_Stability_20261103.zip | 31183355 | c1095714d1b6a41b3cc7ecb17ec122b090678e1c72ae44ee59fbaed2c51c88df |
+| KaonLT_Sparse_Bin_Statistical_Audit_20261103.zip | 32014926 | bd0f352803fcc0aa96c164e898c994106d09ccf102924a504d92ff91b94b1ca2 |
+| KaonLT_Joint_Source_Closure_Acceptance_20261103.zip | 43296621 | 64a4d2d5a7e2d744e1c01a9fad3af92fa71ee01a93c185fb02fd842383e192c3 |
+
+The final joint-source package and original farm ZIP hashes/CRCs were rechecked
+at this checkpoint, together with all 12 retained input identities and 21
+committed source snapshots in its derived/provenance.json. Earlier archive
+identities above are retained from that verified package's provenance, not a
+claim of a new rerun. Detailed evidence references are its derived/
+observed_comparison.json, anchor_consistency.json, component_acceptance.json,
+unit_scan.json, conditional_summary.csv, nested_summary.json,
+bootstrap_convergence_summary.json, mean_closure.json and oracle_anchor_check.json,
+and qa/final_validation.json. Retain source/runtime/Work provenance separately.
+
+### Established procedure and scientific interpretation
+
+SOURCE VERIFIED: main.py performs the subtraction and main_iter.py reloads
+the previous cached data; later K+Lambda SIMC iterations do not repeat pion
+subtraction. High epsilon has no RF-based slow-proton subtraction. Method A
+remains detached/non-production; Method B diagnostic and numerically excluded.
+Local-t templates remain the leading improvement candidate, not an adopted
+production replacement. INFERENCE from the corrected retained comparisons and
+the user's assessment: the current procedure generally produces reasonable
+pion-control/subtraction results and should be preserved while this narrow
+statistical issue is evaluated.
+
+SOURCE VERIFIED / retained diagnostic evidence: K+Sigma0 machinery exists;
+this investigated scope lacks its configured input and uses the recorded
+lambda_only_protected_fallback. That is not evidence of absent real Sigma0.
+Its inclusion is a separate future improvement, not the immediate blocker.
+An incomplete high-MM/shoulder spectrum does not itself justify redesign.
+Full-spectrum chi2 is secondary to adequacy of the pion contribution beneath
+Lambda; numerical success, configured acceptance and physical validity differ.
+
+INFERENCE from genuine-data spectra: the narrow Center/high/t3 K+Lambda peak
+is largely preserved by the original Local-t subtraction. A complete kaon
+model includes protected signal; it is neither the pion-only model nor the
+event-applied background. Earlier identical orange dashed styles obscured
+that distinction. Preservation of the visible peak does not establish an
+unbiased extracted physical yield or true pion fraction.
+
+### Confirmed statistical findings and quantitative scope
+
+SOURCE VERIFIED: pion_component_fits.py::_build_fit_inputs and
+_build_single_template_fit_inputs replace nonpositive/invalid errors with
+max(sqrt(abs(y)), 1). That scalar convention is not invariant under equivalent
+histogram-unit changes. _build_multi_template_fit_inputs instead excludes
+invalid-variance bins; it supplies the joint/protected/gauge fits. Do not
+misidentify this as a nonexistent _build_joint_refinement_inputs helper.
+
+Retained deterministic full-estimator unit test, fixed shapes/alignment and
+physically converted configured amplitude floors: scale 1000 changes native
+Center/high/t3 exact applied background from 0.0607858263 to 0.0402946282
+counts per effective mC (-33.71%). This is a demonstrated defect affecting
+actual candidate subtraction, not just plotting. Positive-variance WLS and
+source-aware staging pass the observed unit tests, but neither is approved.
+
+The neutron anchor [0.8561751288600271, 0.9561751288600271] GeV has 17 normal
+bins: two positive-variance and fifteen zero-variance. Kaon source counts are
+(prompt,random,dummy,dummy-random)=(2,0,0,0). Under the tested fixed-template,
+fixed-normalization, nonnegative source-count assumptions, native An=0.1822022441
+implies at least 26.7292 prompt events: P(N<=2)<=9.48596e-10 and the conditional
+one-sided 95% bound is An<=0.0429159673. This does not justify the native An
+under that model; it is not an independently calibrated physical upper limit
+including template, detector or alignment uncertainty.
+
+Source-aware diagnostics use all four signed sources and quadratic Sumw2,
+refit the complete original sequential chain, and redistribute pi_n, pi_Delta
+and SIDIS. For Center/high/t3, original applied amplitudes (n,Delta,SIDIS)
+=(0.1822022441,0.5690006384,0); diagnostic source-aware amplitudes
+=(0,0.2354685927,0.5035628808). No original model was overwritten.
+
+In the existing exact allcuts [1.10,1.16] GeV window, original Local-t applied
+background is 0.0607858263 counts/effective mC against common kaon input
+0.3322737413 (18.294%). The complete source-aware diagnostic gives 0.0695184208
+(20.922%), a change of +0.0087325945. A prior partial neutron-only change gave
+0.0720356192 and is not the complete refit. ROOT FindBin-inclusive histogram
+integration spans [1.096,1.162) GeV and gives original 0.0655431052; never
+silently compare that bin integral with the exact event-cut scalar. Fixed-weight
+exact sigma=0.00335605794 is not fit/model uncertainty. These are proposed
+subtractions, not measured true pion fractions or final physical yields.
+
+Retained complete sequential study: 4,800 distribution draws across eight
+generating laws, 300 nested outer draws, and the sparse-law 400-inner extension;
+119,300 sampled estimator evaluations, zero numerical failures, 388 recorded
+checks and 13 regression tests passed. Protected rejections remain recorded
+separately from solver failures. This checkpoint did not repeat that Monte Carlo.
+Source-aware staging improves some conditional laws but not all variances or
+intervals. Sparse-law basic 95% interval coverage is 90/100 (binomial MC95%
+[0.823777,0.950995]); percentile coverage is 96/100, not permission to choose
+an interval after looking at coverage. Full conditional source-refit covariance
+and conditional model bias/MSE were computed. Universal coverage, physical
+component truth, total template/systematic covariance and physical bias/MSE
+remain NOT VERIFIED; they are not all being deferred as missing covariance.
+
+SOURCE VERIFIED: the protected pi_Delta fitter initializes applied coefficients
+to zero and copies proposals only after acceptance. Rejection changes actual
+transfer/subtraction; early An/ASIDIS and pion denominator do not revert.
+Center/high/t2 can cross the unchanged p>=1e-6 gate under the alternative
+statistics. This is an intentional conservative fallback, not permission to
+accept rejected proposals or loosen thresholds. Lambda preservation compares
+against R_preDelta after early n/SIDIS removal, so it cannot validate that
+earlier removal. A large proposed coefficient/curvature sigma alone is not
+independent physical support.
+
+### Final independent-information gate: Outcome B
+
+SOURCE VERIFIED dependency trace at the source above:
+
+1. utility/pion_component_shapes.py normalizes selected SIMC channel shapes;
+   cuts/pion_t_template_comparison.py::compare_parent freezes parent alignment,
+   input identity and configuration, then refits the same parent observations.
+   Genuine independent event generation gives shapes, not an independent
+   normalization of pi_n/pi_Delta/SIDIS leaking into kaon PID.
+2. pion_component_fits.py::_run_staged_component_pass constructs each residual
+   from the same target and earlier fitted coefficients. The SIDIS stage
+   precedes the protected Delta/Lambda solution; their projected support in
+   its anchor is therefore a possible omitted mean, not known species counts.
+3. _apply_signal_protected_pi_delta_fit builds R_preDelta=K-An*Tn-ASIDIS*TSIDIS.
+   _fit_lambda_gauge fits the Lambda amplitude to that residual in the gauge
+   window; its Gaussian constraint uses the same observations. Neither a
+   prior label nor protected status makes this an independent measurement.
+4. The retained parent/child JSONs supply spectra, source accounting, SIMC
+   provenance, fits and transfer/application evidence. They supply no independent
+   component-resolved anchor calibration or disjoint held-out fit record.
+   Children overlap their parent; neighboring settings have different mixtures.
+   Pion PID is a different selection, with no independently calibrated
+   component-specific pion-to-kaon response map supplied here. It cannot fix
+   kaon PID fractions merely by copying pion-control fractions.
+5. testing/pion_local_t_event_validation_capture.py uses source SHA + source
+   label + tree-local entry for five partition folds, explicitly full-data
+   models. Cross-PID common physical-event grouping/raw training dependencies
+   are absent from the supplied packet evidence; statistical_validation and
+   replay explicitly report no held-out estimator. This older low-epsilon
+   machinery supplies no independent Center/high/t3 anchor constraint.
+6. The November 3 mean-closure/oracle records contain known injected component
+   means and show why cross-talk matters; they are synthetic controls, not
+   measured independent KaonLT constraints. The theses provide methodological
+   context, not this current kaon-PID anchor normalization. No external truth,
+   absolute SIMC calibration or detector-response constraint is fabricated.
+
+INFERENCE: source-count reconstruction/Sumw2 and histogram splitting alone
+cannot identify these means independently when the same full-data alignment,
+staged priors and residual gauge are reused. Independence is a property of the
+learning/calibration evidence and its covariance, not a renamed fit output.
+
+First missing input / single scientific NEXT: one independently derived joint
+constraint record for Center/high/t3 containing (i) non-SIDIS mean
+An*Tn+ADelta*TDelta+SLambda*TLambda in the existing SIDIS window
+[1.0601751288600272,1.1101751288600272] GeV and (ii) pion contribution in the
+Lambda gauge [1.105,1.125] GeV. It must state the frozen coordinate/bin and
+integration conventions, kaon PID/source normalization, component basis,
+calibration/training source identities, joint uncertainty and covariance with
+the evaluated signed source counts, and demonstrate independence or an
+independently validated transport from the populations used for evaluation.
+The overlapping windows require joint treatment, not two independent error bars.
+Do not require real physical species labels per event if a valid independent
+aggregate constraint can supply this information; none is present here.
+
+Only after that evidence exists is one bounded blind predictive closure of
+these windows and the actual iteration-zero Lambda-window background justified.
+No broad Monte Carlo repeat, empirical purity assumption, parent/child reuse as
+holdout, threshold tuning, new fitting algorithm, farm acquisition, production
+change or speculative correction contract follows from this checkpoint.
+CURRENT owns this NEXT after independent memory-diff review and user-controlled
+publication/pushed-state verification. The separate matched-cohort owner failure,
+absolute-SIMC limitation and all closed phase scopes remain unchanged.
+
+
+## Scientific memory consolidation and synchronization — November 3
+
+The preceding Work checkpoint finished with **Outcome B**, no correction
+contract, and four local memory-file changes. SOURCE VERIFIED: the incoming
+files and complete actual diff matched that checkpoint's final deliverables
+exactly (diff SHA-256
+`599fd1c6ccc7f2021426a5efce2c23091d8fcf4798316d1403d485be4082f70d`).
+The prior review ZIP SHA-256 is
+`6cf5a750a81568fb191ab28dcf41e57f644909e57918001215ff11e24b0bd581`.
+Its CRC/member hashes, 12 input identities and 21 committed-source identities
+were rechecked. No unexpected edits or external review corrections were supplied.
+At the November 3, 2026 consolidation checkpoint, the preceding candidate
+was unaccepted pending independent actual-diff review.
+
+CURRENT is consolidated to one active objective/work item/NEXT; its former
+supporting status detail is retained below without changing phase acceptance.
+The complete preceding November 3 investigation section remains unchanged.
+MEMORY clarifies SIMC pi_n/pi_Delta/pi_SIDIS ownership and that initial
+K+Lambda SIMC is provisional: main_iter reloads prior data while iterating SIMC
+weights. This is not a mechanism for correcting an iteration-zero pion estimate.
+The earlier initiating Global-vs-local visual observation is historical context,
+not the current candidate preference. All prior numerical findings, conditional
+limitations and failed invariants above remain; no science study/test was rerun.
+
+Single scientific NEXT remains the independent joint anchor-component constraint
+specified above, with normalization/provenance and joint covariance to evaluated
+counts. SOURCE VERIFIED records source/candidate integrity; supplied October 30
+completion remains RUNTIME VERIFIED only for acquisition. Closed-scope acceptance
+is MEMORY ONLY in this pass; peak preservation/physical plausibility remain
+INFERENCE. Physical mixture truth/bias/MSE, universal coverage, total model
+systematics and production adoption remain NOT VERIFIED. The source-aware
+diagnostics are not approved corrections. No new contract, source change,
+Method-A/B promotion, farm command, commit or push follows from consolidation.
+
+### Historical status details retained from CURRENT
+
+The following is the supporting status context carried from the incoming
+unreviewed November 3 CURRENT candidate, not a second active-state authority.
+Relative links are adjusted for this investigation's directory. Original
+acceptance belongs to the linked contracts/evidence, with their original limits;
+these paragraphs grant no new acceptance or NEXT. CURRENT alone owns active state.
+
+Separately `BLOCKED`: ninth supplied matched-cohort acquisition failure at published
+`902fa7d292a20b445d8e3e5d1aa49978e922d1e7`; the prior OUTPATH fix is published,
+not runtime acceptance. RUNTIME VERIFIED only as attributed to supplied
+status/process excerpts in the
+[memory-only contract](../phases/kaonlt-ninth-attempt-accountability-memory-update-2026-10-24-task-contract.md):
+`external_input_verification` / `source_changed_during_hash`, before analysis.
+The snapshot hashed 336,715,800,553 bytes in 1,818.525 s; no admissible fresh
+science. Final preservation was incomplete; termination, cleanup and shared
+preservation remain NOT VERIFIED. The
+[incident checkpoint](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#ninth-failure-io-cost-and-assistant-accountability--october-24)
+records cost, unknown cause and repeated assistant readiness/workflow failures.
+SOURCE VERIFIED: the owner fully hashes existence-only skim inputs. October 20
+remains accepted science (MEMORY ONLY here); this closeout authorizes no repair,
+new phase or tenth attempt.
+
+The [matched-cohort owner](../phases/kaonlt-pion-matched-cohort-attempt-isolation-2026-10-21-task-contract.md)
+retains private output/input copies, stable external roles and VOLATILEPATH,
+default/Plot caller probes, both epsilon prepasses, diamond-selection parity,
+optional unconfigured Sigma0 fallback and strict configured-file checks.
+Only its child enables both observers. Original inputs, shared outputs,
+external links, installed/copied packages and fresh six-parent A/B/event
+joins/closure must pass before delivery. Launchers, isolation helpers, installed
+`ltsep` and production physics remain unchanged. Local synthetic checks grant
+no farm readiness or scientific acceptance.
+
+Frozen `shift_prep` writes `MM_shift`/`t_shift` only in private copies. Original
+hashes/inodes and runtime-container identities remain separate; fresh A/B and
+packets must match the latter. Real ROOT writes, current farm inputs and
+preservation remain NOT VERIFIED here.
+See the [October 22 source checkpoint](../investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#matched-cohort-private-acquisition-source-checkpoint--october-22).
+
+The same CLI's explicit offline mode verifies the new bundle, reconstructs six
+B controls, fits seven fresh C strengths per parent and replays signed events
+with distinct A and fixed protected-applied `K_B` for B/C. Original/runtime
+identities, event/cut/template/fit provenance, source/phi-child closure, MM/tail
+statistics, production conventions and paired fixed-weight errors remain in the
+detached six-parent JSON/PDF. Historical pins stay strict; no historical C reuse.
+
+No matched event farm bundle or event-level physical C result is available here.
+Historical
+A/B/C remains immutable and cohort-specific. The earlier failed capture at
+`04f1ec403a9555634e61c229aa347cb76d0c78d3` and published
+[prepass boundary repair](../phases/kaonlt-pion-event-capture-prepass-boundary-fix-2026-10-21-task-contract.md)
+retain their recorded limits; failed artifacts supply no event acceptance.
+The [independent event-validation objective](../phases/kaonlt-pion-adaptive-c-event-validation-2026-10-21-task-contract.md)
+remains: full-sample fits/priors/protected models do not provide a held-out fitted
+estimator. Training-only refits, physical bias truth and MSE selection remain
+unavailable. No strength is selected or promoted.
+
+The [controlled template comparison](../phases/kaonlt-pion-t-template-controlled-comparison-2026-10-19-task-contract.md)
+and [execution gate](../phases/kaonlt-pion-t-template-science-execution-gate-2026-10-19-task-contract.md)
+were source reviewed, user-pushed and farm-run at
+`6d13abb4681b938c56def2a1f455244b0880096c` (SOURCE VERIFIED / RUNTIME VERIFIED,
+scope attributed to supplied artifacts and prior review in the October 20
+contract). Center/Left lowe canonical t1/t2/t3 detached JSON/PDFs and receipts
+were accepted for that diagnostic scope. Candidate t-local templates do not
+establish a scientific preference or production adoption; baseline remains
+authoritative. Center/t2 staged validation worsens, and both protected-delta
+candidates are rejected with applied pi_delta zero. Detailed metrics, evidence
+limits and nomenclature are in the checkpoint. No local farm/artifact rerun.
+
+Prior evidence/reviews own acceptance. The user-requested
+[memory correction](../phases/kaonlt-science-gate-displacement-memory-correction-2026-10-17-task-contract.md)
+records the [assistant's October 15–17 workflow failure](../investigations/kaonlt-science-gate-displacement-2026-10-17.md).
+It is detached from farm science and clears no runtime gate.
+
+- [Full-chain diagnostic](../phases/baseline-pion-full-chain-observability-2026-10-15-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING` for independent validation.
+  RUNTIME VERIFIED only as supplied/prior-reviewed in the
+  [October 18 contract](../phases/kaonlt-low-epsilon-baseline-science-memory-checkpoint-2026-10-18-task-contract.md):
+  all-low debug `f1d1984b5e0fca9ba3c5666477996af783423db7`,
+  `DEBUG_EXIT_STATUS=0`, Center/Left lowe PDFs and Center t1/t2/t3 seven-stage
+  JSON/PDF (19 pages). No populated Right/lowe result. Producer status remains
+  `captured_pending_independent_validation`; `observed_source_HEAD=not_provided`.
+  Checkout verification does not fill missing artifact identity. The reviewed
+  eight-member `KaonLT_loweps_20261018_093137.zip` establishes neither full
+  independent provenance/checker acceptance nor production/normal-launcher isolation.
+
+- [Attempt-output isolation](../phases/kaonlt-pion-full-chain-attempt-output-isolation-2026-10-16-task-contract.md):
+  `BLOCKED`: the historical helper reports
+  `post_clean_background_output_mkdir_outside_attempt` unconditionally for an
+  external background directory. The revised owner audit below distinguishes
+  existing input setup from actual writers; this negative helper grants no PASS.
+  Source checks retain the frozen ancestor and record current HEAD.
+  No safe normal-launcher proof or farm readiness.
+
+- [Safe path interface](../phases/kaonlt-pion-full-chain-safe-output-path-interface-2026-10-16-task-contract.md):
+  `BLOCKED`: `effective_charge_default_root_outpath_not_verified`.
+  [Resolver attestation](../phases/kaonlt-pion-full-chain-ltsep-default-root-attestation-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; installed behavior NOT VERIFIED;
+  both isolation blockers remain.
+  [Receipt repair](../phases/kaonlt-pion-ltsep-receipt-canonical-globus-repair-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; canonical-role policy preserved.
+  [History compatibility](../phases/kaonlt-pion-receipt-regression-history-compatibility-2026-10-16-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; explicit mutual helper/test
+  successor lists repair the committed-history rejection without changing frozen
+  source checks. Pre-existing local report: 47 WSL synthetic/history/isolation tests plus eight
+  Windows Python owner regressions passed (55 total); initial WSL import lacked
+  NumPy. Not rerun by this memory correction. The October 17 receipt/history
+  repair is published at `dceaadb87f303c0c406978b2d85a2728b5bd2056`;
+  publication establishes no farm readiness or completed execution owner.
+  Supplied JLab attempt stopped at `receipt_directory_symlink`; no resolver acceptance.
+
+- E.8.2 Left/lowe: `CLOSED / RUNTIME VALIDATED` per
+  [closure](../evidence/e8-2-left-lowe-runtime-scientific-closure-2026-10-06.md).
+  Final baseline `after_pion_final/MM_0`, stored `Y0`; stage integrals are diagnostics.
+- E.8.3 Left/lowe and authority-page repair: `CLOSED / RUNTIME VALIDATED` per
+  [closure](../evidence/e8-3-left-lowe-runtime-closure-2026-10-07.md).
+  Historical F.6.1 is separate from current F.6.3/E.8.4.
+- E.8.2 baseline-five `Y0/MM_0`: `CLOSED / RUNTIME VALIDATED` per
+  [October 9](../evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md):
+  135/135 data and SIMC gates, original PDF limits. The
+  [QA](../evidence/e8-baseline-five-extracted-yield-scientific-qa-2026-10-11.md)
+  adds no physics acceptance or proof of all component-decomposition physics.
+- F.4.Refresh.2 and Left/lowe F.6.3/E.8.4: `CLOSED / RUNTIME VALIDATED` within
+  [accepted scopes](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md):
+  live-cache parity, real child changes, signed parent preservation.
+  Fix.5.7/Fix.5.8 retain provenance and
+  [97-page legibility closure](../evidence/e8-4-fix5-8-left-lowe-runtime-closure-2026-10-03.md).
+  Earlier F-stage closures and source-reviewed hardening remain in the roadmap.
+- [October 12 and October 13 addendum](../evidence/e8-current-snapshot-contribution-runtime-closure-2026-10-12.md):
+  `CLOSED / RUNTIME VALIDATED` only for five-F.1 candidate materialization,
+  read-only seven-input preflight, eight-page Left/lowe t0/t1/t2 diagnostic at
+  `75756d7b32767f18949386c4c5864c756d5e85f6`; internal coherence PASS,
+  canonical-owner equivalence BLOCKED. Fingerprint/Neff failures resolved only
+  here; no authority replacement. October 13 at
+  `c8e830f38cf59a22b7b6d9753b1a847fe1124e70`: Left/lowe presentation only,
+  eight pages inspected, 5–8 physical 0.8–1.4 GeV/distinct UF/OF; numerical
+  objects/October 12 acceptance unchanged, no Center MM/PDF closure.
+- [Paired extension](../phases/e8-current-snapshot-paired-lowe-phi-mm-extension-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; separate Left/Center lowe
+  aggregates, 16 pages, default eight-page Left-only path preserved. Later paired
+  progress MEMORY ONLY; no independent closure/receipts/hashes/16-page acceptance.
+  Left-only conclusions stay setting-local; priority interrupted, not failed.
+- [Component diagnostic](../phases/baseline-pion-center-t2-neutron-anchor-diagnostic-task-contract.md):
+  `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; capture/cause NOT VERIFIED.
+  [Farm-owner](../phases/baseline-pion-center-t2-anchor-farm-owner-task-contract.md)
+  stays `BLOCKED` before implementation on output isolation; the tracked
+  [isolation proposal](../phases/baseline-pion-center-t2-attempt-output-isolation-task-contract.md)
+  is preserved, not launched, prerequisite only for a future normal-launcher run.
+  These contracts do not define NEXT.
+
+## Verified State
+
+[Durable rules](../MEMORY.md) retain Gate-3/HGCer/transfer roles, F.6.2 acceptance/MM
+scope and t1-only continuity. Absolute mis-ID/proxy/hardware/RF remain NOT VERIFIED.
+`YA/MM_A` is reweighted baseline; standalone Method-A-only final yield/MM is
+NOT VERIFIED. Signed parents, no child normalization, existing errors and
+`MM_0/MM_A`, `Y0/YA` consumers are frozen; no child/yield closure inferred.
+
+## Source / Evidence Identity
+
+Linked records retain source/farm/artifact identities. Frozen reviewed F.4 SHA-256:
+`79e7ceda7221cbeeead4ed5bc306b0e0e670741a27beaa980e22349c555e96d7`.
+
+## Blockers
+
+Private canonical-five Method A and final E.8/F.6.4 remain `BLOCKED`:
+`f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`.
+October 8 owner `ebf3a0be2f50c788c22defe3601fd5b7fee48644`: F.2/F.3 exact PASS,
+F.4 exact FAIL in three Left-lowe parents before analysis; no retry.
+Roadmap retains the historical second-full-run page/artifact failure
+and separate [lineage-only preflight](../evidence/e8-4-canonical-five-lineage-preflight-runtime-closure-2026-10-05.md),
+`CLOSED / RUNTIME VALIDATED` (`analysis_started=false`). F.2 handoff/staging, F.1 preflight repairs and detached
+reproducibility diagnostic remain `DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`;
+microscopic F.1/F.4 archaeology `DEFERRED`. Production correctness unproven.
+
+Absolute SIMC separately `BLOCKED`:
+`SIMC_normfac_luminosity_and_charge_units_not_source_proven`.
+`iter_weight * normfac / Ncontribute` units unproven; two absolute-SIMC page
+families unavailable, not data/identity/yield/parent closure. No scale claim.
+
+Historical normal-launcher/attempt isolation remains separately `BLOCKED`:
+`merge_error_log_outside_attempt` (`-c` merge writes through external `log`),
+`effective_charge_default_root_outpath_not_verified`, and
+`normal_launcher_downstream_write_coverage_unproven`. External SIMC/background
+link repair can also write outside an attempt. Plain `-d` does not invoke
+`-c`; its successful observed run does not clear those broader gates. Setup,
+path configuration and all scientific source remain frozen. The prior
+[debug contract](../phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md)
+and [workflow investigation](../investigations/kaonlt-science-gate-displacement-2026-10-17.md)
+retain historical scope; no owner/pathing/attestation cycle is authorized here.

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16370,
+      "bytes": 6762,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "9dd4f036e4661e4e8db5f6451f29685fbb1b5864ae0ec5a3bd6458b1f2c7e3ea"
+      "sha256": "3379e3aa5c3df26b8a528cc2da8375c5b970825de229a4737458fcfe4dcf9fc4"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 29898,
+      "bytes": 30719,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "b5355e0a2433c17d99669b7d0225d9da3754e9d5839727c9ef1dadf20a7c80a0"
+      "sha256": "628cefb15234913ed7c86ea46847d1fa968415387141fada031bb75a5de4d63c"
     },
     {
       "bytes": 3606,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 109643,
+      "bytes": 138435,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "6a1b4ab2dff7c86d221ee985efc5e169cc2614c9b5c9b4a05177ed47bbde2625"
+      "sha256": "056b9c9637405d3d71ee4992180dc9d08e3f9d8c5e8b4bbbd62f1084b82a5580"
     },
     {
       "bytes": 23507,

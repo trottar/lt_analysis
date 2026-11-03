@@ -68,6 +68,19 @@ component definitions, normalizations, binning, efficiencies, acceptance, L/T
 separation, and uncertainty propagation remain frozen unless a narrow approved
 contract explicitly owns a change.
 
+### Pion statistical interpretation
+
+SIMC pi_n/pi_delta/pi_sidis shapes estimate pion contamination. Subtract once
+at iteration zero; later K+Lambda SIMC iterations reuse it. Local-t is the
+leading candidate, not production-adopted; initial K+Lambda SIMC is provisional.
+High epsilon has no RF slow-proton subtraction. Scalar empty-error fallback
+fails equivalent-unit invariance. Source-aware refits establish conditional
+behavior, not universal coverage or physical bias/MSE. Staged priors and the
+residual Lambda gauge reuse data; shapes do not fix kaon-PID composition.
+Protected Delta acceptance cannot validate earlier pion removal. Judge applied
+background beneath Lambda, not full-MM chi2. Missing Sigma0 input is a separate
+improvement. Diagnostics are not corrections; see the November 3 investigation.
+
 ## HGCer and Method-A/Method-B boundaries
 
 Method A and Method B are independent. Method B uses frozen upstream records
@@ -100,8 +113,8 @@ nuisances, distinct from authoritative absolute normalization. Never force unity
 by area-matching final signal SIMC. Unproven absolute SIMC units still block
 absolute interpretation; diagnostic shifts/scales authorize no production change.
 
-Preserve the full scientific question when narrowing a diagnostic: the user's
-visual comparison places deterioration during canonical-t model construction/
+Historical October initiating observation, not November model preference:
+the user's visual comparison places deterioration during canonical-t model construction/
 refinement, before final pion subtraction; the setting-wide model appears more
 sensible. This observation and the report of earlier working behavior establish
 neither accepted model quality, an exact first-bad operation, identical canonical-t
