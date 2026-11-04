@@ -70,12 +70,14 @@ Separately BLOCKED: canonical-five Method A/final E.8/F.6.4 at
 microscopic F.1/F.4 archaeology remains DEFERRED. Absolute SIMC remains BLOCKED
 at `SIMC_normfac_luminosity_and_charge_units_not_source_proven`; this affects
 absolute interpretation, not valid data-only/identity/yield/parent closure.
-The prior [Step 5 Work audit](investigations/simc-absolute-normalization-ledger-2026-11-03.md)
+The [historical SIMC Work audit](investigations/simc-absolute-normalization-ledger-2026-11-03.md)
 is retained with provenance, not adopted as a new prerequisite or demonstrated
 normalization correction. The [November 3 accountability correction](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md)
 requires preserving mature functionality and the approved priorities; no repeated
 audit or generator archaeology follows without concrete new defect evidence and
-user authorization. Outcome B and the scientific NEXT are unchanged.
+user authorization. Existing fitting/subtraction machinery is available for
+the recorded bounded blind predictive closure once qualifying new evidence is
+independently reviewed. Outcome B and the scientific NEXT are unchanged.
 The earlier normal-launcher isolation blockers and matched-cohort ninth failure
 (`external_input_verification/source_changed_during_hash`) remain in the
 historical details and [incident record](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md).

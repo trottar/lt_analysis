@@ -15,15 +15,33 @@ The scope is Q4p4W2p74 Left/low, Left/high, Center/low, Center/high and
 Right/high: 15 canonical-t parents and 135 phi cells. Preserve explicit support,
 empty and unavailable classifications; no fabricated final coverage.
 
-| Step | Scientific milestone and boundary |
+| Step | Scientific milestone and existing infrastructure |
 | --- | --- |
-| 1 | **BLOCKED**: resolve Center/high/t3 physical/statistical component normalization and transferred background through the independent joint anchor-mean gate in CURRENT. Outcome B remains; no production statistical correction. |
-| 2 | **DEFERRED** pending Step 1: finalize Local-t across all five settings, validating fitted pion-control denominators, pion-only kaon numerators, transfer weights and actual signed-event subtraction. |
-| 3 | **DEFERRED**: scientifically accept Local-t-subtracted `MM_0(t,phi)` and producer-owned `Y0(t,phi)` with the established random/dummy/proton/pion treatment and uncertainties. Prior accepted numerical/presentation scopes remain closed. |
-| 4 | **DEFERRED** forward work: resume E.8.3 -> F.6.3 -> E.8.4 -> F.6.4 in the [approved dependency structure](../decisions/e8-full-analysis-procedure-roadmap.md#approved-dependency-order). Preserve accepted narrow Left/low results; resolve the recorded canonical-five F.4 scientific-equivalence gate when active; validate other settings before production promotion. Final E.8 closure retains its established place before F.6.4. |
-| 5 | **BLOCKED**, separate absolute-SIMC authority: resolve `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. The prior [Work audit](../investigations/simc-absolute-normalization-ledger-2026-11-03.md) is retained as history, not a demonstrated correction or new execution prerequisite. Preserve existing SIMC machinery and accepted numerical closure; no repeat investigation/redesign absent concrete new defect evidence and user authorization. No empirical MC renormalization. |
-| 6 | **DEFERRED**: validated data/SIMC yield ratios using matching canonical cells, Lambda windows, producer-owned yields/errors and statistical, normalization and correlated systematic uncertainties. |
-| 7 | **DEFERRED**: existing K+Lambda SIMC cross-section iterations followed by established cross sections/L/T extraction. Pion subtraction stays fixed after iteration zero. |
+| 1 | **BLOCKED**: Center/high/t3 pion-component normalization, established Outcome B. Preserve sparse-anchor, component cross-talk and source-aware conditional results. Only genuinely new independently derived/calibrated joint-component evidence can reopen the exact gate in CURRENT; after independent review, use the existing fitting/subtraction machinery for one bounded blind predictive closure. No repeated fit studies, synthetic experiments, zero-photoelectron work, archival search or replacement correction. |
+| 2 | **DEFERRED** pending the relevant Step 1 gate: final scientific validation of selected Local-t using the existing fitted pion-control denominator, kaon-side pion numerator, transfer weights and signed-event application. Model selection is settled; Global/Local-(t,phi) remain historical comparisons. No component-fit redesign. |
+| 3 | **DEFERRED** for final scientific acceptance: use existing baseline `MM_0(t,phi)` and producer-owned `Y0(t,phi)`. The accepted [October 9 E.8.2 canonical-five numerical/runtime closure](../evidence/e8-2-canonical-five-baseline-yield-runtime-closure-2026-10-09.md), 135/135 data and 135/135 SIMC yield/MM checks, remains complete within its scope; do not repeat it or rebuild producers. Remaining work is acceptance of final physical subtraction and relevant uncertainties. |
+| 4 | **DEFERRED** forward work; preserve separately recorded blockers: E.8.3 -> F.6.3 -> E.8.4 -> final E.8 -> F.6.4, in the [approved dependency order](../decisions/e8-full-analysis-procedure-roadmap.md#approved-dependency-order). Preserve accepted F.1-F.4/F.6.1/F.6.2, [Left/lowe F.6.3/E.8.4 closure](../evidence/f6-3-e8-4-left-lowe-runtime-closure-2026-10-01.md), and exact canonical-five F.4 failure `f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`. Primary comparison is Local-t versus Local-t + Method A; no retraining/redesign, equivalence bypass or failed-owner rerun without independently reviewed admissible resolution. |
+| 5 | **DEFERRED**: final data/SIMC yield ratios using existing normalization, event weights, yield producers and [ratio implementation](../../../src/binning/calculate_ratio.py). These are implemented functionality. Validate final ratios with accepted background-subtracted yields, matching canonical cells/windows, valid support and properly propagated uncertainties. Preserve the scoped absolute-unit caveat below; no standalone normalization investigation, rescaling or invented prerequisite. |
+| 6 | **DEFERRED**: continue the established SIMC cross-section iterations and L/T separation using existing machinery. Pion subtraction is applied once at iteration zero; later SIMC iterations reuse that result. No iteration or extraction redesign. |
+
+Existing normalization/weight/yield owners remain
+[`get_eff_charge.find_events`](../../../src/normalize/get_eff_charge.py),
+[`iter_weight`](../../../src/simc_ana/iter_weight.py), and
+[`process_hist_simc` / `calculate_yield_simc` / `find_yield_simc` / data producers](../../../src/binning/calculate_yield.py).
+They already consume SIMC `.hist` normalization and apply `normfac/Ncontribute`.
+Random/dummy and slow-proton treatment, three-component pion transfer,
+`no_empirical_residual`, cuts, binning, efficiencies, uncertainty conventions and
+L/T ownership remain frozen. Remaining physical acceptance does not mean these
+procedures need implementation again.
+
+The recorded `SIMC_normfac_luminosity_and_charge_units_not_source_proven`
+limitation remains within its existing absolute-interpretation scope. It is not
+a standalone remaining milestone, authority for another audit, a numerical
+rescaling or a new prerequisite. The [historical SIMC Work ledger](../investigations/simc-absolute-normalization-ledger-2026-11-03.md)
+records what was investigated; it directs no future work. The
+[November 3 accountability record](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md)
+governs the assistant's planning failure. No repeat normalization investigation
+is authorized.
 
 Method A remains the separate HGCer relative-response refinement. Preserve
 accepted F.1-F.4 and F.6.1/F.6.2 evidence, F.4 signed parent normalization and

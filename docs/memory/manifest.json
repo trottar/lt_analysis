@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7760,
+      "bytes": 7921,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "95058ec928490faa89bb22dad43a646e482a9ed8af366bc6ab675620316aa14c"
+      "sha256": "c8071963bfa6ce24bf43327ed1902321551f4331360e70860e3ff3620cb12b1b"
     },
     {
       "bytes": 11186,
@@ -456,9 +456,9 @@
       "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
     },
     {
-      "bytes": 4314,
+      "bytes": 4714,
       "path": "docs/memory/investigations/simc-absolute-normalization-ledger-2026-11-03.md",
-      "sha256": "85577dafa6b212fe7aee7db913fdff27eda080b338e98278f233a9890cf91e2a"
+      "sha256": "368efc84b66a66b456186d7d97975a43036878d64b5fb452b037e44e4ae8286e"
     },
     {
       "bytes": 2348,
@@ -1641,9 +1641,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 34769,
+      "bytes": 36840,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "96d521a38f04815f52683de4aa03d9424c65e5cceceb446f4cbd4f492f99768e"
+      "sha256": "85cf23ceb90ec2c77a42c7191ada93cf16af377c582a09b7cbd6a71ea233a472"
     },
     {
       "bytes": 1698,

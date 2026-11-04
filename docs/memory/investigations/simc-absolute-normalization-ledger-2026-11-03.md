@@ -14,8 +14,10 @@ remain. Preserve the existing absolute-unit evidence limitation within its scope
 ## Scope and result
 
 SOURCE VERIFIED: read-only audit at local/live remote `test`
-`5d5c372007b926bd5245e0f0d8283c98a06da851`. Step 5 was explicitly authorized
-independently of Center/high/t3 Outcome B, which was not reinvestigated.
+`5d5c372007b926bd5245e0f0d8283c98a06da851`. This was the assistant-commissioned
+normalization detour identified in the accountability record, not an independently
+approved scientific priority. The former "Step 5" label is historical; current
+Step 5 is final data/SIMC yield ratios. Outcome B was not resolved by this audit.
 Absolute interpretation remains **BLOCKED**; no production or status promotion.
 
 KaonLT `get_eff_charge.find_events` applies `normfac/Ncontribute`;
@@ -55,9 +57,10 @@ The 36 displayed SIMC zeros comprise 33 exact-zero integrals and three positive
 integrals rounded to `0.0000`. Preserve that distinction before later ratios;
 do not infer support from rounded text alone. Existing narrow closures remain.
 
-## Stop gate and evidence
+## Historical evidence limitation and artifact provenance
 
-First missing physical input: **sample-linked simulated integrated charge and
+The audit recorded this missing input in its offline evidence, not a new
+execution gate or instruction to collect it: **sample-linked simulated integrated charge and
 generating input/source authority**, including original `.hist` normfac,
 Ncontribute, charge/luminosity, genvol and linked weight/model conventions.
 The known-hash Left/low and Center/low `.hist` identities are retained in the
@@ -68,5 +71,6 @@ implementation contract, empirical scale or final physical ratio follows.
 ledger, pinned-source extracts, 135-cell closure CSV, numerical receipts,
 actual memory diff and preservation checks. The prior Work package's 37
 manifest members were verified without repeating its investigations.
-CURRENT alone owns the scientific NEXT. Independent evidence/diff review,
-user publication and pushed-state synchronization remain required.
+This historical ledger directs no future study or generator-record acquisition.
+CURRENT alone owns the scientific NEXT. Its existing independent-constraint gate
+and the approved six-step roadmap govern resumption; this audit adds no prerequisite.
