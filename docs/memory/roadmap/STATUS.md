@@ -58,6 +58,25 @@ CURRENT alone owns the exact active NEXT. The
 records the narrow Step 1 evidence audit; all historical statuses below retain
 their original scope.
 
+## Parent-t reconstruction subparts — November 4 user extension
+
+Explicitly user-authorized parallel diagnostics under Step 3 yield validation
+and Steps 5-6 downstream cross-section progression, not replacement phases or
+new prerequisites. The six-step table above and all accepted scopes remain
+unchanged; production Step 1 Outcome B is not bypassed. See the
+[Part 1 record](../investigations/parent-t-reconstruction-part1-2026-11-04.md).
+
+| Subpart | Scope and status |
+| --- | --- |
+| Part 1 — baseline parent-t reconstruction and bin-quality audit | `SOURCE REVIEWED` for the authorized offline audit, originally ACTIVE for this Work task: exclusion/suppression source traced, 135 Local-t integrated reconstructions inventoried, 15 signed sums and selection/covariance limits evaluated. Direct serialized Local-t MM_0/Y0 and equivalent direct-parent/full-covariance closure remain `BLOCKED` on missing evidence. Not physical acceptance or full-2pi reconstruction; E.8.2 closure was not repeated. |
+| Part 2 — acceptance-aware reconstruction | `SOURCE REVIEWED` for user-authorized offline input-authority and conditional angular diagnostics across all 15 parents. Physical acceptance fold/completion remains `BLOCKED`: actual matching KLambda harmonic response, exact Local-t producer values and full covariance unavailable. Left t1 reference rank 2/3; Center/low t1,t2 support bounded conditional prediction tests. No physical interference/full-azimuth result or Method-A application accepted. See the [Part 2 record](../investigations/parent-t-reconstruction-part2-2026-11-04.md). |
+| Part 3 — Method-A-assisted reconstruction | `DEFERRED`: repeat the accepted reconstruction methodology using Local-t + Method A; measure parent stability, child sensitivity and uncertainty redistribution. Preserve parent-normalized event weights and accepted F.4/F.6 evidence; no retraining, canonical-five blocker bypass or production promotion. Not executed. |
+| Part 4 — validation and cross-section consequences | `DEFERRED`: held-out angular cells, covariance, exclusion sensitivity, data/SIMC ratios and eventual L/T consequences; identify reliable, systematic-limited and angularly unidentifiable quantities. Not executed. |
+
+No production source, cuts/binning, subtraction, uncertainty convention or
+exclusion rule changed. Negative signed yields remain measurements, not an
+automatic deletion criterion. CURRENT alone owns the exact active action.
+
 ## Frozen upstream program
 
 Random subtraction, slow-proton PID cleaning, pion component subtraction, Method-A diagnostics, and Method-B closure retain separate owners. Method B remains diagnostic/cross-check only and never numerically adjusts pion weights.

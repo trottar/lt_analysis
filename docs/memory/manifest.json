@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 7921,
+      "bytes": 8180,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c8071963bfa6ce24bf43327ed1902321551f4331360e70860e3ff3620cb12b1b"
+      "sha256": "c106f6989a3c73fb57a6c2035125b189900cd38f898205c45ddf4a9deed0adfb"
     },
     {
       "bytes": 11186,
@@ -454,6 +454,16 @@
       "bytes": 28637,
       "path": "docs/memory/investigations/kaonlt-science-gate-displacement-2026-10-17.md",
       "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
+    },
+    {
+      "bytes": 7811,
+      "path": "docs/memory/investigations/parent-t-reconstruction-part1-2026-11-04.md",
+      "sha256": "df0a6165d47042cf0a7ad619f79372ff20df333d11f4ace18a97eba41e38e400"
+    },
+    {
+      "bytes": 7963,
+      "path": "docs/memory/investigations/parent-t-reconstruction-part2-2026-11-04.md",
+      "sha256": "8b60e6619437367851aa9ede29e4169bfcc6cf3af07f67b1b5449b3193f2169c"
     },
     {
       "bytes": 4714,
@@ -1641,9 +1651,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 36840,
+      "bytes": 39299,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "85cf23ceb90ec2c77a42c7191ada93cf16af377c582a09b7cbd6a71ea233a472"
+      "sha256": "c28fe6e1a12e4758d567ae58b30371af10f3cf2e4e1d8023c173c13131e614ce"
     },
     {
       "bytes": 1698,

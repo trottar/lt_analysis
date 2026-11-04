@@ -5,35 +5,28 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: baseline-pion interruption, **Q4p4W2p74 / Center / highe / t3**.
-Preserve iteration-zero subtraction. Local-t is the user-selected scientific
-baseline for continued development and final analysis, not production-adopted
-physics. Global and Local-(t,phi) remain historical comparisons. INFERENCE from corrected spectra: the narrow
-Lambda peak is largely preserved; its background is mixture-sensitive.
-Full-spectrum chi2 is not the primary adequacy criterion beneath Lambda.
-High epsilon has no RF slow-proton subtraction. Missing configured Sigma0
-input is a separate improvement, not this blocker. Method A remains detached,
-B diagnostic/numerically excluded; normal [roadmap](roadmap/STATUS.md) forward
-work stays paused. No accepted scope is reopened.
+`ACTIVE`: user-authorized parallel Part 2 parent-t angular reconstruction
+investigation. Offline diagnostics are `SOURCE REVIEWED`; physical acceptance
+fold/completion remains `BLOCKED` on response/producer/covariance evidence.
+See [Part 2](investigations/parent-t-reconstruction-part2-2026-11-04.md) and
+preserved [Part 1](investigations/parent-t-reconstruction-part1-2026-11-04.md).
+Parts 3-4 `DEFERRED`. Local-t selected,
+not production-adopted; Global/Local-(t,phi) historical. Frozen subtraction,
+conventions, detached Method A and diagnostic/excluded Method B unchanged.
 
 ## Current Work Item
 
-The independent joint anchor-mean gate remains blocked on the missing
-independent component-mean evidence specified under Next Action.
+Part 2 evaluated all 15 parents using authentic Part 1 values and conditional
+ratio harmonics, not physical structure-function fits. Reference Left t1
+rank 2/3; Left/low t2,t3 correlations 0.978/0.999. Center/low t1,t2 condition
+numbers 2.21/2.23 and group-held-out RMS pulls 0.99/0.97 support a bounded
+diagnostic Part 3 question, not physical acceptance. No actual KLambda harmonic
+response was available. Uniform/tilted within-bin measures are explicit stress
+hypotheses, never substituted for measured acceptance. Full physical parent
+results/errors remain null. 65 scoped checks and eight independent tests pass.
 
-`BLOCKED`: independent joint anchor-mean gate, **Outcome B**. SOURCE VERIFIED:
-scalar empty-error handling is not unit-covariant; staged/gauge fits reuse the
-kaon data. November 3 source-aware diagnostics improve some conditional laws,
-not universal coverage or physical truth; they are not adopted. Acceptance/
-fallback changes actual subtraction. No independent normalized constraint on
-non-SIDIS contamination of the SIDIS anchor and pion contamination of the
-Lambda gauge was found. SIMC shapes and same-data amplitudes cannot supply it.
-A newly inspected retained Left/low zero-photoelectron diagnostic infers
-response from positive-NPE controls; it supplies neither required Center/high/t3
-mean nor their joint covariance. No speculative correction contract or implementation.
-
-See the [November 3 checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#scientific-memory-checkpoint-and-independent-anchor-gate--november-3)
-for hashes, source trace and results. Historical details below are linked context, not the active NEXT.
+Production independent joint anchor-mean gate remains `BLOCKED`, **Outcome B**.
+Exact requirement is retained below; no repeated component/normalization study.
 
 ## Verified State
 
@@ -54,9 +47,12 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-Local `test`, `origin/test` and public `test` matched
-`5d5c372007b926bd5245e0f0d8283c98a06da851` on November 3 before this roadmap
-update. Only memory differs from farm scientific source
+November 4 Part 2 startup: local `test`, `origin/test` and live public `test`
+matched `646ef3e1061f438a7367ee879eec9fb91f493e40`. Part 1 memory edits were
+still uncommitted and preserved, along with two unrelated review files. Part 2
+adds memory only; scientific source remains unchanged.
+
+Only memory differs from farm scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
 RUNTIME VERIFIED: supplied October 30 `20261030T022205` high-epsilon acquisition
 at the farm scientific source completed analysis, collection and nine-artifact verification.
@@ -64,6 +60,22 @@ Stored `evidence_admissible=false` and `scientifically_accepted=false` remain.
 That acquisition consumes the old ledger/fresh-high NEXT, not scientific acceptance.
 
 ## Blockers
+
+Part 1/2 producer-equivalent closure is `BLOCKED`: exact current-cohort Local-t
+child MM_0/Y0, valid/skip mask, equivalent direct-parent observable if one
+exists, and full cross-child error/covariance decomposition are unavailable in
+the inspected comparison/log inputs. Coarse observers and historical E.8.2
+values are not substitutes. Part 2 also lacks matched accepted KLambda
+harmonic response/model deweighting and response-MC covariance. Pion-template
+support and integrated SIMC masses do not supply it. No farm rerun authorized.
+
+Production Step 1 remains `BLOCKED`, Outcome B: independently derive the
+Center/highe/t3 non-SIDIS mean in the kaon SIDIS anchor
+`[1.0601751288600272, 1.1101751288600272]` GeV and pion mean in the Lambda
+gauge `[1.105, 1.125]` GeV, with joint uncertainty, covariance to evaluated
+signed counts and disjoint/calibrated provenance. Same-data staged/gauge fits
+cannot be relabeled truth. Independent review precedes the already scoped
+blind predictive closure. This parallel study clears none of that gate.
 
 Separately BLOCKED: canonical-five Method A/final E.8/F.6.4 at
 `f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`;
@@ -77,7 +89,7 @@ requires preserving mature functionality and the approved priorities; no repeate
 audit or generator archaeology follows without concrete new defect evidence and
 user authorization. Existing fitting/subtraction machinery is available for
 the recorded bounded blind predictive closure once qualifying new evidence is
-independently reviewed. Outcome B and the scientific NEXT are unchanged.
+independently reviewed. Outcome B remains unresolved; the authorized parallel Part 1 action does not bypass it.
 The earlier normal-launcher isolation blockers and matched-cohort ninth failure
 (`external_input_verification/source_changed_during_hash`) remain in the
 historical details and [incident record](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md).
@@ -86,16 +98,12 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — obtain one independently derived, source-identified joint constraint
-record for **Center/highe/t3**: non-SIDIS mean in the existing kaon SIDIS
-anchor `[1.0601751288600272, 1.1101751288600272]` GeV and pion mean in the
-Lambda gauge `[1.105, 1.125]` GeV, with joint uncertainty, covariance to the
-evaluated signed counts and disjoint/calibrated provenance. It must not be
-derived by relabeling the evaluated staged/gauge fits as truth. Require
-independent scientific review of the new constraint before one blind predictive closure of those windows and the actual
-iteration-zero Lambda-window subtraction with frozen inputs and conventions.
-This remains the scientific NEXT after memory review/publication and
-pushed-state verification; no farm acquisition or correction contract yet.
+NEXT — independently review Part 2 and scope whether the supported
+Center/lowe/t1,t2 conditional diagnostics warrant a bounded Part 3 comparison
+of frozen Local-t versus Local-t + Method A. Preserve the same support,
+predictive tests and covariance limitations; no execution/promotion is
+currently authorized. Physical reconstruction still requires the missing
+producer/response evidence above; Outcome B remains unresolved.
 
 ## Success Criteria
 
