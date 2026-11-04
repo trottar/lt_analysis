@@ -98,6 +98,34 @@ Always supply the exact direct task-contract move command using active external
 configuration and one short inline Codex launch prompt; keep personal paths out
 of tracked memory. These requirements authorize no unsafe farm operation.
 
+### November 3 explicit user correction: judgment before commissioning Work
+
+ChatGPT repeatedly reopened the selected Local-t method, commissioned redundant
+Outcome B and SIMC-normalization studies, and displaced the approved roadmap.
+These were avoidable ChatGPT planning/review errors, not user failures or a
+consequence of Work lacking farm access. Existing instructions were read but
+not applied. See the [accountability record](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md).
+
+The user-approved roadmap governs priorities. Preserve completed decisions,
+accepted scoped runtime evidence and mature analysis functionality. Before any
+substantial Work assignment, inspect relevant source and accepted runtime records:
+is it implemented, has its applicable gate passed, has the investigation already
+concluded, what specific new observable/result/invariant can this task evaluate,
+and does it directly advance the approved roadmap? Do not launch duplicate work
+or work with no demonstrated path to new evidence. A report/receipt is not itself
+scientific progress. Apply the existing displacement alarm before spending resources.
+
+A blocked gate or technically investigable independent topic does not authorize
+a priority change. A proposed alteration requires concrete new evidence and user
+authorization before becoming an execution task. Missing files in an offline
+review package do not establish missing production functionality or justify
+normalization archaeology, redesign, refactoring or repeated validation. Preserve
+the exact absolute-unit evidence limitation without inventing a correction or
+expanding it into an analysis-wide prerequisite. No new SIMC normalization
+correction was demonstrated necessary. Preserve accepted scopes without either
+expanding or downgrading them. Use accumulated source/runtime knowledge for
+professional approval judgment; do not restart validation in each new chat.
+
 ## Delivery preferences
 
 For a source-changing task, ChatGPT provides exactly one standalone Markdown

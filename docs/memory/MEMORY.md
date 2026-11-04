@@ -72,7 +72,11 @@ contract explicitly owns a change.
 
 SIMC pi_n/pi_delta/pi_sidis shapes estimate pion contamination. Subtract once
 at iteration zero; later K+Lambda SIMC iterations reuse it. Local-t is the
-leading candidate, not production-adopted; initial K+Lambda SIMC is provisional.
+user-selected scientific baseline, not production-adopted. Global/Local-(t,phi)
+remain historical comparisons; initial K+Lambda SIMC is provisional.
+The fitted pion-control denominator is essential: pion-only numerator/denominator
+weights act on signed experimental pion events. Small subtraction, positive
+yield, agreement or a near-unity data/SIMC ratio cannot validate that transfer.
 High epsilon has no RF slow-proton subtraction. Scalar empty-error fallback
 fails equivalent-unit invariance. Source-aware refits establish conditional
 behavior, not universal coverage or physical bias/MSE. Staged priors and the
@@ -166,7 +170,10 @@ F.6.3 fills `B_pi_A` with `s_j*w0_j*C_j`, forms `MM_A=pion_input-B_pi_A`,
 and extracts `YA` with the existing uncertainty helper. Existing `YA/MM_A`
 already is the Method-A-reweighted baseline final branch; do not invent a
 missing independent reweighted-baseline producer or treat it as Method-A-only.
-A standalone Method-A-only final yield/MM is NOT VERIFIED. `Y_rw/MM_rw`
+Retain six model/refinement presentations: Local-t versus Local-t + Method A
+is primary; Global and Local-(t,phi), each before/after A, are the other four
+historical combinations. Independent Method-A response diagnostics are separate;
+no standalone A-only final yield or seventh yield series. `Y_rw/MM_rw`
 remain request notation, not new keys. `B_pi_A` is background, not final kaon
 signal. Current E.8.4 MM overlays remain three-way with `Y0/YA` summaries;
 Method-A response/weight evidence may be shown as diagnostics, without false
@@ -358,6 +365,25 @@ synthetic tests, installed-package attestations and fresh farm signed-event
 science are distinct evidence classes. The [October 15–17 incident](investigations/kaonlt-science-gate-displacement-2026-10-17.md)
 records the assistant's failure to apply these existing priorities; it changes
 no scientific ownership, acceptance or Method-A/Method-B role.
+
+### Prevent redundant Work before authorization
+
+The [November 3 accountability correction](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md)
+records ChatGPT's failure to apply already-read safeguards: settled choices and
+Outcome B were reopened/repeated, mature SIMC machinery was underweighted, and
+assistant-created studies displaced approved priorities. Before commissioning
+Work, check implemented source, applicable accepted runtime gates, completed
+investigation conclusions, the exact new evidence-producing outcome and its
+dependency on the user-approved roadmap. Stop duplicates before spending resources.
+An independently investigable topic is not automatically an approved next task;
+priority alterations require concrete new evidence and user authorization.
+Missing offline evidence is not missing production functionality. Preserve
+scoped acceptance and the exact absolute-unit limitation; neither a conditional
+formula nor archive omission demonstrates a needed normalization correction.
+Reports, receipts and this accountability correction are not scientific milestones.
+Enforce the existing displacement alarm prospectively; do not add another support
+cycle to document its repeated violation. Responsibility is ChatGPT's planning
+and review judgment, not the user's actions or Work's lack of farm access.
 
 ### Method-A detector-response scientific lessons
 

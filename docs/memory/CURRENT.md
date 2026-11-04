@@ -6,8 +6,9 @@ memory_schema: 3
 ## Active Objective
 
 `ACTIVE`: baseline-pion interruption, **Q4p4W2p74 / Center / highe / t3**.
-Preserve iteration-zero subtraction. Local-t remains the leading candidate,
-not production-adopted physics. INFERENCE from corrected spectra: the narrow
+Preserve iteration-zero subtraction. Local-t is the user-selected scientific
+baseline for continued development and final analysis, not production-adopted
+physics. Global and Local-(t,phi) remain historical comparisons. INFERENCE from corrected spectra: the narrow
 Lambda peak is largely preserved; its background is mixture-sensitive.
 Full-spectrum chi2 is not the primary adequacy criterion beneath Lambda.
 High epsilon has no RF slow-proton subtraction. Missing configured Sigma0
@@ -27,7 +28,9 @@ not universal coverage or physical truth; they are not adopted. Acceptance/
 fallback changes actual subtraction. No independent normalized constraint on
 non-SIDIS contamination of the SIDIS anchor and pion contamination of the
 Lambda gauge was found. SIMC shapes and same-data amplitudes cannot supply it.
-No speculative correction contract or implementation.
+A newly inspected retained Left/low zero-photoelectron diagnostic infers
+response from positive-NPE controls; it supplies neither required Center/high/t3
+mean nor their joint covariance. No speculative correction contract or implementation.
 
 See the [November 3 checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#scientific-memory-checkpoint-and-independent-anchor-gate--november-3)
 for hashes, source trace and results. Historical details below are linked context, not the active NEXT.
@@ -52,9 +55,11 @@ in this memory pass, attributed to its governing evidence records.
 ## Source / Evidence Identity
 
 Local `test`, `origin/test` and public `test` matched
-`9172aba853fd5b5b744c19add992fa4f27466180` on November 3 before memory edits.
+`5d5c372007b926bd5245e0f0d8283c98a06da851` on November 3 before this roadmap
+update. Only memory differs from farm scientific source
+`9172aba853fd5b5b744c19add992fa4f27466180`.
 RUNTIME VERIFIED: supplied October 30 `20261030T022205` high-epsilon acquisition
-at that source completed analysis, collection and nine-artifact verification.
+at the farm scientific source completed analysis, collection and nine-artifact verification.
 Stored `evidence_admissible=false` and `scientifically_accepted=false` remain.
 That acquisition consumes the old ledger/fresh-high NEXT, not scientific acceptance.
 
@@ -65,6 +70,12 @@ Separately BLOCKED: canonical-five Method A/final E.8/F.6.4 at
 microscopic F.1/F.4 archaeology remains DEFERRED. Absolute SIMC remains BLOCKED
 at `SIMC_normfac_luminosity_and_charge_units_not_source_proven`; this affects
 absolute interpretation, not valid data-only/identity/yield/parent closure.
+The prior [Step 5 Work audit](investigations/simc-absolute-normalization-ledger-2026-11-03.md)
+is retained with provenance, not adopted as a new prerequisite or demonstrated
+normalization correction. The [November 3 accountability correction](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md)
+requires preserving mature functionality and the approved priorities; no repeated
+audit or generator archaeology follows without concrete new defect evidence and
+user authorization. Outcome B and the scientific NEXT are unchanged.
 The earlier normal-launcher isolation blockers and matched-cohort ninth failure
 (`external_input_verification/source_changed_during_hash`) remain in the
 historical details and [incident record](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md).
@@ -78,8 +89,8 @@ record for **Center/highe/t3**: non-SIDIS mean in the existing kaon SIDIS
 anchor `[1.0601751288600272, 1.1101751288600272]` GeV and pion mean in the
 Lambda gauge `[1.105, 1.125]` GeV, with joint uncertainty, covariance to the
 evaluated signed counts and disjoint/calibrated provenance. It must not be
-derived by relabeling the evaluated staged/gauge fits as truth. Once available,
-perform one blind predictive closure of those windows and the actual
+derived by relabeling the evaluated staged/gauge fits as truth. Require
+independent scientific review of the new constraint before one blind predictive closure of those windows and the actual
 iteration-zero Lambda-window subtraction with frozen inputs and conventions.
 This remains the scientific NEXT after memory review/publication and
 pushed-state verification; no farm acquisition or correction contract yet.

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 6762,
+      "bytes": 7760,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "3379e3aa5c3df26b8a528cc2da8375c5b970825de229a4737458fcfe4dcf9fc4"
+      "sha256": "95058ec928490faa89bb22dad43a646e482a9ed8af366bc6ab675620316aa14c"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 30719,
+      "bytes": 32602,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "628cefb15234913ed7c86ea46847d1fa968415387141fada031bb75a5de4d63c"
+      "sha256": "0a0d4eb890b3426e02fd8b61e355befb9a2bdb7ec6e0cda61474c71860617ccc"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 10313,
+      "bytes": 12246,
       "path": "docs/memory/USER.md",
-      "sha256": "247a6823f585ec327796431790b6f0e6fe9a1b4b547434132cb00fcd540f1c22"
+      "sha256": "f2f3a3bfa5628e9be37ff4f506fa59da600676d9b9183481932abad3f170b327"
     },
     {
       "bytes": 1157,
@@ -416,9 +416,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 138435,
+      "bytes": 144061,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "056b9c9637405d3d71ee4992180dc9d08e3f9d8c5e8b4bbbd62f1084b82a5580"
+      "sha256": "f224db2cba1d035af3011c634c6f8230850afc6fad1a4ad9dff3790f4763adc6"
     },
     {
       "bytes": 23507,
@@ -441,6 +441,11 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
+      "bytes": 7697,
+      "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
+      "sha256": "027b7e525d30acccdebc63be152c14c00f33272ae5d2e6c3f21781a8b643df80"
+    },
+    {
       "bytes": 42001,
       "path": "docs/memory/investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md",
       "sha256": "2127a46375b74beeffd24c3303d2ee4c9bf75948736e8270e8caadf1b2820a24"
@@ -449,6 +454,11 @@
       "bytes": 28637,
       "path": "docs/memory/investigations/kaonlt-science-gate-displacement-2026-10-17.md",
       "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
+    },
+    {
+      "bytes": 4314,
+      "path": "docs/memory/investigations/simc-absolute-normalization-ledger-2026-11-03.md",
+      "sha256": "85577dafa6b212fe7aee7db913fdff27eda080b338e98278f233a9890cf91e2a"
     },
     {
       "bytes": 2348,
@@ -1631,9 +1641,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 30989,
+      "bytes": 34769,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "ed08f7a24d399f1e3b0c07c7cd83f5874125a033cec0262d871c462271a7ee34"
+      "sha256": "96d521a38f04815f52683de4aa03d9424c65e5cceceb446f4cbd4f492f99768e"
     },
     {
       "bytes": 1698,

@@ -2052,3 +2052,86 @@ path configuration and all scientific source remain frozen. The prior
 [debug contract](../phases/kaonlt-center-lowe-signed-pion-chain-owner-task-contract.md)
 and [workflow investigation](../investigations/kaonlt-science-gate-displacement-2026-10-17.md)
 retain historical scope; no owner/pathing/attestation cycle is authorized here.
+
+## Final roadmap and retained zero-photoelectron evidence audit — November 3
+
+User scientific decision, not runtime adoption: Local-t is the chosen baseline
+for continued development/final analysis. Global and Local-(t,phi) are historical
+comparisons; selection is not reopened. The fitted pion-control denominator
+and pion-only numerator determine weights applied to signed pion events.
+Reliability is not established by a small Lambda subtraction, positive yield,
+model agreement or unity data/SIMC. The integrated seven-step progression is in
+[roadmap STATUS](../roadmap/STATUS.md#final-background-subtraction-progression--november-3-user-decision),
+not duplicated in CURRENT. Coverage remains five settings/15 parents/135 cells.
+Method A is independent relative-response refinement, primarily Local-t versus
+Local-t + A, within six model/refinement presentations (four historical) and separate
+response diagnostics, no seventh yield series. Accepted F.1-F.4/F.6.1/F.6.2,
+F.4 signed parent normalization and all closed narrow scopes are preserved.
+
+Repository observation: `test`, local `origin/test` and public `test` at
+`5d5c372007b926bd5245e0f0d8283c98a06da851` before this memory-only change.
+The intervening diff from farm scientific source `9172aba...` contains only
+memory records. This audit reuses the completed Outcome B search above; no
+fit, Monte Carlo repeat, model comparison, source correction or farm run.
+
+Previously unexamined numerical candidate: retained
+`Left_FullAnalysis_Q4p4W2p74_lowe_pion_hgcer_zerope_transfer.json`, 774351 bytes,
+SHA-256 `42d80678b6551650497c7fc2b2c7e8f090f7c351f4f99f42c1336902af2ad79b`. Exact bytes were checked against the original accepted
+`KaonLT_F6_3_Left_lowe_runtime_evidence_Q4p4W2p74_20261001-222142.zip`, SHA-256
+`200fda66fe410274df1c9a8252b9e87114d8fd10a520fb7d71691ec6b3772874`.
+The prior source/science audit already identified its diagnostic-only role;
+the new result here is inspection of its retained numerical evidence for this
+joint-mean gate, not a new detector measurement.
+
+SOURCE VERIFIED: `pion_hgcer_transfer.py::build_pion_hgcer_zerope_transfer_map`
+uses prompt/allcuts positive-NPE Part-1 pion records, fitting a zero-truncated
+response family. Its zero atom is inferred, not an HGC-independent pion tag.
+The original file has 30 t/delta cells: 7 valid direct fits, 4 same-t pooled
+solutions, 2 bracketed solutions and 17 unsupported cells. Its top-level status
+is available but Part3 eligibility is
+`review_required_incomplete_uncertainty_or_solution`; non-authoritative and
+production-unchanged flags are true. Response-parameter covariance exists;
+the missing joint anchor-mean/count covariance must not be called missing
+all covariance. The supported fit model is compound-Poisson/gamma gain, with
+an alternate exponential-gain family. Neither establishes independently
+calibrated physical species composition in Center/high/t3.
+
+Producer -> application -> serializer -> consumer: `rand_sub.py` builds the
+diagnostic and detached noRF host products; the application helper uses signed
+cached pion events and t/delta response factors. Serialization retains summaries
+and fit records but omits detached histogram objects; the renderer consumes
+that diagnostic. These proposed Left/low products are not the established
+Local-t numerator/denominator subtraction, and are not transported to high
+epsilon. Setting epsilon median is 0.477841; high epsilon has no RF cleaning.
+The artifact contains no Center/high/t3 component-resolved means or covariance
+with that evaluated population. A complete same-setting independent aggregate
+constraint would suffice; event-level species truth is not demanded.
+
+Independent reconstruction from original October 30 Center/high JSONs:
+allcuts Local-t applied B = 0.0607858263249, fixed-weight sigma =
+0.00335605794290, kaon sum = 0.332273741333, B/K = 18.2939001%.
+Nominal [1.10,1.16] ROOT endpoint-inclusive histogram bins cover
+[1.096,1.162): nommcuts B = 0.0655431051770, sigma = 0.00350640006985.
+No bin-width factor or rescaling is used. The ~1.36e-11 difference from the
+earlier pure-Python refit allcuts value is numerical reproduction precision;
+this audit uses original retained farm weights. Signed prompt/random/dummy/
+dummy-random coefficients, parent/child sums and quadratic Sumw2 were checked.
+These are diagnostic signed normalized integrals, not new producer yields or
+physical pion fractions. Fixed-weight errors exclude fitted-parameter/template
+uncertainties and do not calibrate total subtraction uncertainty.
+
+**Outcome B / BLOCKED remains.** First missing physical input: one independent,
+source-identified, kaon-PID-normalized joint constraint for non-SIDIS mean in
+[1.0601751288600272,1.1101751288600272] GeV and pion mean in
+[1.105,1.125] GeV, with joint uncertainty/covariance to evaluated signed counts
+and demonstrated calibration/transport applicability to Center/high/t3. The
+windows overlap. A response-fit Hessian from Left/low does not supply it.
+Require independent review of any qualifying new constraint before the existing
+bounded blind closure; no closure is executed here. No new acquisition menu,
+Method-A change, empirical MC scale or speculative correction contract follows.
+
+Review evidence: `KaonLT_Roadmap_Step1_Independent_Evidence_20261103.zip` holds
+the small retained extracts, original-data plots, numerical/provenance records,
+source snapshots, memory-only actual diff and deterministic health/preservation
+receipts. It references, without duplicating, the accepted farm/earlier Work
+archives. Memory integrity does not establish scientific or farm acceptance.

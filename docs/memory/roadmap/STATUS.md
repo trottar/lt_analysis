@@ -2,6 +2,44 @@
 
 This roadmap owns approved dependency/status structure only. `CURRENT.md` owns the active objective, blockers, and exact next action; no entry here alone is a runtime claim or source-change authorization.
 
+## Final background-subtraction progression — November 3 user decision
+
+Local-t is the selected scientific baseline for continued development and final
+analysis, not production-adopted physics. Global and Local-(t,phi) remain
+historical comparisons; do not reopen selection. Sparse child fits can
+destabilize the pion-control denominator. Its statistical reliability matters
+regardless of the size of the subtraction beneath Lambda. A positive yield,
+model agreement or data/SIMC near unity is not validation.
+
+The scope is Q4p4W2p74 Left/low, Left/high, Center/low, Center/high and
+Right/high: 15 canonical-t parents and 135 phi cells. Preserve explicit support,
+empty and unavailable classifications; no fabricated final coverage.
+
+| Step | Scientific milestone and boundary |
+| --- | --- |
+| 1 | **BLOCKED**: resolve Center/high/t3 physical/statistical component normalization and transferred background through the independent joint anchor-mean gate in CURRENT. Outcome B remains; no production statistical correction. |
+| 2 | **DEFERRED** pending Step 1: finalize Local-t across all five settings, validating fitted pion-control denominators, pion-only kaon numerators, transfer weights and actual signed-event subtraction. |
+| 3 | **DEFERRED**: scientifically accept Local-t-subtracted `MM_0(t,phi)` and producer-owned `Y0(t,phi)` with the established random/dummy/proton/pion treatment and uncertainties. Prior accepted numerical/presentation scopes remain closed. |
+| 4 | **DEFERRED** forward work: resume E.8.3 -> F.6.3 -> E.8.4 -> F.6.4 in the [approved dependency structure](../decisions/e8-full-analysis-procedure-roadmap.md#approved-dependency-order). Preserve accepted narrow Left/low results; resolve the recorded canonical-five F.4 scientific-equivalence gate when active; validate other settings before production promotion. Final E.8 closure retains its established place before F.6.4. |
+| 5 | **BLOCKED**, separate absolute-SIMC authority: resolve `SIMC_normfac_luminosity_and_charge_units_not_source_proven`. The prior [Work audit](../investigations/simc-absolute-normalization-ledger-2026-11-03.md) is retained as history, not a demonstrated correction or new execution prerequisite. Preserve existing SIMC machinery and accepted numerical closure; no repeat investigation/redesign absent concrete new defect evidence and user authorization. No empirical MC renormalization. |
+| 6 | **DEFERRED**: validated data/SIMC yield ratios using matching canonical cells, Lambda windows, producer-owned yields/errors and statistical, normalization and correlated systematic uncertainties. |
+| 7 | **DEFERRED**: existing K+Lambda SIMC cross-section iterations followed by established cross sections/L/T extraction. Pion subtraction stays fixed after iteration zero. |
+
+Method A remains the separate HGCer relative-response refinement. Preserve
+accepted F.1-F.4 and F.6.1/F.6.2 evidence, F.4 signed parent normalization and
+the ban on child renormalization or retraining/redesign. Primary future
+comparison: Local-t versus Local-t + Method A. Retain six model/refinement
+presentations: that primary pair and four historical Global/Local-(t,phi)
+combinations before/after A. Independent Method-A response diagnostics are separate;
+there is no standalone A-only final yield or seventh independent yield series.
+Method B remains diagnostic-only and numerically excluded.
+
+These milestones authorize no workflow bypass, source change or farm run.
+CURRENT alone owns the exact active NEXT. The
+[November 3 investigation](../investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#final-roadmap-and-retained-zero-photoelectron-evidence-audit--november-3)
+records the narrow Step 1 evidence audit; all historical statuses below retain
+their original scope.
+
 ## Frozen upstream program
 
 Random subtraction, slow-proton PID cleaning, pion component subtraction, Method-A diagnostics, and Method-B closure retain separate owners. Method B remains diagnostic/cross-check only and never numerically adjusts pion weights.
