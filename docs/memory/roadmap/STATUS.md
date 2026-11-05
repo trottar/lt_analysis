@@ -15,6 +15,34 @@ The scope is Q4p4W2p74 Left/low, Left/high, Center/low, Center/high and
 Right/high: 15 canonical-t parents and 135 phi cells. Preserve explicit support,
 empty and unavailable classifications; no fabricated final coverage.
 
+November 5 meeting priorities complement these same six steps: available
+full-t/acceptance-edge diagnostics first, then the colleague's bin-exclusion
+procedure when supplied, unexplained beneath-Lambda background differences,
+conditional physically justified MM-dependent Method-A assessment, and existing
+final-yield gates. Preserve separate unit-normalized shape and yield-normalized
+magnitude diagnostics. General qualitative shape agreement supports Local-t,
+not final acceptance; Center/low and Center/high t3 acceptance-edge sensitivity
+is a hypothesis to test. Numerical exclusion criteria/mask are not yet agreed.
+Do not force A if baseline requirements are met. This is not implementation
+or promotion authority and changes none of the following statuses/dependencies.
+Keep the scoped absolute-unit caveat bounded; no normalization archaeology.
+Full-setting scope covers all five settings and canonical t/phi cells; a
+prioritized single-cell check is not the scientific deliverable or a substitute
+for complete-setting producer evidence.
+
+November 5 final correction fixes this comparison's experimental cohort to
+October 28-30 Local-t. The October 9 substitute is rejected. Preserve data yields;
+recover matched event-weighted SIMC MM information, with its normalization once.
+Unit-integral fit shapes cannot supply absolute MC yield. Keep Method A as the
+last candidate before final-yield acceptance and Outcome B independent. The
+following six statuses/dependencies and existing acceptance gates are unchanged.
+
+The corrective handoff permits existing unchanged October 9 SIMC yields with
+October 28-30 Local-t data. The resulting detached yield-unit comparison is now
+available; it does not promote any of the six scientific acceptance statuses.
+The meeting sequences acceptance-edge review before any justified final-candidate
+MM-dependent Method A; final producer-evidence gates remain unresolved.
+
 | Step | Scientific milestone and existing infrastructure |
 | --- | --- |
 | 1 | **BLOCKED**: Center/high/t3 pion-component normalization, established Outcome B. Preserve sparse-anchor, component cross-talk and source-aware conditional results. Only genuinely new independently derived/calibrated joint-component evidence can reopen the exact gate in CURRENT; after independent review, use the existing fitting/subtraction machinery for one bounded blind predictive closure. No repeated fit studies, synthetic experiments, zero-photoelectron work, archival search or replacement correction. |
@@ -82,7 +110,7 @@ unchanged; production Step 1 Outcome B is not bypassed. See the
 | Subpart | Scope and status |
 | --- | --- |
 | Part 1 — baseline parent-t reconstruction and bin-quality audit | `SOURCE REVIEWED` for the authorized offline audit, originally ACTIVE for this Work task: exclusion/suppression source traced, 135 Local-t integrated reconstructions inventoried, 15 signed sums and selection/covariance limits evaluated. Direct serialized Local-t MM_0/Y0 and equivalent direct-parent/full-covariance closure remain `BLOCKED` on missing evidence. Not physical acceptance or full-2pi reconstruction; E.8.2 closure was not repeated. |
-| Part 2 — acceptance-aware reconstruction | `SOURCE REVIEWED`: [actual combined-setting audit](../investigations/parent-t-combined-reconstruction-part2-2026-11-04.md), 54/54 nominal cells populated with nonzero summed SIMC; four weak current baseline-A cells low/t1/phi4–7. Exact same-cohort selected-Local-t producer Y0/MM_0/validity/error/covariance gate remains `BLOCKED` and is the single NEXT. No missing nominal-cell completion demonstrated necessary; full acceptance/covariance unverified. Prior conditional fits remain off-target history. No new angular/response model or Method-A execution. |
+| Part 2 — acceptance-aware reconstruction | `SOURCE REVIEWED`: [actual combined-setting audit](../investigations/parent-t-combined-reconstruction-part2-2026-11-04.md), 54/54 nominal cells populated with nonzero summed SIMC; four weak current baseline-A cells low/t1/phi4–7. Exact same-cohort selected-Local-t producer Y0/MM_0/validity/error/covariance gate remains `BLOCKED` for final combined ratios/yield acceptance. It is not a prerequisite for the bounded offline acceptance-edge diagnostic; CURRENT alone owns NEXT. No missing nominal-cell completion demonstrated necessary; full acceptance/covariance unverified. Prior conditional fits remain off-target history. No new angular/response model or Method-A execution. |
 | Part 3 — Method-A-assisted reconstruction | `SOURCE REVIEWED`: [paired-input evidence audit](../investigations/parent-t-method-a-part3-2026-11-04.md). Selected-Local-t combined comparison `BLOCKED`: no exact matched producer pair established for 54 cells/six parents. Historical accepted Left/lowe published values show setting-local redistribution only; no selected-B yield improvement or new DeltaY uncertainty established. F.4 support preservation and Lambda-window yield changes distinguished. Review actual evidence; no retraining, equivalence bypass, farm rerun or production promotion. |
 | Part 4 — validation and cross-section consequences | `DEFERRED`: held-out angular cells, covariance, exclusion sensitivity, data/SIMC ratios and eventual L/T consequences; identify reliable, systematic-limited and angularly unidentifiable quantities. Not executed. |
 

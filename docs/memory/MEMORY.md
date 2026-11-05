@@ -177,6 +177,141 @@ model iteration toward unity with iteration-zero data subtraction fixed ->
 existing L/T extraction. This interprets the approved workflow, not a new
 roadmap or algorithm. Retain separate uncertainty/background-validity tests.
 
+### November 5 normalization ownership and repeated assistant failure
+
+`src/normalize/get_eff_charge.py` owns the authorized factors, separately for
+Left, Center and Right: normfac_data=1/Q_data,
+normfac_dummy=1/(4.8579*Q_dummy), normfac_simc=simc_normfactor/simc_nevents.
+`get_eff_charge(hist, inpDict, all_data=True)` computes/returns SIMC factors
+only when all_data is true; `find_events(hist, inpDict)` reads Ncontribute and
+normfac from the SIMC .hist and returns all three factors without that argument.
+Existing data/SIMC yield producers consume these factors. Use them as implemented;
+no extra scaling, alternate convention or repeated normalization investigation.
+
+The user's November 5 correction attributes repeated source-interpretation,
+scientific-planning and instruction-following failures to ChatGPT: normalization
+was treated as unresolved, unnecessary archaeology was pursued, and JSON/NPZ
+provenance questions displaced the existing histogram/yield chain and requested
+physics. Responsibility is not the user's, Codex's, Work's or JLab's. Inspect
+actual histogram dictionaries, normalized producer objects and saved outputs;
+selected-Local-t identification is routine evidence work, not a missing
+normalization procedure. A genuinely missing numerical object stops only its
+affected calculation and names that object/owner/one next gate. Historical unit
+provenance cautions retain their recorded scope and are not a prerequisite for
+the user-authorized Lambda-window comparison. See the existing accountability
+record; no new phase, production change or acceptance follows.
+
+The user further clarified that the SIMC normalization constant, specifically
+simc_normfactor/simc_nevents, is unchanged across farm runs for the same setting.
+This does not assert equal histogram contents/shapes. Do not impose a same-run
+requirement on the constant or multiply already-normalized spectra again.
+Compatible stored SIMC spectra still require matching iteration, cuts, bins,
+weights and population; record the actual cohort without requiring the latest
+run when compatible retained standard spectra answer the scoped question.
+
+October 30 cleanup concerns that temporary diagnostic output/cache only; it
+does not establish absence from ordinary persistent analysis results. The user
+directs compatible retained standard spectra, including other runs where
+scientifically appropriate, before any output-retention blocker/acquisition.
+The November 5 October 9 comparison and its 73-page report are REJECTED for
+the October 28-30 Local-t task. ChatGPT substituted an obsolete experimental
+cohort and interpreted its plots despite the requested dataset. Preserve that
+artifact only as rejected history; do not reuse its numerical findings here.
+Original experimental yields stay unchanged. Unit-integral SIMC templates are
+fit/reference shapes, not event-weighted yield distributions: normfac_simc alone
+cannot restore the discarded amplitude, and fitted signal scales are not MC
+predictions. Matching integrated yields alone cannot recover missing MM-bin
+contents or justify splitting nonaligned histogram bins. Use retained matching
+SIMC yield contents, applying the established factor once only where needed.
+The current atlas has setting_fallback KLambda references in all 135 cells;
+retained fine-bin SIMC and scalar yields are distinct available objects, not
+proof of an exact matching atlas-bin spectrum. No global absence claim follows.
+ChatGPT also wrongly generalized temporary diagnostic cleanup to scientific
+data availability and displaced the task with inventories/provenance work.
+See the accountability correction. Preserve the six steps and independent
+Outcome B; MM-dependent Method A remains the last candidate before final-yield
+acceptance, followed by combined phi ratios, iterations and L/T. No production
+change, automatic Method-A adoption, farm run or publication is authorized.
+
+The subsequent explicit corrective handoff authorizes unchanged October 9
+KLambda SIMC yield histograms with October 28-30 Local-t experimental data.
+Requiring both to share a date because pion subtraction changed was ChatGPT's
+scientific-planning error. Only old experimental data remain excluded. The
+corrected detached comparison reuses SIMC already normalized once and current
+allcuts K-minus-applied-Local-t spectra unchanged: 135 slots, 15 parents, 22-page
+atlas, exact full-window totals and bounded MM ratios/residuals on nonaligned
+native grids. Allcuts preserves both boundary contributions; none is inferred
+from interior-only bins. Center/low t3 D/M=2.570+/-0.139, Center/high t1
+1.323+/-0.048 and t2 1.182+/-0.046 (conditional counting only). The corresponding
+data high-tail fractions are 0.365, 0.200 and 0.224, versus unchanged-MC content
+bounds [0.240,0.248], [0.095,0.102], [0.158,0.163], for 1.132<=MM<1.16 GeV.
+These identify remaining comparisons, not causes, purity or final acceptance.
+1,195 input/arithmetic and 1,338 independent numerical checks passed; all PDF
+pages rendered/visually inspected. No new farm/runtime acceptance follows.
+
+### November 5 meeting: interpretation and immediate scientific sequence
+
+Source: KaonLTMeeting11_5-11_6_2026.pdf (11 pages), supplemented by the user's
+explicit meeting conclusions/clarifications. Slides 2-10 show Q4p4W2p74,
+proton+pion-subtracted data without Method A, old-parameterization iteration-zero
+SIMC, yield and unit-normalized views, and individual cells. The colleagues'
+assessment is user-reported: generally consistent Lambda peak/relevant-tail
+shapes at parent-t and populated (t,phi) level. This supports selected Local-t,
+not final production-yield acceptance, quantitative covariance validation or
+elimination of pion contamination. Do not reopen model-scope selection.
+
+Keep unit-normalized shape diagnostics distinct from existing physically
+yield-normalized comparisons. Data normalization is already applied; compatible
+unchanged SIMC may come from earlier runs, including authorized October 9 SIMC,
+never October 9 experimental data for this task. Use existing get_eff_charge /
+data and SIMC yield machinery unchanged, including iter_weight/normfac/Ncontribute.
+No arbitrary scale, peak matching, double normalization or normalization study.
+Initial D/M need not equal unity with the old cross-section parameterization.
+Preserve 1.10 <= MM < 1.16 GeV, actual bin edges and supported boundary contents;
+no invented fractional fill. Coarse/fine widths are not detector resolution.
+
+Principal reported exceptions are Center/low and Center/high t3. Center does not
+reach as far into high -t as complementary Left/Right settings; lower -t means
+more forward kaons. Its t3 probes the edge of its populated t distribution.
+Acceptance, sparse support and nonuniform within-bin kinematics may increase
+MM/background sensitivity. This is a plausible interpretation to test, not an
+established cause or demonstrated subtraction failure. Pion-background structure
+beyond Lambda matters if it biases the estimate beneath the peak after t-coverage
+effects are considered. Separate unresolved Center/high/t3 Outcome B is unchanged.
+
+The user-approved immediate order complements the existing six steps:
+
+1. Bounded offline full-t/acceptance-edge comparison across all five settings,
+   canonical boundaries marked; assess t3 occupancy/acceptance, especially Center
+   at both epsilons. Where feasible use matching populated t regions and separate
+   unit-normalized/yield-normalized MM diagnostics. Freeze cuts/models/source.
+2. On receipt, reproduce/review the colleague's actual empty/sparse-cell exclusion
+   procedure against data/SIMC support, uncertainty conventions, acceptance and
+   angular coverage. Exclusion direction is agreed; numerical criteria/final mask
+   are not. Distinguish setting-local from combined support; delete no source data.
+3. Determine whether a genuine unexplained pion-background difference remains
+   beneath Lambda, separating acceptance-edge effects from transfer failure.
+   No repeated normalization/source-aware study without new evidence.
+4. Assess MM-dependent HGCer/acceptance Method A only for a justified physical
+   target. Compare SAME Local-t versus Local-t+A; preserve accepted F.1-F.4,
+   source/fit/cut ownership, signed parent normalization and no child renormalization.
+   Slow-proton probability construction is an analogy, not a validated pion model.
+   Preserve detached/non-production status; Method B stays diagnostic/excluded.
+5. Apply existing E.8/F.6 final-yield gates; retain Outcome B and canonical-five
+   Method-A equivalence blocker. Do not force A if baseline requirements are met.
+
+Final combined ratios still require selected-Local-t producer-owned Y0/MM_0,
+errors, validity, lineage and available covariance; observer agreement does not
+complete that gate. It is not a prerequisite to the bounded offline diagnostic.
+After applicable acceptance, sum data and SIMC separately for Left+Center low
+and Left+Center+Right high; inspect six ratio-versus-phi distributions/uncertainties,
+then existing SIMC iterations with iteration-zero pion subtraction fixed, then L/T.
+No changed roadmap status, production promotion or farm authority follows.
+MM-dependent refinement/model-dependent uncertainty reduction remains conditional
+on predictive, bias, variance, coverage, systematic and sensitivity checks.
+Historical absolute-unit caveats stay scoped, not new prerequisites. CURRENT alone
+owns the exact next action; this memory update executes none of these checks.
+
 ### Observable-chain and combined-setting review
 
 Before commissioning models or investigations, trace producer -> serialized

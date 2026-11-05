@@ -191,6 +191,132 @@ correction was demonstrated necessary. Preserve accepted scopes without either
 expanding or downgrading them. Use accumulated source/runtime knowledge for
 professional approval judgment; do not restart validation in each new chat.
 
+### November 4 correction: inspect both epsilons before declaring missing data
+
+For the Lambda-window investigation, use the already supplied low AND high
+farm evidence and all five requested settings. Starting with low epsilon is
+an ordering choice, not permission to omit high epsilon. Before asking for
+data or issuing a task-wide blocker, inventory original packets/receipts and
+retained data/SIMC arrays; distinguish an archive-local omission from exact
+selected-Local-t lineage and from globally unavailable evidence. Assess each
+setting independently and continue supported comparisons. Do not confuse
+135 canonical diagnostic slots with 135 populated/accepted measurements.
+Do not use hard-coded absence fields or integrity check counts as proof of
+scientific unavailability. Preserve historical-versus-selected branch identity,
+available errors and scope; never fabricate comparisons to satisfy the request.
+Do not substitute another blocker ZIP, memory loop or promise for actual work.
+These are execution requirements following repeated assistant failures recorded
+in the existing accountability record, not a new scientific phase. No absolute
+promise of error-free future behavior is warranted; demonstrate compliance by
+the evidence actually inspected and the comparisons actually completed.
+
+### Reusable testing tools instead of per-run rewrites
+
+The user requests a modular testing environment in the existing test area:
+accept new artifact paths, cohorts, settings and supported analysis options
+as validated runtime inputs instead of rewriting scripts for each run. Begin
+with the usual memory checkpoint and actual audit of generated Work-ZIP code;
+use that audit and existing repository tools to scope infrastructure afterward.
+Keep adapters, pure numerical checks and reporting separate; retain provenance,
+signed/invalid/unavailable states, and diagnostic versus producer authority.
+Do not bake workstation paths or change production physics to accommodate tests.
+
+### November 5 meeting decisions and immediate priorities
+
+The user reports colleagues' general Lambda peak/relevant-tail shape agreement
+for latest Local-t data versus unchanged iteration-zero SIMC at parent and
+populated child level. Retain Local-t as selected working baseline; this is
+qualitative, not final yield/covariance/purity acceptance. Keep BOTH unit-normalized
+shape and existing yield-normalized magnitude diagnostics. Unit normalization
+belongs only to the shape view and never rescales authoritative yield spectra.
+The old iteration-zero cross-section parameterization need not give D/M unity.
+
+Test Center/low and Center/high t3 restricted high-minus-t coverage first:
+acceptance-edge/sparse/nonuniform kinematics is a plausible explanation, not
+established cause or evidence of pion-model failure. Review effects beneath
+Lambda even when unusual pion shape extends beyond it. Do not reopen model
+selection or repeat normalization/source-aware investigations without new evidence.
+
+Approved order: all-five full-t/acceptance-edge diagnostic with canonical
+boundaries; colleague's actual exclusion procedure when received; remaining
+beneath-Lambda background discrepancies; Method A only if a physical target is
+justified; existing final-yield gates. Empty/inadequately populated cells should
+be excluded by the colleague's pending procedure, but no numerical criterion or
+final mask is agreed. Review support/errors/acceptance/angular coverage separately
+for individual and combined settings; no invented threshold or source-data deletion.
+No production adoption before relevant scientific/source gates. Do not force A.
+
+Preserve SAME Local-t versus Local-t+A comparison, detached A, signed parent
+normalization and diagnostic/excluded B. A slow-proton probability analogy does
+not validate a pion probability model. Outcome B and canonical-five equivalence
+remain unresolved. Final combined ratios still need producer-owned records,
+errors/validity/lineage and covariance evidence; available offline acceptance
+diagnostics do not require that later gate to be complete. After acceptance,
+sum complementary setting yields, inspect six phi ratios, continue existing SIMC
+iterations with experimental subtraction fixed at iteration zero, then existing L/T.
+Preserve all six roadmap statuses/dependencies. This task updates memory only
+and stops after verification; Check 1 is a separate task, with no farm authority.
+
+Earlier November 5 comparison requirements below retain their yield-calculation
+scope; the meeting explicitly preserves a separate unit-normalized shape view.
+
+The November 5 clarification keeps the immediate MM investigation at full
+setting scope across all five settings and all canonical t/phi cells. Do not
+replace it with one Center/low t3 cell or describe an input inventory as the
+completed scientific comparison. The single next evidence gate must retain
+complete-setting scope; priorities within it do not redefine the deliverable.
+
+The user's November 5 repeated-failure correction explicitly requires using
+the implemented get_eff_charge normalization and existing histogram/yield chain.
+Do not commission further normalization investigations, add scale factors, or
+turn historical unit-provenance caveats into a new analysis prerequisite.
+Inspect actual saved numerical content before claiming it unavailable; JSON
+omissions or NPZ provenance questions are not missing normalization functionality.
+Record responsibility under ChatGPT without blaming user, Codex, Work or JLab,
+then resume all-five-setting Lambda-window physics rather than another general
+audit or documentation-only substitute when applicable spectra are available.
+
+For the November 5 normalized Lambda-window calculation, preserve existing
+experimental and SIMC yield normalization in both coarse/fine views; do not
+unit-area normalize, multiply normfac_simc twice, fit a scale or peak match.
+Use the user-supplied All Five Settings Observer Shape Atlas as the visual
+reference only: five-setting overview, consistent t columns, black data points
+with errors, blue SIMC steps, light grids, clear units/legends, and aligned
+residual/component panels. Gray boundary shading denotes actual unavailable
+support only. Update labels to yield units; retain signed negative observations
+and explicit empty/invalid states. The reference's observer/template content
+and unit-area normalization do not authorize numerical substitutions.
+
+November 5 correction: inspect retained ordinary standard analysis results,
+including compatible other-run producer spectra where scientifically appropriate;
+temporary diagnostic cleanup does not establish their absence. Use genuine
+paired data/SIMC outputs immediately, preserving yields and recording the exact
+cohort/subtraction scope. Do not silently relabel an older baseline as later
+selected-Local-t validation. A fixed per-setting SIMC normalization constant is
+not a statement of equal histogram contents. Do not repeat normalization work,
+generalized inventories, producer rebuilding, or requests for the same run files.
+Only a genuine accessible-output limitation may stop the affected calculation;
+the user alone authorizes any subsequent bounded farm acquisition.
+
+November 5 final correction: the experimental cohort for this task is October
+28-30 Local-t, unchanged. The October 9 comparison is explicitly rejected.
+Compatible other-run SIMC alone may be used when its actual selection, iteration,
+weights and bin contents match; this never licenses older experimental data.
+Do not confuse unit-integral SIMC fit/reference shapes with absolute yield
+histograms or restore their amplitude with normfac_simc or fitted signal scales.
+Do not split nonaligned bins by assuming an unretained within-bin distribution.
+Recover matching yield information directly; if it is genuinely not retained in
+accessible evidence, state the exact limitation and stop. No broad investigation,
+new producer, automatic Method-A adoption, source modification or farm operation.
+
+The corrective latest-Local-t/existing-SIMC handoff explicitly permits the
+retained October 9 KLambda SIMC yield arrays because that simulation is unchanged.
+Keep October 28-30 experimental data; never replace them with October 9 data.
+Different run dates alone do not invalidate unchanged simulation. The factor is
+already applied to retained SIMC yields: no second factor or unit-area scaling.
+Use native bin edges and supported bounds where exact rebinning is unavailable;
+do not turn an axis mismatch into another normalization or acquisition study.
+
 ## Delivery preferences
 
 For a source-changing task, ChatGPT provides exactly one standalone Markdown

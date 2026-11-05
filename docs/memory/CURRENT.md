@@ -15,14 +15,24 @@ Later SIMC iterations approach unity with iteration-zero subtraction fixed.
 
 ## Current Work Item
 
-Global / Local-t / Local-(t,phi): Local-t selected, not production-adopted;
-others historical. Source-aware statistics is independent, promising (user),
-not a fourth scope, Local-t extension or accepted correction.
-Primary selected Local-t versus SAME Local-t + Method A: matched source/cohort/
-fit/cuts/window/normalization, common iteration-zero SIMC denominator. Assess
-BOTH Lambda MM shape and ratio-versus-phi, plus uncertainty/background validity.
-Detached A; diagnostic/excluded B. Sum data/SIMC separately: Left+Center low,
-Left+Center+Right high. No tuning/scaling to force agreement.
+Q4p4W2p74: the November 5 meeting assessment, as reported by the user, finds
+generally consistent Lambda peak/relevant-tail shapes in latest Local-t data
+and unchanged iteration-zero KLambda SIMC, at parent-t and populated child
+level. Local-t remains selected, not production-adopted; this qualitative
+assessment proves neither purity, covariance validity nor final yields.
+Principal reported exceptions: Center/low and Center/high t3. Center's restricted
+high-minus-t coverage makes an acceptance-edge interpretation plausible, not
+established. Test it before attributing the behavior to pion subtraction.
+
+The approved immediate sequence is full-t/acceptance-edge diagnostic, review of
+the colleague's exclusion procedure when supplied, remaining beneath-Lambda
+pion discrepancies, physically justified conditional Method-A assessment, and
+existing final-yield gates; see MEMORY's November 5 meeting section.
+Preserve separate unit-normalized shape and existing yield-normalized magnitude
+diagnostics. No arbitrary scaling of yield spectra or repeated normalization.
+Iteration-zero SIMC uses the old parameterization; initial D/M need not be unity.
+Method A stays detached, optional pending a justified target; Method B remains
+diagnostic/excluded. Outcome B and source-aware statistics remain separate.
 
 ## Verified State
 
@@ -43,11 +53,10 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-November 4 final clarification: local/origin/public test matched
-`02652e90727aa5d8abccaa2eb112693dad140c6b`; tracked tree/index were clean.
-Memory-only; two review files and evidence scopes preserved.
-
-Only memory differs from farm scientific source
+November 5: local/origin/live HTTPS test matched
+`302bccddcc490237aa7128879b4b04ec979260c6`; index unchanged. Pending memory
+and eight offline testing files are local, not published farm source.
+Production physics remains unchanged from scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
 RUNTIME VERIFIED: supplied October 30 `20261030T022205` high-epsilon acquisition
 at the farm scientific source completed analysis, collection and nine-artifact verification.
@@ -56,12 +65,28 @@ That acquisition consumes the old ledger/fresh-high NEXT, not scientific accepta
 
 ## Blockers
 
-First ratio-input gate `BLOCKED`: retained evidence lacks exact current-cohort
-selected-Local-t producer Y0/MM_0, validity/skip and reported error/lineage
-records. Integrated diagnostic candidate B, logged Global-template baseline A
-and historical Left/lowe output cannot replace it. Matching iteration-zero SIMC
-must match cells/window/normalization. Method-A pair/covariance unavailable.
-Offline omissions are not missing functionality or farm-rerun instructions.
+The corrected November 5 detached comparison now uses October 28 lowe /
+October 30 highe Local-t experimental allcuts spectra and the existing unchanged
+iteration-zero KLambda SIMC yield arrays. The explicit corrective handoff
+authorizes retained October 9 SIMC, never its experimental arrays. A change in
+experimental subtraction does not require regenerating unchanged simulation.
+The previous October 9 experimental comparison remains rejected for this task.
+Both existing normalizations stay unchanged: no additional factor, area matching,
+fitted amplitude or unit-area template substitution. All 135 slots and 15 parents
+are compared, with original signed data and empty states. Original allcuts
+boundary contributions permit full-window integrals; earlier interior arrays
+are checked unchanged. Nonaligned MM grids give binwise content/ratio/residual
+bounds without fractional fills. The 22-page atlas and report are in
+KaonLT_Latest_LocalT_Data_Existing_SIMC_20261105.zip. This is detached observer
+evidence, not final producer or subtraction-physics acceptance. Conditional
+counting errors omit unretained fit/training/shared-systematic covariance.
+
+The selected-Local-t producer-evidence requirement remains unresolved for
+final combined angular ratios/yield acceptance: same-cohort producer Y0/MM_0,
+errors, validity/skip reasons, source/fit/cut/normalization lineage and available
+shared covariance, matched to iteration-zero SIMC. Detached spectra and meeting
+agreement do not complete it. This later gate does not block the bounded offline
+full-t diagnostic using available data; no producer rebuild or farm run follows.
 
 Production Step 1 remains `BLOCKED`, Outcome B: independently derive the
 Center/highe/t3 non-SIDIS mean in the kaon SIDIS anchor
@@ -73,9 +98,10 @@ blind predictive closure. This parallel study clears none of that gate.
 
 Separately BLOCKED: canonical-five Method A/final E.8/F.6.4 at
 `f6_3_scientific_equivalence_mismatch:f4:$.parents[0].absolute_baseline_parent_sum`;
-microscopic F.1/F.4 archaeology remains DEFERRED. Absolute SIMC remains BLOCKED
-at `SIMC_normfac_luminosity_and_charge_units_not_source_proven`; this affects
-absolute interpretation, not valid data-only/identity/yield/parent closure.
+microscopic F.1/F.4 archaeology remains DEFERRED. The scoped absolute-unit
+provenance limitation remains; no factor-of-1000 correction was demonstrated.
+Use existing normalization for the authorized matched MM comparison: the
+limitation is not a new standalone study or artificial prerequisite.
 The [historical SIMC Work audit](investigations/simc-absolute-normalization-ledger-2026-11-03.md)
 is retained with provenance, not adopted as a new prerequisite or demonstrated
 normalization correction. The [November 3 accountability correction](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md)
@@ -92,13 +118,16 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — review exact current-cohort selected-Local-t Y0/MM_0 producer
-valid/skip/error/source/fit/normalization records with corresponding
-iteration-zero SIMC yield inputs for six ratio-versus-phi inventories.
-First missing artifact is that selected-Local-t producer record: stop there;
-no historical substitution, invented ratios or general Work. Compare matched
-YA/MM_A only where available, using the same denominator/shared covariance.
-This correction authorizes no numerical study, implementation or farm run.
+NEXT — in a separate scientific task, compare full t distributions of latest
+Local-t experimental data and unchanged SIMC across all five Q4p4W2p74 settings,
+mark canonical t boundaries, and assess occupancy/acceptance within t3, especially
+Center/low and Center/high. Test association of unusual MM/pion-background
+behavior with restricted t coverage; where feasible compare matching populated
+t regions, keeping shape-only and yield-normalized MM diagnostics distinct.
+Use available inputs; no normalization, cut, model or production-source changes.
+This memory-only update does not execute the diagnostic. The colleague's
+exclusion criteria are pending: invent no threshold/mask and delete no data.
+Later producer-evidence/final-yield gates and the six-step roadmap remain intact.
 
 ## Success Criteria
 

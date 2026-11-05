@@ -2135,3 +2135,57 @@ the small retained extracts, original-data plots, numerical/provenance records,
 source snapshots, memory-only actual diff and deterministic health/preservation
 receipts. It references, without duplicating, the accepted farm/earlier Work
 archives. Memory integrity does not establish scientific or farm acceptance.
+
+## November 4 five-setting Lambda-window observer shapes
+
+User explicitly authorized coarse-bin Local-t observer diagnostics after the
+incomplete low-only blocker report. Work calculated from both unchanged original
+farm ZIPs: low `38307c486326faf159cf300fb7c60d6c3758a9f7`, high
+`9172aba853fd5b5b744c19add992fa4f27466180`; repository observation
+`302bccddcc490237aa7128879b4b04ec979260c6`. Local report/ZIP:
+`KaonLT_Five_Setting_Lambda_Observer_Shapes_20261104.zip`.
+
+SOURCE REVIEWED: detached calculation of original allcuts kaon content minus
+retained Local-t applied pion background; no refit or production adoption.
+All 135 child slots retained, 99 selected-kaon populated, 97 shape-normalizable;
+all 15 canonical-phi-summed t parents computed. Thirty-six empty cells and two
+nonpositive interior sums are unavailable, not zero-filled. Every retained child
+KLambda signal scope is `setting_fallback`, not matched cell acceptance.
+Historical fine-grid E.8.2 data/SIMC arrays exist but were not substituted.
+
+Metrics use nine complete 6 MeV bins in 1.102–1.156 GeV, inside the unchanged
+1.10–1.16 event window; unresolved boundary strips are excluded, not interpolated.
+Unit-area normalization is diagnostic only. Conditional fixed-weight counting
+and retained template diagonal errors are propagated with normalization-induced
+bin covariance; fitted/training/normalization-systematic covariance is unavailable.
+No calibrated probability, fitted peak/resolution or scientific acceptance follows.
+
+Observer finding: Center/low t3 has interior RMS 12.50 before and 12.39 MeV after
+pion subtraction, versus 8.94 MeV for its setting template; high-side fraction
+(1.132–1.156) is 0.319 versus 0.127, centroid difference +4.78 MeV, conditional
+error 0.67 MeV. Applied background is 2.47% of pre-pion interior content.
+The broad structure precedes this subtraction; it cannot be attributed solely
+to the final Local-t subtraction from this diagnostic. Center/high t1/t2 remain
+broader after subtraction (10.62/11.65 versus 9.03 MeV setting-template RMS).
+These discrepancies do not distinguish acceptance, resolution or residual physics.
+All three applied pion components were attributed using frozen numerator fractions
+with exact total closure; these are model contributions, not physical truth.
+
+Work produced 21 original PNGs and a 21-page atlas, all-cell numerical records,
+conditional covariance matrices and original-input verification. Calculation
+checks: 1,198; separate direct-original verifier: 2,022. These are detached
+source/numerical checks, not ROOT/farm or final producer validation. No new fit,
+Method A/B, source-aware study, Outcome B investigation, production correction,
+normalization tuning, ratio-versus-phi, iteration, L/T, farm, commit or push.
+CURRENT owns the exact next scientific comparison and remaining lineage gate.
+
+### Follow-up source audit before modular testing
+
+The user's next requested Work-ZIP code audit identified four blind spots in
+the shipped observer verifier: altered scalar metrics, signal scope, SIMC
+covariance and individual component labels were not rejected. A separate
+direct-original recomputation passed 5,986 checks of current principal metrics,
+CSV, components, scope and covariance, so no original observer value is withdrawn
+by that coverage finding. Reusable adoption requires a narrow input/verification
+repair. See [audit](work-zip-modular-testing-audit-2026-11-04.md). No production,
+source-aware, Method-A, farm or physical-acceptance change follows.

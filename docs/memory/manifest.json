@@ -1,14 +1,14 @@
 {
   "files": [
     {
-      "bytes": 5049,
+      "bytes": 4961,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "bfb5f5235b3eef804f9f220fb07745b3056bc854fa66e79dde1e50994b6fc4b8"
+      "sha256": "a312a39eb40562e9bd01131d641251d231b30e38e2dfc1bd6cf7ab5652bb727d"
     },
     {
-      "bytes": 11903,
+      "bytes": 11700,
       "path": "docs/memory/CODEX.md",
-      "sha256": "bee469532825725c20981fb69ee17569d1b29e99706e8e77ea261524dac950b7"
+      "sha256": "41ce75c8ab0624762c60f3d9fdea8133f82697bf773da8c9d195391b77c7c4d3"
     },
     {
       "bytes": 6131,
@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8173,
+      "bytes": 10267,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "b22fed55fd205c4494a2b8af51889ec5daa5fe5440b4a33821a341602f58c86a"
+      "sha256": "8aebd2de2e4daec87151e028b9600a5a29a1f5b2250bb80aa25688b365729749"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 39878,
+      "bytes": 48794,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "deaf5f0a90f90e417a2ccee93ad667245ea0074039421d4d974bc5fed085a196"
+      "sha256": "c979f0ae3d09240be090202afb1b3261ffe3614697c77daa036bf2d41fc63b09"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 16748,
+      "bytes": 25054,
       "path": "docs/memory/USER.md",
-      "sha256": "997ae7572f7b4f7e61408bc1922fdb0ea245207650cb7f1e4b4c8b7a9eed8f42"
+      "sha256": "e6868e7435cd7a55d26a95abea88d9dcd8ed59f1479c2fe7d61149da80349345"
     },
     {
       "bytes": 1157,
@@ -109,6 +109,11 @@
       "bytes": 7648,
       "path": "docs/memory/decisions/memory-system-refinement-m0-m9-plan.md",
       "sha256": "f07fbaf5bc6e8f5fb9327479e0a37813a0b6cae32ce506e08a72e15ad988e758"
+    },
+    {
+      "bytes": 9892,
+      "path": "docs/memory/decisions/modular-offline-observer-tests-task-contract.md",
+      "sha256": "b7ae66537f92f73fbea3c90aef3d7e00b8c48dc9c56301d488f8db238ae09e90"
     },
     {
       "bytes": 575,
@@ -416,9 +421,9 @@
       "sha256": "59d558b9f3a455b05b3983ef96a57486a91ccc85f1b75a3dd8df881e32745877"
     },
     {
-      "bytes": 144061,
+      "bytes": 147582,
       "path": "docs/memory/investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md",
-      "sha256": "f224db2cba1d035af3011c634c6f8230850afc6fad1a4ad9dff3790f4763adc6"
+      "sha256": "696ef380b3e7e84398f5a261e81c5da370168f59700a75f0d37d3c1093775003"
     },
     {
       "bytes": 23507,
@@ -441,9 +446,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 18446,
+      "bytes": 34568,
       "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
-      "sha256": "acd61217829ed4007bced6ebc6d7381e8e6beb1bb6670c9db3d3f6af1d921f7d"
+      "sha256": "317219e76c868eef78c4b34e4bd474d636cba30746444514b9d9b2d74131fb5c"
     },
     {
       "bytes": 42001,
@@ -456,29 +461,34 @@
       "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
     },
     {
-      "bytes": 5460,
+      "bytes": 5371,
       "path": "docs/memory/investigations/parent-t-combined-reconstruction-part2-2026-11-04.md",
-      "sha256": "ba6751577331d2e02d8563e6b98a83f8dca0276eb617d3ef0a9bab811c6598db"
+      "sha256": "092bf5740cad3da8e58cdcfc15e985f1c2e289ac6723e97706cffb625559f403"
     },
     {
-      "bytes": 5510,
+      "bytes": 5420,
       "path": "docs/memory/investigations/parent-t-method-a-part3-2026-11-04.md",
-      "sha256": "15c8c9ac4e412a80912c478e68800e39cb7314cb3ef753e98bee22f2242ff72a"
+      "sha256": "40c641d7093a1d8a653b4347a55e03c19cd2029bfbb6d0cd9add86dbc847b1ef"
     },
     {
-      "bytes": 8235,
+      "bytes": 8102,
       "path": "docs/memory/investigations/parent-t-reconstruction-part1-2026-11-04.md",
-      "sha256": "d42b1131be4740bd62b718a235ca0d536480798a8c6e7da8de75f33314959d3b"
+      "sha256": "4eb410afa7fb5d3911721fd44468b3c48901cbe94ea5f8b207668d19d3683f61"
     },
     {
-      "bytes": 8993,
+      "bytes": 8851,
       "path": "docs/memory/investigations/parent-t-reconstruction-part2-2026-11-04.md",
-      "sha256": "01350e41445d410791aa34c81dc18c34309720805ccb0e595df8ea75cb241197"
+      "sha256": "adc62e471177247fa092a386dc9370d02bc02840302b6c2635a23fed4beb58fd"
     },
     {
       "bytes": 4714,
       "path": "docs/memory/investigations/simc-absolute-normalization-ledger-2026-11-03.md",
       "sha256": "368efc84b66a66b456186d7d97975a43036878d64b5fb452b037e44e4ae8286e"
+    },
+    {
+      "bytes": 6773,
+      "path": "docs/memory/investigations/work-zip-modular-testing-audit-2026-11-04.md",
+      "sha256": "db33c8f00967007377e767d5c847b1cf8a0442dc6667a9853bb594cc4ad2a850"
     },
     {
       "bytes": 2348,
@@ -1661,9 +1671,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 41034,
+      "bytes": 42535,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "c61f4d199ce4eba55a195b0ade22c3f3c42c76dce05749e5db4f48561498c167"
+      "sha256": "de4fd0d61ec336a5ebab1ae5f3eddf00f34ca85e26049f7e7d457f2987f4d8d7"
     },
     {
       "bytes": 1698,
