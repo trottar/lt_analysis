@@ -1,5 +1,7 @@
 # Parent-t reconstruction Part 1 — November 4, 2026
 
+> November 4 scientific-objective correction: These are historical setting-level integrated candidate diagnostics, not exact selected-Local-t producer yields or a test of final combined data/SIMC ratio flatness. Original numbers/source identities remain; CURRENT owns the ratio-input gate.
+
 Status: `SOURCE REVIEWED` for the user-authorized offline source/numerical audit.
 Producer-equivalent Local-t parent closure and full uncertainty: `BLOCKED` on
 missing inputs. Not `CLOSED / RUNTIME VALIDATED`.

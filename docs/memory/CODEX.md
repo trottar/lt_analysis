@@ -37,12 +37,20 @@ do not invent a workaround, reset, stash, clean or overwrite local work.
 
 ## Incident and memory implementation controls
 
-Memory/incident work follows the same one-contract, exact direct move command,
-short inline launch prompt and independent actual-diff review flow. Before any
-edit, inventory the complete dirty tree, index, pending patches, contracts and
-review bundles. Preserve their bytes; never resolve competing contracts implicitly
-by implementing a replacement. Report the first conflicting invariant and its
-narrow resolution under the existing authority.
+Work can and should implement authorized memory/incident updates directly.
+Memory-only correction does not require a separate Codex task, contract,
+placement command, launch prompt or farm run. The user's November 4 clarification
+supersedes the former rule requiring the source-changing Codex workflow for
+every memory update. Do not defer an authorized update solely because the
+memory is tracked Markdown.
+
+Before editing, inventory the dirty tree, index, pending patches and review
+bundles; preserve unrelated bytes and prior accepted evidence. Inspect the
+actual memory diff, regenerate/check the manifest and run memory health.
+Return a reviewable ZIP with the request, before/after files, full diff and
+receipt. Source-changing implementation still follows the contract/Codex/
+independent-review workflow above. User-only publication and farm authorization
+remain unchanged; a memory correction authorizes neither.
 
 Anchor supporting work to the requested artifact. Apply the MAINTENANCE
 science-gate displacement alarm after two consecutive non-evidence support gates

@@ -5,28 +5,24 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: user-authorized parallel Part 2 parent-t angular reconstruction
-investigation. Offline diagnostics are `SOURCE REVIEWED`; physical acceptance
-fold/completion remains `BLOCKED` on response/producer/covariance evidence.
-See [Part 2](investigations/parent-t-reconstruction-part2-2026-11-04.md) and
-preserved [Part 1](investigations/parent-t-reconstruction-part1-2026-11-04.md).
-Parts 3-4 `DEFERRED`. Local-t selected,
-not production-adopted; Global/Local-(t,phi) historical. Frozen subtraction,
-conventions, detached Method A and diagnostic/excluded Method B unchanged.
+`ACTIVE`: clean background-subtracted K+Lambda yields and corresponding
+combined data/SIMC ratios flat versus phi for every t at both epsilons.
+Unity is not required at iteration zero. Later SIMC-model iterations should
+approach unity with experimental subtraction fixed at iteration zero.
+Selected Local-t and the original six-step roadmap govern this objective.
 
 ## Current Work Item
 
-Part 2 evaluated all 15 parents using authentic Part 1 values and conditional
-ratio harmonics, not physical structure-function fits. Reference Left t1
-rank 2/3; Left/low t2,t3 correlations 0.978/0.999. Center/low t1,t2 condition
-numbers 2.21/2.23 and group-held-out RMS pulls 0.99/0.97 support a bounded
-diagnostic Part 3 question, not physical acceptance. No actual KLambda harmonic
-response was available. Uniform/tilted within-bin measures are explicit stress
-hypotheses, never substituted for measured acceptance. Full physical parent
-results/errors remain null. 65 scoped checks and eight independent tests pass.
-
-Production independent joint anchor-mean gate remains `BLOCKED`, **Outcome B**.
-Exact requirement is retained below; no repeated component/normalization study.
+Existing producer -> physics_lists -> average_ratios: Left+Center low,
+Left+Center+Right high; sum data and SIMC separately for 54 cells.
+Assess flatness, normalization, Lambda-background validity and uncertainty
+separately; flat/unity ratios cannot prove purity. Method A uses matched
+selected Local-t branches and the same iteration-zero SIMC denominator.
+Exact selected-Local-t inputs `BLOCKED`; no numerical Work authorized.
+Retain Parts 1/2/3 history: Combined54 support, 0/54 paired cells, 0/6 parents.
+Historical Left/lowe is not selected Local-t.
+See [accountability](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-4-continuation-scientific-objective-and-part-3-authorization-failure).
+Method A detached/non-production; Method B diagnostic/numerically excluded.
 
 ## Verified State
 
@@ -47,10 +43,9 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-November 4 Part 2 startup: local `test`, `origin/test` and live public `test`
-matched `646ef3e1061f438a7367ee879eec9fb91f493e40`. Part 1 memory edits were
-still uncommitted and preserved, along with two unrelated review files. Part 2
-adds memory only; scientific source remains unchanged.
+November 4 audit: local/origin/public test matched
+`bd6e4045d12a063a4caa25fff2965a5c40dfb6bd`. Work applied the memory correction;
+pending Part 2/3, review files and evidence scopes preserved.
 
 Only memory differs from farm scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
@@ -61,13 +56,12 @@ That acquisition consumes the old ledger/fresh-high NEXT, not scientific accepta
 
 ## Blockers
 
-Part 1/2 producer-equivalent closure is `BLOCKED`: exact current-cohort Local-t
-child MM_0/Y0, valid/skip mask, equivalent direct-parent observable if one
-exists, and full cross-child error/covariance decomposition are unavailable in
-the inspected comparison/log inputs. Coarse observers and historical E.8.2
-values are not substitutes. Part 2 also lacks matched accepted KLambda
-harmonic response/model deweighting and response-MC covariance. Pion-template
-support and integrated SIMC masses do not supply it. No farm rerun authorized.
+First ratio-input gate `BLOCKED`: retained evidence lacks exact current-cohort
+selected-Local-t producer Y0/MM_0, validity/skip and reported error/lineage
+records. Integrated diagnostic candidate B, logged Global-template baseline A
+and historical Left/lowe output cannot replace it. Matching iteration-zero SIMC
+must match cells/window/normalization. Method-A pair/covariance unavailable.
+Offline omissions are not missing functionality or farm-rerun instructions.
 
 Production Step 1 remains `BLOCKED`, Outcome B: independently derive the
 Center/highe/t3 non-SIDIS mean in the kaon SIDIS anchor
@@ -98,17 +92,20 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — independently review Part 2 and scope whether the supported
-Center/lowe/t1,t2 conditional diagnostics warrant a bounded Part 3 comparison
-of frozen Local-t versus Local-t + Method A. Preserve the same support,
-predictive tests and covariance limitations; no execution/promotion is
-currently authorized. Physical reconstruction still requires the missing
-producer/response evidence above; Outcome B remains unresolved.
+NEXT — review exact current-cohort selected-Local-t Y0/MM_0 producer
+valid/skip/error/source/fit/normalization records with corresponding
+iteration-zero SIMC yield inputs for six ratio-versus-phi inventories.
+First missing artifact is that selected-Local-t producer record: stop there;
+no historical substitution, invented ratios or general Work. Compare matched
+YA/MM_A only where available, using the same denominator/shared covariance.
+This correction authorizes no numerical study, implementation or farm run.
 
 ## Success Criteria
 
-No production statistical correction or farm readiness is accepted.
-Memory publication and pushed-state synchronization do not change scientific NEXT.
+Six iteration-zero ratio distributions assessed for flatness, available
+covariance and independent background support. Later SIMC refinement approaches
+unity with data subtraction fixed. No thresholds, forced normalization or
+promotion implied. Memory publication alone passes no scientific gate.
 
 ## Do Not Reopen Without New Evidence
 

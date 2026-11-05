@@ -24,6 +24,19 @@ empty and unavailable classifications; no fabricated final coverage.
 | 5 | **DEFERRED**: final data/SIMC yield ratios using existing normalization, event weights, yield producers and [ratio implementation](../../../src/binning/calculate_ratio.py). These are implemented functionality. Validate final ratios with accepted background-subtracted yields, matching canonical cells/windows, valid support and properly propagated uncertainties. Preserve the scoped absolute-unit caveat below; no standalone normalization investigation, rescaling or invented prerequisite. |
 | 6 | **DEFERRED**: continue the established SIMC cross-section iterations and L/T separation using existing machinery. Pion subtraction is applied once at iteration zero; later SIMC iterations reuse that result. No iteration or extraction redesign. |
 
+The clean-yield/data-SIMC angular-ratio objective spans these same steps:
+Step 2 establishes physically defensible selected Local-t subtraction; Step 3
+accepts its final MM and producer yields; Step 4 assesses matched Local-t versus
+Local-t + Method A within existing E.8/F.6 gates; Step 5 uses sums of matching
+data and SIMC yields to assess ratio flatness versus phi for each t and epsilon;
+Step 6 refines the SIMC model toward unity and uses the existing L/T machinery.
+This clarifies purpose, not order, status or dependencies. Iteration-zero unity
+is not required. Data subtraction remains fixed thereafter; no pion retuning,
+area matching or invented normalization. For Method A use the same iteration-zero
+SIMC denominator and evaluate angular flatness, normalization, Lambda-background
+validity and uncertainty separately. Flatness/unity cannot prove purity.
+No new steps, reconstruction phases, thresholds or numerical work are authorized.
+
 Existing normalization/weight/yield owners remain
 [`get_eff_charge.find_events`](../../../src/normalize/get_eff_charge.py),
 [`iter_weight`](../../../src/simc_ana/iter_weight.py), and
@@ -69,8 +82,8 @@ unchanged; production Step 1 Outcome B is not bypassed. See the
 | Subpart | Scope and status |
 | --- | --- |
 | Part 1 — baseline parent-t reconstruction and bin-quality audit | `SOURCE REVIEWED` for the authorized offline audit, originally ACTIVE for this Work task: exclusion/suppression source traced, 135 Local-t integrated reconstructions inventoried, 15 signed sums and selection/covariance limits evaluated. Direct serialized Local-t MM_0/Y0 and equivalent direct-parent/full-covariance closure remain `BLOCKED` on missing evidence. Not physical acceptance or full-2pi reconstruction; E.8.2 closure was not repeated. |
-| Part 2 — acceptance-aware reconstruction | `SOURCE REVIEWED` for user-authorized offline input-authority and conditional angular diagnostics across all 15 parents. Physical acceptance fold/completion remains `BLOCKED`: actual matching KLambda harmonic response, exact Local-t producer values and full covariance unavailable. Left t1 reference rank 2/3; Center/low t1,t2 support bounded conditional prediction tests. No physical interference/full-azimuth result or Method-A application accepted. See the [Part 2 record](../investigations/parent-t-reconstruction-part2-2026-11-04.md). |
-| Part 3 — Method-A-assisted reconstruction | `DEFERRED`: repeat the accepted reconstruction methodology using Local-t + Method A; measure parent stability, child sensitivity and uncertainty redistribution. Preserve parent-normalized event weights and accepted F.4/F.6 evidence; no retraining, canonical-five blocker bypass or production promotion. Not executed. |
+| Part 2 — acceptance-aware reconstruction | `SOURCE REVIEWED`: [actual combined-setting audit](../investigations/parent-t-combined-reconstruction-part2-2026-11-04.md), 54/54 nominal cells populated with nonzero summed SIMC; four weak current baseline-A cells low/t1/phi4–7. Exact same-cohort selected-Local-t producer Y0/MM_0/validity/error/covariance gate remains `BLOCKED` and is the single NEXT. No missing nominal-cell completion demonstrated necessary; full acceptance/covariance unverified. Prior conditional fits remain off-target history. No new angular/response model or Method-A execution. |
+| Part 3 — Method-A-assisted reconstruction | `SOURCE REVIEWED`: [paired-input evidence audit](../investigations/parent-t-method-a-part3-2026-11-04.md). Selected-Local-t combined comparison `BLOCKED`: no exact matched producer pair established for 54 cells/six parents. Historical accepted Left/lowe published values show setting-local redistribution only; no selected-B yield improvement or new DeltaY uncertainty established. F.4 support preservation and Lambda-window yield changes distinguished. Review actual evidence; no retraining, equivalence bypass, farm rerun or production promotion. |
 | Part 4 — validation and cross-section consequences | `DEFERRED`: held-out angular cells, covariance, exclusion sensitivity, data/SIMC ratios and eventual L/T consequences; identify reliable, systematic-limited and angularly unidentifiable quantities. Not executed. |
 
 No production source, cuts/binning, subtraction, uncertainty convention or

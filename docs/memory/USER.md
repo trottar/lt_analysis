@@ -94,9 +94,43 @@ for genuinely missing information. A user correction requires an immediate
 professional re-anchor and the shortest justified action, not rationalization.
 A comprehensive durable memory correction must update the appropriate governing
 records as well as the investigation; a standalone incident write-up is incomplete.
-Always supply the exact direct task-contract move command using active external
-configuration and one short inline Codex launch prompt; keep personal paths out
-of tracked memory. These requirements authorize no unsafe farm operation.
+For source-changing tasks, supply the exact direct task-contract move command
+using active external configuration and one short inline Codex launch prompt;
+keep personal paths out of tracked memory. Authorized Work memory-only updates
+need neither a Codex launch nor a farm operation.
+
+### Work owns authorized memory updates too
+
+Work can and should apply authorized repository-memory updates directly,
+including the governing scientific objective, CURRENT, durable knowledge,
+workflow preferences and accountability history. Do not hand memory-only work
+back to the user as a Codex task or leave it proposed solely because it edits
+tracked Markdown. No separate Codex contract/launch or farm run is required.
+Read the required context, preserve pending work, make the bounded update,
+review its actual diff, regenerate/check the manifest, run memory health and
+deliver the requested ZIP/receipt. Source-changing implementation retains its
+established Codex workflow. The user alone publishes or runs the farm.
+The user explicitly clarified this on November 4 after the assistant wrongly
+deferred the scientific-objective correction and supplied Codex instructions.
+
+### Scientific objective controls recommendations
+
+The user's established objective is clean background-subtracted K+Lambda
+data yields and corresponding combined data/SIMC ratios flat versus phi for
+every t at both epsilons, with later SIMC-model iterations approaching unity.
+Iteration-zero pion subtraction stays fixed. Setting-local E.8 debugging and
+historical parent sums are not the final combined experimental observable.
+Before substantial Work, identify exactly how its new result advances this
+objective under the approved six steps, whether the needed producer/cohort
+inputs actually exist and whether the calculation can answer that physics
+question. If the first input is known missing, identify it and stop that
+comparison; do not authorize another report/study to restate the boundary.
+Method A must use matched selected Local-t branches and the same SIMC
+denominator; assess ratio shape, normalization, background validity and
+uncertainties separately. Ratios cannot justify forcing background or SIMC
+normalization. Existing safeguards must be applied before spending resources;
+new documentation is not scientific throughput. See the existing November 4
+accountability continuation. No numerical Work follows from this correction.
 
 ### November 3 explicit user correction: judgment before commissioning Work
 

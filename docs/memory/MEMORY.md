@@ -8,6 +8,15 @@ repository memory, or supplied farm evidence. `CURRENT.md` is the sole
 ordinary active-state authority. The handoff records exceptional transfer state
 only and cannot override CURRENT.
 
+Work can and should directly update authorized repository memory, including
+scientific priorities, investigation/accountability records and workflow
+preferences. Memory-only updates do not require a separate Codex task,
+contract, launch prompt or farm run. Preserve pending changes, inspect the
+actual diff, regenerate the manifest and run memory-health checks. Reserve
+the Codex implementation workflow for source-changing work. User-only
+publication and farm authorization remain separate. This is the user's
+November 4 clarification and supersedes the former Codex-only memory rule.
+
 At substantial-work start, establish the actual branch, HEAD, and worktree.
 For implementation, current source and relevant diff outrank stale summaries;
 for runtime acceptance, fresh farm/runtime evidence outranks source review.
@@ -84,6 +93,55 @@ residual Lambda gauge reuse data; shapes do not fix kaon-PID composition.
 Protected Delta acceptance cannot validate earlier pion removal. Judge applied
 background beneath Lambda, not full-MM chi2. Missing Sigma0 input is a separate
 improvement. Diagnostics are not corrections; see the November 3 investigation.
+
+### Clean-yield, angular-ratio and SIMC-iteration objective
+
+The established scientific objective is a physically defensible clean
+background-subtracted K+Lambda experimental yield and its corresponding
+K+Lambda SIMC comparison, with data/SIMC ratios flat versus phi in each t bin
+at both epsilons. At fixed epsilon combine complementary spectrometer settings
+by summing data and SIMC yields separately before division. For branch b and
+SIMC iteration n:
+
+\[
+R_{\epsilon,t,\phi}^{(n),b}
+=\frac{\sum_{s\in S_\epsilon}Y_{\mathrm{data},s,t,\phi}^{(0),b}}
+{\sum_{s\in S_\epsilon}Y_{\mathrm{SIMC},s,t,\phi}^{(n)}}.
+\]
+
+At Q4p4W2p74, S_low is Left+Center and S_high is Left+Center+Right: six
+epsilon-by-t distributions, 54 nominal cells. Do not average setting ratios.
+Apply experimental corrections and selected pion subtraction once at iteration
+zero. Immediate angular QA is agreement with a constant versus phi using
+valid covariance where available; unity is not required at iteration zero.
+Keep those experimental yields/subtraction fixed in later SIMC cross-section
+model iterations; established iteration machinery should bring ratios toward
+unity while reproducing data angular dependence. Never retune pion background,
+area-match or add an artificial normalization to force unity.
+
+Method-A evaluation compares selected Local-t versus selected Local-t + A on
+the same cohort, fitted Local-t baseline, cuts, bins, normalization and common
+iteration-zero SIMC denominator. Its primary observable is the change in ratio
+versus phi, not yield increase, parent-sum appearance or smoother error bars.
+Distinguish angular flatness, normalization, physical pion-background support
+beneath Lambda and statistical/correlated/background uncertainty. Neither a
+flat ratio nor unity proves purity; incorrect subtraction can compensate for a
+SIMC-model error. Invent no thresholds, covariance or fitting algorithm.
+Accepted setting-local E.8 debugging is not final combined-yield acceptance.
+Missing matched producer evidence stops that comparison, not a reason to
+commission another historical or conditional substitute.
+
+### Observable-chain and combined-setting review
+
+Before commissioning models or investigations, trace producer -> serialized
+Y0/MM_0/error/validity records -> physics_lists yield files/list.settings ->
+average_ratios setting combination -> the actual observable. At Q4p4W2p74,
+combine Left+Center low epsilon and Left+Center+Right high epsilon into 54
+(t,phi,epsilon) cells before judging final angular gaps. Sum data and SIMC
+separately; do not average setting ratios. Prove branch/cohort ownership:
+t_bin configuration alone does not identify the selected Local-t template
+branch. Missing offline records are not missing functionality. Method A is a
+separate subsequent comparison; an off-target conditional fit clears no gate.
 
 ## HGCer and Method-A/Method-B boundaries
 
@@ -307,7 +365,8 @@ warnings block progress only for material active-state/provenance ambiguity
 or a hard integrity violation. Record nonblocking warnings and batch their
 repair at the next checkpoint or milestone audit; hard failures remain blocking.
 
-The default loop is memory checkpoint -> substantive science/implementation ->
+For source-changing implementation, the default loop is memory checkpoint ->
+substantive science/implementation ->
 deterministic local test -> ChatGPT actual-diff review -> user commit/push ->
 ChatGPT pushed-state synchronization review -> narrow farm/runtime validation
 when required -> fresh evidence review -> memory checkpoint. Commit/push and
@@ -335,12 +394,14 @@ before approving a farm handoff. Expose unverified hard invariants and stop at
 them; do not substitute repeated speculative infrastructure fixes for evidence.
 The [seventh-failure record](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#seventh-failure-and-repeated-review-failures--october-23)
 records repeated assistant review failures and the withdrawn direct-patch advice.
-Preserve audit -> one standalone Markdown contract -> short Codex launch ->
+For source-changing implementation, preserve audit -> one standalone Markdown
+contract -> short Codex launch ->
 Codex implementation/local checks -> independent actual-diff review -> user
 commit/push -> pushed-state synchronization -> farm only if proven ready.
-Publication and farm execution remain user-only. Direct assistant patch/application
-instructions and unreviewed manual repository mutations bypass this workflow
-and are forbidden; this does not prohibit contract-authorized Codex implementation.
+Publication and farm execution remain user-only. Unreviewed source-changing
+patch/application instructions bypass that workflow and are forbidden; this
+does not prohibit authorized direct Work memory updates or contract-authorized
+Codex source implementation.
 
 The [ninth-attempt accountability checkpoint](investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#ninth-failure-io-cost-and-assistant-accountability--october-24)
 adds a durable review constraint: match verification cost to actual read/write

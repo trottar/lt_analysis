@@ -49,6 +49,12 @@ dependency/status structure without owning the exact next action.
 
 ## Execution authority
 
+Work may directly implement authorized repository-memory and incident updates.
+Memory-only work requires preservation, actual-diff review, manifest and health
+checks; it requires no separate Codex task/contract/launch or farm run. Source
+implementation retains the established Codex workflow below. See USER and
+CODEX for the November 4 user clarification.
+
 Codex may make allowlisted local changes and run deterministic local checks.
 Codex must not commit, push, update remote refs, initiate Jefferson Lab farm
 execution, or claim farm/runtime validation. ChatGPT independently audits the

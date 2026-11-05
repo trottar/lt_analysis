@@ -116,3 +116,130 @@ the chronology. No broad cleanup, scientific study, source implementation,
 Codex launch, commit/push, farm operation or follow-on maintenance task follows.
 Independent actual-diff review, user-only publication and pushed-state review
 are the next user-controlled actions; none authorizes a blocked operation.
+
+
+## November 4 continuation: producer gate and combined-setting Part 2 failures
+
+This continuation records the user's explicit correction and ChatGPT's
+responsibility. It creates no competing roadmap or accountability program.
+At re-anchor, local/origin/live public test matched
+`bd6e4045d12a063a4caa25fff2965a5c40dfb6bd`; tracked worktree/index were clean,
+with two pre-existing untracked review files preserved.
+
+1. ChatGPT commissioned Part 2 without satisfying the narrow exact same-cohort
+   Local-t producer-evidence gate ChatGPT itself established after Part 1.
+2. ChatGPT treated individual spectrometer-setting angular coverage as final
+   combined (t,phi,epsilon) coverage. Left+Center at low epsilon and
+   Left+Center+Right at high epsilon must first be combined: 135 nominal
+   setting cells map to 54 nominal final combined cells.
+3. ChatGPT commissioned conditional harmonic/response-model fits before
+   checking how existing average_ratios.f combines settings. The implemented
+   sum-data / sum-SIMC chain, rather than independent setting fits or mean
+   individual ratios, was the relevant observable.
+4. ChatGPT failed to distinguish the agreed acceptance-aware Part 2 from the
+   separately planned Method-A Part 3 comparison, and prematurely advanced
+   that separate comparison without the controlling evidence.
+5. After user corrections, ChatGPT invented replacement roadmap steps and
+   sent another incorrect Work message instead of preserving the original
+   six-step plan. This is the user's attributed workflow correction; no
+   replacement sequence is adopted here.
+6. These failures consumed the user's time, Work resources and money without
+   establishing the requested scientific result. No monetary amount is invented.
+7. Responsibility belongs to ChatGPT's scientific-planning and review judgment,
+   not the user, Work, Codex or the Jefferson Lab environment.
+
+The historical Part 2 conditional-fit study and authentic numerical evidence
+are preserved but explicitly off-target for the requested acceptance-aware
+reconstruction of final combined yields. Its results do not establish that
+reconstruction, final combined coverage, or authorization to advance Method A.
+The selected Local-t producer branch must be distinguished from a t_bin config
+label and from diagnostic Global-minus-Local-t integrated reconstructions.
+Unavailable offline records do not mean missing production functionality.
+
+Binding prevention rule: trace the target observable through the full existing
+producer, serializer and experimental-setting combination chain before
+commissioning a new model or investigation. Verify exact Y0/MM_0 ownership,
+source/cohort/selection, valid/skip state, normalization/error semantics and
+available shared covariance. Establish combined coverage first; only then
+assess whether reconstruction or missing-angle completion is necessary.
+Preserve signed measurements and distinguish zero, unavailable, invalid and
+unsupported inputs. Do not replace the agreed gate with conditional models,
+new roadmap steps, or a premature Method-A comparison.
+
+The authorized corrective scientific work is exact producer evidence ->
+existing setting combination -> combined parent-yield/acceptance assessment.
+No uniform/tilted acceptance substitute, angular fit, pion/normalization study,
+production change, farm job, commit or push is authorized by this correction.
+All accepted scopes, original six steps and Outcome B remain intact.
+
+## November 4 continuation: scientific objective and Part 3 authorization failure
+
+The user's mandatory realignment records repeated failures by ChatGPT to
+apply safeguards that already existed. This is a continuation of this incident,
+not a new incident program, scientific milestone or replacement roadmap.
+The controlling objective was already clean background-subtracted K+Lambda
+yields, corresponding combined data/SIMC ratios flat versus phi at every t
+and epsilon, and later convergence toward unity through SIMC-model iteration
+with experimental background subtraction fixed at iteration zero.
+
+1. ChatGPT repeatedly reopened or displaced the selected Local-t baseline and
+   approved scientific roadmap despite explicit repository safeguards.
+2. ChatGPT commissioned redundant Outcome B and SIMC-normalization
+   investigations without evidence that repetition advanced the final physics.
+3. ChatGPT commissioned original Part 2 conditional angular-model work without
+   satisfying its own producer-evidence gate or checking existing setting combination.
+4. ChatGPT initially treated spectrometer-setting angular coverage as final
+   combined coverage, ignoring established Left/Center/Right combination.
+5. ChatGPT repeatedly invented or relabeled roadmap subparts after corrections
+   instead of preserving the original six-step sequence.
+6. ChatGPT authorized Part 3 despite knowing the required selected Local-t /
+   Method-A paired producer evidence was missing. Later detailed execution
+   requests do not erase that upstream planning/review failure.
+7. The resulting Part 3 archive contained 0/54 selected-Local-t paired combined
+   cells and 0/6 paired parents. ChatGPT centered interpretation on unrelated
+   historical Left/lowe results rather than answering the requested observable.
+8. ChatGPT characterized yield changes, parent stability and error-bar appearance
+   as potential improvements without testing actual data/SIMC ratio versus phi.
+9. ChatGPT failed to maintain fixed iteration-zero background subtraction versus
+   subsequent SIMC-model iteration as the controlling scientific workflow.
+10. ChatGPT repeatedly supplied reports and memory tasks without first deciding
+    whether the proposed calculation could answer the requested physics question.
+
+These are failures of ChatGPT's scientific planning, independent review and
+adherence to existing instructions. They caused repeated user corrections,
+wasted Work resources, monetary cost, delays and loss of scientific throughput.
+No financial total is invented. Responsibility is ChatGPT's, not the user's,
+Work's, Codex's or the Jefferson Lab farm's. The primary failure was not applying
+existing safeguards; no expanded process or new support phase is the remedy.
+
+Authentic Part 1/2/3 values, source identities, pending corrections and scoped
+acceptance remain history. Historical Global-template or Left/lowe results
+cannot become selected-Local-t evidence by relabeling. Parent equality,
+positivity, flat ratios or unity cannot independently establish background purity.
+
+Binding application of existing safeguards: before authorizing Work, identify
+the actual ratio observable, the precise new evidence-producing outcome and
+verified input sufficiency under the original roadmap. First missing artifact
+is presently the exact current-cohort selected-Local-t producer Y0/MM_0 with
+validity/error/model/normalization lineage, to match corresponding iteration-zero
+SIMC yields. Stop the affected comparison there; use matched YA/MM_A only when
+available with the same denominator and shared-error support. No synthetic or
+historical replacement, invented ratio, general investigation or automatic farm
+rerun is authorized. CURRENT owns the resumed scientific operation.
+
+### November 4 clarification: Work directly maintains memory
+
+The user explicitly corrected the assistant: Work can and should perform
+memory updates, and directed application of this clarification together with
+the scientific-objective realignment prompt. The assistant's decision to leave
+that authorized correction proposed and issue Codex launch instructions was
+unnecessary. Memory-only work does not imply a farm run or require a separate
+Codex implementation task. The earlier proposal-only contract/launch handoff
+is superseded for this correction; its archive remains historical evidence.
+
+Work directly applied the bounded governing correction, retained pending
+Part 2/3 evidence and original six-step rows, updated conflicting workflow
+guidance, and regenerated/checked memory integrity. No production source,
+numerical study, Codex launch, farm run, commit or push is authorized or
+performed by this clarification. Actual-diff review and user-controlled
+publication remain required; do not substitute another handoff for the update.

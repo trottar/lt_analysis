@@ -1,5 +1,16 @@
 # Parent-t reconstruction Part 2 — November 4, 2026
 
+> November 4 scientific-objective correction: The conditional setting-level model results do not establish the final selected-Local-t data/SIMC ratio versus phi. They authorize no Method-A study or alternate roadmap; all original evidence below is retained.
+
+> November 4 accountability correction: this conditional setting-specific fit
+> study is **off-target for the requested Part 2**. Its authentic numerical
+> evidence and source identities are preserved below as history. It did not
+> satisfy the exact selected-Local-t producer gate or reconstruct the final
+> combined (t,phi,epsilon) yields. Its recommendation to advance a selected
+> setting's Method-A diagnostic is superseded; CURRENT owns the corrected gate.
+> See [the November 4 continuation](kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-4-continuation-producer-gate-and-combined-setting-part-2-failures).
+
+
 Status: `SOURCE REVIEWED` for the user-authorized offline scientific diagnostic.
 Physical acceptance-folded parent reconstruction/completion: `BLOCKED` on
 missing matching response/producer/covariance evidence. No runtime closure.

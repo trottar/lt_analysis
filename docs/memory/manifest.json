@@ -1,14 +1,14 @@
 {
   "files": [
     {
-      "bytes": 4603,
+      "bytes": 5049,
       "path": "docs/memory/AGENTS.md",
-      "sha256": "de71043f446b7c84b77ce37c805f410512dbf61100f744691d450266f30c1da7"
+      "sha256": "bfb5f5235b3eef804f9f220fb07745b3056bc854fa66e79dde1e50994b6fc4b8"
     },
     {
-      "bytes": 11225,
+      "bytes": 11903,
       "path": "docs/memory/CODEX.md",
-      "sha256": "40611904c77dfc9f70d59ae56dd64c6dfca765d44d6d4052bafbc53159ed1bfe"
+      "sha256": "bee469532825725c20981fb69ee17569d1b29e99706e8e77ea261524dac950b7"
     },
     {
       "bytes": 6131,
@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8180,
+      "bytes": 8178,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c106f6989a3c73fb57a6c2035125b189900cd38f898205c45ddf4a9deed0adfb"
+      "sha256": "c02713447f8020ea291517499f3ea61f252fd517e7249b2924055349ffddca2d"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 32602,
+      "bytes": 36672,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "0a0d4eb890b3426e02fd8b61e355befb9a2bdb7ec6e0cda61474c71860617ccc"
+      "sha256": "5c94e9d43c5c860348650584f23bf322f13143207c84064390f1fc3098b6c1b9"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 12246,
+      "bytes": 14648,
       "path": "docs/memory/USER.md",
-      "sha256": "f2f3a3bfa5628e9be37ff4f506fa59da600676d9b9183481932abad3f170b327"
+      "sha256": "9c8304eb8cd1b5571cfee764eea638fe927d2309d906757ce9d96f9773ec016b"
     },
     {
       "bytes": 1157,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 7697,
+      "bytes": 16214,
       "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
-      "sha256": "027b7e525d30acccdebc63be152c14c00f33272ae5d2e6c3f21781a8b643df80"
+      "sha256": "fdea28a9914aefc66d1b8e0816703f472fc2a514f73fb0880de96eca56c56462"
     },
     {
       "bytes": 42001,
@@ -456,14 +456,24 @@
       "sha256": "0f6b8b7eb23a8347d4b23f064fc688fdc6424e7dec31f58ef61062597e6bed75"
     },
     {
-      "bytes": 7811,
-      "path": "docs/memory/investigations/parent-t-reconstruction-part1-2026-11-04.md",
-      "sha256": "df0a6165d47042cf0a7ad619f79372ff20df333d11f4ace18a97eba41e38e400"
+      "bytes": 5460,
+      "path": "docs/memory/investigations/parent-t-combined-reconstruction-part2-2026-11-04.md",
+      "sha256": "ba6751577331d2e02d8563e6b98a83f8dca0276eb617d3ef0a9bab811c6598db"
     },
     {
-      "bytes": 7963,
+      "bytes": 5510,
+      "path": "docs/memory/investigations/parent-t-method-a-part3-2026-11-04.md",
+      "sha256": "15c8c9ac4e412a80912c478e68800e39cb7314cb3ef753e98bee22f2242ff72a"
+    },
+    {
+      "bytes": 8235,
+      "path": "docs/memory/investigations/parent-t-reconstruction-part1-2026-11-04.md",
+      "sha256": "d42b1131be4740bd62b718a235ca0d536480798a8c6e7da8de75f33314959d3b"
+    },
+    {
+      "bytes": 8993,
       "path": "docs/memory/investigations/parent-t-reconstruction-part2-2026-11-04.md",
-      "sha256": "8b60e6619437367851aa9ede29e4169bfcc6cf3af07f67b1b5449b3193f2169c"
+      "sha256": "01350e41445d410791aa34c81dc18c34309720805ccb0e595df8ea75cb241197"
     },
     {
       "bytes": 4714,
@@ -1651,9 +1661,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 39299,
+      "bytes": 41034,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "c28fe6e1a12e4758d567ae58b30371af10f3cf2e4e1d8023c173c13131e614ce"
+      "sha256": "c61f4d199ce4eba55a195b0ade22c3f3c42c76dce05749e5db4f48561498c167"
     },
     {
       "bytes": 1698,
