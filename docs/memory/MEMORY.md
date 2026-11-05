@@ -86,22 +86,56 @@ remain historical comparisons; initial K+Lambda SIMC is provisional.
 The fitted pion-control denominator is essential: pion-only numerator/denominator
 weights act on signed experimental pion events. Small subtraction, positive
 yield, agreement or a near-unity data/SIMC ratio cannot validate that transfer.
-High epsilon has no RF slow-proton subtraction. Scalar empty-error fallback
-fails equivalent-unit invariance. Source-aware refits establish conditional
-behavior, not universal coverage or physical bias/MSE. Staged priors and the
+High epsilon has no RF slow-proton subtraction. Staged priors and the
 residual Lambda gauge reuse data; shapes do not fix kaon-PID composition.
 Protected Delta acceptance cannot validate earlier pion removal. Judge applied
 background beneath Lambda, not full-MM chi2. Missing Sigma0 input is a separate
 improvement. Diagnostics are not corrections; see the November 3 investigation.
+
+### Model scope and independent source-aware statistics
+
+Global / Local-t / Local-(t,phi) are the established background-model scopes.
+Local-t is selected for continued development/final analysis, not automatically
+production-adopted. The other two remain historical; selection is not reopened.
+Source-aware statistical analysis is independent of that scope comparison:
+not Local-t's definition, an automatic extension, or a fourth background scope.
+Evaluating a diagnostic at Center/high/t3 in an existing configuration does not
+scientifically define its statistics by Local-t.
+
+Read the detailed [November 2-3 statistical checkpoint](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#confirmed-statistical-findings-and-quantitative-scope),
+not a shortened summary: the scalar error fallback has a demonstrated
+equivalent-unit invariance defect affecting applied subtraction. Retained
+source-aware diagnostics use all four signed sources and quadratic Sumw2 and
+refit the complete staged pi_n / pi_Delta / pi_SIDIS procedure. They changed
+applied component estimates, not merely plotted uncertainty bars. Studies
+included sparse counts, conditional coverage/variance, conditional bias/MSE
+and source-refit covariance. Some conditional results improved; universal
+superiority, physical component truth, physical bias/MSE, complete template/
+systematic covariance and production acceptance were not established. Do not
+call computed conditional covariance/bias/MSE absent or promote them to truth.
+Original generating assumptions, numbers, sources and evidence limits remain
+in the owning investigation. The user considers this promising statistical
+work; that scientific assessment is distinct from demonstrated acceptance.
+These diagnostics are not production corrections. No new fitting study or
+adoption is authorized by this clarification.
 
 ### Clean-yield, angular-ratio and SIMC-iteration objective
 
 The established scientific objective is a physically defensible clean
 background-subtracted K+Lambda experimental yield and its corresponding
 K+Lambda SIMC comparison, with data/SIMC ratios flat versus phi in each t bin
-at both epsilons. At fixed epsilon combine complementary spectrometer settings
-by summing data and SIMC yields separately before division. For branch b and
-SIMC iteration n:
+at both epsilons. Before interpreting yields, the cleaned experimental MM
+distribution and matching K+Lambda SIMC must agree closely in shape within
+the actual Lambda signal window: peak and physically relevant tail, common
+selections/binning, matched resolution/acceptance treatment and documented
+normalization. Integrated-yield agreement cannot establish MM-shape agreement.
+Close shape agreement is a necessary target, not independent proof of purity.
+Full-MM component diagnostics remain useful but do not replace signal-window
+agreement. An already-supported shape-normalized diagnostic is separate from
+authoritative absolute-yield normalization; never tune subtraction to match SIMC.
+
+At fixed epsilon combine complementary spectrometer settings by summing data
+and SIMC separately before division. For branch b and SIMC iteration n:
 
 \[
 R_{\epsilon,t,\phi}^{(n),b}
@@ -111,6 +145,8 @@ R_{\epsilon,t,\phi}^{(n),b}
 
 At Q4p4W2p74, S_low is Left+Center and S_high is Left+Center+Right: six
 epsilon-by-t distributions, 54 nominal cells. Do not average setting ratios.
+The ratio should be phi-flat; the data yield itself retains physical angular
+dependence and need not be flat.
 Apply experimental corrections and selected pion subtraction once at iteration
 zero. Immediate angular QA is agreement with a constant versus phi using
 valid covariance where available; unity is not required at iteration zero.
@@ -120,9 +156,13 @@ unity while reproducing data angular dependence. Never retune pion background,
 area-match or add an artificial normalization to force unity.
 
 Method-A evaluation compares selected Local-t versus selected Local-t + A on
-the same cohort, fitted Local-t baseline, cuts, bins, normalization and common
-iteration-zero SIMC denominator. Its primary observable is the change in ratio
-versus phi, not yield increase, parent-sum appearance or smoother error bars.
+the same source/cohort, fitted Local-t baseline, cuts, bins, Lambda window,
+normalization and common iteration-zero SIMC denominator. Its two required
+observables are Lambda-window cleaned-data/SIMC MM shape and data/SIMC ratio
+versus phi, for every admissible branch/cell and all t bins/both epsilons.
+Method A applies the accepted relative-response factor to the relevant pion
+contribution on that same baseline. Yield increase, smaller parent shift,
+smoother errors or historical Left/lowe results cannot establish improvement.
 Distinguish angular flatness, normalization, physical pion-background support
 beneath Lambda and statistical/correlated/background uncertainty. Neither a
 flat ratio nor unity proves purity; incorrect subtraction can compensate for a
@@ -130,6 +170,12 @@ SIMC-model error. Invent no thresholds, covariance or fitting algorithm.
 Accepted setting-local E.8 debugging is not final combined-yield acceptance.
 Missing matched producer evidence stops that comparison, not a reason to
 commission another historical or conditional substitute.
+
+Scientific sequence: pion contamination/subtraction -> clean Lambda-window
+data/SIMC shape agreement -> corresponding yield ratios versus phi -> SIMC
+model iteration toward unity with iteration-zero data subtraction fixed ->
+existing L/T extraction. This interprets the approved workflow, not a new
+roadmap or algorithm. Retain separate uncertainty/background-validity tests.
 
 ### Observable-chain and combined-setting review
 

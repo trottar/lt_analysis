@@ -5,24 +5,24 @@ memory_schema: 3
 
 ## Active Objective
 
-`ACTIVE`: clean background-subtracted K+Lambda yields and corresponding
-combined data/SIMC ratios flat versus phi for every t at both epsilons.
-Unity is not required at iteration zero. Later SIMC-model iterations should
-approach unity with experimental subtraction fixed at iteration zero.
-Selected Local-t and the original six-step roadmap govern this objective.
+`ACTIVE`: physically credible clean K+Lambda: close cleaned-data/K+Lambda-SIMC
+shape agreement in the actual Lambda MM window (peak/relevant tail), matched
+selection/binning/resolution/acceptance and documented normalization. Integrated
+yields alone are insufficient; close shape agreement is necessary, not proof
+of purity. Then data/SIMC ratios flat versus phi for every t/both epsilons;
+data itself has physical angular dependence. Initial unity is not required.
+Later SIMC iterations approach unity with iteration-zero subtraction fixed.
 
 ## Current Work Item
 
-Existing producer -> physics_lists -> average_ratios: Left+Center low,
-Left+Center+Right high; sum data and SIMC separately for 54 cells.
-Assess flatness, normalization, Lambda-background validity and uncertainty
-separately; flat/unity ratios cannot prove purity. Method A uses matched
-selected Local-t branches and the same iteration-zero SIMC denominator.
-Exact selected-Local-t inputs `BLOCKED`; no numerical Work authorized.
-Retain Parts 1/2/3 history: Combined54 support, 0/54 paired cells, 0/6 parents.
-Historical Left/lowe is not selected Local-t.
-See [accountability](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-4-continuation-scientific-objective-and-part-3-authorization-failure).
-Method A detached/non-production; Method B diagnostic/numerically excluded.
+Global / Local-t / Local-(t,phi): Local-t selected, not production-adopted;
+others historical. Source-aware statistics is independent, promising (user),
+not a fourth scope, Local-t extension or accepted correction.
+Primary selected Local-t versus SAME Local-t + Method A: matched source/cohort/
+fit/cuts/window/normalization, common iteration-zero SIMC denominator. Assess
+BOTH Lambda MM shape and ratio-versus-phi, plus uncertainty/background validity.
+Detached A; diagnostic/excluded B. Sum data/SIMC separately: Left+Center low,
+Left+Center+Right high. No tuning/scaling to force agreement.
 
 ## Verified State
 
@@ -43,9 +43,9 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-November 4 audit: local/origin/public test matched
-`bd6e4045d12a063a4caa25fff2965a5c40dfb6bd`. Work applied the memory correction;
-pending Part 2/3, review files and evidence scopes preserved.
+November 4 final clarification: local/origin/public test matched
+`02652e90727aa5d8abccaa2eb112693dad140c6b`; tracked tree/index were clean.
+Memory-only; two review files and evidence scopes preserved.
 
 Only memory differs from farm scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
@@ -102,10 +102,10 @@ This correction authorizes no numerical study, implementation or farm run.
 
 ## Success Criteria
 
-Six iteration-zero ratio distributions assessed for flatness, available
-covariance and independent background support. Later SIMC refinement approaches
-unity with data subtraction fixed. No thresholds, forced normalization or
-promotion implied. Memory publication alone passes no scientific gate.
+Pion subtraction -> Lambda-window data/SIMC peak/tail shape agreement -> six
+phi-ratio distributions -> fixed-data SIMC iteration toward unity -> existing
+L/T, with physical background support and available errors/covariance. No new
+threshold, algorithm, normalization or promotion; exact NEXT/gates unchanged.
 
 ## Do Not Reopen Without New Evidence
 

@@ -243,3 +243,37 @@ guidance, and regenerated/checked memory integrity. No production source,
 numerical study, Codex launch, farm run, commit or push is authorized or
 performed by this clarification. Actual-diff review and user-controlled
 publication remain required; do not substitute another handoff for the update.
+
+## November 4 final continuation: signal-window shape and source-aware scope
+
+The user's final bounded scientific-memory correction identifies these
+additional ChatGPT failures after the preceding objective correction:
+
+1. ChatGPT still reduced the physics goal primarily to integrated yield ratios
+   and failed to emphasize close Lambda-window data/SIMC MM-shape agreement.
+2. ChatGPT repeatedly centered historical Left/lowe Method-A results instead
+   of the selected combined Local-t versus Local-t + Method A comparison.
+3. ChatGPT conflated source-aware statistical fitting with selected Local-t
+   model scope despite the detailed existing statistical investigation.
+4. ChatGPT repeated an incomplete definition in response to correction before
+   consulting the detailed ongoing analysis and repository record.
+5. ChatGPT required the user to reiterate established scientific decisions,
+   consuming additional time and resources after the previous memory correction.
+
+Responsibility is ChatGPT's scientific review and planning judgment, not the
+user, Work, Codex or the farm. No financial total is invented. The operational
+correction is to follow existing evidence/instructions, not invent another
+support framework or continuing maintenance project.
+
+Work directly clarifies CURRENT, MEMORY and USER: Global/Local-t/Local-(t,phi)
+scope selection, independent source-aware statistics, and Method A are distinct.
+The user considers source-aware work promising; conditional improvements and
+changed applied component estimates are not universal truth or production
+acceptance. Original findings/assumptions/provenance remain in the detailed
+November 2-3 checkpoint, unchanged. The complete objective includes close
+Lambda-window data/SIMC peak/tail shape agreement, then corresponding ratio
+flatness versus phi and fixed-data SIMC iteration toward unity, with separate
+uncertainty/background validity. No forcing agreement or new algorithm.
+Exact CURRENT NEXT, six-step roadmap, scientific gates, accepted scoped evidence
+and existing source ownership remain intact. No new study, source implementation,
+Codex contract/launch, farm operation, commit or push follows from this correction.

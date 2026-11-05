@@ -132,6 +132,37 @@ normalization. Existing safeguards must be applied before spending resources;
 new documentation is not scientific throughput. See the existing November 4
 accountability continuation. No numerical Work follows from this correction.
 
+### Complete scientific requirements and distinct investigations
+
+Keep these requirements together in scientific recommendations: physically
+supported pion subtraction; close cleaned-data/K+Lambda-SIMC missing-mass
+shape agreement in the actual Lambda window (peak and relevant tail); then
+corresponding combined data/SIMC ratios flat versus phi at each t/both epsilons
+and eventual unity through existing SIMC-model iteration with experimental
+subtraction fixed at iteration zero, followed by existing L/T extraction.
+The experimental yield itself need not be flat. Integrated-yield agreement is
+insufficient. Match selections, bins, resolution/acceptance and documented
+normalization; keep supported shape-normalized diagnostics separate from
+absolute yields. Shape/ratio agreement cannot alone prove purity or justify
+tuning background or scaling SIMC. Full-MM plots do not replace signal-window QA.
+
+Global / Local-t / Local-(t,phi) are the three model scopes; Local-t is selected,
+not automatically production-adopted. Source-aware statistical fitting is a
+separate promising investigation in the user's assessment, not Local-t's
+definition/automatic extension or a fourth scope. Consult the detailed November
+2-3 record before interpreting it: complete staged component refits changed
+applied estimates and studied conditional coverage, variance, bias/MSE and
+covariance; this did not establish universal superiority, truth or adoption.
+Do not repeat source-aware fits or reopen model selection through memory work.
+
+The primary pair is selected Local-t versus the SAME Local-t + Method A,
+matched in source/cohort/fit/cuts/window/normalization and using the same initial
+SIMC denominator. Assess both Lambda-window MM shape and ratio-versus-phi,
+plus uncertainty/background validity. Historical Left/lowe yield shifts, parent
+stability or attractive errors cannot substitute. Retain six presentations:
+the primary Local-t pair and four historical Global/Local-(t,phi) before/after-A
+comparisons. Method A remains detached/non-production; B diagnostic/excluded.
+
 ### November 3 explicit user correction: judgment before commissioning Work
 
 ChatGPT repeatedly reopened the selected Local-t method, commissioned redundant

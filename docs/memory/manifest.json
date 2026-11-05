@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 8178,
+      "bytes": 8173,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c02713447f8020ea291517499f3ea61f252fd517e7249b2924055349ffddca2d"
+      "sha256": "b22fed55fd205c4494a2b8af51889ec5daa5fe5440b4a33821a341602f58c86a"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 36672,
+      "bytes": 39878,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "5c94e9d43c5c860348650584f23bf322f13143207c84064390f1fc3098b6c1b9"
+      "sha256": "deaf5f0a90f90e417a2ccee93ad667245ea0074039421d4d974bc5fed085a196"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 14648,
+      "bytes": 16748,
       "path": "docs/memory/USER.md",
-      "sha256": "9c8304eb8cd1b5571cfee764eea638fe927d2309d906757ce9d96f9773ec016b"
+      "sha256": "997ae7572f7b4f7e61408bc1922fdb0ea245207650cb7f1e4b4c8b7a9eed8f42"
     },
     {
       "bytes": 1157,
@@ -441,9 +441,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 16214,
+      "bytes": 18446,
       "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
-      "sha256": "fdea28a9914aefc66d1b8e0816703f472fc2a514f73fb0880de96eca56c56462"
+      "sha256": "acd61217829ed4007bced6ebc6d7381e8e6beb1bb6670c9db3d3f6af1d921f7d"
     },
     {
       "bytes": 42001,
