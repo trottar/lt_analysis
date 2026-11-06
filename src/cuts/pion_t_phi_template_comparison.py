@@ -384,4 +384,7 @@ def observe(hist, inp, t_edges, phi_edges, outpath, signal_payload, sigma0_paylo
         with destination.open("x",encoding="utf-8") as stream:
             json.dump(snapshot(result),stream,sort_keys=True,indent=2,allow_nan=False)
             stream.write("\n")
+    if os.environ.get("LT_ANALYSIS_CHECK1_EVIDENCE") == "1":
+        from check1_acceptance_evidence import export_data
+        export_data(hist, inp, result, rows, outpath)
     return result

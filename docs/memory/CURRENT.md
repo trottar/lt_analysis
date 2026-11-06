@@ -24,6 +24,15 @@ Principal reported exceptions: Center/low and Center/high t3. Center's restricte
 high-minus-t coverage makes an acceptance-edge interpretation plausible, not
 established. Test it before attributing the behavior to pion subtraction.
 
+Check 1 retained-input assessment is `SOURCE REVIEWED` for the supported
+canonical occupancy/MM arithmetic only; evidence remains insufficient for both
+Center epsilons. Lambda t3 record shares are 9.8%/13.8% (low/high), versus SIMC
+yield shares 7.4%/12.4%; broad-MM records are not similarly depleted. Counts do
+not establish occupied t length. Continuous t and joint t-MM/applied-background
+information are absent from the named retained inputs, so full accepted-t and
+common-interior tests were not produced. See the
+[Check 1 record](investigations/full-t-acceptance-edge-check1-2026-11-05.md).
+
 The approved immediate sequence is full-t/acceptance-edge diagnostic, review of
 the colleague's exclusion procedure when supplied, remaining beneath-Lambda
 pion discrepancies, physically justified conditional Method-A assessment, and
@@ -53,9 +62,11 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-November 5: local/origin/live HTTPS test matched
-`302bccddcc490237aa7128879b4b04ec979260c6`; index unchanged. Pending memory
-and eight offline testing files are local, not published farm source.
+Check 1 startup: local/origin/live HTTPS test matched
+`6663874fae232729093a7dd51daffd6c710621a8`; published meeting-memory changes
+were checked against the reviewed files, allowing the user-run LF conversion.
+This Check 1 result/memory update is local; index/refs and pending offline
+testing work remain preserved. No new farm source or runtime gate is claimed.
 Production physics remains unchanged from scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
 RUNTIME VERIFIED: supplied October 30 `20261030T022205` high-epsilon acquisition
@@ -118,16 +129,24 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — in a separate scientific task, compare full t distributions of latest
-Local-t experimental data and unchanged SIMC across all five Q4p4W2p74 settings,
-mark canonical t boundaries, and assess occupancy/acceptance within t3, especially
-Center/low and Center/high. Test association of unusual MM/pion-background
-behavior with restricted t coverage; where feasible compare matching populated
-t regions, keeping shape-only and yield-normalized MM diagnostics distinct.
-Use available inputs; no normalization, cut, model or production-source changes.
-This memory-only update does not execute the diagnostic. The colleague's
-exclusion criteria are pending: invent no threshold/mask and delete no data.
-Later producer-evidence/final-yield gates and the six-step roadmap remain intact.
+NEXT — user publication of the independently accepted local
+[Check 1 acquisition implementation](phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md),
+then independent pushed-state synchronization and reviewed preflight-only
+readiness evidence before any separately authorized user acquisition.
+`SOURCE REVIEWED`: the repaired actual diff passed independent review; both
+prior P1/P2 findings are resolved. Archived SIMC ROOT/.hist and consumed derived
+model roles are separately bound and owner-verified; sidecar rollback includes
+temporary-context exit, original exceptions and attempt-owned file checks.
+Six focused regressions passed first; reviewer Windows numerical/export/
+parent-child/collector subset: 117 tests, no failures, 3 skips; Linux owner:
+100 tests, no failures, 1 skip. Seven-file compilation/3.9 grammar and memory
+integrity pass. See the
+[review acceptance](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-p1p2-repair-review-source-acceptance).
+This is source acceptance, not farm readiness or runtime validation. Missing
+Linux NumPy parity, real PDF/capability checks and actual farm preflight remain
+NOT VERIFIED. No further source repair was identified in this bounded review.
+Both Center physics conclusions remain insufficient; preserve Outcome B,
+Method A/B roles and prior results. Stop before Check 2 or final yields.
 
 ## Success Criteria
 

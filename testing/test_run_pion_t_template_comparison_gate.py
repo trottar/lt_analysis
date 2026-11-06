@@ -2445,5 +2445,81 @@ class PrivateTopology(unittest.TestCase):
         self.assertNotEqual(before, owner.file_identity(target))
 
 
+class Check1SourceTests(unittest.TestCase):
+    def test_actual_atomic_publish_never_overwrites_a_colliding_target(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source=Path(temp)/'pending.zip';target=Path(temp)/'final.zip'
+            source.write_bytes(b'verified bytes')
+            owner._check1_rename_no_replace(source,target)
+            self.assertFalse(source.exists());self.assertEqual(target.read_bytes(),b'verified bytes')
+            source.write_bytes(b'other attempt')
+            with self.assertRaises(FileExistsError):owner._check1_rename_no_replace(source,target)
+            self.assertEqual(source.read_bytes(),b'other attempt');self.assertEqual(target.read_bytes(),b'verified bytes')
+
+    def test_preservation_inventory_includes_all_ordinary_sidecar_absences(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory=Path(temp)
+            before=owner.accepted_identities(directory,high=True,check1=True)
+            self.assertEqual(len(before),35);self.assertTrue(all(v is None for v in before.values()))
+            owner.verify_accepted(directory,before,high=True,check1=True)
+            (directory/'Left_kaon_Q4p4W2p74_lowe_check1_data.json').write_bytes(b'unexpected external write')
+            with self.assertRaisesRegex(ValueError,'accepted_artifact_changed'):
+                owner.verify_accepted(directory,before,high=True,check1=True)
+
+    def test_check1_descendants_allow_memory_only_and_exact_paths_with_ancestor_and_blob_pins(self):
+        state=dict(branch='test',head=SHA,origin_test=SHA,porcelain='')
+        paths=['docs/memory/check1-note.md',owner.CHECK1_PROFILE,'src/utility/check1_acceptance_evidence.py']
+        pins=dict(owner.CLEANUP_REPAIR_BLOBS,**owner.REVIEWED_PUBLICATION_BLOBS)
+        calls=[]
+        def git(repo,*args):
+            calls.append(args)
+            if args[0]=='diff':return '\n'.join(paths)
+            if args[0]=='rev-parse':return pins[args[1].split(':',1)[1]]
+            return ''
+        with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=git):
+            self.assertEqual(owner.preflight(ROOT,SHA,high=True,check1=True),state)
+            self.assertIn(('merge-base','--is-ancestor',owner.CHECK1_BASE,SHA),calls)
+            paths.append('src/cuts/pion_component_fits.py')
+            with self.assertRaisesRegex(ValueError,'unexpected_check1_committed_source'):
+                owner.preflight(ROOT,SHA,high=True,check1=True)
+            paths.pop();pins[next(iter(owner.CLEANUP_REPAIR_BLOBS))]='changed'
+            with self.assertRaisesRegex(ValueError,'cleanup_repair_blob_changed'):
+                owner.preflight(ROOT,SHA,high=True,check1=True)
+        paths[:]=['docs/memory/check1-note.md']
+        with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=git):
+            with self.assertRaisesRegex(ValueError,'unexpected_high_committed_source'):
+                owner.preflight(ROOT,SHA,high=True)
+        with patch.object(owner.isolation,'snapshot',return_value=state),patch.object(owner,'git',side_effect=subprocess.CalledProcessError(1,'ancestor')):
+            with self.assertRaises(subprocess.CalledProcessError):owner.preflight(ROOT,SHA,high=True,check1=True)
+
+    def test_new_cli_flags_reject_missing_reference_conflicts_and_injected_child_authority(self):
+        for env in ({owner.CHECK1_AUTH_ENV:'injected'}, {owner.CHECK1_HASH_ENV:'0'*64},
+                    {'LT_ANALYSIS_UNKNOWN_OPT_IN':'1'}):
+            with self.assertRaisesRegex(ValueError,'untrusted_analysis_environment'):
+                owner.child_environment(env,high=True,check1=True)
+        clean=owner.child_environment({},high=True,check1=True)
+        self.assertEqual(clean[owner.CHECK1_ENV],'1');self.assertEqual(clean[owner.HIGH_ENV],'1')
+        with patch.object(owner.debug,'run_analysis') as child:
+            with self.assertRaisesRegex(ValueError,'check1_reference_required'):
+                owner.execute_gate(ROOT,ROOT,ROOT/'unused.zip',SHA,check1=True)
+            with self.assertRaisesRegex(ValueError,'reference_without_mode'):
+                owner.execute_gate(ROOT,ROOT,ROOT/'unused.zip',SHA,check1_reference_bundle=Path('unused'))
+            child.assert_not_called()
+        with patch.object(owner,'execute_gate') as execute,redirect_stderr(io.StringIO()):
+            result=owner.main(['--source-commit',SHA,'--outdir','unused','--output','unused.zip',
+                               '--check1-evidence','--high-epsilon'])
+            self.assertEqual(result,1);execute.assert_not_called()
+
+    def test_complete_profile_exactness_and_inventory_extended_only_when_enabled(self):
+        profile=owner.resolved_profile(ROOT,SHA,check1=True)
+        self.assertEqual(len(profile['artifacts']['global']),35)
+        self.assertEqual(owner.selection(check1=True)[0],owner.SETTINGS)
+        with patch.object(owner.collector,'load_validation_profile',return_value={**profile,'validation_profile':'wrong'}):
+            with self.assertRaisesRegex(ValueError,'profile_contract_mismatch'):owner.resolved_profile(ROOT,SHA,check1=True)
+        old=owner.child_source_inventory(ROOT)
+        self.assertNotIn('src/utility/check1_acceptance_evidence.py',old)
+        self.assertIn('src/utility/check1_acceptance_evidence.py',owner.CHECK1_EXECUTABLES)
+
+
 if __name__ == "__main__":
     unittest.main()

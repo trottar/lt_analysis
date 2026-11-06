@@ -1735,14 +1735,31 @@ def _process_yield_simc_tree(
     t_bins,
     phi_bins,
     progress_bar,
+    check1_sink=None,
+    apply_simc_sub_cuts=None,
 ):
     total_entries = tree.GetEntries()
     phi_scale = 180.0 / math.pi
+    if check1_sink is not None and apply_simc_sub_cuts is None:
+        raise ValueError("check1:simc_no_MM_predicate_required")
 
     for i, evt in enumerate(tree):
         progress_bar(i, total_entries, bar_length=25)
 
-        if particle_type == "kaon":
+        if check1_sink is not None:
+            base_allcuts = apply_simc_cuts(evt, mm_min, mm_max)
+            base_nommcuts = apply_simc_sub_cuts(evt, mm_min, mm_max)
+            hole_rejected = (particle_type == "kaon" and (base_allcuts or base_nommcuts)
+                             and hole_contains(evt.phgcer_x_det, evt.phgcer_y_det))
+            allcuts = bool(base_allcuts and not hole_rejected)
+            nommcuts = bool(base_nommcuts and not hole_rejected)
+            diagnostic_t, diagnostic_phi = -evt.t, evt.phipq * phi_scale
+            diagnostic_t_index, diagnostic_phi_index = find_2d_bin_indices(
+                diagnostic_t, diagnostic_phi, t_bins, phi_bins)
+            check1_sink.observe(i, evt.missmass, diagnostic_t, diagnostic_phi,
+                                evt.iter_weight, allcuts, nommcuts,
+                                diagnostic_t_index, diagnostic_phi_index)
+        elif particle_type == "kaon":
             allcuts = apply_simc_cuts(evt, mm_min, mm_max) and not hole_contains(evt.phgcer_x_det, evt.phgcer_y_det)
         else:
             allcuts = apply_simc_cuts(evt, mm_min, mm_max)
@@ -4279,6 +4296,22 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         len(phi_bins) - 1,
     )
     ave_simc_event_cache = _init_ave_simc_event_cache()
+    check1_sink = None
+    check1_sub_cuts = None
+    if (os.environ.get("LT_ANALYSIS_CHECK1_EVIDENCE") == "1" and iteration == 0
+            and not inpDict.get("bg_opt_prepass_mode")
+            and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT
+            and inpDict.get("ParticleType") == "kaon" and str(inpDict.get("Q2")) == "4p4"
+            and str(inpDict.get("W")) == "2p74"
+            and ((str(inpDict.get("EPSSET")).lower() in ("low", "lowe") and phi_setting in ("Center", "Left"))
+                 or (str(inpDict.get("EPSSET")).lower() in ("high", "highe") and phi_setting in ("Center", "Left", "Right")))
+            and resolve_particle_subtraction_mode(inpDict) == "simc_shape_components"
+            and resolve_pion_subtraction_scope(inpDict) == "t_bin"):
+        from check1_acceptance_evidence import SimcSink, authority
+        authority(inpDict, phi_setting, OUTPATH)
+        from apply_cuts import apply_simc_sub_cuts
+        check1_sink = SimcSink()
+        check1_sub_cuts = apply_simc_sub_cuts
     
     OutFilename = inpDict["OutFilename"] 
     
@@ -4377,6 +4410,8 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
         t_bins,
         phi_bins,
         progress_bar,
+        **({"check1_sink": check1_sink, "apply_simc_sub_cuts": check1_sub_cuts}
+           if check1_sink is not None else {}),
     )
 
     canvas_iter = 0
@@ -4480,6 +4515,10 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
             "yield_simc_close_{}".format(phi_setting),
         )
                 
+    if check1_sink is not None:
+        from check1_acceptance_evidence import export_simc
+        export_simc(check1_sink, tree_simc, normfac_simc, inpDict, phi_setting,
+                    t_bins, phi_bins, simc_hists, OUTPATH)
     return processed_dict, support_hist_dict, _freeze_ave_simc_event_cache(ave_simc_event_cache)
 
 def bin_simc(kin_type, tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, inpDict, iteration):

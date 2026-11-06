@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 10267,
+      "bytes": 11635,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "8aebd2de2e4daec87151e028b9600a5a29a1f5b2250bb80aa25688b365729749"
+      "sha256": "bed08869cca89e75e1c596105ba6564bcabc6e2692bc7d479458e6b205211d7d"
     },
     {
       "bytes": 11186,
@@ -446,6 +446,11 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
+      "bytes": 33705,
+      "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
+      "sha256": "2b7cf0343e838e8b9c48c5cd8265a4ff9ce816d79103a1f9477ee21ed45fa80f"
+    },
+    {
       "bytes": 34568,
       "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
       "sha256": "317219e76c868eef78c4b34e4bd474d636cba30746444514b9d9b2d74131fb5c"
@@ -544,6 +549,11 @@
       "bytes": 9882,
       "path": "docs/memory/phases/baseline-pion-transfer-validity-audit-task-contract.md",
       "sha256": "eb51796a74226ec898da08fa15e08f456b93c494d4cdf7f2e3a73ff34d82c833"
+    },
+    {
+      "bytes": 28419,
+      "path": "docs/memory/phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md",
+      "sha256": "581999b4684cc2f0e5d348afbcadb09de2d46647381ee9c4d24a697b78b17dda"
     },
     {
       "bytes": 8577,

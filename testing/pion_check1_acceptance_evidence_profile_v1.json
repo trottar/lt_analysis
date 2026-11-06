@@ -1,0 +1,249 @@
+{
+  "schema_version": "pion_hgcer_validation_bundle_profile/v4",
+  "validation_profile": "pion_check1_acceptance_evidence/v1",
+  "collection_mode": "generic_artifacts",
+  "settings": [
+    {
+      "phi": "Left",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Left",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "lowe"
+    },
+    {
+      "phi": "Center",
+      "epsilon": "highe"
+    },
+    {
+      "phi": "Right",
+      "epsilon": "highe"
+    }
+  ],
+  "artifacts": {
+    "global": [
+      {
+        "key": "lowe_center_comparison_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "lowe_center_comparison_pdf",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "lowe_left_comparison_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "lowe_left_comparison_pdf",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_pion-t-template-comparison.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "lowe_center_child_comparison_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "lowe_left_child_comparison_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_center_comparison_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_pion-t-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_center_comparison_pdf",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_pion-t-template-comparison.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "highe_left_comparison_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_pion-t-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_left_comparison_pdf",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_pion-t-template-comparison.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "highe_right_comparison_json",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_pion-t-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_right_comparison_pdf",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_pion-t-template-comparison.pdf",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "highe_center_child_comparison_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_pion-t-phi-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_left_child_comparison_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_pion-t-phi-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "highe_right_child_comparison_json",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_pion-t-phi-template-comparison.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "left_lowe_check1_data_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_check1_data.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "left_lowe_check1_data_npz",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_check1_data.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "left_lowe_check1_simc_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_check1_simc.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "left_lowe_check1_simc_npz",
+        "basename_template": "Left_kaon_Q4p4W2p74_lowe_check1_simc.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "left_highe_check1_data_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_check1_data.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "left_highe_check1_data_npz",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_check1_data.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "left_highe_check1_simc_json",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_check1_simc.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "left_highe_check1_simc_npz",
+        "basename_template": "Left_kaon_Q4p4W2p74_highe_check1_simc.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "center_lowe_check1_data_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_check1_data.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "center_lowe_check1_data_npz",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_check1_data.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "center_lowe_check1_simc_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_check1_simc.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "center_lowe_check1_simc_npz",
+        "basename_template": "Center_kaon_Q4p4W2p74_lowe_check1_simc.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "center_highe_check1_data_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_check1_data.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "center_highe_check1_data_npz",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_check1_data.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "center_highe_check1_simc_json",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_check1_simc.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "center_highe_check1_simc_npz",
+        "basename_template": "Center_kaon_Q4p4W2p74_highe_check1_simc.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "right_highe_check1_data_json",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_check1_data.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "right_highe_check1_data_npz",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_check1_data.npz",
+        "kind": "file",
+        "required": true
+      },
+      {
+        "key": "right_highe_check1_simc_json",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_check1_simc.json",
+        "kind": "json",
+        "required": true
+      },
+      {
+        "key": "right_highe_check1_simc_npz",
+        "basename_template": "Right_kaon_Q4p4W2p74_highe_check1_simc.npz",
+        "kind": "file",
+        "required": true
+      }
+    ],
+    "settings": []
+  },
+  "source_identity": {
+    "required_analysis_commit": "6663874fae232729093a7dd51daffd6c710621a8",
+    "allowed_committed_files": [],
+    "allowed_non_analysis_path_prefixes": [
+      "docs/memory/"
+    ]
+  }
+}

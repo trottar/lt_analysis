@@ -438,4 +438,30 @@ class RendererTests(unittest.TestCase):
             self.assertEqual(list(Path(temp).iterdir()),[])
 
 
+class Check1ObserverWiringTests(unittest.TestCase):
+    def test_default_off_imports_no_check1_module_and_enabled_call_follows_serialization(self):
+        import builtins
+        import check1_acceptance_evidence as evidence
+        fixture=ObserverTests(methodName='runTest')
+        actual_import=builtins.__import__
+        def forbid(name,*a,**k):
+            if name=='check1_acceptance_evidence':raise AssertionError('disabled Check 1 import')
+            return actual_import(name,*a,**k)
+        with fixture.environment() as (run,*_),patch.dict(os_environ(),{'LT_ANALYSIS_CHECK1_EVIDENCE':'0'}):
+            with patch.object(builtins,'__import__',side_effect=forbid):self.assertTrue(run()['production_parents_unchanged'])
+        with fixture.environment() as (run,called,cuts,temp,prior):
+            captured=[]
+            def capture(hist,inp,result,rows,outpath):
+                saved=json.loads(next(temp.glob('*pion-t-phi*.json')).read_text())
+                self.assertEqual(saved['status'],'captured_pending_independent_validation')
+                self.assertEqual(saved['selected_row_fingerprints'],result['selected_row_fingerprints'])
+                self.assertEqual(len(rows['pion']),27);self.assertEqual(len(rows['kaon']),27)
+                captured.append(result)
+                raise ValueError('injected exporter failure')
+            with patch.dict(os_environ(),{'LT_ANALYSIS_CHECK1_EVIDENCE':'1'}),patch.object(evidence,'export_data',side_effect=capture):
+                with self.assertRaisesRegex(ValueError,'injected exporter failure'):run()
+            self.assertEqual(len(captured),1);self.assertTrue(captured[0]['production_parents_unchanged'])
+            self.assertEqual(list(temp.glob('*check1*')),[])
+
+
 if __name__=='__main__': unittest.main()
