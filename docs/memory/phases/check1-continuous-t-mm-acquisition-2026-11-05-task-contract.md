@@ -434,3 +434,55 @@ Do not implement an alternative architecture, relax gates, run farm analysis,
 commit/push, execute Check 2/Method A, reopen Outcome B, study Sigma0 or begin
 final yield/SIMC-iteration/LT work. Stop after local implementation/checks and
 actual review material; the subsequent independent review is a separate gate.
+
+## November 6 bounded Lustre publication-capability repair
+
+User-supplied farm observation at test
+374bed263e077c356ea06ae7eea6416886b61d4a: preflight reached
+check1_runtime_preflight and _check1_rename_no_replace raised OSError errno 22
+(EINVAL) from Linux renameat2(RENAME_NOREPLACE) on private Lustre. The preceding
+hard-link and no-clobber checks succeeded. Source/reference admission,
+environment setup and preservation had no reported failures; analysis never
+started. This records the supplied observation, not a new farm verification.
+The earlier local rename capability pass did not establish Lustre support.
+
+This existing contract remains the single authority. Before source edits,
+record these exact requirements: replace the unsupported rename requirement
+with an atomic no-overwrite publication operation supported by the observed
+hard-link behavior; do not catch/ignore EINVAL or use an overwriting rename.
+Test the actual selected operation on BOTH private-output and delivery-parent
+filesystems. A final ZIP must appear atomically with validated complete bytes;
+existing files and symlinks, including concurrent creations, are never replaced.
+If hard-link publication is selected, verify source/target ownership, remove the
+pending source explicitly, and keep rollback active through that cleanup and
+all temporary-context exits. Any release failure must retain its first exception,
+failed owner status and preservation protections; no attempt-owned artifact may
+remain accepted after failure. Rollback never removes independently replaced
+files; secondary rollback/diagnostic errors must be exposed without masking the
+first invariant. Preserve prior P2 sidecar rollback semantics and tests.
+
+Repair source scope is only the existing Check 1 owner publication helper,
+its runtime capability probe and release path in
+testing/run_pion_t_template_comparison_gate.py, plus relevant regressions in
+testing/test_run_pion_t_template_comparison_gate.py and
+testing/test_check1_acceptance_evidence.py. Memory scope remains CURRENT,
+this contract, the existing Check 1 investigation and regenerated manifest.
+No new file, contract, owner, architecture, farm-preparation task or environment
+repair. Ordinary owner modes, physics, normalization, source weights, SIMC,
+subtraction, fitted Local-t transfers, reference cohort and collector schema
+are frozen. Preserve all pending work and source/cleanup/publication blob pins.
+
+Required deterministic cases: reproduce the old Linux renameat2 EINVAL call;
+positive real hard-link publication; file and symlink collisions, including
+concurrent target creation; failure after final linking/source cleanup and
+temporary cleanup; rollback and diagnostic failures; independently replaced
+files; first-failure/owner-status correctness; both filesystem probes; existing
+P1/P2, five-setting, default-off, provenance and collector regressions. Report
+unexecuted platform/farm tests as NOT VERIFIED; no dependency installation or
+weakened assertion. Stop BLOCKED if publication semantics cannot be preserved.
+
+After local repair/tests: complete actual diff -> independent actual-diff
+review -> user publication -> independent pushed-state synchronization -> SAME
+preflight-only gate on the farm. Full acquisition is not the next farm action
+and requires separately reviewed successful readiness evidence and user authority.
+No commit, push, staging or farm execution by Codex.

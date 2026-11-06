@@ -129,24 +129,28 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — user publication of the independently accepted local
-[Check 1 acquisition implementation](phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md),
-then independent pushed-state synchronization and reviewed preflight-only
-readiness evidence before any separately authorized user acquisition.
-`SOURCE REVIEWED`: the repaired actual diff passed independent review; both
-prior P1/P2 findings are resolved. Archived SIMC ROOT/.hist and consumed derived
-model roles are separately bound and owner-verified; sidecar rollback includes
-temporary-context exit, original exceptions and attempt-owned file checks.
-Six focused regressions passed first; reviewer Windows numerical/export/
-parent-child/collector subset: 117 tests, no failures, 3 skips; Linux owner:
-100 tests, no failures, 1 skip. Seven-file compilation/3.9 grammar and memory
-integrity pass. See the
-[review acceptance](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-p1p2-repair-review-source-acceptance).
-This is source acceptance, not farm readiness or runtime validation. Missing
-Linux NumPy parity, real PDF/capability checks and actual farm preflight remain
-NOT VERIFIED. No further source repair was identified in this bounded review.
-Both Center physics conclusions remain insufficient; preserve Outcome B,
-Method A/B roles and prior results. Stop before Check 2 or final yields.
+NEXT — user publication of the SOURCE REVIEWED cumulative Check 1 publication/
+ownership repair, then independent pushed-state synchronization and review of
+the SAME preflight-only gate. Local base test:
+374bed263e077c356ea06ae7eea6416886b61d4a. Publication scope is SEVEN paths:
+the six latest correction paths PLUS the preserved earlier amendment to the
+[existing contract](phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md).
+The manifest already hashes that amended contract; do not omit it from publication.
+`SOURCE REVIEWED`: validated pending identity now flows through execute_gate,
+release and the hard-link helper. Missing/mismatched authority fails without
+inode adoption; actual-guard identical-byte replacement and owned rollback tests
+pass. Prior unknown retention, stable open-ZIP verification and source/target
+protection remain. See the
+[independent acceptance](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-identity-handoff-review-source-acceptance).
+Reviewer focused Linux13 passed; Windows13 ran with one symlink skip. Supplied
+full Linux112/Windows134 logs and all bundle hashes/current snapshots were
+verified; those full runs were not repeated by the reviewer. Three changed Python
+files compile/3.9 grammar, manifest and ordinary health pass. No further source
+repair or new contract is needed. Actual Lustre/farm readiness, Linux NumPy parity,
+real PDF and unavailable capabilities remain NOT VERIFIED. No farm command or
+acquisition approval follows; successful preflight evidence needs review before
+separate user acquisition authority. Prior P1/P2 acceptance, both Center
+conclusions, Outcome B, Method A/B and accepted closures stand. Stop before Check 2.
 
 ## Success Criteria
 

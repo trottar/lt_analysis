@@ -1028,6 +1028,22 @@ def verify_zip(path, source_commit, records, high=False, check1=False):
                     record.get("byte_size") == records[name]["bytes"], "zip_artifact_identity_mismatch:" + name)
 
 
+def _check1_verify_pending(path,source_commit,records):
+    """Establish ownership from the open, validated attempt ZIP, not cleanup stat."""
+    flags=os.O_RDONLY|getattr(os,"O_NOFOLLOW",0)|getattr(os,"O_BINARY",0)
+    with os.fdopen(os.open(path,flags),"rb") as stream:
+        before=os.fstat(stream.fileno())
+        require(stat.S_ISREG(before.st_mode),"check1_pending_not_regular")
+        verify_zip(stream,source_commit,records,high=True,check1=True)
+        stream.seek(0);digest=hashlib.sha256()
+        for chunk in iter(lambda:stream.read(1024*1024),b""):digest.update(chunk)
+        after=os.fstat(stream.fileno());current=path.lstat()
+        identity=lambda info:(info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns)
+        require(stat.S_ISREG(current.st_mode) and identity(before)==identity(after)==identity(current),
+                "check1_pending_changed_during_verification")
+    return (before.st_dev,before.st_ino),dict(sha256=digest.hexdigest(),bytes=before.st_size)
+
+
 def destinations(outdir, output):
     return {"log": outdir / (output.stem + ".log"),
             "summary": outdir / (output.stem + "-run-summary.json"),
@@ -1444,6 +1460,7 @@ print(json.dumps({"executable":sys.executable,"version":sys.version,"modules":mo
         with tempfile.TemporaryDirectory(prefix=".check1-capability-",dir=parent) as temporary:
             source=Path(temporary)/"source";target=Path(temporary)/"link"
             source.write_bytes(b"Check1 no-clobber capability")
+            info=source.stat();identity=(info.st_dev,info.st_ino)  # owned probe creation
             os.link(source,target)
             require(source.read_bytes()==target.read_bytes() and source.stat().st_ino==target.stat().st_ino,
                     "check1_hardlink_capability")
@@ -1453,17 +1470,20 @@ print(json.dumps({"executable":sys.executable,"version":sys.version,"modules":mo
                 pass
             else:
                 raise ValueError("check1_no_clobber_capability")
-            renamed=Path(temporary)/"renamed"
-            _check1_rename_no_replace(source,renamed)
+            published=Path(temporary)/"published"
+            _check1_publish_no_replace(source,published,identity)
+            require(not os.path.lexists(source) and published.read_bytes()==target.read_bytes(),
+                    "check1_publish_cleanup_capability")
             try:
-                _check1_rename_no_replace(target,renamed)
+                _check1_publish_no_replace(target,published,identity)
             except FileExistsError:
                 pass
             else:
-                raise ValueError("check1_atomic_rename_no_clobber_capability")
+                raise ValueError("check1_atomic_publish_no_clobber_capability")
         require(not Path(temporary).exists(),"check1_capability_cleanup")
         probes.append(str(parent))
     record["no_clobber_probe_roles"]=["private_output","delivery_parent"]
+    record["publication_operation"]="hardlink_no_replace_then_unlink_source"
     return record
 
 
@@ -1598,56 +1618,86 @@ def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,bef
     return records,outcomes
 
 
-def _check1_rename_no_replace(source,target):
-    """Same-directory atomic commit; no overwrite and no post-commit cleanup."""
+def _check1_remove_owned(path,device,inode):
+    """Remove only this attempt's regular inode; preserve replacements/symlinks."""
+    try:
+        info=path.lstat()
+    except FileNotFoundError:
+        return
+    if stat.S_ISREG(info.st_mode) and (info.st_dev,info.st_ino)==(device,inode):
+        path.unlink()
+
+
+def _check1_publish_no_replace(source,target,identity=None,created=None):
+    """Atomically link complete bytes without overwrite, then retire the source.
+
+    identity is the caller's previously validated/created inode authority; stats
+    below only compare against it and never establish replacement ownership.
+    Source cleanup is part of publication: its failure rolls back only our link.
+    The caller's ledger keeps ownership even if this rollback itself fails.
+    """
     source,target=Path(source),Path(target)
+    require(isinstance(identity,tuple) and len(identity)==2
+            and all(type(n) is int and n>=0 for n in identity),"check1_source_identity_required")
     require(source.parent.resolve()==target.parent.resolve() and source.is_file()
             and not source.is_symlink(),"check1_atomic_publish_source")
-    if os.name=="nt":
-        os.rename(source,target)  # Windows rename refuses an existing target.
-        return
-    require(sys.platform.startswith("linux"),"check1_atomic_publish_platform")
-    import ctypes
-    library=ctypes.CDLL(None,use_errno=True)
-    require(hasattr(library,"renameat2"),"check1_atomic_publish_unavailable")
-    rename=library.renameat2
-    rename.argtypes=(ctypes.c_int,ctypes.c_char_p,ctypes.c_int,ctypes.c_char_p,ctypes.c_uint)
-    rename.restype=ctypes.c_int
-    if rename(-100,os.fsencode(source),-100,os.fsencode(target),1)!=0:  # AT_FDCWD; RENAME_NOREPLACE
-        number=ctypes.get_errno()
-        raise OSError(number,os.strerror(number),str(target))
+    info=source.lstat()
+    require(stat.S_ISREG(info.st_mode) and (info.st_dev,info.st_ino)==identity,
+            "check1_source_identity_mismatch")
+    os.link(source,target)  # EEXIST for files and symlinks, including races.
+    if created is not None:created.append((target,*identity))
+    try:
+        linked=target.lstat();current=source.lstat()
+        require(stat.S_ISREG(linked.st_mode) and stat.S_ISREG(current.st_mode)
+                and (linked.st_dev,linked.st_ino)==(current.st_dev,current.st_ino)==identity,
+                "check1_publication_source_or_target_replaced")
+        source.unlink()
+    except BaseException as failure:
+        try:
+            _check1_remove_owned(target,*identity)
+        except BaseException as rollback_error:
+            failure.check1_rollback_failures=[str(rollback_error)]
+        raise
 
 
-def release_check1(status, paths, pending, output):
+def release_check1(status, paths, pending, output, pending_identity=None):
     """No-clobber publication after all readback/cleanup/preservation gates."""
     created=[]
+    first_failure=None
     try:
-        status.update("check1_release")
+        status.update("check1_release",publication_complete=False)
+        require(isinstance(pending_identity,tuple) and len(pending_identity)==2
+                and all(type(n) is int and n>=0 for n in pending_identity),"check1_source_identity_required")
         require(all(status.record.get(k) is True for k in ("artifact_verification_completed",
                     "zip_verification_completed","worktree_cleanup_completed","check1_preservation_completed"))
                 and not status.record.get("failure_reason"),"check1_release_gate_incomplete")
         require(sha256(pending)==status.record["zip_identity"]["sha256"],"check1_pending_zip_changed")
         with tempfile.TemporaryDirectory(prefix=".check1-pending-delivery-",dir=output.parent) as temporary:
-            identities={}
-            for name,source,dest in (("log",paths["log"],paths["delivered_log"]),
-                                     ("run_summary",paths["summary"],paths["delivered_summary"])):
-                stage=Path(temporary)/dest.name
-                with source.open("rb") as src,stage.open("xb") as dst:shutil.copyfileobj(src,dst)
-                identity=dict(path=str(dest),sha256=sha256(source),bytes=source.stat().st_size)
-                require(sha256(stage)==identity["sha256"] and stage.stat().st_size==identity["bytes"],"check1_companion_identity")
-                os.link(stage,dest);created.append((dest,dest.stat().st_dev,dest.stat().st_ino))
-                identities[name]=identity
-            status.update("complete",status="success",companion_evidence=identities,
-                          delivered_gate_status_path=str(paths["delivered_receipt"]))
-            receipt=Path(temporary)/paths["delivered_receipt"].name
-            receipt.write_bytes(status.path.read_bytes())
-            os.link(receipt,paths["delivered_receipt"])
-            info=paths["delivered_receipt"].stat();created.append((paths["delivered_receipt"],info.st_dev,info.st_ino))
-        # All fallible staging cleanup precedes the sole final publication.
-        # Its bytes/hash were read back and verified before this atomic rename.
-        _check1_rename_no_replace(pending,output)
+            try:
+                identities={}
+                for name,source,dest in (("log",paths["log"],paths["delivered_log"]),
+                                         ("run_summary",paths["summary"],paths["delivered_summary"])):
+                    stage=Path(temporary)/dest.name
+                    with source.open("rb") as src,stage.open("xb") as dst:shutil.copyfileobj(src,dst)
+                    identity=dict(path=str(dest),sha256=sha256(source),bytes=source.stat().st_size)
+                    require(sha256(stage)==identity["sha256"] and stage.stat().st_size==identity["bytes"],"check1_companion_identity")
+                    info=stage.stat()
+                    os.link(stage,dest);created.append((dest,info.st_dev,info.st_ino))
+                    identities[name]=identity
+                _check1_publish_no_replace(pending,output,pending_identity,created)
+                status.update("complete",status="success",publication_complete=True,companion_evidence=identities,
+                              delivered_gate_status_path=str(paths["delivered_receipt"]))
+                receipt=Path(temporary)/paths["delivered_receipt"].name
+                receipt.write_bytes(status.path.read_bytes())
+                info=receipt.stat()
+                os.link(receipt,paths["delivered_receipt"])
+                created.append((paths["delivered_receipt"],info.st_dev,info.st_ino))
+            except BaseException as error:
+                first_failure=error
+                raise
     except BaseException as exc:
-        failure=dict(status="failed",first_failed_invariant=str(exc),failure_reason=str(exc),failed_stage="check1_release")
+        original=first_failure if first_failure is not None else exc
+        failure=dict(status="failed",publication_complete=False,first_failed_invariant=str(original),failure_reason=str(original),failed_stage="check1_release")
         status.record.update(failure)
         try:
             status.update(**failure)
@@ -1655,14 +1705,33 @@ def release_check1(status, paths, pending, output):
             # A receipt write failure must never prevent rollback of outputs
             # already linked by this attempt, or replace the first invariant.
             status.record["diagnostic_write_failure"]=str(diagnostic_error)
-        rollback_errors=[]
+        # Retire an attempt-owned success receipt before rollback. If unlinking
+        # fails, a leftover receipt must identify a failed release, not acceptance.
+        for p,device,inode in created:
+            if p!=paths["delivered_receipt"]:continue
+            try:
+                flags=os.O_WRONLY|getattr(os,"O_NOFOLLOW",0)|getattr(os,"O_BINARY",0)
+                with os.fdopen(os.open(p,flags),"wb") as handle:
+                    info=os.fstat(handle.fileno())
+                    if stat.S_ISREG(info.st_mode) and (info.st_dev,info.st_ino)==(device,inode):
+                        handle.write((json.dumps(status.record,sort_keys=True)+"\n").encode())
+                        handle.truncate()
+            except Exception as diagnostic_error:
+                status.record["delivered_failure_receipt_error"]=str(diagnostic_error)
+        rollback_errors=list(getattr(original,"check1_rollback_failures",[]))
         for p,device,inode in reversed(created):
             try:
-                if p.exists() and not p.is_symlink() and (p.stat().st_dev,p.stat().st_ino)==(device,inode):p.unlink()
+                _check1_remove_owned(p,device,inode)
             except Exception as rollback_error:
                 rollback_errors.append(str(rollback_error))
-        if rollback_errors:status.record["rollback_failures"]=rollback_errors
-        raise
+        if rollback_errors:
+            status.record["rollback_failures"]=rollback_errors
+            try:status.update(rollback_failures=rollback_errors)
+            except Exception as diagnostic_error:status.record["diagnostic_write_failure"]=str(diagnostic_error)
+        if original is exc:
+            raise
+        raise original from exc
+
 
 
 class GateStatus(isolation.accepted.GateStatus):
@@ -1710,9 +1779,11 @@ def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only
     copies, consumed, costs = {}, {}, None
     succeeded = False
     pending = None
+    pending_identity = None
     admitted = None
     authority = None
     evidence = None
+    first_owner_failure = None
     mode_args={"check1":True} if check1 else {}
     def preservation():
         if check1:
@@ -1895,9 +1966,13 @@ def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only
                 require(result["returncode"] == 0, "collection_failed")
                 status.update("verify_zip", collection_completed=True)
                 archive=pending if check1 else output
-                verify_zip(archive, source_commit, records, high=high, **mode_args)
-                status.update(zip_verification_completed=True, zip_identity={"sha256": sha256(archive),
-                              "bytes": archive.stat().st_size})
+                if check1:
+                    pending_identity,zip_identity=_check1_verify_pending(archive,source_commit,records)
+                    status.update(zip_verification_completed=True,zip_identity=zip_identity)
+                else:
+                    verify_zip(archive, source_commit, records, high=high, **mode_args)
+                    status.update(zip_verification_completed=True, zip_identity={"sha256": sha256(archive),
+                                  "bytes": archive.stat().st_size})
             require(not os.path.lexists(source), "source_cleanup_incomplete")
         require(not os.path.lexists(worktree.parent) and not os.path.lexists(data_parent), "private_cleanup_incomplete")
         status.update(worktree_cleanup_completed=True)
@@ -1919,22 +1994,46 @@ def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only
         with paths["summary"].open("x", encoding="utf-8") as handle:
             handle.write(json.dumps(summary, indent=2, sort_keys=True) + "\n")
         if check1:
-            release_check1(status,paths,pending,output)
+            info=pending.lstat()
+            require(stat.S_ISREG(info.st_mode) and (info.st_dev,info.st_ino)==pending_identity,
+                    "check1_pending_replaced_before_release")
+            release_check1(status,paths,pending,output,pending_identity)
         else:
             isolation.deliver_evidence(status, paths["log"], paths["summary"], output)
         succeeded = True
         return output
     except Exception as exc:
-        status.update(status="failed", failure_reason=str(exc), **({
+        first_owner_failure=exc
+        fields=dict(status="failed", failure_reason=str(exc), **({
             "first_failed_invariant": status.record.get("first_failed_invariant") or str(exc),
             "failed_stage": status.record.get("failed_stage") or status.record["stage"]} if high else {}))
+        if check1:
+            status.record.update(fields)
+            try:status.update(**fields)
+            except Exception as diagnostic_error:status.record["diagnostic_write_failure"]=str(diagnostic_error)
+        else:
+            status.update(**fields)
         raise
     finally:
         if not succeeded:
             try:
-                if check1 and pending is not None and pending.is_file() and not pending.is_symlink():
-                    pending.unlink()
-                preservation()
+                if check1:
+                    cleanup_error=None
+                    try:
+                        if pending is not None:
+                            if pending_identity is not None:_check1_remove_owned(pending,*pending_identity)
+                            # Unknown ownership: retain visibly pending/failed
+                            # evidence. Never adopt the current path in cleanup.
+                    except Exception as exc:
+                        cleanup_error=exc
+                    try:
+                        preservation()
+                    except Exception as exc:
+                        if cleanup_error is None:cleanup_error=exc
+                        else:status.record["secondary_preservation_failure"]=str(exc)
+                    if cleanup_error is not None:raise cleanup_error
+                else:
+                    preservation()
                 if preflight_only and status.record.get("failure_reason") is None:
                     require(not os.path.lexists(worktree.parent) and not os.path.lexists(data_parent),
                             "private_cleanup_incomplete")
@@ -1942,8 +2041,15 @@ def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only
                                   status="success", worktree_cleanup_completed=True,
                                   evidence_admissible=False, scientifically_accepted=False)
             except Exception as exc:
-                status.update(status="failed", preservation_failure_reason=str(exc))
-                raise
+                if check1 and first_owner_failure is not None:
+                    # A source-unlink or preservation error during failure
+                    # cleanup must not replace the already retained invariant.
+                    status.record.update(status="failed",preservation_failure_reason=str(exc))
+                    try:status.update(status="failed",preservation_failure_reason=str(exc))
+                    except Exception as diagnostic_error:status.record["diagnostic_write_failure"]=str(diagnostic_error)
+                else:
+                    status.update(status="failed", preservation_failure_reason=str(exc))
+                    raise
 
 
 def main(argv=None):

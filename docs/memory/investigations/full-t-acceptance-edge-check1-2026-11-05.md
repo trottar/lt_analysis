@@ -507,3 +507,312 @@ Only this allowlisted validation receipt and its manifest change in this pass;
 all implementation, CURRENT/reviewer state, unrelated pending work and prior
 review bundles are preserved. Return the fresh complete actual diff for the
 requested independent review and stop before staging/commit/push/farm work.
+
+## Lustre publication-capability failure and local repair
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`. User-supplied farm observation
+at test 374bed263e077c356ea06ae7eea6416886b61d4a: check1_runtime_preflight
+failed with OSError errno 22 (EINVAL) from renameat2(RENAME_NOREPLACE) on the
+private Lustre temporary renamed target. Preceding hard-link/no-clobber probes
+succeeded. Source/reference admission, environment setup and preservation had
+no reported failures; analysis never started. This is attributed supplied runtime
+information, not an independently executed farm check here. The local rename
+pass did not establish Lustre support. The existing contract was amended with
+the exact failure and bounded invariants before any source edit; no new contract.
+
+SOURCE VERIFIED route: both private-output and delivery-parent capability probes
+now execute the same selected hard-link no-overwrite publication helper used by
+release, verify complete target bytes and pending-source removal, and require an
+existing-target collision to fail. Unsupported renameat2 is removed entirely;
+EINVAL is not caught or ignored and no overwriting rename is substituted.
+The final ZIP is linked atomically from an already verified same-directory
+pending ZIP. os.link refuses existing targets, including concurrent creation and
+symlinks. Device/inode checks protect source and target identities. Source cleanup
+failure rolls back only this attempt's link; its identity remains in the outer
+release ledger even if the first rollback fails.
+
+Release retains rollback through pending unlink, status/receipt publication and
+TemporaryDirectory context exit. Success requires completing that entire path.
+On failure, publication_complete is false, original status becomes failed, an
+owned success receipt is invalidated before removal, and rollback deletes only
+owned regular inodes. Independently replaced files/symlinks are preserved. If
+rollback deletion itself fails, residual files remain failed/inadmissible evidence
+and secondary errors are recorded; neither their existence nor an old success
+receipt establishes acceptance. First errors survive later context cleanup,
+receipt-write and rollback errors. The actual owner's failure-finally path also
+retains the original error, protects a replaced pending file, and executes
+preservation even when pending cleanup fails. Ordinary modes retain their old
+failure behavior. No scientific/helper P1/P2 algorithms or collector changed.
+
+Focused tests executed first: eight Linux tests passed; eight Windows tests ran,
+no failures, one unavailable-symlink skip. The exact old committed Linux function
+was executed against an injected renameat2 errno-22 response after real successful
+hard-link/no-clobber checks. This reproduces the supplied syscall failure class,
+not the unavailable Lustre filesystem. Positive local filesystem operations,
+file/concurrent/symlink collisions, source replacement, post-final-link source and
+context cleanup failures, rollback errors, receipt replacement/invalidation,
+first-error/status correctness and both role probes passed where executable.
+The actual owner finally AST is replayed with real files/status writes to prove
+that source-cleanup failure still runs preservation and keeps the first error.
+The dependency subprocess is mocked only in capability-unit tests; no installed
+ROOT/dependency pass is claimed from those tests.
+
+Full Windows Python 3.12.10 / NumPy 2.3.0 regression: 129 tests, no failures,
+five skips (real PDF-inclusive owner; existing sidecar symlink; two existing
+publication symlink subcases; new publication symlink test). It includes the
+pinned external reference read-only, existing-source projection/transfer/serializer
+closure, signed weights/Sumw2, exact identities, normalization-once, P1/P2, default-
+off, provenance, all-five numerical/profile/collector and negative/failure tests.
+Existing Ubuntu virtual-environment Python 3.12.3 owner suite: 107 tests, no
+failures, one real-pdfinfo skip; actual regular/dangling symlink publication
+collisions passed there. Seven Python files compile and pass Python 3.9 grammar;
+that is not farm Python 3.9 execution. Source scope is the owner and owner tests;
+memory scope is CURRENT, existing contract, this investigation and manifest.
+
+NOT VERIFIED: actual private Lustre and delivery-parent behavior; Linux NumPy
+numerical/export parity; real Poppler PDF-inclusive/six-page checks; unavailable
+Windows symlink cases; full farm Python/ROOT/root_numpy/dependency/caller/path/
+alias/source/profile/reference/cohort/provenance/manifest readiness and producer
+integration. No package installation, environment repair, assertion weakening,
+scientific change, farm execution, staging, commit, push or readiness approval.
+Preserve all pending unrelated bytes/index/refs and prior review bundles. After
+independent actual-diff acceptance, user publication and pushed-state review,
+the next farm gate remains the SAME preflight-only operation. Full acquisition
+is forbidden until its successful readiness evidence is reviewed and the user
+separately authorizes acquisition. Prior P1/P2 review and science scopes stand.
+
+## Independent Lustre repair review: pending-file ownership gap
+
+`ACTIVE`; independent source-review gate `BLOCKED`, narrow repair required.
+Reviewed six-file actual diff at local/origin test
+374bed263e077c356ea06ae7eea6416886b61d4a: 46302 bytes, SHA-256
+081b36f4265e89e9a58c1212be2690cac0349332599a9f40046fea4f339e4329.
+Hash, inventory and read-only reverse check matched actual files. The hard-link
+helper, dual filesystem probes, receipt invalidation, first-failure retention
+and context-exit rollback were inspected; no scientific/P1/P2 algorithm changed.
+
+SOURCE VERIFIED P2-priority finding: execute_gate captures pending_identity only
+immediately before release (line 1968), after collection/ZIP verification/private
+cleanup/preservation/summary writing. Its finally branch (1992-1994) blindly
+unlinks a regular non-symlink pending path when that identity is None. A real-file
+replay of the actual finally AST under a simulated summary failure, with an
+independently replaced pending file and no ownership ID, deleted that replacement.
+The first exception was preserved and preservation ran; ownership protection
+failed. Existing new finally coverage always supplies a known identity.
+
+Single NEXT: fix deletion ownership across the entire pending-file lifecycle;
+without trustworthy ownership, retain the visibly pending/failed file rather
+than delete it. Add failure-before-identity-capture/replacement coverage while
+preserving known-owned cleanup, first-error and preservation checks. Use the
+same contract/allowlist; no new architecture or normalization investigation.
+
+Reviewer Windows Python 3.12.10/NumPy 2.3.0 full numerical/publication cohort:
+129 tests, no failures, 4 skips, pinned reference read-only. WSL Python 3.12.3
+full owner suite: 107 tests, no failures, 1 pdfinfo skip. Initial focused command
+included a misnamed extra method (reviewer invocation error); seven publication
+tests passed there and the correct full owner suite subsequently passed. The
+additional actual-finally reproduction exposes a branch beyond those passes.
+Compilation/3.9 grammar is implementer-reported, not newly rerun in this review.
+Manifest/ordinary health pass with existing nonblocking soft-size warnings;
+batch at checkpoint. Actual Lustre, Linux NumPy/export parity, real PDF/page,
+skipped capabilities and farm environment/provenance conditions remain NOT VERIFIED.
+
+No source edit, staging, commit, push or farm operation by Work. Unrelated bytes,
+previous bundles, raw index and refs remain preserved. After later acceptance,
+user publication and pushed-state review, the next farm action remains the SAME
+preflight-only gate. No acquisition authority follows. Prior P1/P2 source review,
+scientific Check 1 insufficiency, Outcome B, Method A/B and accepted closures stand.
+External review package: KaonLT_Check1_Lustre_Independent_Review_20261106.zip.
+
+## Pending ZIP ownership correction after review
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`, independent actual-diff review
+pending. The reproduced finding above remains the history of the failed local
+candidate; existing contract scope and all accepted scientific/P1/P2 results stand.
+A regression replayed the actual execute_gate finally AST before source repair:
+both unknown-identity subcases deleted the pending file, including an independent
+replacement. Known-identity cases were already protected. No scientific failure
+or farm execution was inferred from that expected pre-fix regression failure.
+
+SOURCE VERIFIED correction: unknown ownership no longer has any path-inspection/
+unlink fallback. It retains visibly pending/failed evidence and still executes
+preservation and propagates the original exception. Normal successful ZIP
+verification now opens the pending file, validates its actual CRC/inventory/
+manifest/source/member hashes with the existing validator, hashes that same open
+file, and requires stable device/inode/size/mtime plus the same regular inode at
+the pending path. Only successful validation returns the trusted cleanup identity.
+Capture occurs before private/source cleanup, preservation and summary writing.
+Validation failure or replacement during verification leaves identity unknown,
+so failure cleanup retains the file. Pre-release identity comparison rejects a
+replacement rather than adopting the newly inspected path. Existing known-owned
+cleanup, first-error retention, hard-link publication, rollback and ordinary modes
+remain unchanged. No collector/schema or contract change was needed.
+
+The two added regressions cover unknown/known ownership with original/replaced
+pending files through the actual finally block, retained first exceptions and
+preservation, valid versus wrong-source ZIPs through the real 35-member validator,
+and replacement of an open validated ZIP with identical bytes. Linux executes
+that replacement and rejects the inode mismatch. Windows refuses unlink of the
+open file with WinError 32; the test explicitly requires that OS behavior and
+preservation of the original inode. An initial Linux-style Windows fixture exposed
+that platform difference and was corrected without allowing another exception or
+weakening the Linux mismatch assertion. No dependency or environment repair.
+
+Focused tests then passed: Linux ten, no skips; Windows ten run, one unavailable-
+symlink skip. Full Windows Python 3.12.10 / NumPy 2.3.0 cohort: 131 tests, no
+failures, five skips (real-Poppler full owner; three existing symlink-capability
+cases; publication symlink case). It includes the real pinned reference read-only,
+P1/P2, existing numerical/projection/default-off/provenance/five-setting/collector
+and failure regressions. Existing Ubuntu virtual-environment Python 3.12.3 owner
+suite: 109 tests, no failures, one real-pdfinfo skip. Both changed Python files
+compile and pass Python 3.9 grammar checks. These do not execute farm Python 3.9.
+
+NOT VERIFIED: actual Lustre/delivery-parent and installed farm runtime/preflight;
+Linux NumPy-dependent numerical/export parity; real Poppler PDF/page checks;
+skipped Windows symlink capabilities. Prior test results are not farm readiness.
+No scientific, P1/P2 or existing hard-link helper/release changes in this pass;
+source scope is the owner ownership lifecycle and two added owner regressions.
+Only CURRENT/this record/manifest are updated in memory; the existing contract,
+reviewer findings and unrelated pending work remain preserved. Return the complete
+revised actual diff, then stop before staging, commit, push or farm execution.
+After later acceptance, user publication and pushed-state review, the next farm
+operation remains the SAME preflight-only gate, never automatic acquisition.
+
+## Independent pending ownership review: publication identity handoff
+
+`ACTIVE`; source-review gate `BLOCKED`, one narrow repair remains. Reviewed
+six-file diff at test 374bed263e077c356ea06ae7eea6416886b61d4a: 61912 bytes,
+SHA-256 aada0840aafc661658df8758595d828916d974be8a85dae11ad1f13bbd95efcd.
+Hash, inventory, read-only reverse application and whitespace checks pass.
+
+The prior unknown-identity deletion is corrected: finally retains unknown-owned
+files, stable open-ZIP validation returns trusted device/inode identity before
+private cleanup, and a pre-release comparison rejects replacements visible there.
+SOURCE VERIFIED remaining P2-priority issue: release_check1 receives no trusted
+identity and _check1_publish_no_replace independently captures source.stat as
+authority. An identical-byte replacement after the last guard but before that
+stat is adopted. A real temporary-file release probe injected such replacement
+at the helper seam: release status success, published inode differs from trusted,
+replacement pending path removed. This is an ownership invariant failure, not
+evidence of different scientific ZIP content. Original inode was retained under
+a hard link, so the reproduction does not depend on inode reuse.
+
+Single NEXT: pass the validated identity through release/publication and check
+against it rather than adopting a new inode. Add a same-content/different-inode
+replacement test between the last guard/hash and linking. Reject without deleting
+or adopting that replacement. Preserve the corrected unknown retention and all
+existing rollback/collision/first-error/preservation checks. Existing contract
+and allowlist suffice; no new architecture or scientific source change.
+
+Reviewer Linux full owner suite: 109 tests, no failures, one pdfinfo skip,
+41.680 seconds. Windows full rerun did not complete: initial automatic approval
+review timed out and the allowed retry was interrupted. The implementer's
+131-test Windows and compilation/3.9 grammar results remain attributed, not
+independently rerun here. Additional real-file release reproduction above exposes
+a gap beyond the passing Linux suite. Manifest/ordinary health pass with existing
+nonblocking soft warnings, scheduled for checkpoint. Actual Lustre/farm, Linux
+NumPy/export parity, real PDF/page and unavailable capabilities remain NOT VERIFIED.
+
+No implementation source, stage, commit, push or farm operation by Work. Previous
+bundles, unrelated pending bytes, raw index and refs remain preserved. Prior
+P1/P2 acceptance and scientific scopes remain unchanged. After later source
+acceptance, user publication and pushed-state review, the next farm gate remains
+the SAME preflight-only operation. No acquisition authority follows. External
+package: KaonLT_Check1_Pending_Identity_Review_20261106.zip.
+
+## Validated identity handoff correction
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local correction only; independent
+actual-diff review remains next. Same test HEAD
+374bed263e077c356ea06ae7eea6416886b61d4a and existing contract. The review finding
+above is preserved. A newly added regression executed the actual execute_gate
+final guard and injected same-byte replacement at the publication-helper seam
+(after the guard and release hash). Before repair it failed with ValueError not
+raised: the replaced inode had been adopted. Its original inode was retained by
+a hard link, so the result does not rely on inode-number reuse.
+
+SOURCE VERIFIED: the validated tuple now travels from execute_gate through
+release_check1 into _check1_publish_no_replace, and missing/invalid identity is
+rejected. The helper no longer captures a source.stat tuple as authority. Its
+lstat and pre/post-link checks compare against the supplied identity, and the
+rollback ledger retains that identity. The capability probe passes an identity
+captured at its own test-file creation. Existing release fixtures likewise pass
+fixture-owned identities recorded before injecting failures; no assertion was
+removed or weakened. The existing sidecar exporter/P1/P2 code, normal owner modes,
+collector schema, scientific inputs/weights, normalization and contract bytes
+are unchanged in this correction.
+
+The real-file post-guard regression now requires failure, absent final ZIP,
+replacement inode/bytes retained, failed source gate receipt, publication_complete
+false and removal of attempt-owned companions. Additional tests reject missing
+and stale identities at both API boundaries, and preserve an independently
+replaced target after linking with failed release status. Existing source
+replacement, collision/symlink, cleanup/rollback/diagnostic failure, first-error,
+unknown-identity retention and actual-finally preservation regressions still pass.
+
+Focused tests ran first: Linux 13 passed; Windows 13 run, no failures, one
+symlink-capability skip. Full Windows Python 3.12.10 / NumPy 2.3.0 suite: 134 run,
+no failures, five skips (real-Poppler full owner; sidecar symlink; two existing
+publication symlink subcases; publication symlink test). The pinned external
+reference was read-only. This includes P1/P2, existing project/transfer/serializer,
+normalization-once, default-off, provenance, five-setting/profile/collector and
+negative/failure regressions. Existing Ubuntu virtual-environment Python 3.12.3
+full owner suite: 112 run, no failures, one real-pdfinfo skip. All three changed
+Python files compile and pass Python 3.9 grammar checks; no farm Python execution.
+
+NOT VERIFIED: actual Lustre/delivery-parent and installed farm preflight/runtime;
+Linux NumPy-dependent numerical/export parity; real Poppler PDF/page checks;
+unavailable Windows symlink capabilities. No packages, environment repair,
+assertion weakening, staging, commit, push, farm execution or acquisition authority.
+Memory health has only the existing nonblocking CURRENT/MEMORY soft-size warnings,
+reserved for the next checkpoint/milestone audit. Six changed paths in this pass:
+owner, owner tests, Check 1 exporter tests (required signature wiring only),
+CURRENT, this investigation and manifest. The existing contract and its earlier
+pending amendment are byte-preserved and supplied separately as snapshot/context;
+this correction introduces no contract edit. Deliver complete six-path diff,
+pre/post source snapshots, actual logs and health/preservation receipts. After
+later independent acceptance, user publication and pushed-state review, the next
+farm action is the SAME preflight-only gate, never automatic acquisition.
+
+## Independent identity handoff review: source acceptance
+
+`SOURCE REVIEWED`: bounded source review passes the cumulative hard-link /
+pending-ownership repair at test 374bed263e077c356ea06ae7eea6416886b61d4a.
+Submitted six-path diff: 78009 bytes, SHA-256
+971f96b1da6224d99ade353680b85191b72f9b61e1f9833cf13cdd7c756d5924.
+Hash, read-only reverse application and diff checks matched actual files. Supplied
+review ZIP CRC, every member hash/size, six-path diff and current snapshots were
+independently verified. No additional blocking source finding in this review.
+
+The validated tuple now passes through execute_gate -> release_check1 -> hard-link
+helper. Missing or mismatched authority fails; stats only compare against the
+trusted tuple. Actual-final-guard identical-byte replacement now fails with no
+final ZIP, replacement survival and failed owner status. New missing-identity and
+post-link target-replacement tests retain existing cleanup, rollback, collisions,
+first-error, receipt and preservation checks. Unknown retention and stable
+open-ZIP validation remain intact. Scientific/P1/P2 code and normal modes are
+unchanged. Five-setting tests only adapt to the required identity parameter.
+
+Reviewer focused Linux: 13 passed, 1.025s. Reviewer focused Windows: 13 run,
+no failures, one symlink skip, 0.843s. Reviewed supplied full logs identify the
+matching current source: Linux112/1 pdfinfo skip, Windows134/5 capability skips,
+no failures. Those full suites were NOT rerun by this reviewer. Independently
+compiled and 3.9-grammar-checked the three changed Python files without bytecode;
+this is not farm Python 3.9 execution. Manifest/ordinary health pass with existing
+nonblocking soft-size warnings, scheduled for checkpoint/milestone.
+
+Publication reconciliation: the latest correction has six paths, but the earlier
+52-line Lustre contract amendment is still uncommitted at this base. Its bytes
+match the previously reviewed contract and supplied context snapshot. The current
+manifest hashes it. The complete accepted publication cohort is SEVEN paths:
+the submitted six plus the existing contract amendment. No additional source
+repair/contract cycle is needed; publish that preserved authority with the repair.
+
+Single NEXT: user publication -> independent pushed-state synchronization ->
+reviewed SAME preflight-only gate. Actual Lustre/delivery-parent, installed farm
+runtime, Linux NumPy parity, real PDF/page and unavailable capability conditions
+remain NOT VERIFIED. No acquisition approval or farm command follows. Source,
+contract, unrelated pending bytes, previous bundles, index and refs remain
+preserved; no stage/commit/push/farm/ROOT operation by Work. Prior P1/P2 acceptance,
+both Center conclusions, Outcome B, Method A/B and accepted closures stand.
+External package: KaonLT_Check1_Identity_Handoff_Acceptance_20261106.zip.

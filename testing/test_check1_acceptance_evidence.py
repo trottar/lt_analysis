@@ -769,6 +769,7 @@ class FiveOwnerTests(unittest.TestCase):
             with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temp:
                 root=Path(temp);art=root/'art';transfer=root/'transfer';art.mkdir();transfer.mkdir()
                 output=transfer/'result.zip';pending=transfer/'result.pending.zip';pending.write_bytes(b'validated pending bytes')
+                info=pending.stat();pending_identity=(info.st_dev,info.st_ino)  # fixture-owned creation
                 status=owner.GateStatus(art,output,'a'*40,high=True,check1=True)
                 status.update(zip_identity=dict(sha256=owner.sha256(pending),bytes=pending.stat().st_size))
                 status.update(artifact_verification_completed=True,zip_verification_completed=True,
@@ -779,7 +780,7 @@ class FiveOwnerTests(unittest.TestCase):
                     field={'verification_failure':'zip_verification_completed','preservation_failure':'check1_preservation_completed',
                            'cleanup_failure':'worktree_cleanup_completed'}[mode]
                     status.update(**{field:False})
-                    with self.assertRaisesRegex(ValueError,'release_gate_incomplete'):owner.release_check1(status,paths,pending,output)
+                    with self.assertRaisesRegex(ValueError,'release_gate_incomplete'):owner.release_check1(status,paths,pending,output,pending_identity)
                     self.assertFalse(output.exists())
                 elif mode in ('cleanup_exception','diagnostic_write_failure'):
                     temporary_directory=owner.tempfile.TemporaryDirectory
@@ -793,18 +794,18 @@ class FiveOwnerTests(unittest.TestCase):
                             raise OSError('injected receipt write failure')
                         return real_update(*args,**kwargs)
                     with patch.object(owner.tempfile,'TemporaryDirectory',side_effect=failing_cleanup),patch.object(status,'update',side_effect=update):
-                        with self.assertRaisesRegex(OSError,'post-link cleanup failure'):owner.release_check1(status,paths,pending,output)
+                        with self.assertRaisesRegex(OSError,'post-link cleanup failure'):owner.release_check1(status,paths,pending,output,pending_identity)
                     self.assertFalse(output.exists())
                     self.assertIn('post-link cleanup failure',status.record['first_failed_invariant'])
                     if mode=='diagnostic_write_failure':self.assertIn('diagnostic_write_failure',status.record)
                 elif mode=='companion_failure':
                     with patch.object(owner.os,'link',side_effect=OSError('injected companion failure')):
-                        with self.assertRaisesRegex(OSError,'injected'):owner.release_check1(status,paths,pending,output)
+                        with self.assertRaisesRegex(OSError,'injected'):owner.release_check1(status,paths,pending,output,pending_identity)
                 elif mode=='collision':
-                    with self.assertRaises(FileExistsError):owner.release_check1(status,paths,pending,output)
+                    with self.assertRaises(FileExistsError):owner.release_check1(status,paths,pending,output,pending_identity)
                     self.assertEqual(output.read_bytes(),b'competitor')
                 else:
-                    owner.release_check1(status,paths,pending,output)
+                    owner.release_check1(status,paths,pending,output,pending_identity)
                     self.assertEqual(output.read_bytes(),b'validated pending bytes');self.assertFalse(pending.exists())
                     self.assertEqual(json.loads(paths['delivered_receipt'].read_text())['zip_identity']['sha256'],owner.sha256(output))
                 if mode!='success':

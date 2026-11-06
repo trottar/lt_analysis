@@ -2450,10 +2450,12 @@ class Check1SourceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             source=Path(temp)/'pending.zip';target=Path(temp)/'final.zip'
             source.write_bytes(b'verified bytes')
-            owner._check1_rename_no_replace(source,target)
+            info=source.stat();identity=(info.st_dev,info.st_ino)  # fixture creation, before injection
+            owner._check1_publish_no_replace(source,target,identity)
             self.assertFalse(source.exists());self.assertEqual(target.read_bytes(),b'verified bytes')
             source.write_bytes(b'other attempt')
-            with self.assertRaises(FileExistsError):owner._check1_rename_no_replace(source,target)
+            info=source.stat();identity=(info.st_dev,info.st_ino)  # fixture creation, before injection
+            with self.assertRaises(FileExistsError):owner._check1_publish_no_replace(source,target,identity)
             self.assertEqual(source.read_bytes(),b'other attempt');self.assertEqual(target.read_bytes(),b'verified bytes')
 
     def test_preservation_inventory_includes_all_ordinary_sidecar_absences(self):
@@ -2519,6 +2521,364 @@ class Check1SourceTests(unittest.TestCase):
         old=owner.child_source_inventory(ROOT)
         self.assertNotIn('src/utility/check1_acceptance_evidence.py',old)
         self.assertIn('src/utility/check1_acceptance_evidence.py',owner.CHECK1_EXECUTABLES)
+
+
+
+
+class Check1PublicationTests(unittest.TestCase):
+    def test_missing_or_mismatched_identity_fails_without_adopting_or_deleting_source(self):
+        for missing in (True,False):
+            with self.subTest(missing=missing),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp);art=root/'art';delivery=root/'delivery';art.mkdir();delivery.mkdir()
+                pending=delivery/'attempt.pending.zip';output=delivery/'final.zip';pending.write_bytes(b'controlled bytes')
+                info=pending.stat();identity=None if missing else (info.st_dev,info.st_ino+1)
+                reason='source_identity_required' if missing else 'source_identity_mismatch'
+                with self.assertRaisesRegex(ValueError,reason):owner._check1_publish_no_replace(pending,output,identity)
+                self.assertFalse(output.exists());self.assertEqual(pending.read_bytes(),b'controlled bytes')
+                status=owner.GateStatus(art,output,SHA,high=True,check1=True)
+                status.update(zip_identity=dict(sha256=owner.sha256(pending),bytes=pending.stat().st_size),
+                    artifact_verification_completed=True,zip_verification_completed=True,worktree_cleanup_completed=True,
+                    check1_preservation_completed=True)
+                paths=owner.destinations(art,output);paths['log'].write_bytes(b'log');paths['summary'].write_bytes(b'summary')
+                with self.assertRaisesRegex(ValueError,reason):owner.release_check1(status,paths,pending,output,identity)
+                self.assertFalse(output.exists());self.assertEqual(pending.read_bytes(),b'controlled bytes')
+                self.assertEqual((pending.stat().st_dev,pending.stat().st_ino),(info.st_dev,info.st_ino))
+                self.assertEqual(status.record['status'],'failed');self.assertFalse(status.record['publication_complete'])
+                self.assertEqual(status.record['failed_stage'],'check1_release')
+                self.assertIn(reason,status.record['first_failed_invariant'])
+                for key in ('delivered_log','delivered_summary','delivered_receipt'):self.assertFalse(paths[key].exists())
+
+    def test_target_replacement_after_link_is_preserved_with_failed_release(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);art=root/'art';delivery=root/'delivery';art.mkdir();delivery.mkdir()
+            pending=delivery/'attempt.pending.zip';output=delivery/'final.zip';pending.write_bytes(b'controlled verified bytes')
+            info=pending.stat();identity=(info.st_dev,info.st_ino)
+            status=owner.GateStatus(art,output,SHA,high=True,check1=True)
+            status.update(zip_identity=dict(sha256=owner.sha256(pending),bytes=pending.stat().st_size),
+                artifact_verification_completed=True,zip_verification_completed=True,worktree_cleanup_completed=True,
+                check1_preservation_completed=True)
+            paths=owner.destinations(art,output);paths['log'].write_bytes(b'log');paths['summary'].write_bytes(b'summary')
+            link=os.link
+            def replace_target(source,target):
+                link(source,target)
+                if target==output:
+                    link(output,delivery/'retained-attempt-inode');output.unlink();output.write_bytes(b'independent final file')
+            with patch.object(owner.os,'link',side_effect=replace_target):
+                with self.assertRaisesRegex(ValueError,'source_or_target_replaced'):
+                    owner.release_check1(status,paths,pending,output,identity)
+            self.assertEqual(output.read_bytes(),b'independent final file')
+            self.assertEqual(pending.read_bytes(),b'controlled verified bytes')
+            self.assertEqual((pending.stat().st_dev,pending.stat().st_ino),identity)
+            self.assertEqual(status.record['status'],'failed');self.assertFalse(status.record['publication_complete'])
+            self.assertIn('source_or_target_replaced',status.record['first_failed_invariant'])
+            for key in ('delivered_log','delivered_summary','delivered_receipt'):self.assertFalse(paths[key].exists())
+
+    def test_same_bytes_replacement_after_actual_final_guard_is_not_published(self):
+        tree=ast.parse((ROOT/'testing/run_pion_t_template_comparison_gate.py').read_bytes().decode())
+        execute=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='execute_gate')
+        guard=next(n for n in ast.walk(execute) if isinstance(n,ast.If) and isinstance(n.test,ast.Name)
+            and n.test.id=='check1' and any(isinstance(c,ast.Expr) and isinstance(c.value,ast.Call)
+                and isinstance(c.value.func,ast.Name) and c.value.func.id=='release_check1' for c in n.body))
+        wrapper=ast.FunctionDef(name='release_after_guard',args=ast.arguments(posonlyargs=[],args=[],kwonlyargs=[],kw_defaults=[],defaults=[]),
+            body=[deepcopy(guard)],decorator_list=[])
+        code=compile(ast.fix_missing_locations(ast.Module(body=[wrapper],type_ignores=[])),'actual-final-release-guard','exec')
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);art=root/'art';delivery=root/'delivery';art.mkdir();delivery.mkdir()
+            pending=delivery/'attempt.pending.zip';output=delivery/'final.zip';raw=b'controlled verified ZIP bytes';pending.write_bytes(raw)
+            info=pending.stat();trusted=(info.st_dev,info.st_ino)
+            status=owner.GateStatus(art,output,SHA,high=True,check1=True)
+            status.update(zip_identity=dict(sha256=owner.sha256(pending),bytes=len(raw)),artifact_verification_completed=True,
+                          zip_verification_completed=True,worktree_cleanup_completed=True,check1_preservation_completed=True)
+            paths=owner.destinations(art,output);paths['log'].write_bytes(b'log');paths['summary'].write_bytes(b'summary')
+            actual=owner._check1_publish_no_replace;seen=[]
+            def replace_before_publication(source,target,*args,**kwargs):
+                self.assertEqual((source.stat().st_dev,source.stat().st_ino),trusted)
+                os.link(source,delivery/'retained-validated-inode');source.unlink();source.write_bytes(raw)
+                seen.append((source.stat().st_dev,source.stat().st_ino))
+                self.assertNotEqual(seen[-1],trusted)
+                return actual(source,target,*args,**kwargs)
+            scope=dict(check1=True,pending=pending,pending_identity=trusted,stat=stat,require=owner.require,
+                       status=status,paths=paths,output=output,release_check1=owner.release_check1)
+            exec(code,scope)
+            with patch.object(owner,'_check1_publish_no_replace',side_effect=replace_before_publication):
+                with self.assertRaisesRegex(ValueError,'source_identity_mismatch'):scope['release_after_guard']()
+            self.assertEqual(len(seen),1);self.assertFalse(output.exists());self.assertEqual(pending.read_bytes(),raw)
+            self.assertEqual((pending.stat().st_dev,pending.stat().st_ino),seen[0])
+            self.assertEqual(status.record['status'],'failed');self.assertFalse(status.record['publication_complete'])
+            self.assertEqual(status.record['failed_stage'],'check1_release')
+            self.assertIn('source_identity_mismatch',status.record['first_failed_invariant'])
+            self.assertEqual(json.loads(status.path.read_text())['status'],'failed')
+            for key in ('delivered_log','delivered_summary','delivered_receipt'):self.assertFalse(paths[key].exists())
+
+    def test_pending_ownership_requires_validated_stable_attempt_zip(self):
+        settings,artifacts,profile_id,_,_=owner.selection(check1=True)
+        payloads={d['basename_template']:('controlled ZIP member '+d['key']).encode() for d in artifacts['global']}
+        records={name:dict(bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest()) for name,raw in payloads.items()}
+        manifest=dict(complete=True,errors=[],git_head=SHA,required_analysis_commit=SHA,validation_profile=profile_id,
+            requested_kinematic='Q4p4W2p74',requested_settings=settings,
+            settings=[dict(s,artifacts={}) for s in settings],global_artifacts={d['key']:dict(
+                sha256=records[d['basename_template']]['sha256'],byte_size=records[d['basename_template']]['bytes'])
+                for d in artifacts['global']})
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'attempt.pending.zip'
+            with zipfile.ZipFile(path,'w') as archive:
+                archive.writestr('global/',b'')
+                for setting in settings:archive.writestr(setting['phi']+'_'+setting['epsilon']+'/',b'')
+                for name,raw in payloads.items():archive.writestr('global/'+name,raw)
+                archive.writestr('manifest.json',json.dumps(manifest))
+                archive.writestr('source_state.txt',b'controlled source state')
+                archive.writestr('source_checks.txt',b'controlled source checks')
+            raw=path.read_bytes();info=path.stat()
+            identity,record=owner._check1_verify_pending(path,SHA,records)
+            self.assertEqual(identity,(info.st_dev,info.st_ino))
+            self.assertEqual(record,dict(sha256=hashlib.sha256(raw).hexdigest(),bytes=len(raw)))
+            verify=owner.verify_zip
+            def replace_after_validation(stream,*args,**kwargs):
+                verify(stream,*args,**kwargs)
+                os.link(path,Path(temp)/'retained-validated-inode');path.unlink();path.write_bytes(raw)
+            with patch.object(owner,'verify_zip',side_effect=replace_after_validation):
+                with self.assertRaises((ValueError,PermissionError)) as caught:
+                    owner._check1_verify_pending(path,SHA,records)
+            if isinstance(caught.exception,PermissionError):
+                # Windows denies unlink of the open verified ZIP; Linux must
+                # exercise the successful replacement and inode-mismatch gate.
+                self.assertEqual(os.name,'nt');self.assertEqual(caught.exception.winerror,32)
+                self.assertEqual(path.stat().st_ino,info.st_ino)
+            else:self.assertRegex(str(caught.exception),'pending_changed_during_verification')
+            self.assertEqual(path.read_bytes(),raw)  # matching bytes never adopt the replacement inode
+            with self.assertRaisesRegex(ValueError,'zip_manifest_invalid'):
+                owner._check1_verify_pending(path,'0'*40,records)
+            self.assertTrue(path.exists())
+
+    def test_actual_owner_unknown_pending_identity_never_deletes_or_adopts_path(self):
+        tree=ast.parse((ROOT/'testing/run_pion_t_template_comparison_gate.py').read_bytes().decode())
+        execute=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='execute_gate')
+        outer=next(n for n in execute.body if isinstance(n,ast.Try) and n.finalbody)
+        wrapper=ast.FunctionDef(name='replay',args=ast.arguments(posonlyargs=[],args=[],kwonlyargs=[],kw_defaults=[],defaults=[]),
+            body=[ast.Try(body=[ast.Raise(exc=ast.Name(id='first',ctx=ast.Load()),cause=None)],handlers=[],orelse=[],
+                          finalbody=deepcopy(outer.finalbody))],decorator_list=[])
+        code=compile(ast.fix_missing_locations(ast.Module(body=[wrapper],type_ignores=[])),'actual-owner-finally','exec')
+        for known,replacement in ((False,False),(False,True),(True,False),(True,True)):
+            with self.subTest(known=known,replacement=replacement),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp);pending=root/'failed.pending.zip';pending.write_bytes(b'our pending ZIP');info=pending.stat()
+                status=owner.GateStatus(root,root/'final.zip',SHA,high=True,check1=True)
+                first=OSError('summary failure before old late identity capture')
+                status.update(status='failed',failure_reason=str(first),first_failed_invariant=str(first),failed_stage='summary')
+                if replacement:
+                    os.link(pending,root/'retained-original');pending.unlink();pending.write_bytes(b'independent replacement')
+                calls=[]
+                def preservation():calls.append('preservation')
+                scope=dict(first=first,succeeded=False,check1=True,pending=pending,
+                    pending_identity=(info.st_dev,info.st_ino) if known else None,preservation=preservation,
+                    preflight_only=False,status=status,first_owner_failure=first,
+                    _check1_remove_owned=owner._check1_remove_owned)
+                exec(code,scope)
+                inspected=[];is_file=Path.is_file
+                def inspect_path(path):
+                    if path==pending:inspected.append(path)
+                    return is_file(path)
+                with patch.object(Path,'is_file',inspect_path):
+                    with self.assertRaises(OSError) as caught:scope['replay']()
+                self.assertIs(caught.exception,first);self.assertEqual(calls,['preservation'])
+                self.assertEqual(status.record['first_failed_invariant'],str(first));self.assertEqual(status.record['status'],'failed')
+                if known and not replacement:self.assertFalse(pending.exists())
+                else:self.assertEqual(pending.read_bytes(),b'independent replacement' if replacement else b'our pending ZIP')
+                if not known:self.assertEqual(inspected,[])
+
+    def test_actual_owner_failure_cleanup_preserves_first_error_and_runs_preservation(self):
+        tree=ast.parse((ROOT/'testing/run_pion_t_template_comparison_gate.py').read_bytes().decode())
+        execute=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='execute_gate')
+        outer=next(n for n in execute.body if isinstance(n,ast.Try) and n.finalbody)
+        # Replay the actual owner's finally body under a prior release failure;
+        # real files/status writes and preservation callbacks remain exercised.
+        wrapper=ast.FunctionDef(name='replay',args=ast.arguments(posonlyargs=[],args=[],kwonlyargs=[],kw_defaults=[],defaults=[]),
+            body=[ast.Try(body=[ast.Raise(exc=ast.Name(id='first',ctx=ast.Load()),cause=None)],handlers=[],orelse=[],
+                          finalbody=deepcopy(outer.finalbody))],decorator_list=[])
+        code=compile(ast.fix_missing_locations(ast.Module(body=[wrapper],type_ignores=[])),'actual-owner-finally','exec')
+        for replacement in (False,True):
+            with self.subTest(replacement=replacement),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp);pending=root/'pending';pending.write_bytes(b'ours');info=pending.stat()
+                status=owner.GateStatus(root,root/'result.zip',SHA,high=True,check1=True)
+                first=OSError('first release failure')
+                status.update(status='failed',failure_reason=str(first),first_failed_invariant=str(first),failed_stage='check1_release')
+                calls=[]
+                def preservation():calls.append('preserved');raise OSError('later preservation failure')
+                if replacement:
+                    os.link(pending,root/'retained');pending.unlink();pending.write_bytes(b'independent pending')
+                actual=Path.unlink
+                def unlink(path,*args,**kwargs):
+                    if path==pending:raise OSError('later pending cleanup failure')
+                    return actual(path,*args,**kwargs)
+                scope=dict(first=first,succeeded=False,check1=True,pending=pending,pending_identity=(info.st_dev,info.st_ino),
+                           preservation=preservation,preflight_only=False,status=status,first_owner_failure=first,
+                           _check1_remove_owned=owner._check1_remove_owned)
+                exec(code,scope)
+                with patch.object(Path,'unlink',unlink):
+                    with self.assertRaises(OSError) as caught:scope['replay']()
+                self.assertIs(caught.exception,first);self.assertEqual(calls,['preserved'])
+                self.assertEqual(status.record['first_failed_invariant'],str(first))
+                self.assertEqual(status.record['status'],'failed');self.assertIn('preservation_failure_reason',status.record)
+                if replacement:self.assertEqual(pending.read_bytes(),b'independent pending')
+
+    def test_reproduce_reviewed_linux_renameat2_einval(self):
+        import ctypes
+        import errno
+        import types
+        # Execute the actual failed committed function with Linux syscall
+        # behavior injected; real Lustre itself is not available locally.
+        raw=subprocess.check_output(['git','show','374bed263e077c356ea06ae7eea6416886b61d4a:testing/run_pion_t_template_comparison_gate.py'],cwd=ROOT).decode()
+        function=next(n for n in ast.parse(raw).body if isinstance(n,ast.FunctionDef) and n.name=='_check1_rename_no_replace')
+        namespace=dict(Path=Path,require=owner.require,sys=types.SimpleNamespace(platform='linux'),
+                       os=types.SimpleNamespace(name='posix',fsencode=os.fsencode,strerror=os.strerror))
+        exec(compile(ast.Module(body=[function],type_ignores=[]),'reviewed-owner','exec'),namespace)
+        rename=Mock(side_effect=lambda *args:(ctypes.set_errno(errno.EINVAL) or -1))
+        with tempfile.TemporaryDirectory() as temp:
+            source=Path(temp)/'source';target=Path(temp)/'renamed';link=Path(temp)/'link'
+            source.write_bytes(b'complete bytes');os.link(source,link)
+            with self.assertRaises(FileExistsError):os.link(source,link)
+            with patch.object(ctypes,'CDLL',return_value=types.SimpleNamespace(renameat2=rename)):
+                with self.assertRaises(OSError) as caught:namespace['_check1_rename_no_replace'](source,target)
+            self.assertEqual(caught.exception.errno,errno.EINVAL)
+            self.assertEqual(rename.call_args.args,(-100,os.fsencode(source),-100,os.fsencode(target),1))
+            self.assertTrue(source.exists());self.assertFalse(target.exists())
+
+    def test_both_filesystems_probe_real_publication_without_renameat2(self):
+        import ctypes
+        record=dict(modules={n:{} for n in ('ROOT','root_numpy','numpy','scipy','matplotlib')},ROOT_version='controlled dependency seam')
+        with tempfile.TemporaryDirectory() as temp:
+            parents=[Path(temp)/n for n in ('private','delivery')]
+            for p in parents:p.mkdir()
+            # Mock only the external dependency subprocess. All filesystem
+            # capability operations and selected publication helper are real.
+            with patch.object(owner.isolation,'python_json',return_value=deepcopy(record)),patch.object(
+                    ctypes,'CDLL',side_effect=AssertionError('renameat2 must not be required')),patch.object(
+                    owner,'_check1_publish_no_replace',wraps=owner._check1_publish_no_replace) as publish:
+                result=owner.check1_runtime_preflight(ROOT,{},*parents)
+            self.assertEqual(result['no_clobber_probe_roles'],['private_output','delivery_parent'])
+            self.assertEqual(result['publication_operation'],'hardlink_no_replace_then_unlink_source')
+            self.assertEqual([c.args[0].parent.parent for c in publish.call_args_list],[parents[0]]*2+[parents[1]]*2)
+            self.assertTrue(all(not list(p.iterdir()) for p in parents))
+            for failed_parent in parents:
+                first=OSError('filesystem probe failure');real=owner._check1_publish_no_replace
+                def fail(source,target,*args):
+                    if source.parent.parent==failed_parent:raise first
+                    return real(source,target,*args)
+                with patch.object(owner.isolation,'python_json',return_value=deepcopy(record)),patch.object(
+                        owner,'_check1_publish_no_replace',side_effect=fail):
+                    with self.assertRaises(OSError) as caught:owner.check1_runtime_preflight(ROOT,{},*parents)
+                self.assertIs(caught.exception,first)
+                self.assertTrue(all(not list(p.iterdir()) for p in parents))
+
+    def test_existing_and_concurrent_target_collisions(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source=Path(temp)/'pending';target=Path(temp)/'final';source.write_bytes(b'ours')
+            info=source.stat();identity=(info.st_dev,info.st_ino)  # fixture creation, before injection
+            target.write_bytes(b'existing')
+            with self.assertRaises(FileExistsError):owner._check1_publish_no_replace(source,target,identity)
+            self.assertEqual(target.read_bytes(),b'existing');target.unlink()
+            actual=os.link
+            def race(src,dst):
+                target.write_bytes(b'concurrent competitor')
+                return actual(src,dst)
+            with patch.object(owner.os,'link',side_effect=race):
+                with self.assertRaises(FileExistsError):owner._check1_publish_no_replace(source,target,identity)
+            self.assertEqual(target.read_bytes(),b'concurrent competitor');self.assertEqual(source.read_bytes(),b'ours')
+
+    def test_symlink_targets_never_replaced(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source=Path(temp)/'pending';target=Path(temp)/'final';source.write_bytes(b'ours')
+            info=source.stat();identity=(info.st_dev,info.st_ino)  # fixture creation, before injection
+            for dangling in (False,True):
+                referent=Path(temp)/'referent'
+                if not dangling:referent.write_bytes(b'existing referent')
+                elif referent.exists():referent.unlink()
+                try:target.symlink_to(referent)
+                except OSError as error:self.skipTest('local symlink capability unavailable: '+str(error))
+                with self.assertRaises(FileExistsError):owner._check1_publish_no_replace(source,target,identity)
+                self.assertTrue(target.is_symlink());self.assertTrue(source.exists());target.unlink()
+                if not dangling:self.assertEqual(referent.read_bytes(),b'existing referent')
+
+    def test_source_cleanup_failure_rolls_back_only_our_link(self):
+        for mode in ('cleanup','replacement','source_replacement','rollback_error'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temp:
+                source=Path(temp)/'pending';target=Path(temp)/'final';source.write_bytes(b'ours')
+                info=source.stat();identity=(info.st_dev,info.st_ino)  # fixture creation, before injection
+                first=OSError('first source cleanup failure');unlink=Path.unlink;ledger=[]
+                def fail(path,*args,**kwargs):
+                    if path==source:
+                        self.assertEqual(target.read_bytes(),b'ours')
+                        if mode=='replacement':
+                            os.link(target,Path(temp)/'retained');unlink(target);target.write_bytes(b'competitor')
+                        raise first
+                    if path==target and mode=='rollback_error':raise OSError('secondary rollback failure')
+                    return unlink(path,*args,**kwargs)
+                actual=os.link
+                def replace_source(src,dst):
+                    actual(src,dst);os.rename(source,Path(temp)/'retained');source.write_bytes(b'new source')
+                with patch.object(Path,'unlink',fail):
+                    if mode=='source_replacement':
+                        with patch.object(owner.os,'link',side_effect=replace_source):
+                            with self.assertRaisesRegex(ValueError,'source_or_target_replaced'):owner._check1_publish_no_replace(source,target,identity,ledger)
+                        self.assertEqual(source.read_bytes(),b'new source');self.assertFalse(target.exists())
+                    else:
+                        with self.assertRaises(OSError) as caught:owner._check1_publish_no_replace(source,target,identity,ledger)
+                        self.assertIs(caught.exception,first)
+                        if mode=='replacement':self.assertEqual(target.read_bytes(),b'competitor')
+                        elif mode=='rollback_error':
+                            self.assertEqual(target.read_bytes(),b'ours');self.assertTrue(first.check1_rollback_failures)
+                        else:self.assertFalse(target.exists())
+                self.assertEqual(len(ledger),1)
+
+    def test_release_postlink_failures_status_and_replacement_preservation(self):
+        for mode in ('source_cleanup','source_rollback','context_cleanup','context_rollback','replacement',
+                     'receipt_replacement','status_write','double_cleanup'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp);art=root/'art';delivery=root/'delivery';art.mkdir();delivery.mkdir()
+                output=delivery/'final.zip';pending=delivery/'pending.zip';pending.write_bytes(b'validated bytes')
+                info=pending.stat();pending_identity=(info.st_dev,info.st_ino)
+                status=owner.GateStatus(art,output,SHA,high=True,check1=True)
+                status.update(zip_identity=dict(sha256=owner.sha256(pending),bytes=pending.stat().st_size),
+                              artifact_verification_completed=True,zip_verification_completed=True,
+                              worktree_cleanup_completed=True,check1_preservation_completed=True)
+                paths=owner.destinations(art,output);paths['log'].write_bytes(b'log');paths['summary'].write_bytes(b'summary')
+                first=OSError('first release failure');unlink=Path.unlink;cleanup=tempfile.TemporaryDirectory.cleanup;update=status.update
+                def fail_unlink(path,*args,**kwargs):
+                    if path==pending and mode in ('source_cleanup','source_rollback','replacement','double_cleanup'):
+                        self.assertEqual(output.read_bytes(),b'validated bytes')
+                        if mode=='replacement':
+                            os.link(output,delivery/'retained');unlink(output);output.write_bytes(b'independent ZIP')
+                        raise first
+                    if mode in ('source_rollback','context_rollback') and path in (output,paths['delivered_receipt']):
+                        raise OSError('rollback error')
+                    return unlink(path,*args,**kwargs)
+                def fail_cleanup(directory):
+                    if mode in ('context_cleanup','context_rollback','receipt_replacement'):
+                        self.assertTrue(output.exists());self.assertTrue(paths['delivered_receipt'].exists())
+                        if mode=='receipt_replacement':
+                            receipt=paths['delivered_receipt'];os.link(receipt,delivery/'retained');unlink(receipt);receipt.write_bytes(b'independent receipt')
+                        cleanup(directory);raise first
+                    cleanup(directory)
+                    if mode=='double_cleanup':raise OSError('later context cleanup error')
+                def fail_update(*args,**kwargs):
+                    if mode=='status_write' and kwargs.get('status')=='success':raise first
+                    return update(*args,**kwargs)
+                with patch.object(Path,'unlink',fail_unlink),patch.object(tempfile.TemporaryDirectory,'cleanup',fail_cleanup),patch.object(status,'update',side_effect=fail_update):
+                    with self.assertRaises(OSError) as caught:owner.release_check1(status,paths,pending,output,pending_identity)
+                self.assertIs(caught.exception,first)
+                self.assertEqual(status.record['status'],'failed');self.assertFalse(status.record['publication_complete'])
+                self.assertEqual(status.record['first_failed_invariant'],str(first));self.assertEqual(status.record['failed_stage'],'check1_release')
+                self.assertFalse(status.record['evidence_admissible']);self.assertFalse(status.record['scientifically_accepted'])
+                if mode in ('source_rollback','context_rollback'):
+                    self.assertTrue(status.record['rollback_failures'])
+                    if paths['delivered_receipt'].exists():
+                        receipt=json.loads(paths['delivered_receipt'].read_text())
+                        self.assertEqual(receipt['status'],'failed');self.assertFalse(receipt['publication_complete'])
+                elif mode=='replacement':self.assertEqual(output.read_bytes(),b'independent ZIP')
+                else:self.assertFalse(output.exists())
+                if mode=='receipt_replacement':self.assertEqual(paths['delivered_receipt'].read_bytes(),b'independent receipt')
+                elif mode!='context_rollback':self.assertFalse(paths['delivered_receipt'].exists())
+                self.assertFalse(paths['delivered_log'].exists());self.assertFalse(paths['delivered_summary'].exists())
+                self.assertEqual(json.loads(status.path.read_text())['status'],'failed')
 
 
 if __name__ == "__main__":
