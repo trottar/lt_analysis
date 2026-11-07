@@ -129,28 +129,30 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — user publication of the SOURCE REVIEWED cumulative Check 1 publication/
-ownership repair, then independent pushed-state synchronization and review of
-the SAME preflight-only gate. Local base test:
-374bed263e077c356ea06ae7eea6416886b61d4a. Publication scope is SEVEN paths:
-the six latest correction paths PLUS the preserved earlier amendment to the
-[existing contract](phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md).
-The manifest already hashes that amended contract; do not omit it from publication.
-`SOURCE REVIEWED`: validated pending identity now flows through execute_gate,
-release and the hard-link helper. Missing/mismatched authority fails without
-inode adoption; actual-guard identical-byte replacement and owned rollback tests
-pass. Prior unknown retention, stable open-ZIP verification and source/target
-protection remain. See the
-[independent acceptance](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-identity-handoff-review-source-acceptance).
-Reviewer focused Linux13 passed; Windows13 ran with one symlink skip. Supplied
-full Linux112/Windows134 logs and all bundle hashes/current snapshots were
-verified; those full runs were not repeated by the reviewer. Three changed Python
+NEXT — user publication of the SOURCE REVIEWED nine-path optimizer-reference
+context repair, then independent pushed-state synchronization and return to the
+SAME reviewed preflight-only gate. Local source base test:
+2ebcf8e45c4a3aa40737e37fb0700e976d6c8698. The supplied failed gate-status
+fields identify that source for attempt
+`kaonlt-e8-4-canonical-five-analysis-a95bbrb9`: failed stage `completion_markers`,
+analysis return code `1`, owner invariant `analysis_failed`, underlying exception
+`check1:destination_exists`. Scientific evidence is inadmissible and not accepted.
+`SOURCE REVIEWED`: both Step 4 optimizer call sites use the copied candidate
+input carrying the explicit Check 1-only non-publishing context. The original
+Step 6 input remains eligible; it publishes once and a repeated final call still
+fails without changing saved packet hashes. Numerical loops, histograms, cuts,
+normalization, weights and publication/rollback remain unchanged. The new caller
+is explicit in the owner/helper executable inventories and exact source allowlist.
+See the [independent review](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-optimizer-context-review-source-acceptance).
+Reviewer new five and existing five preparent cases passed (10 total). Supplied
+Windows144/Linux112 full logs, ZIP/current snapshots and declared protected hashes
+were verified; full suites were not repeated by the reviewer. Five changed Python
 files compile/3.9 grammar, manifest and ordinary health pass. No further source
-repair or new contract is needed. Actual Lustre/farm readiness, Linux NumPy parity,
-real PDF and unavailable capabilities remain NOT VERIFIED. No farm command or
-acquisition approval follows; successful preflight evidence needs review before
-separate user acquisition authority. Prior P1/P2 acceptance, both Center
-conclusions, Outcome B, Method A/B and accepted closures stand. Stop before Check 2.
+repair or new contract is needed. Actual Lustre/farm readiness, Linux NumPy parity
+and real PDF/capabilities remain NOT VERIFIED. No farm command or acquisition
+authority follows; successful preflight evidence requires review before separate
+user acquisition approval. Prior P1/P2, both Center conclusions, Outcome B,
+Method A/B and accepted closures stand. Stop before Check 2.
 
 ## Success Criteria
 

@@ -197,6 +197,160 @@ def five_fixture(directory):
     return out,identities,runtime,ref,auth,histograms
 
 
+class OptimizerReferencePublicationTests(unittest.TestCase):
+    """Real caller/yield/export sequence with controlled events and ROOT histograms.
+
+    Numerical loop, normalization, native closure, authority and packet writer
+    execute unchanged; the small histogram adapter replaces ROOT, not validators.
+    """
+    def sequence(self, eps, enabled=True, ordinary=False):
+        from collections import defaultdict
+        from binning_helpers import find_2d_bin_indices
+        from background_config import (BG_OPT_PREPASS_CONTEXT,
+            resolve_particle_subtraction_mode, resolve_pion_subtraction_scope)
+
+        class Hist(H):
+            def __init__(self, name, title, n, lo, hi, *second):
+                edges=np.linspace(lo,hi,n+1).tolist()
+                shape=(n+2,) if not second else (n+2,second[0]+2)
+                self.values=np.zeros(shape);self.errors=np.zeros(shape);self.edges=edges
+                self.second=np.linspace(second[1],second[2],second[0]+1) if second else None
+            def Fill(self, *args):
+                indices=(ev.bisect_right(self.edges,args[0]),)
+                if self.second is not None:indices+=(ev.bisect_right(self.second,args[1]),)
+                weight=args[len(indices)] if len(args)>len(indices) else 1.
+                self.values[indices]+=weight
+                self.errors[indices]=math.hypot(self.errors[indices],weight)
+            def Scale(self, scale):
+                self.values*=scale;self.errors*=abs(scale)
+            def GetBinCenter(self, index):return (self.edges[index-1]+self.edges[index])/2
+
+        names={'find_yield_simc','calculate_yield_simc','bin_simc','process_hist_simc',
+            '_process_yield_simc_tree','_init_hist_group_matrices','_init_ave_simc_event_cache',
+            '_append_ave_simc_event','_freeze_ave_simc_event_cache','_noop_progress_bar',
+            '_assert_canonical_t_edges','integral_with_stat_error'}
+        module=types.ModuleType('calculate_yield')
+        ns=module.__dict__
+        def unavailable(*args):raise ValueError('controlled ROOT-independent provenance unavailable')
+        ns.update(np=np,math=math,os=os,sys=sys,defaultdict=defaultdict,TH1D=Hist,TH2D=Hist,
+            BG_OPT_PREPASS_CONTEXT=BG_OPT_PREPASS_CONTEXT,
+            resolve_particle_subtraction_mode=resolve_particle_subtraction_mode,
+            resolve_pion_subtraction_scope=resolve_pion_subtraction_scope,
+            find_2d_bin_indices=find_2d_bin_indices,
+            calculate_theta_cm_deg=lambda *a:45.,_get_simc_true_theta_cm_deg=lambda *a:45.,
+            _fill_t_vs_tmin_hist=lambda *a,**k:None,
+            _clone_hist_for_plot=lambda h,**k:deepcopy(h),_build_f6_3_simc_provenance=unavailable)
+        tree=ast.parse((ROOT/'src/binning/calculate_yield.py').read_text())
+        exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,ast.FunctionDef)
+            and n.name in names],type_ignores=[]),'actual_calculate_yield','exec'),ns)
+        optimizer=dict(np=np,sys=sys)
+        tree=ast.parse((ROOT/'src/utility/bg_optimization.py').read_text())
+        exec(compile(ast.Module(body=[n for n in tree.body if isinstance(n,ast.FunctionDef)
+            and n.name in ('_build_simc_reference','_prepare_candidate_hist')],type_ignores=[]),
+            'actual_bg_optimization','exec'),optimizer)
+        cuts=types.ModuleType('apply_cuts');cuts.set_val=lambda d:None
+        cuts.apply_simc_cuts=lambda e,lo,hi:lo<=e.missmass<hi
+        cuts.apply_simc_sub_cuts=lambda e,lo,hi:True
+        hole=types.ModuleType('hgcer_hole')
+        hole.apply_HGCer_hole_cut=lambda *a:types.SimpleNamespace(IsInside=lambda x,y:False)
+        class Tree(list):
+            def GetEntries(self):return len(self)
+        t=np.linspace(.4,.9,4);phi=np.linspace(-180.,180.,10)
+        events=Tree([types.SimpleNamespace(t=-(t[j]+t[j+1])/2,
+            phipq=math.radians((phi[k]+phi[k+1])/2),missmass=1.115,iter_weight=2.,
+            W=2.74,Q2=4.4,epsilon=.5,ssxptar=0.,ssyptar=0.,hsxptar=0.,hsyptar=0.,
+            phgcer_x_det=0.,phgcer_y_det=0.) for j in range(3) for k in range(9)])
+        with tempfile.TemporaryDirectory() as temp:
+            out=Path(temp);ns['OUTPATH']=str(out)
+            identities={p:dict(sha256=ev.file_hash(ROOT/p),bytes=(ROOT/p).stat().st_size) for p in ev.EXECUTABLES}
+            roles=ev.simc_derivation('Center',eps);originals={}
+            for role in ('archive','archive_hist','model','model_hist'):
+                path=out/roles[role]
+                path.write_bytes(b'controlled model' if role=='model' else b'controlled archive')
+                if role in ('archive','archive_hist'):
+                    originals[path.name]=dict(sha256=ev.file_hash(path),bytes=path.stat().st_size)
+            auth=dict(schema_version='check1_owner_authority/v1',reference_sha256=ev.REFERENCE_SHA256,
+                settings=[list(s) for s in ev.SETTINGS],private_output=str(out.resolve()),
+                executables=identities,original_inputs=originals,runtime_before=originals,
+                simc_derivations={roles['model']:roles},source_sha='a'*40,attempt='controlled-sequence',
+                broad_mm={eps:np.linspace(.7,1.3,101).tolist()},reference_source_sha={'Center:'+eps:'b'*40})
+            ap=out/'authority.json';ap.write_bytes(ev.canonical_json(auth))
+            inputs=inp(eps);inputs.update(OutFilename='controlled',POL='',Q2min=4.,Q2max=5.,
+                Wmin=2.,Wmax=3.,yield_emit_plots=False,yield_show_progress=False,
+                particle_subtraction_mode='simc_shape_components',pion_subtraction_scope='t_bin')
+            if ordinary:inputs['pion_subtraction_scope']='setting_wide'
+            before=deepcopy(inputs)
+            hist=dict(InFile_SIMC=types.SimpleNamespace(Get=lambda n:events,
+                GetName=lambda:str(out/roles['model'])),normfac_simc=3.,phi_setting='Center',t_bins=t,phi_bins=phi)
+            env={'LT_ANALYSIS_CHECK1_EVIDENCE':'1' if enabled else '0',
+                ev.AUTHORITY_ENV:str(ap),ev.AUTHORITY_HASH_ENV:ev.file_hash(ap)}
+            with patch.dict(sys.modules,{'calculate_yield':module,'apply_cuts':cuts,'hgcer_hole':hole}),patch.dict(os.environ,env):
+                for _ in range(2):
+                    reference,support=optimizer['_build_simc_reference'](hist,inputs,t,phi)
+                    self.assertEqual(list(out.glob('*check1*')),[], 'Step 4 must never publish')
+                    self.assertEqual(inputs,before)
+                final=ns['find_yield_simc']([hist],inputs)
+                self.assertEqual(reference['binned_SIMC']['Center']['yield'],final['binned_SIMC']['Center']['yield'])
+                self.assertTrue(all(v=={'yield':6.,'yield_err':6.} for v in final['binned_SIMC']['Center']['yield'].values()))
+                for name in ('mm','t','Q2','W'):
+                    for j in range(3):
+                        for k in range(9):
+                            np.testing.assert_array_equal(support[name][j][k].values,hist['_xsect_support_simc'][name][j][k].values)
+                            np.testing.assert_array_equal(support[name][j][k].errors,hist['_xsect_support_simc'][name][j][k].errors)
+                packets=list(out.glob('*check1*.json'))
+                if enabled and not ordinary:
+                    self.assertEqual(len(packets),1)
+                    doc,arrays=ev.read_packet(packets[0]);ev.validate_packet(doc,arrays)
+                    saved={p.name:ev.file_hash(p) for p in out.glob('*check1*')}
+                    self.assertEqual(len(saved),2)
+                    with self.assertRaisesRegex(ValueError,'check1:destination_exists'):
+                        ns['find_yield_simc']([hist],inputs)
+                    self.assertEqual(saved,{p.name:ev.file_hash(p) for p in out.glob('*check1*')})
+                else:
+                    self.assertEqual(packets,[])
+                    ns['find_yield_simc']([hist],inputs)
+                    self.assertEqual(list(out.glob('*check1*')),[])
+
+    def test_step4_then_step6_low_epsilon(self):self.sequence('lowe')
+    def test_step4_then_step6_high_epsilon(self):self.sequence('highe')
+    def test_default_off_both_epsilon_modes(self):
+        for eps in ('lowe','highe'):
+            with self.subTest(eps=eps):self.sequence(eps,enabled=False)
+    def test_ordinary_scope_both_epsilon_modes(self):
+        for eps in ('lowe','highe'):
+            with self.subTest(eps=eps):self.sequence(eps,ordinary=True)
+
+
+    def test_adjacent_repeated_call_guards(self):
+        from background_config import (BG_OPT_PREPASS_CONTEXT,build_bg_optimization_prepass_config,
+            resolve_particle_subtraction_mode,resolve_pion_subtraction_scope)
+        tree=ast.parse((ROOT/'src/binning/calculate_yield.py').read_text())
+        data=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='calculate_yield_data')
+        simc=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='process_hist_simc')
+        data_guard=next(n.test for n in ast.walk(data) if isinstance(n,ast.If)
+            and any(isinstance(i,ast.ImportFrom) and i.module=='pion_t_phi_template_comparison' for i in n.body))
+        simc_guard=next(n.test for n in ast.walk(simc) if isinstance(n,ast.If)
+            and any(isinstance(i,ast.ImportFrom) and i.module=='check1_acceptance_evidence' for i in n.body))
+        def allowed(guard,inputs,iteration=0):
+            return eval(compile(ast.Expression(guard),'actual_export_guard','eval'),dict(os=os,
+                inpDict=inputs,iteration=iteration,phi_setting='Center',
+                BG_OPT_PREPASS_CONTEXT=BG_OPT_PREPASS_CONTEXT,
+                resolve_particle_subtraction_mode=resolve_particle_subtraction_mode,
+                resolve_pion_subtraction_scope=resolve_pion_subtraction_scope))
+        with patch.dict(os.environ,{'LT_ANALYSIS_CHECK1_EVIDENCE':'1',
+                                   'LT_ANALYSIS_PION_T_PHI_TEMPLATE_COMPARISON':'1'}):
+            for eps in ('lowe','highe'):
+                inputs=dict(inp(eps),particle_subtraction_mode='simc_shape_components',pion_subtraction_scope='t_bin')
+                self.assertTrue(allowed(data_guard,inputs));self.assertTrue(allowed(simc_guard,inputs))
+                prepass=build_bg_optimization_prepass_config(inputs)
+                for _ in range(2):self.assertFalse(allowed(data_guard,prepass))
+                self.assertFalse(allowed(simc_guard,inputs,iteration=True))
+                reference=dict(inputs,check1_export_context='optimizer_simc_reference')
+                self.assertFalse(allowed(simc_guard,reference))
+                # This context suppresses only the Check 1 SIMC publisher.
+                self.assertTrue(allowed(data_guard,reference))
+
+
 class PacketTests(unittest.TestCase):
     def test_signed_cancellation_counts_and_quadratic_sumw2(self):
         doc,a=packet()

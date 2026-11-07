@@ -612,6 +612,7 @@ def _evaluate_phi_candidate(base_hist, inpDict, phi_setting, bg_scale1, bg_scale
 
 def _build_simc_reference(base_hist, inpDict, t_bins, phi_bins):
     candidate_inp = dict(inpDict)
+    candidate_inp["check1_export_context"] = "optimizer_simc_reference"
     candidate_inp["NumtBins"] = len(t_bins) - 1
     candidate_inp["NumPhiBins"] = len(phi_bins) - 1
     candidate_inp["yield_emit_plots"] = False

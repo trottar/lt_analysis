@@ -71,10 +71,12 @@ CHECK1_ENV = "LT_ANALYSIS_CHECK1_EVIDENCE"
 CHECK1_AUTH_ENV = "LT_ANALYSIS_CHECK1_AUTHORITY"
 CHECK1_HASH_ENV = "LT_ANALYSIS_CHECK1_AUTHORITY_SHA256"
 CHECK1_PATHS = {"src/cuts/pion_t_phi_template_comparison.py", "src/binning/calculate_yield.py",
+    "src/utility/bg_optimization.py",
     "testing/run_pion_t_template_comparison_gate.py", "testing/test_pion_t_phi_template_comparison.py",
     "testing/test_run_pion_t_template_comparison_gate.py", "src/utility/check1_acceptance_evidence.py",
     "testing/test_check1_acceptance_evidence.py", CHECK1_PROFILE}
 CHECK1_EXECUTABLES = ("src/utility/check1_acceptance_evidence.py",
+    "src/utility/bg_optimization.py",
     "src/cuts/pion_t_phi_template_comparison.py", "src/binning/calculate_yield.py",
     "testing/run_pion_t_template_comparison_gate.py", CHECK1_PROFILE,
     "src/cuts/pion_background_chain_audit.py", "src/utility/prompt_trees.py",

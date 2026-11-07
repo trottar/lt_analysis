@@ -31,6 +31,7 @@ SETTINGS = (("Left", "lowe"), ("Center", "lowe"),
 SOURCES = ("prompt", "rand", "dummy", "dummy_rand")
 CUTS = ("allcuts", "nommcuts")
 EXECUTABLES = ("src/utility/check1_acceptance_evidence.py",
+               "src/utility/bg_optimization.py",
                "src/cuts/pion_t_phi_template_comparison.py", "src/binning/calculate_yield.py",
                "testing/run_pion_t_template_comparison_gate.py",
                "testing/pion_check1_acceptance_evidence_profile_v1.json",

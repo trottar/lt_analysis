@@ -816,3 +816,119 @@ contract, unrelated pending bytes, previous bundles, index and refs remain
 preserved; no stage/commit/push/farm/ROOT operation by Work. Prior P1/P2 acceptance,
 both Center conclusions, Outcome B, Method A/B and accepted closures stand.
 External package: KaonLT_Check1_Identity_Handoff_Acceptance_20261106.zip.
+
+
+## November 6 optimizer-reference destination collision repair
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; actual-diff review pending.
+The user reports a November 6 farm `check1:destination_exists`: Step 4 optimizer
+reference acquisition wrote a SIMC packet before legitimate Step 6 publication
+at the same setting/epsilon basename. The supplied failed gate-status fields,
+quoted in the user's provenance correction, identify source commit
+`2ebcf8e45c4a3aa40737e37fb0700e976d6c8698` and attempt
+`kaonlt-e8-4-canonical-five-analysis-a95bbrb9`. Failed stage: `completion_markers`;
+analysis return code: `1`; owner invariant: `analysis_failed`; underlying exception:
+`check1:destination_exists`. Scientific evidence is inadmissible and not accepted.
+
+`SOURCE VERIFIED` at local test 2ebcf8e45c4a3aa40737e37fb0700e976d6c8698:
+both `_build_simc_reference` callers use ordinary `find_yield_simc`, whose
+iteration-zero Check 1 guard previously admitted the optimizer. The existing
+contract was amended before source edits with an exact nine-path allowance.
+The copied candidate input now sets `check1_export_context` to
+`optimizer_simc_reference`; only the Check 1 SIMC sink/export guard consumes it.
+Original inputs are unchanged; no prepass physics context is reused. The caller
+is added to exact Check 1 source-admission and executable-hash inventories.
+Ordinary owner inventories/modes, schema and the publication helper are frozen.
+
+The real optimizer caller -> find/calculate/bin/process SIMC -> event loop ->
+native closure -> authority -> sidecar writer sequence executes in new local
+controlled-event/histogram tests for low/high epsilon. Before the fix both
+published during Step 4 (2 expected failures); default-off and ordinary-scope
+controls passed. Afterward repeated Step 4 calls publish zero, Step 6 publishes
+one JSON/NPZ pair, and duplicate final calls fail `check1:destination_exists`
+with both prior hashes unchanged. Per-cell yield/error remain 6/6 from raw
+iteration weight 2 and normfac 3; MM/t/Q2/W histogram contents and errors agree.
+ROOT histogram/geometry adapters are controlled fixtures, not farm validation;
+normalization provenance unavailable in that fixture stays explicitly unavailable.
+Existing real data/Local-t source projection, signed/Sumw2, P1/P2, five-setting,
+source/provenance/default-off and collector tests also pass where executable.
+
+Adjacent source audit: both optimizer SIMC reference sites route through the
+new context. Repeated data candidates already use the real existing prepass
+configuration and data-observer guards; a new regression evaluates those actual
+guards for both epsilons. Main Step 6 has one data and one SIMC call; main_auto
+and main_iter SIMC calls use iteration=True and remain excluded. High-epsilon
+selected-data rerun routing and the distinct parent observer are unchanged.
+No additional collision path was identified within this bounded source audit;
+full main/ROOT/farm runtime remains NOT VERIFIED.
+
+Executed local evidence: Windows Python 3.12.10 / NumPy 2.3.0, focused 5 passed;
+affected suites 144 run, 5 skips (one real Poppler PDF-inclusive five-setting
+check, one sidecar-symlink test, two older high-publication symlink subcases,
+one owner-publication symlink test: Windows privilege unavailable). The pinned
+external ZIP test passed read-only after authorized access; its fixed digest
+remains 02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a.
+Linux WSL Python 3.12.3 / GCC 13.3.0 owner suite: 112 run, 1 skip (real Poppler
+pdfinfo absent), including publication ownership/rollback/symlink checks.
+Numerical WSL tests require NumPy, absent in the existing WSL environments:
+NOT VERIFIED there; no packages installed or scientific inputs substituted.
+Five changed Python files compile and parse with Python 3.9 grammar; this is
+not farm Python 3.9 execution. Exact normalized-source comparisons prove only
+the context assignment, Check 1 guard condition and three inventory additions
+changed executable source; all prior Check 1 tests are retained unchanged.
+
+Sole NEXT is independent actual-diff review, then conditional user publication,
+pushed-state synchronization and the SAME reviewed preflight-only gate. Actual
+private/delivery filesystem capabilities, farm Python/ROOT/dependencies,
+path/alias and executable/source/provenance/manifest checks remain mandatory
+before any separately authorized scientific acquisition. No commit, stage,
+push, farm run, acquisition authorization or failed-farm artifact delivery.
+
+## Independent optimizer context review: source acceptance
+
+`SOURCE REVIEWED`: bounded nine-path source review passes at test
+2ebcf8e45c4a3aa40737e37fb0700e976d6c8698. Submitted diff: 29288 bytes,
+SHA-256 e2f7abfcb7daf3caab39472be1b63e394f3cc87e77768e9c51a5cdfab7769d24.
+Hash, read-only reverse application and actual nine-path inventory match. Review
+ZIP CRC, diff/current snapshots and every declared current/protected/unrelated
+file hash were independently checked. No blocking source finding in this scope.
+
+Both Step 4 paths use _build_simc_reference, which adds the explicit context only
+to its existing copied input. Only the default-off Check 1 SIMC sink/export guard
+consumes it. Scientific prepass context is not reused; existing SIMC numerical
+loop, histograms, normalization, weights and yield extraction still run. Original
+production input remains unchanged and final Step 6 publication remains eligible.
+Repeated optimizer calls emit zero packets; final emits one pair; repeated final
+publication raises destination_exists with both previous packet hashes intact.
+The owner/helper inventories and exact Check 1 allowlist now cover the actual
+new caller. Publication/rollback, writer algorithms, collector/schema and prior
+scientific/P1/P2 code remain unchanged. Existing data preparent guards remain.
+
+Reviewer Windows Python 3.12.10/NumPy 2.3.0 executed all five new sequence tests
+and all five existing preparent-contract tests: 10 passes, no failures/skips.
+Both epsilons, repeated references, default-off, ordinary scope, actual adjacent
+guard expressions, unchanged input, yields and MM/t/Q2/W bin contents/errors are
+covered with controlled ROOT/cut/geometry adapters. These establish local wiring
+and numerical checks, not full ROOT/farm or physical validation. Independently
+compiled and 3.9-grammar-checked all five changed Python files without bytecode.
+Supplied full Windows144/5 skips and Linux owner112/1 pdfinfo skip logs were
+reviewed, not independently rerun here. Manifest/ordinary health pass; existing
+soft-size warnings remain nonblocking and scheduled for the next milestone.
+
+The supplied failed gate-status identifies source
+`2ebcf8e45c4a3aa40737e37fb0700e976d6c8698` and attempt
+`kaonlt-e8-4-canonical-five-analysis-a95bbrb9` for the `check1:destination_exists`
+failure documented above. The earlier missing-SHA claim is corrected; this failed,
+inadmissible and unaccepted attempt does not establish runtime validation of the
+independently SOURCE REVIEWED local repair.
+Actual Lustre/delivery-parent, farm interpreter/ROOT/dependencies/path/provenance/
+manifest readiness, Linux NumPy parity and unavailable PDF/capability gates remain
+NOT VERIFIED. No source edit, staging, commit, push or farm operation by Work.
+Source/contract, unrelated pending bytes, prior bundles, index and refs preserved.
+
+Single NEXT: user nine-path publication -> independent pushed-state synchronization
+-> SAME reviewed preflight-only gate. No new source task, environment repair or
+normalization study is needed. Acquisition still requires reviewed successful
+preflight and separate user authority. Prior P1/P2, both Center conclusions,
+Outcome B, Method A/B and accepted closures stand. External package:
+KaonLT_Check1_Optimizer_Context_Acceptance_20261106.zip.

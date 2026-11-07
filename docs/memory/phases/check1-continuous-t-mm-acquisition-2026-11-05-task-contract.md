@@ -486,3 +486,51 @@ review -> user publication -> independent pushed-state synchronization -> SAME
 preflight-only gate on the farm. Full acquisition is not the next farm action
 and requires separately reviewed successful readiness evidence and user authority.
 No commit, push, staging or farm execution by Codex.
+
+## November 6 bounded optimizer-reference publication-context repair
+
+User-supplied farm failure: check1:destination_exists during the November 6
+attempt. The attempt/source SHA was not supplied in this request; do not infer
+it from the current local HEAD. Source audit at live test
+2ebcf8e45c4a3aa40737e37fb0700e976d6c8698 identifies Step 4
+bg_optimization._build_simc_reference -> find_yield_simc -> process_hist_simc
+prematurely publishing the Check 1 SIMC packet, followed by the legitimate
+Step 6 find_yield_simc call publishing the same setting/epsilon basename.
+This is supplied failure information plus current source tracing, not acceptance
+of failed farm artifacts or a new farm execution/physics result.
+
+Before source edits, narrowly extend this SAME contract's allowlist to
+src/utility/bg_optimization.py::_build_simc_reference: add an explicit
+check1_export_context='optimizer_simc_reference' only to its existing copied
+candidate input. Consume that context ONLY in the default-off Check 1 SIMC sink/
+export construction guard in src/binning/calculate_yield.py::process_hist_simc.
+Do not reuse analysis_subtraction_context/bg_opt_prepass_mode or change any
+scientific/optimizer selection, cache, histogram, yield, normalization or weight.
+The original production input must remain unchanged; absence of this context
+keeps the legitimate final export eligible. No writer weakening, output deletion,
+clobbering, filename reuse scheme, silent duplicate skip or automatic retry.
+
+Source scope: those two statements; exact Check 1 source-allowlist and executable-
+inventory additions for bg_optimization.py in the existing owner and helper;
+regressions in testing/test_check1_acceptance_evidence.py. Owner mode logic,
+publication/rollback, helper algorithms/write_packet and collector/profile/schema
+remain frozen. The new caller is an explicit hashed executable dependency in
+Check 1 only; the old observer tuple is not falsely claimed to cover it.
+Allowed paths for this repair are exactly src/utility/bg_optimization.py,
+src/binning/calculate_yield.py, src/utility/check1_acceptance_evidence.py (inventory
+only), testing/run_pion_t_template_comparison_gate.py (exact inventory/allowlist
+only), testing/test_check1_acceptance_evidence.py, CURRENT, this contract, the
+existing Check 1 investigation and manifest. No additional file or architecture.
+
+Required deterministic regressions: actual Step 4 caller followed by Step 6
+yield call for both epsilon modes; zero optimizer packets, exactly one final
+packet, unchanged source input and numerical yields/histograms/cuts/normalization/
+iteration-zero weights, and a repeated final publication still fails with the
+original packet bytes intact. Test default-off, ordinary/non-Check 1 modes and
+repeated optimizer-reference calls. Trace adjacent repeated data/SIMC exporters,
+including optimizer candidates, selected reruns, prepasses and later iterations;
+no speculative new guard or scientific change without a concrete collision.
+Run affected existing optimizer/Check 1/owner/provenance/P1/P2/collector regressions,
+compilation/3.9 grammar, manifest and health; report unavailable environment tests.
+No commit, push, farm rerun or packaging failed artifacts as accepted evidence.
+Return the actual complete diff and local test evidence for independent review.

@@ -4299,6 +4299,7 @@ def process_hist_simc(tree_simc, normfac_simc, t_bins, phi_bins, phi_setting, in
     check1_sink = None
     check1_sub_cuts = None
     if (os.environ.get("LT_ANALYSIS_CHECK1_EVIDENCE") == "1" and iteration == 0
+            and inpDict.get("check1_export_context") != "optimizer_simc_reference"
             and not inpDict.get("bg_opt_prepass_mode")
             and str(inpDict.get("analysis_subtraction_context", "")).strip() != BG_OPT_PREPASS_CONTEXT
             and inpDict.get("ParticleType") == "kaon" and str(inpDict.get("Q2")) == "4p4"

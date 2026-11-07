@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 11977,
+      "bytes": 12154,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "e0e3afd163de9a23bbd6053c048e5e66167c9c6e676c7c4ae09f713237e4ff2c"
+      "sha256": "3bdbfcf8d6974aa930afaf7e259b741fb4ac072195e1a141e01c4573209e4926"
     },
     {
       "bytes": 11186,
@@ -446,9 +446,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 54884,
+      "bytes": 62689,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "455e3648def645e3e017894139ac1fb66b7d535c8d24c4b44bc2e10ab944001a"
+      "sha256": "1e50bf8dafeb19c8797e8d50a996ba0ef999f89e0eaf53ad3a5cb0e9cc44770f"
     },
     {
       "bytes": 34568,
@@ -551,9 +551,9 @@
       "sha256": "eb51796a74226ec898da08fa15e08f456b93c494d4cdf7f2e3a73ff34d82c833"
     },
     {
-      "bytes": 31841,
+      "bytes": 35164,
       "path": "docs/memory/phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md",
-      "sha256": "8311474c863c2476e3f65cea65cf9565455c89285c8b0533c6d976c3d869d9e3"
+      "sha256": "846922f521d4e30892d0bee2dc26c44ff5180e1b657cb1f0541340f4a5b46d9a"
     },
     {
       "bytes": 8577,
