@@ -1,7 +1,8 @@
 """Pure deterministic Check 1 evidence tests; no ROOT or farm execution."""
 from copy import deepcopy
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stderr
 import ast
+import io
 import json
 import math
 import os
@@ -349,6 +350,285 @@ class OptimizerReferencePublicationTests(unittest.TestCase):
                 self.assertFalse(allowed(simc_guard,reference))
                 # This context suppresses only the Check 1 SIMC publisher.
                 self.assertTrue(allowed(data_guard,reference))
+
+
+class ScientificFailureDiagnosticsTests(unittest.TestCase):
+    invariant = ('check1:scientific_identity:Left:lowe.cells[0].fit.'
+                 'pion_component_alignment.applied_components.pi_delta.parent_alignment_hash')
+
+    @staticmethod
+    def documents():
+        from data_coordinates import build_kaon_data_coordinate_contract
+        parent = dict(parent_setting_key='Q4p4W2p74:Left:lowe', common_setting_shift_gev=.0012744878163235551,
+            resolved_configuration_hash='c'*64, accepted=True, source='bin_local_scan', analysis_scope='t_bin',
+            persistence_status='persisted', persistence_rejection_reasons=[], components={name:dict(
+                residual_shift_gev=.001, window_expansion_gev=.002, effective_windows=[[1.1,1.16]],
+                immutable_source_hist_identifier={'component':name,'label':'\u03bb'}, immutable_source_hist_checksum='d'*64)
+                for name in ('pi_n','pi_delta','pi_sidis')})
+        parent['parent_alignment_hash']=ev.digest(ev.alignment_parent_preimage(parent))
+        parent['applied_components']=deepcopy(parent['components'])
+        child=deepcopy(parent)
+        child.update(accepted=False,source='current_common_shift_fallback',analysis_scope='t_phi_bin',common_setting_shift_gev=0.)
+        for value in child['applied_components'].values():
+            value.update(parent_alignment_hash=parent['parent_alignment_hash'],source='parent_setting_fallback',
+                component_fallback_reason='parent alignment unavailable, stale, incompatible, or invalid')
+        child = dict(applied_components=child['applied_components'],
+                     **{k:v for k,v in child.items() if k != 'applied_components'})
+        # Keep first traversal at the observed child hash, before embedded parents.
+        document=dict(cells=[dict(t_index=0,phi_index=0,fit=dict(pion_component_alignment=child))],
+                      parents=[dict(baseline_A=dict(pion_component_alignment=parent))],
+                      coordinate=build_kaon_data_coordinate_contract('Left',{'shift':0.},{'shift':0.}))
+        return deepcopy(document),document
+
+    @staticmethod
+    def change_parent(doc, field='immutable_source_hist_checksum', value='e'*64):
+        parent=doc['parents'][0]['baseline_A']['pion_component_alignment']
+        parent['components']['pi_delta'][field]=value
+        parent['parent_alignment_hash']=ev.digest(ev.alignment_parent_preimage(parent))
+        child=doc['cells'][0]['fit']['pion_component_alignment']
+        child['parent_alignment_hash']=parent['parent_alignment_hash']
+        child['applied_components']['pi_delta']['parent_alignment_hash']=parent['parent_alignment_hash']
+
+    def receipt(self, actual, expected):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); private=root/'private';private.mkdir()
+            path=private/'Left_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json'
+            path.write_bytes(ev.canonical_json(actual))
+            status=owner.GateStatus(root,root/'unpublished.zip','a'*40,high=True,check1=True)
+            status.update('verify_artifacts',analysis_completed=True,analysis_returncode=0)
+            stream=io.StringIO()
+            with redirect_stderr(stream), self.assertRaises(ValueError) as caught:
+                owner._verify_check1_packets(ev,private,'a'*40,{p:{} for p in owner.CHECK1_EXECUTABLES},1,
+                    dict.fromkeys(owner.names(check1=True)),{},dict(children={'Left:lowe':expected}),{},
+                    dict.fromkeys(owner.names()|owner.names(True)),{},diagnostic_status=status)
+            # The real owner's JSON receipt survives removal of its private inputs.
+            shutil.rmtree(private)
+            raw=status.path.read_bytes().decode('utf-8')
+            marker='"check1_scientific_failure": '
+            start=raw.index(marker)+len(marker)
+            diagnostic,end=json.JSONDecoder().raw_decode(raw,start)
+            # Measure the actual nested value from the real writer, preserving
+            # CRLF on Windows rather than normalizing via read_text().
+            persisted_bytes=len(raw[start:end].encode('utf-8'))
+            self.assertLessEqual(persisted_bytes,64*1024)
+            self.assertGreaterEqual(owner._check1_diagnostic_persisted_size(diagnostic),persisted_bytes)
+            saved=json.loads(raw)
+            self.assertEqual(saved['first_failed_invariant'],str(caught.exception))
+            self.assertEqual(saved['failure_reason'],str(caught.exception))
+            self.assertEqual(saved['failed_stage'],'verify_artifacts')
+            self.assertFalse(saved['artifact_verification_completed'])
+            self.assertFalse(saved['collection_completed']);self.assertFalse(saved['zip_verification_completed'])
+            self.assertFalse(saved['evidence_admissible']);self.assertFalse(saved['scientifically_accepted'])
+            self.assertFalse((root/'unpublished.zip').exists())
+            return saved['check1_scientific_failure'],str(caught.exception),stream.getvalue()
+
+    def test_review_oversized_fixture_is_bounded_in_real_persisted_receipt(self):
+        actual,expected=self.documents()
+        for document in (actual,expected):
+            alignment=document['parents'][0]['baseline_A']['pion_component_alignment']
+            for component in alignment['components'].values():
+                for field in ('immutable_source_hist_identifier','effective_windows'):
+                    component[field]=[[[0]*10 for _ in range(5)] for _ in range(4)]
+        self.change_parent(actual)
+        original=ev.scientific_failure_diagnostic(actual,expected,'a'*40,ev.REFERENCE_SHA256,'Left:lowe',self.invariant)
+        self.assertLess(len(ev.canonical_json(original)),64*1024)
+        self.assertGreater(owner._check1_diagnostic_persisted_size(original),64*1024)
+        diag,error,stderr=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant);self.assertIn('bounded_fallback',diag)
+        self.assertEqual(diag['first_difference'],original['first_difference'])
+        self.assertEqual(diag['first_parent_operand_difference'],original['first_parent_operand_difference'])
+        for side in ('actual','expected'):
+            self.assertIn(diag['first_difference'][side]['value'],stderr)
+            summary=diag[side]['parent_hash_operands']['components']['pi_delta']['effective_windows']
+            self.assertNotIn('value',summary)
+            self.assertEqual(summary['sha256'],ev.digest([[[0]*10 for _ in range(5)] for _ in range(4)]))
+            self.assertEqual(diag[side]['parent']['selection'],original[side]['parent']['selection'])
+            self.assertEqual(diag[side]['parent_hash_consistency'],original[side]['parent_hash_consistency'])
+
+    def test_oversized_ancillary_context_fallback_keeps_first_hash_and_operand(self):
+        actual,expected=self.documents();self.change_parent(actual)
+        build=ev.scientific_failure_diagnostic
+        original=build(actual,expected,'a'*40,ev.REFERENCE_SHA256,'Left:lowe',self.invariant)
+        def oversized(*args,**kwargs):
+            diagnostic=build(*args,**kwargs)
+            diagnostic['actual']['extra_context']=['ancillary']*20000
+            return diagnostic
+        with patch.object(ev,'scientific_failure_diagnostic',side_effect=oversized):
+            diag,error,_=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant)
+        self.assertEqual(diag['first_difference'],original['first_difference'])
+        self.assertEqual(diag['first_parent_operand_difference'],original['first_parent_operand_difference'])
+        self.assertIn('ancillary context summarized',diag['bounded_fallback'])
+        self.assertIn('sha256',diag['actual']);self.assertNotIn('diagnostic_error',diag)
+
+    def test_short_operand_windows_survive_oversized_ancillary_context(self):
+        actual,expected=self.documents()
+        for doc in (actual,expected):
+            parent=doc['parents'][0]['baseline_A']['pion_component_alignment']
+            for component in parent['components'].values():
+                for field in ('immutable_source_hist_identifier','effective_windows'):
+                    component[field]=[[[0]*10 for _ in range(5)] for _ in range(4)]
+            parent['components']['pi_delta']['effective_windows']=[[1.1,1.16]]
+        self.change_parent(actual,'effective_windows',[[1.1,1.16],[1.16,1.18]])
+        original=ev.scientific_failure_diagnostic(actual,expected,'a'*40,ev.REFERENCE_SHA256,'Left:lowe',self.invariant)
+        self.assertGreater(owner._check1_diagnostic_persisted_size(original),65536)
+        diag,error,_=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant)
+        self.assertEqual(diag['first_difference'],original['first_difference'])
+        self.assertEqual(diag['first_parent_operand_difference'],original['first_parent_operand_difference'])
+        difference=diag['first_parent_operand_difference']
+        self.assertEqual(difference['path'],'parent_hash_operands.components.pi_delta.effective_windows')
+        self.assertEqual(difference['actual']['value'],[[1.1,1.16],[1.16,1.18]])
+        self.assertEqual(difference['expected']['value'],[[1.1,1.16]])
+
+    def test_short_scientific_first_difference_survives_context_only_fallback(self):
+        actual,expected=self.documents()
+        actual['cells'][0]['fit']['pion_component_alignment']['applied_components']['pi_delta']['effective_windows']=[[1.1,1.16],[1.16,1.18]]
+        build=ev.scientific_failure_diagnostic
+        def oversized(*args,**kwargs):
+            diagnostic=build(*args,**kwargs)
+            diagnostic['actual']['extra_context']=['ancillary']*20000
+            return diagnostic
+        with patch.object(ev,'scientific_failure_diagnostic',side_effect=oversized):
+            diag,error,_=self.receipt(actual,expected)
+        self.assertEqual(error,'check1:scientific_length:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.effective_windows')
+        self.assertEqual(diag['first_difference']['actual']['value'],[[1.1,1.16],[1.16,1.18]])
+        self.assertEqual(diag['first_difference']['expected']['value'],[[1.1,1.16]])
+        self.assertIn('ancillary context summarized',diag['bounded_fallback'])
+
+    def test_only_overbudget_first_operand_is_summarized_with_complete_digest(self):
+        actual,expected=self.documents()
+        windows=[1.1,1.16]
+        for _ in range(210):windows=[windows]
+        self.change_parent(actual,'effective_windows',windows)
+        original=ev.scientific_failure_diagnostic(actual,expected,'a'*40,ev.REFERENCE_SHA256,'Left:lowe',self.invariant)
+        operand=original['first_parent_operand_difference']
+        self.assertIn('value',operand['actual'])
+        self.assertGreater(owner._check1_diagnostic_persisted_size({'first_parent_operand_difference':operand}),65536)
+        diag,error,_=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant)
+        self.assertEqual(diag['first_difference'],original['first_difference'])
+        saved=diag['first_parent_operand_difference']
+        self.assertNotIn('value',saved['actual'])
+        self.assertEqual(saved['actual']['sha256'],ev.digest(operand['actual']['value']))
+        self.assertEqual(saved['expected'],operand['expected'])
+        self.assertEqual(saved['expected']['value'],[1.1,1.16])
+
+    def test_owner_hash_failure_receipt_contains_exact_operands_and_selection(self):
+        actual,expected=self.documents();self.change_parent(actual)
+        # Other child scalars stay identical; inherited hash alone still fails.
+        actual['cells'][0]['fit']['pion_component_alignment']['parent_alignment_hash']=expected['cells'][0]['fit']['pion_component_alignment']['parent_alignment_hash']
+        diag,error,stderr=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant)
+        self.assertEqual(diag['first_difference']['path'],self.invariant.split(':',2)[2])
+        self.assertEqual(diag['first_parent_operand_difference']['path'],
+            'parent_hash_operands.components.pi_delta.immutable_source_hist_checksum')
+        for side in ('actual','expected'):
+            full_hash=diag['first_difference'][side]['value']
+            self.assertEqual(len(full_hash),64);self.assertIn(full_hash,stderr)
+            self.assertEqual(diag[side]['parent_hash_consistency']['status'],'matches')
+            self.assertTrue(diag[side]['parent']['selection']['accepted']['value'])
+            self.assertFalse(diag[side]['child']['selection']['accepted']['value'])
+        self.assertEqual(diag['actual']['lineage_consistency'],'inconsistent')
+        self.assertEqual(diag['expected']['lineage_consistency'],'consistent')
+        self.assertEqual(diag['source_sha'],'a'*40);self.assertEqual(diag['reference_sha256'],ev.REFERENCE_SHA256)
+        self.assertLess(len(ev.canonical_json(diag)),64*1024)
+
+    def test_exact_shift_operand_even_below_scientific_tolerance(self):
+        actual,expected=self.documents();self.change_parent(actual,'residual_shift_gev',.001+1e-14)
+        diag,error,_=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant)
+        diff=diag['first_parent_operand_difference']
+        self.assertEqual(diff['path'],'parent_hash_operands.components.pi_delta.residual_shift_gev')
+        self.assertEqual(diff['actual']['value'],.001+1e-14)
+        self.assertEqual(diff['expected']['value'],.001)
+
+    def test_missing_parent_and_corrupt_stored_hash_are_explicit(self):
+        for missing in (False,True):
+            actual,expected=self.documents();self.change_parent(actual)
+            if missing:actual['parents']=[]
+            else:actual['parents'][0]['baseline_A']['pion_component_alignment']['parent_alignment_hash']='0'*64
+            diag,error,_=self.receipt(actual,expected)
+            self.assertEqual(error,self.invariant)
+            self.assertEqual(diag['actual']['parent_hash_consistency']['status'],'not_verified' if missing else 'mismatch')
+            self.assertEqual(diag['actual']['lineage_consistency'],'missing' if missing else 'inconsistent')
+
+    def test_diagnostic_failure_never_replaces_original_exception(self):
+        actual,expected=self.documents();self.change_parent(actual)
+        with patch.object(ev,'scientific_failure_diagnostic',side_effect=RuntimeError('private content must not leak')):
+            diag,error,stderr=self.receipt(actual,expected)
+        self.assertEqual(error,self.invariant);self.assertEqual(diag['diagnostic_error'],'RuntimeError')
+        self.assertNotIn('private content',json.dumps(diag)+stderr)
+        original=ValueError(self.invariant)
+        with patch.object(ev,'compare_science',side_effect=original),redirect_stderr(io.StringIO()):
+            with self.assertRaises(ValueError) as caught:
+                owner._compare_check1_science(ev,{}, {},'Left:lowe',{}, {},'a'*40,ev.REFERENCE_SHA256)
+        self.assertIs(caught.exception,original)
+
+    def test_unrelated_differences_preserve_comparator_semantics(self):
+        cases=[({'x':1.},{'x':2.},'scientific_value:Left:lowe.x'),
+               (None,'hash','scientific_identity:Left:lowe'),
+               ({'x':1},{'y':1},'scientific_keys:Left:lowe'),
+               ([1],[1,2],'scientific_length:Left:lowe'),
+               ('Center','Left','scientific_identity:Left:lowe')]
+        for actual,expected,error in cases:
+            with self.subTest(error=error),redirect_stderr(io.StringIO()):
+                with self.assertRaises(ValueError) as caught:
+                    owner._compare_check1_science(ev,actual,expected,'Left:lowe',{}, {},'a'*40,ev.REFERENCE_SHA256)
+                self.assertEqual(str(caught.exception),'check1:'+error)
+                diag=ev.scientific_failure_diagnostic({}, {},'a'*40,ev.REFERENCE_SHA256,'Left:lowe',str(caught.exception),actual,expected)
+                self.assertEqual(diag['first_difference']['category'],error.split(':')[0])
+
+    def test_success_is_silent_and_leaves_owner_status_bytes_unchanged(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);status=owner.GateStatus(root,root/'none.zip','a'*40,high=True,check1=True)
+            before=status.path.read_bytes();stream=io.StringIO()
+            with patch.object(ev,'scientific_failure_diagnostic') as diagnostic,redirect_stderr(stream):
+                owner._compare_check1_science(ev,{'x':1.+1e-10},{'x':1.},'Left:lowe',{}, {},'a'*40,ev.REFERENCE_SHA256,status)
+            diagnostic.assert_not_called();self.assertEqual(stream.getvalue(),'');self.assertEqual(status.path.read_bytes(),before)
+
+    def test_status_write_and_stderr_failure_do_not_mask_scientific_failure(self):
+        actual,expected=self.documents();self.change_parent(actual)
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);status=owner.GateStatus(root,root/'none.zip','a'*40,high=True,check1=True)
+            with patch.object(status,'update',side_effect=OSError('closed status')),patch.object(owner.sys,'stderr') as stream:
+                stream.write.side_effect=OSError('closed stderr')
+                with self.assertRaises(ValueError) as caught:
+                    owner._compare_check1_science(ev,ev.scientific_projection(actual),ev.scientific_projection(expected),
+                        'Left:lowe',actual,expected,'a'*40,ev.REFERENCE_SHA256,status)
+            self.assertEqual(str(caught.exception),self.invariant)
+            self.assertEqual(status.record['first_failed_invariant'],self.invariant)
+            self.assertEqual(status.record['diagnostic_write_failure'],'OSError')
+
+    def test_large_identifiers_keep_complete_digests_and_exact_first_scalar(self):
+        actual,expected=self.documents()
+        for doc in (actual,expected):
+            p=doc['parents'][0]['baseline_A']['pion_component_alignment']
+            p['components']['pi_delta']['immutable_source_hist_identifier']={'bins':list(range(10000))}
+        actual['parents'][0]['baseline_A']['pion_component_alignment']['components']['pi_delta']['immutable_source_hist_identifier']['bins'][37]=-37
+        actual['cells'][0]['fit']['pion_component_alignment']['applied_components']['pi_delta']['parent_alignment_hash']='e'*64
+        diag,_,_=self.receipt(actual,expected)
+        diff=diag['first_parent_operand_difference']
+        self.assertEqual(diff['path'],'parent_hash_operands.components.pi_delta.immutable_source_hist_identifier.bins[37]')
+        self.assertEqual(diff['actual']['value'],-37)
+        summary=diag['actual']['parent_hash_operands']['components']['pi_delta']['immutable_source_hist_identifier']
+        self.assertNotIn('value',summary)
+        self.assertLess(len(ev.canonical_json(diag)),64*1024)
+
+    def test_preimage_matches_unchanged_producer_and_large_values_are_bounded(self):
+        # Execute the exact frozen producer function without importing ROOT.
+        tree=ast.parse((ROOT/'src/cuts/pion_component_fits.py').read_bytes())
+        function=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='_alignment_parent_hash')
+        scope=dict(_alignment_hash=ev.digest,COMPONENT_NAMES=('pi_n','pi_delta','pi_sidis'))
+        exec(compile(ast.Module(body=[function],type_ignores=[]),'<frozen-parent-hash>','exec'),scope)
+        actual,_=self.documents();alignment=actual['parents'][0]['baseline_A']['pion_component_alignment']
+        self.assertEqual(ev.digest(ev.alignment_parent_preimage(alignment)),scope['_alignment_parent_hash'](
+            alignment['parent_setting_key'],alignment['common_setting_shift_gev'],alignment['components'],alignment['resolved_configuration_hash']))
+        alignment['components']['pi_delta']['immutable_source_hist_identifier']=['large']*10000
+        summary=ev.diagnostic_value(alignment['components']['pi_delta']['immutable_source_hist_identifier'])
+        self.assertNotIn('value',summary);self.assertEqual(summary['sha256'],ev.digest(['large']*10000))
+        self.assertIsNone(ev.first_exact_difference({'x':1.},{'x':1.}))
+        self.assertIsNotNone(ev.first_exact_difference({'x':-0.},{'x':0.}))
 
 
 class PacketTests(unittest.TestCase):
@@ -970,6 +1250,36 @@ class FiveOwnerTests(unittest.TestCase):
 
 
 class ExternalReferenceTests(unittest.TestCase):
+    def test_failure_diagnostic_on_immutable_reference_structure_when_supplied(self):
+        path=os.environ.get('KAONLT_CHECK1_REFERENCE_TEST_PATH')
+        if not path:self.skipTest('supply read-only pinned ZIP through KAONLT_CHECK1_REFERENCE_TEST_PATH')
+        reference=ev.load_reference(path)
+        expected=reference['children']['Left:lowe'];actual=deepcopy(expected)
+        parent=actual['parents'][0]['baseline_A']['pion_component_alignment']
+        parent['components']['pi_delta']['immutable_source_hist_checksum']='e'*64
+        parent['parent_alignment_hash']=ev.digest(ev.alignment_parent_preimage(parent))
+        actual['cells'][0]['fit']['pion_component_alignment']['applied_components']['pi_delta']['parent_alignment_hash']=parent['parent_alignment_hash']
+        diag=ev.scientific_failure_diagnostic(actual,expected,'a'*40,ev.REFERENCE_SHA256,'Left:lowe',ScientificFailureDiagnosticsTests.invariant)
+        self.assertEqual(diag['first_difference']['path'],ScientificFailureDiagnosticsTests.invariant.split(':',2)[2])
+        # Stored reference identity and a recomputed current-producer preimage
+        # are distinct evidence. Verify reproduction, never force equality.
+        function=next(n for n in ast.parse((ROOT/'src/cuts/pion_component_fits.py').read_bytes()).body
+            if isinstance(n,ast.FunctionDef) and n.name=='_alignment_parent_hash')
+        scope=dict(_alignment_hash=ev.digest,COMPONENT_NAMES=('pi_n','pi_delta','pi_sidis'))
+        exec(compile(ast.Module(body=[function],type_ignores=[]),'<frozen-parent-hash>','exec'),scope)
+        saved=expected['parents'][0]['baseline_A']['pion_component_alignment']
+        recomputed=scope['_alignment_parent_hash'](saved['parent_setting_key'],saved['common_setting_shift_gev'],
+            saved['components'],saved['resolved_configuration_hash'])
+        self.assertEqual(diag['expected']['parent_hash_consistency']['recomputed_hash'],recomputed)
+        self.assertEqual(diag['expected']['parent_hash_consistency']['status'],
+            'matches' if recomputed==saved['parent_alignment_hash'] else 'mismatch')
+        self.assertEqual(diag['expected']['child']['parent_alignment_hash']['value'],
+            'c03775871b5033a2d9682e174293ecefe599ebefb1a2e9a10cbc102dd223c82a')
+        self.assertTrue(diag['expected']['parent']['selection']['accepted']['value'])
+        self.assertFalse(diag['expected']['child']['selection']['accepted']['value'])
+        self.assertEqual(diag['first_parent_operand_difference']['path'],
+            'parent_hash_operands.components.pi_delta.immutable_source_hist_checksum')
+
     def test_real_pinned_reference_when_supplied(self):
         path=os.environ.get('KAONLT_CHECK1_REFERENCE_TEST_PATH')
         if not path:self.skipTest('supply read-only pinned ZIP through KAONLT_CHECK1_REFERENCE_TEST_PATH')

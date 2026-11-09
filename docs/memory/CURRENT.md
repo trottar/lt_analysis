@@ -129,30 +129,44 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — user publication of the SOURCE REVIEWED nine-path optimizer-reference
-context repair, then independent pushed-state synchronization and return to the
-SAME reviewed preflight-only gate. Local source base test:
-2ebcf8e45c4a3aa40737e37fb0700e976d6c8698. The supplied failed gate-status
-fields identify that source for attempt
-`kaonlt-e8-4-canonical-five-analysis-a95bbrb9`: failed stage `completion_markers`,
-analysis return code `1`, owner invariant `analysis_failed`, underlying exception
-`check1:destination_exists`. Scientific evidence is inadmissible and not accepted.
-`SOURCE REVIEWED`: both Step 4 optimizer call sites use the copied candidate
-input carrying the explicit Check 1-only non-publishing context. The original
-Step 6 input remains eligible; it publishes once and a repeated final call still
-fails without changing saved packet hashes. Numerical loops, histograms, cuts,
-normalization, weights and publication/rollback remain unchanged. The new caller
-is explicit in the owner/helper executable inventories and exact source allowlist.
-See the [independent review](investigations/full-t-acceptance-edge-check1-2026-11-05.md#independent-optimizer-context-review-source-acceptance).
-Reviewer new five and existing five preparent cases passed (10 total). Supplied
-Windows144/Linux112 full logs, ZIP/current snapshots and declared protected hashes
-were verified; full suites were not repeated by the reviewer. Five changed Python
-files compile/3.9 grammar, manifest and ordinary health pass. No further source
-repair or new contract is needed. Actual Lustre/farm readiness, Linux NumPy parity
-and real PDF/capabilities remain NOT VERIFIED. No farm command or acquisition
-authority follows; successful preflight evidence requires review before separate
-user acquisition approval. Prior P1/P2, both Center conclusions, Outcome B,
-Method A/B and accepted closures stand. Stop before Check 2.
+NEXT — independent actual-diff review of the November 8 diagnostic-only
+scientific-identity failure receipt; after source acceptance, user publication
+and exact pushed-state synchronization, consider only a separately reviewed,
+evidence-preserving narrow diagnostic execution. No second full acquisition
+is authorized. Local implementation base: test
+`912ca31d0afdd7b9757395d205d7c54bc49018e8`.
+
+The supplied November 7 failed-attempt fields in the
+[contract](phases/check1-scientific-identity-failure-diagnostics-2026-11-08-task-contract.md)
+identify `KaonLT_Check1_Acquisition_Q4p4W2p74_20261107T163552Z-3952780`
+at that source with frozen reference SHA-256
+`02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a`.
+Analysis return code was 0 and analysis completed, but `verify_artifacts` failed
+at `check1:scientific_identity:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.parent_alignment_hash`.
+Artifact verification, collection and ZIP verification did not complete;
+evidence is inadmissible and scientifically unaccepted. These are supplied
+failed-evidence facts, not an independent local parsing of the farm outputs.
+The destination collision did not recur; the new hash operands/cause remain
+NOT VERIFIED. Scientific acquisition stays BLOCKED at the original invariant.
+
+The diagnostic candidate retains the comparator, projection, coordinates,
+tolerances and hash producer unchanged. It records bounded actual/reference
+values, alignment selection/lineage and exact parent-hash operands in the
+existing owner status before cleanup, then re-raises the original exception.
+The November 8 review found that compact JSON did not bound the indented
+receipt. The local repair now bounds the real nested UTF-8/text-newline
+representation; its oversized fixture falls from 90,582 to 21,621 persisted
+diagnostic bytes while retaining first-difference hashes and operand evidence.
+The v2 review additionally found lost short window operands during compaction.
+The local continuation compacts ancillary context first and retains both exact
+first-difference records whenever they fit; the saved window regression is
+21,690 bytes with both short window lists intact. Summarization of a first
+operand is deferred until its own remaining budget is exceeded. Replacement
+actual-diff review remains required; no source acceptance follows.
+See the [implementation record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-8-scientific-identity-failure-diagnostics).
+No farm/ROOT/main/PDF or scientific validation is claimed. Prior P1/P2,
+both Center conclusions, Outcome B, Method A/B and accepted closures stand.
+Stop before Check 2.
 
 ## Success Criteria
 

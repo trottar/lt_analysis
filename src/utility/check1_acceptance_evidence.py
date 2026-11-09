@@ -242,6 +242,142 @@ def compare_science(actual,expected,path="reference"):
         require(type(actual) is type(expected) and actual==expected,"scientific_identity:"+path)
 
 
+def diagnostic_value(value):
+    """Bounded typed value; digest always covers the complete JSON value."""
+    raw = canonical_json(value)
+    result = dict(type=type(value).__name__, sha256=hashlib.sha256(raw).hexdigest())
+    if len(raw) <= 512:
+        result["value"] = value
+    else:
+        result.update(bytes=len(raw), summary="value omitted; complete canonical JSON digest retained")
+        if isinstance(value, (dict, list, str)):
+            result["length"] = len(value)
+    return result
+
+
+def first_science_difference(actual, expected, path):
+    """Explain the unchanged comparator's first failure, in its own ordering."""
+    try:
+        compare_science(actual, expected, path)
+    except ValueError as exc:
+        if isinstance(expected, dict) and isinstance(actual, dict) and set(actual) == set(expected):
+            for key in expected:
+                difference = first_science_difference(actual[key], expected[key], path + "." + key)
+                if difference is not None:
+                    return difference
+        elif isinstance(expected, list) and isinstance(actual, list) and len(actual) == len(expected):
+            for index, (a, b) in enumerate(zip(actual, expected)):
+                difference = first_science_difference(a, b, path + "[" + str(index) + "]")
+                if difference is not None:
+                    return difference
+        return dict(path=path, category=str(exc).split(":", 2)[1],
+                    actual=diagnostic_value(actual), expected=diagnostic_value(expected))
+    return None
+
+
+def first_exact_difference(actual, expected, path="parent_hash_operands"):
+    """Hash preimages require exact JSON identity, including float spelling."""
+    if canonical_json(actual) == canonical_json(expected):
+        return None
+    if isinstance(actual, dict) and isinstance(expected, dict) and set(actual) == set(expected):
+        for key in sorted(expected):
+            difference = first_exact_difference(actual[key], expected[key], path + "." + key)
+            if difference is not None:
+                return difference
+    elif isinstance(actual, list) and isinstance(expected, list) and len(actual) == len(expected):
+        for index, (a, b) in enumerate(zip(actual, expected)):
+            difference = first_exact_difference(a, b, path + "[" + str(index) + "]")
+            if difference is not None:
+                return difference
+    return dict(path=path, actual=diagnostic_value(actual), expected=diagnostic_value(expected))
+
+
+def alignment_parent_preimage(alignment):
+    """Mirror frozen _alignment_parent_hash for JSON-native saved records only.
+
+    The producer's JSON-ready conversion is the identity on saved JSON values.
+    Keep the float conversion and missing-component/operand semantics identical.
+    This is diagnostic information, never an input to acceptance or output repair.
+    """
+    return dict(setting_key=alignment["parent_setting_key"],
+                common_shift_gev=float(alignment["common_setting_shift_gev"]),
+                resolved_configuration_hash=alignment["resolved_configuration_hash"],
+                components={name: {key: ((alignment.get("components") or {}).get(name) or {}).get(key)
+                    for key in ("residual_shift_gev", "window_expansion_gev", "effective_windows",
+                                "immutable_source_hist_identifier", "immutable_source_hist_checksum")}
+                    for name in ("pi_n", "pi_delta", "pi_sidis")})
+
+
+def alignment_identity_record(alignment, component):
+    if not isinstance(alignment, dict):
+        return dict(status="missing")
+    selection = {key: diagnostic_value(alignment.get(key)) for key in (
+        "accepted", "source", "analysis_scope", "persistence_status", "persistence_rejection_reasons")}
+    applied = (alignment.get("applied_components") or {}).get(component) or {}
+    selection["applied_component"] = {key: diagnostic_value(applied.get(key)) for key in (
+        "source", "component_applied_source", "component_fallback_used", "component_fallback_reason",
+        "parent_alignment_hash")}
+    return dict(status="available", parent_alignment_hash=diagnostic_value(alignment.get("parent_alignment_hash")),
+                selection=selection)
+
+
+_DIAGNOSTIC_UNSET = object()
+
+
+def scientific_failure_diagnostic(actual, expected, source_sha, reference_sha, key, failure,
+                                  actual_science=_DIAGNOSTIC_UNSET, expected_science=_DIAGNOSTIC_UNSET):
+    """Compact first-failure receipt using only admitted in-memory child records."""
+    a = scientific_projection(actual) if actual_science is _DIAGNOSTIC_UNSET else actual_science
+    b = scientific_projection(expected) if expected_science is _DIAGNOSTIC_UNSET else expected_science
+    difference = first_science_difference(a, b, key)
+    result = dict(schema_version="check1_scientific_failure/v1", source_sha=source_sha,
+                  reference_sha256=reference_sha, setting=key.split(":")[0], epsilon=key.split(":")[1],
+                  invariant=failure, first_difference=difference, diagnostic_only=True)
+    match = re.search(r"\.cells\[(\d+)\]", difference["path"]) if difference else None
+    if match is None:
+        result["alignment_context"] = "unavailable: first difference does not identify a child cell"
+        return result
+    index = int(match.group(1))
+    component_match = re.search(r"\.(?:applied_components|components)\.(pi_n|pi_delta|pi_sidis)(?:\.|$)", difference["path"])
+    component = component_match.group(1) if component_match else None
+    result.update(cell_index=index, component=component)
+    preimages = {}
+    for side, doc in (("actual", actual), ("expected", expected)):
+        cells = doc.get("cells") or []
+        cell = cells[index] if index < len(cells) else {}
+        ti = cell.get("t_index")
+        parents = doc.get("parents") or []
+        parent = parents[ti] if type(ti) is int and 0 <= ti < len(parents) else {}
+        pa = (parent.get("baseline_A") or {}).get("pion_component_alignment")
+        ca = (cell.get("fit") or {}).get("pion_component_alignment")
+        info = dict(t_index=ti, phi_index=cell.get("phi_index"),
+                    parent_record="children[" + key + "].parents[" + str(ti) + "].baseline_A.pion_component_alignment",
+                    parent=alignment_identity_record(pa, component), child=alignment_identity_record(ca, component))
+        hashes = [pa.get("parent_alignment_hash") if isinstance(pa, dict) else None,
+                  ca.get("parent_alignment_hash") if isinstance(ca, dict) else None,
+                  (((ca or {}).get("applied_components") or {}).get(component) or {}).get("parent_alignment_hash")]
+        info["lineage_consistency"] = ("missing" if any(h is None for h in hashes) else
+                                        "consistent" if len(set(hashes)) == 1 else "inconsistent")
+        info["parent_hash_consistency"] = dict(status="not_verified", reason="parent alignment unavailable")
+        if isinstance(pa, dict):
+            try:
+                preimages[side] = alignment_parent_preimage(pa)
+                computed = digest(preimages[side])
+                info["parent_hash_consistency"] = dict(status="matches" if computed == hashes[0] else "mismatch",
+                                                        recomputed_hash=computed)
+                info["parent_hash_operands"] = {k: diagnostic_value(v) for k, v in preimages[side].items() if k != "components"}
+                info["parent_hash_operands"]["components"] = {name: {k: diagnostic_value(v) for k, v in values.items()}
+                    for name, values in preimages[side]["components"].items()}
+            except (KeyError, TypeError, ValueError):
+                info["parent_hash_consistency"] = dict(status="not_verified", reason="incomplete or invalid parent preimage")
+        result[side] = info
+    result["first_parent_operand_difference"] = (first_exact_difference(preimages["actual"], preimages["expected"])
+        if len(preimages) == 2 else dict(status="not_verified", reason="both parent preimages required"))
+    # The owner bounds this value using its actual indented persistence format.
+    # Compact JSON size cannot bound nested indentation or text-mode newlines.
+    return result
+
+
 def epsilon(inp):
     value = str(inp.get("EPSSET", "")).lower()
     require(value in ("low", "lowe", "high", "highe"), "epsilon")

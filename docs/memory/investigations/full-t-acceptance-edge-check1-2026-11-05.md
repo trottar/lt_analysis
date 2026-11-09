@@ -932,3 +932,166 @@ normalization study is needed. Acquisition still requires reviewed successful
 preflight and separate user authority. Prior P1/P2, both Center conclusions,
 Outcome B, Method A/B and accepted closures stand. External package:
 KaonLT_Check1_Optimizer_Context_Acceptance_20261106.zip.
+
+
+## November 8 scientific-identity failure diagnostics
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; independent ChatGPT actual-diff
+review remains required. Local test base is
+`912ca31d0afdd7b9757395d205d7c54bc49018e8`, matching the November 8 diagnostic
+contract. Pre-existing memory/offline-testing/review work is preserved.
+
+The contract supplies the November 7 attempt
+`KaonLT_Check1_Acquisition_Q4p4W2p74_20261107T163552Z-3952780`, source as above,
+and frozen reference SHA-256
+`02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a`.
+Reported analysis return code 0 and completed analysis are distinct from the
+failed owner: stage `verify_artifacts`, first invariant
+`check1:scientific_identity:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.parent_alignment_hash`.
+Artifact verification, collection and ZIP verification did not complete; both
+scientific acceptance fields remain false. The destination collision did not
+recur. These are contract-supplied failed-evidence facts; this implementation
+neither independently parsed the November 7 farm artifacts nor recovered their
+missing actual hash. Failed artifacts remain diagnosis-only. Cause NOT VERIFIED.
+
+SOURCE VERIFIED locally: the unchanged comparator's failure is intercepted at
+the existing packet gate; bounded diagnostic-only values and first differences
+are written through the existing owner GateStatus before private cleanup. The
+same exception object is re-raised. The receipt retains source/reference roles,
+cell/t/phi/component, complete differing hash strings, parent and child selection,
+parent/child/inherited-hash consistency, exact parent-preimage operand summaries
+and complete canonical digests. Parent hash reproduction mirrors the unchanged
+producer for saved JSON-native values. Exact operand comparison has no tolerance;
+no recomputed hash is substituted into acceptance or scientific output. Missing
+parents and inconsistent links are explicit. Diagnostic construction/write/stderr
+failures cannot replace the original scientific error. Success remains silent.
+
+Controlled regressions serialize a child through the real JSON/coordinate and
+packet gate, write the actual owner status, remove private inputs and read the
+surviving failed receipt. They cover checksum and sub-tolerance shift changes,
+missing/corrupt parents, inconsistent lineage, large identifiers, unrelated
+float/key/list/setting/type failures, unchanged successful status, exception
+identity, and diagnostic/status/stderr failures. Frozen comparator, projection
+and coordinate-validator functions are unchanged; the alignment producer and
+all protected scientific source bytes match startup. No fitting, configuration,
+threshold, normalization, template, weight or publication/collector change.
+
+Local checks: supported Windows Python 3.12.10 / NumPy 2.3.0 suites ran 148 tests,
+no failures, five capability skips (real Poppler PDF-inclusive owner, sidecar
+symlink, publication symlink, two older parent publication symlink subcases).
+Linux WSL Python 3.12.3 / GCC 13.3.0 full standard-library owner suite ran 112
+tests, no failures, one real-pdfinfo skip. An initial broad Windows invocation
+included POSIX-only fixtures and an incorrectly named test module: 212 tests,
+112 environment/loader errors, four skips; its log is retained and not called a
+pass. Supported Windows suites and Linux owner coverage were then run separately.
+No dependencies were installed or fixtures weakened. Linux NumPy numerical parity,
+farm Python 3.9/ROOT/main, real PDF/page rendering and actual farm readiness remain
+NOT VERIFIED. Three changed Python files compile and parse with Python 3.9 grammar;
+that is not execution on Python 3.9. Existing memory soft-size warnings remain
+nonblocking and scheduled for the next checkpoint/milestone.
+
+Final focused rerun: 11 tests passed without skips, including all nine new
+diagnostic cases and both immutable-reference tests. These additionally exercise
+the real immutable reference's
+Left/lowe cell-0 fallback/accepted-parent distinction and full inherited hash.
+The first new reference test incorrectly assumed stored/recomputed parent hash
+equality; it failed and was corrected to assert parity with the unchanged
+producer while preserving both identities and the reported mismatch. The real
+frozen parent preimage recomputes differently from its stored hash under that
+producer definition; this is diagnostic-only metadata consistency, not a cause
+for the November 7 comparison or authority to change the reference. The earlier
+failed test log is retained. No comparator assertion or acceptance gate changed.
+
+NEXT: independent actual-diff review, then conditional user publication and exact
+pushed-state synchronization. Only a separately reviewed evidence-preserving
+narrow diagnostic execution may then be considered. No second full acquisition,
+Check 2, scientific interpretation or farm command is authorized. The original
+scientific-identity invariant still blocks scientific acquisition; prior P1/P2,
+both Center conclusions, Outcome B, Method A/B and accepted closed scopes stand.
+
+
+### November 8 independent-review continuation: persisted bound and exact patch
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; independent actual-diff review
+is still required. The supplied review found one source blocker: the compact
+64 KiB checks did not bound GateStatus._persist's indented UTF-8 text output.
+Its exact fixture was reproduced locally: 19,244 compact bytes, 90,582 bytes in
+the actual saved diagnostic. Earlier compact-size claims did not prove this gate.
+
+The local owner now measures a same-depth one-key envelope using the writer's
+indent=2, sort_keys/default ASCII escaping, UTF-8 and platform text newlines.
+Envelope overhead is included conservatively. Oversized diagnostics summarize
+inline containers with their existing complete canonical SHA-256 digests while
+retaining full first-difference hashes, exact scalar operand differences,
+parent/child selection and consistency. A further ancillary-context fallback
+retains both first differences and complete context digests. The supplied
+oversized fixture now persists 21,621 diagnostic bytes. The actual writer/readback
+regression measures raw saved bytes without newline normalization, and every
+controlled failed receipt checks the same bound and failed/no-publication state.
+The original exception/invariant, science comparator, projection, coordinate
+validator, parent-hash producer, reference and publication path remain unchanged.
+
+The review also found that the original patch's contract addition had been
+read using Windows-1252 instead of UTF-8. Replacement packaging uses Git's raw
+subprocess bytes throughout, including the complete new-contract addition;
+no shell redirection or default text decoding/re-encoding is used. Old review
+bundles and the original contract bytes are preserved. The exact replacement
+patch must pass forward/reverse checks and content reconstruction before delivery.
+
+Continuation checks: Windows Python 3.12.10 / NumPy 2.3.0 affected suites ran
+151 tests with no failures and five existing capability skips (real Poppler
+owner page gate; sidecar/publication symlinks and two parent symlink subcases).
+All 11 focused diagnostic cases passed. Linux WSL Python 3.12.3 standard-library
+owner suite ran 112 tests with no failures and one real-pdfinfo skip. Real farm,
+ROOT/main/PDF, unavailable Windows capabilities and Linux NumPy numerical parity
+remain NOT VERIFIED. No dependency installation or scientific change occurred.
+The initial new size test expected an empty rejection-reason list to remain
+inline; compaction was narrowed to preserve empty containers, then all focused
+and affected regressions passed. Existing memory soft-size warnings remain
+nonblocking, scheduled for the next checkpoint/milestone.
+
+NEXT remains independent review of the repaired full candidate and exact patch;
+conditional later user publication and pushed-state synchronization authorize
+no farm command or acquisition by themselves. The original scientific mismatch
+and its cause remain unresolved; no science, reference repair or second full
+acquisition follows. Method A/B, Outcome B and accepted closed scopes are preserved.
+
+
+### November 8 v2-review continuation: preserve short first-difference windows
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`; independent actual-diff review
+remains required. V2 review found that ancillary compaction also removed short
+exact values in first_parent_operand_difference even though the receipt fit.
+The supplied pi_delta.effective_windows fixture was reproduced: the v2 writer
+saved 21,586 diagnostic bytes containing only the differing windows' digests.
+
+SOURCE VERIFIED locally: both first_difference and first_parent_operand_difference
+now remain exact while ancillary values are compacted, then ancillary context
+is summarized if necessary. Only if the remaining receipt still exceeds the
+actual persisted budget are inline first operands summarized, largest first,
+with a size recheck after each removal. Complete canonical digests are retained;
+other exact short values and full hashes survive. No scientific comparator,
+projection, coordinate, producer-hash, reference or acceptance logic changed.
+
+The real JSON/packet gate and unchanged GateStatus writer/readback now retain
+expected [[1.1,1.16]] and actual [[1.1,1.16],[1.16,1.18]] at
+parent_hash_operands.components.pi_delta.effective_windows. Saved diagnostic:
+21,690 bytes, with the original inherited-hash failure invariant, failed stage,
+failure reason, false admissibility/acceptance and no collection/ZIP/publication.
+Additional saved-receipt tests cover short scientific first-difference lists
+through ancillary-context fallback, and an operand whose own deeply nested
+representation exceeds the budget: only that value is summarized, with its
+complete canonical digest and the other exact short operand preserved.
+All 14 focused diagnostic regressions passed locally. Affected Windows Python
+3.12.10 / NumPy 2.3.0 suites ran 154 tests with no failures and five existing
+capability skips (real-Poppler owner page gate; sidecar/publication symlinks and
+two parent publication symlink subcases). Linux WSL Python 3.12.3 / GCC 13.3.0
+owner suite ran 112 tests with no failures and one real-pdfinfo skip. Farm
+ROOT/main/PDF, unavailable Windows capabilities and Linux NumPy numerical parity
+remain NOT VERIFIED. These are deterministic fixture checks, not farm or
+scientific validation. Prior bundles and the
+unchanged contract are preserved. NEXT remains independent review of the complete
+candidate/exact patch; no publication, farm command or acquisition authority.
+The original scientific mismatch/cause, Method A/B, Outcome B and accepted
+closed scopes remain unchanged. Existing nonblocking memory size warnings
+remain scheduled for the next checkpoint/milestone.

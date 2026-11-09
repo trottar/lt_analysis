@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 12154,
+      "bytes": 12933,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "3bdbfcf8d6974aa930afaf7e259b741fb4ac072195e1a141e01c4573209e4926"
+      "sha256": "cfa5ffedcd9dde5c2a1529bde1686ac5acf53dd784c35a7c97f861740eddef0d"
     },
     {
       "bytes": 11186,
@@ -446,9 +446,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 62689,
+      "bytes": 73594,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "1e50bf8dafeb19c8797e8d50a996ba0ef999f89e0eaf53ad3a5cb0e9cc44770f"
+      "sha256": "462b37e66f96775d478b412b111d9258bc38b74aecb96068c6024caac76c55a4"
     },
     {
       "bytes": 34568,
@@ -554,6 +554,11 @@
       "bytes": 35164,
       "path": "docs/memory/phases/check1-continuous-t-mm-acquisition-2026-11-05-task-contract.md",
       "sha256": "846922f521d4e30892d0bee2dc26c44ff5180e1b657cb1f0541340f4a5b46d9a"
+    },
+    {
+      "bytes": 13405,
+      "path": "docs/memory/phases/check1-scientific-identity-failure-diagnostics-2026-11-08-task-contract.md",
+      "sha256": "d2225012c5aabba8fbe5423d7e7b60e4a27de0b9c8f710a159c8301e967020dc"
     },
     {
       "bytes": 8577,

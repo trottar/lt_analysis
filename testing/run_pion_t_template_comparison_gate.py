@@ -1517,18 +1517,129 @@ def check1_runtime_models(module, private, runtime, costs=None):
     return result
 
 
-def verify_check1_artifacts(module, repo, outdir, source_commit, identities, started_ns, before, runtime, reference, authority):
+def verify_check1_artifacts(module, repo, outdir, source_commit, identities, started_ns, before, runtime, reference, authority, diagnostic_status=None):
     legacy={p:identities[p] for p in child_source_inventory(repo)}
     records={};outcomes={};common_axes=None
     for high in (False,True):
         rec,diag=verify_artifacts(outdir,source_commit,legacy,started_ns,before,runtime,high=high,all_five=True)
         records.update(rec);outcomes["highe" if high else "lowe"]=diag
     return _verify_check1_packets(module,outdir,source_commit,identities,started_ns,before,
-                                  runtime,reference,authority,records,outcomes)
+                                  runtime,reference,authority,records,outcomes,diagnostic_status)
+
+
+def _check1_diagnostic_persisted_size(diagnostic):
+    """Conservative bytes in GateStatus._persist, including the enclosing key.
+
+    The one-key envelope gives the value its real top-level nesting/indentation.
+    Include UTF-8 encoding, default ASCII escaping and text-mode newlines, plus
+    envelope overhead; measuring compact JSON or an unnested value is unsafe.
+    """
+    text = json.dumps({"check1_scientific_failure": diagnostic}, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    return len(text.replace("\n", os.linesep).encode("utf-8"))
+
+
+def _bound_check1_diagnostic(diagnostic):
+    if _check1_diagnostic_persisted_size(diagnostic) <= 64 * 1024:
+        return diagnostic
+
+    def summarize(value):
+        raw = json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+        return dict(type=type(value).__name__, bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
+                    summary="omitted to bound persisted diagnostic")
+
+    def compact(value):
+        if isinstance(value, dict):
+            # Existing typed values already digest the complete canonical value.
+            # Retain hashes and short scalar operands in full, but stop nested
+            # arrays/windows from expanding under the real owner's indentation.
+            if {"type", "sha256", "value"} <= set(value) and (
+                    isinstance(value["value"], (dict, list)) and bool(value["value"]) or
+                    isinstance(value["value"], str) and len(value["value"]) > 128):
+                return dict({k: compact(v) for k, v in value.items() if k != "value"},
+                            summary="inline value omitted to bound persisted diagnostic")
+            return {k: compact(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [compact(v) for v in value]
+        return summarize(value) if isinstance(value, str) and len(value) > 512 else value
+
+    differences = ("first_difference", "first_parent_operand_difference")
+    # These explain the failure. Compact ancillary context before considering
+    # any loss of exact scalar/window values in either first difference.
+    bounded = {k: v if k in differences else compact(v) for k, v in diagnostic.items()}
+    bounded["bounded_fallback"] = "typed container values summarized; complete canonical digests retained"
+    if _check1_diagnostic_persisted_size(bounded) > 64 * 1024:
+        # Retain the first scientific and exact-operand differences even when
+        # ancillary context is too large. Never replace them with an error-only
+        # receipt merely because the explanatory context exceeded its budget.
+        core = {k: bounded[k] for k in ("schema_version", "source_sha", "reference_sha256", "setting", "epsilon",
+            "invariant", "first_difference", "cell_index", "component", "first_parent_operand_difference",
+            "diagnostic_only") if k in bounded}
+        for side in ("actual", "expected"):
+            if side in bounded:
+                core[side] = summarize(diagnostic[side])
+        core["bounded_fallback"] = "ancillary context summarized; first differences retained"
+        bounded = core
+    if _check1_diagnostic_persisted_size(bounded) > 64 * 1024:
+        # Only now can the first differences themselves exceed the available
+        # budget. Remove the largest inline operand first, rechecking after
+        # each removal so other exact short values and full hashes survive.
+        bounded = deepcopy(bounded)
+        candidates = []
+        for field in differences:
+            difference = bounded.get(field)
+            if isinstance(difference, dict):
+                for side in ("actual", "expected"):
+                    value = difference.get(side)
+                    if isinstance(value, dict) and {"type", "sha256", "value"} <= set(value):
+                        candidates.append((_check1_diagnostic_persisted_size(value), field, side))
+        for _, field, side in sorted(candidates, key=lambda item: (-item[0], item[1], item[2])):
+            value = bounded[field][side]
+            value.pop("value")
+            value["summary"] = "inline first-difference value cannot fit persisted budget; complete canonical digest retained"
+            bounded["bounded_fallback"] = "ancillary context summarized; oversized first-difference values summarized as needed"
+            if _check1_diagnostic_persisted_size(bounded) <= 64 * 1024:
+                break
+    require(_check1_diagnostic_persisted_size(bounded) <= 64 * 1024, "check1_diagnostic_persisted_size_limit")
+    return bounded
+
+
+def _compare_check1_science(module, actual, expected, key, child, reference_child,
+                            source_commit, reference_sha, diagnostic_status=None):
+    """Persist explanatory context before the private worktree can be removed."""
+    try:
+        module.compare_science(actual, expected, key)
+    except ValueError as original:
+        if not str(original).startswith(("check1:scientific_identity:", "check1:scientific_keys:",
+                                         "check1:scientific_length:", "check1:scientific_value:")):
+            raise
+        try:
+            diagnostic = _bound_check1_diagnostic(module.scientific_failure_diagnostic(child, reference_child, source_commit,
+                reference_sha, key, str(original), actual, expected))
+        except Exception as secondary:
+            # Do not put arbitrary exception content (which can contain paths or
+            # private payloads) in the receipt, or replace the scientific failure.
+            diagnostic = dict(schema_version="check1_scientific_failure/v1", invariant=str(original),
+                diagnostic_error=type(secondary).__name__, diagnostic_only=True)
+        if diagnostic_status is not None:
+            fields = dict(check1_scientific_failure=diagnostic, status="failed", failed_stage="verify_artifacts",
+                first_failed_invariant=str(original), failure_reason=str(original),
+                evidence_admissible=False, scientifically_accepted=False)
+            diagnostic_status.record.update(fields)
+            try:
+                diagnostic_status.update(**fields)
+            except Exception as secondary:
+                diagnostic_status.record["diagnostic_write_failure"] = type(secondary).__name__
+        try:
+            brief = dict(invariant=str(original), first_difference=diagnostic.get("first_difference"),
+                         diagnostic_error=diagnostic.get("diagnostic_error"))
+            print("check1 scientific diagnostic: " + json.dumps(brief, sort_keys=True), file=sys.stderr, flush=True)
+        except Exception:
+            pass  # A closed stderr must not mask the original comparison error.
+        raise
 
 
 def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,before,
-                           runtime,reference,authority,records,outcomes):
+                           runtime,reference,authority,records,outcomes,diagnostic_status=None):
     """Numerical packet gate; the owning wrapper first enforces real PDF checks.
 
     Direct unit tests of this stage establish no PDF-page or whole-owner pass.
@@ -1542,7 +1653,8 @@ def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,bef
         stem="{}_kaon_Q4p4W2p74_{}_".format(setting,eps)
         child=strict_json((outdir/(stem+"pion-t-phi-template-comparison.json")).read_text())
         module.validate_coordinate_contract(child)
-        module.compare_science(module.scientific_projection(child),module.scientific_projection(reference["children"][key]),key)
+        _compare_check1_science(module,module.scientific_projection(child),module.scientific_projection(reference["children"][key]),
+            key,child,reference["children"][key],source_commit,module.REFERENCE_SHA256,diagnostic_status)
         parent=strict_json((outdir/(stem+"pion-t-template-comparison.json")).read_text())
         # All parent science, including templates, original counts and fit
         # diagnostics, is closed. PDF/container identities are verified by the
@@ -1550,9 +1662,10 @@ def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,bef
         parent_fields=set(parent)-{"pdf","original_analysis_input_identity","source_HEAD","source_files"}
         require(parent_fields==set(reference["parents"][key])-
                 {"pdf","original_analysis_input_identity","source_HEAD","source_files"},"check1_parent_inventory")
-        module.compare_science(module.scientific_projection({k:parent[k] for k in parent_fields},child["coordinate"]),
+        _compare_check1_science(module,module.scientific_projection({k:parent[k] for k in parent_fields},child["coordinate"]),
             module.scientific_projection({k:reference["parents"][key][k] for k in parent_fields},
-                                         reference["children"][key]["coordinate"]),key+":parent")
+                                         reference["children"][key]["coordinate"]),key+":parent",child,reference["children"][key],
+            source_commit,module.REFERENCE_SHA256,diagnostic_status)
         for pop in ("data","simc"):
             jp=outdir/(stem+"check1_"+pop+".json")
             doc,arrays=module.read_packet(jp)
@@ -1947,7 +2060,7 @@ def execute_gate(repo, outdir, output, source_commit, high=False, preflight_only
                 costs["actual_check1_child_simc_hash_bytes"]=sum(runtime[n]["bytes"] for n in model_names)
             if check1:
                 records,outcomes=verify_check1_artifacts(evidence,repo,private,source_commit,identities,
-                    started,prior,runtime,reference,authority)
+                    started,prior,runtime,reference,authority,diagnostic_status=status)
             else:
                 records, outcomes = verify_artifacts(private, source_commit, identities, started, prior, runtime, high=high)
             require(skim_inventory(worktree, baseline) == skims, "skim_existence_changed")
