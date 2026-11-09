@@ -1562,7 +1562,7 @@ def _bound_check1_diagnostic(diagnostic):
             return [compact(v) for v in value]
         return summarize(value) if isinstance(value, str) and len(value) > 512 else value
 
-    differences = ("first_difference", "first_parent_operand_difference")
+    differences = ("first_difference", "first_parent_operand_difference", "raw_rejection")
     # These explain the failure. Compact ancillary context before considering
     # any loss of exact scalar/window values in either first difference.
     bounded = {k: v if k in differences else compact(v) for k, v in diagnostic.items()}
@@ -1572,7 +1572,8 @@ def _bound_check1_diagnostic(diagnostic):
         # ancillary context is too large. Never replace them with an error-only
         # receipt merely because the explanatory context exceeded its budget.
         core = {k: bounded[k] for k in ("schema_version", "source_sha", "reference_sha256", "setting", "epsilon",
-            "invariant", "first_difference", "cell_index", "component", "first_parent_operand_difference",
+            "invariant", "first_difference", "projected_first_difference", "raw_rejection",
+            "cell_index", "component", "first_parent_operand_difference",
             "diagnostic_only") if k in bounded}
         for side in ("actual", "expected"):
             if side in bounded:
@@ -1604,17 +1605,41 @@ def _bound_check1_diagnostic(diagnostic):
 
 
 def _compare_check1_science(module, actual, expected, key, child, reference_child,
-                            source_commit, reference_sha, diagnostic_status=None):
+                            source_commit, reference_sha, diagnostic_status=None,
+                            project=False, coordinates=(None, None), parent_bindings=None):
     """Persist explanatory context before the private worktree can be removed."""
+    raw_documents = (actual, expected)
+    rejected_side = "actual"
     try:
+        if parent_bindings is not None:
+            module.validate_check1_parent_binding(child, parent_bindings[0], key)
+            rejected_side = "reference"
+            module.validate_check1_parent_binding(reference_child, parent_bindings[1], key)
+        if project:
+            rejected_side = "actual"
+            module.validate_check1_science_lineage(actual, key)
+            rejected_side = "reference"
+            module.validate_check1_science_lineage(expected, key)
+            rejected_side = "actual"
+            actual_view = module.check1_scientific_projection(actual, key, coordinates[0])
+            rejected_side = "reference"
+            expected_view = module.check1_scientific_projection(expected, key, coordinates[1])
+            actual, expected = actual_view, expected_view
         module.compare_science(actual, expected, key)
     except ValueError as original:
         if not str(original).startswith(("check1:scientific_identity:", "check1:scientific_keys:",
-                                         "check1:scientific_length:", "check1:scientific_value:")):
+                                         "check1:scientific_length:", "check1:scientific_value:",
+                                         "check1:scientific_lineage:", "check1:scientific_identity_syntax:")):
             raise
         try:
+            raw_rejection = None
+            if str(original).startswith(("check1:scientific_lineage:", "check1:scientific_identity_syntax:")):
+                raw_rejection = dict(side=rejected_side)
+                if hasattr(original, "check1_raw_operands"):
+                    raw_rejection["operands"] = original.check1_raw_operands
             diagnostic = _bound_check1_diagnostic(module.scientific_failure_diagnostic(child, reference_child, source_commit,
-                reference_sha, key, str(original), actual, expected))
+                reference_sha, key, str(original), actual, expected,
+                raw_rejection=raw_rejection, raw_documents=raw_documents))
         except Exception as secondary:
             # Do not put arbitrary exception content (which can contain paths or
             # private payloads) in the receipt, or replace the scientific failure.
@@ -1631,6 +1656,7 @@ def _compare_check1_science(module, actual, expected, key, child, reference_chil
                 diagnostic_status.record["diagnostic_write_failure"] = type(secondary).__name__
         try:
             brief = dict(invariant=str(original), first_difference=diagnostic.get("first_difference"),
+                         raw_rejection=diagnostic.get("raw_rejection"),
                          diagnostic_error=diagnostic.get("diagnostic_error"))
             print("check1 scientific diagnostic: " + json.dumps(brief, sort_keys=True), file=sys.stderr, flush=True)
         except Exception:
@@ -1653,8 +1679,8 @@ def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,bef
         stem="{}_kaon_Q4p4W2p74_{}_".format(setting,eps)
         child=strict_json((outdir/(stem+"pion-t-phi-template-comparison.json")).read_text())
         module.validate_coordinate_contract(child)
-        _compare_check1_science(module,module.scientific_projection(child),module.scientific_projection(reference["children"][key]),
-            key,child,reference["children"][key],source_commit,module.REFERENCE_SHA256,diagnostic_status)
+        _compare_check1_science(module,child,reference["children"][key],
+            key,child,reference["children"][key],source_commit,module.REFERENCE_SHA256,diagnostic_status,project=True)
         parent=strict_json((outdir/(stem+"pion-t-template-comparison.json")).read_text())
         # All parent science, including templates, original counts and fit
         # diagnostics, is closed. PDF/container identities are verified by the
@@ -1662,10 +1688,11 @@ def _verify_check1_packets(module,outdir,source_commit,identities,started_ns,bef
         parent_fields=set(parent)-{"pdf","original_analysis_input_identity","source_HEAD","source_files"}
         require(parent_fields==set(reference["parents"][key])-
                 {"pdf","original_analysis_input_identity","source_HEAD","source_files"},"check1_parent_inventory")
-        _compare_check1_science(module,module.scientific_projection({k:parent[k] for k in parent_fields},child["coordinate"]),
-            module.scientific_projection({k:reference["parents"][key][k] for k in parent_fields},
-                                         reference["children"][key]["coordinate"]),key+":parent",child,reference["children"][key],
-            source_commit,module.REFERENCE_SHA256,diagnostic_status)
+        _compare_check1_science(module,{k:parent[k] for k in parent_fields},
+            {k:reference["parents"][key][k] for k in parent_fields},key+":parent",child,reference["children"][key],
+            source_commit,module.REFERENCE_SHA256,diagnostic_status,project=True,
+            coordinates=(child["coordinate"], reference["children"][key]["coordinate"]),
+            parent_bindings=(parent, reference["parents"][key]))
         for pop in ("data","simc"):
             jp=outdir/(stem+"check1_"+pop+".json")
             doc,arrays=module.read_packet(jp)

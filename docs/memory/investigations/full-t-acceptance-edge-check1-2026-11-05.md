@@ -1095,3 +1095,155 @@ candidate/exact patch; no publication, farm command or acquisition authority.
 The original scientific mismatch/cause, Method A/B, Outcome B and accepted
 closed scopes remain unchanged. Existing nonblocking memory size warnings
 remain scheduled for the next checkpoint/milestone.
+
+
+## November 9 deterministic scientific-identity correction
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: local comparison-only candidate at test base
+fde9b5002e08bf692d706a4303ee23b99edd7adf under the
+[single November 9 contract](../phases/check1-deterministic-scientific-identity-fix-2026-11-09-task-contract.md).
+The startup manifest omission was exactly this new contract (19170 bytes,
+SHA-256 461ddafbb6f23f5631d78eaf5ef710e95642b6ccda66ea5d30aea4f6a92234fd).
+The user explicitly authorized manifest reconciliation and resumption; regenerated
+manifest/check/ordinary health passed with the existing nonblocking size warnings.
+Unrelated worktree bytes and the empty index are preserved.
+
+Evidence: supplied KaonLT_Check1_Independent_Root_Cause_Audit_20261109.zip,
+SHA-256 15e345b7d637ded5fbb1914ebbdcc08726df34377bccc14ba90ff85c86e1af3b,
+and read-only pinned reference
+02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a.
+SOURCE VERIFIED: all 15 retained t-parent preimages reconstruct their stored
+setting-wide ancestor hashes. Each Left/lowe t-bin yields
+c03775871b5033a2d9682e174293ecefe599ebefb1a2e9a10cbc102dd223c82a.
+The t-bin-0 local rehash is 92983dbde534bab2cd80aa229677658b75f6a0969997279ea1118472cafc6fce;
+the child invocation-shift predicate rehash is
+fc192ead77430b4adb0edecf80e8f2d241cd5e62585ffce113ace39441409f4d.
+These are distinct scopes. The earlier November 8 statement of a frozen-parent
+metadata mismatch used the wrong scope; it is superseded by this reconstruction.
+The controlled UUID-only replay proves a sufficient mechanism, not the unique
+historical cause: November 7 actual generated operands/hash remain unavailable.
+
+The correction leaves producer/cache/output/provenance identities unchanged.
+A dedicated Check 1 view validates each side's original setting-wide raw hash,
+all t/child/applied links, component/name/checksum aliases and configuration
+binding before deriving a deterministic cross-run hash. Separate parent-artifact
+and embedded-parent alignment records must match exactly within a run.
+The closed name grammar erases only the generated and clone 10-hex suffixes
+of H_MM_component_shape_full pion names in the source-proven caller context.
+Stable component/setting/context, axis and content/error checksum survive.
+Stable t/phi names remain verbatim. Unknown generated syntax/location fails closed.
+Alignment creation timestamps are validated as producer-format UTC and represented
+only in this view as creation metadata. All other scientific fields remain;
+the existing scientific_projection, compare_science and coordinate-validator
+functions are unchanged. Both child and separate-parent owner seams use this view.
+Bounded failure receipts distinguish setting-wide reconstruction from t-bin and
+child-predicate rehashes and retain raw identity/selection context. No production
+parent_valid, fallback, fitting, selection, normalization, yield or error change.
+
+Final local evidence: Windows Python 3.12.10 / NumPy 2.3.0 combined suites ran
+143 tests, no failures, four capability skips (real-Poppler whole owner,
+sidecar symlink and two parent-publication symlink subcases). The tightened
+UUID-only replay subsequently passed separately across all five child and
+parent comparison paths; timestamp-only variation was tested independently.
+The final diagnostic-scope/immutable-reference rerun passed 17 tests without
+skips, including oversized receipts, missing-parent/operand and write-failure
+cases. Six new real-reference tests cover 135 nominal cells, all 15 parents,
+16 physical/schema negatives with regenerated raw lineage and 12 lineage/
+identity-syntax negatives. Every negative reports its reproducible path.
+Unchanged producer AST/hash reconstruction parity passes without ROOT.
+
+Final WSL Python 3.12.3 / GCC 13.3.0 standard-library owner suite: 112 tests,
+no failures, one missing-pdfinfo skip; WSL NumPy is unavailable. An interim
+Linux run caught CRLF introduced by this implementation into the two edited
+memory records: their raw bytes would change under Git clean conversion.
+Only those allowlisted records were restored to required LF, the manifest
+regenerated/checked, and the full 112-test Linux suite passed. The failed log
+is retained for review, not counted as a pass. No test assertion was weakened.
+All three changed Python files compile and parse with Python 3.9 grammar;
+this is not farm Python 3.9 execution. Underlying projection/comparator/
+coordinate-validator ASTs, seven frozen producer/source file hashes, original
+reference bytes, 35 pre-existing pending files, empty index and refs are
+preserved. git diff --check passes. Manifest and ordinary memory health pass
+with the documented nonblocking size warnings.
+Local validation is not ROOT/PyROOT/main/PDF/farm acceptance. Source review is
+pending; no scientific closure or readiness is inferred. CURRENT owns the single
+push-stable NEXT: review a representative bounded early runtime identity diagnostic
+conditional on source acceptance, user publication and exact pushed-state review.
+Such an equivalent entry point is not proven; preflight-only is insufficient.
+No full acquisition, Check 2, Method A/B change or Outcome B change is authorized.
+Existing size warnings remain nonblocking, scheduled for the next meaningful
+checkpoint/milestone audit; no unrelated cosmetic consolidation follows.
+
+
+### November 9 independent-review P1/P2 continuation
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: same-contract narrow repair; replacement actual-diff review remains
+required. Independent review found that candidate B could change raw UUID/name
+aliases while retaining baseline A's ancestor string, and that a pre-projection
+raw rejection could be explained by an unrelated raw-document UUID difference.
+The frozen producer explicitly requires candidate alignment equality to baseline
+A (candidate_alignment_changed). The verifier now checks that equality for every
+t parent and both artifacts/sides; both raw sides pass before either projection.
+Generated whole-run UUID changes remain permitted only with valid raw lineage.
+
+Raw-lineage/syntax diagnostics now preserve the actual exception invariant,
+rejecting side, parent/cell location and available raw operands. No raw-document
+science first difference is computed on this branch; projected first difference
+and cross-run parent operand difference are unavailable rather than causal claims.
+The legitimate UUID plus broken third-parent applied pi_delta regression must
+identify parents[2]. Existing bounded receipt, exception identity, false
+acceptance and no collection/ZIP/publication boundaries remain.
+
+The submitted test-file raw after-snapshot had CRLF while its Git patch used LF.
+Only this allowlisted test source is normalized to LF; the replacement package
+must verify raw/Git-clean equality and byte-exact forward/reverse reconstruction
+for every task path. Prior snapshots/bundles and unrelated files remain preserved.
+Replacement validation: Windows Python 3.12.10 / NumPy 2.3.0 combined reference,
+all-five/135-cell, physical/lineage-negative, packet, parent/child and collector
+suites ran 146 tests without failures, with the same four capability skips.
+All 19 final affected causal-diagnostic, candidate-B and immutable-reference
+tests passed without skips. WSL Python 3.12.3 / GCC 13.3.0 standard-library
+owner suite ran 112 tests without failures, one missing-pdfinfo skip; WSL NumPy
+remains unavailable. Three changed Python files compile/parse with 3.9 grammar,
+not farm Python 3.9 execution. An initial two-test focused run retained two
+exception-identity assertion failures because its injection still mocked the
+old later projection seam. The fixture now injects at the new first raw check;
+the same assertIs assertion and all actual rejection/receipt checks pass.
+The failed log is retained, not counted as a pass. No assertion was weakened.
+Raw/Git-clean source equality, frozen scientific-source/function identity,
+full exact patch reconstruction and manifest/ordinary health are verified in
+the replacement review receipt. Existing nonblocking memory size warnings stay
+scheduled for the next meaningful checkpoint/milestone. No scientific producer, reference, numeric comparator,
+coordinate contract, Method A/B, Outcome B or farm authority is changed.
+
+
+### November 9 v2-review embedded/separate binding continuation
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: same-contract error-path repair. The user reports acceptance
+at source-design level for all other identity behavior. The remaining binder
+correctly rejected a changed separate-parent alignment but omitted its known
+operands; a missing alignment instead escaped as KeyError. Exact equality is
+retained. Structural checks now identify embedded/separate artifact, parent
+index, branch and available/missing operands in scientific-lineage ValueErrors;
+unequal alignments attach their bounded exact first difference. Ancillary
+receipt context handles malformed records without replacing that evidence.
+No producer, reference, projection, tolerance, fitting or acceptance change.
+
+Three initial focused tests pass: the real pinned third-parent hash/missing-
+alignment cases pass the existing legacy parent/child JSON checks before the
+binder; twenty malformed-record cases cover both artifacts. The real owner
+writer preserves the same exception, failed verify_artifacts status, false
+acceptance, bounded receipt, private cleanup and no ZIP/publication. Final Windows Python 3.12.10 / NumPy 2.3.0 relevant suites ran 149 tests,
+no failures, four unchanged capability skips (real Poppler owner page gate,
+sidecar symlink and two parent-publication symlink subcases). Exact source
+hashes are recorded before/after the run. WSL Python 3.12.3 / GCC 13.3.0 owner
+suite ran 112 tests, no failures, one missing-pdfinfo skip; WSL NumPy remains
+unavailable. Both actual and reference binding-error receipts are covered.
+Seven frozen-source hashes, accepted owner source and original comparison/
+coordinate functions remain unchanged. Changed Python compiles/parses with
+3.9 grammar, not farm 3.9 execution. The replacement receipt verifies raw/
+Git-clean bytes, exact forward/reverse patch reconstruction, unchanged
+reference/unrelated state and manifest/ordinary health. Existing two size
+warnings remain nonblocking, scheduled for the next meaningful checkpoint.
+The only next gate remains CURRENT's conditional narrow readiness review;
+no publication, farm execution, new acquisition or scientific closure follows.

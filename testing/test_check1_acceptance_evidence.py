@@ -67,6 +67,23 @@ def packet():
     return ev.build_packet(m,tables)
 
 
+def fixture_alignment():
+    """Complete controlled setting-wide lineage, without a fit or ROOT call."""
+    components = {name: dict(residual_shift_gev=0., window_expansion_gev=0., effective_windows=[[1.1,1.16]],
+        immutable_source_hist_identifier=dict(component=name, hist_name='fixture_'+name,
+            axis=dict(nbins=1,xmin=1.1,xmax=1.16,bin_edges=[1.1,1.16])),
+        immutable_source_hist_name='fixture_'+name, immutable_source_hist_checksum='d'*64)
+        for name in ('pi_n','pi_delta','pi_sidis')}
+    a = dict(parent_setting_key='Q4p4W2p74', common_setting_shift_gev=0., analysis_scope='setting-wide',
+        resolved_config={}, resolved_configuration_hash=ev.digest({}), components=components,
+        immutable_source_template_identifier={n:deepcopy(c['immutable_source_hist_identifier']) for n,c in components.items()},
+        immutable_source_template_checksum={n:c['immutable_source_hist_checksum'] for n,c in components.items()})
+    a['parent_alignment_hash']=ev.digest(ev.setting_alignment_preimage(a))
+    for c in components.values():c['parent_alignment_hash']=a['parent_alignment_hash']
+    a['applied_components']=deepcopy(components);a['proposed_components']={}
+    return a
+
+
 def five_fixture(directory):
     """Controlled rows through real projections, exporters and owner validators."""
     from testing import test_run_pion_t_template_comparison_gate as old
@@ -137,6 +154,8 @@ def five_fixture(directory):
         for ti,p in enumerate(ab['parents']):
             p['t_edges']=canonical[ti:ti+2]
             for c in owner.COMPONENTS:p['templates'][c]['t_edges']=p['t_edges']
+            for branch in ('baseline_A','candidate_B'):
+                p[branch]['pion_component_alignment']=fixture_alignment()
         with patch.object(old,'IDENTITIES',legacy):child=expand(old.child_payload(setting,ab))
         child['t_edges']=canonical;child['phi_edges']=phi
         if eps=='highe':child['setting']=deepcopy(ab['setting'])
@@ -150,6 +169,7 @@ def five_fixture(directory):
         child['selected_row_fingerprints']={p:old_digest(rr) for p in ('kaon','pion')}
         child['parents']=deepcopy(ab['parents'])
         for c in child['cells']:
+            c['fit']['pion_component_alignment']=fixture_alignment()
             c['t_edges']=canonical[c['t_index']:c['t_index']+2];c['phi_edges']=phi[c['phi_index']:c['phi_index']+2]
             c['applications']['Local_t']=dict(status='available',weights=[0.]+[1.]*100+[0.],
                 cuts={cut:{k:child['observations']['pion'][cut]['children'][c['t_index']][c['phi_index']][k] for k in ('values','variances')} for cut in ev.CUTS})
@@ -360,7 +380,7 @@ class ScientificFailureDiagnosticsTests(unittest.TestCase):
     def documents():
         from data_coordinates import build_kaon_data_coordinate_contract
         parent = dict(parent_setting_key='Q4p4W2p74:Left:lowe', common_setting_shift_gev=.0012744878163235551,
-            resolved_configuration_hash='c'*64, accepted=True, source='bin_local_scan', analysis_scope='t_bin',
+            resolved_configuration_hash='c'*64, accepted=True, source='bin_local_scan', analysis_scope='setting-wide',
             persistence_status='persisted', persistence_rejection_reasons=[], components={name:dict(
                 residual_shift_gev=.001, window_expansion_gev=.002, effective_windows=[[1.1,1.16]],
                 immutable_source_hist_identifier={'component':name,'label':'\u03bb'}, immutable_source_hist_checksum='d'*64)
@@ -398,9 +418,12 @@ class ScientificFailureDiagnosticsTests(unittest.TestCase):
             status.update('verify_artifacts',analysis_completed=True,analysis_returncode=0)
             stream=io.StringIO()
             with redirect_stderr(stream), self.assertRaises(ValueError) as caught:
-                owner._verify_check1_packets(ev,private,'a'*40,{p:{} for p in owner.CHECK1_EXECUTABLES},1,
-                    dict.fromkeys(owner.names(check1=True)),{},dict(children={'Left:lowe':expected}),{},
-                    dict.fromkeys(owner.names()|owner.names(True)),{},diagnostic_status=status)
+                # Exercise the real comparator/receipt on deliberately raw,
+                # sometimes broken legacy lineages. The new full projection's
+                # fail-before-normalization behavior has separate real tests.
+                saved=ev.strict_json(path.read_bytes())
+                owner._compare_check1_science(ev,ev.scientific_projection(saved),ev.scientific_projection(expected),
+                    'Left:lowe',saved,expected,'a'*40,ev.REFERENCE_SHA256,status)
             # The real owner's JSON receipt survives removal of its private inputs.
             shutil.rmtree(private)
             raw=status.path.read_bytes().decode('utf-8')
@@ -1249,6 +1272,424 @@ class FiveOwnerTests(unittest.TestCase):
                     self.assertFalse(paths['delivered_receipt'].exists())
 
 
+class DeterministicIdentityTests(unittest.TestCase):
+    """Real immutable reference, both owner seams, and regenerated raw ancestry."""
+    @classmethod
+    def setUpClass(cls):
+        path=os.environ.get('KAONLT_CHECK1_REFERENCE_TEST_PATH')
+        if not path:raise unittest.SkipTest('BLOCKED real-reference gate: KAONLT_CHECK1_REFERENCE_TEST_PATH required')
+        cls.path=Path(path);cls.reference=ev.load_reference(path)
+        cls.before=ev.file_hash(path)
+
+    @staticmethod
+    def visit(value, transform):
+        if isinstance(value,dict):return transform({k:DeterministicIdentityTests.visit(v,transform) for k,v in value.items()})
+        if isinstance(value,list):return [DeterministicIdentityTests.visit(v,transform) for v in value]
+        return value
+
+    @staticmethod
+    def rebind(doc):
+        """Recompute from exact changed operands, then propagate original links."""
+        replacements={}
+        for p in doc['parents']:
+            a=p['baseline_A']['pion_component_alignment']
+            replacements[a['parent_alignment_hash']]=ev.digest(ev.setting_alignment_preimage(a))
+        def update(v):
+            if 'parent_alignment_hash' in v:v['parent_alignment_hash']=replacements[v['parent_alignment_hash']]
+            return v
+        return DeterministicIdentityTests.visit(doc,update)
+
+    def owner_compare(self, actual, expected, key, coordinate=None, status=None):
+        with redirect_stderr(io.StringIO()):
+            owner._compare_check1_science(ev,actual,expected,key,actual,expected,'a'*40,ev.REFERENCE_SHA256,
+                status,project=True,coordinates=(coordinate,coordinate))
+
+    def test_real_reference_all_five_both_paths_and_exact_hash_scopes(self):
+        function=next(n for n in ast.parse((ROOT/'src/cuts/pion_component_fits.py').read_bytes()).body
+            if isinstance(n,ast.FunctionDef) and n.name=='_alignment_parent_hash')
+        scope=dict(_alignment_hash=ev.digest,COMPONENT_NAMES=('pi_n','pi_delta','pi_sidis'))
+        exec(compile(ast.Module(body=[function],type_ignores=[]),'<unchanged-producer>','exec'),scope)
+        self.assertEqual(sum(len(d['cells']) for d in self.reference['children'].values()),135)
+        for key,child in self.reference['children'].items():
+            for i,p in enumerate(child['parents']):
+                a=p['baseline_A']['pion_component_alignment']
+                self.assertEqual(ev.digest(ev.setting_alignment_preimage(a)),a['parent_alignment_hash'],(key,i))
+                q=ev.setting_alignment_preimage(a)
+                self.assertEqual(scope['_alignment_parent_hash'](q['setting_key'],q['common_shift_gev'],
+                    q['components'],q['resolved_configuration_hash']),a['parent_alignment_hash'])
+                if key=='Left:lowe':
+                    self.assertEqual(a['parent_alignment_hash'],'c03775871b5033a2d9682e174293ecefe599ebefb1a2e9a10cbc102dd223c82a')
+            self.owner_compare(child,child,key)
+            parent=self.reference['parents'][key]
+            ev.validate_check1_parent_binding(child,parent,key)
+            self.owner_compare(parent,parent,key+':parent',child['coordinate'])
+        a=self.reference['children']['Left:lowe']['parents'][0]['baseline_A']['pion_component_alignment']
+        self.assertEqual(ev.digest(ev.alignment_parent_preimage(a)),'92983dbde534bab2cd80aa229677658b75f6a0969997279ea1118472cafc6fce')
+        predicate=ev.alignment_parent_preimage(a);predicate['common_shift_gev']=0.
+        self.assertEqual(ev.digest(predicate),'fc192ead77430b4adb0edecf80e8f2d241cd5e62585ffce113ace39441409f4d')
+        self.assertEqual(self.before,ev.REFERENCE_SHA256)
+
+    def test_uuid_only_all_components_and_aliases_both_owner_paths(self):
+        import re
+        for role in ('children','parents'):
+            for key,expected in self.reference[role].items():
+                counts={n:0 for n in ('pi_n','pi_delta','pi_sidis')}
+                def rename(v):
+                    for k,x in v.items():
+                        if k in ('hist_name','immutable_source_hist_name') and isinstance(x,str) and x.startswith('H_MM_component_shape_full_'):
+                            for n in counts:
+                                if '_'+n+'_' in x:counts[n]+=1
+                            v[k]=re.sub(r'_[0-9a-f]{10}_[0-9a-f]{10}$','_0123456789_abcdef0123',x)
+                    return v
+                actual=self.rebind(self.visit(expected,rename))
+                self.assertTrue(all(counts.values()))
+                coordinate=self.reference['children'][key]['coordinate']
+                with self.assertRaisesRegex(ValueError,'scientific_identity'):
+                    ev.compare_science(ev.scientific_projection(actual,coordinate),ev.scientific_projection(expected,coordinate),key)
+                raw=ev.digest(actual)
+                self.owner_compare(actual,expected,key,coordinate)
+                self.assertEqual(ev.digest(actual),raw)  # no input/output rewriting
+        # Separate positive: a fresh resolver creation time is execution
+        # metadata, while the UUID-only cases above change no other value.
+        expected=self.reference['children']['Left:lowe']
+        def timestamp(v):
+            if 'creation_timestamp' in v:v['creation_timestamp']='2026-11-09T00:00:00+00:00'
+            return v
+        actual=self.visit(expected,timestamp)
+        self.owner_compare(actual,expected,'Left:lowe')
+        self.assertEqual(ev.file_hash(self.path),self.before)
+
+    def test_strict_science_with_consistent_regenerated_lineages(self):
+        key='Left:lowe';expected=self.reference['children'][key]
+        for field in ('immutable_source_hist_checksum','axis','component','hist_context','resolved_config',
+                      'common_setting_shift_gev','residual_shift_gev','window_expansion_gev','effective_windows',
+                      'fit','physical','observation','error','keys','list','coordinate'):
+            with self.subTest(field=field):
+                def alter(v):
+                    if field=='immutable_source_hist_checksum':
+                        if 'immutable_source_hist_checksum' in v:v['immutable_source_hist_checksum']='e'*64
+                        if 'immutable_source_template_checksum' in v:v['immutable_source_template_checksum']={n:'e'*64 for n in v['immutable_source_template_checksum']}
+                    elif field=='axis' and 'bin_edges' in v:v['bin_edges'][0]-=.001
+                    elif field=='hist_context':
+                        for k in ('hist_name','immutable_source_hist_name'):
+                            if isinstance(v.get(k),str):v[k]=v[k].replace('_Left_','_Right_')
+                    elif field=='resolved_config' and 'resolved_config' in v:
+                        v['resolved_config']['check1_negative']=True;v['resolved_configuration_hash']=ev.digest(v['resolved_config'])
+                    elif field in ('common_setting_shift_gev','residual_shift_gev','window_expansion_gev'):
+                        for k in (field,'parent_'+field):
+                            if type(v.get(k)) is float:v[k]+=.001
+                    elif field=='effective_windows':
+                        for k in ('effective_windows','parent_effective_windows'):
+                            if isinstance(v.get(k),list) and v[k]:v[k][0][0]+=.001
+                    return v
+                actual=self.visit(expected,alter)
+                if field=='component':
+                    # Stable source role is scientific, while raw component
+                    # identifiers remain internally valid on both sides.
+                    for branch in ('baseline_A','candidate_B'):
+                        actual['parents'][0][branch]['pion_component_alignment']['pion_control_histogram_provenance']='kaon_control'
+                elif field=='fit':actual['cells'][0]['fit']['A_n']+=1.
+                elif field=='physical':actual['source_coefficients']['prompt']+=.1
+                elif field=='observation':actual['observations']['pion']['allcuts']['children'][0][0]['values'][1]+=1.
+                elif field=='error':actual['observations']['pion']['allcuts']['children'][0][0]['variances'][1]+=1.
+                elif field=='keys':actual['cells'][0]['extra_scientific_key']=1
+                elif field=='list':actual['phi_edges'].append(181.)
+                elif field=='coordinate':
+                    from data_coordinates import coordinate_fingerprint
+                    oldfp=actual['coordinate']['coordinate_fingerprint'];actual['coordinate']['mm_shift']+=.001
+                    newfp=coordinate_fingerprint(actual['coordinate'])
+                    def coordinates(v):
+                        return {k:(newfp if x==oldfp else x) if isinstance(x,str) else x for k,x in v.items()}
+                    actual=self.visit(actual,coordinates)
+                    ev.validate_coordinate_contract(actual)
+                actual=self.rebind(actual)
+                # Explicitly prove raw lineage acceptance first. A stale hash
+                # cannot be the reason any scientific negative is rejected.
+                ev.check1_scientific_projection(actual,key)
+                with self.assertRaisesRegex(ValueError,r'check1:scientific_(identity|value|keys|length):') as error:
+                    self.owner_compare(actual,expected,key)
+                print('science negative',field,str(error.exception))
+
+    def test_lineage_and_unknown_identity_reject_before_normalization(self):
+        key='Left:lowe';expected=self.reference['children'][key]
+        for mode in ('ancestor','missing_ancestor','applied_link','child_link','missing_parent','missing_operand',
+                     'identifier','checksum','unknown_name','unknown_name_location','missing_child_alignment','timestamp'):
+            with self.subTest(mode=mode):
+                actual=deepcopy(expected);a=actual['parents'][1]['baseline_A']['pion_component_alignment']
+                if mode=='ancestor':a['parent_alignment_hash']='0'*64
+                elif mode=='missing_ancestor':del a['parent_alignment_hash']
+                elif mode=='applied_link':a['applied_components']['pi_delta']['parent_alignment_hash']='0'*64
+                elif mode=='child_link':actual['cells'][9]['fit']['pion_component_alignment']['parent_alignment_hash']='0'*64
+                elif mode=='missing_parent':actual['parents'].pop()
+                elif mode=='missing_operand':del a['components']['pi_n']['parent_effective_windows']
+                elif mode=='identifier':a['applied_components']['pi_n']['immutable_source_hist_identifier']['component']='pi_delta'
+                elif mode=='checksum':a['applied_components']['pi_n']['immutable_source_hist_checksum']='e'*64
+                elif mode=='missing_child_alignment':del actual['cells'][9]['fit']['pion_component_alignment']
+                elif mode=='timestamp':a['creation_timestamp']='not a producer UTC timestamp'
+                elif mode=='unknown_name':
+                    actual=self.visit(actual,lambda v:{k:(x.replace('_212ae0983c_','_unknown_') if isinstance(x,str) else x) for k,x in v.items()})
+                    actual=self.rebind(actual)
+                else:actual['unexpected_histogram']='unknown_0123456789'
+                with self.assertRaisesRegex(ValueError,'scientific_lineage|scientific_identity_syntax') as error:
+                    self.owner_compare(actual,expected,key)
+                print('lineage negative',mode,str(error.exception))
+
+    def test_separate_parent_raw_binding_and_missing_setting_preimage_diagnostic(self):
+        key='Left:lowe';child=self.reference['children'][key];parent=deepcopy(self.reference['parents'][key])
+        parent['parents'][2]['baseline_A']['pion_component_alignment']['parent_alignment_hash']='0'*64
+        with self.assertRaisesRegex(ValueError,r'scientific_lineage:Left:lowe.parents\[2\].baseline_A.raw_artifact_binding'):
+            ev.validate_check1_parent_binding(child,parent,key)
+        actual=deepcopy(child)
+        del actual['parents'][0]['baseline_A']['pion_component_alignment']['components']['pi_n']['parent_effective_windows']
+        failure='check1:scientific_value:Left:lowe.cells[0].fit.A_n'
+        diag=ev.scientific_failure_diagnostic(actual,child,'a'*40,ev.REFERENCE_SHA256,key,failure,
+            {'cells':[{'fit':{'A_n':1.}}]},{'cells':[{'fit':{'A_n':2.}}]})
+        self.assertEqual(diag['actual']['parent_hash_consistency']['status'],'not_verified')
+        self.assertIn('not an integrity test',diag['actual']['parent_hash_consistency']['reason'])
+        self.assertEqual(diag['first_parent_operand_difference']['status'],'not_verified')
+        self.assertEqual(diag['expected']['parent_hash_consistency']['status'],'matches')
+
+    def test_real_failed_comparison_receipt_survives_cleanup_and_success_silent(self):
+        key='Left:lowe';expected=self.reference['children'][key];actual=deepcopy(expected)
+        actual['source_coefficients']['prompt']+=.1
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);private=root/'private';private.mkdir()
+            status=owner.GateStatus(root,root/'unpublished.zip','a'*40,high=True,check1=True)
+            status.update('verify_artifacts',analysis_completed=True,analysis_returncode=0)
+            before=status.path.read_bytes();self.owner_compare(expected,expected,key,status=status)
+            self.assertEqual(status.path.read_bytes(),before)
+            with self.assertRaisesRegex(ValueError,'scientific_value'):
+                self.owner_compare(actual,expected,key,status=status)
+            shutil.rmtree(private);saved=json.loads(status.path.read_bytes())
+            self.assertEqual(saved['failed_stage'],'verify_artifacts')
+            self.assertFalse(saved['evidence_admissible']);self.assertFalse(saved['scientifically_accepted'])
+            self.assertFalse(saved['collection_completed']);self.assertFalse(saved['zip_verification_completed'])
+            self.assertFalse((root/'unpublished.zip').exists())
+            self.assertLess(owner._check1_diagnostic_persisted_size(saved['check1_scientific_failure']),65537)
+            self.assertEqual(saved['check1_scientific_failure']['first_difference']['path'],'Left:lowe.source_coefficients.prompt')
+
+    def test_candidate_only_uuid_rejected_raw_on_both_sides_and_owner_paths(self):
+        key='Left:lowe'
+        def rename(v):
+            return {k:(x.replace('_212ae0983c_','_312ae0983c_') if isinstance(x,str) else x) for k,x in v.items()}
+        for role in ('children','parents'):
+            original=self.reference[role][key]
+            for ti in range(3):
+                changed=deepcopy(original)
+                parent=changed['parents'][ti]
+                parent['candidate_B']['pion_component_alignment']=self.visit(parent['candidate_B']['pion_component_alignment'],rename)
+                candidate=parent['candidate_B']['pion_component_alignment']
+                # Internal aliases and inherited strings agree, but the
+                # candidate's own raw preimage has changed behind that string.
+                ev._validate_check1_alignment(candidate,candidate['parent_alignment_hash'],'candidate')
+                self.assertNotEqual(ev.digest(ev.setting_alignment_preimage(candidate)),candidate['parent_alignment_hash'])
+                for side in ('actual','reference'):
+                    with self.subTest(role=role,ti=ti,side=side):
+                        a,b=(changed,original) if side=='actual' else (original,changed)
+                        with patch.object(ev,'_check1_identity_view',side_effect=AssertionError('normalization before raw validation')):
+                            with self.assertRaisesRegex(ValueError,r'parents\['+str(ti)+r'\].candidate_B.pion_component_alignment') as caught:
+                                self.owner_compare(a,b,key if role=='children' else key+':parent',
+                                    self.reference['children'][key]['coordinate'])
+                        self.assertIn('same-run baseline_A',caught.exception.check1_raw_operands['expectation'])
+            child=deepcopy(self.reference['children'][key]);parent=deepcopy(self.reference['parents'][key])
+            for d in (child,parent):
+                a=d['parents'][2]['candidate_B']['pion_component_alignment']
+                d['parents'][2]['candidate_B']['pion_component_alignment']=self.visit(a,rename)
+            # Matching corrupt records in both artifacts cannot bypass P1.
+            with self.assertRaisesRegex(ValueError,r'parents\[2\].candidate_B.pion_component_alignment'):
+                ev.validate_check1_parent_binding(child,parent,key)
+
+    def test_raw_rejection_cause_and_operands_survive_owner_cleanup(self):
+        key='Left:lowe';expected=self.reference['children'][key]
+        def rename(v):
+            return {k:(x.replace('_212ae0983c_','_312ae0983c_') if isinstance(x,str) else x) for k,x in v.items()}
+        regenerated=self.rebind(self.visit(expected,rename))
+        self.owner_compare(regenerated,expected,key)  # legitimate whole-run change
+        for mode in ('third_parent_link','candidate_only','syntax'):
+            actual=deepcopy(regenerated)
+            if mode=='third_parent_link':
+                actual['parents'][2]['baseline_A']['pion_component_alignment']['applied_components']['pi_delta']['parent_alignment_hash']='f'*64
+                location='Left:lowe.parents[2].baseline_A.applied_components.pi_delta.parent_alignment_hash'
+            elif mode=='candidate_only':
+                a=actual['parents'][2]['candidate_B']['pion_component_alignment']
+                actual['parents'][2]['candidate_B']['pion_component_alignment']=self.visit(a,
+                    lambda v:{k:(x.replace('_312ae0983c_','_412ae0983c_') if isinstance(x,str) else x) for k,x in v.items()})
+                location='Left:lowe.parents[2].candidate_B.pion_component_alignment'
+            else:
+                actual['unexpected_histogram']='unproved_0123456789'
+                location='Left:lowe.unexpected_histogram'
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp);private=root/'private';private.mkdir()
+                stem='Left_kaon_Q4p4W2p74_lowe_pion-t-phi-template-comparison.json'
+                (private/stem).write_bytes(ev.canonical_json(actual))
+                status=owner.GateStatus(root,root/'unpublished.zip','a'*40,high=True,check1=True)
+                status.update('verify_artifacts',analysis_completed=True,analysis_returncode=0)
+                # This must never call the recursive science difference on
+                # unprojected documents, even though their UUIDs differ first.
+                with patch.object(ev,'first_science_difference',side_effect=AssertionError('raw documents are not a causal science difference')):
+                    with redirect_stderr(io.StringIO()),self.assertRaises(ValueError) as caught:
+                        owner._verify_check1_packets(ev,private,'a'*40,{p:{} for p in owner.CHECK1_EXECUTABLES},1,
+                            dict.fromkeys(owner.names(check1=True)),{},dict(children={key:expected}),{},
+                            dict.fromkeys(owner.names()|owner.names(True)),{},diagnostic_status=status)
+                shutil.rmtree(private)
+                saved=json.loads(status.path.read_bytes());diag=saved['check1_scientific_failure']
+                self.assertEqual(diag['invariant'],str(caught.exception))
+                self.assertEqual(diag['raw_rejection']['path'],location)
+                self.assertEqual(diag['raw_rejection']['side'],'actual')
+                self.assertIsNone(diag['first_difference'])
+                self.assertEqual(diag['projected_first_difference']['status'],'unavailable')
+                if mode!='syntax':self.assertEqual(diag['first_parent_operand_difference']['status'],'unavailable')
+                self.assertNotIn('diagnostic_error',diag)
+                if mode=='third_parent_link':
+                    self.assertEqual(diag['actual']['t_index'],2)
+                    self.assertNotIn('cell_index',diag)
+                    self.assertEqual(diag['raw_rejection']['operands']['actual']['value'],'f'*64)
+                    self.assertEqual(diag['raw_rejection']['operands']['expected']['value'],
+                        regenerated['parents'][2]['baseline_A']['pion_component_alignment']['parent_alignment_hash'])
+                elif mode=='candidate_only':
+                    self.assertIn('_412ae0983c_',diag['raw_rejection']['operands']['difference']['actual']['value'])
+                else:self.assertEqual(diag['raw_rejection']['rejected_operand']['operand']['value'],'unproved_0123456789')
+                self.assertEqual(saved['first_failed_invariant'],str(caught.exception))
+                self.assertEqual(saved['failure_reason'],str(caught.exception))
+                self.assertEqual(saved['failed_stage'],'verify_artifacts')
+                for field in ('evidence_admissible','scientifically_accepted','collection_completed','zip_verification_completed'):
+                    self.assertFalse(saved[field])
+                self.assertFalse((root/'unpublished.zip').exists())
+                self.assertLessEqual(owner._check1_diagnostic_persisted_size(diag),65536)
+                # Retain the very same exception object on the raw-error seam.
+                original=caught.exception
+                with patch.object(ev,'validate_check1_science_lineage',side_effect=original):
+                    with self.assertRaises(ValueError) as repeated:self.owner_compare(actual,expected,key)
+                self.assertIs(repeated.exception,original)
+
+    def test_raw_rejection_side_and_location_on_child_and_parent_seams(self):
+        key='Left:lowe'
+        exact=ev._check1_raw_operand({'cells':[{'fit':{'unknown_name':'unproved_0123456789'}}]},key,
+            key+'.cells[0].fit.unknown_name')
+        self.assertEqual(exact['operand']['value'],'unproved_0123456789')
+        for role in ('children','parents'):
+            original=self.reference[role][key]
+            bad=deepcopy(original)
+            bad['parents'][2]['baseline_A']['pion_component_alignment']['applied_components']['pi_delta']['parent_alignment_hash']='f'*64
+            for side in ('actual','reference'):
+                with self.subTest(role=role,side=side),tempfile.TemporaryDirectory() as tmp:
+                    a,b=(bad,original) if side=='actual' else (original,bad)
+                    status=owner.GateStatus(Path(tmp),Path(tmp)/'unpublished.zip','a'*40,high=True,check1=True)
+                    status.update('verify_artifacts')
+                    comparison_key=key if role=='children' else key+':parent'
+                    with patch.object(ev,'_check1_identity_view',side_effect=AssertionError('projection attempted')):
+                        with self.assertRaises(ValueError):self.owner_compare(a,b,comparison_key,status=status)
+                    diag=json.loads(status.path.read_bytes())['check1_scientific_failure']
+                    self.assertEqual(diag['raw_rejection']['side'],side)
+                    self.assertEqual(diag['raw_rejection']['path'],comparison_key+'.parents[2].baseline_A.applied_components.pi_delta.parent_alignment_hash')
+                    self.assertEqual(diag['actual' if side=='actual' else 'expected']['t_index'],2)
+                    self.assertEqual(diag['projected_first_difference']['status'],'unavailable')
+                    self.assertIsNone(diag['first_difference'])
+                    self.assertEqual(diag['raw_rejection']['operands']['actual']['value'],'f'*64)
+
+
+    def binding_receipt(self, child, separate, frozen, key='Left:lowe:parent', reference_side=False):
+        """Exercise the real binder/error/owner writer and cleanup, not a mock failure."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);private=root/'private';private.mkdir()
+            (private/'separate.json').write_bytes(ev.canonical_json(separate))
+            separate=ev.strict_json((private/'separate.json').read_bytes())
+            status=owner.GateStatus(root,root/'unpublished.zip','a'*40,high=True,check1=True)
+            status.update('verify_artifacts',analysis_completed=True,analysis_returncode=0)
+            original_binder=ev.validate_check1_parent_binding;errors=[]
+            def capture(*args,**kwargs):
+                try:return original_binder(*args,**kwargs)
+                except ValueError as error:errors.append(error);raise
+            with patch.object(ev,'validate_check1_parent_binding',side_effect=capture):
+                with redirect_stderr(io.StringIO()),self.assertRaises(ValueError) as caught:
+                    a,b=(frozen,separate) if reference_side else (separate,frozen)
+                    owner._compare_check1_science(ev,a,b,key,child,child,'a'*40,
+                        ev.REFERENCE_SHA256,status,project=True,parent_bindings=(a,b))
+            self.assertIs(caught.exception,errors[0])
+            self.assertEqual(private.resolve().parent,root.resolve());shutil.rmtree(private)
+            saved=json.loads(status.path.read_bytes());diag=saved['check1_scientific_failure']
+            self.assertNotIn('diagnostic_error',diag)
+            self.assertEqual(saved['first_failed_invariant'],str(caught.exception))
+            self.assertEqual(saved['failure_reason'],str(caught.exception))
+            self.assertEqual(saved['failed_stage'],'verify_artifacts')
+            for field in ('evidence_admissible','scientifically_accepted','collection_completed','zip_verification_completed'):
+                self.assertFalse(saved[field])
+            self.assertFalse((root/'unpublished.zip').exists())
+            self.assertIsNone(diag['first_difference'])
+            self.assertEqual(diag['projected_first_difference']['status'],'unavailable')
+            self.assertLessEqual(owner._check1_diagnostic_persisted_size(diag),65536)
+            return diag
+
+    def checked_separate_parent(self, mode):
+        """The reviewed real fixture passes the existing parent/child JSON checks."""
+        child=self.reference['children']['Left:lowe'];frozen=self.reference['parents']['Left:lowe']
+        separate=deepcopy(frozen)
+        for branch in ('baseline_A','candidate_B'):
+            record=separate['parents'][2][branch]
+            if mode=='mismatched':record['pion_component_alignment']['parent_alignment_hash']='f'*64
+            else:del record['pion_component_alignment']
+        identities={name:{} for name in child['source_files']};pdf=separate['pdf']
+        owner.verify_payload(separate,'Left',separate['source_HEAD'],identities,
+            dict(sha256=pdf['sha256'],bytes=pdf['bytes'],basename=Path(pdf['path']).name))
+        owner.verify_child_payload(child,'Left',child['source_HEAD'],identities,separate)
+        return child,separate,frozen
+
+    def test_separate_third_parent_hash_receipt_has_both_raw_operands(self):
+        child,separate,frozen=self.checked_separate_parent('mismatched')
+        for reference_side in (False,True):
+            diag=self.binding_receipt(child,separate,frozen,reference_side=reference_side)
+            self.assertEqual(diag['raw_rejection']['side'],'reference' if reference_side else 'actual')
+            self.assertEqual(diag['raw_rejection']['operands']['difference']['separate']['value'],'f'*64)
+        self.assertEqual(diag['raw_rejection']['path'],'Left:lowe:parent.parents[2].baseline_A.raw_artifact_binding')
+        operands=diag['raw_rejection']['operands']
+        self.assertEqual(operands['artifact'],'embedded/separate')
+        self.assertEqual(operands['parent_index'],2);self.assertEqual(operands['branch'],'baseline_A')
+        difference=operands['difference']
+        self.assertTrue(difference['path'].endswith('.pion_component_alignment.parent_alignment_hash'))
+        self.assertEqual(difference['embedded']['value'],child['parents'][2]['baseline_A']['pion_component_alignment']['parent_alignment_hash'])
+        self.assertEqual(difference['separate']['value'],'f'*64)
+
+    def test_missing_separate_third_alignment_has_structured_persistent_receipt(self):
+        child,separate,frozen=self.checked_separate_parent('missing')
+        for reference_side in (False,True):
+            diag=self.binding_receipt(child,separate,frozen,reference_side=reference_side)
+            self.assertEqual(diag['raw_rejection']['side'],'reference' if reference_side else 'actual')
+            self.assertEqual(diag['raw_rejection']['operands']['separate']['status'],'missing')
+        self.assertEqual(diag['raw_rejection']['path'],'Left:lowe:parent.parents[2].baseline_A.pion_component_alignment')
+        operands=diag['raw_rejection']['operands']
+        self.assertEqual(operands['artifact'],'separate');self.assertEqual(operands['parent_index'],2)
+        self.assertEqual(operands['branch'],'baseline_A')
+        self.assertEqual(operands['separate']['status'],'missing')
+        self.assertEqual(operands['embedded']['status'],'available')
+
+    def test_parent_binding_malformed_records_are_classified_on_both_artifacts(self):
+        alignment=fixture_alignment()
+        original=dict(parents=[{branch:dict(pion_component_alignment=deepcopy(alignment))
+            for branch in ('baseline_A','candidate_B')} for _ in range(3)])
+        for artifact in ('embedded','separate'):
+            for mode in ('document','parents_missing','parents_type','parents_short','parent_type',
+                         'branch_missing','branch_type','alignment_missing','alignment_type','alignment_empty'):
+                with self.subTest(artifact=artifact,mode=mode):
+                    bad=deepcopy(original)
+                    if mode=='document':bad=None
+                    elif mode=='parents_missing':del bad['parents']
+                    elif mode=='parents_type':bad['parents']=None
+                    elif mode=='parents_short':bad['parents'].pop()
+                    elif mode=='parent_type':bad['parents'][2]=None
+                    elif mode=='branch_missing':del bad['parents'][2]['candidate_B']
+                    elif mode=='branch_type':bad['parents'][2]['candidate_B']=[]
+                    elif mode=='alignment_missing':del bad['parents'][2]['candidate_B']['pion_component_alignment']
+                    elif mode=='alignment_type':bad['parents'][2]['candidate_B']['pion_component_alignment']=[]
+                    else:bad['parents'][2]['candidate_B']['pion_component_alignment']={}
+                    child,separate=(bad,original) if artifact=='embedded' else (original,bad)
+                    diag=self.binding_receipt(child,separate,original)
+                    operands=diag['raw_rejection']['operands']
+                    self.assertEqual(operands['artifact'],artifact)
+                    if mode not in ('document','parents_missing','parents_type'):
+                        self.assertEqual(operands['parent_index'],2)
+                    if mode.startswith(('branch_','alignment_')):self.assertEqual(operands['branch'],'candidate_B')
+
+
 class ExternalReferenceTests(unittest.TestCase):
     def test_failure_diagnostic_on_immutable_reference_structure_when_supplied(self):
         path=os.environ.get('KAONLT_CHECK1_REFERENCE_TEST_PATH')
@@ -1270,9 +1711,9 @@ class ExternalReferenceTests(unittest.TestCase):
         saved=expected['parents'][0]['baseline_A']['pion_component_alignment']
         recomputed=scope['_alignment_parent_hash'](saved['parent_setting_key'],saved['common_setting_shift_gev'],
             saved['components'],saved['resolved_configuration_hash'])
-        self.assertEqual(diag['expected']['parent_hash_consistency']['recomputed_hash'],recomputed)
-        self.assertEqual(diag['expected']['parent_hash_consistency']['status'],
-            'matches' if recomputed==saved['parent_alignment_hash'] else 'mismatch')
+        self.assertEqual(diag['expected']['t_bin_local_rehash']['recomputed_hash'],recomputed)
+        self.assertEqual(diag['expected']['parent_hash_consistency']['recomputed_hash'],saved['parent_alignment_hash'])
+        self.assertEqual(diag['expected']['parent_hash_consistency']['status'],'matches')
         self.assertEqual(diag['expected']['child']['parent_alignment_hash']['value'],
             'c03775871b5033a2d9682e174293ecefe599ebefb1a2e9a10cbc102dd223c82a')
         self.assertTrue(diag['expected']['parent']['selection']['accepted']['value'])

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from bisect import bisect_right
 from copy import deepcopy
+from datetime import datetime, timezone
 import hashlib
 import io
 import json
@@ -297,7 +298,8 @@ def alignment_parent_preimage(alignment):
 
     The producer's JSON-ready conversion is the identity on saved JSON values.
     Keep the float conversion and missing-component/operand semantics identical.
-    This is diagnostic information, never an input to acceptance or output repair.
+    This local operand selection alone does not establish setting-wide binding;
+    setting_alignment_preimage owns that selection. Never repair stored output.
     """
     return dict(setting_key=alignment["parent_setting_key"],
                 common_shift_gev=float(alignment["common_setting_shift_gev"]),
@@ -308,12 +310,264 @@ def alignment_parent_preimage(alignment):
                     for name in ("pi_n", "pi_delta", "pi_sidis")})
 
 
+_ALIGNMENT_COMPONENTS = ("pi_n", "pi_delta", "pi_sidis")
+_PARENT_OPERANDS = ("residual_shift_gev", "window_expansion_gev", "effective_windows")
+
+
+def setting_alignment_preimage(alignment):
+    """Recover the setting-wide ancestor, never rehash a t-bin as its owner.
+
+    The frozen producer retains setting-wide shifts/windows as parent_* on
+    t-bin components. Identifiers/checksums and common shift remain inherited.
+    Missing operands are an error, including on an unaccepted fallback record.
+    """
+    result = alignment_parent_preimage(alignment)
+    require(set(alignment["components"]) == set(_ALIGNMENT_COMPONENTS), "scientific_lineage:components")
+    for name in _ALIGNMENT_COMPONENTS:
+        component = alignment["components"][name]
+        for field in (*_PARENT_OPERANDS, "immutable_source_hist_identifier", "immutable_source_hist_checksum"):
+            source = ("parent_" + field if field in _PARENT_OPERANDS
+                      and alignment["analysis_scope"] != "setting-wide" else field)
+            require(source in component and component[source] is not None,
+                    "scientific_lineage:setting_preimage." + name + "." + source)
+            result["components"][name][field] = deepcopy(component[source])
+    return result
+
+
+def _check1_hist_name(name, path):
+    """Only the two source-proven uuid4().hex[:10] suffixes are erased.
+
+    _build_hist_name owns the first; _clone_detached_hist owns the second.
+    Preserve prefix, component, setting and caller context. Stable t/phi names
+    are compared verbatim. Unknown generated syntax fails closed.
+    """
+    require(isinstance(name, str), "scientific_identity_syntax:" + path)
+    if name.startswith("H_MM_component_shape"):
+        match = re.fullmatch(
+            r"(H_MM_component_shape_full_(?:pi_n|pi_delta|pi_sidis)_"
+            r"(?:Left|Center|Right)_main_step3_pre_rand_sub)_[0-9a-f]{10}_[0-9a-f]{10}", name)
+        require(match is not None, "scientific_identity_syntax:" + path)
+        return match.group(1) + "_<generated>_<clone>"
+    require(re.search(r"_[0-9a-f]{10}(?:_|$)", name) is None,
+            "scientific_identity_syntax:" + path)
+    return name
+
+
+def _check1_identity_view(value, hashes, path):
+    """Closed identity edits, on a copy, after raw per-side validation.
+
+    Inventory: alignment hash plus components/applied_components/
+    proposed_components name aliases, immutable_source_template_identifier,
+    and creation_timestamp. No identifier object or scientific subtree is
+    removed. All other keys, including checksums and axes, survive unchanged.
+    """
+    if isinstance(value, dict):
+        result = {}
+        for key, item in value.items():
+            here = path + "." + key
+            if key == "parent_alignment_hash":
+                require(".pion_component_alignment." in here and isinstance(item, str) and item in hashes,
+                        "scientific_lineage:" + here)
+                result[key] = hashes[item]
+            elif key in ("hist_name", "immutable_source_hist_name"):
+                require(not isinstance(item, str) or not item.startswith("H_MM_component_shape")
+                        or ".pion_component_alignment." in here or ".setting_wide_preimage." in here,
+                        "scientific_identity_syntax:" + here)
+                result[key] = _check1_hist_name(item, here)
+            elif key == "creation_timestamp":
+                # datetime.now(timezone.utc).isoformat(), in the frozen resolver.
+                require(here.endswith(".pion_component_alignment.creation_timestamp") and isinstance(item, str),
+                        "scientific_identity_syntax:" + here)
+                try:
+                    stamp = datetime.fromisoformat(item)
+                except ValueError as error:
+                    raise ValueError("check1:scientific_identity_syntax:" + here) from error
+                require(stamp.tzinfo == timezone.utc and stamp.isoformat() == item,
+                        "scientific_identity_syntax:" + here)
+                result[key] = "<alignment creation UTC>"
+            else:
+                result[key] = _check1_identity_view(item, hashes, here)
+        return result
+    if isinstance(value, list):
+        return [_check1_identity_view(v, hashes, path + "[" + str(i) + "]") for i, v in enumerate(value)]
+    # Do not let another generated-name occurrence become a late comparison
+    # failure or silently normalize it by spelling alone.
+    require(not isinstance(value, str) or re.search(r"_[0-9a-f]{10}(?:_|$)", value) is None,
+            "scientific_identity_syntax:" + path)
+    return value
+
+
+def _validate_check1_alignment(alignment, ancestor, path):
+    require(isinstance(alignment, dict), "scientific_lineage:" + path)
+    require(alignment.get("parent_alignment_hash") == ancestor, "scientific_lineage:" + path + ".parent_alignment_hash")
+    require(digest(alignment["resolved_config"]) == alignment["resolved_configuration_hash"],
+            "scientific_lineage:" + path + ".resolved_configuration_hash")
+    for group in ("components", "applied_components", "proposed_components"):
+        require(isinstance(alignment.get(group), dict), "scientific_lineage:" + path + "." + group)
+        # A fallback intentionally has no proposed components.
+        require(set(alignment[group]) == set(_ALIGNMENT_COMPONENTS) or
+                (group == "proposed_components" and alignment[group] == {}),
+                "scientific_lineage:" + path + "." + group)
+        for name, component in alignment[group].items():
+            here = path + "." + group + "." + name
+            identifier = component.get("immutable_source_hist_identifier")
+            require(isinstance(identifier, dict) and identifier.get("component") == name,
+                    "scientific_lineage:" + here + ".immutable_source_hist_identifier")
+            require(identifier == alignment["immutable_source_template_identifier"][name]
+                    and component.get("immutable_source_hist_name") == identifier.get("hist_name"),
+                    "scientific_lineage:" + here + ".immutable_source_hist_name")
+            require(component.get("immutable_source_hist_checksum") == alignment["immutable_source_template_checksum"][name]
+                    and re.fullmatch(r"[0-9a-f]{64}", component["immutable_source_hist_checksum"]) is not None,
+                    "scientific_lineage:" + here + ".immutable_source_hist_checksum")
+            # The resolver annotates only applied_components (also exposed as
+            # components), after selecting the mixed map. Proposals have no
+            # inherited link unless they were copied from a parent baseline.
+            if not ((group == "proposed_components" and "parent_alignment_hash" not in component)
+                    or component.get("parent_alignment_hash") == ancestor):
+                error = ValueError("check1:scientific_lineage:" + here + ".parent_alignment_hash")
+                error.check1_raw_operands = dict(actual=diagnostic_value(component.get("parent_alignment_hash")),
+                    expected=diagnostic_value(ancestor), expectation="same-run setting-wide ancestor")
+                raise error
+
+
+def _validate_check1_candidate_alignment(parent, path):
+    """Mirror the frozen producer's candidate_alignment_changed invariant."""
+    baseline = parent["baseline_A"]["pion_component_alignment"]
+    candidate = parent["candidate_B"]["pion_component_alignment"]
+    if candidate != baseline:
+        location = path + ".candidate_B.pion_component_alignment"
+        error = ValueError("check1:scientific_lineage:" + location)
+        error.check1_raw_operands = dict(expectation="same-run baseline_A.pion_component_alignment",
+            difference=first_exact_difference(candidate, baseline, location))
+        raise error
+
+
+def check1_scientific_projection(document, key, coordinate=None):
+    """Check 1 cross-run view; never used for producer/cache/runtime bindings.
+
+    Validate each side's original ancestry before replacing its raw hash by
+    the deterministic digest of its setting-wide scientific preimage. The
+    original projection and compare_science semantics remain unchanged.
+    """
+    try:
+        return _check1_scientific_projection(document, key, coordinate)
+    except (KeyError, TypeError, IndexError) as error:
+        raise ValueError("check1:scientific_lineage:" + key + ":missing_or_invalid_operand:" + str(error)) from error
+
+
+def validate_check1_science_lineage(document, key):
+    """Validate one raw side without constructing any comparison projection."""
+    try:
+        return _check1_science_lineage(document, key)
+    except (KeyError, TypeError, IndexError) as error:
+        raise ValueError("check1:scientific_lineage:" + key + ":missing_or_invalid_operand:" + str(error)) from error
+
+
+def _check1_science_lineage(document, key):
+    parents = document.get("parents")
+    require(isinstance(parents, list) and len(parents) == 3, "scientific_lineage:" + key + ".parents")
+    raw_ancestors = []
+    preimages = []
+    for index, parent in enumerate(parents):
+        path = key + ".parents[" + str(index) + "]"
+        alignment = parent["baseline_A"]["pion_component_alignment"]
+        preimage = setting_alignment_preimage(alignment)
+        ancestor = alignment.get("parent_alignment_hash")
+        require(isinstance(ancestor, str) and digest(preimage) == ancestor,
+                "scientific_lineage:" + path + ".setting_wide_preimage")
+        preimages.append(preimage)
+        raw_ancestors.append(ancestor)
+        _validate_check1_alignment(alignment, ancestor, path + ".baseline_A")
+        _validate_check1_candidate_alignment(parent, path)
+        _validate_check1_alignment(parent["candidate_B"]["pion_component_alignment"], ancestor, path + ".candidate_B")
+    require(all(p == preimages[0] for p in preimages), "scientific_lineage:" + key + ".setting_wide_ancestry")
+    if "cells" in document:
+        require(isinstance(document["cells"], list) and len(document["cells"]) == 27,
+                "scientific_lineage:" + key + ".cells")
+        for index, cell in enumerate(document["cells"]):
+            alignment = cell.get("fit", {}).get("pion_component_alignment")
+            require(alignment is not None or cell.get("fit", {}).get("status") == "unavailable",
+                    "scientific_lineage:" + key + ".cells[" + str(index) + "].fit.pion_component_alignment")
+            if alignment is not None:
+                ti = cell.get("t_index")
+                require(type(ti) is int and 0 <= ti < 3, "scientific_lineage:" + key + ".t_index")
+                _validate_check1_alignment(alignment, raw_ancestors[ti], key + ".cells[" + str(index) + "].fit")
+    return raw_ancestors, preimages
+
+
+def _check1_scientific_projection(document, key, coordinate):
+    raw_ancestors, preimages = validate_check1_science_lineage(document, key)
+    hashes = {}
+    # All raw parents/children must pass before any deterministic view exists.
+    # Exact preimage inputs stay exact, as with the original hash strings.
+    for index, (ancestor, preimage) in enumerate(zip(raw_ancestors, preimages)):
+        hashes[ancestor] = digest(_check1_identity_view(preimage, {},
+            key + ".parents[" + str(index) + "].setting_wide_preimage"))
+    return _check1_identity_view(scientific_projection(document, coordinate), hashes, key)
+
+
+def validate_check1_parent_binding(child, parent, key):
+    """The separate artifact and embedded t parents are the same raw run."""
+    missing = object()
+    def operand(value):
+        return dict(status="missing") if value is missing else dict(status="available", **diagnostic_value(value))
+    def reject(location, artifact, index, branch, embedded, separate, reason, **context):
+        error = ValueError("check1:scientific_lineage:" + location)
+        error.check1_raw_operands = dict(artifact=artifact, parent_index=index, branch=branch, reason=reason,
+            embedded=operand(embedded), separate=operand(separate), **context)
+        if reason == "raw_alignment_mismatch":
+            difference = first_exact_difference(embedded, separate,
+                key + ".parents[" + str(index) + "]." + branch + ".pion_component_alignment")
+            error.check1_raw_operands["difference"] = dict(path=difference["path"],
+                embedded=difference["actual"], separate=difference["expected"])
+        raise error
+    documents = (child, parent)
+    for artifact, document in zip(("embedded", "separate"), documents):
+        if not isinstance(document, dict):
+            reject(key, artifact, None, None, child, parent, "document_mapping_required")
+    lists = (child.get("parents", missing), parent.get("parents", missing))
+    for artifact, records in zip(("embedded", "separate"), lists):
+        if not isinstance(records, list):
+            reject(key + ".parents", artifact, None, None, *lists, "parent_list_required")
+        if len(records) != 3:
+            index = min(len(records), 3)
+            values = [items[index] if index < len(items) else missing for items in lists
+                      if isinstance(items, list)]
+            if len(values) != 2:values = list(lists)
+            reject(key + ".parents[" + str(index) + "]", artifact, index, None, *values,
+                   "three_parents_required", embedded_parent_count=len(lists[0]),
+                   separate_parent_count=len(lists[1]) if isinstance(lists[1], list) else None)
+    for index in range(3):
+        embedded, separate = lists[0][index], lists[1][index]
+        location = key + ".parents[" + str(index) + "]"
+        for artifact, record in (("embedded", embedded), ("separate", separate)):
+            if not isinstance(record, dict):
+                reject(location, artifact, index, None, embedded, separate, "parent_mapping_required")
+        for branch in ("baseline_A", "candidate_B"):
+            branches = (embedded.get(branch, missing), separate.get(branch, missing))
+            for artifact, record in zip(("embedded", "separate"), branches):
+                if not isinstance(record, dict):
+                    reject(location + "." + branch, artifact, index, branch, *branches, "branch_mapping_required")
+            alignments = tuple(record.get("pion_component_alignment", missing) for record in branches)
+            for artifact, alignment in zip(("embedded", "separate"), alignments):
+                if not isinstance(alignment, dict) or not alignment:
+                    reject(location + "." + branch + ".pion_component_alignment", artifact, index, branch,
+                           *alignments, "alignment_mapping_required")
+            if alignments[0] != alignments[1]:
+                reject(location + "." + branch + ".raw_artifact_binding", "embedded/separate", index, branch,
+                       *alignments, "raw_alignment_mismatch")
+        for record in (embedded, separate):
+            _validate_check1_candidate_alignment(record, key + ".parents[" + str(index) + "]")
+
+
 def alignment_identity_record(alignment, component):
     if not isinstance(alignment, dict):
         return dict(status="missing")
     selection = {key: diagnostic_value(alignment.get(key)) for key in (
         "accepted", "source", "analysis_scope", "persistence_status", "persistence_rejection_reasons")}
-    applied = (alignment.get("applied_components") or {}).get(component) or {}
+    components = alignment.get("applied_components")
+    applied = components.get(component) if isinstance(components, dict) else None
+    applied = applied if isinstance(applied, dict) else {}
     selection["applied_component"] = {key: diagnostic_value(applied.get(key)) for key in (
         "source", "component_applied_source", "component_fallback_used", "component_fallback_reason",
         "parent_alignment_hash")}
@@ -324,54 +578,138 @@ def alignment_identity_record(alignment, component):
 _DIAGNOSTIC_UNSET = object()
 
 
+def _check1_raw_operand(document, key, location):
+    """Resolve only an admitted in-memory operand; never read an external path."""
+    if not location.startswith(key + "."):
+        return dict(status="unavailable", reason="invariant has no complete document location")
+    path = location[len(key) + 1:]
+    def value_at(value, operand_path):
+        for token in re.findall(r"[^.\[\]]+|\[\d+\]", operand_path):
+            value = value[int(token[1:-1])] if token.startswith("[") else value[token]
+        return value
+    try:
+        if ".setting_wide_preimage" in path:
+            head, tail = path.split(".setting_wide_preimage", 1)
+            # The parent itself is intentionally not dumped into a receipt.
+            index = int(re.fullmatch(r"parents\[(\d+)\]", head).group(1))
+            document = setting_alignment_preimage(document["parents"][index]["baseline_A"]["pion_component_alignment"])
+            path = tail.lstrip(".")
+        try:
+            value = value_at(document, path)
+        except (KeyError, TypeError, IndexError):
+            # Raw guard names omit this wrapper; syntax-gate paths already
+            # describe the stored JSON and must be tried verbatim first.
+            path = re.sub(r"\.(baseline_A|candidate_B|fit)\.(?!pion_component_alignment)",
+                          r".\1.pion_component_alignment.", "." + path)[1:]
+            value = value_at(document, path)
+        return dict(status="available", path=location, operand=diagnostic_value(value))
+    except (KeyError, TypeError, IndexError, ValueError, AttributeError):
+        return dict(status="unavailable", reason="rejected operand missing or not retained", path=location)
+
+
 def scientific_failure_diagnostic(actual, expected, source_sha, reference_sha, key, failure,
-                                  actual_science=_DIAGNOSTIC_UNSET, expected_science=_DIAGNOSTIC_UNSET):
+                                  actual_science=_DIAGNOSTIC_UNSET, expected_science=_DIAGNOSTIC_UNSET,
+                                  raw_rejection=None, raw_documents=None):
     """Compact first-failure receipt using only admitted in-memory child records."""
-    a = scientific_projection(actual) if actual_science is _DIAGNOSTIC_UNSET else actual_science
-    b = scientific_projection(expected) if expected_science is _DIAGNOSTIC_UNSET else expected_science
-    difference = first_science_difference(a, b, key)
+    if raw_rejection is None:
+        a = scientific_projection(actual) if actual_science is _DIAGNOSTIC_UNSET else actual_science
+        b = scientific_projection(expected) if expected_science is _DIAGNOSTIC_UNSET else expected_science
+        difference = first_science_difference(a, b, key)
+        context_path = difference["path"] if difference else ""
+    else:
+        # No valid pair of comparison views exists. A raw-document mismatch
+        # (for example a legitimate regenerated UUID) is not the rejected gate.
+        difference = None
+        context_path = failure.split(":", 2)[2]
     result = dict(schema_version="check1_scientific_failure/v1", source_sha=source_sha,
                   reference_sha256=reference_sha, setting=key.split(":")[0], epsilon=key.split(":")[1],
                   invariant=failure, first_difference=difference, diagnostic_only=True)
-    match = re.search(r"\.cells\[(\d+)\]", difference["path"]) if difference else None
+    if raw_rejection is not None:
+        side = raw_rejection["side"]
+        docs = raw_documents if raw_documents is not None else (actual, expected)
+        result["projected_first_difference"] = dict(status="unavailable",
+            reason="raw lineage or identity syntax rejected before comparison projections completed")
+        result["raw_rejection"] = dict(invariant=failure, path=context_path, side=side)
+        if "operands" in raw_rejection:
+            # Guard-supplied operands describe the actual within-run binding,
+            # including embedded/separate records, not the other run's value.
+            result["raw_rejection"]["operands"] = raw_rejection["operands"]
+        else:
+            result["raw_rejection"]["rejected_operand"] = _check1_raw_operand(
+                docs[0 if side == "actual" else 1], key, context_path)
+    match = re.search(r"\.(cells|parents)\[(\d+)\]", context_path)
     if match is None:
-        result["alignment_context"] = "unavailable: first difference does not identify a child cell"
+        result["alignment_context"] = ("unavailable: rejected location does not identify a child cell or t parent"
+            if raw_rejection is not None else "unavailable: first difference does not identify a child cell or t parent")
         return result
-    index = int(match.group(1))
-    component_match = re.search(r"\.(?:applied_components|components)\.(pi_n|pi_delta|pi_sidis)(?:\.|$)", difference["path"])
+    index = int(match.group(2))
+    component_match = re.search(r"\.(?:applied_components|components)\.(pi_n|pi_delta|pi_sidis)(?:\.|$)", context_path)
     component = component_match.group(1) if component_match else None
-    result.update(cell_index=index, component=component)
+    result.update(component=component)
+    if match.group(1) == "cells":result["cell_index"] = index
     preimages = {}
     for side, doc in (("actual", actual), ("expected", expected)):
-        cells = doc.get("cells") or []
-        cell = cells[index] if index < len(cells) else {}
-        ti = cell.get("t_index")
-        parents = doc.get("parents") or []
+        doc = doc if isinstance(doc, dict) else {}
+        cells = doc.get("cells")
+        cells = cells if isinstance(cells, list) else []
+        cell = cells[index] if match.group(1) == "cells" and index < len(cells) else {}
+        cell = cell if isinstance(cell, dict) else {}
+        ti = cell.get("t_index") if match.group(1) == "cells" else index
+        parents = doc.get("parents")
+        parents = parents if isinstance(parents, list) else []
         parent = parents[ti] if type(ti) is int and 0 <= ti < len(parents) else {}
-        pa = (parent.get("baseline_A") or {}).get("pion_component_alignment")
-        ca = (cell.get("fit") or {}).get("pion_component_alignment")
+        parent = parent if isinstance(parent, dict) else {}
+        baseline = parent.get("baseline_A")
+        fit = cell.get("fit")
+        pa = baseline.get("pion_component_alignment") if isinstance(baseline, dict) else None
+        ca = fit.get("pion_component_alignment") if isinstance(fit, dict) else None
+        pa = pa if isinstance(pa, dict) else None
+        ca = ca if isinstance(ca, dict) else None
+        applied = ca.get("applied_components") if ca is not None else None
+        applied = applied.get(component) if isinstance(applied, dict) else None
         info = dict(t_index=ti, phi_index=cell.get("phi_index"),
                     parent_record="children[" + key + "].parents[" + str(ti) + "].baseline_A.pion_component_alignment",
                     parent=alignment_identity_record(pa, component), child=alignment_identity_record(ca, component))
         hashes = [pa.get("parent_alignment_hash") if isinstance(pa, dict) else None,
                   ca.get("parent_alignment_hash") if isinstance(ca, dict) else None,
-                  (((ca or {}).get("applied_components") or {}).get(component) or {}).get("parent_alignment_hash")]
+                  applied.get("parent_alignment_hash") if isinstance(applied, dict) else None]
         info["lineage_consistency"] = ("missing" if any(h is None for h in hashes) else
                                         "consistent" if len(set(hashes)) == 1 else "inconsistent")
         info["parent_hash_consistency"] = dict(status="not_verified", reason="parent alignment unavailable")
         if isinstance(pa, dict):
             try:
-                preimages[side] = alignment_parent_preimage(pa)
-                computed = digest(preimages[side])
-                info["parent_hash_consistency"] = dict(status="matches" if computed == hashes[0] else "mismatch",
-                                                        recomputed_hash=computed)
-                info["parent_hash_operands"] = {k: diagnostic_value(v) for k, v in preimages[side].items() if k != "components"}
+                local_preimage = alignment_parent_preimage(pa)
+                computed = digest(local_preimage)
+                info["t_bin_local_rehash"] = dict(scope="t-bin local components; not the setting-wide owner",
+                                                  recomputed_hash=computed)
+                if isinstance(ca, dict):
+                    predicate = deepcopy(local_preimage)
+                    predicate["common_shift_gev"] = float(ca["common_setting_shift_gev"])
+                    info["child_predicate_rehash"] = dict(scope="t-bin components with child invocation shift",
+                                                           recomputed_hash=digest(predicate))
+                try:
+                    recovered = setting_alignment_preimage(pa)
+                except (KeyError, TypeError, ValueError):
+                    info["parent_hash_consistency"] = dict(status="not_verified",
+                        reason="incomplete setting-wide parent-owned operands; local rehash is not an integrity test")
+                    operands = local_preimage
+                    info["parent_hash_operand_scope"] = "t-bin local only; setting-wide operands not verified"
+                else:
+                    preimages[side] = recovered
+                    operands = recovered
+                    info["parent_hash_operand_scope"] = "setting-wide ancestor"
+                    computed = digest(recovered)
+                    info["parent_hash_consistency"] = dict(status="matches" if computed == hashes[0] else "mismatch",
+                        scope="setting-wide ancestor from parent-owned operands", recomputed_hash=computed)
+                info["parent_hash_operands"] = {k: diagnostic_value(v) for k, v in operands.items() if k != "components"}
                 info["parent_hash_operands"]["components"] = {name: {k: diagnostic_value(v) for k, v in values.items()}
-                    for name, values in preimages[side]["components"].items()}
+                    for name, values in operands["components"].items()}
             except (KeyError, TypeError, ValueError):
                 info["parent_hash_consistency"] = dict(status="not_verified", reason="incomplete or invalid parent preimage")
         result[side] = info
-    result["first_parent_operand_difference"] = (first_exact_difference(preimages["actual"], preimages["expected"])
+    result["first_parent_operand_difference"] = (dict(status="unavailable",
+        reason="a cross-run operand difference is not the cause of a raw validation rejection")
+        if raw_rejection is not None else first_exact_difference(preimages["actual"], preimages["expected"])
         if len(preimages) == 2 else dict(status="not_verified", reason="both parent preimages required"))
     # The owner bounds this value using its actual indented persistence format.
     # Compact JSON size cannot bound nested indentation or text-mode newlines.

@@ -129,41 +129,56 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — independent actual-diff review of the November 8 diagnostic-only
-scientific-identity failure receipt; after source acceptance, user publication
-and exact pushed-state synchronization, consider only a separately reviewed,
-evidence-preserving narrow diagnostic execution. No second full acquisition
-is authorized. Local implementation base: test
-`912ca31d0afdd7b9757395d205d7c54bc49018e8`.
+NEXT — review readiness for a representative, bounded early scientific-identity
+runtime diagnostic, conditional on independent actual-diff source acceptance,
+user publication and exact pushed-state synchronization of the November 9
+[deterministic identity correction](phases/check1-deterministic-scientific-identity-fix-2026-11-09-task-contract.md).
+An equivalent bounded entry point is not yet proven. Preflight-only does not
+exercise this comparison. No full acquisition or farm command is authorized.
 
-The supplied November 7 failed-attempt fields in the
-[contract](phases/check1-scientific-identity-failure-diagnostics-2026-11-08-task-contract.md)
-identify `KaonLT_Check1_Acquisition_Q4p4W2p74_20261107T163552Z-3952780`
-at that source with frozen reference SHA-256
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: raw embedded/separate parent-
+binding receipt repair at base test `fde9b5002e08bf692d706a4303ee23b99edd7adf`.
+The user reports v2 source-design acceptance of the other identity behavior.
+Exact equality is retained; mismatches attach both artifact operands, and
+missing/malformed records are classified scientific-lineage ValueErrors.
+Local replacement checks pass; actual-diff review of this narrow repair remains
+required. No runtime acceptance follows.
+The original producer, child parent_valid/fallback decisions,
+reference archive, numerical tolerances and coordinate contract remain frozen.
+The November 8 bounded diagnostic receipt is published at that base; its older
+pre-publication NEXT is consumed. Source review of the new correction is pending.
+
+SOURCE VERIFIED: the pinned reference's stored setting-wide hashes reconstruct
+from retained parent_* shift/window operands across all five settings/three t
+bins. Per-run generated histogram UUID names enter those hashes. The November 9
+independent audit's UUID-only replay is a sufficient failure mechanism; the
+actual November 7 generated hash/operands were not recovered, so its unique
+historical cause remains NOT VERIFIED. The t-bin-local rehash and child
+invocation-shift predicate rehash are distinct diagnostic scopes, not evidence
+of a corrupted reference or authority to change child acceptance.
+
+The candidate independently validates each side's raw setting-wide ancestry,
+component aliases/checksums/inherited links, exact candidate-B/baseline-A raw
+alignment equality, and embedded/separate parent binding before either side is
+projected. Only the Check 1 cross-run view normalizes source-proven UUID suffixes,
+alignment creation timestamps and the resulting verified ancestor hash. Stable
+name context, axes, content/error checksums, configuration, shifts/windows,
+physical observations, fit results/errors and signed/empty states remain under
+the unchanged strict comparator. A raw rejection receipt identifies the actual
+rejected invariant, side, location and retained operands; projected first
+difference is explicitly unavailable if comparison projections did not complete.
+Original output/provenance records are untouched.
+
+The supplied November 7 attempt
+`KaonLT_Check1_Acquisition_Q4p4W2p74_20261107T163552Z-3952780`, at
+`912ca31d0afdd7b9757395d205d7c54bc49018e8`, completed analysis (return code 0)
+but failed verify_artifacts at
+`check1:scientific_identity:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.parent_alignment_hash`.
+Collection/ZIP verification did not complete; evidence remains inadmissible
+and scientifically unaccepted. These are supplied failed-runtime facts, not a
+new local parsing of the removed private output. Frozen reference SHA-256 stays
 `02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a`.
-Analysis return code was 0 and analysis completed, but `verify_artifacts` failed
-at `check1:scientific_identity:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.parent_alignment_hash`.
-Artifact verification, collection and ZIP verification did not complete;
-evidence is inadmissible and scientifically unaccepted. These are supplied
-failed-evidence facts, not an independent local parsing of the farm outputs.
-The destination collision did not recur; the new hash operands/cause remain
-NOT VERIFIED. Scientific acquisition stays BLOCKED at the original invariant.
-
-The diagnostic candidate retains the comparator, projection, coordinates,
-tolerances and hash producer unchanged. It records bounded actual/reference
-values, alignment selection/lineage and exact parent-hash operands in the
-existing owner status before cleanup, then re-raises the original exception.
-The November 8 review found that compact JSON did not bound the indented
-receipt. The local repair now bounds the real nested UTF-8/text-newline
-representation; its oversized fixture falls from 90,582 to 21,621 persisted
-diagnostic bytes while retaining first-difference hashes and operand evidence.
-The v2 review additionally found lost short window operands during compaction.
-The local continuation compacts ancillary context first and retains both exact
-first-difference records whenever they fit; the saved window regression is
-21,690 bytes with both short window lists intact. Summarization of a first
-operand is deferred until its own remaining budget is exceeded. Replacement
-actual-diff review remains required; no source acceptance follows.
-See the [implementation record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-8-scientific-identity-failure-diagnostics).
+See the [November 9 record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-9-deterministic-scientific-identity-correction).
 No farm/ROOT/main/PDF or scientific validation is claimed. Prior P1/P2,
 both Center conclusions, Outcome B, Method A/B and accepted closures stand.
 Stop before Check 2.
