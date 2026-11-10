@@ -15,23 +15,34 @@ Later SIMC iterations approach unity with iteration-zero subtraction fixed.
 
 ## Current Work Item
 
-Q4p4W2p74: the November 5 meeting assessment, as reported by the user, finds
-generally consistent Lambda peak/relevant-tail shapes in latest Local-t data
-and unchanged iteration-zero KLambda SIMC, at parent-t and populated child
-level. Local-t remains selected, not production-adopted; this qualitative
-assessment proves neither purity, covariance validity nor final yields.
-Principal reported exceptions: Center/low and Center/high t3. Center's restricted
-high-minus-t coverage makes an acceptance-edge interpretation plausible, not
-established. Test it before attributing the behavior to pion subtraction.
+Q4p4W2p74 Local-t remains the selected scientific baseline. The November 5
+meeting identified Center/low and Center/high t3 as the principal Lambda-MM
+exceptions. The November 9 Check 1 packet supplies continuous -t, occupancy
+and matched-interior comparisons. Both Center settings have observed support
+through nearly all canonical t3; this does not establish geometric acceptance
+or a resolved Lambda signal. The earlier low-epsilon lower-t3 tail interpretation
+and its use against an upper-edge explanation are withdrawn. Low-epsilon t3
+has weak, poorly resolved Lambda signal; high-epsilon t3 has a potentially
+substantial applied pion background of unverified physical accuracy. See the
+[Check 1 record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-9-continuous-t-evidence-and-pid-follow-up).
 
-Check 1 retained-input assessment is `SOURCE REVIEWED` for the supported
-canonical occupancy/MM arithmetic only; evidence remains insufficient for both
-Center epsilons. Lambda t3 record shares are 9.8%/13.8% (low/high), versus SIMC
-yield shares 7.4%/12.4%; broad-MM records are not similarly depleted. Counts do
-not establish occupied t length. Continuous t and joint t-MM/applied-background
-information are absent from the named retained inputs, so full accepted-t and
-common-interior tests were not produced. See the
-[Check 1 record](investigations/full-t-acceptance-edge-check1-2026-11-05.md).
+Check 1.B reproduced Center/low t2 broad-MM subtraction: the maximum transfer
+was 3435.63 from a small fitted pion-control denominator. This is the known
+denominator-amplification mechanism, with no cross-cohort regression established.
+SHMS delta and HGCer position vary with -t. Low-positive HGCer fractions do not
+show a common Center upper-t3 increase. Center/high t3 applied pion background
+is concentrated at negative delta; the experimental source split does not
+identify the pion-production channels. See the
+[Check 1.B result](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-9-check-1b-results-and-check-1c-decision).
+
+Check 1.C measured different positive-response trends at the two Center
+settings on common joint detector support. Kaon-selected rows support kinematic
+comparison; matched kaon detector values were not available in the reviewed
+evidence. The retained channel SIMC shapes differ in MM and phi, with substantial
+overlap beneath Lambda. The current fitted Center/high t3 SIDIS term contributes
+to the pion-control denominator while its kaon-side amplitude is zero. Fitted
+allocation cannot identify experimental species or establish channel delta
+occupancy. See the [Check 1.C record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-10-ten-bin-channel-constraint).
 
 The approved immediate sequence is full-t/acceptance-edge diagnostic, review of
 the colleague's exclusion procedure when supplied, remaining beneath-Lambda
@@ -62,17 +73,16 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-Check 1 startup: local/origin/live HTTPS test matched
-`6663874fae232729093a7dd51daffd6c710621a8`; published meeting-memory changes
-were checked against the reviewed files, allowing the user-run LF conversion.
-This Check 1 result/memory update is local; index/refs and pending offline
-testing work remain preserved. No new farm source or runtime gate is claimed.
+Local/origin/live test and the November 9 farm acquisition source matched
+`6fb1a94ed8f6b7af61e130c9b42b9762164444b9`. The published deterministic
+identity correction matches the seven independently reviewed blobs. The owner
+reports success, including artifact verification and publication. Direct
+readback verified the archive, log and summary hashes, 35 artifacts, both
+scientific comparison paths and all ten numerical packets against the pinned
+reference. These are scoped diagnostic acquisition checks. The stored
+`evidence_admissible=false` and `scientifically_accepted=false` remain.
 Production physics remains unchanged from scientific source
 `9172aba853fd5b5b744c19add992fa4f27466180`.
-RUNTIME VERIFIED: supplied October 30 `20261030T022205` high-epsilon acquisition
-at the farm scientific source completed analysis, collection and nine-artifact verification.
-Stored `evidence_admissible=false` and `scientifically_accepted=false` remain.
-That acquisition consumes the old ledger/fresh-high NEXT, not scientific acceptance.
 
 ## Blockers
 
@@ -97,7 +107,7 @@ final combined angular ratios/yield acceptance: same-cohort producer Y0/MM_0,
 errors, validity/skip reasons, source/fit/cut/normalization lineage and available
 shared covariance, matched to iteration-zero SIMC. Detached spectra and meeting
 agreement do not complete it. This later gate does not block the bounded offline
-full-t diagnostic using available data; no producer rebuild or farm run follows.
+PID/acceptance diagnostic using available data; no producer rebuild or farm run follows.
 
 Production Step 1 remains `BLOCKED`, Outcome B: independently derive the
 Center/highe/t3 non-SIDIS mean in the kaon SIDIS anchor
@@ -129,59 +139,11 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — review readiness for a representative, bounded early scientific-identity
-runtime diagnostic, conditional on independent actual-diff source acceptance,
-user publication and exact pushed-state synchronization of the November 9
-[deterministic identity correction](phases/check1-deterministic-scientific-identity-fix-2026-11-09-task-contract.md).
-An equivalent bounded entry point is not yet proven. Preflight-only does not
-exercise this comparison. No full acquisition or farm command is authorized.
-
-`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: raw embedded/separate parent-
-binding receipt repair at base test `fde9b5002e08bf692d706a4303ee23b99edd7adf`.
-The user reports v2 source-design acceptance of the other identity behavior.
-Exact equality is retained; mismatches attach both artifact operands, and
-missing/malformed records are classified scientific-lineage ValueErrors.
-Local replacement checks pass; actual-diff review of this narrow repair remains
-required. No runtime acceptance follows.
-The original producer, child parent_valid/fallback decisions,
-reference archive, numerical tolerances and coordinate contract remain frozen.
-The November 8 bounded diagnostic receipt is published at that base; its older
-pre-publication NEXT is consumed. Source review of the new correction is pending.
-
-SOURCE VERIFIED: the pinned reference's stored setting-wide hashes reconstruct
-from retained parent_* shift/window operands across all five settings/three t
-bins. Per-run generated histogram UUID names enter those hashes. The November 9
-independent audit's UUID-only replay is a sufficient failure mechanism; the
-actual November 7 generated hash/operands were not recovered, so its unique
-historical cause remains NOT VERIFIED. The t-bin-local rehash and child
-invocation-shift predicate rehash are distinct diagnostic scopes, not evidence
-of a corrupted reference or authority to change child acceptance.
-
-The candidate independently validates each side's raw setting-wide ancestry,
-component aliases/checksums/inherited links, exact candidate-B/baseline-A raw
-alignment equality, and embedded/separate parent binding before either side is
-projected. Only the Check 1 cross-run view normalizes source-proven UUID suffixes,
-alignment creation timestamps and the resulting verified ancestor hash. Stable
-name context, axes, content/error checksums, configuration, shifts/windows,
-physical observations, fit results/errors and signed/empty states remain under
-the unchanged strict comparator. A raw rejection receipt identifies the actual
-rejected invariant, side, location and retained operands; projected first
-difference is explicitly unavailable if comparison projections did not complete.
-Original output/provenance records are untouched.
-
-The supplied November 7 attempt
-`KaonLT_Check1_Acquisition_Q4p4W2p74_20261107T163552Z-3952780`, at
-`912ca31d0afdd7b9757395d205d7c54bc49018e8`, completed analysis (return code 0)
-but failed verify_artifacts at
-`check1:scientific_identity:Left:lowe.cells[0].fit.pion_component_alignment.applied_components.pi_delta.parent_alignment_hash`.
-Collection/ZIP verification did not complete; evidence remains inadmissible
-and scientifically unaccepted. These are supplied failed-runtime facts, not a
-new local parsing of the removed private output. Frozen reference SHA-256 stays
-`02ff71998fd51d5e56f07484bb1c71185f78ed51d6ce409b0d34154bda7a6d7a`.
-See the [November 9 record](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-9-deterministic-scientific-identity-correction).
-No farm/ROOT/main/PDF or scientific validation is claimed. Prior P1/P2,
-both Center conclusions, Outcome B, Method A/B and accepted closures stand.
-Stop before Check 2.
+NEXT — Obtain the read-only, source-hash-bound accepted event projection
+from the 15 identified pion SIMC h10 trees. Close the ten SHMS-delta slices
+and explicit flow against the 45 original parent templates before comparing
+fixed-B predictions or fitting the detached joint candidate. Review
+Center/high t3 first within the same five-setting scope.
 
 ## Success Criteria
 

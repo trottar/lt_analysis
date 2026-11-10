@@ -1247,3 +1247,147 @@ reference/unrelated state and manifest/ordinary health. Existing two size
 warnings remain nonblocking, scheduled for the next meaningful checkpoint.
 The only next gate remains CURRENT's conditional narrow readiness review;
 no publication, farm execution, new acquisition or scientific closure follows.
+
+
+## November 9 continuous-t evidence and PID follow-up
+
+The published comparison-only correction at
+`6fb1a94ed8f6b7af61e130c9b42b9762164444b9` matches the seven independently
+reviewed v3 blobs. The corresponding acquisition
+`KaonLT_Check1_Acquisition_Q4p4W2p74_20261109T181613Z-98329` reports owner
+success through collection, cleanup, preservation and publication. Direct
+review of the primary ZIP, log and summary matched the owner hashes, including
+ZIP SHA-256 `4fcc463bae457fdd49f5fef5cb814143df9ce7313be73623a7d674d123554213`.
+Independent readback checked all 35 artifacts, both scientific comparison
+paths, ten numerical packets and the October data/dummy and unchanged SIMC
+bindings. This verifies the retained diagnostic payload; the owner's stored
+admissibility and scientific-acceptance flags remain false.
+
+`KaonLT_Check1_Full_t_Matched_Interior_20261109.zip` retains the continuous -t,
+occupancy and matched-interior results. Center prompt and SIMC have broad
+observed t3 support across the retained canonical interval. With the Lambda
+window, empirical common coverage is 97% at low epsilon and 100% at high
+epsilon at the 0.005 GeV^2 resolution. These are occupancy measurements and
+do not isolate geometric acceptance. Center/low broad-MM t2 has a very large
+negative signed subtraction that needs reconciliation against the source
+weights, application and plotting. Center/low t3 has weak and poorly
+resolved Lambda signal despite its measured -t occupancy. The prior
+lower-t3 tail physics interpretation and the resulting conclusion against
+an upper-edge explanation are withdrawn. Center/high t3 has a potentially
+substantial applied pion contribution whose physical accuracy is unverified.
+
+The November 9 user decision adds an acceptance-dependent PID investigation
+within Check 1, using established detector-response observables before any
+Method A consideration. Separate the operational zero, low-positive and
+strong-positive HGCer categories and the training and physical populations.
+Compare all five settings where supported; prioritize the Center t3 anomalies.
+CURRENT owns the active action. Earlier phase closures and the six roadmap
+statuses, unresolved Outcome B and canonical-five equivalence, detached
+Method A and diagnostic/excluded Method B retain their recorded boundaries.
+
+## November 9 Check 1.B results and Check 1.C decision
+
+The two November 9 analytical packages passed member-hash readback. The
+supplied primary acquisition archive, log, summary and delivered status
+also match the preceding readback receipt. This confirms those exact bytes;
+the reported owner outcome and the stored false evidence-admissibility and
+scientific-acceptance flags retain their separate meanings.
+
+The retained Center/low t2 broad-MM arithmetic reproduces +1.405651 before
+pion subtraction, +148.831062 applied pion contribution and -147.425411 after.
+The Lambda-window result remains positive (+0.715728). The maximum transfer,
+about 3435.63, is associated with a small fitted pion-control denominator
+below the Lambda window. See the [October investigation](baseline-pion-control-center-lowe-regression-2026-10-14.md)
+for the staged/joint-fit, source-aware statistics and component history.
+Different cohorts do not establish a regression from their transfer maxima.
+
+Five-setting joint pion-control records show SHMS delta and HGCer-position
+changes with continuous -t. The conditional low-positive training fraction
+does not establish a universal Center upper-t3 increase. About 90-97% of
+Center/high t3 signed beneath-Lambda pion background falls in the retained
+negative-delta grouping (-10 to -1 percent) across the three subintervals.
+Prompt, random, dummy and dummy-random identify experimental sources. The
+total-background tables do not separate pi_n, pi_Delta and pi_SIDIS. The
+analytical packet lacks matched detector rows for the cleaned kaon-selected
+events; this is a package-specific limitation. Weak Center/low t3 Lambda
+support and unresolved Center/high beneath-Lambda background remain.
+
+The user selects the five-setting matched event-level kaon/pion PID and
+three-channel SIMC acceptance comparison within Check 1, including the
+hypothesized SIDIS onset near zero SHMS delta. CURRENT alone owns NEXT.
+The six milestones, historical phase closures, Outcome B and canonical-five
+F.4 blockers, detached Method A and excluded Method B retain their boundaries.
+
+## November 10 ten-bin channel constraint
+
+Check 1.C verified 188253 joint physical pion-control rows and reconstructed
+all 15 retained Local-t transfer arrays. On shared joint detector support, the
+descriptive low-positive fraction rose from middle to upper t3 at Center/low
+(0.664 to 0.809 percent) and fell at Center/high (1.356 to 1.046 percent).
+Neither result calibrates true-pion leakage. Matched kaon detector observables
+and channel-resolved SIMC delta rows were unavailable in the reviewed analytical
+evidence. Center/high t3 fitted kaon-side SIDIS amplitude was zero; its nonzero
+pion-side amplitude contributes to the control denominator. The applied
+channel allocation is algebra on the same signed experimental rows. Weak
+Center/low t3 Lambda support and the earlier Center/low t2 denominator finding
+retain their respective scopes.
+
+The user directs a five-setting comparison of the three existing fitted
+pion-control components to signed experimental pion control, preserving
+joint delta, -t, MM and phi. Every delta diagnostic uses the established
+ten proton-cleaning bins with edges [-10,-7,-4,-1,2,5,8,11,14,17,20] percent.
+Keep the empty cells, native MM edges and original parent normalization.
+Use the pion-side B amplitudes without refitting. Quantify the SIDIS
+neighboring-t stability and differing Delta shapes as hypotheses; the
+[-1,2) percent cell cannot resolve an onset exactly at zero. Use readable,
+visually reviewed figures and retain signed values. Do not repeat the
+Center/low t2 denominator investigation or treat loader fallback details
+as a reason to reject shape comparisons. No experimental event is labeled
+as a species from the fitted allocation.
+
+This continues the existing six-step roadmap. Outcome B and the canonical-five
+equivalence gate remain blocked, Method A stays detached, and Method B stays
+diagnostic/excluded. CURRENT owns the sole NEXT.
+
+## November 10 joint pion-component acceptance constraint
+
+The ten-bin archive passed hash and numerical-receipt readback. It preserves
+188253 observed pion-control rows, 300 setting/t/delta/selection cells and
+45 channel parent closures on phi and MM. Center/high t3 has 90.6 percent of
+signed Lambda-window pion control below delta=-1 percent. No channel-specific
+delta templates passed admission in that archive. These are diagnostic results.
+
+The user authorizes a detached joint (MM,delta) candidate across all 15 parents:
+one constrained amplitude per channel across the exact ten delta bins within
+a parent, with existing normalization and no cross-setting equality. First
+reconstruct original parent templates from source-bound delta slices plus
+explicit flow. Compare fixed-model residuals before the candidate fit. Reusing
+the same pion-control data is appropriate for development if fit-data dependence
+and source covariance are accounted for. Evaluate finite-SIMC, alignment and
+acceptance uncertainties separately from conditional counting precision. A
+zero fitted kaon-side SIDIS term is a physical-model concern; pion-control
+identification does not calibrate the kaon-side leakage. Preserve Outcome B,
+all six roadmap states, historical denominator evidence and the existing
+Method A/B boundaries.
+
+### Closing offline checkpoint
+
+The all-five-setting joint (MM,delta) candidate remains BLOCKED at template
+admission. No exact channel h10 event file or equivalent same-event ssdelta
+projection was available in the inspected retained evidence. The observed
+ten-bin spectra remain usable, with empty and unsupported states kept separate.
+No ten-bin model residual, fit, uncertainty reduction or kaon-side correction
+is inferred.
+
+A separate phi/MM local sensitivity calculation covers all 15 parents and
+uses common observed support with the same fixed pion-side amplitudes.
+It propagates original signed counting errors and conditional finite-SIMC
+variance through the shared parent normalization and fixed alignment.
+For Center/high t3 complete Lambda bins, the least-constrained MM contrast
+has a conditional standard error of 3.168 in MM
+and 0.812 in phi/MM; including conditional finite
+SIMC statistics gives 3.366 and
+0.892. This measures phi information only.
+Data-to-fit covariance for independent validation and acceptance/alignment
+model covariance remain unavailable. Outcome B still requires independent
+kaon-side anchor/gauge information and applicable covariance.
