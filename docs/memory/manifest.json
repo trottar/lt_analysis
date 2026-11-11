@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 12079,
+      "bytes": 12601,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "ab5f2c223123ad992964fa5d7a13cd7385fd9a2a8af39d8ee1de3efcf78a48a1"
+      "sha256": "ce0e69388e81c85b64fdafa32a483edfb08eb1e04dc791d5338a76ad5f1899c9"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 48794,
+      "bytes": 50299,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "c979f0ae3d09240be090202afb1b3261ffe3614697c77daa036bf2d41fc63b09"
+      "sha256": "ebf6b78bb160a2ed31cf3ed247ab003661c35b1417c1b95139bee6b90366887c"
     },
     {
       "bytes": 3606,
@@ -446,9 +446,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 95230,
+      "bytes": 107675,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "ee41608b566148b97f80370ae1ccb236edd32c02bae6c02a961b18898d555384"
+      "sha256": "71d22b188ba1f8b343b20d9e161ed97a2ab863b844125a160142629474856784"
     },
     {
       "bytes": 34568,
@@ -1326,6 +1326,11 @@
       "sha256": "82cab94614812a72b2a63b87e3b9eff31cface6eede8ca83d2397192d18b2451"
     },
     {
+      "bytes": 8160,
+      "path": "docs/memory/phases/joint-pion-mm-delta-fit-2026-11-11-task-contract.md",
+      "sha256": "851f150b0c9954d3ab4ce66381293b87fa8d861fef299f50c409858bac59c314"
+    },
+    {
       "bytes": 11392,
       "path": "docs/memory/phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md",
       "sha256": "bdc31dc57e6f8f8002dc7100a68921646e26f495c1fa757afebf9125bd2e4a57"
@@ -1659,6 +1664,11 @@
       "bytes": 17459,
       "path": "docs/memory/phases/phase-f6-method-a-production-promotion.md",
       "sha256": "3772ab5fc28c9e2b1942e30af9dc937a410334c1701a637211fcf94c4bae321a"
+    },
+    {
+      "bytes": 7801,
+      "path": "docs/memory/phases/pion-bootstrap-transfer-2026-11-11-task-contract.md",
+      "sha256": "f3bcf77a436b398c7ca7287980d63a635457c9387d4c0230994ce9fafc74bbc5"
     },
     {
       "bytes": 9492,

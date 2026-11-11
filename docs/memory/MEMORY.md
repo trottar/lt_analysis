@@ -119,6 +119,30 @@ work; that scientific assessment is distinct from demonstrated acceptance.
 These diagnostics are not production corrections. No new fitting study or
 adoption is authorized by this clarification.
 
+### November 11 detached joint pion-fit priority
+
+The user's November 11 handoff accepts the source-bound regenerated projection
+and fixed MM/delta diagnostic and authorizes one constrained neutron/Delta/SIDIS
+amplitude per canonical-t parent across the ten existing SHMS-delta bins, all
+five settings/15 parents. Improving relative component weights is primary.
+Possible acceptance/template mismatch belongs in a separate, explicitly limited
+model-uncertainty analysis rather than postponing the fit. Preserve alignment,
+normalization, selected data/cuts and Local-t production. Same-data development,
+retained staged priors, empirical sensitivity and physical validation are distinct;
+invent no missing covariance or automatic production adoption. Outcome B remains
+independent, Method A detached and Method B diagnostic/excluded.
+
+### Bootstrap/model/PID covariance ownership
+
+Source-aware bootstrap reuses each retained event draw across fits, selections
+and application; MC channels use independent draws with shared parent/child
+normalization. Conditional protected-A transfer retains known data/denominator
+and common-SIMC numerator/denominator covariance. Missing learned-stage and
+numerator-fit covariance remains unavailable. Model response kernels need a
+justified nuisance covariance; scan ranges are not one sigma. External PID
+covariance/cross terms stay null until its owner supplies definitions and overlap;
+do not wait for PID, zero-fill it, assume independence or double-count effects.
+
 ### Clean-yield, angular-ratio and SIMC-iteration objective
 
 The established scientific objective is a physically defensible clean

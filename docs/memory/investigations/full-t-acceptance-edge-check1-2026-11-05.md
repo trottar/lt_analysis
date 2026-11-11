@@ -1427,3 +1427,196 @@ Actual regenerated ROOT reads, PyROOT and farm behavior remain NOT VERIFIED.
 The production source and baseline, all six roadmap states, Outcome B,
 detached Method A and diagnostic/excluded Method B retain their boundaries.
 No Git publication, farm operation or new scientific fit was executed.
+
+
+## November 11 fixed-model MM-delta comparison
+
+The user requested fixed-model residuals before any detached joint fit.
+Local and public test HEAD and supplied projection runtime HEAD agree at
+f346579713168bb9c36b48128df51117c83059ae. Six published snapshots match the
+reviewed corrected candidate. The farm projection ZIP SHA-256 is
+17244335766882fceaf7c42e74e6f2c3509f759b0b78c774ae3e596fb17e709c.
+Independent readback verifies 15 source-bound roles, 45 raw/aligned closures,
+canonical-phi and explicit flows; 188253 observed source/entry records bind
+to the November 9 acquisition. New hashes were admitted as regenerated inputs.
+Measured historical raw-parent differences are zero, with aligned differences
+at most 3.42e-15; historical equality was not required.
+
+The fixed-B comparison covers all five settings and 15 parents, preserving
+ten delta bins, signed sources, existing shifts and parent normalization.
+Center/high t3 broad native MM [0.7,1.3) gives data 5.094172 +/- 0.083070,
+model 4.997829 and residual +0.096342 +/- 0.083070. Delta [-10,-7) gives
++0.350696 +/- 0.046359; [-4,-1) gives -0.174789 +/- 0.037512.
+All five t3 parents have positive broad-MM residuals in [-10,-7).
+Complete native Lambda bins [1.102,1.156) give data 0.417555,
+model 0.443693 and residual -0.026137 +/- 0.026175 at Center/high t3.
+Exact [1.10,1.16) data are 0.469769 +/- 0.025871; model boundary-bin content
+bounds are [0.443693,0.549561], without fractional fills.
+
+Center/high t3 has 186/1000 occupied native broad MM/delta cells, six negative
+signed cells, and three occupied cells without retained MC support. Lambda
+has 28/90 occupied cells; four empty cells carry model yield totaling 0.002487.
+Empty data, finite-MC absence and physical acceptance are distinct.
+All observed/model delta-flow counts are zero. Native-MM flows remain explicit.
+
+Errors are conditional signed counting plus finite-MC propagation through the
+shared stochastic parent normalization and fixed interpolation. Retained B
+covariance matches the applied amplitudes, but data-to-B, MC-to-B, upstream
+cleaning, acceptance/alignment and shared systematic covariance remain absent.
+Residual quadratics are descriptive, without independent-fit p-values.
+Joint designs have numerical rank three in all parents/regions, with weak
+physical separation: Center/high t3 broad Delta/SIDIS local correlation is
+-0.920; Lambda joint local errors (n,Delta,SIDIS) are (0.727,1.242,1.455).
+No fitted values or uncertainty reduction have been adopted.
+
+The retained scientific bundle is
+KaonLT_Fixed_LocalT_Pion_MM_Delta_Comparison_20261111.zip, with original plots,
+all native-cell residuals/support/errors, numerical inputs, source identities,
+replay scripts and independent checks. Checks include 30600 exact observed
+native-cell readbacks, 15 original fit-input histograms, 45 derivative checks,
+90 signed-source aggregate checks and 30 parent residual sums.
+Independent fixed-model review is NEXT. No detached fit, source change,
+Git publication or farm execution was performed by the reviewer. Outcome B
+remains unresolved, Method A detached and Method B diagnostic/excluded.
+
+
+## November 11 detached joint MM-delta fit
+
+The user accepted the regenerated 15-source/45-closure farm projection and the
+all-five/15-parent fixed-model comparison as diagnostic evidence. Their joint-fit
+handoff authorizes revised relative amplitudes as the primary goal; possible
+acceptance/shape mismatch is a model-uncertainty concern, not a deferral gate.
+The implementation follows the single joint-fit contract at starting test HEAD
+f346579713168bb9c36b48128df51117c83059ae. Production and all six roadmap states
+are unchanged. The new testing CLI is ROOT-independent and detached.
+
+One nonnegative amplitude per channel is shared across ten delta bins within
+each parent; settings/parents are independent. Original staged targets,
+regularization widths, MM fit domain, positive finite signed Sumw2 rule,
+alignment and single parent normalization remain. The primary quadratic uses
+counting plus correlated finite-MC precision fixed at original B. All 15 original
+marginal joint fits replay within 1.02e-8 before joint fitting. Empirical empty
+and unsupported cells are retained separately without fictitious variance.
+
+Center/high t3 fixed (n,Delta,SIDIS)=(0.235833,1.777489,2.984507) becomes
+(0.189216,1.395621,3.208202). Conditional estimator errors are
+(0.044257,0.237827,0.256694); Delta/SIDIS correlation is -0.93855.
+Counting errors are (0.034146,0.183664,0.197950), finite-MC errors
+(0.028155,0.151093,0.163425). MC propagation includes shared parent normalization,
+fixed interpolation and the design-transpose/residual term in the differentiated
+normal equations. Within-candidate regional residual errors include data/fit and
+direct-template/estimator cross terms, conditional on stored priors and precision.
+Old-versus-new fit covariance, prior/data reuse covariance, upstream cleaning and
+physical acceptance/alignment covariance remain unavailable; no independent
+validation or calibrated confidence interval is claimed.
+
+The same-precision data residual quadratic changes 306.2545 -> 296.3345 (3.24%).
+Native complete Lambda model integral changes 0.443693 -> 0.439954, with signed
+data 0.417555 and fitted residual -0.022399 +/- 0.023905 conditional in-sample.
+Its fitted (n,Delta,SIDIS) contributions are (0.027441,0.074970,0.337543).
+The broad model integral changes to 4.793039 against data 5.094172: objective
+reduction is not integrated-yield closure. The applied production numerator,
+denominator, background and event weights are unmodified.
+
+For [-10,-7) delta at Center/high t3 the signed broad-MM fraction is
+0.287128 +/- 0.007357 conditional counting, above every retained channel's
+fraction. The maximum is SIDIS 0.231521 +/- 0.003762 conditional MC. Thus a
+positive three-weight mixture alone cannot exactly reproduce the observed
+fraction and total with these central shapes; the empirical gap 0.055606 is
+a marginal total-variation discrepancy lower bound, not calibrated physical
+acceptance covariance or an adopted correction.
+
+Leave-one-occupied-delta refits span n=[0.136914,0.247227],
+Delta=[1.037405,1.545062], SIDIS=[2.718317,3.572385]. Retained non-rejected
+alignment/baseline shifts span n=[0.166520,0.189216],
+Delta=[1.252947,1.395621], SIDIS=[3.208202,3.367674]. These are empirical
+influence/scan envelopes with no assigned probability law or quadrature sum.
+Counting-only Center/high t3 gives (0,2.113750,2.480697); covariance evaluated at
+the candidate gives (0.183024,1.368450,3.240491). No-prior and Lambda-excluded
+sensitivities are also retained. Center/low t3 neutron is at zero; Center/low
+t2 neutron is prior-dominated (retained width 0.001 around zero), with central
+0.000129 versus unregularized 0.278196. Tiny conditional errors are not species
+absence. All 15 constrained solutions, correlations, contours and residuals
+are retained in the scientific bundle.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING, subject to independent review.
+Recommendation: further offline model/weight-robustness validation is warranted
+after actual-diff/scientific review; no production adoption or farm integration
+run follows. Full outputs, embedded project-data plots, exact source diffs,
+before/after snapshots and deterministic/local numerical checks are packaged in
+KaonLT_Joint_MM_Delta_Fit_20261111_review_bundle.zip. Outcome B remains unresolved,
+Method A detached and Method B diagnostic/excluded. No commit, push or farm run.
+
+
+## November 11 source-aware bootstrap and conditional transfer
+
+The user accepted the detached joint-fit source-level implementation and requested
+source-aware data/SIMC bootstrap, correlated model uncertainty and propagation
+through existing pion transfer without waiting for externally owned PID results.
+Public/local test remained f346579713168bb9c36b48128df51117c83059ae. The accepted
+joint source/test/contract bytes match its review ZIP and remain unpublished.
+The single bootstrap contract adds a detached CLI/tests; production, prior
+pending source, all six roadmap milestones, index and refs are preserved.
+
+1024 paired data-only, MC-only and joint replicas cover all five settings and
+15 parents, with 46080 fits and 46080 parent/channel/phi closure checks.
+One Poisson(1) multiplicity per retained cohort/source/PID-tree/entry is reused
+across selections, parent labels, MM/delta/phi cells, fitting and application.
+Independent MC channel/file-entry draws preserve raw parent/child relations.
+Replica Sumw2 is sum(k*w^2), not sum(k^2*w^2). Fixed alignment and common
+stochastic parent normalization are rebuilt. Counting and correlated finite-MC
+precision are recomputed per replica at the original-B convention; retained
+staged targets/widths and upstream calibration remain conditional/fixed.
+No failed fits or unsupported broad/Lambda transfers occurred in the final run.
+
+Center/high t3 amplitude bootstrap means (n,Delta,SIDIS) are
+(0.152453,1.678388,2.826742), with SD (0.046726,0.283777,0.303005), compared
+with unchanged detached central (0.189216,1.395621,3.208202). Empirical
+Delta/SIDIS correlation is -0.956133. Bootstrap mean displacement is not silently
+adopted as physical bias correction. Complete-native-Lambda control mean/SD is
+0.409727/0.019403 versus central 0.439954. Exact-allcuts Lambda background
+mean/SD is 0.065674/0.004331 versus detached central 0.061554 and unchanged
+original applied 0.060786. Conditional background variance components are
+data-only 1.3422952e-5, MC-only 4.4857441e-6, nonlinear interaction 6.2050247e-7,
+paired cross 2.3114461e-7, total 1.8760343e-5. Their paired identity closes;
+the nonlinear output covariance is not an assumed independent quadrature sum.
+
+Protected kaon A coefficients are fixed, but the SAME bootstrapped SIMC shapes
+enter numerator and denominator. SAME pion draws enter B fitting and event
+application. Original transfer ratios and signed cached application replay for
+all parents with the original floor/clipping/zero-flow convention. The explicit
+clip_max sentinel is traced to owner-emitted None through snapshot(None), not
+treated as an invented default. Post-cleaning kaon rows do exist and reproduce
+the frozen kaon MM input; raw learned populations and common physical run/event
+IDs across PID trees are not retained for the full learned/protected-numerator
+refit here. Complete numerator-fit, training/prior/PID, shared-systematic and
+physical-model covariance remain unavailable. Conditional transfer is not full
+physical subtraction uncertainty; no independence or zero missing error is used.
+
+Full MM/phi covariance is stored losslessly as centered replica factors with
+explicit axes/common-support indices; exact Lambda/phi covariance is separate
+because partial native-MM boundary bins cannot be fractionally filled. An
+independent MC-only numerical replay checks all 15360 numerator/denominator
+vectors (maximum denominator difference 2.23e-16). All 45 amplitude and 45
+Lambda-background covariance readbacks and factor reconstruction pass.
+
+Source-defined alignment/leave-delta response vectors and measured residual
+bias directions preserve the negative-delta mismatch. Their outer products are
+correlated response kernels without an assigned probability law; physical model
+covariance remains null pending justified nuisance covariance. External PID
+covariance/cross terms are explicitly null, not zero. The interface requires
+matched axes/units/populations/lineage and overlap checks before combination.
+
+Center/high t3 first-half/full amplitude SD differences are about 1.1/2.1/3.8
+percent. Center/low t3 neutron is bound in 1018/1024 replicas; six positive-tail
+outcomes control its variance, with roughly 54 percent half/full SD change.
+That rare-tail precision is limited, not a stable Gaussian absence claim.
+Center/low t2 retains its strongly constraining prior. Conditional empirical
+percentiles are not calibrated physical coverage.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING, subject to independent actual-
+diff/scientific review. KaonLT_Pion_Bootstrap_Uncertainty_20261111_review_bundle.zip
+contains source diffs, exact snapshots, all replicas/covariance factors, correlated
+model responses, external-PID interface, original project-data plots and checks.
+No production update, commit, push, farm run, Method A/B promotion or Outcome B
+closure occurred. Independent bootstrap/scientific review is NEXT.
