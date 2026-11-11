@@ -1391,3 +1391,39 @@ SIMC statistics gives 3.366 and
 Data-to-fit covariance for independent validation and acceptance/alignment
 model covariance remain unavailable. Outcome B still requires independent
 kaon-side anchor/gauge information and applicable covariance.
+
+## November 11 regenerated pion SIMC projection compatibility
+
+The user intentionally reran all 15 neutron, Delta and SIDIS channels.
+Different hashes, entry counts and accepted histogram contents are expected.
+The November 9 owner provenance remains historical. Its resolved originals
+were shared background-sample files; the E.8.4-named worktree was the successful
+November 9 attempt's temporary analysis alias. The subsequent handoff used
+fit-packet alias paths as its primary lookup and shared storage as a fallback.
+
+The uploaded numbered (5) handoff is byte-identical to the original 214916-byte
+ZIP, SHA-256 584b7a1cfb2627a515df18be17d77b26fdfbec0d7d33fdad52a8236d59e54233.
+Its extractor, reference builder and all six members were inspected. The
+builder continues to construct the historical reference. Compatibility is
+implemented in the reviewed candidate testing extractor with an explicit
+reference option and regenerated input root. Default historical hash,
+entry-count and histogram checks remain. Regenerated mode records fresh
+file identities, tree/branch metadata and before/after checks; it constructs
+new direct parents with the existing scalar integrator, preserves fixed
+alignment and parent normalization, and closes the ten delta slices and
+flows against those same-cohort parents. Historical differences are separate
+receipt fields. This establishes no historical-template equivalence or
+fitted-mixture acceptance.
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING, subject to independent actual-
+diff review. Windows Python 3.12.10 / NumPy 2.3.0 ran 26 focused tests and
+30 existing integrator/observer regressions, 56 total, no failures and two
+existing symlink-capability skips. Real historical arrays replayed 45
+content/Sumw2 closures. Python 3.9 grammar/compilation passed. Tests cover
+changed hashes/entries/weights, signed contributions, flows and endpoints,
+all-15 mocked execution, changed inputs/reference, alias duplication,
+source pins, exclusive publication and rollback through context exit.
+Actual regenerated ROOT reads, PyROOT and farm behavior remain NOT VERIFIED.
+The production source and baseline, all six roadmap states, Outcome B,
+detached Method A and diagnostic/excluded Method B retain their boundaries.
+No Git publication, farm operation or new scientific fit was executed.

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 11441,
+      "bytes": 12079,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "a31657a18887d6efd704e3aa1a5071947ac0d0923c1a868d172c275e5e2d0b00"
+      "sha256": "ab5f2c223123ad992964fa5d7a13cd7385fd9a2a8af39d8ee1de3efcf78a48a1"
     },
     {
       "bytes": 11186,
@@ -446,9 +446,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 92906,
+      "bytes": 95230,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "99e3e69e6b6978d5f89abe6cfd61f2e781192245480b2706a2765d9e2b303b9e"
+      "sha256": "ee41608b566148b97f80370ae1ccb236edd32c02bae6c02a961b18898d555384"
     },
     {
       "bytes": 34568,
@@ -1674,6 +1674,11 @@
       "bytes": 1647,
       "path": "docs/memory/phases/post-push-current-continuity.md",
       "sha256": "5ddc1ecb5fecdb3fb351f7c286b90a93e1765d2533ed72c6ab9976e41ddc1c5f"
+    },
+    {
+      "bytes": 5600,
+      "path": "docs/memory/phases/regenerated-pion-h10-projection-compatibility-2026-11-11-task-contract.md",
+      "sha256": "6756a8ecaf4cc3623b32554d7a8e24ec571a7a7ad41512f6aeab10656841a708"
     },
     {
       "bytes": 19421,

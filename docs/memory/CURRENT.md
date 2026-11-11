@@ -54,6 +54,12 @@ Iteration-zero SIMC uses the old parameterization; initial D/M need not be unity
 Method A stays detached, optional pending a justified target; Method B remains
 diagnostic/excluded. Outcome B and source-aware statistics remain separate.
 
+The November 11 projection compatibility candidate is DEVELOPMENT COMPLETE,
+FARM VALIDATION PENDING. It adds an explicit regenerated-input mode to the
+read-only testing extractor, preserving historical default behavior. No new
+pion-component fit or scientific acceptance follows. See the
+[task contract](phases/regenerated-pion-h10-projection-compatibility-2026-11-11-task-contract.md).
+
 ## Verified State
 
 The [relocated historical details](investigations/baseline-pion-control-center-lowe-regression-2026-10-14.md#historical-status-details-retained-from-current)
@@ -139,11 +145,14 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Obtain the read-only, source-hash-bound accepted event projection
-from the 15 identified pion SIMC h10 trees. Close the ten SHMS-delta slices
-and explicit flow against the 45 original parent templates before comparing
-fixed-B predictions or fitting the detached joint candidate. Review
-Center/high t3 first within the same five-setting scope.
+NEXT — After user publication and pushed-state synchronization of the
+source-reviewed regenerated pion h10 projection, obtain the read-only,
+source-hash-bound event projection from all 15 regenerated pion SIMC h10 trees.
+Verify tree/branch identities and close ten SHMS-delta slices, including
+out-of-range and missing-mass flows, against 45 same-cohort direct parents.
+Keep November 9 sources and templates as historical comparison evidence, not
+an exact-byte requirement on the regenerated cohort. Review Center/high t3
+first in the complete five-setting scope. No new fit or production promotion.
 
 ## Success Criteria
 
