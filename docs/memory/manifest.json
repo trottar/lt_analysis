@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 12601,
+      "bytes": 13118,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "ce0e69388e81c85b64fdafa32a483edfb08eb1e04dc791d5338a76ad5f1899c9"
+      "sha256": "2f550f9808e134424fa96c037a9208ef33ef3a80dc00560eb56cce08d8da5b49"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 50299,
+      "bytes": 50420,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "ebf6b78bb160a2ed31cf3ed247ab003661c35b1417c1b95139bee6b90366887c"
+      "sha256": "5977a7a5c46cdd206a3db3258d098ac673fcec88030831576c099e50ffde02e5"
     },
     {
       "bytes": 3606,
@@ -326,6 +326,11 @@
       "sha256": "0758e3be6441e4f6e41f65945843acfc32e764e2c5ba95e53041699dc479ab59"
     },
     {
+      "bytes": 1443,
+      "path": "docs/memory/evidence/regenerated-pion-h10-projection-runtime-closure-2026-11-11.md",
+      "sha256": "26b989b0cee5ed2e19a849c92e37082654fd84826ac4eb555861daf30133e6da"
+    },
+    {
       "bytes": 323,
       "path": "docs/memory/handoffs/CURRENT_HANDOFF.md",
       "sha256": "c711f801f776042aa3761077658e6cedb0d657c9ef1e151a960631bf0399f14d"
@@ -446,9 +451,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 107675,
+      "bytes": 113061,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "71d22b188ba1f8b343b20d9e161ed97a2ab863b844125a160142629474856784"
+      "sha256": "43026f28328dc576bd652bbbbee4b7e75a3d21859bd6552eabc8830b471298cb"
     },
     {
       "bytes": 34568,
@@ -1669,6 +1674,11 @@
       "bytes": 7801,
       "path": "docs/memory/phases/pion-bootstrap-transfer-2026-11-11-task-contract.md",
       "sha256": "f3bcf77a436b398c7ca7287980d63a635457c9387d4c0230994ce9fafc74bbc5"
+    },
+    {
+      "bytes": 6376,
+      "path": "docs/memory/phases/pion-uncertainty-propagation-2026-11-11-task-contract.md",
+      "sha256": "c052807d2d6df29cd2c7f6fc7d82ed16d45f191581740a861a7d866bd3af65b2"
     },
     {
       "bytes": 9492,

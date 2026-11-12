@@ -1620,3 +1620,85 @@ contains source diffs, exact snapshots, all replicas/covariance factors, correla
 model responses, external-PID interface, original project-data plots and checks.
 No production update, commit, push, farm run, Method A/B promotion or Outcome B
 closure occurred. Independent bootstrap/scientific review is NEXT.
+
+
+## November 11 publication checkpoint and uncertainty propagation
+
+The user records independent source review of the detached joint fit and
+source-aware bootstrap/conditional transfer: both are SOURCE REVIEWED. User
+publication and pushed-state synchronization completed at test
+5daceacf43be914de7cce2868fc9ff6dfc8f2c86; this continuation verifies live public
+and local identity and exact reviewed source snapshots. The regenerated h10
+projection is CLOSED / RUNTIME VALIDATED only within its accepted 15-source,
+45-parent diagnostic-acquisition scope, as recorded by the supplied handoff.
+No new farm execution or physical-subtraction acceptance is claimed here.
+The earlier unpublished/development-review statements above describe historical
+checkpoints and are superseded for current status by this paragraph.
+
+ACTIVE: complete existing statistical and model-dependence propagation using
+the retained 1024 replicas and alignment/delta-influence variations. Deliver
+supported MM/phi and exact-Lambda sensitivity ranges without waiting for PID
+or requiring a new calibrated acceptance-nuisance phase. Broad-MM negative-delta
+residuals are not automatically Lambda uncertainty. Preserve all six roadmap
+states/dependencies, Outcome B BLOCKED and detached Method A/excluded Method B.
+
+
+### Completed five-setting statistical/model-dependence propagation
+
+DEVELOPMENT COMPLETE, FARM VALIDATION PENDING, subject to independent source/
+scientific review. The new detached consumer retains the published 1024-replica
+NPZ byte-for-byte and performs no new fits/resampling. It evaluates 116 already
+approved alignment/delta-influence cases across all five settings/15 parents.
+All broad and exact-Lambda transfers are supported here. Every central/model
+denominator, Lambda integral and active MM/phi response replays against the
+accepted bootstrap result. Protected A is fixed, with the same varied shapes
+in numerator/denominator and the original signed event application unchanged.
+
+Center/high t3 central exact-allcuts Lambda background is 0.0615541025,
+conditional bootstrap SD 0.0043313212 and mean 0.0656744772. Existing combined
+sensitivity range is [0.0583032301,0.0752890737], a central shift of
+[-0.0032508723,+0.0137349712]. Alignment alone spans [0.0615541025,0.0752890737];
+delta influence spans [0.0583032301,0.0679239910]. Complete-native-Lambda control
+denominator central 0.4399542638 has existing-model range [0.397390,0.491410].
+No model probability law, calibrated one-sigma or quadrature total is invented.
+
+For the most-negative delta bin [-10,-7) percent, the central fitted residual is
+0.388750 in broad native MM, -0.001978 in complete-native Lambda and 0.389176 in
+complete high-MM bins above 1.16 GeV. Boundary-straddling bins remain separate.
+The broad discrepancy is predominantly higher MM; its full magnitude is not a
+Lambda uncertainty. The transferred model range follows actual coherent
+scenarios, not direct allocation of the broad residual beneath the signal.
+
+The package tabulates all-45 central/bootstrap amplitudes, full conditional
+covariance/correlation, model amplitudes/boundaries, denominator/numerator MM,
+joint control MM/delta, transferred MM/phi and exact Lambda/phi vectors. Full
+statistical MM/phi factors and common-replica masks, aggregate MM/phi/Lambda
+covariance and denominator/background cross covariance are preserved. Each
+model scenario remains coherent; a pointwise envelope is not a single model.
+Response co-movement matrices are descriptive geometry, not probabilistic
+model correlation. No Center/low alignment alternatives exist in the retained
+cases; that family is unavailable, not a zero error. Supported delta ranges
+are delivered. Empty/signed/support states, Center/low t3 rare neutron tail and
+Center/low t2 prior limitation are preserved without reopening their study.
+
+Independent readback validates 90 all-parent covariance/cross-covariance
+aggregates, 15 amplitude covariance matrices, 15 Lambda/phi variance sums,
+and 116 direct signed-event transfer integrations from the original acquisition:
+maximum transfer discrepancy zero. All 1024 empirical replicas and original
+source identities remain unchanged. Deterministic suites run 145 tests with
+two existing Windows symlink-capability skips and no failures. Python 3.9
+grammar/compilation and exact patch reconstruction are separate local checks;
+Linux numerical parity and ROOT/farm integration are NOT RUN in this task.
+
+The review artifact is KaonLT_Pion_Uncertainty_Propagation_20261111_review_bundle.zip,
+including exact eight-path diff/snapshots, source/member hashes, full numerical
+arrays, eight embedded original project-data plots, CSVs, validation and
+conditional user-only Git commands. Missing full protected-numerator/upstream
+learning/physical-model and external PID covariance/cross terms remain null.
+The supported statistical and sensitivity result is complete without waiting
+for PID or a new acceptance-nuisance calibration. No physical coverage or
+production-subtraction acceptance follows. All six roadmap states/dependencies,
+independent Outcome B BLOCKED, Method A detached and B excluded are unchanged.
+No staging, commit, push or farm execution occurred. Independent source/science
+review is NEXT, then return to existing physical subtraction/final-yield gates
+under their unchanged dependencies and user-owned publication/execution.

@@ -138,8 +138,10 @@ Source-aware bootstrap reuses each retained event draw across fits, selections
 and application; MC channels use independent draws with shared parent/child
 normalization. Conditional protected-A transfer retains known data/denominator
 and common-SIMC numerator/denominator covariance. Missing learned-stage and
-numerator-fit covariance remains unavailable. Model response kernels need a
-justified nuisance covariance; scan ranges are not one sigma. External PID
+numerator-fit covariance remains unavailable. Model responses may be delivered as
+completed sensitivity ranges/envelopes without a new calibration prerequisite;
+only probabilistic covariance requires justified nuisance weights. Scan ranges
+are not one sigma. External PID
 covariance/cross terms stay null until its owner supplies definitions and overlap;
 do not wait for PID, zero-fill it, assume independence or double-count effects.
 

@@ -54,18 +54,21 @@ Iteration-zero SIMC uses the old parameterization; initial D/M need not be unity
 Method A stays detached, optional pending a justified target; Method B remains
 diagnostic/excluded. Outcome B and source-aware statistics remain separate.
 
-The regenerated projection, fixed-model comparison and detached joint-fit
-implementation are accepted diagnostic/source evidence per the user's November
-11 bootstrap handoff. The reviewed joint-fit files remain local/unpublished at
-f346579713168bb9c36b48128df51117c83059ae and are preserved exactly.
-The source-aware bootstrap is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING,
-subject to independent review: 1024 paired data/MC/joint replicas cover all 15
-parents. Conditional control and transferred-background covariance retain shared
-event/template relationships. Full protected-numerator, upstream learning,
-physical-model and external PID covariance remain unavailable, not zero.
-PID results are externally owned and were not awaited. See the
-[bootstrap contract](phases/pion-bootstrap-transfer-2026-11-11-task-contract.md) and
-[results](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-11-source-aware-bootstrap-and-conditional-transfer).
+The November 11 regenerated pion h10 projection is CLOSED / RUNTIME VALIDATED
+within its accepted [15-source/45-parent diagnostic-acquisition boundary](evidence/regenerated-pion-h10-projection-runtime-closure-2026-11-11.md). The
+detached joint MM/delta fit and source-aware bootstrap/conditional transfer are
+SOURCE REVIEWED per the user's continuation handoff. Publication and pushed-state
+synchronization are recorded at test 5daceacf43be914de7cce2868fc9ff6dfc8f2c86;
+live public/local HEAD and reviewed source snapshots match. The 1024 paired
+replicas and existing alignment/delta-influence responses are retained unchanged.
+Statistical/model-dependence propagation is DEVELOPMENT COMPLETE, FARM VALIDATION
+PENDING, subject to independent actual-diff/scientific review: all five settings,
+15 parents and 116 existing model cases. The retained 1024 replicas are unchanged;
+supported MM/phi and exact-Lambda sensitivity envelopes are delivered separately
+from statistical covariance, without external-PID or new calibration prerequisites. Full protected-numerator,
+upstream learning and external PID covariance remain unavailable, not zero.
+See the [propagation contract](phases/pion-uncertainty-propagation-2026-11-11-task-contract.md)
+and [bootstrap results](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-11-source-aware-bootstrap-and-conditional-transfer).
 
 ## Verified State
 
@@ -86,7 +89,7 @@ in this memory pass, attributed to its governing evidence records.
 
 ## Source / Evidence Identity
 
-Local/origin/live test and the November 9 farm acquisition source matched
+At the November 9 checkpoint, local/origin/live test and farm acquisition source matched
 `6fb1a94ed8f6b7af61e130c9b42b9762164444b9`. The published deterministic
 identity correction matches the seven independently reviewed blobs. The owner
 reports success, including artifact verification and publication. Direct
@@ -152,13 +155,14 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent actual-diff and scientific review of the source-aware
-bootstrap/control covariance and conditional MM/phi transfer across all five
-settings and 15 parents. Review estimator mean shifts, constrained rare tails,
-correlated model-response kernels and explicitly unavailable terms before any
-PID combination or production adoption. External PID covariance and its overlap/
-cross terms must be verified when supplied; do not wait for it to review this
-completed study. User publication remains separate. No farm operation follows.
+NEXT — Independent actual-diff and scientific review of the completed five-
+setting/15-parent uncertainty propagation: retained statistical covariance,
+116 coherent model-response cases, supported MM/phi and exact-Lambda envelopes,
+and explicit missing/PID terms. No new calibration phase is required to review
+the delivered sensitivity results. After acceptance and user publication/pushed-
+state synchronization, return to existing physical Local-t subtraction/final-
+yield gates with dependencies unchanged, including independent Outcome B BLOCKED.
+Do not change production, promote Method A/B or run the farm automatically.
 
 ## Success Criteria
 
