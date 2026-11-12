@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 13118,
+      "bytes": 13402,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "2f550f9808e134424fa96c037a9208ef33ef3a80dc00560eb56cce08d8da5b49"
+      "sha256": "4d2fac909cdc9ab72c090e9345f5528ef65c1d3678001c3fbe35060ecdf57ec5"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 50420,
+      "bytes": 50776,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "5977a7a5c46cdd206a3db3258d098ac673fcec88030831576c099e50ffde02e5"
+      "sha256": "c61f4bf55e949ee868816881a3311051f581dc52b52c0fffc1c1246f85f6b771"
     },
     {
       "bytes": 3606,
@@ -451,9 +451,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 113061,
+      "bytes": 117811,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "43026f28328dc576bd652bbbbee4b7e75a3d21859bd6552eabc8830b471298cb"
+      "sha256": "9cd7b8a304e7a39f9a8addc0beae08c24d803753caa467e431feb056a4024600"
     },
     {
       "bytes": 34568,

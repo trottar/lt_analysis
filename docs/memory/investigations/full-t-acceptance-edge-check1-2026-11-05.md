@@ -1702,3 +1702,72 @@ independent Outcome B BLOCKED, Method A detached and B excluded are unchanged.
 No staging, commit, push or farm execution occurred. Independent source/science
 review is NEXT, then return to existing physical subtraction/final-yield gates
 under their unchanged dependencies and user-owned publication/execution.
+
+
+## November 11 Outcome B source/evidence audit and publication synchronization
+
+The supplied continuation handoff records completed independent review and
+publication of the joint fit, source-aware 1024-replica bootstrap and five-setting/
+15-parent uncertainty propagation (116 coherent model cases): all SOURCE
+REVIEWED. Local and live public test match d28ad6e7f620f0c4cc18c389373560f56fd9e84a.
+All three review bundles pass CRC/member hashes; frozen source/test/contracts
+match earlier reviewed snapshots, and all eight latest propagation paths match
+published bytes. Earlier bundles' active-memory snapshots are superseded by the
+latest checkpoint, not required to match it. The regenerated projection retains
+its accepted diagnostic-acquisition CLOSED / RUNTIME VALIDATED scope; there is
+no new farm or physical-subtraction acceptance. Previous review-pending wording
+above remains historical and is superseded for current status here.
+
+SOURCE VERIFIED: pion_component_shapes.py normalizes selected SIMC shapes.
+pion_component_fits.py::_run_staged_component_pass builds component residuals
+from the same target and earlier fitted amplitudes; the protected Delta path
+constructs R_preDelta from that kaon target minus early fitted terms and calls
+_fit_lambda_gauge on it. The original Center/high t3 receipt confirms gauge
+source_histogram=R_preDelta, window [1.105,1.125], one-component weighted least
+squares and available conditional fit uncertainty. Existing coefficient
+covariance is present; it is not an independent anchor/gauge calibration.
+
+The original acquisition source packet explicitly labels covariance conditional
+fixed-weight Sumw2 with fitted/training/shared-systematic covariance unavailable;
+it contains 6527 processed kaon and 24967 pion rows for Center/high. Thus observed
+data are present, not globally missing. Its applied kaon amplitudes are
+(n,Delta,SIDIS)=(0.1822022441,0.5690006384,0), while original control SIDIS is
+2.9845068988 and detached joint central SIDIS is 3.2082020108. These are fitted
+conditional allocations, not physical truth or an independent zero-SIDIS bound.
+
+SOURCE VERIFIED: bootstrap_pion_mm_delta.py imports the same protected A values
+and holds their estimates fixed, sharing resampled MC shapes with the fitted
+control denominator. propagate_pion_mm_delta_uncertainty.py consumes the retained
+replicas/model scenarios and explicitly preserves missing full physical/PID
+covariance. This provides useful conditional statistical covariance and model
+sensitivity; neither estimates the missing independently calibrated kaon-side
+means. The three current supplied review packages and original acquisition
+record provide no qualifying independent joint-constraint/calibration record.
+This is a scoped admissibility finding about inspected evidence, not a claim
+that no such measurement can exist elsewhere. No historical archive search,
+zero-photoelectron study, synthetic experiment, source change or refit occurred.
+
+Outcome B / BLOCKED remains. First missing input is a jointly specified pair
+of independent aggregate component means for Center/high t3: non-SIDIS mean in
+the kaon SIDIS anchor [1.0601751288600272,1.1101751288600272] GeV and pion-background
+mean entering the existing Lambda gauge [1.105,1.125] GeV. Supply their 2x2 mean
+covariance and cross covariance to evaluated signed prompt/random/dummy/
+dummy-random observations, with exact component basis, PID/source normalization,
+cuts, coordinate/native-bin integration convention and training/calibration
+identities. Overlapping intervals require joint treatment. If disjointness
+justifies zero cross covariance, document it; do not assume independence.
+An independently calibrated aggregate constraint suffices without eventwise
+species labels. Same-data fits, observed total gauge counts and copied control
+fractions are not substitutes. External PID uncertainty remains separately
+owned and unavailable, not a supplied independent constraint by default.
+
+Stop at the independent-input gate; no implementation contract/source change
+is warranted without that input. Independent review of qualifying new evidence
+precedes the existing blind predictive closure. All six roadmap dependencies,
+Local-t selection, no_empirical_residual, Method A detached/B diagnostic-excluded,
+frozen normalization/production/yield logic, unrelated bytes, index and refs
+are preserved. The review ZIP contains the four-file memory diff/snapshots,
+unchanged source snapshots, actual receipt/result extracts, input hashes and
+memory-integrity/preservation checks. No new scientific covariance/mean or
+combined one-sigma physical error was invented. No tests of changed analysis
+code were needed because no analysis code changed; farm/runtime NOT RUN.

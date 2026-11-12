@@ -145,6 +145,12 @@ are not one sigma. External PID
 covariance/cross terms stay null until its owner supplies definitions and overlap;
 do not wait for PID, zero-fill it, assume independence or double-count effects.
 
+Outcome B still requires independently sourced aggregate anchor/gauge means,
+their joint covariance and covariance to evaluated signed counts. Conditional
+bootstrap/model-response covariance does not supply that input; mean/cross
+covariance independence must follow from calibration/learning provenance, not
+from a prior label or disjoint histogram bins.
+
 ### Clean-yield, angular-ratio and SIMC-iteration objective
 
 The established scientific objective is a physically defensible clean

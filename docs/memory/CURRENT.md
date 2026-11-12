@@ -55,20 +55,23 @@ Method A stays detached, optional pending a justified target; Method B remains
 diagnostic/excluded. Outcome B and source-aware statistics remain separate.
 
 The November 11 regenerated pion h10 projection is CLOSED / RUNTIME VALIDATED
-within its accepted [15-source/45-parent diagnostic-acquisition boundary](evidence/regenerated-pion-h10-projection-runtime-closure-2026-11-11.md). The
-detached joint MM/delta fit and source-aware bootstrap/conditional transfer are
-SOURCE REVIEWED per the user's continuation handoff. Publication and pushed-state
-synchronization are recorded at test 5daceacf43be914de7cce2868fc9ff6dfc8f2c86;
-live public/local HEAD and reviewed source snapshots match. The 1024 paired
-replicas and existing alignment/delta-influence responses are retained unchanged.
-Statistical/model-dependence propagation is DEVELOPMENT COMPLETE, FARM VALIDATION
-PENDING, subject to independent actual-diff/scientific review: all five settings,
-15 parents and 116 existing model cases. The retained 1024 replicas are unchanged;
-supported MM/phi and exact-Lambda sensitivity envelopes are delivered separately
-from statistical covariance, without external-PID or new calibration prerequisites. Full protected-numerator,
-upstream learning and external PID covariance remain unavailable, not zero.
-See the [propagation contract](phases/pion-uncertainty-propagation-2026-11-11-task-contract.md)
-and [bootstrap results](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-11-source-aware-bootstrap-and-conditional-transfer).
+within its accepted [15-source/45-parent diagnostic-acquisition boundary](evidence/regenerated-pion-h10-projection-runtime-closure-2026-11-11.md).
+The detached joint MM/delta fit, source-aware 1024-replica bootstrap and
+five-setting/15-parent uncertainty propagation with 116 coherent model cases
+are SOURCE REVIEWED per the supplied Outcome B handoff. Publication and
+independent pushed-state synchronization are recorded at test
+d28ad6e7f620f0c4cc18c389373560f56fd9e84a; this checkpoint verifies live public/
+local identity and reviewed source snapshots. Amplitudes, covariance, responses
+and central predictions are unchanged. Conditional statistical covariance and
+model sensitivity ranges are available; complete calibrated physical covariance
+and external PID/cross terms remain unavailable, not zero.
+
+Outcome B remains BLOCKED: current supplied source-bound evidence contains no
+qualifying independent Center/high t3 joint anchor-component constraint. The
+same-data staged/gauge fits, fixed-protected-A bootstrap and propagated model
+responses do not provide independent kaon-side means or their count covariance.
+The current [Outcome B audit](investigations/full-t-acceptance-edge-check1-2026-11-05.md#november-11-outcome-b-sourceevidence-audit-and-publication-synchronization)
+records the exact missing input. No new fit, calibration or implementation follows.
 
 ## Verified State
 
@@ -155,14 +158,17 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent actual-diff and scientific review of the completed five-
-setting/15-parent uncertainty propagation: retained statistical covariance,
-116 coherent model-response cases, supported MM/phi and exact-Lambda envelopes,
-and explicit missing/PID terms. No new calibration phase is required to review
-the delivered sensitivity results. After acceptance and user publication/pushed-
-state synchronization, return to existing physical Local-t subtraction/final-
-yield gates with dependencies unchanged, including independent Outcome B BLOCKED.
-Do not change production, promote Method A/B or run the farm automatically.
+NEXT — Review one independently derived/calibrated Center/high t3 joint
+constraint: non-SIDIS mean in [1.0601751288600272,1.1101751288600272] GeV,
+pion-background mean entering the existing Lambda gauge [1.105,1.125] GeV,
+joint mean covariance and covariance with evaluated signed source counts,
+matched component basis, kaon-PID normalization/cuts/bin integration and source/
+learning provenance. Demonstrate disjointness or independently validated
+calibration/transport; an independent aggregate constraint suffices. Missing
+cross terms are not assumed zero. Outcome B remains BLOCKED until this evidence
+passes independent review; only then may the existing bounded blind predictive
+closure be scoped/executed. No new fitting/bootstrap/calibration phase, source
+implementation, production correction, farm run or automatic downstream advance.
 
 ## Success Criteria
 
