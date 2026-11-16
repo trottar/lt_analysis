@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 13402,
+      "bytes": 15645,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4d2fac909cdc9ab72c090e9345f5528ef65c1d3678001c3fbe35060ecdf57ec5"
+      "sha256": "de8750fd6e0602e2943ab88de3b1b133217f2fdaa02cc710dd636ae220ee4c29"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 50776,
+      "bytes": 51148,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "c61f4bf55e949ee868816881a3311051f581dc52b52c0fffc1c1246f85f6b771"
+      "sha256": "f47685fecc04d10340b16789e6e27ca85410eacd7a33e69fd000091f58cc2dc6"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 25054,
+      "bytes": 26164,
       "path": "docs/memory/USER.md",
-      "sha256": "e6868e7435cd7a55d26a95abea88d9dcd8ed59f1479c2fe7d61149da80349345"
+      "sha256": "496a4119c8d1ea8d42c070765a3f4c369d8d8a46c7db91f2f9a2a78cfbd6daa2"
     },
     {
       "bytes": 1157,
@@ -94,6 +94,11 @@
       "bytes": 3131,
       "path": "docs/memory/decisions/farm-validation-bundle-wrapper-contract.md",
       "sha256": "6194f83e803d5222ae887c4211f75d842e9fe388c4c3d0f8a344fab7a6ed4d07"
+    },
+    {
+      "bytes": 6233,
+      "path": "docs/memory/decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md",
+      "sha256": "4208ff02dda1a8c249ce2ef03ca49ec1ccffd63283955011b059190bfe41c169"
     },
     {
       "bytes": 4035,
@@ -451,9 +456,9 @@
       "sha256": "c0a89e1f9f12ec70b42ac77dce29f02e206713c948ba4a6879625b686234ea99"
     },
     {
-      "bytes": 117811,
+      "bytes": 130418,
       "path": "docs/memory/investigations/full-t-acceptance-edge-check1-2026-11-05.md",
-      "sha256": "9cd7b8a304e7a39f9a8addc0beae08c24d803753caa467e431feb056a4024600"
+      "sha256": "f3c18d501cd6890098584b549d8da8fa986aa6ead46aaa8dbdf6f6cc3e4332f0"
     },
     {
       "bytes": 34568,
@@ -1566,6 +1571,11 @@
       "sha256": "c502d652bb9414f9fd70a516f70a912c137e105068bda67b6bbe1285e3b47fe1"
     },
     {
+      "bytes": 8662,
+      "path": "docs/memory/phases/lambda-bin-exclusion-reverse-reconstruction-2026-11-12-task-contract.md",
+      "sha256": "a95917beb1e79e513ff5efee877fe52dfe5d13dd65da0e38169ee2837e06b7ad"
+    },
+    {
       "bytes": 14192,
       "path": "docs/memory/phases/memory-bracketed-scientific-throughput-policy-surface-fix-task-contract.md",
       "sha256": "c34e4bc3aa5893c813606adf0d75f967ad7c54637b8724926016d5944b784f4c"
@@ -1716,9 +1726,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 42535,
+      "bytes": 43658,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "de4fd0d61ec336a5ebab1ae5f3eddf00f34ca85e26049f7e7d457f2987f4d8d7"
+      "sha256": "addfedbe229d73736e1198025752f224d8af986025cc6b7842430245e16f9c8e"
     },
     {
       "bytes": 1698,

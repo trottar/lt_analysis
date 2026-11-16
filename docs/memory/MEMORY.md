@@ -155,8 +155,8 @@ from a prior label or disjoint histogram bins.
 
 The established scientific objective is a physically defensible clean
 background-subtracted K+Lambda experimental yield and its corresponding
-K+Lambda SIMC comparison, with data/SIMC ratios flat versus phi in each t bin
-at both epsilons. Before interpreting yields, the cleaned experimental MM
+K+Lambda SIMC comparison. Neither unity nor phi-flatness is an iteration-zero
+acceptance requirement (November 12 user decision). Before interpreting yields, the cleaned experimental MM
 distribution and matching K+Lambda SIMC must agree closely in shape within
 the actual Lambda signal window: peak and physically relevant tail, common
 selections/binning, matched resolution/acceptance treatment and documented
@@ -177,15 +177,11 @@ R_{\epsilon,t,\phi}^{(n),b}
 
 At Q4p4W2p74, S_low is Left+Center and S_high is Left+Center+Right: six
 epsilon-by-t distributions, 54 nominal cells. Do not average setting ratios.
-The ratio should be phi-flat; the data yield itself retains physical angular
-dependence and need not be flat.
-Apply experimental corrections and selected pion subtraction once at iteration
-zero. Immediate angular QA is agreement with a constant versus phi using
-valid covariance where available; unity is not required at iteration zero.
-Keep those experimental yields/subtraction fixed in later SIMC cross-section
-model iterations; established iteration machinery should bring ratios toward
-unity while reproducing data angular dependence. Never retune pion background,
-area-match or add an artificial normalization to force unity.
+Ratios versus phi are diagnostic at iteration zero, not a flatness/unity
+acceptance gate. Data retain physical angular dependence. Apply corrections
+and selected pion subtraction once at iteration zero; later SIMC cross-section
+iterations address ratio shape/magnitude with that subtraction fixed. No pion
+retuning, area matching or artificial normalization to force agreement.
 
 Method-A evaluation compares selected Local-t versus selected Local-t + A on
 the same source/cohort, fitted Local-t baseline, cuts, bins, Lambda window,
@@ -317,10 +313,10 @@ The user-approved immediate order complements the existing six steps:
    canonical boundaries marked; assess t3 occupancy/acceptance, especially Center
    at both epsilons. Where feasible use matching populated t regions and separate
    unit-normalized/yield-normalized MM diagnostics. Freeze cuts/models/source.
-2. On receipt, reproduce/review the colleague's actual empty/sparse-cell exclusion
-   procedure against data/SIMC support, uncertainty conventions, acceptance and
-   angular coverage. Exclusion direction is agreed; numerical criteria/final mask
-   are not. Distinguish setting-local from combined support; delete no source data.
+2. November 12 supersedes the pending-mask state: user adopts all four Lambda
+   criteria, 30 total/20 signal entries and both neighboring-yield comparisons,
+   reviewed mask 67/135. Production integration/farm validation remain pending;
+   preserve signed data, setting normalization and identical data/SIMC support.
 3. Determine whether a genuine unexplained pion-background difference remains
    beneath Lambda, separating acceptance-edge effects from transfer failure.
    No repeated normalization/source-aware study without new evidence.
@@ -343,6 +339,16 @@ MM-dependent refinement/model-dependent uncertainty reduction remains conditiona
 on predictive, bias, variance, coverage, systematic and sensitivity checks.
 Historical absolute-unit caveats stay scoped, not new prerequisites. CURRENT alone
 owns the exact next action; this memory update executes none of these checks.
+
+### November 12 user decision
+
+[Adopted mask/priority](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md):
+67/135 cells, four criteria at 30/20; integration/farm validation pending.
+All 15 parent MM views need identical data/SIMC edges, separate shape/yield
+normalization and no fractional fills. Assess existing pion-control n/Delta/SIDIS
+support/degeneracy before separately authorized Local-t reanalysis; no unsupported
+positive kaon-side SIDIS floor. Preserve source-aware work and formal Outcome B;
+unrelated gates must not displace that assessment. SIMC/LT machinery unchanged.
 
 ### Observable-chain and combined-setting review
 

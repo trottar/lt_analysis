@@ -116,9 +116,9 @@ deferred the scientific-objective correction and supplied Codex instructions.
 ### Scientific objective controls recommendations
 
 The user's established objective is clean background-subtracted K+Lambda
-data yields and corresponding combined data/SIMC ratios flat versus phi for
-every t at both epsilons, with later SIMC-model iterations approaching unity.
-Iteration-zero pion subtraction stays fixed. Setting-local E.8 debugging and
+data yields. Neither unity nor phi-flatness of data/SIMC is an iteration-zero
+acceptance requirement; subsequent SIMC-model iterations address shape/magnitude
+with the initial pion subtraction fixed (November 12 decision). Setting-local E.8 debugging and
 historical parent sums are not the final combined experimental observable.
 Before substantial Work, identify exactly how its new result advances this
 objective under the approved six steps, whether the needed producer/cohort
@@ -137,9 +137,10 @@ accountability continuation. No numerical Work follows from this correction.
 Keep these requirements together in scientific recommendations: physically
 supported pion subtraction; close cleaned-data/K+Lambda-SIMC missing-mass
 shape agreement in the actual Lambda window (peak and relevant tail); then
-corresponding combined data/SIMC ratios flat versus phi at each t/both epsilons
-and eventual unity through existing SIMC-model iteration with experimental
-subtraction fixed at iteration zero, followed by existing L/T extraction.
+corresponding combined ratios used diagnostically at iteration zero; later
+existing SIMC-model iteration addresses ratio shape/magnitude with initial
+subtraction fixed, followed by existing L/T. Neither initial unity nor initial
+phi-flatness is an acceptance requirement.
 The experimental yield itself need not be flat. Integrated-yield agreement is
 insufficient. Match selections, bins, resolution/acceptance and documented
 normalization; keep supported shape-normalized diagnostics separate from
@@ -242,7 +243,9 @@ boundaries; colleague's actual exclusion procedure when received; remaining
 beneath-Lambda background discrepancies; Method A only if a physical target is
 justified; existing final-yield gates. Empty/inadequately populated cells should
 be excluded by the colleague's pending procedure, but no numerical criterion or
-final mask is agreed. Review support/errors/acceptance/angular coverage separately
+final mask was agreed at that meeting. The November 12 user decision supersedes
+that pending state with the four-criterion 30/20 mask (67/135); integration and
+farm validation remain pending. Review support/errors/acceptance/angular coverage separately
 for individual and combined settings; no invented threshold or source-data deletion.
 No production adoption before relevant scientific/source gates. Do not force A.
 
@@ -316,6 +319,19 @@ Different run dates alone do not invalidate unchanged simulation. The factor is
 already applied to retained SIMC yields: no second factor or unit-area scaling.
 Use native bin edges and supported bounds where exact rebinning is unavailable;
 do not turn an axis mismatch into another normalization or acquisition study.
+
+### November 12 presentation and scientific-priority decision
+
+All 15 parent MM comparisons must use identical experimental/SIMC bin edges,
+never coarse/fine overlays or fabricated fractional-bin information. Separate
+unit-normalized shapes from original yield-normalized comparisons. User adoption
+of the 67/135 exclusion mask does not establish production integration or runtime
+acceptance. Prioritize the existing pion-control neutron/Delta/SIDIS decomposition
+using accepted phase space, channel shapes/degeneracies and available constraints/
+uncertainties; no unsupported positive kaon-side SIDIS lower bound. Preserve prior
+source-aware work and formal Outcome B without restarting completed investigations
+or replacing this priority with unrelated gates. Details are in the
+[governing decision](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md).
 
 ## Delivery preferences
 

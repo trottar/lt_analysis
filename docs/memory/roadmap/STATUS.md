@@ -22,7 +22,9 @@ conditional physically justified MM-dependent Method-A assessment, and existing
 final-yield gates. Preserve separate unit-normalized shape and yield-normalized
 magnitude diagnostics. General qualitative shape agreement supports Local-t,
 not final acceptance; Center/low and Center/high t3 acceptance-edge sensitivity
-is a hypothesis to test. Numerical exclusion criteria/mask are not yet agreed.
+is a hypothesis to test. At that meeting the mask was not yet agreed; the
+[November 12 user decision](../decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md)
+now adopts the four-criterion 30/20 mask (67/135), pending integration/farm validation.
 Do not force A if baseline requirements are met. This is not implementation
 or promotion authority and changes none of the following statuses/dependencies.
 Keep the scoped absolute-unit caveat bounded; no normalization archaeology.
@@ -58,12 +60,22 @@ accepts its final MM and producer yields; Step 4 assesses matched Local-t versus
 Local-t + Method A within existing E.8/F.6 gates; Step 5 uses sums of matching
 data and SIMC yields to assess ratio flatness versus phi for each t and epsilon;
 Step 6 refines the SIMC model toward unity and uses the existing L/T machinery.
-This clarifies purpose, not order, status or dependencies. Iteration-zero unity
-is not required. Data subtraction remains fixed thereafter; no pion retuning,
+Neither unity nor phi-flatness is an iteration-zero acceptance requirement,
+per the November 12 user decision; ratio variation is diagnostic. This changes
+no six-step status/dependency or prior scoped runtime acceptance. Data subtraction remains fixed thereafter; no pion retuning,
 area matching or invented normalization. For Method A use the same iteration-zero
 SIMC denominator and evaluate angular flatness, normalization, Lambda-background
 validity and uncertainty separately. Flatness/unity cannot prove purity.
-No new steps, reconstruction phases, thresholds or numerical work are authorized.
+The user-adopted exclusion is a scientific decision, not integration/runtime
+acceptance or authority to execute a farm reanalysis. Immediate priority is the
+existing pion-control neutron/Delta/SIDIS decomposition, accepted phase-space
+support, channel degeneracy and supported uncertainties; no positive SIDIS floor
+without evidence. Formal Outcome B remains BLOCKED without displacing that
+assessment. After assessment and separately authorized correction, the planned
+existing Local-t chain includes (t,phi) binning and the adopted mask before
+Lambda spectra/yields. All 15 parent comparisons require identical data/SIMC
+edges, separate shape/yield views and no fabricated fractional-bin information.
+The existing SIMC iteration and L/T machinery are preserved. CURRENT owns NEXT.
 
 Existing normalization/weight/yield owners remain
 [`get_eff_charge.find_events`](../../../src/normalize/get_eff_charge.py),
@@ -115,7 +127,9 @@ unchanged; production Step 1 Outcome B is not bypassed. See the
 | Part 4 — validation and cross-section consequences | `DEFERRED`: held-out angular cells, covariance, exclusion sensitivity, data/SIMC ratios and eventual L/T consequences; identify reliable, systematic-limited and angularly unidentifiable quantities. Not executed. |
 
 No production source, cuts/binning, subtraction, uncertainty convention or
-exclusion rule changed. Negative signed yields remain measurements, not an
+production exclusion rule changed in that historical audit. The November 12
+user adoption is separate from pending production integration. Negative signed
+yields remain measurements, not an
 automatic deletion criterion. CURRENT alone owns the exact active action.
 
 ## Frozen upstream program

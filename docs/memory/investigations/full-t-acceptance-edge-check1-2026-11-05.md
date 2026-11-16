@@ -1771,3 +1771,193 @@ unchanged source snapshots, actual receipt/result extracts, input hashes and
 memory-integrity/preservation checks. No new scientific covariance/mean or
 combined one-sigma physical error was invented. No tests of changed analysis
 code were needed because no analysis code changed; farm/runtime NOT RUN.
+
+
+## November 12 existing-data physical Lambda assessment
+
+The user explicitly resumed physical subtraction assessment using existing
+results, without a new acquisition prerequisite. At live public/local test
+77c44eb60192f38c6979e71a2ae0cd8a920ada76, the offline observer assessment reuses
+October 28/30 Local-t cleaned experimental MM, unchanged iteration-zero KLambda
+SIMC, completed three-component fits, 1024 bootstrap replicas and 116 model
+responses. No fit, bootstrap generation, calibration search, SIMC normalization
+investigation, production source change or farm run occurred.
+
+Delivered packet: kaonlt_physical_pion_subtraction_20261112_review_bundle.zip,
+with standalone Scientific_Report.html embedding 20 original figures, fifteen
+nine-cell atlases, all 150 parent/cell comparisons, exact 135-cell Lambda
+bootstrap replicas/covariance and complete-native-MM covariance factors.
+The 135 source-bound applied-event histograms reproduce old kaon and pion
+inputs with maximum absolute difference 6.59e-17; low-epsilon stored kaon
+weights preserve applied slow-proton factors. Parent sums and all 116 existing
+scenario Lambda/phi vectors close to retained published numerical results.
+This establishes arithmetic/input binding, not new physical acceptance.
+
+Center/low t3: original D/M=2.5701 +/-0.1390 (conditional counting plus retained
+MC statistics); tail fraction MM>=1.132 within [1.10,1.16) is
+0.364678 +/-0.025277 versus MC native-grid content bounds [0.2402,0.2480].
+Existing model tail range [0.364529,0.364744] barely changes it; cleaned-integral
+sensitivity is -0.123% to +0.0535%. Joint-background bootstrap SD=0.0001861
+(0.133% of original cleaned integral), conditional only.
+Center/high t3: original D/M=1.2362 +/-0.0918; tail
+0.185508 +/-0.034681 versus MC bounds [0.1791,0.1862]. Existing-model
+cleaned-integral change is -5.34% to +0.914%; original pion subtraction is
+18.29% of pre-pion integral, with conditional joint-background SD=0.0043313.
+The high t3 full broad most-negative-delta control residual is predominantly
+above 1.16 GeV, not an equal Lambda-background correction. Center/high t1/t2
+retain larger Lambda-region tail differences under all retained variations.
+Other settings, peak-bin comparisons, signed residuals and support appear in
+the report and complete tables. Histogram maxima are not fitted mass shifts
+or resolution measurements. Initial iteration-zero D/M need not be unity.
+
+All 135 physical cells are retained: 99 populated, 36 zero-kaon-count slots,
+33 with finite-MC absence. Three empty-kaon cells retain signed negative pion
+estimates; one populated Right/high t1 phi8 has nonpositive cleaned integral.
+No invented sparse threshold or exclusion. Complementary-setting sums give
+54/54 nominal combined cells with observed kaon and MC support; those are
+observer window-integral diagnostics, not uniform acceptance or producer Y0.
+Finite-MC absence makes ratios/peaks/fraction errors unavailable, not zero
+physical acceptance. Yield-normalized and separate signed unit-area plots
+preserve authoritative yields and nonaligned-grid MC content bounds.
+
+Original fixed-weight counting errors, conditional joint-background bootstrap
+covariance and uncalibrated model sensitivity ranges remain separate. No
+quadrature sum double-counts pion counting or assumes missing Cov(kaon,B)=0.
+Full physical covariance, protected-A/upstream learning, external PID/shared
+systematics and separate partial-boundary-bin bootstrap covariance remain
+unavailable. Exact full-Lambda/phi bootstrap covariance is retained. Outcome B
+remains unresolved and does not block this completed numerical comparison.
+The available scenarios do not establish an envelope of all true backgrounds.
+
+NEXT is independent scientific review of this existing-data assessment against
+the established final-MM/yield criteria. No new prerequisite, production
+adoption, Method A promotion or farm/acquisition execution. All six roadmap
+statuses/dependencies and source, contract, tests, unrelated bytes/index/refs
+are preserved. Ordinary memory manifest/health and exact patch/preservation
+receipts accompany the review package; local checks do not establish farm or
+physical-subtraction acceptance.
+
+
+## November 12 detached bin exclusion and reverse reconstruction
+
+User handoff authorizes an actual colleague-inspired diagnostic, following the
+completed five-setting physical assessment without another acquisition study.
+One contract precedes source edits:
+[fixed mask/reconstruction contract](../phases/lambda-bin-exclusion-reverse-reconstruction-2026-11-12-task-contract.md).
+Base public/local test: 77c44eb60192f38c6979e71a2ae0cd8a920ada76. Local source
+candidate only; independent ChatGPT actual-diff/scientific review remains NEXT.
+No accepted production or farm state changes.
+
+The four real criteria are total raw entries, signal-region raw entries,
+signed cleaned signal yield >= equal-width left yield, and >= equal-width
+right yield. Every failure is recorded. Primary provisional thresholds are
+30 total and 20 signal entries, with predeclared 0/0, 15/10, 45/30, 60/40
+sensitivity trials; 0/0 keeps the shape criteria. No optimum is selected.
+Trial Lambda signal [1.114,1.126), left [1.102,1.114), right [1.126,1.138)
+GeV use adjacent 12 MeV regions on actual retained experimental edges, not
+omega windows, a fitted width, accepted KaonLT thresholds or a production mask.
+Counts are raw kaon nommcuts/source rows and allcuts signal rows, including
+random/dummy/zero weights; separate source counts, nonzero-weight/effective
+support and original signed normalized yields are retained. The user regards
+pion-control statistics as the background-model starting point and does not
+assume the kaon-selected sample perfectly pure. No new uncertainty is invented
+from that interpretation. No bin-level charge factor or 0 +/-10000 convention.
+
+New ROOT-independent testing consumer applies one frozen experimental-only
+mask identically to data and existing MC; no MC agreement enters criteria.
+Source/Local-t application states, empty/weak/nonpositive/finite-MC support
+are distinct. Negative yield or poor MC agreement alone never excludes a cell.
+Original/retained/rejected children reverse aggregate to 15 parents, five
+settings, 54 combined cells and six angular ratios by summing data and MC
+separately. No retained-support renormalization. The existing runtime/producers,
+Local-t amplitudes, alignment, normalization, random/dummy/slow-proton weights,
+Method A/B roles and roadmap remain frozen.
+
+All-retained source closure passes for 135 cells, 15 parents and 54 combined
+cells. Independent readback matches 105 prior parent and 216 combined scalars;
+2700 trial criterion checks pass. Conditional 135x135 background covariance
+propagates by A C A.T and matches masked 1024-replica covariance. All 116
+existing model responses use the same mask; scenarios vary only their original
+parent about the existing joint central prediction, never invented simultaneous
+multi-parent shifts. Original fixed-counting variance, conditional background
+bootstrap and model sensitivity remain separate; no double counting or assumed
+zero kaon/background/PID cross covariance. Selection-induced bias, complete
+physical covariance and separately unavailable boundary-bin covariance remain
+unresolved. These are observer window integrals, not producer-owned final Y0.
+
+Primary 30/20: 67/135 cells, 21,640/22,135 raw Lambda entries (97.76%) and
+49,555/55,738 broad selected rows (88.91%) retained. Failure frequencies overlap:
+44 total-entry, 68 signal-entry, 3 left and 5 right comparisons. Threshold
+pairs 15/10, 45/30 and 60/40 retain 76, 66 and 61 cells, respectively.
+Center/low t3 retains 4/9 cells and 545/647 entries: tail fraction decreases
+0.364678 -> 0.330612 +/-0.025952, but matching MC also changes to
+[0.225987,0.233635]. Gap above MC upper content bound decreases about 16.9%,
+not disappears. Rejected-cell signed tail fraction is about 0.600; retained
+model tail range [0.330439,0.330672] still disagrees. Center/high t1/t2 tails
+remain 0.194844 +/-0.014786 and 0.217324 +/-0.016696 versus MC bounds
+[0.094597,0.101004] and [0.151290,0.156245]; descriptive shape-distance lower
+bounds slightly worsen. Center/high t3 retains only 2/9 cells, 231/336 entries
+and 65.66% MC window yield: data tail 0.157496 +/-0.039907 versus MC
+[0.164509,0.172663]. Available errors retain compatibility without purity proof;
+applied background 0.039746, conditional joint-background SD 0.003250.
+
+Six combined angular distributions do not uniformly flatten: descriptive CV
+changes low t1 .09336->.09180, t2 .06636->.06640; low t3 loses phi5, with
+common-eight-phi CV .27021->.27369. High t1 .14202->.17404, t2 .11537->.11229,
+t3 .34658->.38821. No covariance-qualified flatness probability or full angular
+acceptance is claimed. All-parent spectra, signed rejected contributions,
+coherent model effects and threshold dependence accompany the report.
+
+Conclusion: the trial identifies sparse-cell influence and a modest Center/low
+t3 tail reduction but does not establish a general remedy or acceptable
+physical-acceptance cost. No maximum acceptable loss was approved; no mask is
+adopted. Outcome B remains unresolved without being converted into an evidence-
+acquisition task. Complete review ZIP: kaonlt_lambda_bin_exclusion_20261112_review_bundle.zip,
+including 23 embedded original figures, all 135 decisions/five trials, complete
+actual source/memory diff, deterministic checks and before/after snapshots.
+The initial real-data attempt passed numerical checks but exposed NumPy-integer
+JSON serialization; the bounded correction and saved-output regression pass.
+24 focused local tests pass. Source/farm/physical acceptance are separate;
+Linux numerical/ROOT/farm behavior is not established by these Windows checks.
+Preservation, compilation/grammar, manifest and ordinary-health receipts are
+included. No staging, commit, push, farm run, refit or new bootstrap occurred.
+
+
+## November 12 user adoption and scientific-priority synchronization
+
+The later explicit user decision supersedes the preceding unadopted-trial state;
+it does not change its numerical results or claim a general improvement from
+exclusion. The user adopts the four-criterion 30-total/20-signal Lambda procedure,
+including both neighboring-yield comparisons, and the reviewed 67/135 mask.
+Production integration/farm validation remain pending. Preserve signed data,
+setting normalization and identical retained experimental/SIMC support; no
+bin-level charge correction, surrogate uncertainty or automatic source change.
+The [governing decision](../decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md)
+pins the reviewed artifact and mask IDs and owns the complete policy.
+
+Neither unity nor phi-flatness is an iteration-zero acceptance requirement;
+prior descriptive CV/ratio results are diagnostics, not a rejection gate.
+Subsequent existing SIMC cross-section iteration keeps initial pion subtraction
+fixed. All 15 parent MM comparisons must use identical data/SIMC edges, never
+coarse/fine mixtures, with separate unit-normalized and original yield-normalized
+views and no fabricated fractional-bin information. Existing mixed-grid figures
+are historical; this memory task does not replot them or claim compliance.
+
+The immediate priority is acceptance-informed assessment of the existing pion-control
+neutron/Delta/SIDIS decomposition and physically concerning fitted zero kaon-side
+SIDIS, especially Center/high t3. Use accepted phase space, channel support/shapes,
+degeneracies, physically supported constraints and available uncertainties. A fitted
+zero is not proof of absent SIDIS; no positive lower bound is imposed without
+evidence. Preserve completed source-aware work, conditional bootstrap/model
+responses and formal Outcome B without repeating completed studies or letting
+unrelated gates displace this assessment.
+
+After assessment and separately authorized correction, planned reanalysis uses
+the existing Local-t chain through (t,phi) binning and the adopted mask, then
+Lambda MM/yields. Existing SIMC/LT and Method A/B ownership stay unchanged.
+This records the user's scientific choices, not new production/runtime acceptance
+or authorization to execute a farm run now. Public/local test remains
+77c44eb60192f38c6979e71a2ae0cd8a920ada76. Independent memory-diff review is the
+current handoff; user publication and pushed-state synchronization precede the
+substantive decomposition assessment. Source, tests, prior bundles, unrelated
+pending work, raw index and refs remain preserved.
