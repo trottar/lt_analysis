@@ -2,6 +2,10 @@
 
 This roadmap owns approved dependency/status structure only. `CURRENT.md` owns the active objective, blockers, and exact next action; no entry here alone is a runtime claim or source-change authorization.
 
+Diagnostic navigation: the [bounded D1/D1.a-D5 sequence and D2 scope](../investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md#bounded-diagnostic-sequence-and-d2-scope)
+records source-reviewed D1/D1.a and the later diagnostic scopes. This link changes
+none of the six production milestones below; CURRENT owns the conditional NEXT.
+
 ## Final background-subtraction progression — November 3 user decision
 
 Local-t is the selected scientific baseline for continued development and final

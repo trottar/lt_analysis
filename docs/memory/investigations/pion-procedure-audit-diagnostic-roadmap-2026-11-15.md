@@ -2,24 +2,23 @@
 
 ## Authority and evidence status
 
-User authority: the Scientific Memory Update and D1 Preparation handoff following
-the November 15 full pion-background procedure audit. This is a memory-only
-checkpoint. CURRENT is the sole active-priority/exact-NEXT owner. D1 has not
-begun. Independent memory-diff review, user publication and independent
-pushed-state verification precede the next scientific operation.
+This record began with the November 15 Scientific Memory Update and D1
+Preparation handoff. The November 16 D1/D1.a Memory Closure and D2 Preparation
+user handoff now records D1 and D1.a as SOURCE REVIEWED within their bounded
+scopes and authorizes read-only D2 after memory review/publication/synchronization.
+CURRENT remains the sole active-priority/exact-NEXT owner. This operation updates
+memory only: no D2, source implementation, production reanalysis or farm run.
 
-Public/local test observed at this checkpoint:
-`d811c7e6f9c2c4e113238fc578f136dacb9aae32`. The November 12 memory decision is
-published, including the adopted exclusion and required earlier task contract.
-The committed manifest has one verified integrity defect: it records that
-contract as 8662 bytes/SHA-256
-`a95917beb1e79e513ff5efee877fe52dfe5d13dd65da0e38169ee2837e06b7ad`, while
-the committed and current local contract is 8661 bytes/SHA-256
+November 15 historical public/local test observation:
+`d811c7e6f9c2c4e113238fc578f136dacb9aae32`. Its one contract-manifest CRLF/LF
+discrepancy recorded 8662 bytes/SHA-256
+`a95917beb1e79e513ff5efee877fe52dfe5d13dd65da0e38169ee2837e06b7ad`
+instead of the actual 8661 bytes/SHA-256
 `a6bcf9b79ac802a0d883ff5e199cd7978092adeb8b702ddce4c7f38886ebc19b`.
-The mismatch is the previously identified final CRLF/LF byte difference.
-This memory operation regenerates the manifest from actual bytes; it makes
-no change to the contract. A passing local manifest is not a claim that this
-correction is already published.
+That historical integrity discrepancy was repaired in the published D1-preparation memory at
+`c567382027cca3d6aa8c1019c298459d046a33ee`, the current live/local base observed
+at this checkpoint. The manifest now passes. D1.a source/test changes remain
+local/uncommitted; source review is not publication or runtime acceptance.
 
 Audit artifact: `KaonLT_Full_Pion_Background_Procedure_Audit_20261115_review_bundle.zip`,
 6030458 bytes, SHA-256
@@ -56,9 +55,28 @@ has conditional stage sigma 0.162155076037, but the complete learned-neutron/
 data/template covariance is not included in that residual treatment.
 This establishes the numerical origin, not stability under a justified complete
 uncertainty treatment and not physical absence of SIDIS. Do not delete this
-empty bin, invent an independent covariance or impose a positive SIDIS floor.
+physical histogram bin, invent an independent covariance or impose a positive SIDIS floor.
 Exact operands: `numerical/Center_highe_t3_sidis_stage_bins.csv` and
 `numerical/empty_bin_support.json` in the audit.
+
+November 16 D1 closure: the remaining seven bins contribute +10.6094147226.
+Zero experimental entries and zero experimental Sumw2 in all four signed
+streams establish genuine absence of observed support, not cancellation. The
+small template-only residual error assigns excessive inverse-variance weight
+in this particular staged WLS procedure. The earlier fixed-weight neutron
+amplitude sign-crossing argument is not a valid physical stability test when
+the implemented variance dependencies are restored. D1 is SOURCE REVIEWED,
+not proof of physical SIDIS absence or complete covariance. The user accepts
+this defect as established; do not restart a general D1 investigation.
+
+The [D1.a implementation record](../phases/kaon-sidis-empty-bin-support-2026-11-16.md)
+owns the exact reviewed opt-in support rule, contract, source identities,
+eight/seven-bin comparison and test limits. Its seven-bin G=10.6094147226,
+H=48.4742198501 and nonnegative A_SIDIS=0.218867157746 follow from unchanged
+retained weights, without a positive floor. Physical histogram bins remain.
+Only Center/high t3 changes in the retained fifteen-parent fixed-weight replay;
+the 13 focused tests pass and the broader inherited error remains documented.
+D1.a is SOURCE REVIEWED, unpublished/default-off and not farm validated.
 
 ### Accepted templates and production ownership
 
@@ -101,41 +119,48 @@ no qualifying independent joint non-SIDIS anchor/pion-gauge constraint has been
 established. This is separate from the authorized read-only diagnostic sequence;
 it does not commission a new evidence-acquisition search.
 
-## Bounded D1-D5 sequence
+## Bounded diagnostic sequence and D2 scope
 
-This sequence describes diagnostic scope and order, not competing active-state
-authority. CURRENT alone owns exact NEXT and its review/publication conditions.
+These are diagnostics, not new production milestones. CURRENT alone owns the
+exact conditional NEXT; the six production-step labels/dependencies are frozen.
 
-1. **D1 — SIDIS-boundary stability and source-aware covariance.** Initially
-   read-only, Center/high t3, using existing retained eight-bin and source-event
-   evidence. Reconstruct signed prompt/random/dummy/dummy-random contributions,
-   original observed/model populations, neutron-subtracted residuals, per-bin
-   weighted scores and conditional variances. Trace fitted neutron-amplitude,
-   data/template and training-covariance dependencies. Where the existing
-   evidence supports a statistically justified uncertainty treatment, assess
-   boundary sensitivity; otherwise identify precisely what is unidentifiable.
-   Preserve empty observations. Do not remove bins, impose a positive SIDIS
-   floor, invent missing covariance, replace the production estimator, rerun
-   completed fit/bootstrap/model studies or start farm acquisition. Determine
-   stability or inability to identify the coefficient; do not presume either.
-2. **D2 — Accepted channel support.** Reuse completed raw canonical-t comparisons
-   for neutron/Delta/SIDIS accepted populations, effective statistics, momentum,
-   SHMS delta/phi coverage, shapes and channel overlap; no repeated study.
-3. **D3 — Physical pion PID-transfer support.** Examine existing measurements/
-   diagnostics of HGCer response, phase-space overlap, momentum/delta, detector
-   position and available run dependence. State supported transfer constraints
-   and unavailable terms; invent no calibration or covariance.
-4. **D4 — Protected-Delta interpretation.** Classify recorded rejection reasons
-   across 15 parents, distinguishing fit quality, component support, degeneracy
-   and configured fallback. The existing rejection count is not a new fit.
-5. **D5 — Predictive background closure.** Use independent or suitably held-out
-   evidence only where available and supported. Same-data fit agreement is not
-   independent closure; preserve formal Outcome B limitations.
+| Diagnostic | Recorded state and boundary |
+| --- | --- |
+| D1 | **SOURCE REVIEWED**: zero-SIDIS numerical origin and source-aware conditional covariance limitations established; no physical-absence claim or repeat general study. |
+| D1.a | **SOURCE REVIEWED**: opt-in original-support weighted-fit correction; user publication and narrow runtime validation remain separate. |
+| D2 | **NEXT after memory publication and independent synchronization**: accepted neutron/Delta/SIDIS component shapes and canonical-t phase-space support; read-only reuse of retained evidence. |
+| D3 | **DEFERRED**: physical HGCer pion-control-to-kaon PID transfer. |
+| D4 | **DEFERRED**: protected-Delta rejection and fallback interpretation. |
+| D5 | **DEFERRED**: independent or suitably held-out pion-background predictive closure; same-data fit agreement is not independent closure. |
 
-No D1 execution, new estimator, production correction or source-changing task
-contract is created by this memory update. Any justified correction requires
-a separate standalone repository contract, independent review and explicit
-user authorization. Stop this operation at the memory-review bundle.
+**D2 question:** Do the accepted neutron, Delta and SIDIS SIMC templates correctly
+represent the canonical-t populations used to model pion backgrounds? Here
+accepted denotes the selected/accepted simulation population, not demonstrated
+physical adequacy of the background model.
+
+Reuse already retained raw canonical-t projections and earlier comparisons;
+do not repeat a completed study or launch another unrestricted fit campaign.
+Inspect across all five settings/fifteen canonical-t parents:
+
+1. Accepted channel populations versus t, phi, SHMS delta, momentum and missing mass.
+2. Finite-SIMC support and effective statistics.
+3. Production setting-wide shapes versus raw event-weighted canonical-t shapes.
+4. Equal-phi aggregation effects, keeping detached diagnostic and production ownership distinct.
+5. Neutron/Delta/SIDIS shape overlap and degeneracy.
+6. Retained component-model and Lambda-background sensitivity, without new unrestricted fits.
+
+The earlier Center/high t3 raw-versus-setting-wide normal-bin L1 differences
+are neutron 0.639572 (about 0.640), Delta 0.301043 and SIDIS 0.399584 (about
+0.400). These are shape differences, not significances or automatic corrections.
+Distinguish actual construction defects from finite-MC limits and physical
+acceptance differences. The earlier proposed canonical-t template contract is
+not automatically implemented; D2 is diagnostic, not source-changing production.
+
+D1.a publication and farm validation are required before claiming its accepted
+production behavior, but do not block separately authorized read-only D2.
+Formal Outcome B remains BLOCKED as the distinct independent-component-constraint
+requirement. No D2, D1.a farm operation or source implementation occurs in this
+memory checkpoint. Stop at its review bundle; publication/synchronization follow.
 
 ## Literature references for diagnostics, not production prescriptions
 
@@ -210,9 +235,11 @@ non-production; Method B remains diagnostic-only and numerically excluded.
 
 ## Review boundary and maintenance
 
-Memory-only candidate; independent actual-diff review and user publication are
-pending. No source/test/contract/fit/cut/normalization/weight/yield changes and
-no D1/farm execution. CURRENT owns the conditional D1 NEXT. No MEMORY.md growth
-is needed: lasting lessons and diagnostic references are owned by this record.
-Existing CURRENT/MEMORY soft-size warnings are nonblocking; consolidate at the
-next checkpoint/milestone audit, not through a new maintenance gate now.
+This November 16 memory-only candidate records the user's D1/D1.a source-review
+closure and conditional D2 decision. It preserves all pending implementation,
+tests, coefficients, histograms and scientific/runtime boundaries. No numerical
+diagnosis, D2 execution or farm/source operation was repeated. The next sequence
+is independent memory actual-diff review -> user-only memory publication ->
+independent pushed-state synchronization -> read-only D2. CURRENT alone owns NEXT.
+Existing CURRENT/MEMORY soft-size warnings are nonblocking; batch consolidation
+at the next checkpoint/milestone audit without growing MEMORY.md here.

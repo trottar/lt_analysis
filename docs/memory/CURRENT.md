@@ -13,6 +13,8 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
+The bounded diagnostic is D2 after this memory publication and independent
+synchronization; this checkpoint does not execute D2.
 
 ## Current Work Item
 
@@ -25,17 +27,24 @@ setting-level normalization and identical retained data/SIMC support. Exact
 criteria, windows, mask identity and ownership are in the
 [governing decision](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md).
 
-Immediate scientific priority is D1: Center/high t3 SIDIS-boundary stability
-and source-aware covariance, initially read-only using retained evidence.
-The completed November 15 detached audit traces the fitted zero to a negative
-weighted neutron-subtracted residual projection, dominated by an empty MM bin;
-it does not establish physical SIDIS absence or complete fitted-neutron/data/
-template covariance. Canonical-t replacement alone does not remove the zero;
-protected-Delta rejection/zero policies remain distinct from physical absence.
-The [audit and bounded D1-D5 sequence](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md)
-preserve exact source, numerical and literature limits. This memory update
-does not begin D1, approve a template repair, refit or promote farm acceptance.
-Outcome B remains BLOCKED as a separate independent-evidence limitation.
+D1 and D1.a are SOURCE REVIEWED within their bounded scopes, per the November
+16 user closure handoff. The [D1/D1.a record](phases/kaon-sidis-empty-bin-support-2026-11-16.md)
+owns exact identities, findings and review attribution. The empty-bin defect is
+established: do not repeat its diagnosis or a general D1 covariance study.
+Full covariance and physical SIDIS absence remain unverified.
+
+D1.a changes only its SIDIS fitting objective, retaining physical bins and
+signed cancellations without a positive floor. Its reviewed
+[contract/candidate](phases/kaon-sidis-empty-bin-support-2026-11-16-task-contract.md)
+remain unchanged, default-off, unpublished and not farm validated. Publication/
+runtime acceptance precede production claims; neither blocks read-only D2.
+
+After memory review, user publication and independent synchronization, D2 is
+NEXT: retained neutron/Delta/SIDIS shapes and canonical-t support across all
+15 parents. The [diagnostic sequence/scope](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md#bounded-diagnostic-sequence-and-d2-scope)
+separates construction, finite-MC and acceptance limits. No D2 execution,
+automatic template implementation or unrestricted fit campaign occurs here.
+D3-D5 remain DEFERRED; Outcome B remains separately BLOCKED.
 
 All 15 parent MM comparisons must put data and SIMC on identical bin edges;
 never mix coarse/fine histograms in one comparison. Keep separate unit-normalized
@@ -194,15 +203,12 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — After independent actual-diff review of this memory-only update,
-user-only commit/push and independent verification of the published candidate,
-perform D1: Center/high t3 SIDIS-boundary stability and source-aware covariance
-diagnostic, initially read-only with existing retained eight-bin/source evidence.
-Preserve empty observations; no bin removal, positive SIDIS floor, missing
-covariance invention or production-estimator replacement. D1 has not begun.
-D2-D5 remain ordered diagnostic follow-ups, not new production milestones.
-Any source correction requires a separate contract, review and user authorization
-before the planned Local-t -> (t,phi) -> adopted-mask -> Lambda reanalysis.
+NEXT — Independent actual-diff review of this memory-only closure; then user-only
+memory publication and independent pushed-state synchronization, followed by
+read-only D2 using retained raw canonical-t/channel evidence across 15 parents.
+D1.a source publication/farm acceptance remains separate and does not block D2.
+This checkpoint runs no D2, source implementation, production reanalysis or farm
+operation. D3-D5 remain DEFERRED; the six production milestones stay unchanged.
 
 ## Success Criteria
 

@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 15914,
+      "bytes": 16237,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "c538f23ce9a9fb04ef089406622bc5497138429bbeec357877a534d7c102321e"
+      "sha256": "df1df904ab28c6c5634501b5b7fae19be204f79ddbc1302ff57c1fe420d2f705"
     },
     {
       "bytes": 11186,
@@ -496,9 +496,9 @@
       "sha256": "adc62e471177247fa092a386dc9370d02bc02840302b6c2635a23fed4beb58fd"
     },
     {
-      "bytes": 14010,
+      "bytes": 15955,
       "path": "docs/memory/investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md",
-      "sha256": "561b11815be1db884263c5d4f9f051a818830d3417c119ada1d549b5cecff23e"
+      "sha256": "2fb2624f4f46f6cb77693ef09123fa74d6e7a7d5ca59af13ce8ab911e387fbf6"
     },
     {
       "bytes": 4714,
@@ -1346,6 +1346,16 @@
       "sha256": "851f150b0c9954d3ab4ce66381293b87fa8d861fef299f50c409858bac59c314"
     },
     {
+      "bytes": 8394,
+      "path": "docs/memory/phases/kaon-sidis-empty-bin-support-2026-11-16-task-contract.md",
+      "sha256": "8cf9f023399521f7a201fbd7ef33aaa1dfe19ebbb47f20cd703346fb88a557c0"
+    },
+    {
+      "bytes": 5471,
+      "path": "docs/memory/phases/kaon-sidis-empty-bin-support-2026-11-16.md",
+      "sha256": "80083886835619799750645f99ef61fbf44af79061eede869ba75050261cc79a"
+    },
+    {
       "bytes": 11392,
       "path": "docs/memory/phases/kaonlt-ab-legibility-fresh-c-2026-10-26-task-contract.md",
       "sha256": "bdc31dc57e6f8f8002dc7100a68921646e26f495c1fa757afebf9125bd2e4a57"
@@ -1731,9 +1741,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 44195,
+      "bytes": 44543,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "5720dffb7131c3cb8f1887cf9a56bca0416cf4185dc7121b4d0233284f733de8"
+      "sha256": "3900b2c54f6b39ce2678c4282321707125d477066088e0eca35bfd6cd91bb54b"
     },
     {
       "bytes": 1698,
