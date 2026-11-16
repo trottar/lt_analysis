@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 15645,
+      "bytes": 15914,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "de8750fd6e0602e2943ab88de3b1b133217f2fdaa02cc710dd636ae220ee4c29"
+      "sha256": "c538f23ce9a9fb04ef089406622bc5497138429bbeec357877a534d7c102321e"
     },
     {
       "bytes": 11186,
@@ -494,6 +494,11 @@
       "bytes": 8851,
       "path": "docs/memory/investigations/parent-t-reconstruction-part2-2026-11-04.md",
       "sha256": "adc62e471177247fa092a386dc9370d02bc02840302b6c2635a23fed4beb58fd"
+    },
+    {
+      "bytes": 14010,
+      "path": "docs/memory/investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md",
+      "sha256": "561b11815be1db884263c5d4f9f051a818830d3417c119ada1d549b5cecff23e"
     },
     {
       "bytes": 4714,
@@ -1571,9 +1576,9 @@
       "sha256": "c502d652bb9414f9fd70a516f70a912c137e105068bda67b6bbe1285e3b47fe1"
     },
     {
-      "bytes": 8662,
+      "bytes": 8661,
       "path": "docs/memory/phases/lambda-bin-exclusion-reverse-reconstruction-2026-11-12-task-contract.md",
-      "sha256": "a95917beb1e79e513ff5efee877fe52dfe5d13dd65da0e38169ee2837e06b7ad"
+      "sha256": "a6bcf9b79ac802a0d883ff5e199cd7978092adeb8b702ddce4c7f38886ebc19b"
     },
     {
       "bytes": 14192,
@@ -1726,9 +1731,9 @@
       "sha256": "eeb67deacdc505edb0fab078fad800114dc445e5dc8d5845035b0d966d487d8f"
     },
     {
-      "bytes": 43658,
+      "bytes": 44195,
       "path": "docs/memory/roadmap/STATUS.md",
-      "sha256": "addfedbe229d73736e1198025752f224d8af986025cc6b7842430245e16f9c8e"
+      "sha256": "5720dffb7131c3cb8f1887cf9a56bca0416cf4185dc7121b4d0233284f733de8"
     },
     {
       "bytes": 1698,

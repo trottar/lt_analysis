@@ -111,6 +111,15 @@ CURRENT alone owns the exact active NEXT. The
 records the narrow Step 1 evidence audit; all historical statuses below retain
 their original scope.
 
+## November 15 diagnostic navigation
+
+The [pion-procedure audit and D1-D5 diagnostic sequence](../investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md)
+record the user's bounded read-only scientific follow-up. They add no production
+milestone, alter none of the six step statuses/dependencies above, and do not
+resolve Outcome B. CURRENT alone owns the exact active diagnostic and its
+review/publication conditions. The audit's proposed template repair is not
+authorized implementation or a replacement scientific NEXT.
+
 ## Parent-t reconstruction subparts — November 4 user extension
 
 Explicitly user-authorized parallel diagnostics under Step 3 yield validation

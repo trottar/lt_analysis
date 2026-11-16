@@ -25,13 +25,17 @@ setting-level normalization and identical retained data/SIMC support. Exact
 criteria, windows, mask identity and ownership are in the
 [governing decision](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md).
 
-Immediate scientific priority is the physically concerning fitted zero
-kaon-side SIDIS component, particularly Center/high t3. Assess the existing
-pion-control neutron/Delta/SIDIS decomposition with channel SIMC and accepted
-phase-space support: compare shapes, overlap/degeneracy, physically supported
-constraints and available uncertainties. Do not impose a positive SIDIS lower
-bound without evidence or restart completed fit/bootstrap investigations.
-Outcome B remains formally unresolved, not a reason to displace this priority.
+Immediate scientific priority is D1: Center/high t3 SIDIS-boundary stability
+and source-aware covariance, initially read-only using retained evidence.
+The completed November 15 detached audit traces the fitted zero to a negative
+weighted neutron-subtracted residual projection, dominated by an empty MM bin;
+it does not establish physical SIDIS absence or complete fitted-neutron/data/
+template covariance. Canonical-t replacement alone does not remove the zero;
+protected-Delta rejection/zero policies remain distinct from physical absence.
+The [audit and bounded D1-D5 sequence](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md)
+preserve exact source, numerical and literature limits. This memory update
+does not begin D1, approve a template repair, refit or promote farm acceptance.
+Outcome B remains BLOCKED as a separate independent-evidence limitation.
 
 All 15 parent MM comparisons must put data and SIMC on identical bin edges;
 never mix coarse/fine histograms in one comparison. Keep separate unit-normalized
@@ -190,16 +194,15 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent ChatGPT actual-diff review of this memory-only priority
-update; after user publication, synchronize live test against the reviewed
-memory. The substantive next action remains the acceptance-informed assessment
-of the existing pion-control neutron/Delta/SIDIS decomposition and zero kaon-side
-SIDIS component, using accepted phase space, channel shapes, degeneracies,
-supported constraints and available uncertainties. Do not impose a positive
-SIDIS floor without evidence or let unrelated Outcome B/normalization gates
-displace it. No implementation, refit, acquisition or farm execution occurs in
-this memory task. Any correction requires separate authorization before the
-planned Local-t -> (t,phi) -> adopted-mask -> Lambda spectra/yields reanalysis.
+NEXT — After independent actual-diff review of this memory-only update,
+user-only commit/push and independent verification of the published candidate,
+perform D1: Center/high t3 SIDIS-boundary stability and source-aware covariance
+diagnostic, initially read-only with existing retained eight-bin/source evidence.
+Preserve empty observations; no bin removal, positive SIDIS floor, missing
+covariance invention or production-estimator replacement. D1 has not begun.
+D2-D5 remain ordered diagnostic follow-ups, not new production milestones.
+Any source correction requires a separate contract, review and user authorization
+before the planned Local-t -> (t,phi) -> adopted-mask -> Lambda reanalysis.
 
 ## Success Criteria
 
