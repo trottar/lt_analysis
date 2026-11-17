@@ -100,3 +100,98 @@ reopen it. The [separate bounded mechanism](d2a-root-integration-2026-11-16.md)
 adds only a detached existing-input runner/checker and does not repeat D2.a.
 Its NEXT is independent review, before publication/pushed-state verification
 and any user-run ROOT gate. No corrected ROOT fit is newly claimed here.
+
+## Full-cohort validation scope — November 16 user correction
+
+The user directs full-cohort Q4p4W2p74 D2.a validation as the immediate priority.
+The correction and bounded ROOT mechanism are published and SOURCE REVIEWED
+at test `55a1258791483b658729c13508c9aa2c49864e74`; current committed files
+match the reviewed candidate. Actual corrected ROOT execution and complete
+full-cohort acceptance remain NOT VERIFIED. The earlier Center/high t3 mechanism
+remains useful as a smoke/diagnostic check, but cannot establish final acceptance
+of this cross-cutting correction. Its earlier contract and historical evidence
+remain unchanged. CURRENT alone owns the active NEXT and publication conditions;
+the earlier bounded handoff does not authorize full-cohort implementation.
+
+### Scientific invariant and affected cohort
+
+Accepted physical populations originate from correctly selected and weighted
+events. Binned objects are derived representations and must not be manipulated
+to fabricate a different event population. Valid histogram operations for
+fitting, visualization, integration and preserving sums of compatible unnormalized
+populations remain legitimate. This is not a ban on histogram-based fitting.
+
+The published repairs address setting-wide templates improperly representing
+canonical-t populations, equal weighting of independently normalized phi children,
+silent broader-acceptance substitution, destructive pruning, synthetic joints
+from independent marginals, and inadequate source/selection/cache-reuse identity.
+This user correction changes complete validation scope, not those source findings.
+
+| Q4p4W2p74 setting | Canonical-t parents | Native (t,phi) cells |
+| --- | ---: | ---: |
+| Center/high | 3 | 27 |
+| Center/low | 3 | 27 |
+| Left/high | 3 | 27 |
+| Left/low | 3 | 27 |
+| Right/high | 3 | 27 |
+| Total | 15 | 135 |
+
+Three pion channels give 45 channel-parent combinations and 405 channel-specific
+phi slots. Accepted acquisition retains 462245 event rows, 306/405 populated
+channel slots and 105/135 physical slots with pion support. Empty, sparse,
+unsupported and unavailable states must remain explicit; complete support is
+not fabricated. The separately adopted four-criterion Lambda mask retains
+67/135 cells for its reviewed cohort; that selection is not pion SIMC support.
+Include KLambda/KSigma0 paths according to actual configured inputs and source
+identities; do not invent an unavailable KSigma0 population or simulation source.
+
+### Required dependent validation sequence
+
+1. Corrected ROOT construction across all settings, parents and native cells:
+   original event selection/weights; raw entries, signed weights, Sumw2 and flow
+   bins; direct event-to-parent and parent-to-child closure; canonical-t/phi/MM
+   boundaries; effective HGCer geometry and source identities; cold/warm cache
+   consistency and independent clones; explicit unavailable/unsupported support.
+2. Actual neutron/Delta/SIDIS components on pion-control and kaon-selected sides
+   using appropriately validated populations: complete staged histories, objective
+   arithmetic, uncertainties, fit status and protected-Delta behavior. Preserve
+   D1.a default-off and separately compare its enabled original-support rule,
+   retaining physical empty/cancelled bins without a positive SIDIS floor.
+3. Existing background transfer: pion-control denominator, kaon-side numerator
+   and event-level pion-background transfer weights. Preserve random/dummy,
+   slow-proton, normalization and cut semantics; no replacement transfer model.
+4. Follow all affected native cells through spectra and yields. Apply the adopted
+   Lambda exclusion and existing matched data/SIMC binning only at appropriate
+   downstream acceptance gates. Changed fitted amplitudes alone do not establish
+   validated corrected physical Lambda yields.
+5. Old-versus-corrected comparison for all 15 parents: pion-channel MM templates,
+   component amplitudes/fit outcomes, modeled background beneath Lambda,
+   transfer-factor behavior, protected-Delta acceptance/fallback, and relevant
+   Lambda spectra/yields only where genuine validated outputs exist. No arbitrary
+   rescaling or substitution of fitted coefficients for unavailable observables.
+
+### Reuse, boundaries and subsequent preparation
+
+Reuse existing ROOT inputs, retained projections and receipts. The November 11
+acquisition remains CLOSED / RUNTIME VALIDATED within its diagnostic purpose.
+Do not repeat that acquisition, 15-source/45-parent projection closures, 1140
+D2.a deterministic event checks, accepted local source regressions or completed
+acceptance investigations. Consuming their outputs does not reopen closed phases.
+
+D1/D1.a stay SOURCE REVIEWED within their scopes; D2 stays SOURCE REVIEWED
+within its diagnostic scope; D2.a correction and bounded mechanism stay SOURCE
+REVIEWED without farm acceptance. Preserve D3-D5 DEFERRED, Outcome B BLOCKED,
+all six production milestones and their original dependencies, selected Local-t,
+Method A detached/non-production, Method B diagnostic-only/excluded and the
+adopted 67/135 Lambda cohort. No roadmap milestone is promoted by this correction.
+
+This is a memory-only scope update. Stop for independent ChatGPT actual-diff
+review. After approval, user publication and independent pushed-state verification
+of this memory update, prepare one standalone full-cohort D2.a validation contract
+using existing producer/runner/checker infrastructure, reusing the bounded runner
+where useful. That subsequent contract must require complete affected-cohort
+evidence before D2.a acceptance; no separate engineering program or architecture
+restart follows. Source implementation retains contract -> Codex -> deterministic
+checks -> independent actual-diff review -> user publication -> applicable farm
+validation. No full-cohort contract/implementation, ROOT execution, farm run,
+broader analysis, Git staging, commit or push occurs in this memory task.

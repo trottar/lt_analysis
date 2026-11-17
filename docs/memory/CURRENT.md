@@ -13,8 +13,8 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The immediate work is the bounded D2.a corrected-ROOT integration mechanism.
-D2/D2.a source review does not establish physical/runtime acceptance.
+The immediate priority is full-cohort Q4p4W2p74 D2.a validation preparation.
+Source review is not corrected ROOT or full-cohort acceptance.
 
 ## Current Work Item
 
@@ -41,15 +41,15 @@ remain unchanged and default-off; source publication is verified at test
 
 D2 construction/conditional-sensitivity evidence was source-reviewed by a
 separately coded same-assistant review; physical adequacy remains unverified.
-The November 16 user emergency supersedes the pion-only recommendation:
-D2.a is SOURCE REVIEWED and published at the verified e1f0293 checkpoint across
-pion/KLambda/KSigma0 population construction, pruning and joint distributions.
-The [original contract](phases/event-population-authority-2026-11-16-task-contract.md)
-and [record](phases/event-population-authority-2026-11-16.md) retain findings.
-The [bounded integration mechanism](phases/d2a-root-integration-2026-11-16.md)
-is SOURCE REVIEWED after the bounded checker/input-binding repair and actual-
-diff pass. Corrected ROOT execution remains unverified; publish/pushed-state
-review precede the existing-input t3 gate. D1.a remains default-off.
+D2.a correction and its [bounded mechanism](phases/d2a-root-integration-2026-11-16.md)
+are SOURCE REVIEWED and published at
+`55a1258791483b658729c13508c9aa2c49864e74`, without corrected ROOT acceptance.
+The [D2.a record](phases/event-population-authority-2026-11-16.md#full-cohort-validation-scope--november-16-user-correction)
+owns the user's scope correction: all five settings, 15 canonical-t parents,
+135 native cells and dependent construction, fits, transfer and Lambda outputs.
+Center/high t3 is a smoke/diagnostic check, insufficient for final D2.a acceptance.
+Reuse accepted inputs/evidence; preserve support states, D1.a default-off and
+the separate Lambda mask. No implementation now.
 D3-D5 remain DEFERRED and Outcome B BLOCKED. Matched-grid/unit-shape versus
 original-yield requirements and D1/D2 history remain in the
 [diagnostic investigation](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md).
@@ -205,11 +205,11 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Bounded Center/high t3 corrected-ROOT integration under the existing
-[contract](phases/d2a-root-integration-2026-11-16-task-contract.md), conditional
-on user-only publication and independent pushed-state verification of the
-repaired mechanism. No farm execution is authorized here; no reacquisition,
-full analysis, D3-D5 advance or roadmap promotion.
+NEXT — After independent actual-diff approval, user publication and pushed-state
+verification of this memory update, prepare one full-cohort D2.a validation
+contract using existing producer/runner/checker infrastructure. Stop here at the
+memory review bundle: no contract creation, implementation, ROOT/farm execution,
+D3-D5 advance or roadmap promotion. Full-cohort evidence is required for acceptance.
 
 ## Success Criteria
 
