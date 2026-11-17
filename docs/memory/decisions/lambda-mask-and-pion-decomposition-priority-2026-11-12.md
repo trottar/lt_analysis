@@ -100,3 +100,43 @@ substantive priority remains the decomposition assessment, not another memory
 reconciliation phase. Existing six roadmap statuses/dependencies and scoped
 source/runtime closures are preserved. No physics source, Codex implementation,
 farm run, refit, new bootstrap, commit or push occurs in this task.
+
+## November 17 controlled population-correction comparison
+
+The user's corrective instruction now requires independently executed OLD and
+CORRECTED fits for all 15 parents through the same unchanged fitter. Only the
+population constructor may differ; experimental/source events, all scientific
+settings and procedures, alignment and primary D1.a default-off state are identical.
+The complete binding requirements and parity/output obligations are in the
+[D2.a governing record](../phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement).
+Historical Global A/raw-pion B outputs and population/overlap plots do not answer
+this controlled fitting question. Retain full signal-plus-background, pion-only
+models and actual event-applied subtraction as distinct objects. This requirement
+changes no mask, scientific model, roadmap status or source/runtime acceptance.
+
+### November 17 correction: runtime location is not a source defect
+
+Needing Jefferson Lab's ROOT environment does not establish a required code or
+runner update. Existing acquired inputs, retained rows, published population
+correction and shared fitter must be considered before implementation is scoped.
+Demonstrate the exact missing existing-code capability separately; do not infer
+it from absent Work PyROOT. The prepared matched-arm contract is DEFERRED and
+unpublished. Its necessity and any future authorization must be independently
+established. No new fit, farm update or acceptance is implied by this correction.
+
+### November 17 correction: numerical fitting is distinct from ROOT execution
+
+The user's NumPy clarification supersedes making an existing ROOT session the
+scientific NEXT merely because the public fitter imports ROOT. Retained genuine
+NumPy records and histogram arrays are numerical fitting inputs. Work must assess
+whether the existing numerical routines/staged procedure can operate through an
+array interface, preserving all mathematics, settings, signal protection, gates,
+uncertainty treatment and failure policies between OLD and CORRECTED.
+
+This does not establish that a ready equivalent array fitter exists. Verify the
+actual reused code and every relevant histogram/coordinate/error operation; do
+not substitute another statistical model, minimizer or historical amplitudes.
+Record any specific irreducible ROOT operation separately. A literal import
+failure is not evidence that offline fitting cannot be done. ROOT/main.py/farm
+integration acceptance remains separate and still needs its own runtime evidence.
+No production change, new farm contract or ROOT installation follows by inference.

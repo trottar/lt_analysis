@@ -333,6 +333,27 @@ source-aware work and formal Outcome B without restarting completed investigatio
 or replacing this priority with unrelated gates. Details are in the
 [governing decision](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md).
 
+### November 17 controlled-comparison review requirement
+
+Require the same genuine existing fitter and frozen experimental/SIMC events,
+scientific settings and downstream algorithms for independently new OLD and
+CORRECTED fits; only population construction changes. Primary D1.a stays off.
+Apply the complete [D2.a requirements](phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement).
+Do not substitute historical fitted amplitudes, confuse total/pion-only/applied
+backgrounds or defend disputed interpretation without checking source/forensics.
+These failures belong to ChatGPT's task design and scientific-review judgment.
+Missing Work ROOT/PyROOT establishes only local execution limits, not a need
+for Codex or farm code updates. Prove the exact existing-code capability gap
+before commissioning implementation. The prepared matched-arm contract is
+DEFERRED; the user has not published it. Do not reuse earlier launch/push advice.
+Retained NumPy data are scientific inputs, not unusable merely because the public
+entry point imports ROOT. Inspect/reuse the existing numerical fitting routines
+with a verified array interface in Work; preserve mathematics, stages, objectives,
+constraints, uncertainties and policies. Do not require a ROOT session or farm
+update before assessing this route, and do not claim equivalence or new results
+until demonstrated. The user requests the next chat handoff only AFTER user
+publication and independent pushed-state verification of this memory correction.
+
 ## Delivery preferences
 
 For a source-changing task, ChatGPT provides exactly one standalone Markdown

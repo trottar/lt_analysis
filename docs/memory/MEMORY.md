@@ -8,21 +8,18 @@ repository memory, or supplied farm evidence. `CURRENT.md` is the sole
 ordinary active-state authority. The handoff records exceptional transfer state
 only and cannot override CURRENT.
 
-Work can and should directly update authorized repository memory, including
-scientific priorities, investigation/accountability records and workflow
-preferences. Memory-only updates do not require a separate Codex task,
-contract, launch prompt or farm run. Preserve pending changes, inspect the
-actual diff, regenerate the manifest and run memory-health checks. Reserve
-the Codex implementation workflow for source-changing work. User-only
-publication and farm authorization remain separate. This is the user's
-November 4 clarification and supersedes the former Codex-only memory rule.
+Work implements authorized memory/accountability updates directly: preserve
+pending work; audit diff, manifest and health. Source changes require Codex;
+only the user publishes/runs farm. Inspect branch/HEAD/worktree at startup;
+source/diff outrank summaries; runtime acceptance requires farm evidence.
 
-At substantial-work start, establish the actual branch, HEAD, and worktree.
-For implementation, current source and relevant diff outrank stale summaries;
-for runtime acceptance, fresh farm/runtime evidence outranks source review.
-Source review never establishes farm validation. Historical and chat material
-is lower authority than canonical current, evidence, phase, and decision
-records.
+D2.a needs NEW OLD/CORRECTED fits with identical source events, numerical fitting
+code/settings and D1.a off; only population construction changes. Distinguish
+total, pion-only and applied backgrounds. See [requirements](phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement).
+Retained NumPy inputs support numerical feasibility work. Failed ROOT imports
+do not prove fits impossible: assess array-interface equivalence to the existing
+staging/objectives/constraints/policies. No equivalent new array fits are yet
+demonstrated. The farm/Codex contract stays DEFERRED; no automatic escalation.
 
 ## Source and provenance semantics
 

@@ -39,20 +39,15 @@ signed cancellations without a positive floor. Its reviewed
 remain unchanged and default-off; source publication is verified at test
 `e1f02933774d1c066154be49a77aa66340593bc3`, without farm validation.
 
-D2 construction/conditional-sensitivity evidence was source-reviewed by a
-separately coded same-assistant review; physical adequacy remains unverified.
-D2.a correction and its [bounded mechanism](phases/d2a-root-integration-2026-11-16.md)
-are SOURCE REVIEWED and published at
-`55a1258791483b658729c13508c9aa2c49864e74`, without corrected ROOT acceptance.
-The [D2.a record](phases/event-population-authority-2026-11-16.md#full-cohort-validation-scope--november-16-user-correction)
-owns the user's scope correction: all five settings, 15 canonical-t parents,
-135 native cells and dependent construction, fits, transfer and Lambda outputs.
-Center/high t3 is a smoke/diagnostic check, insufficient for final D2.a acceptance.
-Reuse accepted inputs/evidence; preserve support states, D1.a default-off and
-the separate Lambda mask. No implementation now.
-D3-D5 remain DEFERRED and Outcome B BLOCKED. Matched-grid/unit-shape versus
-original-yield requirements and D1/D2 history remain in the
-[diagnostic investigation](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md).
+D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
+mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
+November 17 requires independently NEW OLD/CORRECTED fits for all 15 parents:
+same events, fitter and scientific settings, primary D1.a off; ONLY the builder
+changes. [D2.a requirements](phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement)
+and [ChatGPT accountability](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-17-d2a-task-design-and-scientific-review-failures)
+govern. Historical fits/no-new-fit reports are not this comparison; distinguish
+total kaon models, pion-only models and applied subtraction. Preserve Local-t,
+67/135 mask, all six steps, D3-D5 DEFERRED and Outcome B BLOCKED.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -205,11 +200,13 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — After independent actual-diff approval, user publication and pushed-state
-verification of this memory update, prepare one full-cohort D2.a validation
-contract using existing producer/runner/checker infrastructure. Stop here at the
-memory review bundle: no contract creation, implementation, ROOT/farm execution,
-D3-D5 advance or roadmap promotion. Full-cohort evidence is required for acceptance.
+NEXT — After review, user publication and independent pushed-state verification,
+provide the corrected chat handoff and resume Work's NumPy-array controlled-fitting
+feasibility/execution using genuine retained inputs and the existing numerical
+fitting routines. A failed ROOT import blocks that literal entry point only;
+it does not prove offline fits impossible. Verify an array interface preserves
+the same mathematics, settings and policies before claiming results. The farm
+contract remains DEFERRED; no automatic ROOT/farm/Codex escalation.
 
 ## Success Criteria
 

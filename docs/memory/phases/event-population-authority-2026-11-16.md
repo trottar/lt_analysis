@@ -195,3 +195,120 @@ restart follows. Source implementation retains contract -> Codex -> deterministi
 checks -> independent actual-diff review -> user publication -> applicable farm
 validation. No full-cohort contract/implementation, ROOT execution, farm run,
 broader analysis, Git staging, commit or push occurs in this memory task.
+
+## November 17 binding controlled-comparison requirement
+
+Authority: the user's corrective handoff, following ChatGPT's scientific-review
+failures recorded in the [accountability continuation](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-17-d2a-task-design-and-scientific-review-failures).
+The scientific question is the effect of fixing event populations, not changing
+fitting methodologies. All five Q4p4W2p74 settings and all 15 canonical-t parents
+require independently NEW fits of both arms through the SAME existing fitter
+implementation and source version. Historical amplitudes are not a fitting arm.
+
+Both arms must use identical experimental event populations and SIMC source
+events; cuts, selections, coordinates, canonical bins, HGCer treatment, event
+weights and normalization; staged procedures, component definitions, objective
+functions, alignment, fit windows, priors, constraints, optimizer and convergence
+criteria; KLambda protection, Delta treatment, fit-quality gates and failure
+policies; transfer-weight construction, signed event-level subtraction and
+downstream yield algorithms. D1.a is identical and default-OFF in the primary
+comparison; any later enabled comparison must be paired and separately labelled.
+Frozen alignment parameters must be identical between primary arms: do not
+independently optimize alignment or mix historical and refitted alignments.
+
+ONLY the population-building algorithm changes:
+
+- OLD faithfully reconstructs the historical broken constructor as an isolated
+  nonproduction diagnostic. Its defects are intentionally reproduced, not fixed
+  opportunistically or routed back into production.
+- CORRECTED uses the published D2.a accepted-event-by-event constructor for pion
+  and KLambda templates, with KSigma0 only where genuinely configured. No
+  normalized-child or broader-scope fallback may impersonate corrected support.
+
+Machine-verifiable parity must bind shared input records/source events, effective
+fit arguments and code identities. Distinguish complete kaon signal-plus-background
+models, pion-only fitted backgrounds and actual event-applied pion subtraction.
+Return separately the control denominator, kaon pion numerator, transfer weights,
+signed applied background and cleaned kaon spectra/Lambda peak and relevant tail.
+Reject/restrict interpretation on the actual source-defined fit-quality outcome;
+retain rejected results, failure policies, sparse/unsupported cells and unresolved
+physical constraints. A successful numerical fit is not physical decomposition.
+
+The retained historical Global A/raw-pion B comparisons have matching experimental
+inputs and resolved configurations across all 15 parents. Exact runtime call-path
+equivalence is separately NOT VERIFIED. They do not measure OLD-versus-CORRECTED
+with independently executed matched fits; their defective populations preclude
+using their decomposition as validated physical evidence. The offline November 16
+package has no new fits and is reusable input/arithmetic evidence only.
+
+Preserve D1/D1.a/D2/D2.a scoped states, selected Local-t, all six roadmap statuses,
+the separate adopted 67/135 Lambda mask, Outcome B BLOCKED, D3-D5 DEFERRED,
+Method A detached/nonproduction and Method B diagnostic-only/excluded. No new
+normalization, cuts, SIDIS floor, fit threshold, invented population or failed-fit
+bypass is authorized. CURRENT owns the actual gate and publication conditions.
+
+### November 17 execution audit and controlled-comparison handoff
+
+Work completed the authorized governing/accountability memory correction before
+the fitter audit. Live/local base is `6c976bde6c5b920743143f3326d1fc4d14abffad`.
+Direct checks confirm all 15 historical comparisons have identical experimental
+arrays, resolved configurations and alignments; runtime path equivalence is not
+inferred. The real current fitter imports ROOT; PyROOT is absent from the inspected
+Windows and WSL interpreters, so no genuine new fit was executed and no surrogate
+was substituted. Original acquired farm sources and retained rows remain reusable.
+
+The [single contract](d2a-matched-population-comparison-2026-11-17-task-contract.md)
+extends the existing bounded testing owner/checker to independently new matched
+OLD/CORRECTED fits for all 15 parents, differing only in constructor, followed by
+the unchanged transfer and actual signed-event application. It is a prepared local
+handoff, not implementation, ROOT evidence or source acceptance of future code.
+User-only publication/runtime and independent actual-diff/pushed-state review
+remain required; no farm command is issued. All scoped states/boundaries above
+remain unchanged. CURRENT alone owns the exact next action.
+
+### November 17 superseding correction: proposed contract DEFERRED
+
+The preceding prepared-contract paragraph is historical, not the active gate.
+The user has not pushed. ChatGPT incorrectly escalated missing local PyROOT
+into a required farm-oriented Codex update without establishing an independent
+existing-code capability gap. The [eighth accountability finding](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#eighth-failure-unsupported-codexfarm-update-escalation)
+records responsibility. The prepared contract is DEFERRED; earlier launch and
+publication advice is superseded. Preserve it as history, not authority to run.
+The acquired inputs and published population correction remain; matched NEW
+fits are still NOT VERIFIED. Resume the existing-code scientific path before
+proposing any implementation. No code update, new contract or farm run follows.
+
+### November 17 NumPy fitting correction and verified OLD constructor
+
+The latest user clarification supersedes a ROOT-session-first scientific NEXT.
+Genuine retained NumPy inputs are available. Missing PyROOT blocks the literal
+current import, not inherently the mathematical fit. Work must assess reusing the
+existing numerical fitting routines through a verified array interface, preserving
+the full same-code staged procedure, objectives, alignment, priors/constraints,
+optimizer, protection, gates, errors and failure policies. Primary D1.a stays off.
+No ready equivalent array implementation or NEW paired fit has yet been verified.
+Do not confuse an offline numerical fit with ROOT/farm/production acceptance.
+Actual ROOT behavior remains a separate runtime question; no farm/Codex update
+is justified merely by the wrapper dependency. The prepared contract is DEFERRED.
+
+The latest read-only input/source check also corrects its setting-only OLD
+assumption: ALL45 saved selected pion-parent arrays match historical aggregation
+of independently normalized phi children. The old normalizer leaves zero-normal-
+integral children unchanged, including their raw flow contents/Sumw2; the old sum
+includes those children before one final normalization. Omitting them initially
+matched41/45; preserving the actual source rule matches45/45 across all102 bins
+and Sumw2. The current legacy helper intentionally raises; do not bypass that
+production guard or use the deferred contract's inaccurate OLD approximation.
+Isolate the authentic historical constructor as diagnostic-only. Historical
+KLambda setting references and corrected direct-t signal shapes remain distinct;
+genuinely configured Sigma0 only. Actual historical full call-path equivalence
+remains unverified; matching constructor outputs does not establish it.
+
+Evidence: KaonLT_D2a_Existing_Code_Controlled_Fitting_Map_20261117.zip, SHA-256
+931eda23fcff5847e3956cb95e5e4e060aad3121ba5be3dcbd699e23404724ca;
+historical_branch_receipt45.json and source/function identities. That package
+contains zero new fits. Its ROOT-session-first next gate is now superseded, not
+its observed input/source facts. Current source anchor remains
+6c976bde6c5b920743143f3326d1fc4d14abffad. The [ninth accountability finding](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#ninth-failure-root-interface-limitation-misreported-as-scientific-infeasibility)
+owns attribution. CURRENT owns the NumPy-first scientific NEXT conditional on
+the user publication/pushed-state review and subsequent chat handoff.

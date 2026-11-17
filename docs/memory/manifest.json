@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16321,
+      "bytes": 16195,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "4a23bb1926d9d3df743bbbe26bdbb9eaf70ea207503dcbc80981fe3c13c951e1"
+      "sha256": "7077f1ed2d833613e2777772f5e07fa335083e7f44eb46208e142a34856e41ed"
     },
     {
       "bytes": 11186,
@@ -31,9 +31,9 @@
       "sha256": "8488ff2f9feba8329f40b7fa71e50682bff4816bb9ebdb53e3d04bbde6eee978"
     },
     {
-      "bytes": 51148,
+      "bytes": 51116,
       "path": "docs/memory/MEMORY.md",
-      "sha256": "f47685fecc04d10340b16789e6e27ca85410eacd7a33e69fd000091f58cc2dc6"
+      "sha256": "1541d530ce651fcf0fd30561863d85a791a55fd50db7571c53947789ed1388df"
     },
     {
       "bytes": 3606,
@@ -46,9 +46,9 @@
       "sha256": "ec7486c68d90d10200c40b597a9801cd6a3172ba50e6b66fbec1278ff0e3c72a"
     },
     {
-      "bytes": 26164,
+      "bytes": 27709,
       "path": "docs/memory/USER.md",
-      "sha256": "496a4119c8d1ea8d42c070765a3f4c369d8d8a46c7db91f2f9a2a78cfbd6daa2"
+      "sha256": "3d18748d1ade1f0856121e396c27405149fa1f89462be3bedd6aec01999aa6ad"
     },
     {
       "bytes": 1157,
@@ -96,9 +96,9 @@
       "sha256": "6194f83e803d5222ae887c4211f75d842e9fe388c4c3d0f8a344fab7a6ed4d07"
     },
     {
-      "bytes": 6233,
+      "bytes": 8877,
       "path": "docs/memory/decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md",
-      "sha256": "4208ff02dda1a8c249ce2ef03ca49ec1ccffd63283955011b059190bfe41c169"
+      "sha256": "dab7c7fb3c637907ba218e5fa0bb0a0b08825e81bf1eb9e1915864c06fffacf8"
     },
     {
       "bytes": 4035,
@@ -461,9 +461,9 @@
       "sha256": "f3c18d501cd6890098584b549d8da8fa986aa6ead46aaa8dbdf6f6cc3e4332f0"
     },
     {
-      "bytes": 34568,
+      "bytes": 41172,
       "path": "docs/memory/investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md",
-      "sha256": "317219e76c868eef78c4b34e4bd474d636cba30746444514b9d9b2d74131fb5c"
+      "sha256": "380c85cf9e74937b900207b7c0284a262eea48bcace619f4c12db4b3529fc4e7"
     },
     {
       "bytes": 42001,
@@ -579,6 +579,11 @@
       "bytes": 13405,
       "path": "docs/memory/phases/check1-scientific-identity-failure-diagnostics-2026-11-08-task-contract.md",
       "sha256": "d2225012c5aabba8fbe5423d7e7b60e4a27de0b9c8f710a159c8301e967020dc"
+    },
+    {
+      "bytes": 22444,
+      "path": "docs/memory/phases/d2a-matched-population-comparison-2026-11-17-task-contract.md",
+      "sha256": "ce3fed9b6b203ac13d8bab7c726e4f6d8573b2372c28d921b43a0af1836e6ea3"
     },
     {
       "bytes": 6931,
@@ -1221,9 +1226,9 @@
       "sha256": "65fada9c1828d1505f94a2b183cbdacf8429f181b34cfd4db3b68f4b7db16fc0"
     },
     {
-      "bytes": 12278,
+      "bytes": 20450,
       "path": "docs/memory/phases/event-population-authority-2026-11-16.md",
-      "sha256": "609a9e8c3c3173aefbebf466871f34a27b9769d38eb634a3760520cb7b092a21"
+      "sha256": "1a3fc3c55b899f663c3e179d6eeddfa9ddb2896e49f2e7e13a40fca3b80873ee"
     },
     {
       "bytes": 23544,

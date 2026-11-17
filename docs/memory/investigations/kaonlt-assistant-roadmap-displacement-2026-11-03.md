@@ -517,3 +517,99 @@ prerequisite for available offline diagnostics. Accepted runtime scopes, all six
 roadmap statuses/dependencies, Outcome B and canonical-five Method-A equivalence
 blocker remain unchanged. This memory-only synchronization executes no check,
 numerical analysis, exclusion, source implementation, publication or farm run.
+
+## November 17 D2.a task-design and scientific-review failures
+
+Authority: the user's explicit corrective handoff, preserved in this Work review
+bundle. Responsibility is ChatGPT's task design and scientific-review judgment,
+not the user, Work, Codex or Jefferson Lab. This continuation records no farm
+failure, new physical acceptance or resource total.
+
+1. ChatGPT commissioned an offline D2.a package producing no new fits even though
+   the scientific question required a controlled OLD-versus-CORRECTED fitting
+   comparison. Input inventories, geometric sensitivity and historical replay
+   were substituted for that requested evidence.
+2. ChatGPT reviewed historical Global A/raw-pion B results as though they answered
+   the corrected-fit question. They are not newly fitted D2.a populations.
+3. ChatGPT repeatedly confused complete kaon signal-plus-background models,
+   pion-only fitted background models and actual event-applied pion subtraction.
+4. ChatGPT interpreted scientifically unvalidated historical fits rather than
+   recognizing their defective event populations. Arithmetic closure or a saved
+   success status did not establish physical adequacy of their decompositions.
+5. ChatGPT asserted different fitting configurations without adequate evidence.
+   Retained comparisons show matching experimental inputs and resolved
+   configurations across all 15 parents; exact runtime call-path equivalence
+   remains separately unverified. Do not turn that unknown into a demonstrated
+   configuration difference or an equivalence claim.
+6. ChatGPT repeatedly defended incorrect interpretations rather than checking
+   current source, authoritative memory and already resolved forensic evidence.
+7. ChatGPT failed to specify the user's single-variable controlled comparison,
+   displacing scientific progress with unnecessary interpretation/support work.
+
+The governing [scientific decision](../decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md#november-17-controlled-population-correction-comparison)
+and [D2.a requirements](../phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement)
+now require identical experimental/SIMC source events, settings, fit code/version,
+staging/objectives/alignment/priors/constraints/optimizer/gates/policies, transfer
+and yield procedures; D1.a default-off in both primary arms. Only OLD's isolated
+historical broken population constructor versus CORRECTED's published event-level
+constructor changes. Both arms independently execute new fits. Historical fit
+amplitudes, surrogate minimizers or altered methodology cannot substitute.
+
+The November 16 offline packet remains reusable genuine input/arithmetic evidence,
+not completion of the controlled scientific comparison. Preserve its bytes and
+source provenance; its interpretation is limited by this correction. Inspect
+whether the unchanged genuine fitter executes locally. The earlier instruction
+to prepare an extension merely because ROOT is farm-only is superseded by the
+eighth-failure correction below. Do not substitute another historical report.
+Work owns this memory correction directly; no delegation to Codex. User alone
+publishes and runs the farm after implementation/review/pushed-state gates.
+
+### Eighth failure: unsupported Codex/farm-update escalation
+
+The user confirms no publication occurred. ChatGPT's corrective task text itself
+introduced a faulty conditional: if genuine fitting needs Jefferson Lab, prepare
+a farm-oriented implementation contract. Requiring the farm's ROOT environment
+does NOT imply a source or runner defect. The executing assistant compounded
+this task-design error by treating absent local PyROOT as sufficient justification
+for the new Codex contract and recommending publication/launch before separately
+demonstrating a missing capability in existing reviewed infrastructure.
+
+The existing acquired events, retained experimental records, published D2.a
+population correction and shared fitter were available. Their availability does
+not prove that the controlled fit has run; the exact existing-code invocation
+and any genuine runner gap still require evidence. Neither invent a code defect
+from an interpreter limitation nor assert no code change could ever be needed.
+This eighth failure is ChatGPT's task-design/scientific-review judgment, not the
+user's, Work's, Codex's or Jefferson Lab's. No farm failure is alleged.
+
+The earlier contract recommendation, Codex launch prompt and publication block
+are superseded. The untracked contract is retained as DEFERRED history with an
+explicit warning, not current implementation authority. No source implementation,
+new fit, staging, commit, push or farm execution occurred. CURRENT now returns
+to the existing-code matched-fit path; no replacement support contract is created.
+The first seven failures and all frozen scientific/state boundaries remain.
+
+### Ninth failure: ROOT-interface limitation misreported as scientific infeasibility
+
+After recording the eighth escalation failure, ChatGPT again made an authorized
+ROOT session the next gate. It checked only that the literal ROOT-dependent
+entry point would not import, then concluded too broadly that controlled fits
+could not execute in Work. It failed first to assess an array interface to the
+existing numerical fitting routines using the already available NumPy inputs.
+The user's correction is that ROOT is not mathematically required merely because
+the present wrapper uses ROOT histogram objects. Responsibility is ChatGPT's
+task design and scientific-review judgment, not the user, Work, Codex or JLab.
+
+The source review established imports and an environment limitation; it did not
+establish scientific infeasibility. Nor does this correction establish a working
+array-native implementation or numerical equivalence: those remain to be measured
+using the existing routines and frozen full procedure. The prior capability ZIP
+remains valid for its source/input/constructor observations and zero-execution
+record, but its ROOT-session-first NEXT is superseded. Do not reopen acquisition,
+revive the deferred contract, emulate ROOT to claim runtime validation, replace
+the fit mathematics, invent results or declare a new blocker from imports alone.
+
+Work directly updates the governing requirements/CURRENT/USER/durable memory.
+The next chat handoff follows user publication and independent pushed-state
+verification, as explicitly requested. No new fits or source implementation occurs
+in this memory task; all earlier failure records and scientific boundaries remain.
