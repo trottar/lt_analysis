@@ -13,13 +13,14 @@ pending work; audit diff, manifest and health. Source changes require Codex;
 only the user publishes/runs farm. Inspect branch/HEAD/worktree at startup;
 source/diff outrank summaries; runtime acceptance requires farm evidence.
 
-D2.a needs NEW OLD/CORRECTED fits with identical source events, numerical fitting
-code/settings and D1.a off; only population construction changes. Distinguish
-total, pion-only and applied backgrounds. See [requirements](phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement).
-Retained NumPy inputs support numerical feasibility work. Failed ROOT imports
-do not prove fits impossible: assess array-interface equivalence to the existing
-staging/objectives/constraints/policies. No equivalent new array fits are yet
-demonstrated. The farm/Codex contract stays DEFERRED; no automatic escalation.
+D2.a NEW NumPy paired fits are independently numerically reviewed, not ROOT/farm
+accepted. Same events/settings, D1.a off; only the population builder changes.
+Protected PASS: OLD3/15, corrected6/15; all135 applications close. Nine parents
+remain rejected; zero fitted components do not establish absent contamination.
+See [numerical review](phases/event-population-authority-2026-11-16.md#november-17-new-numerical-results-and-independent-scientific-review)
+for provenance, strict-gate checks and limitations. Shared fit/transfer covariance
+is incomplete. Retained NumPy inputs support scientific work; a failed ROOT
+import is not numerical infeasibility. Farm/Codex contract remains DEFERRED.
 
 ## Source and provenance semantics
 

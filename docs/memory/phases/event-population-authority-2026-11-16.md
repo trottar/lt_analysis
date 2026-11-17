@@ -312,3 +312,83 @@ its observed input/source facts. Current source anchor remains
 6c976bde6c5b920743143f3326d1fc4d14abffad. The [ninth accountability finding](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#ninth-failure-root-interface-limitation-misreported-as-scientific-infeasibility)
 owns attribution. CURRENT owns the NumPy-first scientific NEXT conditional on
 the user publication/pushed-state review and subsequent chat handoff.
+
+### November 17 new numerical results and independent scientific review
+
+Supersedes the earlier NOT VERIFIED new-fit statements in this historical record.
+Live/local test/source anchor: 9dbbb40710e317cdde4937a5ab335dbbf6d70faa.
+Original numerical producer was ChatGPT's numerical environment, NOT Work/farm.
+Work independently reviewed its current-source mathematical functions through
+the array interface, retained events, stages, constraints, errors and policies.
+Primary input KaonLT_D2a_NumPy_Controlled_20261117.zip: 13,804,935 bytes,
+SHA-256 71e1cdd329aeabf5755d9ec872eb202218f75127fdacc05b3f28062b284641d3;
+all75 manifest entries verified. Supporting November16 scientific input SHA-256
+8b79a468a095e1356e3b146fb3d8986d9ca8a73c43722ce1ea636804c44d8a43.
+The two source-reference files match published current source exactly.
+
+NEW OLD/CORRECTED uses identical signed experimental events, native MM edges,
+selection/weights, alignment, staging, priors, solver, constraints, errors and
+failure policies, D1.a OFF. Only constructors change: authentic normalized-phi
+OLD (including flow-only children) versus direct accepted-event canonical-t
+CORRECTED, including real direct-t KLambda. No historical coefficients replace
+new fits. KSigma0 is not configured; preserve source-permitted Lambda-only mode.
+
+Independent709 checks PASS: event values/Sumw2,60 staged histories,30 protected
+calculations and strict transfer/application identities. One regularized joint
+OLD/CORRECTED pair was rerun (Center/high t3); other new joint outputs reused,
+not another30-fit campaign. Max staged amplitude delta8.89e-16, protected
+amplitude3.34e-16/chi-square8.53e-14; signed applied/clean arrays close exactly.
+The incoming reproducer copied historical kaon-validation diagnostics and used
+proposal weights. Work rebuilt new diagnostics and ran the actual strict gate
+with proposal_mode=False:30/30 gates and weights match. This resolves the
+provenance defect without changing central results; outer PASS is not protected
+PASS. Original package retained unchanged. Additional152 arithmetic checks and
+all30 protected candidate spectrum objectives independently pass. Source uses
+pre-Delta Sumw2 including scaled early-template variances, not data-only errors.
+
+Protected PASS OLD3/15 -> CORRECTED6/15. Gains: Center/high t2, Left/high t3,
+Left/low t1. Existing passes Center/high t3 and Right/high t2/t3 persist. Nine
+corrected rejections: Center/high t1; Center/low t1,t2,t3; Left/high t1,t2;
+Left/low t2,t3; Right/high t1. Allnine fail spectrum p>=1e-6; three also fail
+chi-square/ndf<=5 (Center/low t2,Left/high t1,Left/low t3). Lambda gauge also
+fails for Center/high t1,Center/low t1,Left/low t3. Rejected candidates retain
+source zero-Delta policy and staged n/SIDIS, never relabeled accepted.
+
+In nine complete Lambda bins [1.102,1.156)GeV, Center/high t3 actual signed
+applied B falls0.083744->0.045897; clean rises0.228861->0.266708, observed
+0.312605. Both protected fits pass. Center/low t3 stays rejected: B0.005103
+->0.003305, clean0.128500->0.130297. These are counts/effective mC, not truth
+fractions or final producer Y0. Full model, pion-only numerator and actual signed
+application remain separate. Weighted overlaps/conditioning, conditional control
+covariance, bound/zero components, residual hotspots and tails are quantified
+for all15; zeros are not species-absence evidence. No full physical covariance.
+
+Unchanged iteration-zero KLambda event weights already equal normfac_simc times
+iter_weight. Compare that same direct-t MC in both arms, no additional factor,
+fitted-signal rescaling or peak matching. Separate original-yield and unit-shape
+plots/residuals show remaining shape/magnitude differences; corrected clean/MC
+Lambda integral is1.244 at Center/high t3 and2.477 at Center/low t3. Unity is not
+an iteration-zero gate. One corrected parent Lambda bin (Left/high t1) is
+negative and retained. Shape covariance is conditional counting propagation only.
+
+All135 native cells per arm close to parents in actual application, clean and
+unchanged MC. Apply frozen adopted67 IDs only downstream, identically to data
+and MC; no re-eligibility. Three newly passing parents retain7/4/2 cells, with
+masked applied changes +0.044774,+0.049405,+0.000822. Yet46/67 adopted cells
+remain in protected-rejected parents. This is a fixed-mask sensitivity study,
+not production integration or a promotion of rejected fits.
+
+Review artifacts: KaonLT_D2a_NumPy_Scientific_Review_20261117.zip and separate
+KaonLT_D2a_NumPy_Results_Memory_20261117.zip with SHA-256 receipts, report,
+source identities, actual arrays/tables,15 six-panel progressions and15 Lambda
+comparison figures (300dpi PNG/SVG), deterministic checks and full health check.
+CURRENT owns the next source-aware uncertainty/predictive-adequacy gate for
+these new corrected full-cohort estimators, preserving model/settings/mask and
+shared-row/template identity. No repeated acquisition, D1 empty-bin diagnosis,
+ROOT-availability audit, new contract or automatic farm/Codex escalation.
+
+D1/D1.a/D2/D2.a stay scoped SOURCE REVIEWED. November11 acquisition retains
+CLOSED / RUNTIME VALIDATED in its original scope. Local-t, six milestones,
+67/135 mask, MethodA detached/nonproduction, MethodB diagnostic/excluded,
+OutcomeB BLOCKED and D3-D5 DEFERRED remain. No tracked production source change,
+staging,commit,push,ROOT/main.py/farm execution or production acceptance.

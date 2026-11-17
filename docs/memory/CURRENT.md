@@ -13,8 +13,8 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The immediate priority is full-cohort Q4p4W2p74 D2.a validation preparation.
-Source review is not corrected ROOT or full-cohort acceptance.
+The immediate priority is full-cohort Q4p4W2p74 D2.a scientific validation.
+Source-kernel NumPy evidence is not ROOT or production acceptance.
 
 ## Current Work Item
 
@@ -41,13 +41,14 @@ remain unchanged and default-off; source publication is verified at test
 
 D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
 mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
-November 17 requires independently NEW OLD/CORRECTED fits for all 15 parents:
-same events, fitter and scientific settings, primary D1.a off; ONLY the builder
-changes. [D2.a requirements](phases/event-population-authority-2026-11-16.md#november-17-binding-controlled-comparison-requirement)
-and [ChatGPT accountability](investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#november-17-d2a-task-design-and-scientific-review-failures)
-govern. Historical fits/no-new-fit reports are not this comparison; distinguish
-total kaon models, pion-only models and applied subtraction. Preserve Local-t,
-67/135 mask, all six steps, D3-D5 DEFERRED and Outcome B BLOCKED.
+November 17 NEW NumPy OLD/CORRECTED fits are independently SOURCE REVIEWED
+at `9dbbb40710e317cdde4937a5ab335dbbf6d70faa`: same events/fitter/settings,
+D1.a off; only populations change. Protected PASS 3/15->6/15; nine rejected.
+All135 native applications close;46/67 adopted cells remain in rejected parents.
+[Numerical review](phases/event-population-authority-2026-11-16.md#november-17-new-numerical-results-and-independent-scientific-review)
+owns provenance, findings and covariance limits. No production promotion or
+automatic ROOT/farm/Codex escalation. Preserve Local-t,67/135, six steps,
+D3-D5 DEFERRED and Outcome B BLOCKED.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -201,12 +202,12 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 ## Next Action
 
 NEXT — After review, user publication and independent pushed-state verification,
-provide the corrected chat handoff and resume Work's NumPy-array controlled-fitting
-feasibility/execution using genuine retained inputs and the existing numerical
-fitting routines. A failed ROOT import blocks that literal entry point only;
-it does not prove offline fits impossible. Verify an array interface preserves
-the same mathematics, settings and policies before claiming results. The farm
-contract remains DEFERRED; no automatic ROOT/farm/Codex escalation.
+evaluate source-aware uncertainty/predictive adequacy of these NEW corrected
+15-parent fits using retained signed rows/SIMC identities and existing numerical
+machinery. Propagate shared-source/refitting effects through D,N,w,applied B and
+clean Lambda on the fixed67 support; retain the nine protected rejections.
+No retuning, new acquisition or automatic ROOT/farm/Codex escalation. The farm
+contract remains DEFERRED; this does not reopen D1's closed empty-bin diagnosis.
 
 ## Success Criteria
 
