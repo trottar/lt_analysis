@@ -4,10 +4,11 @@
 
 User-directed emergency correction superseding the former pion-only scope.
 Base live/local test: bd811bb3ce666afa58e654f0ded8cdb8550104c6.
-DEVELOPMENT COMPLETE, FARM VALIDATION PENDING after deterministic checks;
-independent actual-diff review remains NEXT before user-only publication.
+SOURCE REVIEWED after the repaired actual-diff review; published local/live
+`test` e1f02933774d1c066154be49a77aa66340593bc3 is independently matched
+to the reviewed source. Actual corrected ROOT integration remains unverified.
 The [single contract](event-population-authority-2026-11-16-task-contract.md)
-governs the complete correction. No source publication or farm execution occurs.
+governs the complete correction. Publication does not establish farm acceptance.
 
 ## Confirmed defects and source ownership
 
@@ -87,6 +88,15 @@ for hole/grid changes, unknown geometry, legacy identities and preserved phi-onl
 adaptation. Auto-hole geometry also participates in loader-cache identity.
 
 The repaired candidate passes 163 local tests (127 pass, 36 PyROOT skips) and
-requires fresh independent actual-diff review before publication. This records
-a locally corrected source defect, not ROOT/farm or physical acceptance. D1.a,
+passed the later actual-diff/published-state review within its source scope.
+This records a corrected source defect, not ROOT/farm or physical acceptance. D1.a,
 the six-step roadmap, Outcome B and all earlier runtime boundaries are preserved.
+
+## Corrected-ROOT handoff boundary
+
+The November 16 existing-evidence review reuses the CLOSED / RUNTIME VALIDATED
+November 11 acquisition; absence of ROOT files from a small review ZIP does not
+reopen it. The [separate bounded mechanism](d2a-root-integration-2026-11-16.md)
+adds only a detached existing-input runner/checker and does not repeat D2.a.
+Its NEXT is independent review, before publication/pushed-state verification
+and any user-run ROOT gate. No corrected ROOT fit is newly claimed here.

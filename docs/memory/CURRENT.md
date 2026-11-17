@@ -13,8 +13,8 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The immediate user-directed correction is D2.a: event-level population authority.
-The prior D2 evidence remains diagnostic; no physical/runtime acceptance follows.
+The immediate work is the bounded D2.a corrected-ROOT integration mechanism.
+D2/D2.a source review does not establish physical/runtime acceptance.
 
 ## Current Work Item
 
@@ -36,18 +36,20 @@ Full covariance and physical SIDIS absence remain unverified.
 D1.a changes only its SIDIS fitting objective, retaining physical bins and
 signed cancellations without a positive floor. Its reviewed
 [contract/candidate](phases/kaon-sidis-empty-bin-support-2026-11-16-task-contract.md)
-remain unchanged, default-off, unpublished and not farm validated. Publication/
-runtime acceptance precede production claims; neither blocks read-only D2.
+remain unchanged and default-off; source publication is verified at test
+`e1f02933774d1c066154be49a77aa66340593bc3`, without farm validation.
 
 D2 construction/conditional-sensitivity evidence was source-reviewed by a
 separately coded same-assistant review; physical adequacy remains unverified.
 The November 16 user emergency supersedes the pion-only recommendation:
-D2.a is ACTIVE across pion/KLambda/KSigma0 population construction, destructive
-pruning and fabricated joint distributions. The
-[single contract](phases/event-population-authority-2026-11-16-task-contract.md)
-and [implementation record](phases/event-population-authority-2026-11-16.md)
-own scope, reuse-identity repair and validation limits. D1.a stays default-off/local with original support
-and physical bins preserved. No full corrected fit or farm acceptance is claimed.
+D2.a is SOURCE REVIEWED and published at the verified e1f0293 checkpoint across
+pion/KLambda/KSigma0 population construction, pruning and joint distributions.
+The [original contract](phases/event-population-authority-2026-11-16-task-contract.md)
+and [record](phases/event-population-authority-2026-11-16.md) retain findings.
+The [bounded integration mechanism](phases/d2a-root-integration-2026-11-16.md)
+is SOURCE REVIEWED after the bounded checker/input-binding repair and actual-
+diff pass. Corrected ROOT execution remains unverified; publish/pushed-state
+review precede the existing-input t3 gate. D1.a remains default-off.
 D3-D5 remain DEFERRED and Outcome B BLOCKED. Matched-grid/unit-shape versus
 original-yield requirements and D1/D2 history remain in the
 [diagnostic investigation](investigations/pion-procedure-audit-diagnostic-roadmap-2026-11-15.md).
@@ -203,12 +205,11 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent actual-diff review of the repaired D2.a implementation bundle,
-including the preexisting D1.a delta, before any user-only publication. The
-correction is DEVELOPMENT COMPLETE, FARM VALIDATION PENDING within its source
-contract; no runtime/physical acceptance is inferred. Publication, pushed-state
-verification and one narrow user-run farm gate remain separate. No automatic
-production-wide rerun, D3-D5 advance or six-step roadmap promotion is authorized.
+NEXT — Bounded Center/high t3 corrected-ROOT integration under the existing
+[contract](phases/d2a-root-integration-2026-11-16-task-contract.md), conditional
+on user-only publication and independent pushed-state verification of the
+repaired mechanism. No farm execution is authorized here; no reacquisition,
+full analysis, D3-D5 advance or roadmap promotion.
 
 ## Success Criteria
 

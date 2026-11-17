@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16280,
+      "bytes": 16286,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "cdf01f2abdb4c7f36e8c5455cd8d7c8f3ac045840be68e3fefaf34afc22dca46"
+      "sha256": "6f0c9f0e3be8351faa53e92a13731d3a59de52e19dd94e9973fac8512ba0082f"
     },
     {
       "bytes": 11186,
@@ -579,6 +579,16 @@
       "bytes": 13405,
       "path": "docs/memory/phases/check1-scientific-identity-failure-diagnostics-2026-11-08-task-contract.md",
       "sha256": "d2225012c5aabba8fbe5423d7e7b60e4a27de0b9c8f710a159c8301e967020dc"
+    },
+    {
+      "bytes": 6931,
+      "path": "docs/memory/phases/d2a-root-integration-2026-11-16-task-contract.md",
+      "sha256": "3ce66687718f54639a02f4a4139ea8fbc6eb232592a0d2bad7f6e7d5a90b4c60"
+    },
+    {
+      "bytes": 8922,
+      "path": "docs/memory/phases/d2a-root-integration-2026-11-16.md",
+      "sha256": "9a7a4ab337758bf315fad0e6f9544c51aced522494cc6876eb049809cabe109f"
     },
     {
       "bytes": 8577,
@@ -1211,9 +1221,9 @@
       "sha256": "65fada9c1828d1505f94a2b183cbdacf8429f181b34cfd4db3b68f4b7db16fc0"
     },
     {
-      "bytes": 5744,
+      "bytes": 6329,
       "path": "docs/memory/phases/event-population-authority-2026-11-16.md",
-      "sha256": "7b4c368d2ace0117e073c4ef52410cba5117d62308cd35144c025f50df67dc63"
+      "sha256": "dde669e4644f6f15dc3a66c7a4bb40998e1561ccfe41e7336f0e995d2b923a6f"
     },
     {
       "bytes": 23544,
