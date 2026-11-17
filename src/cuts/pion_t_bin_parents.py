@@ -9,6 +9,7 @@ rendering; it never rebuilds parent inputs from averages.
 from __future__ import annotations
 
 import textwrap
+from copy import deepcopy
 
 from pion_control_anchor_audit import observe_anchor_audit
 from pion_background_chain_audit import observe_chain_audit
@@ -448,6 +449,33 @@ def _finalize_frozen_parent_collection(hist, inp_dict, parents, t_bins, *, reuse
     return frozen_parents
 
 
+def _parent_template_population_identity(pion_payload, signal_payload, sigma0_payload):
+    """A direct t population is independent of its diagnostic phi partition."""
+    reusable = True
+    def parent_identity(payload, optional=False):
+        nonlocal reusable
+        identity = deepcopy((payload or {}).get("event_population_identity"))
+        if identity is None and optional:
+            return None
+        if (not isinstance(identity, dict) or identity.get("population_definition") != 3
+                or identity.get("reuse_safe") is not True or not identity.get("source")):
+            reusable = False
+        if isinstance(identity, dict):
+            identity.pop("phi_edges", None)
+        return identity
+    components = (pion_payload or {}).get("components") or {}
+    if not all(name in components for name in ("pi_n", "pi_delta", "pi_sidis")):
+        reusable = False
+    result = {
+        "schema": 2,
+        "pion": {name: parent_identity(payload) for name, payload in components.items()},
+        "lambda": parent_identity(signal_payload),
+        "sigma0": parent_identity(sigma0_payload, optional=True),
+    }
+    result["reuse_safe"] = reusable
+    return result
+
+
 def build_setting_t_bin_pion_parents(
     hist,
     inp_dict,
@@ -487,6 +515,8 @@ def build_setting_t_bin_pion_parents(
     if pion_component_shape_payload is None:
         raise RuntimeError("authoritative_t_bin_parents_require_component_shapes")
 
+    template_population_identity = _parent_template_population_identity(
+        pion_component_shape_payload, kaon_signal_shape_payload, kaon_sigma0_shape_payload)
     contracts = []
     for t_index in range(expected_count):
         t_edges = [float(t_bins[t_index]), float(t_bins[t_index + 1])]
@@ -503,7 +533,10 @@ def build_setting_t_bin_pion_parents(
     # a frozen parent fit, but no change in its physics identity or either
     # producer fingerprint is allowed to cross this boundary.
     existing_parents = hist.get("_pion_t_bin_parent_results")
-    if isinstance(existing_parents, tuple) and len(existing_parents) == expected_count:
+    if (inp_dict.get("d1a_kaon_sidis_support_enabled") is not True
+            and template_population_identity["reuse_safe"]
+            and isinstance(existing_parents, tuple) and len(existing_parents) == expected_count
+            and all(parent.get("template_population_identity") == template_population_identity for parent in existing_parents)):
         reusable = True
         provenance_changes = []
         for t_index, (parent, contract) in enumerate(zip(existing_parents, contracts)):
@@ -581,6 +614,8 @@ def build_setting_t_bin_pion_parents(
             analysis_scope=scope,
             t_bin_index=t_index,
         )
+        if any(value is None for value in scope_component_shapes.values()):
+            raise RuntimeError("unsupported_event_population:authoritative_parent_component")
         alignment_bin_key = {
             "kinematic_setting": get_particle_subtraction_setting_key(inp_dict),
             "epsilon": str(inp_dict.get("EPSSET", "")).strip().lower(),
@@ -630,6 +665,7 @@ def build_setting_t_bin_pion_parents(
             mm_offset_data=float(mm_offset_data or 0.0),
             phi_setting=phi_setting,
             context="particle_stage_{}_t{}".format(phi_setting, t_index + 1),
+            kaon_experimental_support=parent_input.get("kaon_sidis_experimental_support"),
             parent_alignment=parent_pion_alignment,
             pion_component_alignment=active_alignment,
             alignment_bin_key=alignment_bin_key,
@@ -659,7 +695,9 @@ def build_setting_t_bin_pion_parents(
             "H_proton_estimate": parent_input.get("H_proton_estimate"),
             "H_proton_cleaned": parent_input.get("H_proton_cleaned"),
             "H_proton_cleaned_final_rf": kaon_input,
+            "kaon_sidis_experimental_support": parent_input.get("kaon_sidis_experimental_support"),
             "H_pion_control": pion_control,
+            "template_population_identity": deepcopy(template_population_identity),
             "source_accounting": dict(parent_input.get("source_accounting") or {}),
             "pion_control_source_accounting": dict(
                 parent_input.get("pion_control_source_accounting") or {}

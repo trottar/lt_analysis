@@ -34,7 +34,7 @@ from background_config import (
 )
 from utility import normalize_hist_to_unit_area
 from apply_cuts import apply_simc_cuts, apply_simc_sub_cuts, set_val
-from binning_helpers import find_2d_bin_indices
+from binning_helpers import find_2d_bin_indices, find_bin_index
 from hgcer_hole import apply_HGCer_hole_cut
 
 
@@ -213,6 +213,7 @@ def _make_component_hist(component_name, phi_setting, context, prefix, n_bins, x
         float(x_max),
     )
     hist.SetDirectory(0)
+    hist.Sumw2()
     return hist
 
 
@@ -241,6 +242,9 @@ def _clone_component_payload(payload):
         "setting_shape": _clone_detached_hist(payload.get("setting_shape")),
         "setting_shape_full": _clone_detached_hist(payload.get("setting_shape_full")),
         "binned_shapes": _clone_binned_shape_map(payload.get("binned_shapes") or {}),
+        "t_shapes": {key: _clone_detached_hist(hist) for key, hist in (payload.get("t_shapes") or {}).items()},
+        "event_population_identity": deepcopy(payload.get("event_population_identity")),
+        "event_population_support": deepcopy(payload.get("event_population_support") or {}),
         "diagnostics": deepcopy(payload.get("diagnostics") or {}),
     }
 
@@ -248,7 +252,7 @@ def _clone_component_payload(payload):
 def _freeze_bin_edges_for_cache(edges):
     if edges is None:
         return None
-    return tuple(round(float(value), 8) for value in np.asarray(edges, dtype=float))
+    return tuple(float(value) for value in np.asarray(edges, dtype=float))
 
 
 def _freeze_cache_value(value):
@@ -257,6 +261,8 @@ def _freeze_cache_value(value):
             (str(key), _freeze_cache_value(item))
             for key, item in sorted(value.items(), key=lambda item: str(item[0]))
         )
+    if isinstance(value, np.ndarray):
+        return _freeze_cache_value(value.tolist())
     if isinstance(value, (list, tuple)):
         return tuple(_freeze_cache_value(item) for item in value)
     if isinstance(value, np.generic):
@@ -271,6 +277,9 @@ def _get_root_file_cache_token(root_filename):
             os.path.abspath(root_filename),
             int(getattr(stat_result, "st_mtime_ns", int(stat_result.st_mtime * 1e9))),
             int(stat_result.st_size),
+            int(stat_result.st_ctime_ns),
+            int(stat_result.st_dev),
+            int(stat_result.st_ino),
         )
     except OSError:
         return (os.path.abspath(root_filename), None, None)
@@ -293,21 +302,77 @@ def _build_component_shape_cache_key(
     cache_identity=None,
 ):
     return (
+        "event_population_v2;iter_weight_or_one;normal_bins_once;half_open",
         _get_root_file_cache_token(root_filename),
         str(tree_name),
         str(phi_setting),
         str(particle_type).strip().lower(),
         str(component_name),
-        round(float(mm_min), 8),
-        round(float(mm_max), 8),
-        round(float(mm_plot_min), 8),
-        round(float(mm_plot_max), 8),
+        float(mm_min),
+        float(mm_max),
+        float(mm_plot_min),
+        float(mm_plot_max),
         int(mm_plot_nbins),
         _freeze_bin_edges_for_cache(t_bins),
         _freeze_bin_edges_for_cache(phi_bins),
         bool(use_full_mm_range),
         _freeze_cache_value(cache_identity),
     )
+
+
+
+def _validated_population_edges(edges):
+    if edges is None:
+        return None
+    values = np.asarray(edges, dtype=float)
+    if values.ndim != 1 or len(values) < 2 or not np.all(np.isfinite(values)) or np.any(np.diff(values) <= 0):
+        raise ValueError("invalid_event_population_edges")
+    return values
+
+
+def _event_population_hgcer_identity(hole, particle_type):
+    """Identify the effective selection; unknown geometry cannot authorize reuse."""
+    if str(particle_type).strip().lower() != "kaon":
+        return {"applied": False, "selection": "no_hgcer_hole"}
+    try:
+        count = int(hole.GetN())
+        points = [[float(hole.GetX()[i]), float(hole.GetY()[i])] for i in range(count)]
+        if count < 3 or not all(math.isfinite(value) for point in points for value in point):
+            return None
+    except (AttributeError, TypeError, ValueError, OverflowError, ReferenceError):
+        return None
+    return {"applied": True, "selection": "outside_TCutG_IsInside", "coordinates": ["phgcer_x_det", "phgcer_y_det"], "points": points}
+
+
+def _build_t_shape_map(component_name, phi_setting, context, n_bins, x_min, x_max, t_bins):
+    if t_bins is None:
+        return {}
+    return {"t_bin{}".format(i + 1): _make_component_hist(
+        component_name, phi_setting, "{}_t{}".format(context, i + 1),
+        "H_MM_event_parent", n_bins, x_min, x_max)
+        for i in range(len(t_bins) - 1)}
+
+
+def _new_event_moments():
+    return {"count": 0, "signed": 0.0, "absolute": 0.0, "sumw2": 0.0}
+
+
+def _fill_event_population(hist, moments, value, weight):
+    hist.Fill(value, weight)
+    moments["count"] += 1
+    moments["signed"] += weight
+    moments["absolute"] += abs(weight)
+    moments["sumw2"] += weight * weight
+
+
+def _event_population_support(hist, moments):
+    result = dict(moments)
+    result["values"] = [float(hist.GetBinContent(i)) for i in range(hist.GetNbinsX() + 2)]
+    result["variances"] = [float(hist.GetBinError(i)) ** 2 for i in range(hist.GetNbinsX() + 2)]
+    result["normal_sumw"] = sum(result["values"][1:-1])
+    result["normal_sumw2"] = sum(result["variances"][1:-1])
+    result["status"] = "available" if result["count"] > 0 and result["normal_sumw"] > 0.0 else "unsupported"
+    return result
 
 
 def _build_binned_shape_map(component_name, phi_setting, context, n_bins, x_min, x_max, t_bins, phi_bins):
@@ -374,6 +439,9 @@ def _empty_component_payload(
     return {
         "setting_shape": setting_hist,
         "setting_shape_full": setting_full_hist,
+        "t_shapes": {},
+        "event_population_identity": None,
+        "event_population_support": {"status": "source_unavailable", "reason": fallback_reason},
         "binned_shapes": _build_binned_shape_map(
             component_name,
             phi_setting,
@@ -404,6 +472,10 @@ def load_pion_simc_component_shape(
     failure_reasons=None,
     cache_identity=None,
 ):
+    t_bins = _validated_population_edges(t_bins)
+    phi_bins = _validated_population_edges(phi_bins)
+    if phi_bins is not None and t_bins is None:
+        raise ValueError("phi_event_population_requires_t_edges")
     tree_name = resolve_simc_tree_name(inpDict)
     mm_min = float(inpDict["mm_min"])
     mm_max = float(inpDict["mm_max"])
@@ -413,6 +485,31 @@ def load_pion_simc_component_shape(
     source_provenance = deepcopy(source_provenance or {})
     failure_reasons = dict(failure_reasons or {})
     required_branch_names = tuple(required_branch_names or ())
+    if t_bins is not None:
+        required_branch_names = tuple(dict.fromkeys(required_branch_names + _KAON_SIMC_REQUIRED_BRANCHES + (("phipq",) if phi_bins is not None else ())))
+    selection_identity = {key: deepcopy(inpDict.get(key)) for key in ("Q2", "W", "EPSSET", "POL", "ParticleType", "tmin", "tmax", "cut_poly", "cut_mode", "poly_points", "TMIN_RESOLUTION_THRESHOLD")}
+    full_nbins = mm_plot_nbins if use_full_mm_range else 100
+    full_xmin = mm_plot_min if use_full_mm_range else mm_min
+    full_xmax = mm_plot_max if use_full_mm_range else mm_max
+    hole_cut = hgcer_cutg
+    if (root_filename and os.path.isfile(root_filename)
+            and str(particle_type).strip().lower() == "kaon" and hole_cut is None):
+        hole_cut = apply_HGCer_hole_cut(inpDict["Q2"], inpDict["W"], inpDict["EPSSET"], phi_setting)
+    hole_identity = _event_population_hgcer_identity(hole_cut, particle_type)
+    population_identity = {
+        "schema": 2, "population_definition": 3,
+        "reuse_safe": hole_identity is not None,
+        "source": _get_root_file_cache_token(root_filename) if root_filename else None,
+        "tree": tree_name, "selection": selection_identity,
+        "particle_type": str(particle_type).strip().lower(), "phi_setting": str(phi_setting),
+        "hgcer_selection": hole_identity,
+        "mm_axis": {"nbins": full_nbins, "min": full_xmin, "max": full_xmax, "flows": True},
+        "mm_selection_window": [mm_min, mm_max],
+        "component": component_name, "weight": "getattr(evt, iter_weight, 1.0)",
+        "normalization": "normal_bins_once_after_event_accumulation",
+        "t_edges": None if t_bins is None else t_bins.tolist(),
+        "phi_edges": None if phi_bins is None else phi_bins.tolist(),
+    }
     resolution_fallback_used = source_provenance.pop("fallback_used", None)
     path_exists = bool(root_filename and os.path.isfile(root_filename))
     base_diagnostic_updates = {
@@ -429,7 +526,7 @@ def load_pion_simc_component_shape(
         base_diagnostic_updates["resolution_fallback_used"] = bool(resolution_fallback_used)
 
     cache_key = None
-    if root_filename and hgcer_cutg is None:
+    if root_filename and hgcer_cutg is None and population_identity["reuse_safe"]:
         cache_key = _build_component_shape_cache_key(
             root_filename,
             tree_name,
@@ -444,7 +541,7 @@ def load_pion_simc_component_shape(
             t_bins,
             phi_bins,
             use_full_mm_range,
-            cache_identity=cache_identity,
+            cache_identity={"source_provenance": cache_identity, "event_population": population_identity},
         )
         cached_payload = _SIMC_COMPONENT_SHAPE_CACHE.get(cache_key)
         if cached_payload is not None:
@@ -457,9 +554,6 @@ def load_pion_simc_component_shape(
             )
             return _clone_component_payload(cached_payload)
 
-    full_nbins = mm_plot_nbins if use_full_mm_range else 100
-    full_xmin = mm_plot_min if use_full_mm_range else mm_min
-    full_xmax = mm_plot_max if use_full_mm_range else mm_max
 
     setting_shape = _make_component_hist(
         component_name,
@@ -489,6 +583,15 @@ def load_pion_simc_component_shape(
         t_bins,
         phi_bins,
     )
+
+    t_shapes = _build_t_shape_map(component_name, phi_setting, context, full_nbins, full_xmin, full_xmax, t_bins)
+    outside_phi = _build_t_shape_map(component_name, phi_setting, context + "_outside_phi", full_nbins, full_xmin, full_xmax, t_bins)
+    outside_t_hist = _make_component_hist(component_name, phi_setting, context, "H_MM_outside_t", full_nbins, full_xmin, full_xmax)
+    outside_t_moments = _new_event_moments()
+    setting_moments = _new_event_moments()
+    t_moments = {key: _new_event_moments() for key in t_shapes}
+    outside_moments = {key: _new_event_moments() for key in t_shapes}
+    child_moments = {key: {phi: _new_event_moments() for phi in children} for key, children in binned_shapes.items()}
 
     if not root_filename or not path_exists:
         reason_key = "no_source_configured" if not root_filename else "configured_path_does_not_exist"
@@ -631,14 +734,6 @@ def load_pion_simc_component_shape(
 
     set_val(inpDict)
 
-    hole_cut = hgcer_cutg
-    if str(particle_type).strip().lower() == "kaon" and hole_cut is None:
-        hole_cut = apply_HGCer_hole_cut(
-            inpDict["Q2"],
-            inpDict["W"],
-            inpDict["EPSSET"],
-            phi_setting,
-        )
 
     t_bin_edges = None if t_bins is None else np.asarray(t_bins, dtype=float)
     phi_bin_edges = None if phi_bins is None else np.asarray(phi_bins, dtype=float)
@@ -660,7 +755,7 @@ def load_pion_simc_component_shape(
         adj_missmass = evt.missmass
         adj_t = -evt.t
         weight = float(getattr(evt, "iter_weight", 1.0))
-        if not math.isfinite(weight):
+        if not math.isfinite(weight) or not math.isfinite(float(adj_missmass)) or not math.isfinite(float(adj_t)):
             continue
 
         base_cuts = apply_simc_cuts(evt, mm_min, mm_max)
@@ -675,25 +770,37 @@ def load_pion_simc_component_shape(
 
         if nommcuts:
             n_events_passed += 1
-            setting_shape_full.Fill(adj_missmass, weight)
-            if t_bin_edges is not None and phi_bin_edges is not None:
-                phi_shift_deg = float(evt.phipq) * (180.0 / math.pi)
-                t_index, phi_index = find_2d_bin_indices(
-                    adj_t,
-                    phi_shift_deg,
-                    t_bin_edges,
-                    phi_bin_edges,
-                )
-                if t_index is not None and phi_index is not None:
-                    binned_shapes["t_bin{}".format(t_index + 1)][
-                        "phi_bin{}".format(phi_index + 1)
-                    ].Fill(adj_missmass, weight)
+            _fill_event_population(setting_shape_full, setting_moments, adj_missmass, weight)
+            t_index = find_bin_index(adj_t, t_bin_edges) if t_bin_edges is not None else None
+            if t_index is not None:
+                t_key = "t_bin{}".format(t_index + 1)
+                _fill_event_population(t_shapes[t_key], t_moments[t_key], adj_missmass, weight)
+                phi_index = find_bin_index(float(evt.phipq) * (180.0 / math.pi), phi_bin_edges) if phi_bin_edges is not None else None
+                if phi_index is not None:
+                    phi_key = "phi_bin{}".format(phi_index + 1)
+                    _fill_event_population(binned_shapes[t_key][phi_key], child_moments[t_key][phi_key], adj_missmass, weight)
+                else:
+                    _fill_event_population(outside_phi[t_key], outside_moments[t_key], adj_missmass, weight)
+            elif t_bin_edges is not None:
+                _fill_event_population(outside_t_hist, outside_t_moments, adj_missmass, weight)
 
         if allcuts:
             n_events_passed_mm_window += 1
             setting_shape.Fill(adj_missmass, weight)
 
     input_file.Close()
+
+    event_support = {
+        "setting": _event_population_support(setting_shape_full, setting_moments),
+        "parents": {key: _event_population_support(hist, t_moments[key]) for key, hist in t_shapes.items()},
+        "children": {key: {phi: _event_population_support(hist, child_moments[key][phi]) for phi, hist in children.items()} for key, children in binned_shapes.items()},
+        "outside_phi": {key: _event_population_support(hist, outside_moments[key]) for key, hist in outside_phi.items()},
+        "outside_t": _event_population_support(outside_t_hist, outside_t_moments),
+        "t_scope_requested": t_bin_edges is not None,
+        "interval_convention": "[low, high); original ROOT MM flows",
+    }
+    for key, parent_hist in t_shapes.items():
+        normalize_hist_to_unit_area(parent_hist, quiet=True, context="{} {} direct event {}".format(phi_setting, component_name, key))
 
     setting_integral_before_norm = float(setting_shape.Integral())
     full_integral_before_norm = float(setting_shape_full.Integral())
@@ -791,6 +898,9 @@ def load_pion_simc_component_shape(
         "setting_shape": setting_shape,
         "setting_shape_full": setting_shape_full,
         "binned_shapes": binned_shapes,
+        "t_shapes": t_shapes,
+        "event_population_identity": population_identity,
+        "event_population_support": event_support,
         "diagnostics": diagnostics,
     }
     if cache_key is not None:

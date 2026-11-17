@@ -51,7 +51,7 @@ OUTPATH=lt.OUTPATH
 # Importing utility functions
 
 sys.path.append("utility")
-from utility import TH1D_to_TH2D, create_polar_plot
+from utility import create_polar_plot
 
 ################################################################################################################################################
 # Suppressing the terminal splash of Print()
@@ -471,210 +471,16 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
 
     hDelta.Print(outputpdf)
 
-    C_ssxptar_ssyptar = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssxptar_ssyptar.append(TCanvas())
-        C_ssxptar_ssyptar[i].Divide(1,2)
-        C_ssxptar_ssyptar[i].cd(1)
-        h_ssyptar_ssxptar_data = TH1D_to_TH2D(hist["H_ssxptar_DATA"], hist["H_ssyptar_DATA"], h2d_name="h_ssyptar_ssxptar_data", title=f"{phisetlist[i]} Data;SHMS xptar;SHMS yptar", n_bins=25)
-        h_ssyptar_ssxptar_data.Draw("COLZ")
-        C_ssxptar_ssyptar[i].cd(2)
-        h_ssyptar_ssxptar_simc = TH1D_to_TH2D(hist["H_ssxptar_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="h_ssyptar_ssxptar_simc", title=f"{phisetlist[i]} Simc;SHMS xptar;SHMS yptar", n_bins=25, z_min=1e-12, z_max=h_ssyptar_ssxptar_data.GetMaximum())
-        h_ssyptar_ssxptar_simc.Draw("COLZ")
-        C_ssxptar_ssyptar[i].Print(outputpdf)
+    # No paired post-subtraction event coordinates are supplied by this
+    # presentation payload. Independent 1D marginals cannot supply correlations.
+    joint_status = TCanvas()
+    notice = ROOT.TPaveText(0.08, 0.25, 0.92, 0.75, "NDC")
+    notice.AddText("Joint accepted-event detector distributions: UNAVAILABLE")
+    notice.AddText("Original paired coordinates and their signed event weights are required.")
+    notice.AddText("No joint distribution is reconstructed from separate 1D histograms.")
+    notice.Draw()
+    joint_status.Print(outputpdf)
 
-    C_hsxptar_hsyptar = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsxptar_hsyptar.append(TCanvas())
-        C_hsxptar_hsyptar[i].Divide(1,2)
-        C_hsxptar_hsyptar[i].cd(1)
-        h_hsyptar_hsxptar_data = TH1D_to_TH2D(hist["H_hsxptar_DATA"], hist["H_hsyptar_DATA"], h2d_name="h_hsyptar_hsxptar_data", title=f"{phisetlist[i]} Data;HMS xptar;HMS yptar", n_bins=25)
-        h_hsyptar_hsxptar_data.Draw("COLZ")
-        C_hsxptar_hsyptar[i].cd(2)
-        h_hsyptar_hsxptar_simc = TH1D_to_TH2D(hist["H_hsxptar_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="h_hsyptar_hsxptar_simc", title=f"{phisetlist[i]} Simc;HMS xptar;HMS yptar", n_bins=25, z_min=1e-12, z_max=h_hsyptar_hsxptar_data.GetMaximum())
-        h_hsyptar_hsxptar_simc.Draw("COLZ")
-        C_hsxptar_hsyptar[i].Print(outputpdf)        
-
-    C_ssdelta_hsdelta = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_hsdelta.append(TCanvas())
-        C_ssdelta_hsdelta[i].Divide(1,2)
-        C_ssdelta_hsdelta[i].cd(1)
-        h_hsdelta_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_hsdelta_DATA"], h2d_name="h_hsdelta_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;HMS Delta", n_bins=25)
-        h_hsdelta_ssdelta_data.Draw("COLZ")
-        C_ssdelta_hsdelta[i].cd(2)
-        h_hsdelta_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_hsdelta_SIMC"], h2d_name="h_hsdelta_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;HMS Delta", n_bins=25, z_min=1e-12, z_max=h_hsdelta_ssdelta_data.GetMaximum())
-        h_hsdelta_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_hsdelta[i].Print(outputpdf)
-        
-    C_ssdelta_ssxptar = []    
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_ssxptar.append(TCanvas())
-        C_ssdelta_ssxptar[i].Divide(1,2)
-        C_ssdelta_ssxptar[i].cd(1)
-        h_ssxptar_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_ssxptar_DATA"], h2d_name="h_ssxptar_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS Delta;SHMS xptar", n_bins=25)
-        h_ssxptar_ssdelta_data.Draw("COLZ")
-        C_ssdelta_ssxptar[i].cd(2)
-        h_ssxptar_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ssxptar_SIMC"], h2d_name="h_ssxptar_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS Delta;SHMS xptar", n_bins=25, z_min=1e-12, z_max=h_ssxptar_ssdelta_data.GetMaximum())
-        h_ssxptar_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_ssxptar[i].Print(outputpdf)
-
-    C_hsdelta_hsxptar = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_hsxptar.append(TCanvas())
-        C_hsdelta_hsxptar[i].Divide(1,2)
-        C_hsdelta_hsxptar[i].cd(1)
-        h_hsxptar_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_hsxptar_DATA"], h2d_name="h_hsxptar_hsdelta_data", title=f"{phisetlist[i]} Data;HMS Delta;HMS xptar", n_bins=25)
-        h_hsxptar_hsdelta_data.Draw("COLZ")
-        C_hsdelta_hsxptar[i].cd(2)
-        h_hsxptar_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_hsxptar_SIMC"], h2d_name="h_hsxptar_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS Delta;HMS xptar", n_bins=25, z_min=1e-12, z_max=h_hsxptar_hsdelta_data.GetMaximum())
-        h_hsxptar_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_hsxptar[i].Print(outputpdf)
-
-    C_ssdelta_ssyptar = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_ssyptar.append(TCanvas())
-        C_ssdelta_ssyptar[i].Divide(1,2)
-        C_ssdelta_ssyptar[i].cd(1)
-        h_ssyptar_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_ssyptar_DATA"], h2d_name="h_ssyptar_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS Delta;SHMS yptar", n_bins=25)
-        h_ssyptar_ssdelta_data.Draw("COLZ")
-        C_ssdelta_ssyptar[i].cd(2)
-        h_ssyptar_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ssyptar_SIMC"], h2d_name="h_ssyptar_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS Delta;SHMS yptar", n_bins=25, z_min=1e-12, z_max=h_ssyptar_ssdelta_data.GetMaximum())
-        h_ssyptar_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_ssyptar[i].Print(outputpdf)
-
-    C_hsdelta_hsyptar = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_hsyptar.append(TCanvas())
-        C_hsdelta_hsyptar[i].Divide(1,2)
-        C_hsdelta_hsyptar[i].cd(1)
-        h_hsyptar_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_hsyptar_DATA"], h2d_name="h_hsyptar_hsdelta_data", title=f"{phisetlist[i]} Data;HMS Delta;HMS yptar", n_bins=25)
-        h_hsyptar_hsdelta_data.Draw("COLZ")
-        C_hsdelta_hsyptar[i].cd(2)
-        h_hsyptar_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_hsyptar_SIMC"], h2d_name="h_hsyptar_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS Delta;HMS yptar", n_bins=25, z_min=1e-12, z_max=h_hsyptar_hsdelta_data.GetMaximum())
-        h_hsyptar_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_hsyptar[i].Print(outputpdf)
-
-    C_ssdelta_Q2 = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_Q2.append(TCanvas())
-        C_ssdelta_Q2[i].Divide(1,2)
-        C_ssdelta_Q2[i].cd(1)
-        h_Q2_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_Q2_DATA"], h2d_name="h_Q2_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;Q2", n_bins=25)
-        h_Q2_ssdelta_data.Draw("COLZ")
-        C_ssdelta_Q2[i].cd(2)
-        h_Q2_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_Q2_SIMC"], h2d_name="h_Q2_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;Q2", n_bins=25, z_min=1e-12, z_max=h_Q2_ssdelta_data.GetMaximum())
-        h_Q2_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_Q2[i].Print(outputpdf)
-
-    C_hsdelta_Q2 = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_Q2.append(TCanvas())
-        C_hsdelta_Q2[i].Divide(1,2)
-        C_hsdelta_Q2[i].cd(1)
-        h_Q2_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_Q2_DATA"], h2d_name="h_Q2_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;Q2", n_bins=25)
-        h_Q2_hsdelta_data.Draw("COLZ")
-        C_hsdelta_Q2[i].cd(2)
-        h_Q2_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_Q2_SIMC"], h2d_name="h_Q2_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;Q2", n_bins=25, z_min=1e-12, z_max=h_Q2_hsdelta_data.GetMaximum())
-        h_Q2_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_Q2[i].Print(outputpdf)
-
-    C_ssdelta_MM = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_MM.append(TCanvas())
-        C_ssdelta_MM[i].Divide(1,2)
-        C_ssdelta_MM[i].cd(1)
-        h_MM_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_MM_DATA"], h2d_name="h_MM_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;MM", n_bins=25)
-        h_MM_ssdelta_data.Draw("COLZ")
-        C_ssdelta_MM[i].cd(2)
-        h_MM_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_MM_SIMC"], h2d_name="h_MM_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;MM", n_bins=25, z_min=1e-12, z_max=h_MM_ssdelta_data.GetMaximum())
-        h_MM_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_MM[i].Print(outputpdf)
-
-    C_hsdelta_MM = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_MM.append(TCanvas())
-        C_hsdelta_MM[i].Divide(1,2)
-        C_hsdelta_MM[i].cd(1)
-        h_MM_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_MM_DATA"], h2d_name="h_MM_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;MM", n_bins=25)
-        h_MM_hsdelta_data.Draw("COLZ")
-        C_hsdelta_MM[i].cd(2)
-        h_MM_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_MM_SIMC"], h2d_name="h_MM_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;MM", n_bins=25, z_min=1e-12, z_max=h_MM_hsdelta_data.GetMaximum())
-        h_MM_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_MM[i].Print(outputpdf)        
-        
-    C_ssdelta_W = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_W.append(TCanvas())
-        C_ssdelta_W[i].Divide(1,2)
-        C_ssdelta_W[i].cd(1)
-        h_W_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_W_DATA"], h2d_name="h_W_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;W", n_bins=25)
-        h_W_ssdelta_data.Draw("COLZ")
-        C_ssdelta_W[i].cd(2)
-        h_W_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_W_SIMC"], h2d_name="h_W_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;W", n_bins=25, z_min=1e-12, z_max=h_W_ssdelta_data.GetMaximum())
-        h_W_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_W[i].Print(outputpdf)
-
-    C_hsdelta_W = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_W.append(TCanvas())
-        C_hsdelta_W[i].Divide(1,2)
-        C_hsdelta_W[i].cd(1)
-        h_W_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_W_DATA"], h2d_name="h_W_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;W", n_bins=25)
-        h_W_hsdelta_data.Draw("COLZ")
-        C_hsdelta_W[i].cd(2)
-        h_W_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_W_SIMC"], h2d_name="h_W_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;W", n_bins=25, z_min=1e-12, z_max=h_W_hsdelta_data.GetMaximum())
-        h_W_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_W[i].Print(outputpdf)
-        
-    C_ssdelta_t = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_t.append(TCanvas())
-        C_ssdelta_t[i].Divide(1,2)
-        C_ssdelta_t[i].cd(1)
-        h_t_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_t_DATA"], h2d_name="h_t_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;|-t|", n_bins=25)
-        h_t_ssdelta_data.Draw("COLZ")
-        C_ssdelta_t[i].cd(2)
-        h_t_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_t_SIMC"], h2d_name="h_t_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;|-t|", n_bins=25, z_min=1e-12, z_max=h_t_ssdelta_data.GetMaximum())
-        h_t_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_t[i].Print(outputpdf)
-        
-    C_hsdelta_t = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_t.append(TCanvas())
-        C_hsdelta_t[i].Divide(1,2)
-        C_hsdelta_t[i].cd(1)
-        h_t_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_t_DATA"], h2d_name="h_t_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;|-t|", n_bins=25)
-        h_t_hsdelta_data.Draw("COLZ")
-        C_hsdelta_t[i].cd(2)
-        h_t_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_t_SIMC"], h2d_name="h_t_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;|-t|", n_bins=25, z_min=1e-12, z_max=h_t_hsdelta_data.GetMaximum())
-        h_t_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_t[i].Print(outputpdf)
-
-    C_ssdelta_ph_q = []        
-    for i,hist in enumerate(histlist_copy):
-        C_ssdelta_ph_q.append(TCanvas())
-        C_ssdelta_ph_q[i].Divide(1,2)
-        C_ssdelta_ph_q[i].cd(1)
-        h_ph_q_ssdelta_data = TH1D_to_TH2D(hist["H_ssdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_ssdelta_data", title=f"{phisetlist[i]} Data;SHMS delta;ph_q", n_bins=25)
-        h_ph_q_ssdelta_data.Draw("COLZ")
-        C_ssdelta_ph_q[i].cd(2)
-        h_ph_q_ssdelta_simc = TH1D_to_TH2D(hist["H_ssdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_ssdelta_simc", title=f"{phisetlist[i]} Simc;SHMS delta;ph_q", n_bins=25, z_min=1e-12, z_max=h_ph_q_ssdelta_data.GetMaximum())
-        h_ph_q_ssdelta_simc.Draw("COLZ")
-        C_ssdelta_ph_q[i].Print(outputpdf)
-
-    C_hsdelta_ph_q = []        
-    for i,hist in enumerate(histlist_copy):
-        C_hsdelta_ph_q.append(TCanvas())
-        C_hsdelta_ph_q[i].Divide(1,2)
-        C_hsdelta_ph_q[i].cd(1)
-        h_ph_q_hsdelta_data = TH1D_to_TH2D(hist["H_hsdelta_DATA"], hist["H_ph_q_DATA"], h2d_name="h_ph_q_hsdelta_data", title=f"{phisetlist[i]} Data;HMS delta;ph_q", n_bins=25)
-        h_ph_q_hsdelta_data.Draw("COLZ")
-        C_hsdelta_ph_q[i].cd(2)
-        h_ph_q_hsdelta_simc = TH1D_to_TH2D(hist["H_hsdelta_SIMC"], hist["H_ph_q_SIMC"], h2d_name="h_ph_q_hsdelta_simc", title=f"{phisetlist[i]} Simc;HMS delta;ph_q", n_bins=25, z_min=1e-12, z_max=h_ph_q_hsdelta_data.GetMaximum())
-        h_ph_q_hsdelta_simc.Draw("COLZ")
-        C_hsdelta_ph_q[i].Print(outputpdf)
-        
     Cph_q = TCanvas()
 
     binmax = []
@@ -975,17 +781,6 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         simc_pad = data_pad + 1
 
         mm_vs_t_simc = hist.get("MM_vs_t_SIMC")
-        if mm_vs_t_simc is None:
-            mm_vs_t_simc = TH1D_to_TH2D(
-                hist["H_MM_SIMC"],
-                hist["H_t_SIMC"],
-                h2d_name="MM_vs_t_SIMC_fallback_{}".format(i),
-                title="{} Simc;MM;t".format(phisetlist[i]),
-                n_bins=25,
-                z_min=1e-12,
-                z_max=hist["MM_vs_t_DATA"].GetMaximum(),
-            )
-            hist["MM_vs_t_SIMC"] = mm_vs_t_simc
 
         CMMt.cd(data_pad)
         hist["MM_vs_t_DATA"].SetMinimum(1)
@@ -994,10 +789,16 @@ def plot_data_vs_simc(t_bins, phi_bins, histlist, phisetlist, inpDict):
         hist["MM_vs_t_DATA"].Draw("COLZ")
 
         CMMt.cd(simc_pad)
-        mm_vs_t_simc.SetMinimum(1)
-        mm_vs_t_simc.SetLineColor(i+(len(phisetlist)+1))
-        mm_vs_t_simc.SetTitle(phisetlist[i] + " Simc")
-        mm_vs_t_simc.Draw("COLZ")
+        if mm_vs_t_simc is None:
+            missing_joint = ROOT.TPaveText(0.08, 0.3, 0.92, 0.7, "NDC")
+            missing_joint.AddText("SIMC MM/t joint population unavailable")
+            missing_joint.AddText("Original paired event coordinates are required.")
+            missing_joint.Draw()
+        else:
+            mm_vs_t_simc.SetMinimum(1)
+            mm_vs_t_simc.SetLineColor(i+(len(phisetlist)+1))
+            mm_vs_t_simc.SetTitle(phisetlist[i] + " Simc")
+            mm_vs_t_simc.Draw("COLZ")
 
     CMMt.Print(outputpdf)
     

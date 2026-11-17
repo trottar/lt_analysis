@@ -99,6 +99,7 @@ from pion_component_fits import (
     load_or_resolve_pion_component_alignment,
 )
 from pion_component_shapes import (
+    load_kaon_simc_sigma0_shape,
     load_kaon_simc_signal_shape,
     load_setting_pion_component_shapes,
 )
@@ -4687,6 +4688,7 @@ def rand_sub(
                         hole_contains,
                         mm_min,
                         mm_max,
+                        collect_kaon_sidis_support=(inpDict.get("d1a_kaon_sidis_support_enabled") is True),
                     )
                     if bool((proton_cleaning_application or {}).get("accepted")):
                         if coordinate_contract is not None:
@@ -4807,6 +4809,28 @@ def rand_sub(
                         raise RuntimeError(
                             "authoritative_t_bin_pion_parents_require_frozen_canonical_bins"
                         )
+                    # D2.a: canonical populations must come from their original
+                    # SIMC events after the authoritative edges are resolved.
+                    import apply_cuts as _simc_scope_cuts
+                    _simc_scope_cut_state = dict(vars(_simc_scope_cuts))
+                    try:
+                        scope_payload = load_setting_pion_component_shapes(
+                            inpDict, phi_setting, particle_type=ParticleType,
+                            t_bins=frozen_t_bins, phi_bins=frozen_phi_bins,
+                            hgcer_cutg=hgcer_cutg, context="rand_sub_direct_event_scopes")
+                        signal_source = ((kaon_signal_shape_payload or {}).get("diagnostics") or {}).get("root_filename")
+                        kaon_signal_shape_payload = load_kaon_simc_signal_shape(
+                            signal_source, inpDict, phi_setting,
+                            t_bins=frozen_t_bins, phi_bins=frozen_phi_bins,
+                            hgcer_cutg=hgcer_cutg, context="rand_sub_direct_event_signal_scopes")
+                        sigma_source = ((kaon_sigma0_shape_payload or {}).get("diagnostics") or {}).get("root_filename")
+                        kaon_sigma0_shape_payload = load_kaon_simc_sigma0_shape(
+                            sigma_source, inpDict, phi_setting,
+                            t_bins=frozen_t_bins, phi_bins=frozen_phi_bins,
+                            hgcer_cutg=hgcer_cutg, context="rand_sub_direct_event_sigma_scopes")
+                    finally:
+                        vars(_simc_scope_cuts).clear()
+                        vars(_simc_scope_cuts).update(_simc_scope_cut_state)
                     pion_hgcer_diagnostic_config = get_pion_hgcer_diagnostic_config(
                         inp_dict=inpDict,
                         phi_setting=phi_setting,
@@ -5144,6 +5168,9 @@ def rand_sub(
                 phi_setting=phi_setting,
                 context="{}_{}_setting".format(phi_setting, EPSSET),
                 pion_component_alignment=setting_alignment,
+                kaon_experimental_support=(proton_cleaning_application or {}).get(
+                    "kaon_sidis_experimental_support"
+                ),
                 alignment_bin_key=alignment_bin_key,
             )
             setting_wide_diagnostic_only = (
@@ -5276,6 +5303,9 @@ def rand_sub(
                         "H_pion_control_cut": control_t.get("H_pion_control_cut"),
                         "pion_control_records": control_t.get("records"),
                         "source_accounting": proton_product.get("source_accounting"),
+                        "kaon_sidis_experimental_support": proton_product.get(
+                            "kaon_sidis_experimental_support"
+                        ),
                         "pion_control_source_accounting": control_t.get("source_accounting"),
                         "kaon_data_coordinate": dict(
                             proton_product.get("kaon_data_coordinate") or {}

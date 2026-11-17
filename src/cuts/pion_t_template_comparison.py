@@ -282,7 +282,8 @@ def compare_parent(parent, templates, inp_dict, *, selected_shapes, global_shape
                       mm_offset_data=baseline["template_mm_offset_data"],
                       phi_setting=baseline["particle_subtraction_phi_setting"],
                       context="template_comparison_t{}".format(parent["t_bin_index"] + 1),
-                      pion_component_alignment=deepcopy(alignment))
+                      pion_component_alignment=deepcopy(alignment),
+                      kaon_experimental_support=deepcopy(parent.get("kaon_sidis_experimental_support")))
         debug_enabled, debug_records = ownership._DEBUG_ENABLED, list(ownership._DEBUG_RECORDS)
         try:
             candidate = fitter(_clone(inputs["pion"], "comparison_pion_input"),

@@ -108,15 +108,19 @@ class GuardTests(unittest.TestCase):
 
 class ScopeAndFitterTests(unittest.TestCase):
     def test_actual_resolver_direct_t_setting_and_missing(self):
-        direct=H(); fallback=H(values=(0.,0.,0.,0.)); setting=H()
-        for local,global_,expected in ((direct,setting,'local_t_phi'),(fallback,setting,'setting_fallback'),(None,None,'unavailable')):
-            payload=dict(binned_shapes={'t_bin1':{'phi_bin1':local}},setting_shape_full=global_)
-            with patch.dict(sys.modules,{'pion_component_fits':fits}),patch.object(fits,'_sum_hist_list_to_unit_area',return_value=None):
-                selected=fits._resolve_single_scope_hist(payload,'test',0,0)
-                self.assertEqual(child.scope_evidence(payload,0,0,selected,fits._hist_has_usable_support),expected)
-        payload=dict(binned_shapes={'t_bin1':{'phi_bin2':direct}},setting_shape_full=setting)
-        with patch.dict(sys.modules,{'pion_component_fits':fits}),patch.object(fits,'_sum_hist_list_to_unit_area',return_value=direct):
-            self.assertEqual(child.scope_evidence(payload,0,0,direct,fits._hist_has_usable_support),'local_t_aggregate_fallback')
+        direct=H(); empty=H(values=(0.,0.,0.,0.)); setting=H()
+        identity={'schema':2,'source':['source.root',1,2]}
+        for local,expected in ((direct,'local_t_phi'),(empty,'unavailable'),(None,'unavailable')):
+            payload=dict(binned_shapes={'t_bin1':{'phi_bin1':local}},
+                         t_shapes={'t_bin1':direct},setting_shape_full=setting,
+                         event_population_identity=identity)
+            selected=fits._resolve_single_scope_hist(payload,'test',0,0)
+            self.assertEqual(child.scope_evidence(payload,0,0,selected,fits._hist_has_usable_support),expected)
+            self.assertIs(fits._resolve_single_scope_hist(payload,'setting-wide'),setting)
+            self.assertIs(fits._resolve_single_scope_hist(payload,'t_bin1',0),direct)
+        payload=dict(binned_shapes={'t_bin1':{'phi_bin2':direct}},t_shapes={'t_bin1':direct},
+                     setting_shape_full=setting,event_population_identity=identity)
+        self.assertIsNone(fits._resolve_single_scope_hist(payload,'test',0,0))
 
     def test_cell_clones_all_inputs_and_passes_existing_procedure(self):
         pion,kaon=H(),H(); shapes={c:H() for c in child.COMPONENTS}
@@ -240,7 +244,7 @@ class ObserverTests(unittest.TestCase):
             parents.append(dict(t_bin_index=ti,t_edges=[float(ti),float(ti+1)],analysis_scope=f't_bin{ti+1}',
                 H_pion_control=h,H_proton_cleaned_final_rf=kh,fit_result=dict(template_mm_offset_data=0.,particle_subtraction_phi_setting=setting)))
         if mismatch: parents[0]['H_pion_control'].values[1]+=1
-        shape_payload=dict(setting_shape_full=H(),binned_shapes={f't_bin{ti+1}':{f'phi_bin{pi+1}':H() for pi in range(9)} for ti in range(3)})
+        shape_payload=dict(setting_shape_full=H(),t_shapes={f't_bin{ti+1}':H() for ti in range(3)},event_population_identity={'schema':2,'source':['fixture.root',1,2]},binned_shapes={f't_bin{ti+1}':{f'phi_bin{pi+1}':H() for pi in range(9)} for ti in range(3)})
         components=dict(components={c:deepcopy(shape_payload) for c in child.COMPONENTS})
         if fallback:
             components['components']['pi_n']['binned_shapes'] = {}
@@ -335,12 +339,12 @@ class ObserverTests(unittest.TestCase):
                 self.assertEqual(cell['applications']['Local_t_phi']['status'],'unavailable')
 
     def test_accepted_fallback_and_genuine_local_statuses(self):
-        for fallback,status in ((False,'fitted_local_templates'),(True,'fitted_with_template_fallback')):
+        for fallback,status in ((False,'fitted_local_templates'),(True,'fit_failed')):
             with self.subTest(fallback=fallback), self.environment(fallback=fallback) as (run,*_):
                 result=run()
                 self.assertEqual(result['cell_status_counts'],{status:27})
-                self.assertTrue(all(c['fit_returned'] and c['fit_accepted'] for c in result['cells']))
-                self.assertTrue(all(c['template_scopes']['pi_n']==('setting_fallback' if fallback else 'local_t_phi')
+                self.assertTrue(all((not c['fit_returned'] and not c['fit_accepted']) if fallback else (c['fit_returned'] and c['fit_accepted']) for c in result['cells']))
+                self.assertTrue(all(c['template_scopes']['pi_n']==('unavailable' if fallback else 'local_t_phi')
                                     for c in result['cells']))
 
     def test_owner_verifies_actual_observer_fixture_for_both_settings(self):
@@ -399,7 +403,7 @@ class ObserverTests(unittest.TestCase):
         from matplotlib.figure import Figure
         from matplotlib.backends.backend_pdf import PdfPages
         original=Figure.suptitle
-        for kwargs,status in ((dict(rejected=True),'fit_rejected'),(dict(fallback=True),'fitted_with_template_fallback')):
+        for kwargs,status in ((dict(rejected=True),'fit_rejected'),(dict(fallback=True),'fit_failed')):
             with self.subTest(status=status),self.environment(**kwargs) as (run,called,cuts,temp,prior):
                 doc=run(); doc['cells']=doc['cells'][:1]
                 with patch.object(Figure,'suptitle',autospec=True,side_effect=original) as title,patch.object(PdfPages,'savefig'):

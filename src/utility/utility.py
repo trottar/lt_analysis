@@ -369,83 +369,27 @@ def flatten_hist(histogram):
 
 ################################################################################################################################################
 
-def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis", 
+def TH1D_to_TH2D(h1, h2, h2d_name="h2d", title="2D Histogram;X axis;Y axis",
                  n_bins=None, x_min=None, x_max=None, y_min=None, y_max=None,
-                 z_min=None, z_max=None):
-    
-    # Get the number of bins and ranges for each histogram
-    orig_n_bins_x = h1.GetNbinsX()
-    orig_n_bins_y = h2.GetNbinsX()
-    
-    # Determine the number of bins to use
-    if n_bins is None:
-        n_bins = min(orig_n_bins_x, orig_n_bins_y)
-    else:
-        # Check that n_bins does not exceed the original number of bins
-        max_allowed_bins = min(orig_n_bins_x, orig_n_bins_y)
-        if n_bins > max_allowed_bins:
-            print(f"Warning: Requested {n_bins} bins, but input histograms have {orig_n_bins_x} and {orig_n_bins_y} bins.")
-            print(f"Using {max_allowed_bins} bins instead.")
-            n_bins = max_allowed_bins
-
-    # Use original ranges if custom ranges are not specified
-    x_min = x_min if x_min is not None else h1.GetXaxis().GetXmin()
-    x_max = x_max if x_max is not None else h1.GetXaxis().GetXmax()
-    y_min = y_min if y_min is not None else h2.GetXaxis().GetXmin()
-    y_max = y_max if y_max is not None else h2.GetXaxis().GetXmax()
-    
-    # Create a 2D histogram with specified or original binning
-    h2d = ROOT.TH2D(h2d_name, title, n_bins, x_min, x_max, n_bins, y_min, y_max)
-    
-    # Calculate bin widths for input and output histograms
-    input_bin_width_x = (h1.GetXaxis().GetXmax() - h1.GetXaxis().GetXmin()) / orig_n_bins_x
-    input_bin_width_y = (h2.GetXaxis().GetXmax() - h2.GetXaxis().GetXmin()) / orig_n_bins_y
-    output_bin_width_x = (x_max - x_min) / n_bins
-    output_bin_width_y = (y_max - y_min) / n_bins
-    
-    # Fill the 2D histogram
-    for i in range(1, orig_n_bins_x + 1):
-        for j in range(1, orig_n_bins_y + 1):
-            x_value = h1.GetBinCenter(i)
-            y_value = h2.GetBinCenter(j)
-            
-            # Get bin contents and errors
-            z_value1 = h1.GetBinContent(i)
-            z_value2 = h2.GetBinContent(j)
-            z_error1 = h1.GetBinError(i)
-            z_error2 = h2.GetBinError(j)
-            
-            # Calculate the new bin content and error
-            z_value = z_value1 * z_value2
-            # Calculate the new bin error, avoiding divide by zero
-            if z_value1 != 0 and z_value2 != 0:
-                rel_error1 = z_error1 / z_value1
-                rel_error2 = z_error2 / z_value2
-                z_error = z_value * np.sqrt(rel_error1**2 + rel_error2**2)
-            elif z_value1 == 0 and z_value2 == 0:
-                z_error = 0
-            elif z_value1 == 0:
-                z_error = z_value2 * z_error1
-            else:  # z_value2 == 0
-                z_error = z_value1 * z_error2
-            
-            # Scale the content and error based on the change in bin widths
-            scale_factor_x = input_bin_width_x / output_bin_width_x
-            scale_factor_y = input_bin_width_y / output_bin_width_y
-            z_value *= scale_factor_x * scale_factor_y
-            z_error *= scale_factor_x * scale_factor_y
-            
-            # Fill the bin
-            bin_val = h2d.Fill(x_value, y_value, z_value)
-            
-            # Set the bin error
-            h2d.SetBinError(bin_val, z_error)
-
-    # Set the z-axis range if specified
+                 z_min=None, z_max=None, *, paired_events=None):
+    """Fill from original selected (x, y, weight) records; marginals set axes only."""
+    if paired_events is None:
+        raise ValueError("joint_event_population_requires_original_paired_records")
+    bins = int(n_bins if n_bins is not None else min(h1.GetNbinsX(), h2.GetNbinsX()))
+    x_min = h1.GetXaxis().GetXmin() if x_min is None else x_min
+    x_max = h1.GetXaxis().GetXmax() if x_max is None else x_max
+    y_min = h2.GetXaxis().GetXmin() if y_min is None else y_min
+    y_max = h2.GetXaxis().GetXmax() if y_max is None else y_max
+    hist = ROOT.TH2D(h2d_name, title, bins, x_min, x_max, bins, y_min, y_max)
+    hist.SetDirectory(0)
+    hist.Sumw2()
+    for x, y, weight in paired_events:
+        if not all(math.isfinite(float(value)) for value in (x, y, weight)):
+            raise ValueError("nonfinite_joint_event_record")
+        hist.Fill(float(x), float(y), float(weight))
     if z_min is not None and z_max is not None:
-        h2d.GetZaxis().SetRangeUser(z_min, z_max)            
-    
-    return h2d
+        hist.GetZaxis().SetRangeUser(z_min, z_max)
+    return hist
 
 ################################################################################################################################################
 
@@ -1627,43 +1571,16 @@ def _find_outlier_bins_by_frac_err(hist,
         # Everything is zero-ish; nothing stands out
         return []
 
-def prune_hist(hist,
-               threshold: int = 10,
-               factor: float = 3.5,
-               include_overflow: bool = False,
-               debug: bool = False) -> int:
+def prune_hist(hist, threshold=10, factor=3.5, include_overflow=False, debug=False):
+    """Report high-fractional-error candidates without changing physical data.
+
+    Signed cancellation, negative yields and sparse observations retain their
+    original contents, errors, entries and flows. Selection belongs to events
+    or an explicitly adopted mask, never an uncertainty-based histogram reset.
     """
-    Main pruning function (mutates `hist`).
-
-    Steps:
-      1) Detect and ZERO bins with abnormally large fractional uncertainty (err/|content|).
-      2) If the histogram is effectively unusable, reset it entirely.
-
-    Full-reset conditions:
-      - hist.GetEntries() <= threshold
-      - OR hist.Integral() <= 0
-
-    Returns
-    -------
-    int
-        Number of bins zeroed due to large fractional uncertainties.
-    """
-    outliers = _find_outlier_bins_by_frac_err(
-        hist, factor=factor, include_overflow=include_overflow
-    )
-
-    for i in outliers:
-        hist.SetBinContent(i, 0.0)
-        hist.SetBinError(i, 0.0)
-
-    if debug and outliers:
-        print(f"[prune_hist] Zeroed high-frac-σ bins: {outliers}")
-
-    if hist.GetEntries() <= threshold or hist.Integral() <= 0:
-        if debug:
-            print("[prune_hist] Full reset: entries<=threshold or integral<=0")
-        hist.Reset()
-
+    outliers = _find_outlier_bins_by_frac_err(hist, factor=factor, include_overflow=include_overflow)
+    if debug:
+        print("[prune_hist] {} candidate bins; accepted population preserved".format(len(outliers)))
     return len(outliers)
 
 ##################################################################################################################################################

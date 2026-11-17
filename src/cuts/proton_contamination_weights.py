@@ -9251,6 +9251,40 @@ def _clone_mm_target_map(target_templates, suffix):
     }
 
 
+def _new_kaon_sidis_experimental_support(histogram, source_bundle):
+    """Original four-stream observations, independent of proton-cleaned weights."""
+    names = ("prompt", "rand", "dummy_prompt", "dummy_rand")
+    specs = (source_bundle or {}).get("sources") or {}
+    complete = histogram is not None and all(
+        name in specs and specs[name].get("tree") is not None
+        and math.isfinite(float(specs[name].get("coefficient", 0.0) or 0.0))
+        and float(specs[name].get("coefficient", 0.0) or 0.0) != 0.0
+        for name in names
+    )
+    nbins = int(histogram.GetNbinsX()) if histogram is not None else 0
+    return {
+        "schema": "kaon_sidis_original_support/v1", "complete": bool(complete),
+        "selection": "nommcuts_after_hgcer_hole_and_final_rf_before_proton_weight",
+        "edges": [float(histogram.GetXaxis().GetBinLowEdge(i))
+                  for i in range(1, nbins + 2)] if histogram is not None else [],
+        "sources": {("dummy" if name == "dummy_prompt" else name):
+                    {"entries": [0] * (nbins + 2), "sumw2": [0.0] * (nbins + 2)}
+                    for name in names},
+    }
+
+
+def _record_kaon_sidis_experimental_support(support, histogram, source_name,
+                                           mm_value, raw_weight):
+    """Called only at the existing final-RF, no-MM-cut fill boundary."""
+    source_name = "dummy" if source_name == "dummy_prompt" else source_name
+    if source_name not in support["sources"]:
+        raise RuntimeError("D1a_unknown_experimental_source:{}".format(source_name))
+    index = int(histogram.FindBin(float(mm_value)))
+    source = support["sources"][source_name]
+    source["entries"][index] += 1
+    source["sumw2"][index] += float(raw_weight) ** 2
+
+
 def _new_canonical_t_source_accounting(t_index, t_edges):
     return {
         "t_index": int(t_index),
@@ -9319,6 +9353,7 @@ def apply_kaon_proton_cleaning_to_targets(
     hole_contains,
     mm_min,
     mm_max,
+    collect_kaon_sidis_support=False,
 ):
     if not isinstance(cleaning_result, dict):
         return {"accepted": False, "reason": "missing cleaning result"}
@@ -9366,6 +9401,16 @@ def apply_kaon_proton_cleaning_to_targets(
                     t_index, t_edges
                 ),
             })
+
+    kaon_sidis_support = None
+    if collect_kaon_sidis_support:
+        kaon_sidis_support = _new_kaon_sidis_experimental_support(
+            final_targets.get("h_mm_nosub"), source_bundle
+        )
+        for product in canonical_t_products:
+            product["kaon_sidis_experimental_support"] = _new_kaon_sidis_experimental_support(
+                product["final_targets"].get("h_mm_nosub"), source_bundle
+            )
 
     h_weight_sum_delta = ROOT.TH1D(
         "H_proton_weight_sum_delta",
@@ -9622,6 +9667,17 @@ def apply_kaon_proton_cleaning_to_targets(
                     nommcuts=nommcuts, noholecuts=noholecuts,
                 )
             if rf_accept:
+                if collect_kaon_sidis_support and nommcuts:
+                    _record_kaon_sidis_experimental_support(
+                        kaon_sidis_support, final_targets["h_mm_nosub"],
+                        source_name, adj_mm, raw_weight,
+                    )
+                    if canonical_t_product is not None:
+                        _record_kaon_sidis_experimental_support(
+                            canonical_t_product["kaon_sidis_experimental_support"],
+                            canonical_t_product["final_targets"]["h_mm_nosub"],
+                            source_name, adj_mm, raw_weight,
+                        )
                 rf_counts["accepted"] += 1
                 if allcuts:
                     mm_fill_counters["final_mm_fills"] += 1
@@ -9842,6 +9898,8 @@ def apply_kaon_proton_cleaning_to_targets(
         "all_consistent": all(bool(row.get("consistent", False)) for row in cross_stage_rows),
     }
     cleaning_result["application"] = application
+    if collect_kaon_sidis_support:
+        application["kaon_sidis_experimental_support"] = kaon_sidis_support
     return application
 
 

@@ -617,6 +617,43 @@ def _build_fit_inputs(
     }
 
 
+def _kaon_sidis_unsupported_bins(target_hist, residual_hist, support):
+    """D1.a: decide only from original observations, never residual contents."""
+    reason = "D1a_original_experimental_support_unavailable_or_invalid"
+    if not isinstance(support, dict) or support.get("complete") is not True:
+        raise RuntimeError(reason)
+    if (support.get("schema") != "kaon_sidis_original_support/v1"
+            or support.get("selection") != "nommcuts_after_hgcer_hole_and_final_rf_before_proton_weight"):
+        raise RuntimeError(reason)
+    nbins = int(target_hist.GetNbinsX())
+    edges = [float(target_hist.GetXaxis().GetBinLowEdge(i)) for i in range(1, nbins + 2)]
+    if support.get("edges") != edges:
+        raise RuntimeError("D1a_original_experimental_support_axis_mismatch")
+    sources = support.get("sources") or {}
+    names = ("prompt", "rand", "dummy", "dummy_rand")
+    for name in names:
+        source = sources.get(name) or {}
+        entries, variances = source.get("entries"), source.get("sumw2")
+        if not isinstance(entries, list) or not isinstance(variances, list) or len(entries) != nbins + 2 or len(variances) != nbins + 2:
+            raise RuntimeError(reason)
+        for count, variance in zip(entries, variances):
+            if (not _is_finite_number(count) or float(count) < 0 or float(count) != int(count)
+                    or not _is_finite_number(variance) or float(variance) < 0
+                    or (float(count) == 0.0 and float(variance) != 0.0)):
+                raise RuntimeError(reason)
+    excluded = []
+    for i in range(1, nbins + 1):
+        if all(sources[name]["entries"][i] == 0 and sources[name]["sumw2"][i] == 0.0 for name in names):
+            # An allegedly empty original bin with nonzero cleaned content/error
+            # is contradictory provenance, not an exclusion opportunity.
+            if float(target_hist.GetBinContent(i)) != 0.0 or float(target_hist.GetBinError(i)) != 0.0:
+                raise RuntimeError("D1a_empty_original_support_conflicts_with_target:{}".format(i))
+            error = float(residual_hist.GetBinError(i))
+            if math.isfinite(error) and error > 0.0:
+                excluded.append(i)
+    return excluded
+
+
 def _build_single_template_fit_inputs(
     target_hist,
     template_hist,
@@ -624,6 +661,7 @@ def _build_single_template_fit_inputs(
     fit_max,
     include_windows=None,
     exclude_windows=None,
+    fit_excluded_bin_indices=None,
 ):
     if include_windows is None:
         include_windows = []
@@ -636,7 +674,10 @@ def _build_single_template_fit_inputs(
     template_values = []
     fit_bin_indices = []
 
+    excluded_indices = set(fit_excluded_bin_indices or ())
     for bin_index in range(1, target_hist.GetNbinsX() + 1):
+        if bin_index in excluded_indices:
+            continue
         x_center = float(target_hist.GetBinCenter(bin_index))
         if x_center < fit_min or x_center > fit_max:
             continue
@@ -678,6 +719,8 @@ def _solve_nonnegative_template_amplitude(
     exclude_windows=None,
     amplitude_windows=None,
     amplitude_mode="least_squares",
+    fit_excluded_bin_indices=None,
+    minimum_fit_bins=1,
 ):
     template_name = getattr(template_hist, "GetName", lambda: "template")()
     validation_message = _validate_template_hist(template_hist, target_hist, template_name)
@@ -700,6 +743,7 @@ def _solve_nonnegative_template_amplitude(
         fit_max,
         include_windows=include_windows,
         exclude_windows=exclude_windows,
+        fit_excluded_bin_indices=fit_excluded_bin_indices,
     )
     if len(fit_inputs["x"]) == 0:
         return {
@@ -712,6 +756,11 @@ def _solve_nonnegative_template_amplitude(
             "amplitude_mode": str(amplitude_mode or "least_squares"),
             "amplitude_windows": deepcopy(amplitude_windows or include_windows or []),
         }
+
+    if len(fit_inputs["x"]) < int(minimum_fit_bins):
+        return {"success": False, "amplitude": 0.0, "sigma": None,
+                "chi2": None, "n_fit_bins": len(fit_inputs["x"]),
+                "message": "insufficient supported fit bins", "fit_diagnostics": {}}
 
     resolved_amplitude_mode = str(amplitude_mode or "least_squares")
     resolved_amplitude_windows = deepcopy(amplitude_windows or include_windows or [])
@@ -3935,6 +3984,7 @@ def _run_staged_component_pass(
     amplitude_seed,
     amplitude_prefix,
     pass_index,
+    kaon_sidis_experimental_support=None,
 ):
     amplitude_map = {
         template_name: max(float((amplitude_seed or {}).get(template_name, 0.0) or 0.0), 0.0)
@@ -3986,6 +4036,18 @@ def _run_staged_component_pass(
             include_windows = stage_windows
             amplitude_windows = None
 
+        sidis_support_rule = (amplitude_prefix == "A" and component_name == "pi_sidis"
+                              and stage_mode == "least_squares"
+                              and kaon_sidis_experimental_support is not None)
+        support_options = {}
+        excluded_fit_bins = []
+        if sidis_support_rule:
+            excluded_fit_bins = _kaon_sidis_unsupported_bins(
+                target_hist, residual_hist, kaon_sidis_experimental_support
+            )
+            support_options = {"fit_excluded_bin_indices": excluded_fit_bins,
+                               "minimum_fit_bins": 2}
+
         solve_result = _solve_nonnegative_template_amplitude(
             residual_hist,
             template_hists[component_name],
@@ -3995,7 +4057,24 @@ def _run_staged_component_pass(
             exclude_windows=exclude_windows,
             amplitude_windows=amplitude_windows,
             amplitude_mode=stage_mode,
+            **support_options
         )
+        if sidis_support_rule:
+            original_inputs = _build_single_template_fit_inputs(
+                residual_hist, template_hists[component_name], fit_min, fit_max,
+                include_windows=include_windows, exclude_windows=exclude_windows,
+            )
+            excluded_fit_bins = [i for i in original_inputs["fit_bin_indices"] if i in excluded_fit_bins]
+            support_diagnostic = {
+                "candidate": "D1.a", "original_support_schema": "kaon_sidis_original_support/v1",
+                "excluded_bin_indices": excluded_fit_bins,
+                "exclusion_reason": "no_entries_in_all_four_original_signed_sources_and_zero_experimental_sumw2_with_template_created_residual_variance",
+                "minimum_fit_bins": 2,
+            }
+            solve_result.setdefault("fit_diagnostics", {})["d1a_original_support"] = support_diagnostic
+            if not solve_result.get("success"):
+                raise RuntimeError("D1a_SIDIS_fit_failed:{}:excluded_bins={}".format(
+                    solve_result.get("message"), excluded_fit_bins))
         amplitude_map[component_name] = float(solve_result.get("amplitude", 0.0) or 0.0)
         uncertainty_map[component_name] = solve_result.get("sigma")
         pass_summary[component_name] = {
@@ -4655,6 +4734,7 @@ def _fit_staged_anchor_templates(
     fit_tolerance=1e-5,
     validation_options=None,
     context="",
+    kaon_sidis_experimental_support=None,
 ):
     if exclude_windows is None:
         exclude_windows = []
@@ -4747,6 +4827,7 @@ def _fit_staged_anchor_templates(
             stage_amplitudes,
             amplitude_prefix,
             pass_index,
+            kaon_sidis_experimental_support=kaon_sidis_experimental_support,
         )
         stage_amplitudes.update(pass_amplitudes)
         stage_uncertainties.update(pass_uncertainties)
@@ -5460,6 +5541,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
     alignment_windows=None,
     _alignment_scoring_only=False,
     kaon_sigma0_source_diagnostics=None,
+    kaon_experimental_support=None,
 ):
     fit_min = float(inpDict.get("bg_opt_mm_plot_min", BG_OPT_MM_PLOT_MIN))
     fit_max = float(inpDict.get("bg_opt_mm_plot_max", BG_OPT_MM_PLOT_MAX))
@@ -5521,12 +5603,21 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    d1a_enabled = (inpDict.get("d1a_kaon_sidis_support_enabled") is True
+                   and not _alignment_scoring_only)
+    if d1a_enabled:
+        if kaon_experimental_support is None:
+            raise RuntimeError("D1a_original_experimental_support_unavailable_or_invalid")
+        if fit_mode != "staged_only":
+            raise RuntimeError("D1a_requires_staged_only_kaon_fit")
     protected_fit_config = _resolve_pi_delta_signal_protected_fit_config(fit_config)
     residual_shift_settings = resolve_particle_subtraction_component_residual_shift_settings(
         "kaon_nosub",
         inp_dict=inpDict,
         phi_setting=phi_setting,
     )
+    if d1a_enabled and not _skip_residual_shift and residual_shift_settings.get("enabled", False):
+        raise RuntimeError("D1a_requires_fixed_alignment_no_residual_shift_selection")
     postfit_scale_map = resolve_particle_subtraction_component_postfit_scales(
         "kaon_nosub",
         component_names=("pi_n", "pi_delta", "pi_sidis", KAON_SIGMA0_TEMPLATE_NAME),
@@ -5590,6 +5681,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
                 _skip_residual_shift=True,
                 _alignment_scoring_only=True,
                 kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
+                kaon_experimental_support=kaon_experimental_support,
             ),
             fit_min=fit_min,
             cleanup_validation_mm_max=validation_options.get("cleanup_validation_mm_max"),
@@ -5653,6 +5745,7 @@ def fit_kaon_nosub_with_simc_pion_shapes(
         fit_tolerance=fit_config.get("particle_subtraction_fit_tolerance", 1e-5),
         validation_options=validation_options,
         context="{}_kaon_nosub".format(context or "scope"),
+        kaon_sidis_experimental_support=(kaon_experimental_support if d1a_enabled else None),
     )
     result = _apply_component_postfit_scales(
         result,
@@ -5891,16 +5984,8 @@ def fit_kaon_nosub_with_simc_pion_shapes(
 
 
 def _sum_hist_list_to_unit_area(hist_list, hist_name):
-    template_hist = next((hist for hist in hist_list if hist is not None), None)
-    if template_hist is None:
-        return None
-
-    summed_hist = _clone_hist(template_hist, hist_name, reset=True)
-    for hist in hist_list:
-        if hist is not None:
-            summed_hist.Add(hist)
-    normalize_hist_to_unit_area(summed_hist, quiet=True, context=hist_name)
-    return summed_hist
+    """Legacy physical-parent reconstruction is forbidden; use direct events."""
+    raise RuntimeError("event_population_cannot_be_reconstructed_from_normalized_children")
 
 
 def _hist_has_usable_support(hist, min_integral=1e-12):
@@ -5948,79 +6033,32 @@ def clone_kaon_lambda_comparison_payload(component_fit_result, context=""):
     return payload
 
 
-def _resolve_component_scope_hist(component_entry, component_name, analysis_scope, t_bin_index=None, phi_bin_index=None):
-    if not isinstance(component_entry, dict):
+def _resolve_event_population_scope(payload, analysis_scope, t_bin_index, phi_bin_index):
+    if not isinstance(payload, dict):
         return None
-
-    setting_shape_full = component_entry.get("setting_shape_full")
     if t_bin_index is None and phi_bin_index is None:
-        return setting_shape_full
+        if str(analysis_scope or "").startswith("t_bin"):
+            raise RuntimeError("event_population_scope_indices_required")
+        return payload.get("setting_shape_full")
+    if t_bin_index is None:
+        raise RuntimeError("event_population_phi_scope_requires_t_index")
+    identity = payload.get("event_population_identity") or {}
+    if identity.get("schema") != 2 or not identity.get("source"):
+        return None
+    t_key = "t_bin{}".format(int(t_bin_index) + 1)
+    if phi_bin_index is None:
+        hist = (payload.get("t_shapes") or {}).get(t_key)
+    else:
+        hist = ((payload.get("binned_shapes") or {}).get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
+    return hist if _hist_has_usable_support(hist) else None
 
-    binned_shapes = component_entry.get("binned_shapes") or {}
-    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
-    if phi_bin_index is not None and t_key is not None:
-        direct_hist = (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
-        if _hist_has_usable_support(direct_hist):
-            return direct_hist
 
-        # Sparse or empty (t,phi) component bins are expected in fine slicing.
-        # Fall back to the t-aggregated template before using the setting-wide shape.
-        phi_shape_map = binned_shapes.get(t_key) or {}
-        aggregated_hist = _sum_hist_list_to_unit_area(
-            list(phi_shape_map.values()),
-            "{}_{}_fallback_tbin{}".format(component_name, analysis_scope or "scope", int(t_bin_index) + 1),
-        )
-        if _hist_has_usable_support(aggregated_hist):
-            return aggregated_hist
-        return setting_shape_full
-
-    if t_key is not None:
-        phi_shape_map = binned_shapes.get(t_key) or {}
-        aggregated_hist = _sum_hist_list_to_unit_area(
-            list(phi_shape_map.values()),
-            "{}_{}_aggregated".format(component_name, analysis_scope or "scope"),
-        )
-        if _hist_has_usable_support(aggregated_hist):
-            return aggregated_hist
-        return setting_shape_full
-
-    return setting_shape_full
+def _resolve_component_scope_hist(component_entry, component_name, analysis_scope, t_bin_index=None, phi_bin_index=None):
+    return _resolve_event_population_scope(component_entry, analysis_scope, t_bin_index, phi_bin_index)
 
 
 def _resolve_single_scope_hist(shape_payload, analysis_scope, t_bin_index=None, phi_bin_index=None):
-    if not isinstance(shape_payload, dict):
-        return None
-
-    setting_shape_full = shape_payload.get("setting_shape_full")
-    if t_bin_index is None and phi_bin_index is None:
-        return setting_shape_full
-
-    binned_shapes = shape_payload.get("binned_shapes") or {}
-    t_key = "t_bin{}".format(int(t_bin_index) + 1) if t_bin_index is not None else None
-    if phi_bin_index is not None and t_key is not None:
-        direct_hist = (binned_shapes.get(t_key) or {}).get("phi_bin{}".format(int(phi_bin_index) + 1))
-        if _hist_has_usable_support(direct_hist):
-            return direct_hist
-
-        phi_shape_map = binned_shapes.get(t_key) or {}
-        aggregated_hist = _sum_hist_list_to_unit_area(
-            list(phi_shape_map.values()),
-            "single_shape_{}_fallback_tbin{}".format(analysis_scope or "scope", int(t_bin_index) + 1),
-        )
-        if _hist_has_usable_support(aggregated_hist):
-            return aggregated_hist
-        return setting_shape_full
-
-    if t_key is not None:
-        aggregated_hist = _sum_hist_list_to_unit_area(
-            list((binned_shapes.get(t_key) or {}).values()),
-            "single_shape_{}_aggregated".format(analysis_scope or "scope"),
-        )
-        if _hist_has_usable_support(aggregated_hist):
-            return aggregated_hist
-        return setting_shape_full
-
-    return setting_shape_full
+    return _resolve_event_population_scope(shape_payload, analysis_scope, t_bin_index, phi_bin_index)
 
 
 def _clone_shift_payload_hist(shift_payload, payload_keys, component_name, output_name):
@@ -7223,6 +7261,7 @@ def build_particle_subtraction_component_result(
     pion_component_alignment=None,
     alignment_bin_key=None,
     kaon_sigma0_source_diagnostics=None,
+    kaon_experimental_support=None,
 ):
     configure_particle_subtraction_root_ownership_debug(
         resolve_particle_subtraction_root_ownership_debug(inpDict)
@@ -7235,6 +7274,11 @@ def build_particle_subtraction_component_result(
             "fallback_used": True,
             "fallback_reason": "particle subtraction mode is not simc_shape_components",
         }
+
+    if str(analysis_scope or "").startswith("t_bin") and any(
+        not _hist_has_usable_support((component_shapes or {}).get(name)) for name in COMPONENT_NAMES
+    ):
+        raise RuntimeError("unsupported_event_population:missing_scoped_pion_component")
 
     _require_kaon_lambda_simc_shape(
         kaon_signal_shape,
@@ -7349,6 +7393,7 @@ def build_particle_subtraction_component_result(
         _skip_residual_shift=dynamic_alignment_enabled,
         alignment_windows=alignment_windows,
         kaon_sigma0_source_diagnostics=kaon_sigma0_source_diagnostics,
+        kaon_experimental_support=kaon_experimental_support,
     )
     kaon_fit = _promote_sparse_zero_solution_if_applicable(
         kaon_fit,

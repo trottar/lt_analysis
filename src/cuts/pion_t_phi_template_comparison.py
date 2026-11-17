@@ -120,18 +120,12 @@ def make_hist(reference, cell, name):
 
 
 def scope_evidence(payload, ti, pi, selected, usable):
-    """Mirror the existing resolver's support decisions, not a new fallback."""
-    direct = ((payload or {}).get("binned_shapes") or {}).get("t_bin{}".format(ti+1)) or {}
-    if usable(direct.get("phi_bin{}".format(pi+1))):
-        return "local_t_phi"
-    if not usable(selected):
+    """Report direct event scope or explicit unavailability; never substitute."""
+    identity = (payload or {}).get("event_population_identity") or {}
+    if identity.get("schema") != 2 or not identity.get("source") or not usable(selected):
         return "unavailable"
-    # Aggregate support is tested by the same resolver, with setting fallback
-    # removed. An empty t aggregate cannot be mislabelled by value equality.
-    from pion_component_fits import _resolve_single_scope_hist
-    probe = dict(payload or {}, setting_shape_full=None)
-    resolved = _resolve_single_scope_hist(probe, "scope_evidence", ti, pi)
-    return "local_t_aggregate_fallback" if usable(resolved) else "setting_fallback"
+    direct = (((payload or {}).get("binned_shapes") or {}).get("t_bin{}".format(ti + 1)) or {}).get("phi_bin{}".format(pi + 1))
+    return "local_t_phi" if selected is direct and usable(direct) else "unavailable"
 
 
 def fit_cell(pion, kaon, shapes, inp, *, ti, pi, parent, signal, sigma0,
@@ -317,6 +311,8 @@ def observe(hist, inp, t_edges, phi_edges, outpath, signal_payload, sigma0_paylo
                     # A single empty population is the existing fitter's
                     # sparse/zero-solution case; do not impose a new support cut.
                     require(any(any(v>0 for v in cell["inputs"][p]["stored_sumw2"]) for p in rows), "empty_observed_cell")
+                    require(all(_hist_has_usable_support(child_shapes.get(c)) for c in COMPONENTS), "unsupported_event_population:missing_local_pion_component")
+                    require(_hist_has_usable_support(signal), "unsupported_event_population:missing_local_k_lambda")
                     child_fit = fit_cell(inputs["pion"],inputs["kaon"],child_shapes,inp,ti=ti,pi=pi,
                         parent=parent,signal=signal,sigma0=sigma0,
                         sigma0_diagnostics=(sigma0_payload or {}).get("diagnostics") or {},
