@@ -202,3 +202,23 @@ no policy or baseline adopted. Previous findings retain actual tested-policy sco
 The existing D2.a phase owns measurements. Independent Stage1 evidence/diff review
 is NEXT;user authorization is required before Stage2. Constraint/window research,
 Method A and production adoption do not follow automatically.
+
+### November 18 reviewed Stage 1 and authorized Stage 2
+
+Independent ChatGPT Stage1 scientific/published-memory review is complete within
+its numerical scope. The user explicitly authorizes Work-owned Stage2 Lambda-
+constraint combinations next;no acceptance policy or production baseline adopted.
+The existing D2.a phase owns exact54-case scope and results. F120 remains primary;
+a single frozen F280 secondary diagnostic is not cross-family optimization.
+Stage3 windows and Stage4 cross-family work remain separately reviewed/unauthorized.
+CURRENT owns NEXT;stop after Stage2 and return scientific/memory bundles for
+independent review. Preserve fixed67/135,Local-t,six milestones and all scientific,
+Method A/B and source/runtime boundaries. User alone publishes accepted changes.
+
+Stage2 is now numerically complete on all54 combinations/all128 paired draws.
+A Gaussian/retention.90 stability plane exists;retention/mode error reductions
+carry conditional-mean and source-availability dependence. No improved total
+physical tradeoff,baseline,hybrid,normalization or Method A adoption is established.
+The existing D2.a phase owns measurements. NEXT is independent ChatGPT Stage2
+numerical/diff review before the next scientific decision. Stage3 windows and
+Stage4 cross-family optimization remain separately authorized future scopes.

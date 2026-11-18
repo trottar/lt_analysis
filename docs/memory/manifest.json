@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16022,
+      "bytes": 16067,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "da803cb1d9372e6eeebcfc90ffc961c5dc74f6da93ef57ad80f89e0c9db14fe8"
+      "sha256": "39eb9adef858202b44501caa8c91711aa35a843a0ecc12c62d773f09dd75288a"
     },
     {
       "bytes": 11186,
@@ -96,9 +96,9 @@
       "sha256": "6194f83e803d5222ae887c4211f75d842e9fe388c4c3d0f8a344fab7a6ed4d07"
     },
     {
-      "bytes": 13145,
+      "bytes": 14483,
       "path": "docs/memory/decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md",
-      "sha256": "d392b9f808dedbadfcc0db2d9c4d377c7b97fd1bd350d241b33983a23861c4b7"
+      "sha256": "e9bc9bca40da25b672da60cf665bc33fd45ad2f4f1aedf44e192e8f7d678bce0"
     },
     {
       "bytes": 4035,
@@ -1226,9 +1226,9 @@
       "sha256": "65fada9c1828d1505f94a2b183cbdacf8429f181b34cfd4db3b68f4b7db16fc0"
     },
     {
-      "bytes": 46846,
+      "bytes": 54144,
       "path": "docs/memory/phases/event-population-authority-2026-11-16.md",
-      "sha256": "daa5df8772cd3bb19fb67507ae21d5910b73474140ec1f2e09c3aa97dddc1620"
+      "sha256": "ff5adc290b9f62ab7576132f7db9b59e6a3e140b7df9e751eae4d1635ff1b5cf"
     },
     {
       "bytes": 23544,

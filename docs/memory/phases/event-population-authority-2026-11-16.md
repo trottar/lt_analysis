@@ -700,3 +700,111 @@ CURRENT owns the sole NEXT:independent ChatGPT Stage1 numerical/diff review;
 only then may the user authorize Stage2. Local-t,six roadmap milestones,
 D1/D1.a/D2/D2.a SOURCE REVIEWED,fixed67/135,OutcomeB BLOCKED,D3-D5 DEFERRED,
 MethodA detached and MethodB excluded remain. STOP at Stage1.
+
+### November 18 Stage 1 review closure and Stage 2 authorization
+
+The supplied portable handoff records completed independent ChatGPT Stage1
+scientific and pushed-memory review at live test7d6c24a224cc87ed530aeea6e392563e1f20bfa4.
+Work verified its complete manifest,nested original scientific/memory archives,
+original November16 event-input member and exact four published memory identities.
+This accepts Stage1 evidence in its stated numerical scope,not policy/production
+adoption or a second Stage1 investigation. User explicitly authorizes Stage2 now.
+
+ACTIVE Stage2 predeclares54 raw combinations:minrelative.03/.05/.10,
+poorrelative.25/.35/.50,retention.80/.90/.95,Gaussian/fixed mode. Audit source
+conditional activity and mathematically inactive branches;run new source-distinct
+protected fits and full128 paired source draws for every combination. Source
+F120 quality remains primary;the single frozen F280 gate is a separately labeled
+post-fit secondary diagnostic,not Stage4 optimization. All32 existing disjoint
+partitions per parent may support new constraint predictions;conditional plugin
+limits remain. No invented fraction bounds or support relaxation. Optional
+min/max fractions remain None;gauge minimum bins remains source-default2.
+
+Original1.10-1.30 window/interpolation,normalization,alignment,source/tree/entry
+weights,Sumw2/flows,cuts,source populations,early neutron/SIDIS/control ownership,
+D1.a OFF,15 parents/135 cells/fixed67 mask and zero-Delta fallback are frozen.
+Statistical covariance is conditional;model-response envelopes are not one-sigma
+systematics. Compare original-yield and signed unit-shape peak/tail/native/angular
+responses without MC-only optimization or initial unity/phi-flatness requirement.
+No parameter,baseline,hybrid,fitter,normalization or Method A adoption.
+
+CURRENT owns NEXT:execute Stage2 then independent ChatGPT numerical/diff review.
+STOP after Stage2. Stage3 windows and Stage4 cross-family studies require separate
+review/user authorization. No Codex,tracked production edits,ROOT/farm,new SIMC,
+staging,commit,push or Method A. Local-t,six milestones,D1/D1.a/D2/D2.a SOURCE
+REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,MethodA detached and MethodB excluded remain.
+
+### November 18 completed Stage2 Lambda-constraint factorial
+
+Source:test7d6c24a224cc87ed530aeea6e392563e1f20bfa4;Stage1 independent scientific/
+published-memory review complete in supplied checkpoint scope. All54 declared
+minrelative/poorrelative/retention/requested-mode combinations executed with
+source F120 primary and one frozen post-fit F280 secondary reference. No Stage3
+windows,Stage4 cross-family search or model/threshold/production adoption.
+
+810 independently executed central calls verify150 parent-specific active
+constraint groups/36 cohort mathematical groups.18828 source-effective paired
+protected calls cover all103680 raw case/draw combinations,128 per parent.
+810+18828 complete invocation records retain345 source-distinct unavailable
+proposals without filling/dropping. Actual source fallback keeps every applied
+estimator's128 draws. Full1620 parent/14580 native records,covariance/shape
+intervals,source-owner map,810 nuisance uncertainty records,2430 conditioned
+slices and180 pairwise interaction contrasts saved. Observed applications
+have12 primary/36 secondary groups,not independent raw-duplicate evidence.
+
+All54 central accepted-parent sets remain6 primary/8 secondary. Primary full54
+central yield span max0.140924%,retained-native span0.177371%. Gaussian retention.90
+across minrelative.03-.10/poorrelative.25-.50 gives sigma ratios.999958-1.001353,
+median1.000;max conditional mean response0.037844%. This is a stable numerical
+uncertainty-parameter plane,not proof of reduced total physical uncertainty.
+Source-fixed mode ignores good-gauge sigma but becomes Gaussian-inflated on
+poor gauges;fixed within-fit Lambda error remains unavailable,not physical zero.
+
+Left/hight1 shows hidden retention dependence:central application unchanged,
+but retention.95 Gaussian gives sigma ratio.912413(MC SE.031850),conditional
+mean+5.4629%,proposal availability119->97/128 and PASS draws89->74. Fixed/.95
+sigma ratio.909077 accompanies mean+5.6071%. Retention.80 Gaussian raises sigma
+15.6096% and shifts conditional mean-5.9442%. Full-grid retained-native conditional
+mean response reaches8.3319%. These are resampling-mean responses,not true bias;
+stronger protection can reduce dispersion by increasing source failure/fallback.
+No missing proposal or unobserved physical covariance is replaced with zero.
+
+Existing32 disjoint experimental partitions per parent reused:4371 protected
+calls(including480 reconstructed unchanged full-chain training operands),51840
+policy/partition records. Common-available fold comparisons distinguish model
+changes from availability selection. Left/hight1 retention.95 Gaussian has27
+available folds vs32 BASE;paired full-domain chi-square/bin median delta-.05983,
+Lambda-region median delta0. Plugin checks omit trained-parameter predictive
+covariance;not calibrated p-values,external truth or independent experiments.
+
+Source checks:39276 literal published quality evaluations,103680 source-key
+mappings,all19638 actual primary decisions/effective-sigma checks,1620 original
+weight-builder comparisons(max5.55e-17) and1620 saved covariance/native closure
+checks PASS. BASE F120/F280128-draw applications reproduce Stage1. Source
+population construction,weights,Sumw2,flows,normalization,alignment,original
+1.10-1.30 window/interpolation,early neutron/SIDIS/control ownership and D1.a OFF
+are frozen. Bounds min/max fractionsNone,min gauge bins2 unchanged. No missing
+Sigma0 or reconstructed accepted populations from normalized histograms.
+
+INFERENCE:stable Gaussian/.90 numerical plane established;retention/mode variance
+gains carry conditional-mean/availability dependence. No demonstrably superior
+total physical bias/variance neighborhood or new iteration-zero baseline adopted.
+Primary Center/lowt3 remains rejected for all54 central constraints;secondary
+changes are small relative to its own F280 BASE and do not resolve prior mixed
+native shapes. Neither initial MC unity nor phi-flatness required;no MC-only or
+per-phi optimization. Signed unit/yield views and fixed67/135 support preserved.
+
+Model spans are observed sensitivity,not one-sigma systematics. Covariance is
+conditional on fixed proton estimator,selection/alignment/mask and source-tree
+namespace;cross-PID/external terms remain unavailable. High/low effects are
+matched-support yield/angular proxies,not physical cross sections/LT. SOURCE
+VERIFIED covers the numerical scope;RUNTIME VERIFIED remains November11 acquisition
+only. D2.a stays SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED;Local-t,six
+milestones,MethodA detached and MethodB excluded unchanged.
+
+Review packages:KaonLT_D2a_Stage2_Lambda_Constraints_20261118.zip and separate
+KaonLT_D2a_Stage2_Memory_20261118.zip,with report,actual arrays,source code,
+50 PNG/SVG pairs,deterministic reproduction,full health and SHA-256 receipts.
+CURRENT alone owns NEXT:independent ChatGPT Stage2 scientific/diff review before
+next scientific decision. STOP after Stage2;no automatic Stage3/4,Method A,Codex,
+farm,new acquisition,tracked production edits,staging,commit or push.
