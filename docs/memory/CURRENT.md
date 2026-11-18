@@ -13,7 +13,7 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The immediate priority is full-cohort Q4p4W2p74 D2.a scientific validation.
+The immediate priority is independent review of the final D2.a assessment.
 Source-kernel NumPy evidence is not ROOT or production acceptance.
 
 ## Current Work Item
@@ -41,14 +41,15 @@ remain unchanged and default-off; source publication is verified at test
 
 D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
 mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
-November 17 NEW NumPy OLD/CORRECTED fits are independently SOURCE REVIEWED
-at `9dbbb40710e317cdde4937a5ab335dbbf6d70faa`: same events/fitter/settings,
-D1.a off; only populations change. Protected PASS 3/15->6/15; nine rejected.
-All135 native applications close;46/67 adopted cells remain in rejected parents.
-[Numerical review](phases/event-population-authority-2026-11-16.md#november-17-new-numerical-results-and-independent-scientific-review)
-owns provenance, findings and covariance limits. No production promotion or
-automatic ROOT/farm/Codex escalation. Preserve Local-t,67/135, six steps,
-D3-D5 DEFERRED and Outcome B BLOCKED.
+November 17 final D2.a assessment is complete at source
+`8f7822927861d3f156ad8bfb9f1f8d79a0a99d23`: same source mathematics, D1.a off.
+Central protected PASS6/15; nine rejected;46/67 retained cells in rejected parents.
+3840 event-resampling refits and471 available disjoint-row predictions quantify
+source-aware limits. All3840 STRICT draws retained;43 FORCED proposals unavailable.
+No defensible HYBRID demonstrated or adopted; STRICT reference unchanged.
+[Final assessment](phases/event-population-authority-2026-11-16.md#november-17-final-scientific-assessment-before-method-a)
+owns boundary, covariance, shape and predictive evidence. No production promotion.
+Preserve Local-t,67/135, six steps, D3-D5 DEFERRED and Outcome B BLOCKED.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -201,13 +202,12 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — After review, user publication and independent pushed-state verification,
-evaluate source-aware uncertainty/predictive adequacy of these NEW corrected
-15-parent fits using retained signed rows/SIMC identities and existing numerical
-machinery. Propagate shared-source/refitting effects through D,N,w,applied B and
-clean Lambda on the fixed67 support; retain the nine protected rejections.
-No retuning, new acquisition or automatic ROOT/farm/Codex escalation. The farm
-contract remains DEFERRED; this does not reopen D1's closed empty-bin diagnosis.
+NEXT — Independent ChatGPT review of the completed final D2.a scientific
+assessment and actual memory diff, then an explicit iteration-zero pion-baseline
+freeze decision before any detached Method A comparison. User publication and
+independent pushed-state synchronization apply to this memory update. STRICT
+stays unchanged; HYBRID is not demonstrated/adopted. No additional acquisition,
+automatic ROOT/farm/Codex task or Method A application is commissioned.
 
 ## Success Criteria
 

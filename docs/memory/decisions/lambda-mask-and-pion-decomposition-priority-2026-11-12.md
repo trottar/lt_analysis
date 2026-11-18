@@ -140,3 +140,26 @@ Record any specific irreducible ROOT operation separately. A literal import
 failure is not evidence that offline fitting cannot be done. ROOT/main.py/farm
 integration acceptance remains separate and still needs its own runtime evidence.
 No production change, new farm contract or ROOT installation follows by inference.
+
+### November 17 final D2.a assessment and hybrid investigation boundary
+
+The user authorizes final scientific diagnostics A->B->C->D before Method A:
+MM-boundary/protected-failure attribution, source-aware uncertainty/prediction,
+parent-level STRICT/FORCED hybrid feasibility, then all15/native135 Lambda
+peak/tail and fixed67-mask comparisons. This authorizes investigation only,
+not adoption. Keep STRICT unchanged; never optimize choices by individual phi
+or use the intended KLambda MC shape validator to define the hybrid selector.
+Iteration-zero unit-normalized Lambda shape is a primary diagnostic, separately
+from unchanged original yields. Later SIMC iterations retain the selected pion
+subtraction; initial unity/phi-flatness and MC rescaling are not requirements.
+
+The final diagnostic has now been executed. No independent/stable hybrid was
+demonstrated; source rejections, conditional covariance limits, mode-specific
+unavailable proposals and native variation remain. The [final assessment](../phases/event-population-authority-2026-11-16.md#november-17-final-scientific-assessment-before-method-a)
+owns measured findings and exact input/evidence identities. Independent ChatGPT
+review must decide whether a scientifically supported pion baseline can be
+frozen before any detached Method A comparison. No Method A application, new
+contract,acquisition,farm operation or production baseline promotion follows
+automatically. CURRENT alone owns the actual next gate. All six milestone
+statuses,Local-t,67/135,OutcomeB BLOCKED,D3-D5 DEFERRED and MethodA/B boundaries
+remain unchanged.

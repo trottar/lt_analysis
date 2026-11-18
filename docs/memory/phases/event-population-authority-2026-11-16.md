@@ -392,3 +392,101 @@ CLOSED / RUNTIME VALIDATED in its original scope. Local-t, six milestones,
 67/135 mask, MethodA detached/nonproduction, MethodB diagnostic/excluded,
 OutcomeB BLOCKED and D3-D5 DEFERRED remain. No tracked production source change,
 staging,commit,push,ROOT/main.py/farm execution or production acceptance.
+
+### November 17 final scientific assessment before Method A
+
+User approved investigating a scientifically defensible parent-level
+STRICT/FORCED hybrid, NOT adopting one. Work executed the final A->B->C->D
+diagnostics: MM-boundary/failure attribution; source-aware uncertainty and
+predictive adequacy; independent hybrid feasibility; full Lambda/native shape
+assessment. Source anchor8f7822927861d3f156ad8bfb9f1f8d79a0a99d23; published
+mathematical fitter/subtraction bytes unchanged. No production implementation.
+
+Inputs: original November16 source-event evidence and November17 controlled/
+scientific-review outputs, plus the three provided diagnostic archives:
+
+- KaonLT_D2a_Forced_Pass_Diagnostic_20261117.zip: d89a5574ea22a34828c83fb3d38cec246b0728f9d0ca4a814f6903230ed8cb4c
+- KaonLT_D2a_CORRECTED_Forced_vs_Strict_All15_20261117.zip: 5bea6ce2cfc1043899977ea3cab4bd408e88507745d2a280f212ab3570b860d4
+- KaonLT_D2a_CORRECTED_tPhi_Strict_vs_Forced_135cells_20261117.zip: 899df0f254b5004c0974323f20af6e0e5ea21cbcab0bbdb7ad5aab5d181cd1bc
+
+Both supplied member manifests/ZIP CRCs pass. Native atlas lacks a complete
+member manifest; its entire ZIP is hashed and all13500 native normal-bin
+records independently reconstructed (max absolute error8.28e-25). Current-source
+central fits/applications reproduce the saved results at numerical solver
+tolerance. Central six protected PASS/nine REJECT and identical STRICT/FORCED
+on the six passes are verified. The fixed46 rejected-mask cells reproduce
+29 FORCED-favored,15 STRICT-favored and2 tied signed-unit-shape screens.
+That MC-dependent screening is NOT an independent hybrid selector or purity test.
+
+A:45 channel-parent support records quantify original/aligned bins and source
+shift losses. Source chi-square uses original pre-Delta variance, including
+scaled early-template Sumw2. Lambda/intermediate/high-boundary residuals are
+separated. Removing zeroed-edge contributions at fixed coefficients does not
+clear any rejected parent's original spectrum p>=1e-6 criterion. Center/low t3
+has17.4% edge chi-square, but frozen p without those bins is9.56e-7. A detached
+flat-endpoint counterfactual (no refit, original coefficients/variance/bin set)
+changes its chi-square99.484->86.529; this unvalidated extension neither
+recovers accepted events nor changes production interpolation/source status.
+Meaningful residual disagreement remains; boundary loss is not a blanket excuse.
+
+B:256 deterministic Poisson event-resampling refits per parent, seed20261117,
+3840 total, reuse exact staged/joint/protected source routines, direct accepted
+SIMC events and original signed experimental rows. Same source/tree/entry
+multiplicities feed fitting and application; coherent native children close.
+Retain D,N,w,B,clean-Lambda covariance, template fluctuations, gate/fallback
+switching, actual signed cancellation/Sumw2 and weak-denominator amplification.
+Lambda45x45 chain covariance is PSD with integral and native closure checked.
+These are conditional offline numerical estimates under the protected policy,
+not a new full-wrapper/producer outer-gate or runtime acceptance claim.
+
+All3840 STRICT estimates remain available. FORCED lacks43 source proposals:
+35 lambda_pre_delta_deficit,8 missing_lambda_constraint, in Center/high t3(19),
+Center/low t2(6),Left/high t1(18). Missing FORCED never zero-fills or removes
+valid STRICT draws. Initial detached availability bookkeeping was corrected;
+actual final arrays preserve per-mode availability, with source-status rechecks.
+Source PASS frequencies for central six passes are3.1%,71.9%,8.6%,35.5%,79.3%,
+77.7% for Center/high t2,t3;Left/high t3;Left/low t1;Right/high t2,t3. These
+measure empirical gate/estimator stability, not probabilities of physical truth
+or a calibrated null goodness-of-fit test; no threshold is invented for adoption.
+
+Thirty-two disjoint experimental half-splits per parent yield471/480 protected
+candidate predictions. Nine source-unavailable proposals are independently
+rechecked; no replacement. Held-out rows are disjoint from training, but repeated
+splits overlap and plugin predictive residuals omit trained-parameter covariance:
+their p-values are descriptive, not calibrated acceptance. Residual disagreement
+persists. Tree-local entry numbers cannot identify shared raw events across PID
+trees. Such cross-tree covariance, refitted upstream proton effects and external
+PID/luminosity/efficiency systematics remain unavailable, NOT measured zero.
+
+C:No independently justified, calibrated, statistically stable parent-level
+HYBRID is demonstrated. Pion-control convergence, endpoint assumptions and
+MC-shape improvements do not justify overriding the protected gate. No phi-bin
+optimization, fake third spectrum or adoption. STRICT computational reference
+unchanged; FORCED remains diagnostic even where its central shape is preferable.
+
+D:All15 parents/135 native children compare original-yield and separate signed
+unit Lambda shapes on identical6MeV bins [1.102,1.156)GeV, with peak-bin,
+signed centroid/defined RMS and upper-tail diagnostics. Same unchanged iteration-
+zero KLambda normalization once; no MC rescaling or unity/phi-flatness gate.
+Native source-aware envelopes and paired fixed-support angular moments expose
+nonuniform subtraction sensitivity, not acceptance-corrected L/T observables.
+Frozen67 IDs are never reselected;46 remain in central rejected parents. Empty,
+sparse, negative, unsupported and undefined signed-normalization states remain
+distinct. Old atlas allcuts MC outside-window zeros are not missing simulation;
+its exact selection is independently checked, new MM diagnostics use nommcuts.
+
+Deliverables: KaonLT_D2a_Final_Scientific_Assessment_20261117.zip and separate
+KaonLT_D2a_Final_Assessment_Memory_20261117.zip, SHA-256 receipts, complete
+report/tables,source/provenance,3840 draws/471 predictions,15 six-panel parent
+figures plus30 native yield/unit grids (300dpi PNG/SVG), actual memory diff,
+before/after, manifest/health and preservation checks.
+
+Full-cohort scientific baseline freeze is not established by this assessment.
+CURRENT owns independent ChatGPT review and the explicit freeze decision before
+any detached Method A comparison. Do not commission another historical fit,
+acquisition, ROOT audit, speculative implementation or farm update automatically.
+Preserve all six milestones,Local-t,D1/D1.a/D2/D2.a scoped SOURCE REVIEWED,
+OutcomeB BLOCKED,D3-D5 DEFERRED,adopted67/135,MethodA detached/nonproduction,
+MethodB diagnostic/excluded, existing SIMC and L/T machinery. No source physics,
+cuts,weights,normalization,priors,production windows,original inputs,Git staging/
+commit/push,ROOT/farm execution or Method A application changed/performed.
