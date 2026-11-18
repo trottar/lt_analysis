@@ -13,7 +13,7 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-Stage2 independent review is complete;Stage3 numerical evidence awaits review.
+Stage3 independent review is complete;Stage4 is DEFERRED by user decision.
 Source-kernel NumPy evidence is not ROOT or production acceptance.
 
 ## Current Work Item
@@ -41,17 +41,18 @@ remain unchanged and default-off; source publication is verified at test
 
 D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
 mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
-Stage1/Stage2 independent scientific and published-memory reviews are complete
-within their offline scope. At live test
-`caf84d7ae632fb559c11cd15062c69aa6885733c`,authorized Stage3 now covers12
-MM windows:180 central,23040 paired and5760 heldout source-defined protected
-fits. L26,F120 primary/F280 separate secondary,D1.a OFF and all other inputs
-remain fixed. The [existing phase](phases/event-population-authority-2026-11-16.md#november-18-completed-stage3-mm-window-and-boundary-sensitivity)
-owns exact evidence. Near-full1.10-1.294/1.300 is centrally stable;larger
-truncations change gate/fallback and yield. Primary parent/native spans reach
-15.33%/16.63%;no superior physical region or baseline adopted. Original
-omitted-tail observations remain discrepant;endpoint hold is only a frozen-
-coefficient counterfactual,no refit. Stage4/Method A require separate authority.
+Stage1-Stage3 independent reviews are complete within their offline scope,per
+the supplied November18 handoff. At memory checkpoint test
+`d46c253dcad0b8cd51ec2f459168d496c35dedcf`,scientific source is unchanged.
+The [existing phase](phases/event-population-authority-2026-11-16.md#november-18-stage3-review-and-provisional-ksigma0-handoff)
+owns Stage3 results and attributed KSigma0 proxy findings. Preserve near-full-
+window stability,parent/native sensitivity15.33%/16.63%,endpoint/upper-tail
+limitations and no superior physical window. A translated-KLambda proxy can
+reallocate pion-Delta but is not genuine KSigma0 SIMC or independent calibration;
+Lambda predictive/statistical limitations remain. User reports genuine KSigma0
+SIMC being collected/run;not delivered or scientifically validated. Stage4 is
+DEFERRED. Local-t,W03/F120 reference,L26,F280 diagnostic,D1.a OFF,fixed67 mask
+and no policy/window/subtraction-baseline adoption remain.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -204,9 +205,9 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent ChatGPT review of completed Stage3 numerical evidence and
-actual memory diff before any further scientific decision. STOP after Stage3;
-no automatic Stage4,Method A,Codex,production/farm or Git publication.
+NEXT — Review genuine KSigma0 SIMC provenance/support upon user delivery.
+No automatic acquisition,farm,Stage4,Method A or baseline change. Stop at this
+memory handoff;user publication/pushed-state review remain separate.
 
 ## Success Criteria
 

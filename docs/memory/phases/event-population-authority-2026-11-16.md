@@ -890,3 +890,59 @@ scientific decision. STOP after Stage3;no Stage4,MethodA,Codex,source edit,farm,
 new acquisition,staging,commit,push or baseline adoption. Preserve Local-t,six
 milestones,D1/D1.a/D2/D2.a SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,
 MethodA detached and MethodB diagnostic/excluded.
+
+### November 18 Stage3 review and provisional KSigma0 handoff
+
+Authority:the user's November18 memory-only handoff after independent ChatGPT
+Stage3 review and the detached KSigma0 proxy investigation. Work verified live/
+local testd46c253dcad0b8cd51ec2f459168d496c35dedcf;its intervening commit is
+memory-only and published fitter/subtractor match Stage3 source snapshots.
+Stage3 independent review is now complete within its offline numerical scope,
+not ROOT/farm or production acceptance. Preserve12 windows,15 parents,135 native
+phi cells,F120 primary/F280 separate diagnostic,near-full-window stability,
+larger-truncation gate/fallback/yield changes,parent/native spans15.33%/16.63%,
+endpoint support/upper-tail residual limitations and no superior physical window.
+Stage3 science ZIP SHA256:
+73f397b4d82706d5df1a6223c78da9fd2f5415b503c4de6caf1cafdd98228a61.
+
+The supplied handoff reports a completed detached provisional KSigma0 study:
+retained KLambda lineshape translated by the physical Lambda-Sigma0 mass
+separation,with width variants;all15 parents,original W03/F120 comparator,
+32 source-disjoint heldout partitions and128 paired source-aware resamples per
+parent,full-MM decomposition/subtraction and original-yield/separate unit-shape
+Lambda peak/tail comparisons. Reported inference:an added component near Sigma0
+can materially reallocate pion-Delta,especially Center/lowt3,but improved Sigma0-
+region agreement does not consistently improve heldout Lambda predictions;
+Center/hight3 remains statistically unstable. These findings are attributed
+to the supplied review,not new Work calculations or a fresh source/figure audit.
+
+Named review artifact:KaonLT_KSigma0_FullMM_Presentation_Audit_20261118.zip.
+Its bytes/hash,source implementation and plots were NOT VERIFIED in this memory
+task;the artifact was not available in the current local inputs. No identity
+is invented and no numerical study is repeated. The translated/width-varied
+proxy is NOT genuine KSigma0 SIMC,independent physical calibration,proof of
+contamination or authority for an adopted subtraction correction.
+
+User decisions:Stage4 cross-family optimization is DEFERRED;no new protected
+policy,window or pion-subtraction baseline adopted. User reports collecting/
+running genuine KSigma0 SIMC;it has not yet been delivered or scientifically
+validated. Continue that physical-anchor avenue only upon user delivery and
+review. No automatic simulation run,acquisition task or farm command follows.
+Keep Local-t,W03/F120 reference,L26,F280 diagnostic,fixed67/135,OutcomeB BLOCKED,
+D3-D5 DEFERRED,six production milestones,MethodA detached and MethodB excluded.
+A missing signal component does not itself supply OutcomeB's independent joint
+anchor/count covariance or resolve the existing physical-statistics limitations.
+
+Accountability:the handoff attributes ChatGPT's initial proxy-review omission
+of full-MM fitted/applied background decomposition to assistant execution
+failure despite repeated existing instructions,not a missing user requirement.
+The governing decision owns the complete presentation contract;USER clarifies
+directly embedded scientific-review figures. Apply those existing requirements
+before declaring a review complete;ZIPs,tables or statistics alone do not satisfy
+them. No new scientific phase,presentation implementation or replot is commissioned.
+
+This task updates memory only and stops at its reviewed diff/manifest/health
+bundle. CURRENT alone owns the substantive NEXT:review genuine KSigma0 SIMC
+upon user delivery. No new physics/proxy fits,Stage4,Codex,production source,
+ROOT/farm execution,staging,commit or push. Source-reviewed and closed/runtime
+phases retain their original evidence scopes;no baseline or physical acceptance.

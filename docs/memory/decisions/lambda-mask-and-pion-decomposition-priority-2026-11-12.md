@@ -67,6 +67,17 @@ mapping honestly; no new acquisition or replot is authorized by this memory task
 Earlier mixed-grid plots remain historical evidence, not fulfillment of this
 requirement. No existing plot, histogram or analysis source is changed here.
 
+Embed relevant full-MM and separate Lambda peak/relevant-tail figures directly
+in scientific reviews;ZIPs,tables or statistical summaries alone are insufficient.
+Show observed pion control and fitted neutron/Delta/SIDIS,KLambda and physically
+available genuine KSigma0 with the complete model;separate pre-gate candidates
+from accepted/fallback estimates. Show pion-only numerator,control denominator,
+transfer weights,actual signed applied background and cleaned Lambda versus
+unchanged KLambda SIMC. Proxy templates must be labeled as provisional assumptions.
+Preserve the common edges,signed observations and separate yield/unit-shape views
+above;presentation consumes supported outputs and authorizes no new correction.
+
+
 ## Immediate scientific priority and planned sequence
 
 The fitted zero kaon-side SIDIS component is physically concerning and requires
@@ -240,3 +251,16 @@ demonstrated total physical improvement. No baseline adopted. Existing D2.a
 phase owns exact results;CURRENT NEXT is independent ChatGPT Stage3 science/diff
 review before user decision. STOP after Stage3;no automatic Stage4 or Method A.
 All scientific/mask/roadmap/source/runtime and publication boundaries preserved.
+
+### November 18 reviewed Stage3 and genuine KSigma0 delivery gate
+
+The user reports independent Stage3 review complete in its offline scope;
+no superior physical window or new protected policy/subtraction baseline adopted.
+The existing D2.a phase records the limited translated-KLambda KSigma0 proxy
+study and assistant presentation omission with explicit attribution/limitations.
+A proxy is not genuine SIMC or independent physical calibration. Stage4 cross-
+family optimization is DEFERRED by user decision. Genuine KSigma0 SIMC is being
+collected/run by the user,but not yet delivered or scientifically validated.
+CURRENT owns NEXT:review it upon user delivery,not an automatic run/acquisition.
+Preserve Local-t,W03/F120 reference,fixed67 mask,OutcomeB,six milestones and
+MethodA/B boundaries. No new calculation,source implementation or farm authority.

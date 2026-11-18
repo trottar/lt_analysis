@@ -146,6 +146,9 @@ insufficient. Match selections, bins, resolution/acceptance and documented
 normalization; keep supported shape-normalized diagnostics separate from
 absolute yields. Shape/ratio agreement cannot alone prove purity or justify
 tuning background or scaling SIMC. Full-MM plots do not replace signal-window QA.
+Embed the relevant figures directly in scientific reviews,not only ZIPs,tables
+or statistical summaries;apply the [complete presentation contract](decisions/lambda-mask-and-pion-decomposition-priority-2026-11-12.md#all-15-parent-mm-presentation-requirement).
+
 
 Global / Local-t / Local-(t,phi) are the three model scopes; Local-t is selected,
 not automatically production-adopted. Source-aware statistical fitting is a
