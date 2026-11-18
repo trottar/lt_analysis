@@ -808,3 +808,85 @@ KaonLT_D2a_Stage2_Memory_20261118.zip,with report,actual arrays,source code,
 CURRENT alone owns NEXT:independent ChatGPT Stage2 scientific/diff review before
 next scientific decision. STOP after Stage2;no automatic Stage3/4,Method A,Codex,
 farm,new acquisition,tracked production edits,staging,commit or push.
+
+### November 18 independent Stage2 review and Stage3 authorization
+
+The user-supplied STAGE2_REVIEW_CHECKPOINT records independent ChatGPT review
+complete within the54-case/128-paired-draw offline numerical scope. Stage2 science
+SHA256 d74c5e25b96c420300b2da765f09bfecbc35b613192201d2644261616e0c2764;
+memory SHA25626996270ca7979656cd0e862ff43e0690c082255ae416f723d189032d7675880.
+Work verified the portable157-file package and live/local test
+caf84d7ae632fb559c11cd15062c69aa6885733c,including unchanged scientific source.
+Accepted scope:6/15 F120 and8/15 F280 across54 constraints;Gaussian/.90 numerical
+stability,retention error/mean/availability tradeoff;no physical baseline adopted.
+
+User authorizes Stage3 only:predeclared protected-MM lower/upper boundary
+factorial with genuine retained inputs and published NumPy fitter. L26 Gaussian
+.05/.35,retention.90,F120 primary,F280 fixed secondary,D1.a OFF,normalizations,
+cuts,source protections/failures/interpolation,15 parents/135 cells/fixed67 mask
+remain frozen. Verify original-window replay before interpreting alternatives;
+separate actual refits from fixed-coefficient endpoint counterfactuals. Preserve
+omitted-tail observations,source-aware128 paired draws and32 disjoint splits,
+native shape/yield/angular response and unavailable states. No Stage4 or Method A.
+CURRENT owns NEXT:execute Stage3 then independent ChatGPT scientific/diff review.
+No production/source edit,Codex,new acquisition,ROOT/farm,staging,commit,push or
+baseline adoption. Local-t,six milestones,D1/D1.a/D2/D2.a SOURCE REVIEWED,OutcomeB
+BLOCKED,D3-D5 DEFERRED,MethodA detached and MethodB diagnostic/excluded unchanged.
+
+### November 18 completed Stage3 MM-window and boundary sensitivity
+
+User-authorized Stage3 executed at testcaf84d7ae632fb559c11cd15062c69aa6885733c
+after attributed independent Stage2 review and an opening four-file memory/
+manifest/hard-health checkpoint. Portable157-member SHA256 verification PASS;
+scientific source matches published/bundled snapshots. All15 parent/135 native
+original-window L26/F120/F280 results reproduce before alternatives;both128-draw
+application streams also reproduce. No new ROOT/farm or production acceptance.
+
+Predeclared12 distinct windows:lower1.100/1.106/1.112 crossed with upper
+1.270/1.282/1.294/1.300 GeV. Source center/positive-variance/exclusion semantics
+are preserved. Higher lower edges explicitly remove one/two leading Lambda
+bins from protected fitting only;original gauge domain and all nine complete
+Lambda bins/events remain measured/evaluated. These are wing-truncation
+sensitivities,not complete-Lambda fitting recommendations. L26 Gaussian.05/.35,
+retention.90,F120 primary/F280 fixed secondary,D1.a OFF,source protections/
+failures/interpolation/normalization/cuts/inputs and fixed67 mask are unchanged.
+
+180 central and23040 source-aware paired protected refits,128 perparent/window;
+5760 heldout protected fits on the original32 source-disjoint partitions per
+parent.23220 literal source primary gates/window ownership checks PASS;240
+unavailable proposals remain explicit and all applied128-draw fallback streams
+retained. Full360 parent/3240 native results,source D/N/w/signed eventB/C,
+residual regions,original/aligned support,conditional chain/native covariance,
+full native shape intervals,envelopes,matched-epsilon/angular proxies retained.
+
+Complete-Lambda lower1.10/upper1.294 versus1.300 has primary maxcentral response
+0.096273%,sigma ratios.989384-1.027472. Across12 windows,primary parent span
+15.3265%,retained-native16.6298%;sigma ratios.943532-1.771499. These are
+conditional numerical responses,not physical bias or calibrated1sigma systematics.
+At Center/lowt3,upper1.270/1.282 central acceptance replaces zero-Delta fallback;
+yield-14.3098%/-14.7445%,sigma+16.0548%/+12.9177%. More passes do not establish
+physical improvement. Original heldout upper-tail discrepancy worsens:upper1.270
+common-paired median chi2/bin delta+.332491. Native agreement remains heterogeneous.
+
+Center/lowt3 original bin100[1.294,1.300) has107 neutron,625 Delta,675 SIDIS
+accepted rows;shift query beyond the last center zeros their aligned bin.
+Fixed-W03-coefficient endpoint hold reduces candidate chi2 99.4841->86.5290,
+but changes neither source policy nor accepted output and is explicitly NOT
+a refit or recovered population. Significant tail/model ambiguity remains.
+
+INFERENCE:local near-full-window stability exists;no superior physically
+validated broad window region or subtraction baseline established. No policy/
+window/constraint/normalization/MethodA adoption. Conditional source covariance
+omits external/cross-PID/calibration terms;prediction plugins omit trained-
+parameter covariance. Native and matched high/low effects are yield/angular
+proxies,not final producer cross sections/LT. Genuine KLambda available;missing
+KSigma0 remains source-owned Lambda-only fallback,not invented simulation.
+
+Deliverables:KaonLT_D2a_Stage3_MM_Window_20261118.zip and separate
+KaonLT_D2a_Stage3_Memory_20261118.zip,with report,actual arrays/source,individual
+PNG/SVG atlas,deterministic reproduction,full health,diff and SHA256 receipts.
+CURRENT owns NEXT:independent ChatGPT review of both Stage3 bundles before user
+scientific decision. STOP after Stage3;no Stage4,MethodA,Codex,source edit,farm,
+new acquisition,staging,commit,push or baseline adoption. Preserve Local-t,six
+milestones,D1/D1.a/D2/D2.a SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,
+MethodA detached and MethodB diagnostic/excluded.

@@ -222,3 +222,21 @@ physical tradeoff,baseline,hybrid,normalization or Method A adoption is establis
 The existing D2.a phase owns measurements. NEXT is independent ChatGPT Stage2
 numerical/diff review before the next scientific decision. Stage3 windows and
 Stage4 cross-family optimization remain separately authorized future scopes.
+
+### November 18 Stage2 review complete;Stage3 authorized
+
+Independent ChatGPT Stage2 scientific/published-memory review is complete within
+its offline scope;no physical baseline adopted. User authorizes Stage3 protected
+MM-window/boundary factorial only. Existing D2.a phase owns evidence/scope. L26,
+F120 primary/F280 separate fixed diagnostic,D1.a OFF,fixed67 mask and scientific
+inputs/source stay unchanged. CURRENT owns NEXT:Stage3 then independent review.
+STOP after Stage3;Stage4,Method A,source changes,Codex,farm and publication are
+not authorized. Preserve all existing scientific decisions and six milestones.
+
+Stage3 is now numerically complete:12 protected-MM windows,128 paired source
+draws and32 heldout partitions perparent. Near-full-window numerical stability
+is scoped;larger truncations change gate/fallback and native yield without
+demonstrated total physical improvement. No baseline adopted. Existing D2.a
+phase owns exact results;CURRENT NEXT is independent ChatGPT Stage3 science/diff
+review before user decision. STOP after Stage3;no automatic Stage4 or Method A.
+All scientific/mask/roadmap/source/runtime and publication boundaries preserved.
