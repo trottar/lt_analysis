@@ -163,3 +163,22 @@ contract,acquisition,farm operation or production baseline promotion follows
 automatically. CURRENT alone owns the actual next gate. All six milestone
 statuses,Local-t,67/135,OutcomeB BLOCKED,D3-D5 DEFERRED and MethodA/B boundaries
 remain unchanged.
+
+### November 17 acceptance/constraint study and decision boundary
+
+The user authorized Work-owned detached sensitivity calculations,not adoption.
+Iteration-zero goals remain:determine pion contamination;freeze a subsequently
+selected subtraction before SIMC cross-section iteration;prioritize Lambda peak/
+relevant tail with separate original-yield and unit-shape views;require neither
+initial data/MC unity nor phi-flatness. Assess variance against model dependence,
+native yields and matched-epsilon response;no per-cell or MC-shape-only tuning.
+Physical cross sections require actual matched accepted calibration/producer inputs.
+
+The [completed measured study](../phases/event-population-authority-2026-11-16.md#november-17-completed-acceptance-and-model-dependence-sensitivity)
+records the approved grid and actual150 central/19200 paired protected refits.
+A continuous numerical plateau is established but no better physically demonstrated
+full-cohort tradeoff is accepted. STRICT unchanged;FORCED diagnostic;no baseline,
+threshold or hybrid adoption. Original67/135 mask,Local-t,six milestones,OutcomeB
+BLOCKED,D3-D5 DEFERRED,MethodA detached and MethodB excluded remain. CURRENT owns
+the sole NEXT:independent ChatGPT actual numerical/diff review then user baseline
+decision. No new acquisition,farm,Codex or Method A task follows automatically.

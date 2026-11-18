@@ -490,3 +490,109 @@ OutcomeB BLOCKED,D3-D5 DEFERRED,adopted67/135,MethodA detached/nonproduction,
 MethodB diagnostic/excluded, existing SIMC and L/T machinery. No source physics,
 cuts,weights,normalization,priors,production windows,original inputs,Git staging/
 commit/push,ROOT/farm execution or Method A application changed/performed.
+
+### November 17 approved acceptance and model-dependence sensitivity
+
+The user authorizes an ACTIVE detached numerical study, not production adoption.
+Assess iteration-zero pion contamination and freeze any subsequently selected
+subtraction before later SIMC cross-section iterations. Prioritize Lambda peak/
+relevant-tail shape with separate original-yield and unit-shape views; no initial
+data/MC unity or phi-flatness requirement and no MC fitted rescaling. Quantify
+statistical variance against increased model dependence, native-cell yields and
+available downstream sensitivity. Seek a broad stable region, not one tuned
+configuration or pass-count maximum. Physical cross sections require genuinely
+matched accepted producer/calibration inputs; otherwise use explicit yield/
+angular proxies. No per-phi choices or MC-shape-only selection.
+
+Predeclared policy-only thresholds:1e-6,1e-8,1e-9,1e-10 and diagnostic FORCED.
+Keep original candidate amplitudes,chi-square/ndf<=5,solver/rank/finite/support,
+nonnegativity,Lambda retention and gauge validity. Only after this scan validates,
+refit one family at a time: minimum gauge-relative uncertainty0.03/0.05/0.10;
+poor-gauge uncertainty0.25/0.35/0.50;retention0.80/0.90/0.95;Gaussian versus
+existing fixed gauge;upper windows1.10-1.30,1.10-1.294,1.10-1.27 GeV.
+The last two isolate the last normal-bin center and the wider upper-boundary
+region. Original interpolation remains; the prior unvalidated fixed-coefficient
+endpoint hold is separately identified. Primary family comparisons retain
+STRICT policy; crossings with relaxed policies are separate. Paired source-aware
+resampling uses128 original-stream draws per parent. No results are asserted at
+this opening checkpoint. The previous final assessment remains accepted evidence
+within its numerical scope; this new authorization supersedes its review-only NEXT.
+
+No source change,Codex launch,Git staging/commit/push,farm/new SIMC acquisition
+or Method A application. Local-t,six milestones,67/135,D1/D1.a/D2/D2.a scoped
+SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,MethodA detached,MethodB excluded
+remain. CURRENT alone owns NEXT. Independent ChatGPT review and a user baseline
+decision follow the actual study; no automatic adoption is authorized.
+
+### November 17 completed acceptance and model-dependence sensitivity
+
+Source identity: live/local test0ae7c5f6b0673df3345977c7d1568eccc3cc4ddc.
+Existing acquisition/projection evidence reused; no ROOT/farm/new SIMC or source
+implementation. Task B used the existing15 CORRECTED candidates with zero fitter
+calls. Original non-p gates, amplitudes and denominator preserved. Pass counts:
+1e-6:6;1e-8:6;1e-9:7;1e-10:8. FORCED15 central proposals are diagnostic availability,
+never physical acceptance. Center/lowt3 adds at1e-9;Left/hight2 at1e-10. Gauge
+quality continues to reject Center/hight1,Center/lowt1,Left/lowt3 regardless of p.
+
+Executed ten one-family configurations:150 central protected fits and19200 new
+protected-stage refits using128 paired genuine source-event draws per parent.
+All19350 full diagnostics preserve constraints,conditional covariances,amplitudes,
+solver/bound/fallback status. Upstream pion-control and early neutron/SIDIS stages
+are unchanged for these knobs and reused from exactly the same verified source
+draw. They are not historical substitutes. Same-event fit/application/native
+multiplicities and Sumw2 propagate D->N->w->signedB->cleanLambda covariance.
+All750 original-builder comparisons pass,max absolute weight difference5.55e-17;
+native closure,integral covariance,baseline draw parity and original retained
+member identities verified. No unavailable proposal replaced or zero-filled.
+
+STRICT continuous neighborhood minrelative0.03-0.10,poorrelative0.25-0.50,
+retention0.80-0.95: largest parent clean-yield span0.04648749%,max0.0080712 of
+baseline conditional sigma. Median clean sigma ratio1.000 for each continuous
+variant;poor-relative knobs exactly inactive under retained gauge-quality gates.
+This is a numerical plateau,not demonstrated external robustness or lower bias.
+Fixed mode yields max parent change0.09444%,median sigma ratio1.000,individual
+clean sigma about0.981-1.063 of baseline;source poor gauges still use
+Gaussian-inflated mode. No broad variance benefit. These parameters cannot change
+early neutron/SIDIS amplitudes by the existing scientific ownership.
+
+Actual original-interpolation window refits:upper1.294 preserves6 passes;
+upper1.27 raises10,with max parent yield response14.30984% and retained-cell
+response15.52666%;median clean sigma ratio1.001775. Four newly passing parents
+Center/lowt3,Left/hight2,Left/lowt2,Right/hight1 still have original-domain
+descriptive p2.30e-9,4.56e-12,8.70e-20,1.71e-40 and excluded chi-square
+45.05,66.34,114.86,211.02 respectively. These are same-data residual diagnostics,
+not independent/calibrated acceptance tests. Reduced-window PASS does not prove
+physical correctness. Original/aligned support45,150 region residual records
+and earlier fixed-coefficient endpoint-hold counterfactual remain separate.
+
+At BASE/P1E9 Center/lowt3 clean parent yield changes-15.106%,masked yield-14.401%,
+conditional clean sigma grows6.18%;paired proposal use15/128. Statistical variance
+is conditional on fixed upstream proton estimator,selection/alignment/mask and
+source-tree namespaces. Missing cross-PID/shared external covariance is unavailable,
+not zero. FORCED variance is conditional on proposal availability;paired common-
+available ratios and Monte Carlo jackknife precision are separately retained.
+No variant-matched accepted cross-section producer/calibration inputs supplied;
+reported matched-epsilon/angular/native effects are normalized yield proxies,
+not physical cross sections or L/T. Model spans are not one-sigma systematics.
+
+INFERENCE: this predeclared grid establishes a stable continuous neighborhood
+but no physically demonstrated better full-cohort bias/variance/model-dependence
+tradeoff over STRICT. Limiting evidence includes inactive constraints,no broad
+variance reduction,window-sensitive yields/omitted residuals,unchanged early-stage
+identifiability and unavailable physical bias/covariance. No baseline,threshold,
+hybrid or correction adopted. Scientific source and original KLambda display
+normalization unchanged;no per-cell tuning or MC-shape-only optimum selected.
+
+Review artifacts:KaonLT_D2a_Acceptance_Model_Sensitivity_20261117.zip and separate
+KaonLT_D2a_Acceptance_Model_Memory_20261117.zip,each with external SHA-256 receipt.
+The scientific package contains750 parent/6750 native comparisons,3750 signed
+transfer-region summaries,750 chain covariances,128-draw arrays,19350 source
+records,51 PNG/SVG pairs and deterministic reproduction. SOURCE VERIFIED covers
+numerical/source scope;RUNTIME VERIFIED remains the original November11 acquisition
+only;physical cross sections,full external covariance,ROOT wrappers/production and
+Method A efficacy are NOT VERIFIED. D2.a remains SOURCE REVIEWED.
+
+CURRENT alone owns NEXT:independent ChatGPT numerical/diff review then user
+baseline decision,Method A separate. Local-t,six milestones,fixed67/135,
+D1/D1.a/D2/D2.a scoped SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,MethodA
+detached,MethodB excluded and deferred implementation boundary preserved.

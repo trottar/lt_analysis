@@ -13,7 +13,7 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The immediate priority is independent review of the final D2.a assessment.
+The completed D2.a constraint study awaits independent scientific review.
 Source-kernel NumPy evidence is not ROOT or production acceptance.
 
 ## Current Work Item
@@ -41,15 +41,15 @@ remain unchanged and default-off; source publication is verified at test
 
 D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
 mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
-November 17 final D2.a assessment is complete at source
-`8f7822927861d3f156ad8bfb9f1f8d79a0a99d23`: same source mathematics, D1.a off.
-Central protected PASS6/15; nine rejected;46/67 retained cells in rejected parents.
-3840 event-resampling refits and471 available disjoint-row predictions quantify
-source-aware limits. All3840 STRICT draws retained;43 FORCED proposals unavailable.
-No defensible HYBRID demonstrated or adopted; STRICT reference unchanged.
-[Final assessment](phases/event-population-authority-2026-11-16.md#november-17-final-scientific-assessment-before-method-a)
-owns boundary, covariance, shape and predictive evidence. No production promotion.
-Preserve Local-t,67/135, six steps, D3-D5 DEFERRED and Outcome B BLOCKED.
+The detached acceptance/constraint study is numerically complete at source
+`0ae7c5f6b0673df3345977c7d1568eccc3cc4ddc`; see the
+[measured assessment](phases/event-population-authority-2026-11-16.md#november-17-completed-acceptance-and-model-dependence-sensitivity).
+Policy-only passes6/6/7/8;150 central and19200 paired protected refits.
+Continuous constraints are stable (max parent span0.04649%) without broad
+variance gain. Window1.27 gives10 passes but up to14.31% parent/15.53% retained
+cell yield response and unresolved omitted-region residuals. No better physical
+full-cohort tradeoff or baseline adoption is established. STRICT unchanged;
+FORCED diagnostic;fixed67,Local-t,six steps,D3-D5 DEFERRED,OutcomeB BLOCKED.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -202,12 +202,10 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent ChatGPT review of the completed final D2.a scientific
-assessment and actual memory diff, then an explicit iteration-zero pion-baseline
-freeze decision before any detached Method A comparison. User publication and
-independent pushed-state synchronization apply to this memory update. STRICT
-stays unchanged; HYBRID is not demonstrated/adopted. No additional acquisition,
-automatic ROOT/farm/Codex task or Method A application is commissioned.
+NEXT — Independent ChatGPT review of the completed numerical evidence and
+actual four-file memory diff, followed by a user iteration-zero baseline decision.
+No parameter,threshold or hybrid adoption follows automatically. Method A remains
+separate; no additional acquisition,farm or Codex task is commissioned.
 
 ## Success Criteria
 
