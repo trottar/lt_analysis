@@ -182,3 +182,23 @@ threshold or hybrid adoption. Original67/135 mask,Local-t,six milestones,Outcome
 BLOCKED,D3-D5 DEFERRED,MethodA detached and MethodB excluded remain. CURRENT owns
 the sole NEXT:independent ChatGPT actual numerical/diff review then user baseline
 decision. No new acquisition,farm,Codex or Method A task follows automatically.
+
+### Corrected three-stage research sequence
+
+The prior handoff incorrectly merged acceptance,model constraints and windows
+and omitted acceptance-gate interactions. Previous findings retain their actual
+configuration scope. ACTIVE Stage1 is the complete acceptance-threshold factorial;
+independent numerical/diff review and user Stage2 authorization precede any
+Lambda-constraint combinations;window combinations are a later separate stage.
+No threshold,baseline,hybrid or Method A treatment is adopted. CURRENT owns NEXT;
+see the existing D2.a phase for the exact source audit and declared grid. All
+six roadmap milestones,Local-t,fixed67 mask,OutcomeB BLOCKED,D3-D5 DEFERRED,
+MethodA detached and MethodB excluded retain their established scope/status.
+
+Stage1 is now numerically complete:480 raw combinations with explicit mathematical/
+empirical redundancy;source-owned gauge softening and protected gates verified.
+Native Center/lowt3 responses remain heterogeneous despite parent shape improvement;
+no policy or baseline adopted. Previous findings retain actual tested-policy scope.
+The existing D2.a phase owns measurements. Independent Stage1 evidence/diff review
+is NEXT;user authorization is required before Stage2. Constraint/window research,
+Method A and production adoption do not follow automatically.

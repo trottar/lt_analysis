@@ -13,7 +13,7 @@ of purity. Neither unity nor phi-flatness of data/SIMC is an acceptance
 requirement at iteration zero. Later SIMC cross-section iterations address
 ratio shape/magnitude with the initial pion subtraction fixed; data itself
 retains physical angular dependence. Preserve existing SIMC and L/T machinery.
-The completed D2.a constraint study awaits independent scientific review.
+The completed Stage1 acceptance factorial awaits independent review.
 Source-kernel NumPy evidence is not ROOT or production acceptance.
 
 ## Current Work Item
@@ -41,15 +41,16 @@ remain unchanged and default-off; source publication is verified at test
 
 D2/D2.a remain SOURCE REVIEWED, not corrected ROOT accepted; the bounded
 mechanism is published at `55a1258791483b658729c13508c9aa2c49864e74`.
-The detached acceptance/constraint study is numerically complete at source
-`0ae7c5f6b0673df3345977c7d1568eccc3cc4ddc`; see the
-[measured assessment](phases/event-population-authority-2026-11-16.md#november-17-completed-acceptance-and-model-dependence-sensitivity).
-Policy-only passes6/6/7/8;150 central and19200 paired protected refits.
-Continuous constraints are stable (max parent span0.04649%) without broad
-variance gain. Window1.27 gives10 passes but up to14.31% parent/15.53% retained
-cell yield response and unresolved omitted-region residuals. No better physical
-full-cohort tradeoff or baseline adoption is established. STRICT unchanged;
-FORCED diagnostic;fixed67,Local-t,six steps,D3-D5 DEFERRED,OutcomeB BLOCKED.
+The corrected Stage1 acceptance factorial is complete at source
+`fd655875cc470f6356a0302750bfaf3fc3ef22b6`;the
+[existing D2.a phase](phases/event-population-authority-2026-11-16.md#completed-corrected-stage-1-factorial)
+records480 raw combinations,220 mathematical gates,119 observed-ndf groups and
+86 sampled applied estimators.1399 new central/resampling protected fits and
+700 held-out protected calls executed. Source gauge quality softens the prior;
+no extra veto. Default-gauge p counts6/6/8/10;no threshold/baseline adoption.
+Prior results retain their actual diagnostic scope. Center/lowt3 parent gains
+hide two worsened retained cells and6.18% greater conditional sigma. Constraint/
+window combinations remain later,separately reviewed stages. D1.a remains OFF.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -202,10 +203,10 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Independent ChatGPT review of the completed numerical evidence and
-actual four-file memory diff, followed by a user iteration-zero baseline decision.
-No parameter,threshold or hybrid adoption follows automatically. Method A remains
-separate; no additional acquisition,farm or Codex task is commissioned.
+NEXT — Independent ChatGPT review of completed Stage1 numerical evidence and
+actual memory diff. Only then may the user authorize Stage2 Lambda-constraint
+combinations. STOP at Stage1;no automatic window/cross-family work,Method A,
+production adoption,farm or new acquisition.
 
 ## Success Criteria
 

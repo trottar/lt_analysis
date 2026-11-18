@@ -596,3 +596,107 @@ CURRENT alone owns NEXT:independent ChatGPT numerical/diff review then user
 baseline decision,Method A separate. Local-t,six milestones,fixed67/135,
 D1/D1.a/D2/D2.a scoped SOURCE REVIEWED,OutcomeB BLOCKED,D3-D5 DEFERRED,MethodA
 detached,MethodB excluded and deferred implementation boundary preserved.
+
+### Corrected Stage 1 sequencing and source-defined acceptance
+
+The user corrected the previous handoff:three research stages were combined and
+acceptance-gate interactions omitted. Prior November17 numerical results retain
+evidence scope only for actual tested configurations;they are not a complete
+acceptance-threshold factorial. ACTIVE Stage1 now crosses protected-spectrum
+minimum p/maximum chi-square per ndf and Lambda-gauge maximum chi-square per ndf/
+optional minimum p. Stage2 Lambda-constraint and Stage3 window combinations require
+separate user authorization after independent Stage1 numerical/diff review.
+
+Source audit distinguishes structural invariants,post-fit quality thresholds,
+gauge-quality controls that change effective Gaussian constraints,physical Lambda
+retention and zero-Delta failure policy. The earlier detached policy added a
+separate gauge-quality veto. Published source instead softens a poor gauge with
+Gaussian-inflated uncertainty and decides protected acceptance by spectrum quality
+and retention after valid construction/solver. Preserve those exact source rules;
+never present the old diagnostic veto as production behavior. No scientific source
+change or physical adoption is authorized. Original window,.05/.35 uncertainties,
+Gaussian mode,.90 retention,selection/normalization/alignment and D1.a OFF remain.
+
+Predeclared Stage1 factorial:protected p1e-4/1e-6/1e-8/1e-9/1e-10/1e-12;
+protected maxchi2/ndf2/3/5/8/10;gauge maxchi2/ndf3/5/10/20;gauge pNone/.001/.01/.05.
+480 raw combinations include source defaults;tighter/permissive diagnostics are
+not adoption. Identify redundant effective limits and equal applied estimators;
+do not count repeated outcomes as independent evidence. Reuse exact candidates
+for post-fit changes;refit through unchanged published routines when the gauge
+constraint branch changes. Complete all15 parents/135 cells/fixed67 mask,source-
+aware statistics and available predictive evidence. No Stage2/3 work follows.
+
+### Completed corrected Stage 1 factorial
+
+Authoritative source:testfd655875cc470f6356a0302750bfaf3fc3ef22b6. Original
+1.10-1.30 window,Gaussian mode,.05/.35 uncertainty,.90 retention,alignment,
+normalization,source populations,stage ownership and D1.a OFF preserved.
+No Stage2 Lambda-constraint/window/cross-family combinations were executed.
+
+480 predeclared combinations completed:220 mathematical effective gates over
+possible unchanged-domain ndfs;119 observed-ndf groups;91 candidate/decision
+and86 applied-estimator groups on central/128-draw cohort evidence. Duplicates
+are not independent evidence. Full7200 parent/64800 native numerical records,
+complete configuration/effective matrices and ndf-dependent binding limits saved.
+
+240 direct central source fits verify exact candidate/constraint equivalence
+within gauge-quality branches.1920 original source-matched BASE candidates reused;
+1159 changed-gauge paired refits give1399 new protected fits total. Spectrum p/
+chi-square changes reuse candidates without refitting. Literal published AST
+quality expressions independently verify928800 central/resampling outcomes.
+Original source transfer and signed-event checks cover all7200 applications via
+29 distinct central source applications. Native/integral covariance and baseline
+source-stream closure pass. All constraints,solver/fallback,covariances,owner
+identities and actual numerical arrays are retained.
+
+Important source correction:poor gauge quality changes the effective Gaussian
+constraint;it is not a separate published-source rejection veto. Prior scan
+counts6/6/7/8 describe its additional diagnostic veto,not complete source behavior.
+At original gauge q<=10,p disabled,spectrum q<=5,the actual source counts are
+p1e-6:6;1e-8:6;1e-9:8;1e-10:10. Poor-gauge Center/hight1 may enter at1e-9;
+Center/lowt1 additionally enters at1e-10. No invented intermediate acceptance
+rule is carried forward;source-defined construction,solver,physical bounds,
+retention and zero-Delta failure application remain unchanged.
+
+Six raw policies have the exact same central and128-draw applied estimator as
+BASE:protected p1e-6,q5/8/10,gauge q10/20,gauge p disabled. This is a sampled
+application plateau,not independent confirmations or an improvement.22 policies
+have unchanged central applications but can increase maximum sigma to1.165 of
+BASE. Source branch/acceptance interactions matter. Full-grid individual parent
+sigma ratios span0.919-1.339;more fallback is not demonstrated lower physical bias.
+
+Center/lowt3 at p1e-9:parent yield-15.106%,masked yield-14.401%,conditional sigma
+ratio1.061818,Monte Carlo jackknife SE0.028125. Pass frequency6/128->15/128;
+p1e-10 only18/128. Parent unit L1 to unchanged initial SIMC0.263582->0.171285,
+but retained phi3/7 worsen and phi4/6 improve. Individual retained yield responses
+-11.38%,-14.45%,-15.05%,-16.39%. Parent-average agreement is not native closure.
+Shape reference agreement is not physical purity or a policy-selection criterion.
+
+Existing32 source-disjoint partitions per parent reused with source fits for
+these policies:480 full-chain training calls plus220 changed-gauge protected
+calls;700 protected invocations. All471 available baseline predictive records
+reproduce;9 unavailable remain.230400 policy/split records and7200 summaries
+provided. Same-source disjoint plugin residuals omit trained-parameter covariance
+and are not calibrated p-values,external truth or independent experiments. For
+Center/lowt3 all-proposal heldout chi-square/bin median2.10121 is unchanged by
+post-fit p relaxation;accepted-only changes are selection-conditioned.
+
+INFERENCE:stable applied-policy plateaus and unstable boundaries are established,
+but no uniformly improved physically validated full-cohort policy is demonstrated.
+Limitations are heterogeneous native shapes,gate/fallback instability,model/variance
+coupling and unavailable physical bias/external covariance,not merely historical
+threshold failure. Covariance is conditional on fixed proton estimator,mask and
+source-tree namespaces;cross-PID/external terms are unavailable,not zero. Matched
+high/low effects are yield/angular proxies,not physical cross sections or L/T.
+
+Review bundles:KaonLT_D2a_Stage1_Acceptance_Factorial_20261117.zip and separate
+KaonLT_D2a_Stage1_Memory_20261117.zip,with actual arrays,deterministic code,
+source identities,52 PNG/SVG pairs,full health and exhaustive SHA-256 receipts.
+SOURCE VERIFIED covers numerical/source scope;RUNTIME VERIFIED remains original
+November11 acquisition only. D2.a remains SOURCE REVIEWED. No source edit,Codex,
+staging,commit,push,farm,new acquisition or Method A application.
+
+CURRENT owns the sole NEXT:independent ChatGPT Stage1 numerical/diff review;
+only then may the user authorize Stage2. Local-t,six roadmap milestones,
+D1/D1.a/D2/D2.a SOURCE REVIEWED,fixed67/135,OutcomeB BLOCKED,D3-D5 DEFERRED,
+MethodA detached and MethodB excluded remain. STOP at Stage1.
