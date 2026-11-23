@@ -946,3 +946,80 @@ bundle. CURRENT alone owns the substantive NEXT:review genuine KSigma0 SIMC
 upon user delivery. No new physics/proxy fits,Stage4,Codex,production source,
 ROOT/farm execution,staging,commit or push. Source-reviewed and closed/runtime
 phases retain their original evidence scopes;no baseline or physical acceptance.
+
+
+### November 23 colleague yield and KSigma0 input handoff
+
+The user's November 23 memory-only handoff supplied two original farm-collected
+archives. ZIP CRC, member inventory and byte identities were verified offline.
+These checks do not rerun the colleague's analysis or SIMC.
+
+- `KaonLT_Colleague_Yields_20261123T231108Z-2526928.zip`, SHA-256 `fd8348630c9087a9e4c46a560b7ed006d44eefcd460bba67b4fe03d255d2cbb6`.
+- `KaonLT_Colleague_KSigma0_AllSettings_20261123T231712Z-2526928.zip`, SHA-256 `bc68d67dd1e2501492827f9a855347a3ca006f28a149522454fece6edba7af26`.
+
+The yield archive contains NumPy arrays and masks, CSVs, ten setting configs,
+165 HDF5 files and ten diagnostic PDFs. Configs retain prompt/random selections,
+diamond and HGCer-hole geometry, binning, data/dummy runs and normalization
+uncertainties, HCANA offsets, MM/t/RF shifts and HMS saturation settings.
+The array axes are [epsilon, spectrometer setting, t, phi, value/error].
+Right/low is a nonphysical array slot. Q2p1_W2p95 (2x6-v14) has shape
+(2,3,2,6,2), 17/60 retained cells, -t edges 0.16/0.24/0.37 GeV^2 and 60-degree
+phi bins. Q4p4_W2p74 (3x8-v4) has shape (2,3,3,8,2), 77/120 retained cells,
+-t edges 0.40/0.58/0.75/0.90 GeV^2 and 45-degree phi bins. Both cover
+-180 to 180 degrees and configure a 30% maximum relative yield uncertainty.
+
+All 94 retained values/errors reproduce from the HDF5 MM spectra. Sum positive
+bin content in [1.10,1.16) GeV and add stored bin errors in quadrature.
+The spectra have 400 bins at 2 MeV from 0.80 to 1.60 GeV. Signed integration
+reduces individual yields by up to 10.307985% and 18.094655%, respectively,
+relative to the clipped yields. Preserve both estimators. Their difference
+does not measure pion contamination or favor a subtraction method. This is an
+external analysis comparison with event-level independence unestablished.
+
+The Sigma archive covers Left/low, Center/low, Left/high, Center/high and
+Right/high at Q2p1_W2p95, Q3p0_W2p32, Q3p0_W3p14, Q4p4_W2p74 and Q5p5_W3p02.
+It includes setting inputs/settings, submission definitions, reconstruction,
+model/detector source, tables and .hist/.gen/.geni metadata. All 25 inputs and
+settings specify genuine K+Sigma0 with 200,000 requested successes and
+radiation, decay and smearing enabled. Each .hist identifies Sigma0,
+reports Ncontribute=200000 and provides normfac. Common source SHA-256 values:
+
+- `physics_iterate.f`: `8b0fdadb2e5146100b9699be27fc09551da3ad7c9cb875124157eab8242f3299`
+- `par.pl`: `8ea3f9a3ba6944ea3f26b07569046357051547a588076d065b3afc5e32b656c9`
+- `mc_shms_hut.f`: `d97340ef1859002976c25699393f479a7b158f132d11d618def441651e8eac3e`
+- `default.dat`: `8ea3f9a3ba6944ea3f26b07569046357051547a588076d065b3afc5e32b656c9`
+- `saghai_sigma0.dat`: `51ac4384a0ff3502e0f4ef6a6c5d33e0d7aa6ef23cb6411169710fccdab28756`
+- `saghai_proton.dat`: `d012b738e27a43b83d8d29b62a7026893ef01e9bd58d8dd868bf0b572aeaed19`
+- `recon_hcana.C`: `b497fc0833b09df686e415410af78cbd0859e6369ca8a34122c3e53294522060`
+- `recon_hcana.h`: `b12f67cda743c6951631b124a773f0557926df162d56ba1467d3602cadd14ad7`
+- `run_simc.py`: `5b5d66282b9184f1b8e339ac4b40b87b765b2eb724dee74e4b56deda71c58790`
+
+Per-member hashes and setting-level normalization metadata are in the memory
+review bundle. The archive contains no ROOT or binary event file delivery.
+Input provenance leaves accepted event support, ROOT compatibility, detector
+resolution treatment and missing-mass shapes under our cuts unverified.
+
+Step 1a is the next substantive task and awaits separate Work authorization
+after memory review and publication synchronization. Map settings, binning,
+diamond/HGCer geometry and other cuts onto existing KaonLT infrastructure.
+Identify available event populations and normalization. Reproduce signed and
+clipped definitions and identify a narrow reviewable matched-selection path.
+The eventual comparison distinguishes original KaonLT yields, KaonLT with
+colleague cuts, published colleague yields, signed colleague yields, exclusion
+masks and MM peak/tail/background. Preserve the existing embedded-figure,
+matched-bin, original-yield and unit-shape presentation requirements.
+
+Step 2 requires later authorization. Audit the model, parameters, detector
+changes, reconstruction and output compatibility. The proposed reusable
+workflow uses a dedicated environment with setting-specific inputs and isolated
+outputs, informed by background_samples/set_BackgroundInput.sh,
+background_samples/background_samples.conf, src/setup/run_simc_tree,
+existing pion-channel inputs and the explicit external Sigma0 interfaces.
+A later scientific gate assesses genuine MM shapes, accepted phase space
+and pion-component response. This record authorizes no such execution.
+
+Stage 1-3 offline review scopes, Stage 4 DEFERRED, provisional proxy limits,
+D1/D1.a/D2/D2.a SOURCE REVIEWED, Outcome B BLOCKED, D3-D5 DEFERRED, Method A
+detached, Method B diagnostic/excluded and the six roadmap milestones remain.
+The colleague inputs do not resolve Outcome B or establish a superior pion
+subtraction. CURRENT owns the sole substantive NEXT.

@@ -49,10 +49,11 @@ owns Stage3 results and attributed KSigma0 proxy findings. Preserve near-full-
 window stability,parent/native sensitivity15.33%/16.63%,endpoint/upper-tail
 limitations and no superior physical window. A translated-KLambda proxy can
 reallocate pion-Delta but is not genuine KSigma0 SIMC or independent calibration;
-Lambda predictive/statistical limitations remain. User reports genuine KSigma0
-SIMC being collected/run;not delivered or scientifically validated. Stage4 is
-DEFERRED. Local-t,W03/F120 reference,L26,F280 diagnostic,D1.a OFF,fixed67 mask
-and no policy/window/subtraction-baseline adoption remain.
+Lambda predictive/statistical limitations remain. The phase record now includes
+verified colleague yields, cuts, MM spectra and genuine KSigma0 model inputs.
+Matched yields and accepted KSigma0 shapes remain unvalidated. Stage4 DEFERRED.
+Local-t, W03/F120, L26, separate F280, D1.a OFF and the 67/135 mask retain their
+scope. No new subtraction baseline has been adopted.
 
 Planned after decomposition assessment and any separately authorized correction:
 rerun the established Local-t chain through (t,phi) binning and the adopted
@@ -205,9 +206,9 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Review genuine KSigma0 SIMC provenance/support upon user delivery.
-No automatic acquisition,farm,Stage4,Method A or baseline change. Stop at this
-memory handoff;user publication/pushed-state review remain separate.
+NEXT — Step 1a: establish a reproducible matched-cut colleague yield comparison
+after memory review, user publication, pushed-state review and separate Work
+authorization. Step 2 (KSigma0 generation) requires later authorization.
 
 ## Success Criteria
 

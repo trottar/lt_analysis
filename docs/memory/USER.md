@@ -359,6 +359,11 @@ publication and independent pushed-state verification of this memory correction.
 
 ## Delivery preferences
 
+All future ChatGPT-generated Work and Codex handoffs must include a task-specific
+model and reasoning-effort recommendation. Balance scientific reliability,
+implementation complexity and Plus usage limits. Escalate model capability or
+reasoning effort only when the task warrants it.
+
 For a source-changing task, ChatGPT provides exactly one standalone Markdown
 **task contract**, placed in the repository, followed by one short **inline
 Codex launch prompt** telling Codex to read repository memory and that contract.
