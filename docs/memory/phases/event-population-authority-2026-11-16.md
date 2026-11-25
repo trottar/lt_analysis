@@ -1023,3 +1023,288 @@ D1/D1.a/D2/D2.a SOURCE REVIEWED, Outcome B BLOCKED, D3-D5 DEFERRED, Method A
 detached, Method B diagnostic/excluded and the six roadmap milestones remain.
 The colleague inputs do not resolve Outcome B or establish a superior pion
 subtraction. CURRENT owns the sole substantive NEXT.
+
+### November 24 Step 1a preselection checkpoint
+
+The independently reviewed offline package is
+`KaonLT_Step1a_Paper_Reference_20261123.zip` (SHA-256
+`11cd60d445a8a7a881b028c364df2649042993c4158ee2cee5c66f7f36cca3b9`).
+The original yield archive identity is recorded above. All 94 retained
+reference yields/errors reproduce. Q4p4 has 120 original-selection A-grid
+cells and 15 signed applied-pion parent arrays with replay closure. In order
+Left/low, Center/low, Left/high, Center/high, Right/high, A-grid versus
+signed D on reference-retained geometry is +0.10%, +0.74%, -9.04%,
+-25.51% and -10.20%. The independent review reports a deficit in every
+highest reference -t setting bin and a Center/high deficit of 15.94% before
+pion subtraction. The ratios mix selections and backgrounds and do not
+identify a unique correction. All 165 reference MM histograms store zero
+content and errors outside [1.10,1.16) GeV. Sideband and external component
+comparisons are unavailable. Preserve original A, A-grid, matched B, clipped C,
+and signed D as separate estimators.
+
+The checked October 9 Q4p4 baseline log from `8e68d2acae91fd97622793df563aba0296403a48`
+matches the reference data and dummy membership in four settings. Right/high
+shares all reference runs, with one historical-only data run (4972) also in
+the effective-charge population. The log identifies historical producer-owned
+yields. Current replay, cut and normalization parity remain unverified. Q2p1 has reference run
+lists, with original KaonLT membership and producer-bound yields unverified here.
+The per-run skim producer makes Uncut_Kaon_Events before its six named cuts,
+from the installed ltsep branch dictionary. It omits raw replay entry identity.
+Merged split trees and retained selected projections cannot establish raw
+preselection coverage. The current skim/comparison owners do not provide a
+two-kinematic raw branch-and-coordinate receipt.
+
+Matched B remains BLOCKED in both kinematics. Its first prerequisite is a
+reviewed read-only receipt for current run lists, source and charge identities
+across the ten settings plus one raw data/dummy witness pair per kinematic.
+Exact timing/RF, saturation and coordinate semantics must be supplied where
+unresolved. Any receipt owner requires separate review. No new runtime claims,
+physics adoption or change of scientific ownership.
+
+### November 24 diamond-priority reconciliation
+
+The user reports that the cuts and normalization are essentially equivalent
+for the intended comparison, with diamond acceptance the possible exception.
+Proton subtraction is similar and differs in detail. This is user-supplied
+context, not demonstrated parity. The original-selection common-grid yields
+remain distinct from matched-cut yields. Low-epsilon sums agree within 1%;
+full replay, exact analysis reproduction, proton equivalence and broad
+normalization/selection parity are deferred. The immediate scope is applied
+diamond geometry. The six production milestones retain their statuses.
+
+### November 24 applied diamond result
+
+Q4p4 saved October 9 full-analysis lowe/highe JSONs at
+`8e68d2acae91fd97622793df563aba0296403a48` serialize identical final
+22-vertex Center common-overlap cuts in `inpDict.poly_points`. Archive
+`Q4p4W2p74_E8_2_baseline_five_8e68d2ac_20261009T223015Z.zip` SHA-256
+`df5a64563c7322416f0895c52557bea69f49d73ac0cb47836b0635a27e7660c4`.
+October 30 and November 9 logs agree at six decimals. All five paper-reference
+settings use the same eight vertices. Q2p1 reference settings also coincide,
+with seven vertices and area 0.018553049 GeV^3. Q2p1 exact KaonLT applied
+vertices are unavailable in reviewed artifacts.
+
+Q4p4 areas in d(Q^2)dW: KaonLT 0.109524595, reference 0.138168400,
+intersection 0.104844102, union 0.142848893, KaonLT-only 0.004680493,
+reference-only 0.033324298 GeV^3. Intersection contains 95.73% of the
+KaonLT and 75.88% of the reference polygon. IoU 73.40%. There is no
+Center/high-specific boundary. These areas do not estimate occupancy or
+yield loss. A later bounded diamond-only comparison is justified on genuine
+pre-diamond signed streams covering the union, with all other selections,
+run cohort, normalization and background treatment fixed.
+
+Q2p1 low/high FullAnalysis `inpDict.poly_points` remain unavailable.
+Their recovery is separate from the Q4p4 offline comparison.
+Practical sequence: finish diamond geometry recovery; consider a separately
+authorized diamond-only sensitivity; generate genuine KSigma0 for the 25
+settings using existing background infrastructure; validate its MM and
+acceptance; assess the pion components; evaluate final Local-t and the adopted
+mask; then validate producer yields and use existing iteration and L/T.
+The six production milestones, frozen ownership and deferrals retain their scope.
+
+### November 24 offline diamond correction and missing-evidence gate
+
+Q4p4 applied diamond geometry is independently reviewed. The exact polygons,
+numerical differences and successful LF repair are preserved from
+`KaonLT_Step1_Diamond_Acceptance_20261124.zip`, SHA-256
+`1f97b6b025c46005a4ff5aa37f9c0bb62fea2a587cc388a9c0279d93bf8167e7`.
+The production launcher prefers the dynamic common polygon to supplied input.
+This source finding does not gate an offline polygon comparison. Treating
+production implementation as the next scientific step was a workflow error.
+The external-diamond contract is parked and unauthorized. No Codex
+implementation, production-source change or farm execution occurred.
+
+The sole substantive task is an offline, fixed-weight Q4p4 diamond-only
+comparison on identical genuine pre-diamond rows. It is BLOCKED on missing
+experimental and dummy prompt/random and KLambda SIMC event payloads,
+including joint Q2/W, applicable non-diamond selections, row/source
+identities and existing signed weights or their unchanged inputs. No
+historical Q2p1 polygon is needed. No background refits or transfer-weight
+changes are in scope.
+
+The Check 1 receipt binds the five settings to existing merged kaon data
+and dummy ROOTs with their prompt/noRF and rand/noRF tree identities, and
+to the five archived iteration-zero KLambda ROOTs and h10 model bindings.
+These are provenance records; the corresponding event payloads were not
+available in the searched local evidence. Additional Q2/W kinematics
+archives contain binned summaries, external data, or previously selected
+pion simulations. Already accepted findings about missing coordinates in
+retained projections and unavailable events outside the applied diamond
+stand. No event partitions, signed-weight changes, counts, fraction
+estimates, or plots were produced. No acquisition or implementation is NEXT.
+
+### November 24 genuine KSigma0 infrastructure authorization
+
+The user authorizes preparation of Step 2 generation before a later
+user-controlled farm campaign. Step 2 is the sole immediate NEXT. The
+corrected fixed-weight Q4p4 diamond comparison remains BLOCKED on genuine
+pre-diamond experimental, dummy and KLambda SIMC Q2/W event rows with source
+identities, selections and existing weights. That evidence gate stays separate.
+The external-diamond implementation contract remains parked.
+
+The verified November 23 KSigma0 archive covers 25 physical settings. The
+generation path is an isolated, explicit opt-in through the existing background
+launcher and SIMC runner, with externally staged exact files. Source review
+found a reconstruction interface and output-name mismatch. The supplied
+kaon macro preserves Weight; the existing shape consumer reads iter_weight
+or defaults to unit weight. A checked identity mapping is needed on a
+separate consumer-ready artifact before any explicit source binding.
+No generated events, accepted support, model promotion or farm readiness
+is claimed. The initial later runtime gate is one genuine Q4p4 Center/high
+sample, independently reviewed before broadening. No fitting or changes to
+the six scientific production milestones are authorized.
+
+
+### November 24 isolated KSigma0 implementation candidate
+
+The initial independent review held publication over Git byte normalization,
+direct runner approval admission and the archived macro's TFile tree ownership.
+The user authorized the bounded local repair. The exact JSON bytes now have a
+path-specific Git attribute. The private dispatch re-admits the external
+approval and physical context and verifies the complete staged file inventory.
+The pinned original macro stays in the private provenance directory. The only
+execution derivative replaces the destructor with a defaulted destructor so
+the local TFiles alone release their trees. Both identities enter the receipt.
+Publication remains pending independent actual-diff review of the repair.
+The ownership change has deterministic byte checks, with ROOT execution still
+NOT VERIFIED. No other reconstruction behavior or scientific input changed.
+
+`DEVELOPMENT COMPLETE, FARM VALIDATION PENDING`: default-off isolated generation
+candidate under the root `kaonlt_ksigma0_generation_task_contract.md`, based on
+local test HEAD `e98889fb7aadb54005c34a0b3c02d81f05b4f8ff`. Independent ChatGPT
+actual-diff acceptance, user publication and pushed-state verification remain
+required. This is SOURCE VERIFIED local implementation evidence, not runtime
+or scientific acceptance. Existing unstaged memory reconciliation is preserved.
+
+The original archive and reviewed JSON/CSV identities match the contract and
+user-supplied digests. The public JSON is an exact copy of the reviewed manifest
+(SHA-256 `4b795a56666b96986f135f54917e4f4c377f76740204d0afa5c016140c15e5ef`),
+the sole 25-setting lookup. CSV SHA-256 is
+`02773236a846d0d8512c8204c889f880f9f4c322f8117648add20266c0332b6d`.
+All 900 consumed archive members verify, including all 25 inputs, settings,
+historical reports and common source/table copies. Historical report values
+remain provenance only. No archive, physical-model bytes, colleague launcher or
+private physical path is added to tracked material.
+
+The Sigma-only branch precedes ltsep and every shared link/setup operation.
+It admits an independently approved external base commit plus complete tracked
+source/deployed-file, compiler/ROOT/tool and runtime/environment identities;
+it never selects the modified local reference model as a base. One exclusive
+private root owns each setting, exact renamed input, source/table copies,
+builds, native conversion, raw ROOT, archived reconstruction pair and logs.
+The reconstruction call uses kaon and mass 0.493677 with co-located raw ROOT
+and hist, producing a distinct reconstructed file. Failed runs retain failed
+receipts. Checked candidates require finite typed h10 branches, reaction and
+current normalization fields, independently reproduced tray membership/order,
+unchanged native Weight, and a separate complete identity clone with iter_weight
+equal to Weight and verified Sumw2. No consumer bindings are exported.
+
+Deterministic WSL tests cover all-setting admission, hostile archives, hash and
+reaction failures, private path/link/owner/collision checks, base provenance,
+missing/failed/stale output handling, runner ordering, ROOT interface stubs,
+identity-copy branches and legacy neutron/Delta/SIDIS routing. The unchanged
+external-source suite retains the contract-documented cleanup-guard failure
+for a symlink into the checkout with a missing intermediate directory; the
+Sigma route bypasses that guard and shared setup. It is not repaired here.
+
+Local corrected result: 29 generation tests PASS with no skips; unchanged external
+Sigma-source suite: 8 PASS, 6 capability skips and the same one known failure.
+Shell syntax, Python 3.9 grammar/local compilation and whitespace checks PASS.
+Grammar checking is not Python 3.9 execution; ROOT behaviors use stubs only.
+
+Remaining runtime prerequisites: an independently reviewed, externally supplied
+dedicated base manifest and approval digest; complete compatible source,
+module/include, drift chamber/database, binary writer/converter and runtime
+libraries; approved compiler/ROOT environment; and an owned disjoint physical
+attempt parent. The local reference supplies interface evidence only, not the
+complete historical corrected tree or approval of a replacement. After source
+review/publication synchronization and admission, the smallest runtime gate is
+one user-controlled Q4p4 Center/high attempt. Actual builds, generator/converter,
+ROOT macro, surviving entries/weights, recoil/MM and accepted kinematic support
+remain NOT VERIFIED. No farm command is delivered at this gate. Scientific
+review precedes any expansion to the other four Q4p4 settings, then the other
+twenty upon authorization; generated shapes authorize no fit or adoption.
+
+Offline diamond remains BLOCKED on its existing genuine pre-diamond rows;
+its external-diamond contract stays parked. Preserve Local-t, W03/F120, L26,
+separate F280, D1.a OFF, the 67/135 mask, Stage1-3 and all six milestones.
+Stage4 and D3-D5 remain DEFERRED, Outcome B BLOCKED, Method A detached and
+Method B diagnostic/excluded. CURRENT owns the sole next action.
+
+
+### November 24 reference-base compatibility amendment
+
+The user reports independent acceptance of the three previous repairs and
+reproduction of all 29 deterministic tests. Publication remains held for the
+new concrete reference compatibility defect. Codex re-established live test
+HEAD `e98889fb7aadb54005c34a0b3c02d81f05b4f8ff`, preserved those repairs and
+added one bounded amendment to the existing root contract under the user's
+follow-up authorization. The new compatibility diff awaits independent review;
+state remains DEVELOPMENT COMPLETE, FARM VALIDATION PENDING.
+
+SOURCE VERIFIED: reference commit `641b8c07182fd045fd8a5c007cdc1b71a418f3ce`
+contains 553 tracked entries, exactly two tracked optics symlinks and the
+reported reconstruction and COSY binary dependencies. Admission now verifies
+Git modes/blob identities and exact deployed bytes rather than rejecting all
+reconstruction paths or .bin suffixes. Only the three reference reconstruction
+files and two COSY binaries have path-specific pinned exceptions. The base
+launcher is admitted as metadata and omitted from the private attempt, never
+executed. The archived Sigma0 C/header overlay and its sole accepted destructor
+ownership derivation remain unchanged.
+
+Only the two pinned SHMS optics link/target pairs are admitted. Their actual
+relative spelling, regular tracked targets and physical containment must match.
+The private alias paths contain independent regular copies of the exact target
+bytes. Private aliases, targets and COSY dependencies are rechecked during the
+attempt. Unknown links, retargeting, chains, escaping paths, untracked files,
+modified Git objects and unrelated binary/job outputs remain rejected.
+
+SOURCE VERIFIED: the actual converter Makefile hardcodes ROOTSYS and invokes
+root-config through ROOTDIR/bin, not PATH alone. The private converter build
+now selects the approved canonical ROOTSYS by command-line assignment and uses
+that same selection for effective-variable checking and conversion builds.
+The source Makefile is unchanged. Before any generation, read-only checks
+compare effective ROOTSYS/ROOTDIR, exact approved root-config libraries/includes,
+ROOT version and the reconstruction ROOT's loaded libCore with a lightweight
+PyROOT probe in the validator interpreter/environment. Imported ROOT module and
+core-library hashes must be in the external runtime approval. PYTHONPATH is
+explicitly part of that approved environment. The validator rechecks its actual
+loaded identity before opening events. A missing/mismatched PyROOT blocks
+admission before attempt creation or builds.
+
+Local regression coverage uses all 553 actual Git objects, original optics
+reader paths and the exact converter Makefile in disposable exports; the
+modified reference worktree model is never incorporated. Forty deterministic
+WSL tests PASS with no skips, retaining all 29 accepted tests. ROOT/tool probes
+use explicit stubs; these checks establish no facility ROOT availability,
+ABI/build compatibility, recoil/MM/support or scientific acceptance. The known
+legacy cleanup-guard baseline failure remains separate and unchanged.
+
+The approved dedicated base/toolchain/runtime identities and first genuine
+Q4p4 Center/high attempt remain future prerequisites after independent diff
+review, user publication and pushed-state synchronization. No farm operation,
+publication, physical-model/parameter/input-manifest change, production consumer
+change or diamond implementation occurs. CURRENT retains the exact next gate;
+all existing scientific ownership, mask, milestones and deferrals remain.
+
+### November 24 runtime-identity correction
+
+Independent review verified the reference compatibility diff and its forty
+local tests, and held publication on two gaps. The user then authorized the
+bounded correction. The private pre-generation PyROOT probe and final event
+validator now use the same explicit interpreter, entry point, private working
+directory and approved environment with Python user site disabled. The private
+probe must agree with the initial external approval before any build, and the
+event validator rechecks its loaded ROOT identity before opening event data.
+
+The externally approved tool manifest now pins the GNU/Linux loader inspector
+alongside the existing tools. The private runner checks the native converter's
+resolved libCore path and SHA-256 under its exact conversion environment after
+linking and before it consumes the generated input. A missing dependency or
+wrong core blocks the attempt. The loader output and resolved identity are
+retained in the private logs and receipt. All input, model, optics, detector,
+normalization and reconstruction decisions retain their established scopes.
+
+This remains a local candidate pending independent actual-diff review.
+Real facility dependency resolution, execution and scientific acceptance remain
+NOT VERIFIED. No publication, farm operation or diamond work occurred.

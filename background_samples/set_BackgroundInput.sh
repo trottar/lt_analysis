@@ -4,6 +4,21 @@
 # getPathDict.py calling os.getlogin() on worker nodes.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Isolated route must precede ltsep resolution and every legacy link mutation.
+if [[ "${1:-}" == "--sigma-only" ]]; then
+    exec python3 -B "${SCRIPT_DIR}/prepare_ksigma0.py" "$@"
+fi
+if [[ "${1:-}" == "--sigma-help" ]]; then
+    exec python3 -B "${SCRIPT_DIR}/prepare_ksigma0.py" --help
+fi
+for sigma_argument in "$@"; do
+    case "${sigma_argument}" in
+        --sigma*|--setting|--archive|--base|--base-manifest*|--attempt-parent)
+            echo "ERROR: Sigma arguments require an initial --sigma-only selector" >&2
+            exit 1
+            ;;
+    esac
+done
 LTSEP_FIELDS_SCRIPT="${REPO_ROOT}/farm_env/print_ltsep_path_fields.py"
 if [[ ! -f "${LTSEP_FIELDS_SCRIPT}" ]]; then
     echo "ERROR: failed to locate ${LTSEP_FIELDS_SCRIPT}" >&2
@@ -153,6 +168,10 @@ while getopts 'h' flag; do
         echo "The following arguments can be called for the production backgrounds..."
         echo "    EPSILON=arg1, Q2=arg2, W=arg3"
         echo "    -h, help"
+        echo "    --sigma-help: isolated Sigma-only CLI and external base schema"
+        echo "    --sigma-only --setting <canonical-stem> [--setting <stem> ...]"
+        echo "      --archive <zip> --base <dedicated-tree> --base-manifest <json>"
+        echo "      --base-manifest-sha256 <approved-digest> --attempt-parent <private-dir>"
         echo
         echo "Avaliable Kinematics..."
         echo "                      Q2=5p5, W=3p02"

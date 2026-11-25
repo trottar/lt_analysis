@@ -50,7 +50,7 @@ window stability,parent/native sensitivity15.33%/16.63%,endpoint/upper-tail
 limitations and no superior physical window. A translated-KLambda proxy can
 reallocate pion-Delta but is not genuine KSigma0 SIMC or independent calibration;
 Lambda predictive/statistical limitations remain. The phase record now includes
-verified colleague yields, cuts, MM spectra and genuine KSigma0 model inputs.
+paper-reference yields, cuts, MM spectra and genuine KSigma0 model inputs.
 Matched yields and accepted KSigma0 shapes remain unvalidated. Stage4 DEFERRED.
 Local-t, W03/F120, L26, separate F280, D1.a OFF and the 67/135 mask retain their
 scope. No new subtraction baseline has been adopted.
@@ -206,9 +206,11 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Step 1a: establish a reproducible matched-cut colleague yield comparison
-after memory review, user publication, pushed-state review and separate Work
-authorization. Step 2 (KSigma0 generation) requires later authorization.
+NEXT — Step 2: independent review of the KSigma0 runtime-identity correction. After user
+publication/pushed-state review and approved-base admission, one Q4p4
+Center/high runtime gate remains; ROOT/farm NOT VERIFIED. Offline diamond
+stays BLOCKED on pre-diamond data/dummy/KLambda rows with existing weights;
+its external-diamond contract remains parked.
 
 ## Success Criteria
 

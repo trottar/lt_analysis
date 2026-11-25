@@ -16,9 +16,9 @@
       "sha256": "18db7dba261fa5fef77ae2e5502687a95d2e2838409ff6311e92b1c0a4c96696"
     },
     {
-      "bytes": 16235,
+      "bytes": 16357,
       "path": "docs/memory/CURRENT.md",
-      "sha256": "fbcf13d86c035041e59506a6c7f0e26ba510e2690d12d18fb1c4f8028d6f44af"
+      "sha256": "029c7bf0433b493a0b2ea7e020527a202ad27cd0299760807101b7c7cd0b1819"
     },
     {
       "bytes": 11186,
@@ -1226,9 +1226,9 @@
       "sha256": "65fada9c1828d1505f94a2b183cbdacf8429f181b34cfd4db3b68f4b7db16fc0"
     },
     {
-      "bytes": 68486,
+      "bytes": 86480,
       "path": "docs/memory/phases/event-population-authority-2026-11-16.md",
-      "sha256": "aff67299e30fdbf4620ee9405cbb63ab7f05a4aedddf63ec97d9063ae5771685"
+      "sha256": "f7a10466edd1885130cfa4dac4ac174b637d4ba17045c14823a7a00225a4d8fc"
     },
     {
       "bytes": 23544,
