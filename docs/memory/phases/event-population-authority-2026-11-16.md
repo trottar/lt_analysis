@@ -1305,6 +1305,120 @@ wrong core blocks the attempt. The loader output and resolved identity are
 retained in the private logs and receipt. All input, model, optics, detector,
 normalization and reconstruction decisions retain their established scopes.
 
-This remains a local candidate pending independent actual-diff review.
-Real facility dependency resolution, execution and scientific acceptance remain
-NOT VERIFIED. No publication, farm operation or diamond work occurred.
+At this local checkpoint the candidate awaited review. The later publication
+and withdrawal of operational approval are recorded below. Facility execution
+and scientific acceptance remained NOT VERIFIED.
+
+### November 24 failed KSigma0 operational review and assistant accountability
+
+**BLOCKED.** The user withdrew ChatGPT's operational approval of the
+twelve-file generation implementation published at
+`e8cdd3eb01c0c559d3ef80dd2c34667614b78ee9` (parent
+`e98889fb7aadb54005c34a0b3c02d81f05b4f8ff`). Pushed blob identity
+was independently verified. Preserve the bounded source-review findings for
+archive and setting identity, scientific-model preservation, private SIMC
+materialization, optics and ROOT reconstruction compatibility, native Weight,
+identity-valued iter_weight, and the output validator. Those mechanisms
+remain source-reviewed in scope. Their tests and published identities did
+not establish a complete operator workflow or produced scientific artifacts.
+
+The user wanted genuine KΣ⁰ generation using the mature background launcher
+and configuration, with both generation and the outstanding pre-diamond
+acquisition intended for separately controlled farm work. They did not ask
+for a replacement operator framework, external approval system or repeated
+environment discovery. These failures repeat the review and displacement
+errors documented in the [October 22 incident](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md)
+and [November 3 investigation](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md).
+
+| Failure | ChatGPT responsibility |
+| --- | --- |
+| Task design | ChatGPT authorized a seven-argument isolated operator interface before showing why the existing configuration toggles and three positional arguments could not be used. |
+| Dependency closure | ChatGPT approved a mandatory external base/runtime manifest and digest without a delivered producer or provisioning procedure. Fixture manifests obscured the missing operator input and delivery path. |
+| Fragmented review | ChatGPT accumulated component passes without tracing the ordinary invocation through configuration, base preparation, generation, conversion, reconstruction, validation and scientific artifact return. |
+| Premature approval | ChatGPT repeatedly approved progression despite the incomplete chain. Matching all twelve published blobs established publication identity. ChatGPT did not apply prior readiness lessons or the working scripts the user repeatedly asked it to use. |
+| Support displacement | ChatGPT substituted environment discovery for generation despite extensive existing farm evidence. The discovery confirmed facilities and inputs but produced no events and did not supply the blocked manifest. |
+| Incorrect farm instruction | ChatGPT told the user to use `bash set_BackgroundInput.sh high 4p4 2p74` with `RUN_SIGMA0=true` and the three pion-channel toggles off. It presented an intended interface as executable and caused the avoidable failed invocation below. |
+| Response to correction | ChatGPT proposed another narrow launcher-fix contract. The user rejected further fragmented review and requested a comprehensive audit. The launcher-fix contract is parked and unauthorized. |
+
+**SOURCE VERIFIED at the published commit.** First-argument `--sigma-only`
+is the only isolated Sigma generation dispatch. The ordinary launcher
+registers neutron, Delta and SIDIS, with no `RUN_SIGMA0` registration.
+The shipped configuration declares empty external `KSIGMA0_*` roles and
+does not implement an ordinary Sigma toggle. The ordinary route performs
+shared link setup before the empty active-list check. The preparer requires
+an external base/runtime manifest and its independently supplied SHA-256
+digest and explicitly does not generate or approve the manifest. The advised
+ordinary configuration therefore cannot dispatch KΣ⁰ generation. The
+manifest is the first unresolved, non-bypassable input to the separate
+published Sigma route.
+
+**RUNTIME VERIFIED within the user-supplied terminal-output scope.** The
+analysis checkout matched the published commit. Three existing SIMC
+installations, the original KΣ⁰ archive, Python through the existing
+`replay_lt_env`, GCC/gfortran 11.4.0 and ROOT 6.24/08 were reported present.
+Invoking the preparer without arguments returned the required-argument
+parser error. The ordinary invocation with only the proposed Sigma toggle
+enabled printed `No backgrounds are enabled`. There was no successful KΣ⁰
+generation, conversion, reconstruction or scientific validation in the
+supplied evidence. Installed SIMC suitability, PyROOT, the complete runtime
+chain and actual shared-path effects of the failed ordinary route remain
+NOT VERIFIED. Private paths belong in external environment configuration.
+
+The requested genuine KΣ⁰ event sample remains unavailable. The separate
+Q4p4 offline diamond comparison remains BLOCKED on genuine pre-diamond
+experimental data, dummy and KLambda SIMC rows. This sequence produced no
+new scientific evidence and cost the user avoidable time. Responsibility
+belongs to ChatGPT's task design, integration review, operational approval
+and instruction-following decisions.
+
+### November 25 rollback and completed assistant-accountability findings
+
+The user terminated the KΣ⁰ development and repair cycle, withdrew ChatGPT's
+operational approval, and directed restoration to published test
+`e8cdd3eb01c0c559d3ef80dd2c34667614b78ee9`. The rollback preserves the preceding
+unpublished accountability and implementation bytes externally. This
+accountability update is for separate review and is absent from the restored
+checkout. The user supplied ChatGPT's completed historical audit as recording
+authority. These findings do not commission another audit.
+
+The requested work was a fourth channel analogous to neutron, Delta and SIDIS.
+ChatGPT chose a parallel architecture, approved an incomplete operator-to-runtime
+path, missed native build behavior and supplied an unsupported ordinary
+invocation. The farm launcher reported `No backgrounds are enabled`. No
+successful genuine KΣ⁰ generation resulted. ChatGPT then commissioned an
+excessively broad repair with a High reasoning-effort recommendation. The user
+reports exhaustion of their Codex allowance. Exact token totals and financial
+cost are unavailable.
+
+| Established November 24 failure | Existing precedent identified by the completed audit |
+| --- | --- |
+| Replaced mature infrastructure without demonstrating a capability gap. | [November 3 failures D–F](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#chronology-failures-af) and [November 17 eighth failure](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md#eighth-failure-unsupported-codexfarm-update-escalation). |
+| Expanded prerequisites recursively. | [October 17 root cause 2 and rule 3](../investigations/kaonlt-science-gate-displacement-2026-10-17.md#4-root-causes-not-excuses). |
+| Approved without auditing the complete execution chain. | [October 23 seventh failure](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md), lines 276–282. |
+| Failed to inspect actual native filesystem and build behavior. | [October 22–24 path failures](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md) and [LEARNINGS](../LEARNINGS.md), lines 5–12 and 115–125. |
+| Treated passing synthetic tests as sufficient operational approval. | [October 22 lines 18–25 and October 24 lines 573–599](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md). |
+| A failed owner operation could retain an accepted child receipt. | [LEARNINGS](../LEARNINGS.md), lines 108–113 and 134–140. |
+| Required disproportionate verification and computational expenditure. | [October 24 ninth-failure I/O and accountability findings](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md#ninth-failure-io-cost-and-assistant-accountability--october-24). |
+| Issued unsupported farm instructions. | [October 17 rule 6](../investigations/kaonlt-science-gate-displacement-2026-10-17.md), [October 23 seventh failure](../investigations/kaonlt-matched-cohort-farm-readiness-failure-2026-10-22.md) and [COMMUNICATION](../COMMUNICATION.md). |
+| Failed to enforce the displacement alarm. | [October 17 rules 3–4](../investigations/kaonlt-science-gate-displacement-2026-10-17.md), [November 3 failures E–F](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md) and [MAINTENANCE](../MAINTENANCE.md). |
+| Delegated ChatGPT's own accountability investigation to Work. | [November 3 independent-review failure](../investigations/kaonlt-assistant-roadmap-displacement-2026-11-03.md) and [October 17 incomplete accountability correction](../investigations/kaonlt-science-gate-displacement-2026-10-17.md). |
+
+The underlying failure was repeated non-enforcement of existing safeguards.
+Responsibility belongs to ChatGPT's planning, task design, audit judgment,
+approval and instruction-following decisions. Work, Codex, the user and
+Jefferson Lab are not responsible for these assistant decisions. No new
+governance or safeguards are adopted. The operational approval stays withdrawn,
+and no KΣ⁰ repair, audit, scientific study or farm run is active. Preserve
+bounded component source findings and accepted science in their original scopes.
+The separate offline diamond comparison remains blocked on genuine pre-diamond
+data, dummy and KLambda event rows with existing weights.
+
+### Subsequent November 25 authorization
+
+The user authorized resuming KΣ⁰ work as a minimal fourth channel in the
+ordinary neutron, Delta and SIDIS infrastructure. This supersedes the
+inactivity decision above only for the new bounded contract. The earlier
+operational approval remains withdrawn, and the abandoned isolated repair
+contract remains inactive. Work prepares the specification. Codex implements
+only the independently reviewed contract. No source change, publication,
+farm execution or diamond implementation was authorized for this memory update.

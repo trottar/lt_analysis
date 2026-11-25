@@ -206,11 +206,11 @@ no strength is selected. None of these separate scopes defines the present NEXT.
 
 ## Next Action
 
-NEXT — Step 2: independent review of the KSigma0 runtime-identity correction. After user
-publication/pushed-state review and approved-base admission, one Q4p4
-Center/high runtime gate remains; ROOT/farm NOT VERIFIED. Offline diamond
-stays BLOCKED on pre-diamond data/dummy/KLambda rows with existing weights;
-its external-diamond contract remains parked.
+KSigma0 operational approval remains withdrawn. The user authorized a minimal
+fourth channel through existing background infrastructure.
+NEXT — Codex implementation of the reviewed minimal KSigma0 channel contract.
+Offline diamond remains BLOCKED on pre-diamond data, dummy and KLambda rows
+with existing weights. Its implementation contract stays parked.
 
 ## Success Criteria
 
